@@ -1,0 +1,32 @@
+digraph G
+{
+  edge [fontname="FreeSans",fontsize="10",labelfontname="FreeSans",labelfontsize="10"];
+  node [fontname="FreeSans",fontsize="10",shape=record];
+  rankdir=LR;
+  Node1 [label="AIOUSB::USB_DIO_16_Family",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node2 -> Node1 [dir=back,color="midnightblue",fontsize="10",style="solid",fontname="FreeSans"];
+  Node2 [label="AIOUSB::USBDevice",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classAIOUSB_1_1USBDevice.html"];
+  Node3 -> Node2 [dir=back,color="darkorchid3",fontsize="10",style="dashed",label="name",fontname="FreeSans"];
+  Node3 [label="std::string",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip="STL class."];
+  Node4 -> Node3 [dir=back,color="midnightblue",fontsize="10",style="solid",fontname="FreeSans"];
+  Node4 [label="std::basic_string\< char \>",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip="STL class."];
+  Node5 -> Node1 [dir=back,color="darkorchid3",fontsize="10",style="dashed",label="supportedProductIDs",fontname="FreeSans"];
+  Node5 [label="AIOUSB::IntArray",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classAIOUSB_1_1IntArray.html"];
+  Node6 -> Node5 [dir=back,color="midnightblue",fontsize="10",style="solid",fontname="FreeSans"];
+  Node6 [label="std::vector\< int \>",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip="STL class."];
+  Node7 -> Node6 [dir=back,color="darkorchid3",fontsize="10",style="dashed",label="elements",fontname="FreeSans"];
+  Node7 [label="T",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled"];
+  Node8 -> Node1 [dir=back,color="darkorchid3",fontsize="10",style="dashed",label="dioStreamSubsystem",fontname="FreeSans"];
+  Node8 [label="AIOUSB::DIOStreamSubsystem",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classAIOUSB_1_1DIOStreamSubsystem.html"];
+  Node9 -> Node8 [dir=back,color="midnightblue",fontsize="10",style="solid",fontname="FreeSans"];
+  Node9 [label="AIOUSB::DeviceSubsystem",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classAIOUSB_1_1DeviceSubsystem.html"];
+  Node2 -> Node9 [dir=back,color="darkorchid3",fontsize="10",style="dashed",label="parent",fontname="FreeSans"];
+  Node10 -> Node1 [dir=back,color="darkorchid3",fontsize="10",style="dashed",label="digitalIOSubsystem",fontname="FreeSans"];
+  Node10 [label="AIOUSB::DigitalIOSubsystem",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classAIOUSB_1_1DigitalIOSubsystem.html"];
+  Node9 -> Node10 [dir=back,color="midnightblue",fontsize="10",style="solid",fontname="FreeSans"];
+  Node11 -> Node10 [dir=back,color="darkorchid3",fontsize="10",style="dashed",label="writeValues",fontname="FreeSans"];
+  Node11 [label="AIOUSB::UCharArray",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classAIOUSB_1_1UCharArray.html"];
+  Node12 -> Node11 [dir=back,color="midnightblue",fontsize="10",style="solid",fontname="FreeSans"];
+  Node12 [label="std::vector\< unsigned char \>",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip="STL class."];
+  Node7 -> Node12 [dir=back,color="darkorchid3",fontsize="10",style="dashed",label="elements",fontname="FreeSans"];
+}

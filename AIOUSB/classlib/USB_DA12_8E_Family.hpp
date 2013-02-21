@@ -1,0 +1,88 @@
+/*
+ * $RCSfile: USB_DA12_8E_Family.hpp,v $
+ * $Revision: 1.5 $
+ * $Date: 2009/12/23 22:39:10 $
+ * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
+ *
+ * class USB_DA12_8E_Family declarations
+ */
+
+#if ! defined( USB_DA12_8E_Family_hpp )
+#define USB_DA12_8E_Family_hpp
+
+// {{{ includes
+#include <USBDevice.hpp>
+#include <DA12_AnalogOutputSubsystem.hpp>
+#include <DigitalIOSubsystem.hpp>
+// }}}
+
+namespace AIOUSB {
+
+/**
+ * Class USB_DA12_8E_Family represents a USB-DA12-8E-family device, which encompasses the following product IDs:<br>
+ * USB_DA12_8E.<br><br>
+ * Instances of class <i>USB_DA12_8E_Family</i> are automatically created by the USB device manager when they are
+ * detected on the bus. You should use one of the <i>USBDeviceManager</i> search methods, such as
+ * <i>USBDeviceManager::getDeviceByProductID( int productID ) const</i>,
+ * to obtain a reference to a <i>USB_DA12_8E_Family</i> instance. You can then cast the <i>USBDevice</i>
+ * reference obtained from one of those methods to a <i>USB_DA12_8E_Family</i> and make use of this class' methods, like so:
+ * <pre>USBDeviceArray devices = deviceManager.getDeviceByProductID( USB_DA12_8E );
+ *if( devices.size() > 0 )
+ *  USB_DA12_8E_Family &device = *( USB_DA12_8E_Family * ) devices.at( 0 );</pre>
+ */
+
+class USB_DA12_8E_Family : public USBDevice {
+	friend class USBDeviceManager;
+
+	// {{{ static members
+private:
+	static IntArray supportedProductIDs;
+
+	static void initialize();
+	// }}}
+
+	// {{{ protected members
+protected:
+	DA12_AnalogOutputSubsystem analogOutputSubsystem;
+	// }}}
+
+	// {{{ protected methods
+protected:
+	USB_DA12_8E_Family( int productID, int deviceIndex );
+	virtual ~USB_DA12_8E_Family();
+	// }}}
+
+	// {{{ public methods
+public:
+
+	/*
+	 * properties
+	 */
+
+	static StringArray getSupportedProductNames();
+	static IntArray getSupportedProductIDs();
+	static bool isSupportedProductID( int productID );
+	virtual std::ostream &print( std::ostream &out );
+
+	/*
+	 * subsystems
+	 */
+
+	/**
+	 * Gets a reference to the analog output subsystem of this device.
+	 * @return A reference to the analog output subsystem.
+	 */
+
+	DA12_AnalogOutputSubsystem &dac() {
+		return analogOutputSubsystem;
+	}	// adc()
+
+	// }}}
+
+};	// class USB_DA12_8E_Family
+
+}	// namespace AIOUSB
+
+#endif
+
+/* end of file */

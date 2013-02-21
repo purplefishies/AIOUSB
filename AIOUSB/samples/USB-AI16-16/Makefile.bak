@@ -1,0 +1,81 @@
+#
+# $RCSfile: Makefile,v $
+# $Revision: 1.18 $
+# $Date: 2009/12/21 00:33:29 $
+# jEdit:tabSize=4:indentSize=4:collapseFolds=1:
+#
+# make file for AIOUSB library sample programs
+#
+
+ifdef DEBUG
+	DEBUGOPTS = -ggdb
+	ifdef AIOUSBLIBDIR
+		LIBAIOUSB := $(AIOUSBLIBDIR)/libaiousbdbg.a
+		LIBAIOUSBCPP := $(AIOUSBLIBDIR)/libaiousbcppdbg.a
+	else
+		LIBAIOUSB := -laiousbdbg				# use default library search path
+		LIBAIOUSBCPP := -laiousbcppdbg			# use default library search path
+	endif
+	ifdef AIOUSBCLASSLIBDIR
+		LIBCLASSAIOUSB := $(AIOUSBCLASSLIBDIR)/libclassaiousbdbg.a
+	else
+		LIBCLASSAIOUSB := -lclassaiousbdbg		# use default library search path
+	endif
+else
+	DEBUGOPTS = -DNDEBUG
+	ifdef AIOUSBLIBDIR
+		LIBAIOUSB := $(AIOUSBLIBDIR)/libaiousb.a
+		LIBAIOUSBCPP := $(AIOUSBLIBDIR)/libaiousbcpp.a
+	else
+		LIBAIOUSB := -laiousb					# use default library search path
+		LIBAIOUSBCPP := -laiousbcpp				# use default library search path
+	endif
+	ifdef AIOUSBCLASSLIBDIR
+		LIBCLASSAIOUSB := $(AIOUSBCLASSLIBDIR)/libclassaiousb.a
+	else
+		LIBCLASSAIOUSB := -lclassaiousb			# use default library search path
+	endif
+endif
+
+ifndef AIOUSBJAVALIBDIR
+	AIOUSBJAVALIBDIR := ../../java
+endif
+
+LIBUSB := -lusb-1.0
+COMMONOPTS := -Wall -pthread -fPIC
+
+.PNONY: all
+all: sample2 sample Sample.jar extcal Extcal.jar
+
+sample2: sample2.c
+	gcc -std=gnu99 -D_GNU_SOURCE $(DEBUGOPTS) $(COMMONOPTS) $(COPTS) sample2.c $(LIBAIOUSB) $(LIBUSB) -lm -o sample2
+
+sample: sample.cpp
+	g++ $(DEBUGOPTS) $(COMMONOPTS) $(CPPOPTS) sample.cpp $(LIBAIOUSBCPP) $(LIBUSB) -o sample
+
+Sample.jar: Sample.class
+	@echo "Class-Path: $(AIOUSBJAVALIBDIR)/aiousb.jar" > manifest
+	jar cmfe manifest Sample.jar Sample Sample.class
+	rm manifest
+
+Sample.class: Sample.java
+	javac -cp $(AIOUSBJAVALIBDIR)/aiousb.jar Sample.java
+
+extcal: extcal.cpp
+	g++ $(DEBUGOPTS) $(COMMONOPTS) $(CPPOPTS) extcal.cpp $(LIBCLASSAIOUSB) $(LIBAIOUSBCPP) $(LIBUSB) -o extcal
+
+Extcal.jar: Extcal.class
+	@echo "Class-Path: $(AIOUSBJAVALIBDIR)/aiousb.jar" > manifest
+	jar cmfe manifest Extcal.jar Extcal Extcal.class
+	rm manifest
+
+Extcal.class: Extcal.java
+	javac -cp $(AIOUSBJAVALIBDIR)/aiousb.jar Extcal.java
+
+mostlyclean:
+	-rm -f sample.o extcal.o Sample.class Extcal.class
+
+clean:
+	-rm -f sample2 sample2.o sample sample.o extcal extcal.o Sample.jar Sample.class Extcal.jar Extcal.class
+
+# end of file

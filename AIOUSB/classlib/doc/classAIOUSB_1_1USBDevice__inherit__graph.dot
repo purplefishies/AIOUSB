@@ -1,0 +1,23 @@
+digraph G
+{
+  edge [fontname="FreeSans",fontsize="10",labelfontname="FreeSans",labelfontsize="10"];
+  node [fontname="FreeSans",fontsize="10",shape=record];
+  rankdir=LR;
+  Node1 [label="AIOUSB::USBDevice",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node1 -> Node2 [dir=back,color="midnightblue",fontsize="10",style="solid",fontname="FreeSans"];
+  Node2 [label="AIOUSB::USB_AI16_Family",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classAIOUSB_1_1USB__AI16__Family.html"];
+  Node1 -> Node3 [dir=back,color="midnightblue",fontsize="10",style="solid",fontname="FreeSans"];
+  Node3 [label="AIOUSB::USB_AO16_Family",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classAIOUSB_1_1USB__AO16__Family.html"];
+  Node1 -> Node4 [dir=back,color="midnightblue",fontsize="10",style="solid",fontname="FreeSans"];
+  Node4 [label="AIOUSB::USB_CTR_15_Family",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classAIOUSB_1_1USB__CTR__15__Family.html"];
+  Node1 -> Node5 [dir=back,color="midnightblue",fontsize="10",style="solid",fontname="FreeSans"];
+  Node5 [label="AIOUSB::USB_DA12_8A_Family",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classAIOUSB_1_1USB__DA12__8A__Family.html"];
+  Node1 -> Node6 [dir=back,color="midnightblue",fontsize="10",style="solid",fontname="FreeSans"];
+  Node6 [label="AIOUSB::USB_DA12_8E_Family",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classAIOUSB_1_1USB__DA12__8E__Family.html"];
+  Node1 -> Node7 [dir=back,color="midnightblue",fontsize="10",style="solid",fontname="FreeSans"];
+  Node7 [label="AIOUSB::USB_DIO_16_Family",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classAIOUSB_1_1USB__DIO__16__Family.html"];
+  Node1 -> Node8 [dir=back,color="midnightblue",fontsize="10",style="solid",fontname="FreeSans"];
+  Node8 [label="AIOUSB::USB_DIO_32_Family",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classAIOUSB_1_1USB__DIO__32__Family.html"];
+  Node1 -> Node9 [dir=back,color="midnightblue",fontsize="10",style="solid",fontname="FreeSans"];
+  Node9 [label="AIOUSB::USB_DIO_Family",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classAIOUSB_1_1USB__DIO__Family.html"];
+}
