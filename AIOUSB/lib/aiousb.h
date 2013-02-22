@@ -218,20 +218,20 @@ enum ClearFIFOMethod {
  */
 
 enum ResultCode {
-    AIOUSB_SUCCESS                                          = 0,
+    AIOUSB_SUCCESS                                  = 0,
     AIOUSB_ERROR_DEVICE_NOT_CONNECTED               = 1,
-    AIOUSB_ERROR_DUP_NAME                                 = 2,
+    AIOUSB_ERROR_DUP_NAME                           = 2,
     AIOUSB_ERROR_FILE_NOT_FOUND                     = 3,
-    AIOUSB_ERROR_INVALID_DATA                             = 4,
+    AIOUSB_ERROR_INVALID_DATA                       = 4,
     AIOUSB_ERROR_INVALID_INDEX                      = 5,
     AIOUSB_ERROR_INVALID_MUTEX                      = 6,
     AIOUSB_ERROR_INVALID_PARAMETER                  = 7,
     AIOUSB_ERROR_INVALID_THREAD                     = 8,
     AIOUSB_ERROR_NOT_ENOUGH_MEMORY                  = 9,
     AIOUSB_ERROR_NOT_SUPPORTED                      = 10,
-    AIOUSB_ERROR_OPEN_FAILED                              = 11
-
-    , AIOUSB_ERROR_LIBUSB                                   = 100
+    AIOUSB_ERROR_OPEN_FAILED                        = 11,
+    AIOUSB_ERROR_BAD_TOKEN_TYPE                     = 12,
+    AIOUSB_ERROR_LIBUSB                                   = 100
 };    // enum ResultCode
 
 #define LIBUSB_RESULT_TO_AIOUSB_RESULT( code )  ( unsigned long )( AIOUSB_ERROR_LIBUSB + -( int )( code ) )

@@ -205,6 +205,12 @@ typedef struct {
     AIOUSB_BOOL workerBusy;                                 // AIOUSB_TRUE == worker thread is busy
     unsigned long workerStatus;                             // thread-defined status information (e.g. bytes remaining to receive or transmit)
     unsigned long workerResult;                             // standard AIOUSB_* result code from worker thread (if workerBusy == AIOUSB_FALSE)
+
+  /* New entries for the FastIT behavior */
+  
+  unsigned char *FastITConfig;
+  unsigned char *FastITBakConfig;
+ 
 } DeviceDescriptor;
 
 PRIVATE_EXTERN DeviceDescriptor deviceTable[ MAX_USB_DEVICES ];

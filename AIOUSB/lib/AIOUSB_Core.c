@@ -796,7 +796,8 @@ PRIVATE const char *GetSafeDeviceName( unsigned long DeviceIndex ) {
 			 * name from the local product name table
 			 */
 			AIOUSB_UnLock();					// unlock while communicating with device
-			if( GetDeviceName( DeviceIndex, &deviceName ) != AIOUSB_SUCCESS ) {
+                        unsigned long res = GetDeviceName( DeviceIndex, &deviceName );
+			if( res != AIOUSB_SUCCESS ) {
 				/*
 				 * failed to get name from device, so fall back to local table after all
 				 */
@@ -812,8 +813,9 @@ PRIVATE const char *GetSafeDeviceName( unsigned long DeviceIndex ) {
 			deviceName = ProductIDToName( deviceDesc->ProductID );
 			AIOUSB_UnLock();
 		}	// if( deviceDesc->bGetName )
-	} else
+	} else { 
 		AIOUSB_UnLock();
+        }
 	return deviceName;
 }	// GetSafeDeviceName()
 
