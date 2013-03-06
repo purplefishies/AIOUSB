@@ -10,16 +10,21 @@
 #include <stdarg.h>
 #include "AIOUSB_Core.h"
 
+using namespace AIOUSB;
 
 const int MAX_NAME_SIZE = 20;
 const int DEF_MAX_CHANNELS = 128;
 const int DEF_NUM_CHANNELS = 16;
 const int DEF_CAL_CHANNEL  = 5;
 
-#define FATAL_LEVEL 0
-#define ERROR_LEVEL 0
-#define DEBUG_LEVEL 1
-#define INFO_LEVEL  2
+
+#define ERROR_LEVEL 2<<1
+#define FATAL_LEVEL 2<<1
+#define ALERT_LEVEL 2<<2
+#define WARN_LEVEL 2<<3
+#define INFO_LEVEL 2<<4 
+#define DEBUG_LEVEL 2<<5
+#define TRACE_LEVEL 2<<6
 
 extern int CURRENT_DEBUG_LEVEL;
 
@@ -28,16 +33,24 @@ extern int CURRENT_DEBUG_LEVEL;
 #define INFO(X,...)  if( CURRENT_DEBUG_LEVEL & INFO_LEVEL ) \
                          printf(X, ##__VA_ARGS__);
 
+#define TRACE(X,...) if( CURRENT_DEBUG_LEVEL & TRACE_LEVEL ) \
+                         printf(X, ##__VA_ARGS__ );
+
 #define DEBUG(X,...) if( CURRENT_DEBUG_LEVEL & DEBUG_LEVEL ) \
                          printf(X, ##__VA_ARGS__ );
 
 #define ERROR(X,...) if( CURRENT_DEBUG_LEVEL & ERROR_LEVEL ) \
                          printf(X, ##__VA_ARGS__ );
 
-#define FATAL(X,...) if( CURRENT_DEBUG_LEVEL & FATAL_LEVEL ) \
+#define FATAL(X,...) if( CURRENT_DEBUG_LEVEL & ERROR_LEVEL ) \
                          printf(X, ##__VA_ARGS__ );
 
 
+#define TERSE_LOGGING    ( WARN_LEVEL | ERROR_LEVEL | INFO_LEVEL )
+#define VERBOSE_LOGGING  ( DEBUG_LEVEL | INFO_LEVEL | WARN_LEVEL | ERROR_LEVEL )
+
+#define THROW_ERROR(x)  ThrowError( x , __LINE__ )
+#define CHECK_RESULT(x) if( result != AIOUSB_SUCCESS ) ThrowError(result,__LINE__);
 
 
 
@@ -65,6 +78,7 @@ class TestCaseSetup {
   TestCaseSetup();
   void findDevice();
   void doSomething();
+  void setCurrentDeviceIndex( int deviceIndex );
   void doBulkConfigBlock();
   void doPreSetup();
   void doSetAutoCalibration();
@@ -74,17 +88,19 @@ class TestCaseSetup {
   void doScanSingleChannel();
   void doPreReadImmediateVoltages();
   void doCSVReadVoltages();
+  void doCleanupAfterBulk();
+  void ThrowError(unsigned long, int);
+
+  unsigned long doFastITScan();
+  unsigned short *doGetBuffer();
 
   static void THROW_IF_ERROR(int result, const char *format, ... );
   static int envGetInteger(const char *env);
   static double envGetDouble(const char *env);
 
   
-  
   void doTestSetAutoCalibration();
   void doGenericVendorWrite(unsigned char Request, unsigned short Value, unsigned short Index, unsigned long *DataSize, void *pData);
-
-
 
   void doBulkAcquire();
   void doBulkAcquire(int block_size, int over_sample, double clock_speed );
@@ -95,7 +111,7 @@ class TestCaseSetup {
   double *getVolts();
   unsigned short *getCounts();
   unsigned char *getGainCodes();
-
+  
 
   unsigned long productID, nameSize, numDIOBytes, numCounters;
   unsigned long deviceIndex;
@@ -107,9 +123,11 @@ class TestCaseSetup {
   unsigned short *counts;
   double *volts;
   unsigned char *gainCodes;
+  ADConfigBlock configBlock;
  private:
   void setupVoltageParameters(void);
   unsigned long TEST_ADC_BulkPoll( unsigned long DeviceIndex, unsigned long *BytesLeft );
+  unsigned short  *dataBuf;
 
 
 };

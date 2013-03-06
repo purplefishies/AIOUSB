@@ -13,20 +13,22 @@
 #include <exception>
 #include <iostream>
 #include "TestCaseSetup.h"
+
+
 using namespace AIOUSB;
 
-
-// extern int CURRENT_DEBUG_LEVEL;
+extern int CURRENT_DEBUG_LEVEL;
 
 
 int main( int argc, char **argv ) {
   // printf("Sample test for Checking the Calibration on the board: %s, %s", AIOUSB_GetVersion(), AIOUSB_GetVersionDate());
+  CURRENT_DEBUG_LEVEL = VERBOSE_LOGGING;
   unsigned long result = AIOUSB_Init();
   int block_size;
   int over_sample;
   double clock_speed;
   // const char *entries[] = {"BLOCK_SIZE","OVER_SAMPLE","CLOCK_SPEED"};
-  int CURRENT_DEBUG_LEVEL = 2;
+  // int CURRENT_DEBUG_LEVEL = 2;
   
   block_size  = TestCaseSetup::envGetInteger("BLOCK_SIZE");
   over_sample = TestCaseSetup::envGetInteger("OVER_SAMPLE");
@@ -45,14 +47,19 @@ int main( int argc, char **argv ) {
         tcs.doSetAutoCalibration();
         tcs.doVerifyGroundCalibration();
         tcs.doVerifyReferenceCalibration();
-        std::cout << "Running something" << std::endl;
-        // tcs.doBulkAcquire();
+
+
         tcs.doBulkAcquire( block_size, over_sample, clock_speed );
+
         // unsigned char CPUCSByte = 0x01;
         // unsigned long numBytes = 1;
         // tcs.doGenericVendorWrite(0xA0, 0xE600, 0 , &numBytes , &CPUCSByte );
         // CPUCSByte = 0x00;
         // tcs.doGenericVendorWrite(0xA0, 0xE600, 0 , &numBytes , &CPUCSByte );
+
+        unsigned short *tmp = tcs.doGetBuffer();
+        tcs.doCleanupAfterBulk();
+
         std::cout << block_size << "," << over_sample << "," << clock_speed << "," << "Passed" << std::endl;
       } catch ( Error &e  ) {
         std::cout << block_size << "," << over_sample << "," << clock_speed << "," << "Failed" << std::endl;

@@ -157,7 +157,7 @@ typedef struct {
     AIOUSB_BOOL bGateSelectable;
     long RootClock;
     AIOUSB_BOOL bGetName;
-    unsigned ConfigBytes;
+    unsigned long ConfigBytes;
     unsigned ImmDACs;
     AIOUSB_BOOL bDACStream;
     unsigned DACsUsed;
@@ -209,19 +209,22 @@ typedef struct {
   /* New entries for the FastIT behavior */
   
   unsigned char *FastITConfig;
+  unsigned int FastITConfig_size;
   unsigned char *FastITBakConfig;
+  
+  unsigned char *ADBuf;
+  int ADBuf_size;
  
 } DeviceDescriptor;
 
 PRIVATE_EXTERN DeviceDescriptor deviceTable[ MAX_USB_DEVICES ];
 
 
-
-
 PRIVATE_EXTERN AIOUSB_BOOL AIOUSB_Lock();
 PRIVATE_EXTERN AIOUSB_BOOL AIOUSB_UnLock();
 PRIVATE_EXTERN AIOUSB_BOOL AIOUSB_IsInit();
 PRIVATE_EXTERN unsigned long AIOUSB_Validate( unsigned long *DeviceIndex );
+PRIVATE_EXTERN unsigned long AIOUSB_EnsureOpen( unsigned long DeviceIndex );
 PRIVATE_EXTERN const char *ProductIDToName( unsigned int productID );
 PRIVATE_EXTERN unsigned int ProductNameToID( const char *name );
 PRIVATE_EXTERN const char *GetSafeDeviceName( unsigned long DeviceIndex );

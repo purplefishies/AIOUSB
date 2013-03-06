@@ -231,6 +231,8 @@ enum ResultCode {
     AIOUSB_ERROR_NOT_SUPPORTED                      = 10,
     AIOUSB_ERROR_OPEN_FAILED                        = 11,
     AIOUSB_ERROR_BAD_TOKEN_TYPE                     = 12,
+    AIOUSB_ERROR_TIMEOUT                            = 13,
+    AIOUSB_ERROR_HANDLE_EOF                         = 14,
     AIOUSB_ERROR_LIBUSB                                   = 100
 };    // enum ResultCode
 
@@ -251,7 +253,8 @@ enum WindowsResultCode {
     ERROR_INVALID_THREAD                        = AIOUSB_ERROR_INVALID_THREAD,
     ERROR_NOT_ENOUGH_MEMORY                     = AIOUSB_ERROR_NOT_ENOUGH_MEMORY,
     ERROR_NOT_SUPPORTED                         = AIOUSB_ERROR_NOT_SUPPORTED,
-    ERROR_OPEN_FAILED                           = AIOUSB_ERROR_OPEN_FAILED
+    ERROR_OPEN_FAILED                           = AIOUSB_ERROR_OPEN_FAILED,
+    ERROR_TIMEOUT                               = AIOUSB_ERROR_TIMEOUT
 };    // enum WindowsResultCode
 #endif
 
@@ -587,11 +590,16 @@ extern unsigned long ADC_BulkAcquire(
 
 extern unsigned long ADC_BulkPoll(
     unsigned long DeviceIndex,
-    unsigned long *BytesLeft );
+    unsigned long *BytesLeft 
+    );
 
 
-extern unsigned long ADC_InitFastITScanV(
-    unsigned long DeviceIndex
+/* FastScan Functions */
+extern unsigned long ADC_InitFastITScanV( unsigned long DeviceIndex );
+
+extern unsigned long ADC_CreateFastITConfig( 
+    unsigned long DeviceIndex,
+    int size
     );
 
 extern unsigned long ADC_ResetFastITScanV(
@@ -599,19 +607,18 @@ extern unsigned long ADC_ResetFastITScanV(
     );
 
 extern unsigned long ADC_SetFastITScanVChannels(
+    unsigned long DeviceIndex,
+    unsigned long NewChannels
+    );
+
+extern unsigned long ADC_GetFastITScanV(    
     unsigned long DeviceIndex
     );
 
-extern unsigned long ADC_GetFastITScanV(unsigned long DeviceIndex,
-                                        double *pBuf
-                                        );
-
-extern unsigned long ADC_GetITScanV( unsigned long DeviceIndex,
-                                     double *pBuf
-                                     );
-
-
-
+extern unsigned long ADC_GetITScanV( 
+    unsigned long DeviceIndex,
+    double *pBuf
+    );
 
 
 extern unsigned long DACDirect(
