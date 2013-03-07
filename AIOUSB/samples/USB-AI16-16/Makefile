@@ -22,6 +22,7 @@ ifdef DEBUG
 		LIBCLASSAIOUSB 		:= $(AIOUSBCLASSLIBDIR)/libclassaiousbdbg.a
 		CLASSLIB_BUILD  	=  $(LIBCLASSAIOUSB): ; cd $(AIOUSBCLASSLIBDIR) && $(MAKE)
 		LIBAIOUSB_CPPDEP	:= $(LIBCLASSAIOUSB)	
+		CFLAGS			+=  -I$(AIOUSBCLASSLIBDIR)
 	else
 		LIBCLASSAIOUSB := -lclassaiousbdbg		# use default library search path
 	endif
@@ -32,7 +33,7 @@ else
 		LIBAIOUSBCPP 		:= $(AIOUSBLIBDIR)/libaiousbcpp.a
 		AIOUSBLIB_BUILD		= $(LIBAIOUSB): ; cd $(AIOUSBLIBDIR) && $(MAKE)
 		LIBAIOUSB_CDEP		:= $(LIBAIOUSB)
-
+		CFLAGS			+=  -I$(AIOUSBCLASSLIBDIR)
 	else
 		LIBAIOUSB := -laiousb				# use default library search path
 		LIBAIOUSBCPP := -laiousbcpp			# use default library search path
@@ -69,14 +70,17 @@ OBJFILE_OPTS		:= -c
 INCPATH			:= -Ilib $(CFLAGS)
 LIBPATH			:= -Llib $(LDFLAGS)
 
+LIBS			+= $(LIBCLASSAIOUSB) $(LIBAIOUSBCPP) $(LIBUSB)
+
 
 TARGETS			:= $(wildcard *.cpp)
-OBJECT_FILES		:= $(patsubst %.cpp,%.o,$(TARGETS))
+CTARGETS		:= $(wildcard *.c)
+OBJECT_FILES		:= $(patsubst %.cpp,%.o,$(TARGETS)) $(patsubst %.c,%.c.o,$(CTARGETS))
 JAVA_TARGETS		:= $(wildcard *.java)
 JAVA_OBJECT_FILES	:= $(patsubst %.java,%.class,$(JAVA_TARGETS)) \
 				  $(patsubst %.java,%.jar,$(JAVA_TARGETS))
 
-FINAL_TARGETS		:= $(patsubst %.cpp,%,$(TARGETS))
+FINAL_TARGETS		:= $(patsubst %.cpp,%,$(TARGETS))  $(patsubst %.c,%,$(CTARGETS))
 
 ALL_CLEAN_TARGETS	:=	$(JAVA_OBJECT_FILES) \
 			  	$(OBJECT_FILES) \
@@ -130,8 +134,6 @@ Sample.jar: Sample.class
 Sample.class: Sample.java
 	$(JAVAC) -cp $(AIOUSBJAVALIBDIR)/aiousb.jar Sample.java
 
-extcal: extcal.cpp
-	$(CPP) $(DEBUGOPTS) $(COMMONOPTS) $(CPPOPTS) extcal.cpp $(LIBCLASSAIOUSB) $(LIBAIOUSBCPP) $(LIBUSB) -o extcal
 
 Extcal.jar: Extcal.class
 	@echo "Class-Path: $(AIOUSBJAVALIBDIR)/aiousb.jar" > manifest
@@ -148,26 +150,31 @@ mostlyclean:
 lib/TestCaseSetup.o: lib/TestCaseSetup.cpp lib/TestCaseSetup.h  $(LIBRARY_DEPS)
 	$(CPP) $(DEBUGOPTS) $(LIBPATH) $(OBJFILE_OPTS) $(COMMONOPTS) $(CPPOPTS) $<  $(LIBAIOUSBCPP) $(LIBUSB) -o $@
 
-prom_read_test: prom_read_test.cpp
-	$(CPP) $(DEBUGOPTS) $(COMMONOPTS) $(CPPOPTS) $< $(LIBAIOUSBCPP) $(LIBUSB) -o $@
-
 #
 # Smart Generic rules that can build any NEW C or C++ file that 
 # you add to this directory
 #
 
-
+#
+# C++ Rules
+#
 %.o:%.cpp $(COMMON_DEPS) $(LIBRARY_DEPS)
-	$(CPP) $(DEBUGOPTS) $(OBJFILE_OPTS) $(INCPATH) $(COMMONOPTS) $(CPPOPTS) $< $(LIBAIOUSBCPP) $(LIBUSB) -o $@
+	$(CPP) $(DEBUGOPTS) $(OBJFILE_OPTS) $(INCPATH) $(COMMONOPTS) $(CPPOPTS) $< $(LIBPATH) -o $@
 
-%:%.c	$(COMMON_DEPS)
-	$(CC) -std=gnu99  -D_GNU_SOURCE $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $(COPTS) $< $(LIBAIOUSB) $(LIBUSB) -lm -o $@
-
-%:%.cpp	$(COMMON_DEPS) $(LIBRARY_DEPS) 
-	$(CPP) $(LDFLAGS) $(DEBUGOPTS) $(OBJFILE_OPTS) $(INCPATH) $(COMMONOPTS) $(CPPOPTS) $< $(LIBAIOUSBCPP) $(LIBUSB) -o $@
+%:%.o	$(COMMON_DEPS) $(LIBRARY_DEPS) 
+	$(CPP)  $(LDFLAGS) $(DEBUGOPTS) $(INCPATH) $(COMMONOPTS) $(CPPOPTS) $< $(COMMON_DEPS) $(LIBS)  -o $@
 
 
-%:%.o
-	$(CPP) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $(CPPOPTS) $< $(COMMON_DEPS) $(LIBAIOUSBCPP) $(LIBUSB) -o $@
+#$(CPP)  $(LDFLAGS) $(DEBUGOPTS) $(INCPATH) $(COMMONOPTS) $(CPPOPTS) $< $(COMMON_DEPS) $(LIBAIOUSBCPP) $(LIBUSB) -o $@
+#  $(LIBCLASSAIOUSB) $(LIBAIOUSBCPP) $(LIBUSB)
+
+#
+# C Rules
+#
+%.c.o:%.c	$(COMMON_DEPS)
+	$(CC) -std=gnu99  -D_GNU_SOURCE $(OBJFILE_OPTS) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $(COPTS) $<  -lm -o $@
+
+%:%.c.o
+	$(CC) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $< $(LIBUSB) -o $@ $(LIBAIOUSB) $(LIBUSB) -lm 
 
 

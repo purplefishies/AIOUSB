@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
       // const int clkspeed                  = (double)clkspeed;
       const double CLOCK_SPEED            = DEFAULT_VALUE( TestCaseSetup::envGetDouble("CLOCK_SPEED") , 500000 );
       const unsigned char NUM_OVERSAMPLES = DEFAULT_VALUE( TestCaseSetup::envGetInteger("NUM_OVERSAMPLES"), 1 );
-      const unsigned STREAMING_BLOCK_SIZE = (unsigned)DEFAULT_VALUE(TestCaseSetup::envGetInteger("STREAMING_BLOCK_SIZE"), (512 * 1000));
+      // const unsigned STREAMING_BLOCK_SIZE = (unsigned)DEFAULT_VALUE(TestCaseSetup::envGetInteger("STREAMING_BLOCK_SIZE"), (512 * 1000));
       const unsigned NUM_SCANS            = DEFAULT_VALUE( TestCaseSetup::envGetInteger("NUM_SCANS") , 12800);
 
 
@@ -114,16 +114,16 @@ int main(int argc, char **argv) {
 
           if (result == AIOUSB_SUCCESS && bytesRemaining == 0 && bulk_fail == 0 ) {
             // printf("Successfully bulk acquired %d bytes\n", BULK_BYTES);
-            fprintf(stdout,"PASS,%d,%d\n",BULK_BYTES, result);
+            fprintf(stdout,"PASS,%lu,%lu\n",BULK_BYTES, result);
           } else {
             // printf("Failed to bulk acquire %d bytes\n", BULK_BYTES);
-            fprintf(stdout,"FAIL,%d,%d\n",BULK_BYTES,result);
+            fprintf(stdout,"FAIL,%lu,%lu\n",BULK_BYTES, result);
           }
         } else {
           // printf(
           //        "Error '%s' attempting to start bulk acquire of %d bytes\n",
           //        AIOUSB_GetResultCodeAsString(result), BULK_BYTES);
-          fprintf(stdout,"%d,FAIL,,%d,\n",time(NULL),result);
+          fprintf(stdout,"%lu,FAIL,,%lu,\n",time(NULL),result);
         }
       }
       fflush(stdout);
@@ -657,7 +657,7 @@ void AioUsbPrintDeviceProps(DeviceProperties *devProps ) {
   fprintf(stderr, "---------- AIO USB Device Properties ----------\n");
   fprintf(stderr, "Name: %s\n", devProps->Name);
   fprintf(stderr, "ProductID: 0x%x\n", devProps->ProductID);
-  fprintf(stderr, "SerialNumber: %llx\n", devProps->SerialNumber);
+  fprintf(stderr, "SerialNumber: %lu\n", devProps->SerialNumber);
   fprintf(stderr, "ADCChannels: %u\n", devProps->ADCChannels);
   fprintf(stderr, "ADCChannelsPerGroup: %u\n", devProps->ADCChannelsPerGroup);
   fprintf(stderr, "ADCMUXChannels: %u\n", devProps->ADCMUXChannels);
