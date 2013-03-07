@@ -2740,6 +2740,14 @@ double GetHiRef(unsigned long deviceIndex)
 	return RefData;
 }
 
+unsigned void
+AIOUSB_Copy_Config_Block( ADConfigBlock *to, ADConfigBlock *from )
+{
+  to->device = from->device;
+  to->size = from->size;
+  memcpy( &to->device->registers[0], &from->device->registers[0], to->size );
+}
+
 
 unsigned long 
 AIOUSB_Validate_Device( unsigned long DeviceIndex )
@@ -2770,6 +2778,76 @@ AIOUSB_Validate_Device( unsigned long DeviceIndex )
   return result;
 }
 
+/** 
+ * @desc Performs a number of ADC_GetImmediate calls and then averages out the values
+ *       to determine adequate values for the Ground and Reference values
+ * 
+ * @param DeviceIndex 
+ * @param grounCounts 
+ * @param referenceCounts 
+ */void
+AIOUSB_Acquire_Reference_Counts( 
+                      unsigned long DeviceIndex,
+                      double *grounCounts,
+                      double *referenceCounts
+                                 )
+{
+  int k;
+
+  for( k = 0; k <= 1; k++ ) {
+          AIOUSB_Lock();
+          AIOUSB_SetCalMode( &deviceDesc->cachedConfigBlock ,( reading == 0 ) ? AD_CAL_MODE_GROUND : AD_CAL_MODE_REFERENCE );
+
+          AIOUSB_UnLock();			// unlock while communicating with device
+          result = WriteConfigBlock( DeviceIndex );
+
+          if( result == AIOUSB_SUCCESS ) {
+                  /*
+                   * average a bunch of readings to get a nice, stable reading
+                   */
+                  const int AVERAGE_SAMPLES = 256;
+                  const unsigned MAX_GROUND = 0x00ff, MIN_REFERENCE = 0xf000;
+                  long countsSum = 0;
+                  int sample;
+                  unsigned short counts[ MAX_IMM_ADCS ];
+                  for( sample = 0; sample < AVERAGE_SAMPLES; sample++ ) {
+                          result = ADC_GetImmediate( DeviceIndex, 0, counts );
+                          if( result == AIOUSB_SUCCESS )
+                              countsSum += counts[ 0 ];
+                          else
+                              goto RETURN_AIOUSB_GetBulkAcquire;
+                  }
+
+                  averageCounts = countsSum / ( double ) AVERAGE_SAMPLES;
+
+                  if( reading == 0 ) {
+                          if( averageCounts <= MAX_GROUND )
+                              *groundCounts = averageCounts;
+                          else {
+                                  result = AIOUSB_ERROR_INVALID_DATA;
+                                  goto RETURN_AIOUSB_GetBulkAcquire;
+                          }	/* if( averageCounts ...*/
+                  } else {
+                          if(
+                             averageCounts >= MIN_REFERENCE
+                             && averageCounts <= AI_16_MAX_COUNTS
+                             )
+                              *referenceCounts = averageCounts;
+                          else {
+                                  result = AIOUSB_ERROR_INVALID_DATA;
+                                  goto RETURN_AIOUSB_GetBulkAcquire;
+                          }
+                  }
+          } else
+              goto abort;
+  }
+ RETURN_AIOUSB_GetBulkAcquire:
+  return;
+
+}
+
+
+
 /**
  * @desc Performs automatic calibration of the ADC
  *
@@ -2788,8 +2866,8 @@ unsigned long AIOUSB_ADC_InternalCal(
 ) {
         double HiRef;
         double LoRef = 0.0;
-        ADConfigBlock nconfig = {0};
-        ADConfigBlock oconfig = {0}; 
+        ADConfigBlock *nconfig;
+        ADConfigBlock oconfig; 
         unsigned long result;
         DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
         unsigned short * calTable;
@@ -2808,37 +2886,66 @@ unsigned long AIOUSB_ADC_InternalCal(
           goto RETURN_AIOUSB_ADC_InternalCal;
         }
 
-        HiRef = GetHiRef( DeviceIndex );
-        LoRef = 0.0;
-
 	if( autoCal ) {
 		/*
 		 * create calibrated calibration table
 		 */
-		/* result = ReadConfigBlock( DeviceIndex, AIOUSB_FALSE ); */
-                /* int i; */
-                ADC_GetConfig( DeviceIndex, &oconfig.registers[0], &deviceDesc->ConfigBytes );
 
+
+                nconfig = &deviceDesc->cachedConfigBlock;
+                AIOUSB_Copy_Config_Block( &oconfig, nconfig );
+
+                HiRef = GetHiRef( DeviceIndex );
+                LoRef = 0.0;
+                ReadConfigBlock( DeviceIndex , AIOUSB_FALSE );
+
+                /* result = ADC_GetConfig( DeviceIndex, &oconfig.registers[0], &deviceDesc->ConfigBytes ); */
 
 		if( result == AIOUSB_SUCCESS ) {
-			/* AIOUSB_Lock(); */
- 
-                        AIOUSB_SetRegister( deviceDesc->cachedConfigBlock,  AD_CONFIG_CAL_MODE , 0x05 );
-                        AIOUSB_SetRegister( deviceDesc->cachedConfigBlock,  AD_CONFIG_GAIN_CODE, 0x01 );
-                        
-			/* AIOUSB_UnLock(); */
+
+                        double dRef = HiRef - LoRef;
+                        int rangeChannel = 0x00;
+                        int rangeValue   = DAC_RANGE_MAX;
+                        double groundCounts, referenceCounts;
+            
+                        AIOUSB_SetRegister( nconfig,  AD_REGISTER_CAL_MODE , 0x05 );
+                        AIOUSB_SetRegister( nconfig,  AD_REGISTER_GAIN_CODE, 0x01 );
+                        int k ;
+
+                        AIOUSB_Acquire_Reference_Counts( DeviceIndex, &groundCounts, &referenceCounts );
+
+
+                        for( k = 0 ; k <= 1 ; k ++ ) {
+                                int HiRead;
+                                ADC_SetConfig( DeviceIndex , &nconfig->registers[0], &deviceDesc->ConfigBytes );
+
+                                /* ADC_LoadCalTable( DeviceIndex , calTable  ); */
+
+                                AIOUSB_SetRegister( nconfig,  AD_REGISTER_TRIG_COUNT , 0x04 );
+                                AIOUSB_SetRegister( nconfig,  AD_REGISTER_START_END  , 0x00 );
+                                AIOUSB_SetRegister( nconfig,  AD_REGISTER_OVERSAMPLE , 0xFF );
+                                
+                                AIOUSB_SetRegister( nconfig,  AD_REGISTER_CAL_MODE , 
+                                                    AIOUSB_GetRegister( nconfig, AD_REGISTER_CAL_MODE ) | 0x02 );
+                               
+                                AIOUSB_Acquire_Reference_Counts( DeviceIndex, &groundCounts, &referenceCounts );
+                                HiRead = ();
+                                
+                        }
+
 
 			double averageCounts, groundCounts, referenceCounts;
 			int reading;
 			for( reading = 0; reading <= 1; reading++ ) {
-				AIOUSB_Lock();
+                          /* AIOUSB_SetRegister( deviceDesc->cachedConfigBlock, AD_CONFIG_CAL_MODE, AD_CAL_MODE_GROUND ); */
+				/* AIOUSB_Lock(); */
 				/* AIOUSB_SetCalMode( &deviceDesc->cachedConfigBlock */
 				/* 	, ( reading == 0 ) */
 				/* 		? AD_CAL_MODE_GROUND */
 				/* 		: AD_CAL_MODE_REFERENCE ); */
+				/* AIOUSB_UnLock(); // unlock while communicating with device */
+				/* result = WriteConfigBlock( DeviceIndex ); */
 
-				AIOUSB_UnLock();			// unlock while communicating with device
-				result = WriteConfigBlock( DeviceIndex );
 				if( result == AIOUSB_SUCCESS ) {
 					/*
 					 * average a bunch of readings to get a nice, stable reading
@@ -2954,11 +3061,22 @@ abort:
 
 
 void
-AIOUSB_SetRegister( ADConfigBlock cb, unsigned int Register, unsigned char value ) 
+AIOUSB_SetRegister( ADConfigBlock *cb, unsigned int Register, unsigned char value ) 
 {
   AIOUSB_Lock();
-  cb.registers[Register] = value ;
+  cb->registers[Register] = value ;
   AIOUSB_UnLock();
+}
+
+
+unsigned char
+AIOUSB_GetRegister( ADConfigBlock *cb, unsigned int Register ) 
+{
+  unsigned char tmpval;
+  AIOUSB_Lock();
+  tmpval = cb->registers[Register];
+  AIOUSB_UnLock();
+  return tmpval;
 }
 
 
