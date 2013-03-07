@@ -20,7 +20,10 @@ DOCINDEX := $(DOCDIR)/index.html				# use index.html as a proxy for all document
 COMMONOPTS := -c -Wall -pthread -fPIC
 
 .PHONY : all
-all : $(LIBS) $(DOCINDEX)
+all : $(LIBS) 
+
+
+completely_all: $(LIBS) $(DOCINDEX)
 
 .PHONY : mostlyclean
 mostlyclean:

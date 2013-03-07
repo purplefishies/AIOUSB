@@ -1920,7 +1920,7 @@ unsigned long GenericVendorWrite(
         unsigned char Request, 
         unsigned short Value,
         unsigned short Index,
-        unsigned long *DataSize,
+        unsigned long DataSize,
         void *pData
         )
 {
@@ -1951,9 +1951,9 @@ unsigned long GenericVendorWrite(
                                                               Value, 
                                                               Index, 
                                                               (unsigned char *)pData, 
-                                                              *DataSize, 
+                                                              DataSize, 
                                                               timeout );
-        if( bytesTransferred != (int)*DataSize ) { 
+        if( bytesTransferred != (int)DataSize ) { 
             result = LIBUSB_RESULT_TO_AIOUSB_RESULT( bytesTransferred );
         } 
     } else {
@@ -1965,8 +1965,6 @@ unsigned long GenericVendorWrite(
 }
 
 /** 
- * 
- * 
  * @param deviceIndex 
  * @param Request 
  * @param Value 
@@ -2201,7 +2199,23 @@ unsigned long ADC_ResetFastITScanV(
     )
 {
     unsigned long result = 0;
+    DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
+    unsigned long Dat;
+    if( !deviceDesc->bADCStream  || deviceDesc->ConfigBytes < 20  ) {
+            result = AIOUSB_ERROR_BAD_TOKEN_TYPE;
+            goto RETURN_ADC_ResetFastITScanV;
+    }
+    result = ADC_SetConfig( DeviceIndex, &deviceDesc->FastITBakConfig[0], &deviceDesc->ConfigBytes );
+    if( result != AIOUSB_SUCCESS ) 
+        goto RETURN_ADC_ResetFastITScanV;
+
+    Dat = 0x0;
+    result = GenericVendorWrite( DeviceIndex, 0xD4, 0x1E, 0, sizeof(Dat), &Dat );
+
+ RETURN_ADC_ResetFastITScanV:
     return result;
+
+
 }
 
 
@@ -2989,7 +3003,7 @@ unsigned long AIOUSB_ADC_InternalCal(
             double groundCounts, referenceCounts;
             double averageCounts;
             int reading;
-#if 1
+
             for( reading = 0; reading <= 1; reading++ ) {
               AIOUSB_Lock();
               AIOUSB_SetCalMode( &deviceDesc->cachedConfigBlock ,( reading == 0 ) ? AD_CAL_MODE_GROUND : AD_CAL_MODE_REFERENCE );
@@ -3037,7 +3051,7 @@ unsigned long AIOUSB_ADC_InternalCal(
               } else
                 goto abort;
             }	// for( readings ...
-#endif
+
           abort:
             AIOUSB_Lock();
             deviceDesc->cachedConfigBlock = origConfigBlock;
