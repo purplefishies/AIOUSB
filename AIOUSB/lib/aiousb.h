@@ -271,16 +271,29 @@ enum {
 
     // A/D configuration block indexes
     AD_CONFIG_GAIN_CODE                 = 0, // gain code for A/D channel 0 (one of GAIN_CODE_* settings below)
-    // gain codes for channels 1-15 occupy configuration block indexes 1-15
+                                             // gain codes for channels 1-15 occupy configuration block indexes 1-15
+    AD_REGISTER_GAIN_CODE               = 0,
+
     AD_CONFIG_CAL_MODE                  = 16,       // calibration mode (one of AD_CAL_MODE_* settings below)
+    AD_REGISTER_CAL_MODE                = 16,
+    
+    
     AD_CONFIG_TRIG_COUNT                = 17,         // trigger and counter clock (one of AD_TRIG_* settings below)
+    AD_REGISTER_TRIG_COUNT              = 17,
+
     AD_CONFIG_START_END                 = 18,         // start and end channels for scan (bits 7-4 contain end channel, bits 3-0 contain start channel)
+    AD_REGISTER_START_END               = 18,
+
     AD_CONFIG_OVERSAMPLE                = 19,         // oversample setting (0-255 samples in addition to single sample)
+    AD_REGISTER_OVERSAMPLE              = 19,
+
     AD_CONFIG_MUX_START_END             = 20,          // MUX start and end channels for scan (bits 7-4 contain end channel MS-nibble, bits 3-0 contain start channel MS-nibble)
 
     // A/D gain codes
     AD_NUM_GAIN_CODES                   = 8,
     AD_DIFFERENTIAL_MODE                = 8,                 // OR with gain code to enable differential mode for channels 0-7
+
+
 
     // A/D trigger and counter bits
     AD_TRIGGER_CTR0_EXT                 = 0x10,           // 1==counter 0 externally triggered
@@ -779,9 +792,13 @@ extern unsigned long AIOUSB_ADC_InternalCal(
     const char *saveFileName );
 
 extern void AIOUSB_SetRegister( 
-                               ADConfigBlock cb, 
+                               ADConfigBlock *cb, 
                                unsigned int Register, 
                                unsigned char value );
+
+extern unsigned char
+AIOUSB_GetRegister( ADConfigBlock *cb, 
+                    unsigned int Register ); 
 
 
 extern unsigned long AIOUSB_ADC_ExternalCal(
