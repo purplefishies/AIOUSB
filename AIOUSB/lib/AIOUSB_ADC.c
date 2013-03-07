@@ -2741,7 +2741,34 @@ double GetHiRef(unsigned long deviceIndex)
 }
 
 
+unsigned long 
+AIOUSB_Validate_Device( unsigned long DeviceIndex )
+{
+  unsigned long result ;
+  DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
+  if( ! AIOUSB_Lock() ) {
+    result = AIOUSB_ERROR_INVALID_MUTEX;
+    goto RETURN_AIOUSB_Validate_Device;
+  }
 
+  result = AIOUSB_Validate( &DeviceIndex );
+  if( result != AIOUSB_SUCCESS ) {
+    AIOUSB_UnLock();
+    goto RETURN_AIOUSB_Validate_Device;
+  }
+
+  if( deviceDesc->bADCStream == AIOUSB_FALSE ) {
+    AIOUSB_UnLock();
+    result = AIOUSB_ERROR_NOT_SUPPORTED;
+    goto RETURN_AIOUSB_Validate_Device;
+  }
+
+  if( ( result = ADC_QueryCal( DeviceIndex ) ) != AIOUSB_SUCCESS ) {
+    AIOUSB_UnLock();
+  }
+ RETURN_AIOUSB_Validate_Device:
+  return result;
+}
 
 /**
  * @desc Performs automatic calibration of the ADC
@@ -2759,168 +2786,180 @@ unsigned long AIOUSB_ADC_InternalCal(
 	, unsigned short returnCalTable[]
 	, const char *saveFileName
 ) {
-	if( ! AIOUSB_Lock() )
-		return AIOUSB_ERROR_INVALID_MUTEX;
+        double HiRef;
+        double LoRef = 0.0;
+        ADConfigBlock nconfig = {0};
+        ADConfigBlock oconfig = {0}; 
+        unsigned long result;
+        DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
+        unsigned short * calTable;
+        int k = 0;
 
-	unsigned long result = AIOUSB_Validate( &DeviceIndex );
-	if( result != AIOUSB_SUCCESS ) {
-		AIOUSB_UnLock();
-		return result;
-	}
+        result = AIOUSB_Validate_Device( DeviceIndex );
 
-	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
-	if( deviceDesc->bADCStream == AIOUSB_FALSE ) {
-		AIOUSB_UnLock();
-		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}
-
-	if( ( result = ADC_QueryCal( DeviceIndex ) ) != AIOUSB_SUCCESS ) {
-		AIOUSB_UnLock();
-		return result;
-	}
+        if( result != AIOUSB_SUCCESS ) 
+          goto RETURN_AIOUSB_ADC_InternalCal;
 
 	AIOUSB_UnLock();
-	unsigned short *const calTable = ( unsigned short * ) malloc( CAL_TABLE_WORDS * sizeof( unsigned short ) );
-	assert( calTable != 0 );
-	if( calTable != 0 ) {
-		if( autoCal ) {
-			/*
-			 * create calibrated calibration table
-			 */
-			result = ReadConfigBlock( DeviceIndex, AIOUSB_FALSE );
-			if( result == AIOUSB_SUCCESS ) {
-				AIOUSB_Lock();
-				const ADConfigBlock origConfigBlock = deviceDesc->cachedConfigBlock;	// restore when done
-				AIOUSB_SetAllGainCodeAndDiffMode( &deviceDesc->cachedConfigBlock, AD_GAIN_CODE_0_10V, AIOUSB_FALSE );
-				AIOUSB_SetTriggerMode( &deviceDesc->cachedConfigBlock, 0 );
-				AIOUSB_SetScanRange( &deviceDesc->cachedConfigBlock, 0, 0 );
-				AIOUSB_SetOversample( &deviceDesc->cachedConfigBlock, 0 );
-				AIOUSB_UnLock();
-				double averageCounts, groundCounts, referenceCounts;
-				int reading;
-				for( reading = 0; reading <= 1; reading++ ) {
-					AIOUSB_Lock();
-					AIOUSB_SetCalMode( &deviceDesc->cachedConfigBlock
-						, ( reading == 0 )
-							? AD_CAL_MODE_GROUND
-							: AD_CAL_MODE_REFERENCE );
-					AIOUSB_UnLock();			// unlock while communicating with device
-					result = WriteConfigBlock( DeviceIndex );
-					if( result == AIOUSB_SUCCESS ) {
-						/*
-						 * average a bunch of readings to get a nice, stable reading
-						 */
-						const int AVERAGE_SAMPLES = 256;
-						const unsigned MAX_GROUND = 0x00ff
-							, MIN_REFERENCE = 0xf000;
-						long countsSum = 0;
-						int sample;
-						unsigned short counts[ MAX_IMM_ADCS ];
-						for( sample = 0; sample < AVERAGE_SAMPLES; sample++ ) {
-							result = ADC_GetImmediate( DeviceIndex, 0, counts );
-							if( result == AIOUSB_SUCCESS )
-								countsSum += counts[ 0 ];
-							else
-								goto abort;
-						}
-						averageCounts = countsSum / ( double ) AVERAGE_SAMPLES;
-						if( reading == 0 ) {
-							if( averageCounts <= MAX_GROUND )
-								groundCounts = averageCounts;
-							else {
-								result = AIOUSB_ERROR_INVALID_DATA;
-								goto abort;
-							}	// if( averageCounts ...
-						} else {
-							if(
-								averageCounts >= MIN_REFERENCE
-								&& averageCounts <= AI_16_MAX_COUNTS
-							)
-								referenceCounts = averageCounts;
-							else {
-								result = AIOUSB_ERROR_INVALID_DATA;
-								goto abort;
-							}	// if( averageCounts ...
-						}
-					} else
-						goto abort;
-				}
-abort:
-				AIOUSB_Lock();
-				deviceDesc->cachedConfigBlock = origConfigBlock;
-				AIOUSB_UnLock();				// unlock while communicating with device
-				WriteConfigBlock( DeviceIndex );
+	calTable = ( unsigned short * ) malloc( CAL_TABLE_WORDS * sizeof( unsigned short ) );
 
-				if( result == AIOUSB_SUCCESS ) {
-					/*
-					 * we have good ground and reference readings; calculate table that makes ground
-					 * reading equal to 0.0V and reference reading equal to 9.933939V; in order to
-					 * compensate for an approximate 4.3 mV voltage drop across the primary MUX, we
-					 * increase our target reference value by the same amount, yielding a new target
-					 * of 9.933939V + 4.3 mV = 9.938239V = 65130.249 counts in unipolar mode
-					 */
-					const double TARGET_GROUND_COUNTS = 0;	// == 0.0V on 0-10V range (0.0V / 10.0V * 65535 = 0.0)
-					const double TARGET_REFERENCE_COUNTS = GetHiRef( DeviceIndex );
-					const double slope
-						= ( TARGET_REFERENCE_COUNTS - TARGET_GROUND_COUNTS )
-						/ ( referenceCounts - groundCounts );
-					const double offset = TARGET_GROUND_COUNTS - slope * groundCounts;
-					int index;
-					for( index = 0; index < CAL_TABLE_WORDS; index++ ) {
-						long value = ( long ) round( slope * index + offset );
-						if( value < 0 )
-							value = 0;
-						else if( value > AI_16_MAX_COUNTS )
-							value = AI_16_MAX_COUNTS;
-						calTable[ index ] = ( unsigned short ) value;
-					}
-				}
-			}
-		} else {
-			/*
-			 * create default (1:1) calibration table; that is, each output word equals the input word
-			 */
-			int index;
-			for( index = 0; index < CAL_TABLE_WORDS; index++ )
-				calTable[ index ] = ( unsigned short ) index;
-		}	// if( autoCal )
+        if( !calTable ) {
+          result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+          goto RETURN_AIOUSB_ADC_InternalCal;
+        }
+
+        HiRef = GetHiRef( DeviceIndex );
+        LoRef = 0.0;
+
+	if( autoCal ) {
+		/*
+		 * create calibrated calibration table
+		 */
+		/* result = ReadConfigBlock( DeviceIndex, AIOUSB_FALSE ); */
+                /* int i; */
+                ADC_GetConfig( DeviceIndex, &oconfig.registers[0], &deviceDesc->ConfigBytes );
+
 
 		if( result == AIOUSB_SUCCESS ) {
-			/*
-			 * optionally return calibration table to caller
-			 */
-			if( returnCalTable != 0 )
-				memcpy( returnCalTable, calTable, CAL_TABLE_WORDS * sizeof( unsigned short ) );
+			/* AIOUSB_Lock(); */
+ 
+                        AIOUSB_SetRegister( deviceDesc->cachedConfigBlock,  AD_CONFIG_CAL_MODE , 0x05 );
+                        AIOUSB_SetRegister( deviceDesc->cachedConfigBlock,  AD_CONFIG_GAIN_CODE, 0x01 );
+                        
+			/* AIOUSB_UnLock(); */
 
-			/*
-			 * optionally save calibration table to a file
-			 */
-			if( saveFileName != 0 ) {
-				FILE *const calFile = fopen( saveFileName, "w" );
-				if( calFile != NULL ) {
-					const size_t wordsWritten = fwrite( calTable, sizeof( unsigned short ), CAL_TABLE_WORDS, calFile );
-					fclose( calFile );
-					if( wordsWritten != ( size_t ) CAL_TABLE_WORDS ) {
-						remove( saveFileName );		// file is likely corrupt or incomplete
-						result = AIOUSB_ERROR_FILE_NOT_FOUND;
-					}	// if( wordsWritten ...
+			double averageCounts, groundCounts, referenceCounts;
+			int reading;
+			for( reading = 0; reading <= 1; reading++ ) {
+				AIOUSB_Lock();
+				/* AIOUSB_SetCalMode( &deviceDesc->cachedConfigBlock */
+				/* 	, ( reading == 0 ) */
+				/* 		? AD_CAL_MODE_GROUND */
+				/* 		: AD_CAL_MODE_REFERENCE ); */
+
+				AIOUSB_UnLock();			// unlock while communicating with device
+				result = WriteConfigBlock( DeviceIndex );
+				if( result == AIOUSB_SUCCESS ) {
+					/*
+					 * average a bunch of readings to get a nice, stable reading
+					 */
+					const int AVERAGE_SAMPLES = 256;
+					const unsigned MAX_GROUND = 0x00ff
+						, MIN_REFERENCE = 0xf000;
+					long countsSum = 0;
+					int sample;
+					unsigned short counts[ MAX_IMM_ADCS ];
+					for( sample = 0; sample < AVERAGE_SAMPLES; sample++ ) {
+						result = ADC_GetImmediate( DeviceIndex, 0, counts );
+						if( result == AIOUSB_SUCCESS )
+							countsSum += counts[ 0 ];
+						else
+							goto abort;
+					}
+					averageCounts = countsSum / ( double ) AVERAGE_SAMPLES;
+					if( reading == 0 ) {
+						if( averageCounts <= MAX_GROUND )
+							groundCounts = averageCounts;
+						else {
+							result = AIOUSB_ERROR_INVALID_DATA;
+							goto abort;
+						}	// if( averageCounts ...
+					} else {
+						if(
+							averageCounts >= MIN_REFERENCE
+							&& averageCounts <= AI_16_MAX_COUNTS
+						)
+							referenceCounts = averageCounts;
+						else {
+							result = AIOUSB_ERROR_INVALID_DATA;
+							goto abort;
+						}	// if( averageCounts ...
+					}
 				} else
+					goto abort;
+			}
+abort:
+			AIOUSB_Lock();
+			deviceDesc->cachedConfigBlock = oconfig;
+			AIOUSB_UnLock();				// unlock while communicating with device
+			WriteConfigBlock( DeviceIndex );
+
+			if( result == AIOUSB_SUCCESS ) {
+				/*
+				 * we have good ground and reference readings; calculate table that makes ground
+				 * reading equal to 0.0V and reference reading equal to 9.933939V; in order to
+				 * compensate for an approximate 4.3 mV voltage drop across the primary MUX, we
+				 * increase our target reference value by the same amount, yielding a new target
+				 * of 9.933939V + 4.3 mV = 9.938239V = 65130.249 counts in unipolar mode
+				 */
+				const double TARGET_GROUND_COUNTS = 0;	// == 0.0V on 0-10V range (0.0V / 10.0V * 65535 = 0.0)
+				const double TARGET_REFERENCE_COUNTS = GetHiRef( DeviceIndex );
+				const double slope
+					= ( TARGET_REFERENCE_COUNTS - TARGET_GROUND_COUNTS )
+					/ ( referenceCounts - groundCounts );
+				const double offset = TARGET_GROUND_COUNTS - slope * groundCounts;
+				int index;
+				for( index = 0; index < CAL_TABLE_WORDS; index++ ) {
+					long value = ( long ) round( slope * index + offset );
+					if( value < 0 )
+						value = 0;
+					else if( value > AI_16_MAX_COUNTS )
+						value = AI_16_MAX_COUNTS;
+					calTable[ index ] = ( unsigned short ) value;
+				}
+			}
+		}
+	} else {
+		/*
+		 * create default (1:1) calibration table; that is, each output word equals the input word
+		 */
+		int index;
+		for( index = 0; index < CAL_TABLE_WORDS; index++ )
+			calTable[ index ] = ( unsigned short ) index;
+	}	// if( autoCal )
+
+	if( result == AIOUSB_SUCCESS ) {
+		/*
+		 * optionally return calibration table to caller
+		 */
+		if( returnCalTable != 0 )
+			memcpy( returnCalTable, calTable, CAL_TABLE_WORDS * sizeof( unsigned short ) );
+
+		/*
+		 * optionally save calibration table to a file
+		 */
+		if( saveFileName != 0 ) {
+			FILE *const calFile = fopen( saveFileName, "w" );
+			if( calFile != NULL ) {
+				const size_t wordsWritten = fwrite( calTable, sizeof( unsigned short ), CAL_TABLE_WORDS, calFile );
+				fclose( calFile );
+				if( wordsWritten != ( size_t ) CAL_TABLE_WORDS ) {
+					remove( saveFileName );		// file is likely corrupt or incomplete
 					result = AIOUSB_ERROR_FILE_NOT_FOUND;
-			}	// if( saveFileName ...
+				}	// if( wordsWritten ...
+			} else
+				result = AIOUSB_ERROR_FILE_NOT_FOUND;
+		}	// if( saveFileName ...
 
-			/*
-			 * finally, send calibration table to device
-			 */
-			result = AIOUSB_ADC_SetCalTable( DeviceIndex, calTable );
-		}	// if( result ...
+		/*
+		 * finally, send calibration table to device
+		 */
+		result = AIOUSB_ADC_SetCalTable( DeviceIndex, calTable );
+	}	// if( result ...
 
-		free( calTable );
-	} else
-		result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
-
+	free( calTable );
+ RETURN_AIOUSB_ADC_InternalCal:
 	return result;
 }	// AIOUSB_ADC_InternalCal()
 
+
+void
+AIOUSB_SetRegister( ADConfigBlock cb, unsigned int Register, unsigned char value ) 
+{
+  AIOUSB_Lock();
+  cb.registers[Register] = value ;
+  AIOUSB_UnLock();
+}
 
 
 /*

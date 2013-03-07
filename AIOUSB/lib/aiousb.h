@@ -778,6 +778,12 @@ extern unsigned long AIOUSB_ADC_InternalCal(
     unsigned short returnCalTable[],
     const char *saveFileName );
 
+extern void AIOUSB_SetRegister( 
+                               ADConfigBlock cb, 
+                               unsigned int Register, 
+                               unsigned char value );
+
+
 extern unsigned long AIOUSB_ADC_ExternalCal(
     unsigned long DeviceIndex,
     const double points[],

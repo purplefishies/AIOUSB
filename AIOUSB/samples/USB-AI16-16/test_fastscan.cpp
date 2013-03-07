@@ -44,6 +44,9 @@ int main( int argc, char **argv )
 
         tcs.doFastITScan();
 
+        // tcs.doFastITScan();
+        // tcs.doFastITScan();
+
         unsigned short *tmp = tcs.doGetBuffer();
         tcs.doCleanupAfterBulk();
 

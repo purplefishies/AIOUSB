@@ -73,6 +73,13 @@ void TestCaseSetup::doPreSetup()
   }
 }
 
+
+/** 
+ * @desc Exception handler
+ * 
+ * @param result 
+ * @param linnum 
+ */
 void 
 TestCaseSetup::ThrowError( unsigned long result , int linnum )
 {
@@ -95,17 +102,9 @@ TestCaseSetup::doFastITScan()
   // Set the length to 21, and create a Config object
   result = ADC_CreateFastITConfig( deviceIndex ,  21 );
   CHECK_RESULT(result);
-  // if( result != AIOUSB_SUCCESS ) 
-  //   THROW_ERROR(result);
 
   result = ADC_InitFastITScanV( deviceIndex  );
   CHECK_RESULT( result );
-  // if( result != AIOUSB_SUCCESS ) 
-  //   THROW_ERROR( result );
-
-  // AIOUSB_InitConfigBlock( &configBlock, deviceIndex, AIOUSB_FALSE );
-  // AIOUSB_SetCalMode( &configBlock, AD_CAL_MODE_NORMAL );
-  // AIOUSB_SetTriggerMode( &configBlock, 0 );
 
   deviceDesc->FastITConfig[0] = 0x05;
   deviceDesc->FastITConfig[1] = 0x02;
@@ -116,7 +115,6 @@ TestCaseSetup::doFastITScan()
   // CHECK_RESULT( result );
   // if( result != AIOUSB_SUCCESS ) 
   //   goto RETURN_doFastITScan;
-
   // for( int i = 0; i <= 127; i++ )  {
   //   int RangeCode = deviceDesc->FastITConfig[i % 8];
   //   int V = 1;
@@ -129,6 +127,7 @@ TestCaseSetup::doFastITScan()
   result = ADC_GetFastITScanV( deviceIndex );
   CHECK_RESULT( result );
  
+  // Now perform a reset at the end
 
 }
 
