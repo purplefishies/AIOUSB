@@ -333,7 +333,8 @@ enum ADGainCode {
 enum ADCalMode {
     AD_CAL_MODE_NORMAL                  = 0,                // normal measurement
     AD_CAL_MODE_GROUND                  = 1,                // measure ground
-    AD_CAL_MODE_REFERENCE               = 3                 // measure reference
+    AD_CAL_MODE_REFERENCE               = 3,                // measure reference
+    AD_CAL_MODE_BIP_GROUND              = 5,
 };    // enum ADCalMode
 
 struct ADConfigBlock {
