@@ -2005,8 +2005,6 @@ unsigned long GenericVendorRead(
         goto RETURN_GenericVendorRead;
     }
 
-
-
     if( deviceHandle != NULL ) {
           const unsigned timeout = deviceDesc->commTimeout;
           AIOUSB_UnLock();   // unlock while communicating with device
@@ -2024,382 +2022,20 @@ unsigned long GenericVendorRead(
       } else {
         result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
         AIOUSB_UnLock();
-    }	// if( deviceHandle ...
+    } /* if( deviceHandle .. */
  RETURN_GenericVendorRead:
     return result;
-}	// GenericVendorRead()
+}
 
 
-
-
-
-
-
-/*   case Device.PID of */
-/*     $8001: begin //USB-DIO-32 */
-/*       Device.DIOBytes := 4; */
-/*       Device.Counters := 3; */
-/*       Device.RootClock := 3000000; */
-/*       Device.bGetName := True; */
-/*       Device.bSetCustomClocks := True; */
-/*       Device.bDIODebounce := True; */
-/*     end; */
-/*     $8004: begin //USB-DIO-32I */
-/*       Device.DIOBytes := 4; */
-/*       Device.DIOConfigBits := 32; */
-/*       Device.bGetName := True; */
-/*       Device.bSetCustomClocks := True; */
-/*     end; */
-/*     $8002: begin //USB-DIO-48 */
-/*       Device.DIOBytes := 6; */
-/*       Device.bGetName := True; */
-/*     end; */
-/*     $8003: begin //USB-DIO-96 */
-/*       Device.DIOBytes := 12; */
-/*       Device.bGetName := True; */
-/*     end; */
-/*     $8008, $8009, $800A: begin //USB-DIO16A family, old revs */
-/*       Device.DIOBytes := 1; */
-/*       Device.bGetName := True; */
-/*       Device.bDIOStream := True; */
-/*       Device.bDIOSPI := True; */
-/*       Device.bClearFIFO := True; */
-/*     end; */
-/*     $800C, $800D, $800E, $800F: begin //USB-DIO16A family, current revs */
-/*       Device.DIOBytes := 4; */
-/*       Device.Tristates := 2; */
-/*       Device.bGetName := True; */
-/*       Device.bDIOStream := True; */
-/*       Device.bDIOSPI := True; */
-/*       Device.bClearFIFO := True; */
-/*     end; */
-/*     $8010, $8011, $8012, $8014, $8015, $8016, //USB-IIRO-16 family */
-/*     $8018,        $801A, $801C,        $801E, //USB-IDIO-16 family */
-/*     $8019, $801D, $801F: begin //USB-II-16-OEM family */
-/*       Device.DIOBytes := 4; */
-/*       Device.bGetName := True; */
-/*       Device.WDGBytes := 2; */
-/*     end; */
-/*     $4001, $4002: begin //USB-DA12-8A */
-/*       Device.bGetName := AIOUSB_FALSE; */
-/*       Device.bDACStream := True; */
-/*       Device.ImmDACs := 8; */
-/*       Device.DACsUsed := 5; */
-/*       Device.bGetName := True; */
-/*     end; */
-/*     $4003: begin //USB-DA12-8E (no streaming) */
-/*       Device.bGetName := AIOUSB_FALSE; */
-/*       Device.ImmDACs := 8; */
-/*       Device.bGetName := True; */
-/*     end; */
-/*     $8020: begin //USB-CTR-15 */
-/*       Device.Counters := 5; */
-/*       Device.bGateSelectable := True; */
-/*       Device.RootClock := 10000000; */
-/*       Device.bGetName := True; */
-/*     end; */
-/*     $8030, $8031: begin //USB-IIRO4-2SM, USB-IIRO4-COM */
-/*       Device.DIOBytes := 2; */
-/*       Device.bGetName := True; */
-/*     end; */
-/*     $8032: begin //USBP-DIO16RO8 */
-/*       Device.DIOBytes := 3; */
-/*       Device.bGetName := True; */
-/*     end; */
-/*     $8033: begin //PICO-DIO16RO8 */
-/*       Device.DIOBytes := 3; */
-/*       Device.bGetName := True; */
-/*     end; */
-/*     $8036: begin //USBP-II8IDO4 */
-/*       Device.DIOBytes := 2; */
-/*       Device.bGetName := True; */
-/*       Device.ImmADCs := 2; */
-/*     end; */
-/*     $8037: begin //PICO-II8IDO4 */
-/*       Device.DIOBytes := 2; */
-/*       Device.bGetName := True; */
-/*       Device.ImmADCs := 2; */
-/*     end; */
-/*     $8040..$8044, $8140..$8144: begin //USB-AI(O)16-16 family */
-/*       Device.DIOBytes := 2; */
-/*       Device.Counters := 1; */
-/*       Device.RootClock := 10000000; */
-/*       Device.bGetName := True; */
-/*       Device.bADCStream := True; */
-/*       Device.ADCChannels := 16; */
-/*       Device.ADCMUXChannels := 16; */
-/*       Device.ConfigBytes := 20; */
-/*       Device.RangeShift := 0; */
-/*       Device.bClearFIFO := True; */
-/*       if (Device.PID and $0100) <> 0 then begin */
-/*         Device.bDACBoardRange := True; */
-/*         Device.ImmDACs := 2; */
-/*       end; */
-/*     end; */
-/*     $8045..$8049, $8145..$8149: begin //USB-AI(O)16-64 family */
-/*       Device.DIOBytes := 2; */
-/*       Device.Counters := 1; */
-/*       Device.RootClock := 10000000; */
-/*       Device.bGetName := True; */
-/*       Device.bADCStream := True; */
-/*       Device.ADCChannels := 16; */
-/*       Device.ADCMUXChannels := 64; */
-/*       Device.ConfigBytes := 21; */
-/*       Device.RangeShift := 2; */
-/*       Device.bClearFIFO := True; */
-/*       if (Device.PID and $0100) <> 0 then begin */
-/*         Device.bDACBoardRange := True; */
-/*         Device.ImmDACs := 2; */
-/*       end; */
-/*     end; */
-/*     $804A..$805F, $814A..$815F: begin //USB-AI(O)16-32+ family */
-/*       Device.DIOBytes := 2; */
-/*       Device.Counters := 1; */
-/*       Device.RootClock := 10000000; */
-/*       Device.bGetName := True; */
-/*       Device.bADCStream := True; */
-/*       Device.ADCChannels := 16; */
-/*       Device.ADCMUXChannels := 32 * ((((Device.PID - $804A) and not $0100) div 5) + 1); */
-/*       Device.ConfigBytes := 21; */
-/*       Device.RangeShift := 3; */
-/*       Device.bClearFIFO := True; */
-/*       if (Device.PID and $0100) <> 0 then begin */
-/*         Device.bDACBoardRange := True; */
-/*         Device.ImmDACs := 2; */
-/*       end; */
-/*     end; */
-/*     $8060, $8070..$807F: begin //USB-AO16-16A family */
-/*       Device.DIOBytes := 2; */
-/*       Device.bGetName := True; */
-/*       Device.FlashSectors := 32; */
-/*       Device.bDACBoardRange := True; */
-/*       Device.bDACChannelCal := True; */
-/*       //Device.bClearFIFO := True; */
-/*       //Add a new-style DAC streaming */
-/*       case Device.PID and $6 of */
-/*         $0: Device.ImmDACs := 16; */
-/*         $2: Device.ImmDACs := 12; */
-/*         $4: Device.ImmDACs := 8; */
-/*         $6: Device.ImmDACs := 4; */
-/*       end; */
-/*       if (Device.PID and 1) = 0 then Device.ImmADCs := 2; */
-/*     end; */
-/*     else begin */
-/*       //Device.bADCStream := True; Result := ERROR_SUCCESS; */
-/*       //Device.bDIOStream := True; Result := ERROR_SUCCESS; */
-/*       //Device.bDIOSPI := True; Result := ERROR_SUCCESS; */
-/*     end; */
-/*   end; */
-
-
-
-/* function AIOUSB_EnsureOpen(const DeviceIndex: LongWord): LongWord; */
-/* var */
-/*   Device: PDeviceData; */
-/*   DeviceInfo: USB_DEV_DSC; */
-/*   dwBytesReturned: LongWord; */
-/* begin */
-/*   Device := @Dev[DeviceIndex]; */
-
-
-
-
-
-
-
-/*   Device.DIOBytes := 0; */
-/*   Device.DIOConfigBits := 0; */
-/*   Device.Counters := 0; */
-/*   Device.RootClock := 0; */
-/*   Device.Tristates := 0; */
-/*   Device.bGetName := AIOUSB_FALSE; */
-/*   Device.ConfigBytes := 0; */
-/*   Device.bGateSelectable := False; */
-/*   Device.bDACBoardRange := False; */
-/*   Device.bDACChannelCal := False; */
-/*   Device.ImmDACs := 0; */
-/*   Device.ImmADCs := 0; */
-/*   Device.ADCChannels := 0; */
-/*   Device.ADCMUXChannels := 0; */
-/*   Device.ADCWorker := nil; */
-/*   Device.bDACStream := False; */
-/*   Device.bADCStream := False; */
-/*   Device.RangeShift := 0; */
-/*   Device.bDIOStream := False; */
-/*   Device.StreamingBlockSize := 31*1024; */
-/*   Device.bDIODebounce := False; */
-/*   Device.bDIOSPI := False; */
-/*   Device.bClearFIFO := False; */
-/*   Device.FlashSectors := 0; */
-/*   Device.WDGBytes := 0; */
-/*   Device.bSetCustomClocks := False; */
-
-/*   case Device.PID of */
-/*     $8001: begin //USB-DIO-32 */
-/*       Device.DIOBytes := 4; */
-/*       Device.Counters := 3; */
-/*       Device.RootClock := 3000000; */
-/*       Device.bGetName := True; */
-/*       Device.bSetCustomClocks := True; */
-/*       Device.bDIODebounce := True; */
-/*     end; */
-/*     $8004: begin //USB-DIO-32I */
-/*       Device.DIOBytes := 4; */
-/*       Device.DIOConfigBits := 32; */
-/*       Device.bGetName := True; */
-/*       Device.bSetCustomClocks := True; */
-/*     end; */
-/*     $8002: begin //USB-DIO-48 */
-/*       Device.DIOBytes := 6; */
-/*       Device.bGetName := True; */
-/*     end; */
-/*     $8003: begin //USB-DIO-96 */
-/*       Device.DIOBytes := 12; */
-/*       Device.bGetName := True; */
-/*     end; */
-/*     $8008, $8009, $800A: begin //USB-DIO16A family, old revs */
-/*       Device.DIOBytes := 1; */
-/*       Device.bGetName := True; */
-/*       Device.bDIOStream := True; */
-/*       Device.bDIOSPI := True; */
-/*       Device.bClearFIFO := True; */
-/*     end; */
-/*     $800C, $800D, $800E, $800F: begin //USB-DIO16A family, current revs */
-/*       Device.DIOBytes := 4; */
-/*       Device.Tristates := 2; */
-/*       Device.bGetName := True; */
-/*       Device.bDIOStream := True; */
-/*       Device.bDIOSPI := True; */
-/*       Device.bClearFIFO := True; */
-/*     end; */
-/*     $8010, $8011, $8012, $8014, $8015, $8016, //USB-IIRO-16 family */
-/*     $8018,        $801A, $801C,        $801E, //USB-IDIO-16 family */
-/*     $8019, $801D, $801F: begin //USB-II-16-OEM family */
-/*       Device.DIOBytes := 4; */
-/*       Device.bGetName := True; */
-/*       Device.WDGBytes := 2; */
-/*     end; */
-/*     $4001, $4002: begin //USB-DA12-8A */
-/*       Device.bGetName := False; */
-/*       Device.bDACStream := True; */
-/*       Device.ImmDACs := 8; */
-/*       Device.DACsUsed := 5; */
-/*       Device.bGetName := True; */
-/*     end; */
-/*     $4003: begin //USB-DA12-8E (no streaming) */
-/*       Device.bGetName := False; */
-/*       Device.ImmDACs := 8; */
-/*       Device.bGetName := True; */
-/*     end; */
-/*     $8020: begin //USB-CTR-15 */
-/*       Device.Counters := 5; */
-/*       Device.bGateSelectable := True; */
-/*       Device.RootClock := 10000000; */
-/*       Device.bGetName := True; */
-/*     end; */
-/*     $8030, $8031: begin //USB-IIRO4-2SM, USB-IIRO4-COM */
-/*       Device.DIOBytes := 2; */
-/*       Device.bGetName := True; */
-/*     end; */
-/*     $8032: begin //USBP-DIO16RO8 */
-/*       Device.DIOBytes := 3; */
-/*       Device.bGetName := True; */
-/*     end; */
-/*     $8033: begin //PICO-DIO16RO8 */
-/*       Device.DIOBytes := 3; */
-/*       Device.bGetName := True; */
-/*     end; */
-/*     $8036: begin //USBP-II8IDO4 */
-/*       Device.DIOBytes := 2; */
-/*       Device.bGetName := True; */
-/*       Device.ImmADCs := 2; */
-/*     end; */
-/*     $8037: begin //PICO-II8IDO4 */
-/*       Device.DIOBytes := 2; */
-/*       Device.bGetName := True; */
-/*       Device.ImmADCs := 2; */
-/*     end; */
-/*     $8040..$8044, $8140..$8144: begin //USB-AI(O)16-16 family */
-/*       Device.DIOBytes := 2; */
-/*       Device.Counters := 1; */
-/*       Device.RootClock := 10000000; */
-/*       Device.bGetName := True; */
-/*       Device.bADCStream := True; */
-/*       Device.ADCChannels := 16; */
-/*       Device.ADCMUXChannels := 16; */
-/*       Device.ConfigBytes := 20; */
-/*       Device.RangeShift := 0; */
-/*       Device.bClearFIFO := True; */
-/*       if (Device.PID and $0100) <> 0 then begin */
-/*         Device.bDACBoardRange := True; */
-/*         Device.ImmDACs := 2; */
-/*       end; */
-/*     end; */
-/*     $8045..$8049, $8145..$8149: begin //USB-AI(O)16-64 family */
-/*       Device.DIOBytes := 2; */
-/*       Device.Counters := 1; */
-/*       Device.RootClock := 10000000; */
-/*       Device.bGetName := True; */
-/*       Device.bADCStream := True; */
-/*       Device.ADCChannels := 16; */
-/*       Device.ADCMUXChannels := 64; */
-/*       Device.ConfigBytes := 21; */
-/*       Device.RangeShift := 2; */
-/*       Device.bClearFIFO := True; */
-/*       if (Device.PID and $0100) <> 0 then begin */
-/*         Device.bDACBoardRange := True; */
-/*         Device.ImmDACs := 2; */
-/*       end; */
-/*     end; */
-/*     $804A..$805F, $814A..$815F: begin //USB-AI(O)16-32+ family */
-/*       Device.DIOBytes := 2; */
-/*       Device.Counters := 1; */
-/*       Device.RootClock := 10000000; */
-/*       Device.bGetName := True; */
-/*       Device.bADCStream := True; */
-/*       Device.ADCChannels := 16; */
-/*       Device.ADCMUXChannels := 32 * ((((Device.PID - $804A) and not $0100) div 5) + 1); */
-/*       Device.ConfigBytes := 21; */
-/*       Device.RangeShift := 3; */
-/*       Device.bClearFIFO := True; */
-/*       if (Device.PID and $0100) <> 0 then begin */
-/*         Device.bDACBoardRange := True; */
-/*         Device.ImmDACs := 2; */
-/*       end; */
-/*     end; */
-/*     $8060, $8070..$807F: begin //USB-AO16-16A family */
-/*       Device.DIOBytes := 2; */
-/*       Device.bGetName := True; */
-/*       Device.FlashSectors := 32; */
-/*       Device.bDACBoardRange := True; */
-/*       Device.bDACChannelCal := True; */
-/*       //Device.bClearFIFO := True; */
-/*       //Add a new-style DAC streaming */
-/*       case Device.PID and $6 of */
-/*         $0: Device.ImmDACs := 16; */
-/*         $2: Device.ImmDACs := 12; */
-/*         $4: Device.ImmDACs := 8; */
-/*         $6: Device.ImmDACs := 4; */
-/*       end; */
-/*       if (Device.PID and 1) = 0 then Device.ImmADCs := 2; */
-/*     end; */
-/*     else begin */
-/*       //Device.bADCStream := True; Result := ERROR_SUCCESS; */
-/*       //Device.bDIOStream := True; Result := ERROR_SUCCESS; */
-/*       //Device.bDIOSPI := True; Result := ERROR_SUCCESS; */
-/*     end; */
-/*   end; */
-
-
-
-/*   if Device.DIOConfigBits = 0 then Device.DIOConfigBits := Device.DIOBytes; */
-
-/*   SetLength(Device.LastDIOData, Device.DIOBytes); */
-
-/*   Device.bOpen := True; */
-/*   Result := ERROR_SUCCESS; */
-/* end; */
-
+/** 
+ * @desc Creates FastIT Config Blocks 
+ * 
+ * @param DeviceIndex 
+ * @param size 
+ * 
+ * @return 
+ */
 unsigned long 
 ADC_CreateFastITConfig( unsigned long DeviceIndex,
                         int size 
@@ -2420,6 +2056,12 @@ ADC_CreateFastITConfig( unsigned long DeviceIndex,
   return AIOUSB_SUCCESS;
 }
 
+
+/** 
+ * @desc Frees memory associated with the FastConfig Config blocks. Use
+ *       this call after you are done using the ADC_FastIT* Functions
+ * @param DeviceIndex 
+ */
 void 
 ADC_ClearFastITConfig(  unsigned long DeviceIndex )
 {
@@ -2466,16 +2108,8 @@ unsigned long ADC_InitFastITScanV(
     unsigned long DeviceIndex
     )
 {
-/* var */
-/*   I: Integer; */
-/*   L: LongWord; */
-/*   Dat: Byte; */
-    long l;
     int Dat;
     unsigned long result;
-    /* unsigned char *FastITConfig; */
-    /* unsigned char *FastITBakConfig; */
-    unsigned long sizeof_dat = 0;
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     ADConfigBlock configBlock;
 
@@ -2483,23 +2117,16 @@ unsigned long ADC_InitFastITScanV(
     configBlock.device = deviceDesc;
     configBlock.size = deviceDesc->FastITConfig_size;
     
-/* begin */
-  /* try {  */
-    /* result := Validate(DeviceIndex); */
-    l = 3;
-  
     if( !AIOUSB_Lock() )
         return AIOUSB_ERROR_INVALID_MUTEX;
 
     result = AIOUSB_Validate( &DeviceIndex );
-  /* if result <> ERROR_SUCCESS then Exit; */
+
     if( result != AIOUSB_SUCCESS ) {
         AIOUSB_UnLock();
         goto RETURN_ADC_InitFastITScanV;
     }
 
-    /* result := AIOUSB_EnsureOpen(DeviceIndex); */
-    /* result = AIOUSB_EnsureOpen( &DeviceIndex ); */
     result = AIOUSB_EnsureOpen( DeviceIndex );
     if( result != AIOUSB_SUCCESS ) {
       AIOUSB_UnLock();
@@ -2511,107 +2138,47 @@ unsigned long ADC_InitFastITScanV(
       goto RETURN_ADC_InitFastITScanV;
     }
 
-    // if( deviceDesc->ImmADCs == 0 ) {
-    //     AIOUSB_UnLock();
-    //     goto RETURN_ADC_InitFastITScanV;
-    // } 
-
-    /* if( ConfigBytes < 20 ) { */
-    /*     AIOUSB_Unlock(); */
-    /*     return result; */
-    /* } */
-
-    /* if result <> ERROR_SUCCESS then Exit; */
-    /* if( result != AIOUSB_SUCCESS )  { */
-    /*   AIOUSB_Unlock(); */
-    /*   return result; */
-    /* } */
-
-    /* with Dev[DeviceIndex] do begin */
-    /*   if not bADCStream then begin */
-    /*     result := ERROR_BAD_TOKEN_TYPE; */
-    /*     Exit; */
-    /*   end; */
-
-    /* if ConfigBytes < 20 then begin */
-    /*   result := ERROR_BAD_TOKEN_TYPE; */
-    /*   Exit; */
-    /* end; */
-
-
-    /* SetLength(FastITConfig, configBlock.size ); */
-    /* SetLength(FastITBakConfig, configBlock.size); */
-    
-    
-    /* deviceDesc->FastITConfig = (unsigned char*)malloc( sizeof(unsigned char) * configBlock.size ); */
-    /* deviceDesc->FastITBakConfig = (unsigned char*)malloc( sizeof(unsigned char) * configBlock.size ); */
-    // result = ADC_CreateFastITConfig( deviceDesc, deviceDesc->ConfigBytes );
     result = ADC_CreateFastITConfig( DeviceIndex , deviceDesc->FastITConfig_size );
     if( result != AIOUSB_SUCCESS ) 
       goto CLEANUP_ADC_InitFastITScanV;
 
-    /* L := ConfigBytes; */
-    /* result := ADC_GetConfig(DeviceIndex, @FastITBakConfig[0], L); */
-    /* L = ConfigBytes; */
+
 
     result = ADC_GetConfig( DeviceIndex, &deviceDesc->FastITBakConfig[0], &configBlock.size );
 
-    /* if result <> ERROR_SUCCESS then Exit; */
+
     if( result != AIOUSB_SUCCESS ) {
         AIOUSB_UnLock();
         goto RETURN_ADC_InitFastITScanV;
     }
 
-      /* for I := 0 to 15 do FastITConfig[I] := FastITBakConfig[I]; //Use their range codes. */
-    // for( i = 0; i <= 15; i ++ ) 
-    //     deviceDesc->FastITConfig[i] = deviceDesc->FastITBakConfig[i];
+    /* Copy old config */
     memcpy( &deviceDesc->FastITConfig[0], &deviceDesc->FastITBakConfig[0], configBlock.size );
 
-    //FastITConfig[$11] := $04 or (FastITBakConfig[$11] and $10); //Software-start scan, use their CTR0 EXT bit.
+    /* Make changes to the config block */
     deviceDesc->FastITConfig[0x11] = 0x04 | ( deviceDesc->FastITBakConfig[0x11] & 0x10 );
+    deviceDesc->FastITConfig[0x11] = 0x05 | (deviceDesc->FastITBakConfig[0x10] & 0x10); 
+    deviceDesc->FastITConfig[0x13] = 3 > deviceDesc->FastITBakConfig[0x13] ? 3 :  deviceDesc->FastITBakConfig[0x13];    /* Oversample at least +3. */
 
-    /* FastITConfig[$11] := $05 or (FastITBakConfig[$11] and $10); Timer scan, use their CTR0 EXT bit. */
-    deviceDesc->FastITConfig[0x11] = 0x05 |  (deviceDesc->FastITBakConfig[0x10] & 0x10); 
-                                    
-    /* FastITConfig[$13] := Max(3, FastITBakConfig[$13]); //Oversample at least +3. */
-    deviceDesc->FastITConfig[0x13] = 3 > deviceDesc->FastITBakConfig[0x13] ? 3 :  deviceDesc->FastITBakConfig[0x13];    //Oversample at least +3. */
-                   
-      
-      /* Dat := Min(64, ADCMUXChannels) - 1; */
     Dat = 64 > deviceDesc->ADCMUXChannels ?  deviceDesc->ADCMUXChannels - 1  : 63;
 
-    /* FastITConfig[$12] := Dat shl 4; */
     deviceDesc->FastITConfig[0x12] = Dat << 4;
-
-    /* FastITConfig[$14] := Dat and $F0; */
     deviceDesc->FastITConfig[0x14] = Dat & 0xF0;
 
-    /* result := ADC_SetConfig(DeviceIndex, @FastITConfig[0], L); */
     result = ADC_SetConfig(DeviceIndex, &deviceDesc->FastITConfig[0], &configBlock.size );
 
     AIOUSB_UnLock();
 
-    /* if result <> ERROR_SUCCESS then begin */
-    /*      ADC_SetConfig(DeviceIndex, @FastITBakConfig[0], L); */
-    /*      Exit; */
-    /* end; */
     if( result != AIOUSB_SUCCESS ) {
         ADC_SetConfig( DeviceIndex , &deviceDesc->FastITConfig[0],  &configBlock.size );
         return result;
     }
     
     Dat  = 0x01;
-
- /* result := GenericVendorWrite(DeviceIndex, $D4, $1E, 0, SizeOf(Dat), @Dat); */
+    /* GVW is currently having issues */
     /* result = GenericVendorWrite( DeviceIndex, 0xD4, 0x1E , 0 , &sizeof_dat , &Dat ); */
     result = 0;
-    // if( result != AIOUSB_SUCCESS ) { 
-    //   unsigned long L = configBlock.size;
-    //   // ADC_SetConfig( DeviceIndex, &deviceDesc->FastITBakConfig[0], &L );
-    //   result = 0;
-    // }
-    /* if result <> ERROR_SUCCESS then ADC_SetConfig(DeviceIndex, @FastITBakConfig[0], L); */
-    /* end; */
+
     if( result != AIOUSB_SUCCESS ) {  
     CLEANUP_ADC_InitFastITScanV:
       if(  deviceDesc->FastITConfig_size  )
@@ -2620,8 +2187,6 @@ unsigned long ADC_InitFastITScanV(
     
  RETURN_ADC_InitFastITScanV:
     return result;
-  /* except */
-    /* result := ERROR_INTERNAL_ERROR; */
 }
 
 /**
@@ -2741,57 +2306,34 @@ unsigned long ADC_GetFastITScanV( unsigned long DeviceIndex )
     ADConfigBlock configBlock;
     configBlock.device = deviceDesc;
     configBlock.size = deviceDesc->FastITConfig_size;
-    int Dat;
     int StartChannel;
     int EndChannel;
     int Channels;
-    int ch;
     unsigned long BytesLeft;
 
     result = AIOUSB_Validate( &DeviceIndex );
     if( result != AIOUSB_SUCCESS ) 
       goto RETURN_ADC_GetFastITScanV;
 
-/*     Result := AIOUSB_EnsureOpen(DeviceIndex); */
-/*     if Result <> ERROR_SUCCESS then Exit; */
     result = AIOUSB_EnsureOpen( DeviceIndex );
     if( result != AIOUSB_SUCCESS ) 
       goto RETURN_ADC_GetFastITScanV;
     
-/*     with Dev[DeviceIndex] do begin */
-/*       if not bADCStream then begin */
-/*         Result := ERROR_BAD_TOKEN_TYPE; */
-/*         Exit; */
-/*       end; */
     if( ! deviceDesc->bADCStream  ) {
       result = AIOUSB_ERROR_BAD_TOKEN_TYPE;
       goto RETURN_ADC_GetFastITScanV;
     }
 
-/*       if ConfigBytes < 20 then begin */
-/*         Result := ERROR_BAD_TOKEN_TYPE; */
-/*         Exit; */
-/*       end; */
     if( deviceDesc->ConfigBytes < 20 ) {
       result = AIOUSB_ERROR_BAD_TOKEN_TYPE;
       goto RETURN_ADC_GetFastITScanV;
     }
-/*       //Determine channels. */
-/*       StartChannel := FastITConfig[$12] and $F; */
-/*       EndChannel := FastITConfig[$12] shr 4; */
-/*       if ConfigBytes >= 21 then begin */
-/*         StartChannel := StartChannel or ((FastITConfig[20] and $F) shl 4); */
-/*         EndChannel := EndChannel or (FastITConfig[20] and $F0); */
-/*       end; */
+
     StartChannel = deviceDesc->FastITConfig[0x12] & 0x0f;
     EndChannel   = deviceDesc->FastITConfig[0x12] >> 4;
-/*       Channels := EndChannel - StartChannel + 1; */
-    Channels =  EndChannel - StartChannel + 1;
+    Channels     =  EndChannel - StartChannel + 1;
 
-/* Set array to receive scan(=channels * (1+oversample)). */
-/* SetLength(ADBuf, Channels * (1 + FastITConfig[$13])); */
-    /* deviceDesc->ADBuf = ()malloc(sizeof( )* Channels * (1 + FastITConfig[0x13] ) ); */
-    
+  
     result = ADC_CreateADBuf( deviceDesc , Channels * (1 + deviceDesc->FastITConfig[0x13] ) );
     if( result != AIOUSB_SUCCESS ) 
       goto CLEANUP_ADC_GetFastITScanV;
@@ -2835,34 +2377,6 @@ unsigned long ADC_GetFastITScanV( unsigned long DeviceIndex )
       }	
     }
  
-    // result = ADC_BulkPoll( DeviceIndex, &BytesLeft );
-    // if( result != AIOUSB_SUCCESS )
-    //   goto CLEANUP_ADC_GetFastITScanV;
-    // if( BytesLeft != 0 ) {
-    //   result = AIOUSB_ERROR_HANDLE_EOF;
-    //   goto CLEANUP_ADC_GetFastITScanV;
-    // }
-/*       //Condition data; cull 75%(round down) of samples per channel from first block of channels, cull first from others, and average. */
-/*       I := 0; */
-/*       Inc(pBuf, StartChannel); */
-/*       for Ch := StartChannel to EndChannel do begin */
-/*         RangeCode := FastITConfig[Ch shr RangeShift]; */
-/*         Tot := 0; */
-/*         Wt := 0; */
-/*         if (Ch shr RangeShift) = 0 then J := 4 else J := 1; //Discard first 4 samples from first 8 channels, and first 1 sample from other channels. */
-/*         J := Min(J, FastITConfig[$13]); //Except always keep at least one sample. */
-/*         for J := J to FastITConfig[$13] do begin */
-/*           Tot := Tot + ADBuf[I * (1 + FastITConfig[$13]) + J]; */
-/*           Inc(Wt); */
-/*         end; */
-/*         V := Tot / Wt * (1 / 65536); */
-/*         if (RangeCode and 1) <> 0 then V := V * 2 - 1; */
-/*         if (RangeCode and 2) = 0 then V := V * 2; */
-/*         if (RangeCode and 4) = 0 then V := V * 5; */
-/*         pBuf^ := V; */
-/*         Inc(pBuf); */
-/*         Inc(I); */
-/*       end; */
 #if 0
     for( int i=0, ch = StartChannel; ch < EndChannel; i ++ ) {
       int RangeCode = deviceDesc->FastITConfig[ch >> deviceDesc->RangeShift];

@@ -20,15 +20,13 @@ using namespace AIOUSB;
 extern int CURRENT_DEBUG_LEVEL;
 
 
-int main( int argc, char **argv ) {
-  // printf("Sample test for Checking the Calibration on the board: %s, %s", AIOUSB_GetVersion(), AIOUSB_GetVersionDate());
+int main( int argc, char **argv ) 
+{
   CURRENT_DEBUG_LEVEL = VERBOSE_LOGGING;
   unsigned long result = AIOUSB_Init();
   int block_size;
   int over_sample;
   double clock_speed;
-  // const char *entries[] = {"BLOCK_SIZE","OVER_SAMPLE","CLOCK_SPEED"};
-  // int CURRENT_DEBUG_LEVEL = 2;
   
   block_size  = TestCaseSetup::envGetInteger("BLOCK_SIZE");
   over_sample = TestCaseSetup::envGetInteger("OVER_SAMPLE");
@@ -45,12 +43,6 @@ int main( int argc, char **argv ) {
         tcs.setCurrentDeviceIndex(0);
 
         tcs.doFastITScan();
-        // tcs.doPreSetup();
-        // tcs.doBulkConfigBlock();
-        // tcs.doSetAutoCalibration();
-        // tcs.doVerifyGroundCalibration();
-        // tcs.doVerifyReferenceCalibration();
-        // tcs.doBulkAcquire( block_size, over_sample, clock_speed );
 
         unsigned short *tmp = tcs.doGetBuffer();
         tcs.doCleanupAfterBulk();
@@ -58,7 +50,6 @@ int main( int argc, char **argv ) {
         std::cout << block_size << "," << over_sample << "," << clock_speed << "," << "Passed" << std::endl;
       } catch ( Error &e  ) {
         std::cout << e.what() << std::endl;
-        // std::cout << "Got Error " << e.cstr << std::endl;
         std::cout << block_size << "," << over_sample << "," << clock_speed << "," << "Failed" << std::endl;
       }
     }

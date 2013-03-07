@@ -6,46 +6,67 @@
 #
 # make file for AIOUSB library sample programs
 #
-
 ifdef DEBUG
-	DEBUGOPTS = -ggdb
-	ifdef AIOUSBLIBDIR
-		LIBAIOUSB 		:= $(AIOUSBLIBDIR)/libaiousbdbg.a
-		LIBAIOUSBCPP 		:= $(AIOUSBLIBDIR)/libaiousbcppdbg.a
-		AIOUSBLIB_BUILD		= $(LIBAIOUSB): ; cd $(AIOUSBLIBDIR) && $(MAKE)
-		LIBAIOUSB_CDEP		:= $(LIBAIOUSB)
-	else
-		LIBAIOUSB := -laiousbdbg			# use default library search path
-		LIBAIOUSBCPP := -laiousbcppdbg			# use default library search path
-	endif
-	ifdef AIOUSBCLASSLIBDIR
-		LIBCLASSAIOUSB 		:= $(AIOUSBCLASSLIBDIR)/libclassaiousbdbg.a
-		CLASSLIB_BUILD  	=  $(LIBCLASSAIOUSB): ; cd $(AIOUSBCLASSLIBDIR) && $(MAKE)
-		LIBAIOUSB_CPPDEP	:= $(LIBCLASSAIOUSB)	
-		CFLAGS			+=  -I$(AIOUSBCLASSLIBDIR)
-	else
-		LIBCLASSAIOUSB := -lclassaiousbdbg		# use default library search path
-	endif
+	DEBUGOPTS 	:= -ggdb
+	DEBUGSTEM 	:= dbg
 else
-	DEBUGOPTS = -DNDEBUG
-	ifdef AIOUSBLIBDIR
-		LIBAIOUSB 		:= $(AIOUSBLIBDIR)/libaiousb.a
-		LIBAIOUSBCPP 		:= $(AIOUSBLIBDIR)/libaiousbcpp.a
-		AIOUSBLIB_BUILD		= $(LIBAIOUSB): ; cd $(AIOUSBLIBDIR) && $(MAKE)
-		LIBAIOUSB_CDEP		:= $(LIBAIOUSB)
-		CFLAGS			+=  -I$(AIOUSBCLASSLIBDIR)
-	else
-		LIBAIOUSB := -laiousb				# use default library search path
-		LIBAIOUSBCPP := -laiousbcpp			# use default library search path
-	endif
-	ifdef AIOUSBCLASSLIBDIR
-		LIBCLASSAIOUSB 		:= $(AIOUSBCLASSLIBDIR)/libclassaiousb.a
-		CLASSLIB_BUILD  	= $(LIBCLASSAIOUSB): ; cd $(AIOUSBCLASSLIBDIR) && $(MAKE)
-		LIBAIOUSB_CPPDEP	:= $(LIBCLASSAIOUSB)	
-	else
-		LIBCLASSAIOUSB := -lclassaiousb			# use default library search path
-	endif
+	DEBUGOPTS	:= -DNDEBUG
+	DEBUGSTEM	:=
 endif
+
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# Regular C related Build
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ifdef AIOUSBLIBDIR
+	LIBAIOUSB 		:= $(AIOUSBLIBDIR)/libaiousb$(DEBUGSTEM).a
+	LIBAIOUSBCPP 		:= $(AIOUSBLIBDIR)/libaiousbcpp$(DEBUGSTEM).a
+
+	ALL_AIOUSBLIBDIR_CFILES	:= $(wildcard $(AIOUSBLIBDIR)/*.c )
+	LIBAIOUSB_CDEP		:= $(LIBAIOUSB) $(wildcard $(AIOUSBLIBDIR)/*.c )
+
+#       Dynamic Build Rule for aiousblib
+	AIOUSBLIB_BUILD		= $(LIBAIOUSB): $(ALL_AIOUSBLIBDIR_CFILES) ; cd $(AIOUSBLIBDIR) && $(MAKE)
+else
+	LIBAIOUSB 		:= -laiousbdbg			# use default library search path
+	LIBAIOUSBCPP 		:= -laiousbcppdbg			# use default library search path
+endif
+
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# C++ Related Build
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ifdef AIOUSBCLASSLIBDIR
+	LIBCLASSAIOUSB 		:= $(AIOUSBCLASSLIBDIR)/libclassaiousbdbg.a
+	ALL_AIOUSBLIBDIR_CFILES	:= $(wildcard $(AIOUSBLIBDIR)/*.c )
+	ALL_CLASSLIB_CPPFILES	:= $(wildcard $(AIOUSBCLASSLIBDIR)/*.c)
+	LIBAIOUSB_CPPDEP	:= $(LIBCLASSAIOUSB) $(ALL_AIOUSBLIBDIR_CFILES)  $(ALL_CLASSLIB_CPPFILES)
+
+	CFLAGS			+=  -I$(AIOUSBCLASSLIBDIR)
+#       Dynamic Build rule for C++ lib
+	CLASSLIB_BUILD  	=  $(LIBCLASSAIOUSB): $(LIBAIOUSB) $(ALL_AIOUSBLIBDIR_CFILES)  $(ALL_CLASSLIB_CPPFILES) ; cd $(AIOUSBCLASSLIBDIR) && $(MAKE)
+else
+	LIBCLASSAIOUSB 		:= -lclassaiousbdbg		# use default library search path
+endif
+
+# else
+# 	DEBUGOPTS = -DNDEBUG
+# 	ifdef AIOUSBLIBDIR
+# 		LIBAIOUSB 		:= $(AIOUSBLIBDIR)/libaiousb.a
+# 		LIBAIOUSBCPP 		:= $(AIOUSBLIBDIR)/libaiousbcpp.a
+# 		AIOUSBLIB_BUILD		= $(LIBAIOUSB): ; cd $(AIOUSBLIBDIR) && $(MAKE)
+# 		LIBAIOUSB_CDEP		:= $(LIBAIOUSB)
+# 		CFLAGS			+=  -I$(AIOUSBCLASSLIBDIR)
+# 	else
+# 		LIBAIOUSB := -laiousb				# use default library search path
+# 		LIBAIOUSBCPP := -laiousbcpp			# use default library search path
+# 	endif
+# 	ifdef AIOUSBCLASSLIBDIR
+# 		LIBCLASSAIOUSB 		:= $(AIOUSBCLASSLIBDIR)/libclassaiousb.a
+# 		CLASSLIB_BUILD  	= $(LIBCLASSAIOUSB): ; cd $(AIOUSBCLASSLIBDIR) && $(MAKE)
+# 		LIBAIOUSB_CPPDEP	:= $(LIBCLASSAIOUSB)	
+# 	else
+# 		LIBCLASSAIOUSB := -lclassaiousb			# use default library search path
+# 	endif
+# endif
 
 ifndef AIOUSBJAVALIBDIR
 	AIOUSBJAVALIBDIR := ../../java
@@ -106,9 +127,10 @@ test	:
 	@echo "AIOUSBLIB_DIR= $(AIOUSBLIBDIR)"
 	@echo "AIOLIB=$(LIBCLASSAIOUSB)"
 	@echo "LIBRARY_DEPS=$(LIBRARY_DEPS)"
-	@echo '$(call CLASSLIB_BUILD)'
-	@echo '$(call AIOUSBLIB_BUILD)'
+	@echo "BUILD_DEPS=$(LIBAIOUSB_CPPDEP)"
 
+#	@echo '$(call CLASSLIB_BUILD)'
+#	@echo '$(call AIOUSBLIB_BUILD)'	
 # @echo "CPPDEPS=	$(LIBAIOUSB_CPPDEP)"
 # @echo "CDEPS=$(LIBAIOUSB_CDEP)"
 
@@ -124,6 +146,8 @@ clean:
 $(eval $(call AIOUSBLIB_BUILD))
 $(eval $(call CLASSLIB_BUILD))
 
+testthing:
+	@echo "$(call CLASSLIB_BUILD)"
 
 
 Sample.jar: Sample.class
@@ -164,9 +188,6 @@ lib/TestCaseSetup.o: lib/TestCaseSetup.cpp lib/TestCaseSetup.h  $(LIBRARY_DEPS)
 %:%.o	$(COMMON_DEPS) $(LIBRARY_DEPS) 
 	$(CPP)  $(LDFLAGS) $(DEBUGOPTS) $(INCPATH) $(COMMONOPTS) $(CPPOPTS) $< $(COMMON_DEPS) $(LIBS)  -o $@
 
-
-#$(CPP)  $(LDFLAGS) $(DEBUGOPTS) $(INCPATH) $(COMMONOPTS) $(CPPOPTS) $< $(COMMON_DEPS) $(LIBAIOUSBCPP) $(LIBUSB) -o $@
-#  $(LIBCLASSAIOUSB) $(LIBAIOUSBCPP) $(LIBUSB)
 
 #
 # C Rules
