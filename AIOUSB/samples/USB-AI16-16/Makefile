@@ -9,6 +9,7 @@
 ifdef DEBUG
 	DEBUGOPTS 	:= -ggdb
 	DEBUGSTEM 	:= dbg
+	DEBUG_ARGS	:= DEBUG=-DDEBUG
 else
 	DEBUGOPTS	:= -DNDEBUG
 	DEBUGSTEM	:=
@@ -25,7 +26,7 @@ ifdef AIOUSBLIBDIR
 	LIBAIOUSB_CDEP		:= $(LIBAIOUSB) $(wildcard $(AIOUSBLIBDIR)/*.c )
 
 #       Dynamic Build Rule for aiousblib
-	AIOUSBLIB_BUILD		= $(LIBAIOUSB): $(ALL_AIOUSBLIBDIR_CFILES) ; cd $(AIOUSBLIBDIR) && $(MAKE)
+	AIOUSBLIB_BUILD		= $(LIBAIOUSB): $(ALL_AIOUSBLIBDIR_CFILES) ; cd $(AIOUSBLIBDIR) && $(MAKE) $(DEBUG_ARGS)
 else
 	LIBAIOUSB 		:= -laiousbdbg			# use default library search path
 	LIBAIOUSBCPP 		:= -laiousbcppdbg			# use default library search path
@@ -42,31 +43,10 @@ ifdef AIOUSBCLASSLIBDIR
 
 	CFLAGS			+=  -I$(AIOUSBCLASSLIBDIR)
 #       Dynamic Build rule for C++ lib
-	CLASSLIB_BUILD  	=  $(LIBCLASSAIOUSB): $(LIBAIOUSB) $(ALL_AIOUSBLIBDIR_CFILES)  $(ALL_CLASSLIB_CPPFILES) ; cd $(AIOUSBCLASSLIBDIR) && $(MAKE)
+	CLASSLIB_BUILD  	=  $(LIBCLASSAIOUSB): $(LIBAIOUSB) $(ALL_AIOUSBLIBDIR_CFILES)  $(ALL_CLASSLIB_CPPFILES) ; cd $(AIOUSBCLASSLIBDIR) && $(MAKE) $(DEBUG_ARGS)
 else
 	LIBCLASSAIOUSB 		:= -lclassaiousbdbg		# use default library search path
 endif
-
-# else
-# 	DEBUGOPTS = -DNDEBUG
-# 	ifdef AIOUSBLIBDIR
-# 		LIBAIOUSB 		:= $(AIOUSBLIBDIR)/libaiousb.a
-# 		LIBAIOUSBCPP 		:= $(AIOUSBLIBDIR)/libaiousbcpp.a
-# 		AIOUSBLIB_BUILD		= $(LIBAIOUSB): ; cd $(AIOUSBLIBDIR) && $(MAKE)
-# 		LIBAIOUSB_CDEP		:= $(LIBAIOUSB)
-# 		CFLAGS			+=  -I$(AIOUSBCLASSLIBDIR)
-# 	else
-# 		LIBAIOUSB := -laiousb				# use default library search path
-# 		LIBAIOUSBCPP := -laiousbcpp			# use default library search path
-# 	endif
-# 	ifdef AIOUSBCLASSLIBDIR
-# 		LIBCLASSAIOUSB 		:= $(AIOUSBCLASSLIBDIR)/libclassaiousb.a
-# 		CLASSLIB_BUILD  	= $(LIBCLASSAIOUSB): ; cd $(AIOUSBCLASSLIBDIR) && $(MAKE)
-# 		LIBAIOUSB_CPPDEP	:= $(LIBCLASSAIOUSB)	
-# 	else
-# 		LIBCLASSAIOUSB := -lclassaiousb			# use default library search path
-# 	endif
-# endif
 
 ifndef AIOUSBJAVALIBDIR
 	AIOUSBJAVALIBDIR := ../../java

@@ -2310,7 +2310,7 @@ unsigned long ADC_SetFastITScanVChannels(
  *
  * @return
  */
-unsigned long ADC_GetFastITScanV( unsigned long DeviceIndex )
+unsigned long ADC_GetFastITScanV( unsigned long DeviceIndex, double *pData )
 {
     unsigned long result = 0;
 /* try */
@@ -2324,6 +2324,16 @@ unsigned long ADC_GetFastITScanV( unsigned long DeviceIndex )
     int EndChannel;
     int Channels;
     unsigned long BytesLeft;
+    unsigned short *thisDataBuf;
+    int bufsize      = 128*255 ;
+    double clockHz = 0;
+    double *pBuf;
+
+    int BULK_BYTES = 100000;
+    double CLOCK_SPEED = 100000;
+
+    /* thisDataBuf  = ( unsigned short * ) malloc( bufsize ); */
+
 
     result = AIOUSB_Validate( &DeviceIndex );
     if( result != AIOUSB_SUCCESS ) 
@@ -2346,63 +2356,92 @@ unsigned long ADC_GetFastITScanV( unsigned long DeviceIndex )
     StartChannel = deviceDesc->FastITConfig[0x12] & 0x0f;
     EndChannel   = deviceDesc->FastITConfig[0x12] >> 4;
     Channels     =  EndChannel - StartChannel + 1;
-
   
     result = ADC_CreateADBuf( deviceDesc , Channels * (1 + deviceDesc->FastITConfig[0x13] ) );
     if( result != AIOUSB_SUCCESS ) 
       goto CLEANUP_ADC_GetFastITScanV;
 
-/*       //Begin get-data. */
-/*       Result := ADC_BulkAcquire(DeviceIndex, Length(ADBuf) * SizeOf(ADBuf[0]), @ADBuf[0]); */
-/*       // somethign */
-/*       if Result <> ERROR_SUCCESS then Exit; */
-/*       CTR_8254Mode(DeviceIndex, 0, 2, 0); */
-/*       CTR_8254Mode(DeviceIndex, 0, 2, 1); */
-    result = ADC_BulkAcquire( DeviceIndex, deviceDesc->ADBuf_size , &deviceDesc->ADBuf[0] );
+/*  Stuff I still need to code here */
+/*  Result := ADC_BulkAcquire(DeviceIndex, Length(ADBuf) * SizeOf(ADBuf[0]), @ADBuf[0]); */
+/*  if Result <> ERROR_SUCCESS then Exit; */
+/*  CTR_8254Mode(DeviceIndex, 0, 2, 0); */
+/*  CTR_8254Mode(DeviceIndex, 0, 2, 1); */
+/*  result = ADC_BulkAcquire( DeviceIndex, deviceDesc->ADBuf_size , &deviceDesc->ADBuf[0] ); */
+/* AIOUSB_Reset( DeviceIndex ); */
+/* ADC_SetOversample( DeviceIndex, 1); */
+/* ADC_SetScanLimits( DeviceIndex, 0, Channels  - 1 ); */
+/* AIOUSB_SetStreamingBlockSize( DeviceIndex, 100000 ); */
+
+    bufsize = 1000 * Channels * sizeof( unsigned short ) * 3 /* 1 sample + 3 oversamples */;
+    CLOCK_SPEED = 100000;      // Hz
+    
+    thisDataBuf  = ( unsigned short * ) malloc( bufsize );
+
+    clockHz = 0;
+
+    /* CTR_StartOutputFreq( DeviceIndex, 0, &clockHz ); */
+    /* ADC_ADMode( DeviceIndex, AD_TRIGGER_SCAN | AD_TRIGGER_TIMER, AD_CAL_MODE_NORMAL ); */
+    /* AIOUSB_SetMiscClock( DeviceIndex, CLOCK_SPEED ); */
+    /* result = ADC_BulkAcquire( DeviceIndex, bufsize , thisDataBuf ); */
+    /* TEsting Code */
+    ADC_SetOversample( DeviceIndex, 10 );
+    ADC_SetScanLimits( DeviceIndex, 0, Channels  - 1 );
+    AIOUSB_SetStreamingBlockSize( DeviceIndex, 100000 );
+    /* BULK_BYTES = 100000 * Channels * sizeof( unsigned short ) * 11 /\* 1 sample + 10 oversamples *\/; */
+    BULK_BYTES = 8*16*3*sizeof(unsigned short);
+    CLOCK_SPEED = 100000;	// Hz
+    /* dataBuf = ( unsigned short * ) malloc( BULK_BYTES ); */
+    thisDataBuf = ( unsigned short * ) malloc( BULK_BYTES );
+    
+    clockHz = 0;
+    CTR_StartOutputFreq( DeviceIndex, 0, &clockHz );
+    ADC_ADMode( DeviceIndex, AD_TRIGGER_SCAN | AD_TRIGGER_TIMER, AD_CAL_MODE_NORMAL );
+    AIOUSB_SetMiscClock( DeviceIndex, CLOCK_SPEED );
+
+
+    result = ADC_BulkAcquire( DeviceIndex, BULK_BYTES, thisDataBuf );
+
     if( result != AIOUSB_SUCCESS )
       goto CLEANUP_ADC_GetFastITScanV;
 
-    /* ADC_GetImmediate( DeviceIndex , 0 , 0 ); */
-
-/*       if WaitForSingleObject(ADCWorker.Handle, 1000) <> WAIT_OBJECT_0 then begin */
-/*         Result := ERROR_TIMEOUT; */
-/*         Exit; */
-/*       end; */
-    /* Need to use the Bulk worker acquire */
-
-/*       Result := ADC_BulkPoll(DeviceIndex, BytesLeft); */
-/*       if Result <> ERROR_SUCCESS then Exit; */
-/*       if BytesLeft <> 0 then begin */
-/*         Result := ERROR_HANDLE_EOF; */
-/*         Exit; */
-/*       end; */
 
     for( int seconds = 0; seconds < 100; seconds++ ) {
       sleep( 1 );
       result = ADC_BulkPoll( DeviceIndex, &BytesLeft );
       if( result == AIOUSB_SUCCESS ) {
+#ifdef DEBUG
         printf( "  %lu bytes remaining\n", BytesLeft );
+#endif
         if( BytesLeft == 0 )
           break;
       } else {
-        printf( "Error '%s' polling bulk acquire progress\n"
-                , AIOUSB_GetResultCodeAsString( result ) );
+#ifdef DEBUG
+        printf( "Error '%s' polling bulk acquire progress\n", AIOUSB_GetResultCodeAsString( result ) );
+#endif
         break;
-      }	
+      }
     }
  
-#if 0
-    for( int i=0, ch = StartChannel; ch < EndChannel; i ++ ) {
-      int RangeCode = deviceDesc->FastITConfig[ch >> deviceDesc->RangeShift];
+#if 1
+    pBuf = pData;
+
+    for( int i=0, ch = StartChannel; ch <= EndChannel; i ++ , ch ++ ) {
+      /* int RangeCode = deviceDesc->FastITConfig[ch >> deviceDesc->RangeShift]; */
+#ifdef DEBUG
+      printf("Channel %d\n", i );
+#endif
+      int RangeCode = AIOUSB_GetRegister( &deviceDesc->cachedConfigBlock, ch >> deviceDesc->RangeShift );
       int Tot = 0, Wt = 0;
-      int V;
+      float V;
       int j = ((ch >> deviceDesc->RangeShift ) == 0  ? 4  : 1 ) ;
-      
-      for( ; j <= deviceDesc->FastITConfig[0x13] ; j ++ ) {
-        Tot += deviceDesc->ADBuf[i * (1+ deviceDesc->FastITConfig[0x13])+j];
+
+      for( ; j <=  AIOUSB_GetRegister( &deviceDesc->cachedConfigBlock, 0x13 ); j ++ ) { 
+
+        Tot += thisDataBuf[i * (1+ deviceDesc->FastITConfig[0x13] )+j];
         Wt ++;
+
       }
-      V = Tot / Wt*(1 / 65536);
+      V = Tot / Wt /(float)65536;
       if( (RangeCode & 1 ) != 0 ) 
         V = V*2 -1;
       if( (RangeCode & 2) != 0 )
@@ -2410,10 +2449,11 @@ unsigned long ADC_GetFastITScanV( unsigned long DeviceIndex )
       if( (RangeCode & 4) != 0 )
         V = V*5;
 
-      /* pData = V; */
-      // pBuf++;
-      i ++;
-    } /* for( int i=0.. */
+      *pBuf = (double)V;
+      pBuf ++;
+
+      fflush(stdout);
+    }
 #endif
 
 /*     end; */
@@ -2421,7 +2461,8 @@ unsigned long ADC_GetFastITScanV( unsigned long DeviceIndex )
 /*     Result := ERROR_INTERNAL_ERROR; */
 /*   end; */
  CLEANUP_ADC_GetFastITScanV:
-    ADC_ClearADBuf( deviceDesc );
+    free(thisDataBuf);
+    /* ADC_ClearADBuf( deviceDesc ); */
 
  RETURN_ADC_GetFastITScanV:
     return result;

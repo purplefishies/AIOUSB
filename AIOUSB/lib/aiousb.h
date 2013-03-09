@@ -626,7 +626,8 @@ extern unsigned long ADC_SetFastITScanVChannels(
     );
 
 extern unsigned long ADC_GetFastITScanV(    
-    unsigned long DeviceIndex
+    unsigned long DeviceIndex,
+    double *pData
     );
 
 extern unsigned long ADC_GetITScanV( 

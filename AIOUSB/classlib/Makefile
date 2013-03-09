@@ -19,6 +19,15 @@ DOCINDEX := $(DOCDIR)/index.html				# use index.html as a proxy for all document
 
 COMMONOPTS := -c -Wall -pthread -fPIC
 
+ifdef DEBUG
+        DEBUGOPTS       += -ggdb $(DEBUG)
+else
+        DEBUGOPTS       += -DNDEBUG
+endif
+
+
+
+
 .PHONY : all
 all : $(LIBS) 
 
@@ -42,10 +51,10 @@ libclassaiousbdbg.a : $(CPPDBGOBJS)
 $(CPPOBJS) $(CPPDBGOBJS) : $(HPPSOURCES)
 
 %.o : %.cpp
-	g++ $(INCLUDES) -DNDEBUG $(COMMONOPTS) $(CPPOPTS) $< -o $@
+	g++ $(DEBUGOPTS) $(INCLUDES) -DNDEBUG $(COMMONOPTS) $(CPPOPTS) $< -o $@
 
 %.dbg.o : %.cpp
-	g++ -ggdb $(INCLUDES) $(COMMONOPTS) $(CPPOPTS) $< -o $@
+	g++  $(DEBUGOPTS) $(INCLUDES) $(COMMONOPTS) $(CPPOPTS) $< -o $@
 
 $(DOCINDEX) : Doxyfile $(HPPSOURCES) $(CPPSOURCES)
 	doxygen

@@ -5,8 +5,13 @@ using namespace AIOUSB;
 
 int CURRENT_DEBUG_LEVEL = 1;
 
-TestCaseSetup::TestCaseSetup() : deviceIndex(0) , deviceFound(false) , CAL_CHANNEL(DEF_CAL_CHANNEL), 
-                   MAX_CHANNELS(DEF_MAX_CHANNELS) , NUM_CHANNELS(DEF_NUM_CHANNELS) {
+TestCaseSetup::TestCaseSetup() : deviceIndex(0) , 
+                                 deviceFound(false) , 
+                                 CAL_CHANNEL(DEF_CAL_CHANNEL), 
+                                 MAX_CHANNELS(DEF_MAX_CHANNELS) , 
+                                 NUM_CHANNELS(DEF_NUM_CHANNELS) ,
+                                 number_oversamples(10)
+{
   counts                  = (unsigned short*)malloc( sizeof(unsigned short)*MAX_CHANNELS);
   volts                   = (double *)malloc(sizeof(double)* MAX_CHANNELS);
   gainCodes               = (unsigned char *)malloc(sizeof(unsigned char)*NUM_CHANNELS);
@@ -18,11 +23,6 @@ TestCaseSetup::TestCaseSetup() : deviceIndex(0) , deviceFound(false) , CAL_CHANN
 void TestCaseSetup::setCurrentDeviceIndex( int DI )
 {
   this->deviceIndex = deviceIndex;
-}
-
-
-void TestCaseSetup::doSomething(void) {
-  printf("Reached\n");
 }
 
 void TestCaseSetup::resetCPU(void) {
@@ -89,15 +89,30 @@ TestCaseSetup::ThrowError( unsigned long result , int linnum )
 }
 
 
-unsigned long
-TestCaseSetup::doFastITScan()
+void
+TestCaseSetup::doFastITScan( int numgets )
 {
   unsigned long result;
 
   DeviceDescriptor *const deviceDesc = &deviceTable[ deviceIndex ];
 
+  double *data;
+
+
   result = ADC_SetCal( deviceIndex, ":AUTO:");
   CHECK_RESULT( result );
+
+  AIOUSB_SetRegister( &deviceDesc->cachedConfigBlock, 0x00 , 0x05 );
+  AIOUSB_SetRegister( &deviceDesc->cachedConfigBlock, 0x01 , 0x02 );
+  for( int i = 2 ; i <= 15 ; i ++ ) 
+    AIOUSB_SetRegister( &deviceDesc->cachedConfigBlock, i , 0x00 );
+
+  AIOUSB_SetRegister( &deviceDesc->cachedConfigBlock, 0x13 , 0x07 );
+  
+
+  result = ADC_SetConfig( deviceIndex, &deviceDesc->cachedConfigBlock.registers[0] , &deviceDesc->ConfigBytes );
+  CHECK_RESULT( result );
+
 
   // Set the length to 21, and create a Config object
   result = ADC_CreateFastITConfig( deviceIndex ,  21 );
@@ -106,29 +121,23 @@ TestCaseSetup::doFastITScan()
   result = ADC_InitFastITScanV( deviceIndex  );
   CHECK_RESULT( result );
 
-  deviceDesc->FastITConfig[0] = 0x05;
-  deviceDesc->FastITConfig[1] = 0x02;
-  for( int i = 2; i <= 15; i ++ ) 
-    deviceDesc->FastITConfig[i] = 0x00;
+  data = (double *)malloc( sizeof(double)*16 );
+
   
-  // result = ADC_InitFastITScanV( deviceIndex );
-  // CHECK_RESULT( result );
-  // if( result != AIOUSB_SUCCESS ) 
-  //   goto RETURN_doFastITScan;
-  // for( int i = 0; i <= 127; i++ )  {
-  //   int RangeCode = deviceDesc->FastITConfig[i % 8];
-  //   int V = 1;
-  //   if( (RangeCode & 2 )  == 0 )
-  //     std::cout << "Something here" << std::endl;
-  //   if( (RangeCode & 4 ) == 0 )
-  //     std::cout << "Something here" << std::endl;
-  // }
+  for( int i = 0 ; i < numgets ; i ++ )  {
+    result = ADC_GetFastITScanV( deviceIndex , data);
+    for( int j = 0; j <= 15; j ++ ) { 
+      std::cout << data[j] << ",";
+    }
+    std::cout << std::endl;
+    // Display the results
+    
+    CHECK_RESULT( result );
+  }
 
-  result = ADC_GetFastITScanV( deviceIndex );
-  CHECK_RESULT( result );
- 
   // Now perform a reset at the end
-
+  ADC_ResetFastITScanV( deviceIndex );
+ 
 }
 
 

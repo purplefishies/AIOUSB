@@ -91,7 +91,7 @@ class TestCaseSetup {
   void doCleanupAfterBulk();
   void ThrowError(unsigned long, int);
 
-  unsigned long doFastITScan();
+  void doFastITScan( int numgets );
   unsigned short *doGetBuffer();
 
   static void THROW_IF_ERROR(int result, const char *format, ... );
@@ -124,6 +124,8 @@ class TestCaseSetup {
   double *volts;
   unsigned char *gainCodes;
   ADConfigBlock configBlock;
+  unsigned int number_oversamples;
+
  private:
   void setupVoltageParameters(void);
   unsigned long TEST_ADC_BulkPoll( unsigned long DeviceIndex, unsigned long *BytesLeft );

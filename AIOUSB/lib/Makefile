@@ -44,6 +44,12 @@ SHCPPLIB	:= libaiousbcpp.so
 CPPDBGLIB 	:= libaiousbcppdbg.a
 SHCPPDBGLIB 	:= libaiousbcppdbg.so
 
+ifdef DEBUG
+        DEBUGOPTS       += -ggdb $(DEBUG)
+else
+        DEBUGOPTS       := -DNDEBUG
+endif
+
 
 LIBS := $(CLIB) $(CDBGLIB) $(CPPLIB) $(CPPDBGLIB)  $(SHCLIB) $(SHCDBGLIB) $(SHCPPLIB) $(SHCPPDBGLIB)
 
@@ -87,16 +93,16 @@ $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) : aiousb.h AIOUSB_Core.h
 COMMONOPTS := -c -Wall -pthread -fPIC
 
 $(COBJS) : %.o : %.c
-	$(CC) -DNDEBUG -std=gnu99 -D_GNU_SOURCE $(COMMONOPTS) $(COPTS) $< -o $@
+	$(CC) $(DEBUGOPTS) -std=gnu99 -D_GNU_SOURCE $(COMMONOPTS) $(COPTS) $< -o $@
 
 $(CDBGOBJS) : %.dbg.o : %.c
-	$(CC) -ggdb -std=gnu99 -D_GNU_SOURCE $(COMMONOPTS) $(COPTS) $< -o $@
+	$(CC) $(DEBUGOPTS) -std=gnu99 -D_GNU_SOURCE $(COMMONOPTS) $(COPTS) $< -o $@
 
 $(CPPOBJS) : %.cpp.o : %.c
-	g++ -DNDEBUG $(COMMONOPTS) $(CPPOPTS) $< -o $@
+	g++ $(DEBUGOPTS) $(COMMONOPTS) $(CPPOPTS) $< -o $@
 
 $(CPPDBGOBJS) : %.cpp.dbg.o : %.c
-	g++ -ggdb $(COMMONOPTS) $(CPPOPTS) $< -o $@
+	g++ $(DEBUGOPTS) $(COMMONOPTS) $(CPPOPTS) $< -o $@
 
 mostlyclean:
 	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS)

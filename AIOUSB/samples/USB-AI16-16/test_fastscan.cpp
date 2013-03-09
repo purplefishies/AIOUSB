@@ -26,11 +26,14 @@ int main( int argc, char **argv )
   unsigned long result = AIOUSB_Init();
   int block_size;
   int over_sample;
+  int numgets;
   double clock_speed;
   
   block_size  = TestCaseSetup::envGetInteger("BLOCK_SIZE");
   over_sample = TestCaseSetup::envGetInteger("OVER_SAMPLE");
   clock_speed = TestCaseSetup::envGetDouble("CLOCK_SPEED");
+  numgets     = TestCaseSetup::envGetInteger("NUMBER_GETS");
+  numgets = ( numgets <= 0 ? 200 : numgets );
 
   if( result == AIOUSB_SUCCESS ) {
           
@@ -42,7 +45,7 @@ int main( int argc, char **argv )
         tcs.findDevice();
         tcs.setCurrentDeviceIndex(0);
 
-        tcs.doFastITScan();
+        tcs.doFastITScan( numgets );
 
         // tcs.doFastITScan();
         // tcs.doFastITScan();
