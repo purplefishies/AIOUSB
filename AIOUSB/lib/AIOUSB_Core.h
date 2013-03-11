@@ -208,10 +208,10 @@ typedef struct {
 
   /* New entries for the FastIT behavior */
   
-  unsigned char *FastITConfig;
-  unsigned int FastITConfig_size;
-  unsigned char *FastITBakConfig;
-  
+  ADConfigBlock *FastITConfig;
+  ADConfigBlock *FastITBakConfig;
+  unsigned long FastITConfig_size;
+ 
   unsigned char *ADBuf;
   int ADBuf_size;
  

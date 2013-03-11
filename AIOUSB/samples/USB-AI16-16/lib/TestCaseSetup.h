@@ -73,12 +73,12 @@ class TestCaseSetup {
 
  public:
   
-  // TestCaseSetup() : deviceIndex(0) , deviceFound(false) , CAL_CHANNEL(DEF_CAL_CHANNEL), 
+  // TestCaseSetup() : DeviceIndex(0) , deviceFound(false) , CAL_CHANNEL(DEF_CAL_CHANNEL), 
   //                   MAX_CHANNELS(DEF_MAX_CHANNELS) , NUM_CHANNELS(DEF_NUM_CHANNELS) {}
   TestCaseSetup();
   void findDevice();
   void doSomething();
-  void setCurrentDeviceIndex( int deviceIndex );
+  void setCurrentDeviceIndex( int DeviceIndex );
   void doBulkConfigBlock();
   void doPreSetup();
   void doSetAutoCalibration();
@@ -114,7 +114,7 @@ class TestCaseSetup {
   
 
   unsigned long productID, nameSize, numDIOBytes, numCounters;
-  unsigned long deviceIndex;
+  unsigned long DeviceIndex;
   bool deviceFound;
   const int CAL_CHANNEL  ;
   const int MAX_CHANNELS ;

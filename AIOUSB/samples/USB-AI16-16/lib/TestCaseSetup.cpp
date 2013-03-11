@@ -5,7 +5,7 @@ using namespace AIOUSB;
 
 int CURRENT_DEBUG_LEVEL = 1;
 
-TestCaseSetup::TestCaseSetup() : deviceIndex(0) , 
+TestCaseSetup::TestCaseSetup() : DeviceIndex(0) , 
                                  deviceFound(false) , 
                                  CAL_CHANNEL(DEF_CAL_CHANNEL), 
                                  MAX_CHANNELS(DEF_MAX_CHANNELS) , 
@@ -22,7 +22,7 @@ TestCaseSetup::TestCaseSetup() : deviceIndex(0) ,
 
 void TestCaseSetup::setCurrentDeviceIndex( int DI )
 {
-  this->deviceIndex = deviceIndex;
+  this->DeviceIndex = DeviceIndex;
 }
 
 void TestCaseSetup::resetCPU(void) {
@@ -40,7 +40,7 @@ void TestCaseSetup::findDevice(void) {
     if( ( deviceMask & 1 ) != 0 ) {
       // found a device, but is it the correct type?
       nameSize = MAX_NAME_SIZE;
-      result = QueryDeviceInfo( this->deviceIndex, &productID, &nameSize, name, &numDIOBytes, &numCounters );
+      result = QueryDeviceInfo( this->DeviceIndex, &productID, &nameSize, name, &numDIOBytes, &numCounters );
       if( result == AIOUSB_SUCCESS ) {
         if( productID >= USB_AI16_16A && 
             productID <= USB_AI12_128E ) { 
@@ -51,7 +51,7 @@ void TestCaseSetup::findDevice(void) {
         throw std::string("Unable to find device");
       }
     }	// if( ( deviceMask ...
-    this->deviceIndex++;
+    this->DeviceIndex++;
     deviceMask >>= 1;
   }	// while( deviceMask ...
 }
@@ -59,16 +59,16 @@ void TestCaseSetup::findDevice(void) {
 void TestCaseSetup::doPreSetup()
 {
 
-  AIOUSB_Reset( deviceIndex );
-  AIOUSB_SetCommTimeout( deviceIndex, 1000 );
-  AIOUSB_SetDiscardFirstSample( deviceIndex, AIOUSB_TRUE );
+  AIOUSB_Reset( DeviceIndex );
+  AIOUSB_SetCommTimeout( DeviceIndex, 1000 );
+  AIOUSB_SetDiscardFirstSample( DeviceIndex, AIOUSB_TRUE );
   
   __uint64_t serialNumber;
-  int result = GetDeviceSerialNumber( deviceIndex, &serialNumber );
+  int result = GetDeviceSerialNumber( DeviceIndex, &serialNumber );
   if( result != AIOUSB_SUCCESS  ) {
     std::stringstream er;
     er << "Error '" << AIOUSB_GetResultCodeAsString( result );
-    er << "' getting serial number of device at index " << deviceIndex ;
+    er << "' getting serial number of device at index " << DeviceIndex ;
     throw Error( er.str().c_str() );
   }
 }
@@ -94,38 +94,41 @@ TestCaseSetup::doFastITScan( int numgets )
 {
   unsigned long result;
 
-  DeviceDescriptor *const deviceDesc = &deviceTable[ deviceIndex ];
+  DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 
   double *data;
 
 
-  result = ADC_SetCal( deviceIndex, ":AUTO:");
+  result = ADC_SetCal( DeviceIndex, ":AUTO:");
   CHECK_RESULT( result );
 
-  AIOUSB_SetRegister( &deviceDesc->cachedConfigBlock, 0x00 , 0x05 );
-  AIOUSB_SetRegister( &deviceDesc->cachedConfigBlock, 0x01 , 0x02 );
-  for( int i = 2 ; i <= 15 ; i ++ ) 
+  result = ADC_GetConfig( DeviceIndex, ADC_GetADConfigBlock_Registers( &deviceDesc->cachedConfigBlock ), &deviceDesc->ConfigBytes );
+  CHECK_RESULT( result );
+
+  // AIOUSB_SetRegister( &deviceDesc->cachedConfigBlock, 0x00 , 0x05 );
+  // AIOUSB_SetRegister( &deviceDesc->cachedConfigBlock, 0x01 , 0x02 );
+  for( int i = 0 ; i <= 15 ; i ++ ) 
     AIOUSB_SetRegister( &deviceDesc->cachedConfigBlock, i , 0x00 );
 
   AIOUSB_SetRegister( &deviceDesc->cachedConfigBlock, 0x13 , 0x07 );
   
 
-  result = ADC_SetConfig( deviceIndex, &deviceDesc->cachedConfigBlock.registers[0] , &deviceDesc->ConfigBytes );
+  result = ADC_SetConfig( DeviceIndex, &deviceDesc->cachedConfigBlock.registers[0] , &deviceDesc->ConfigBytes );
   CHECK_RESULT( result );
 
 
   // Set the length to 21, and create a Config object
-  result = ADC_CreateFastITConfig( deviceIndex ,  21 );
-  CHECK_RESULT(result);
+  // result = ADC_CreateFastITConfig( DeviceIndex ,  21 );
+  // CHECK_RESULT(result);
 
-  result = ADC_InitFastITScanV( deviceIndex  );
+  result = ADC_InitFastITScanV( DeviceIndex  );
   CHECK_RESULT( result );
 
   data = (double *)malloc( sizeof(double)*16 );
 
   
   for( int i = 0 ; i < numgets ; i ++ )  {
-    result = ADC_GetFastITScanV( deviceIndex , data);
+    result = ADC_GetFastITScanV( DeviceIndex , data);
     for( int j = 0; j <= 15; j ++ ) { 
       std::cout << data[j] << ",";
     }
@@ -136,7 +139,7 @@ TestCaseSetup::doFastITScan( int numgets )
   }
 
   // Now perform a reset at the end
-  ADC_ResetFastITScanV( deviceIndex );
+  ADC_ResetFastITScanV( DeviceIndex );
  
 }
 
@@ -147,7 +150,7 @@ TestCaseSetup::doFastITScan( int numgets )
  */
 void TestCaseSetup::doBulkConfigBlock()
 {
-   AIOUSB_InitConfigBlock( &configBlock, deviceIndex, AIOUSB_FALSE );
+   AIOUSB_InitConfigBlock( &configBlock, DeviceIndex, AIOUSB_FALSE );
 
    AIOUSB_SetAllGainCodeAndDiffMode( &configBlock, AD_GAIN_CODE_10V, AIOUSB_FALSE );
    AIOUSB_SetCalMode( &configBlock, AD_CAL_MODE_NORMAL );
@@ -155,7 +158,7 @@ void TestCaseSetup::doBulkConfigBlock()
    AIOUSB_SetTriggerMode( &configBlock, 0 );
    AIOUSB_SetScanRange( &configBlock, 2, 13 );
    AIOUSB_SetOversample( &configBlock, 0 );
-   int result = ADC_SetConfig( deviceIndex, configBlock.registers, &configBlock.size );
+   int result = ADC_SetConfig( DeviceIndex, configBlock.registers, &configBlock.size );
    if( result != AIOUSB_SUCCESS  ) {
      std::stringstream er;
      er << "Error '" << AIOUSB_GetResultCodeAsString( result ) << "' setting A/D configuration";
@@ -198,15 +201,15 @@ void TestCaseSetup::doBulkAcquire(int block_size, int over_sample, double clock_
 
   INFO("Setting up over samples and scan limits\n");
 
-  AIOUSB_Reset( deviceIndex );
-  ADC_SetOversample( deviceIndex, OVER_SAMPLE );
-  ADC_SetScanLimits( deviceIndex, 0, NUM_CHANNELS - 1 );
-  AIOUSB_SetStreamingBlockSize( deviceIndex, BLOCK_SIZE );
+  AIOUSB_Reset( DeviceIndex );
+  ADC_SetOversample( DeviceIndex, OVER_SAMPLE );
+  ADC_SetScanLimits( DeviceIndex, 0, NUM_CHANNELS - 1 );
+  AIOUSB_SetStreamingBlockSize( DeviceIndex, BLOCK_SIZE );
 
-  // AIOUSB_Reset( deviceIndex );
-  // ADC_SetOversample( deviceIndex, OVER_SAMPLE );
-  // ADC_SetScanLimits( deviceIndex, 0, NUM_CHANNELS - 1 );
-  // AIOUSB_SetStreamingBlockSize( deviceIndex, BLOCK_SIZE );
+  // AIOUSB_Reset( DeviceIndex );
+  // ADC_SetOversample( DeviceIndex, OVER_SAMPLE );
+  // ADC_SetScanLimits( DeviceIndex, 0, NUM_CHANNELS - 1 );
+  // AIOUSB_SetStreamingBlockSize( DeviceIndex, BLOCK_SIZE );
     
   // unsigned short *const dataBuf = ( unsigned short * ) malloc( BULK_BYTES );
   dataBuf = ( unsigned short * ) malloc( BULK_BYTES );
@@ -215,19 +218,19 @@ void TestCaseSetup::doBulkAcquire(int block_size, int over_sample, double clock_
     /*
      * make sure counter is stopped
      */
-    CTR_StartOutputFreq( deviceIndex, 0, &clockHz );
+    CTR_StartOutputFreq( DeviceIndex, 0, &clockHz );
 
     // configure A/D for timer-triggered acquisition
        
-    ADC_ADMode( deviceIndex, AD_TRIGGER_SCAN | AD_TRIGGER_TIMER, AD_CAL_MODE_NORMAL );
+    ADC_ADMode( DeviceIndex, AD_TRIGGER_SCAN | AD_TRIGGER_TIMER, AD_CAL_MODE_NORMAL );
 
     
     // start bulk acquire; ADC_BulkAcquire() will take care of starting
     // and stopping the counter; but we do have to tell it what clock
     // speed to use, which is why we call AIOUSB_SetMiscClock()
     
-    AIOUSB_SetMiscClock( deviceIndex, CLOCK_SPEED );
-    result = ADC_BulkAcquire( deviceIndex, BULK_BYTES, dataBuf );
+    AIOUSB_SetMiscClock( DeviceIndex, CLOCK_SPEED );
+    result = ADC_BulkAcquire( DeviceIndex, BULK_BYTES, dataBuf );
 
     THROW_IF_ERROR( result, "attempting to start bulk acquire" );
     INFO("Started bulk acquire of %d bytes\n", BULK_BYTES );
@@ -237,7 +240,7 @@ void TestCaseSetup::doBulkAcquire(int block_size, int over_sample, double clock_
       for( int seconds = 0; seconds < 100; seconds++ ) {
         TRACE("Sleeping %d seconds\n", SLEEP_TIME );
         sleep(SLEEP_TIME );
-        result = TEST_ADC_BulkPoll( deviceIndex, &bytesRemaining );
+        result = TEST_ADC_BulkPoll( DeviceIndex, &bytesRemaining );
         if( result == AIOUSB_SUCCESS ) {
           DEBUG( "  %lu bytes remaining\n", bytesRemaining );
 
@@ -253,7 +256,7 @@ void TestCaseSetup::doBulkAcquire(int block_size, int over_sample, double clock_
       }
       
       // Turn off timer-triggered mode
-      ADC_ADMode( deviceIndex, 0, AD_CAL_MODE_NORMAL );
+      ADC_ADMode( DeviceIndex, 0, AD_CAL_MODE_NORMAL );
     }
   } 
 }
@@ -323,11 +326,11 @@ unsigned long TestCaseSetup::TEST_ADC_BulkPoll( unsigned long DeviceIndex,
 void TestCaseSetup::doVerifyGroundCalibration(void)
 {
   TRACE("doVerifyGroundCalibration:\tVerifying the ground counts\n");
-  ADC_SetOversample( deviceIndex, 0 );
-  ADC_SetScanLimits( deviceIndex, CAL_CHANNEL, CAL_CHANNEL );
-  ADC_ADMode( deviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_GROUND );
+  ADC_SetOversample( DeviceIndex, 0 );
+  ADC_SetScanLimits( DeviceIndex, CAL_CHANNEL, CAL_CHANNEL );
+  ADC_ADMode( DeviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_GROUND );
 
-  int result = ADC_GetScan( deviceIndex, this->counts );
+  int result = ADC_GetScan( DeviceIndex, this->counts );
   THROW_IF_ERROR( result, "attempting to read ground counts" );
   INFO("Ground counts = %u (should be approx. 0)\n", this->counts[ CAL_CHANNEL ] );
   TRACE("leaving doVerifyGroundCalibration\n");
@@ -374,7 +377,7 @@ void TestCaseSetup::doGenericVendorWrite(unsigned char Request, unsigned short V
 {
   int result = 0;
   INFO( "doGenericVendorWrite:\tDoing Generic Vendor Write\n" );
-  /*result = GenericVendorWrite( deviceIndex, Request, Value, Index, DataSize, pData );*/
+  /*result = GenericVendorWrite( DeviceIndex, Request, Value, Index, DataSize, pData );*/
   THROW_IF_ERROR( result, "performing GenericVendorWrite" );
   INFO( "doGenericVendorWrite:\tCompleted Generic Vendor Write\n" );
 }
@@ -392,7 +395,7 @@ void TestCaseSetup::doSetAutoCalibration(void)
   /*
    * demonstrate automatic A/D calibration
    */
-  result = ADC_SetCal( deviceIndex, ":AUTO:" );
+  result = ADC_SetCal( DeviceIndex, ":AUTO:" );
   THROW_IF_ERROR( result, "performing automatic A/D calibration" );
   INFO("A/D settings successfully configured\n");
   TRACE("Done doSetAutoCalibtration\n");
@@ -417,8 +420,8 @@ void TestCaseSetup::doVerifyReferenceCalibration(void)
 {
   TRACE("doVerifyReferenceCalibration:\t");
   INFO( "Checking Reference Calibration\n");
-  ADC_ADMode( deviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_REFERENCE );
-  int result = ADC_GetScan( deviceIndex, counts );
+  ADC_ADMode( DeviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_REFERENCE );
+  int result = ADC_GetScan( DeviceIndex, counts );
   THROW_IF_ERROR( result, "attempting to read reference counts" );
   INFO( "eference counts = %u (should be approx. 65130)\n", counts[ CAL_CHANNEL ] );
   TRACE("doVerifyReferenceCalibration:\tCompleted");
@@ -435,11 +438,11 @@ void TestCaseSetup::doDemonstrateReadVoltages()
   for( int channel = 0; channel < NUM_CHANNELS; channel++ )
     gainCodes[ channel ] = AD_GAIN_CODE_0_10V;
   
-  ADC_RangeAll( deviceIndex, gainCodes, AIOUSB_TRUE );
-  ADC_SetOversample( deviceIndex, 10 );
-  ADC_SetScanLimits( deviceIndex, 0, NUM_CHANNELS - 1 );
-  ADC_ADMode( deviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_NORMAL );
-  result = ADC_GetScanV( deviceIndex, volts );
+  ADC_RangeAll( DeviceIndex, gainCodes, AIOUSB_TRUE );
+  ADC_SetOversample( DeviceIndex, 10 );
+  ADC_SetScanLimits( DeviceIndex, 0, NUM_CHANNELS - 1 );
+  ADC_ADMode( DeviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_NORMAL );
+  result = ADC_GetScanV( DeviceIndex, volts );
   
   THROW_IF_ERROR( result, " performing A/D channel scan" );
 
@@ -460,11 +463,11 @@ void TestCaseSetup::doCSVReadVoltages()
   for( int channel = 0; channel < NUM_CHANNELS; channel++ )
     gainCodes[ channel ] = AD_GAIN_CODE_0_10V;
   
-  // ADC_RangeAll( deviceIndex, gainCodes, AIOUSB_TRUE );
-  // ADC_SetOversample( deviceIndex, 10 );
-  // ADC_SetScanLimits( deviceIndex, 0, NUM_CHANNELS - 1 );
-  // ADC_ADMode( deviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_NORMAL );
-  result = ADC_GetScanV( deviceIndex, volts );
+  // ADC_RangeAll( DeviceIndex, gainCodes, AIOUSB_TRUE );
+  // ADC_SetOversample( DeviceIndex, 10 );
+  // ADC_SetScanLimits( DeviceIndex, 0, NUM_CHANNELS - 1 );
+  // ADC_ADMode( DeviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_NORMAL );
+  result = ADC_GetScanV( DeviceIndex, volts );
   THROW_IF_ERROR( result, " performing A/D channel scan" );
   for( int channel = 0; channel < NUM_CHANNELS - 1 ; channel ++ ) { 
     LOG("%.3f,", volts[channel] );
@@ -485,10 +488,10 @@ void TestCaseSetup::doPreReadImmediateVoltages()
   for( int channel = 0; channel < NUM_CHANNELS; channel++ )
     gainCodes[ channel ] = AD_GAIN_CODE_0_10V;
   
-  ADC_RangeAll( deviceIndex, gainCodes, AIOUSB_TRUE );
-  ADC_SetOversample( deviceIndex, 10 );
-  ADC_SetScanLimits( deviceIndex, 0, NUM_CHANNELS - 1 );
-  ADC_ADMode( deviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_NORMAL );
+  ADC_RangeAll( DeviceIndex, gainCodes, AIOUSB_TRUE );
+  ADC_SetOversample( DeviceIndex, 10 );
+  ADC_SetScanLimits( DeviceIndex, 0, NUM_CHANNELS - 1 );
+  ADC_ADMode( DeviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_NORMAL );
 
   DEBUG("Completed doPreReadImmediateVoltages\n");
 
@@ -501,7 +504,7 @@ void TestCaseSetup::doPreReadImmediateVoltages()
 void TestCaseSetup::doScanSingleChannel()
 {
 
-  int result = ADC_GetChannelV( deviceIndex, CAL_CHANNEL, &volts[ CAL_CHANNEL ] );
+  int result = ADC_GetChannelV( DeviceIndex , CAL_CHANNEL, &volts[ CAL_CHANNEL ] );
   THROW_IF_ERROR( result, " reading A/D channel " );
   LOG("Volts read from A/D channel %d = %f\n", CAL_CHANNEL, volts[ CAL_CHANNEL ] );
 }

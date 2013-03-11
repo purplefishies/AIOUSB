@@ -296,11 +296,14 @@ enum {
 
 
     // A/D trigger and counter bits
-    AD_TRIGGER_CTR0_EXT                 = 0x10,           // 1==counter 0 externally triggered
+    AD_TRIGGER_CTR0_EXT                 = 0x10,             // 1==counter 0 externally triggered
     AD_TRIGGER_FALLING_EDGE             = 0x08,             // 1==triggered by falling edge
     AD_TRIGGER_SCAN                     = 0x04,             // 1==scan all channels, 0==single channel
+
+    /* mutually exclusive for now */
     AD_TRIGGER_EXTERNAL                 = 0x02,             // 1==triggered by external pin on board
     AD_TRIGGER_TIMER                    = 0x01,             // 1==triggered by counter 2
+
     AD_TRIGGER_VALID_MASK               = ( AD_TRIGGER_CTR0_EXT
                                             | AD_TRIGGER_FALLING_EDGE
                                             | AD_TRIGGER_SCAN
@@ -606,6 +609,12 @@ extern unsigned long ADC_BulkPoll(
     unsigned long DeviceIndex,
     unsigned long *BytesLeft 
     );
+
+
+extern unsigned char *ADC_GetADConfigBlock_Registers( 
+    ADConfigBlock *config 
+    );
+
 
 
 /* FastScan Functions */
