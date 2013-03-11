@@ -2362,7 +2362,7 @@ unsigned long ADC_GetFastITScanV( unsigned long DeviceIndex, double *pData )
     int bufsize;
     double clockHz = 0;
     double *pBuf;
-
+    int numsleep = 100;
     double CLOCK_SPEED = 100000;
 
     result = AIOUSB_Validate( &DeviceIndex );
@@ -2421,23 +2421,47 @@ unsigned long ADC_GetFastITScanV( unsigned long DeviceIndex, double *pData )
     if( result != AIOUSB_SUCCESS )
       goto CLEANUP_ADC_GetFastITScanV;
 
-
-    for( int seconds = 0; seconds < 100; seconds++ ) {
-      sleep( 1 );
+    BytesLeft = bufsize; 
+    numsleep = 0;
+    usleep(2);
+    while( BytesLeft ) { 
       result = ADC_BulkPoll( DeviceIndex, &BytesLeft );
-      if( result == AIOUSB_SUCCESS ) {
-/* #ifdef DEBUG */
-/*         printf( "  %lu bytes remaining\n", BytesLeft ); */
-/* #endif */
-        if( BytesLeft == 0 )
-          break;
-      } else {
+      if( result != AIOUSB_SUCCESS ) {
 /* #ifdef DEBUG */
 /*         printf( "Error '%s' polling bulk acquire progress\n", AIOUSB_GetResultCodeAsString( result ) ); */
 /* #endif */
         break;
+      } else {
+/* #ifdef DEBUG */
+/*         printf( "  %lu bytes remaining\n", BytesLeft ); */
+/* #endif */
+        numsleep ++;
+        usleep(10);
+        if( numsleep > 100 ) {
+          result = AIOUSB_ERROR_TIMEOUT;
+          break;
+        }
       }
     }
+
+    if( result != AIOUSB_SUCCESS )
+      goto CLEANUP_ADC_GetFastITScanV;
+/*     for( int seconds = 0; seconds < 1000; seconds++ ) { */
+/*       usleep(seconds); */
+/*       result = ADC_BulkPoll( DeviceIndex, &BytesLeft ); */
+/*       if( result == AIOUSB_SUCCESS ) { */
+/* /\* #ifdef DEBUG *\/ */
+/* /\*         printf( "  %lu bytes remaining\n", BytesLeft ); *\/ */
+/* /\* #endif *\/ */
+/*         if( BytesLeft == 0 ) */
+/*           break; */
+/*       } else { */
+/* /\* #ifdef DEBUG *\/ */
+/* /\*         printf( "Error '%s' polling bulk acquire progress\n", AIOUSB_GetResultCodeAsString( result ) ); *\/ */
+/* /\* #endif *\/ */
+/*         break; */
+/*       } */
+/*     } */
  
     pBuf = pData;
 
