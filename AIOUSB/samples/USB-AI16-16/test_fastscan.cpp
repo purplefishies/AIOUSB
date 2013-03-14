@@ -2,8 +2,6 @@
  * sample program to write out the calibration table and then 
  * reload it again, verify that the data is in fact reversed
  * 
- *
- * 
  */
 
 #include <aiousb.h>
@@ -45,6 +43,8 @@ int main( int argc, char **argv )
         tcs.findDevice();
         tcs.setCurrentDeviceIndex(0);
 
+        tcs.doFastITScanSetup();
+        tcs.doFastITScan( numsamples );
         tcs.doFastITScan( numsamples );
 
         unsigned short *tmp = tcs.doGetBuffer();

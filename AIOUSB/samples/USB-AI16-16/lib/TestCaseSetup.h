@@ -75,6 +75,7 @@ class TestCaseSetup {
   
   // TestCaseSetup() : DeviceIndex(0) , deviceFound(false) , CAL_CHANNEL(DEF_CAL_CHANNEL), 
   //                   MAX_CHANNELS(DEF_MAX_CHANNELS) , NUM_CHANNELS(DEF_NUM_CHANNELS) {}
+  ~TestCaseSetup();
   TestCaseSetup();
   void findDevice();
   void doSomething();
@@ -91,7 +92,10 @@ class TestCaseSetup {
   void doCleanupAfterBulk();
   void ThrowError(unsigned long, int);
 
+  void doFastITScanSetup();
   void doFastITScan( int numgets );
+
+
   unsigned short *doGetBuffer();
 
   static void THROW_IF_ERROR(int result, const char *format, ... );

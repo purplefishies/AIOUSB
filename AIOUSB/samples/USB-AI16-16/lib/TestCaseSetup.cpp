@@ -20,6 +20,15 @@ TestCaseSetup::TestCaseSetup() : DeviceIndex(0) ,
   // Turn on the Debug level 
 }
 
+TestCaseSetup::~TestCaseSetup() 
+{
+  AIOUSB_Exit();
+  free(counts);
+  free(volts);
+  free(gainCodes);
+}
+
+
 void TestCaseSetup::setCurrentDeviceIndex( int DI )
 {
   this->DeviceIndex = DeviceIndex;
@@ -89,15 +98,12 @@ TestCaseSetup::ThrowError( unsigned long result , int linnum )
 }
 
 
-void
-TestCaseSetup::doFastITScan( int numgets )
+void 
+TestCaseSetup::doFastITScanSetup()
 {
-  unsigned long result;
 
   DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
-
-  double *data;
-
+  unsigned long result;
 
   result = ADC_SetCal( DeviceIndex, ":AUTO:");
   CHECK_RESULT( result );
@@ -105,8 +111,6 @@ TestCaseSetup::doFastITScan( int numgets )
   result = ADC_GetConfig( DeviceIndex, ADC_GetADConfigBlock_Registers( &deviceDesc->cachedConfigBlock ), &deviceDesc->ConfigBytes );
   CHECK_RESULT( result );
 
-  // AIOUSB_SetRegister( &deviceDesc->cachedConfigBlock, 0x00 , 0x05 );
-  // AIOUSB_SetRegister( &deviceDesc->cachedConfigBlock, 0x01 , 0x02 );
   for( int i = 0 ; i <= 15 ; i ++ ) 
     AIOUSB_SetRegister( &deviceDesc->cachedConfigBlock, i , 0x00 );
 
@@ -115,15 +119,16 @@ TestCaseSetup::doFastITScan( int numgets )
 
   result = ADC_SetConfig( DeviceIndex, &deviceDesc->cachedConfigBlock.registers[0] , &deviceDesc->ConfigBytes );
   CHECK_RESULT( result );
+}
 
-
-  // Set the length to 21, and create a Config object
-  // result = ADC_CreateFastITConfig( DeviceIndex ,  21 );
-  // CHECK_RESULT(result);
+void
+TestCaseSetup::doFastITScan( int numgets )
+{
+  unsigned long result;
+  double *data;
 
   result = ADC_InitFastITScanV( DeviceIndex  );
   CHECK_RESULT( result );
-
   data = (double *)malloc( sizeof(double)*16 );
 
   
@@ -137,6 +142,8 @@ TestCaseSetup::doFastITScan( int numgets )
     
     CHECK_RESULT( result );
   }
+
+  free(data);
 
   // Now perform a reset at the end
   ADC_ResetFastITScanV( DeviceIndex );
