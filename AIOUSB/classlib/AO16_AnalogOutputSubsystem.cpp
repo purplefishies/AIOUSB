@@ -7,18 +7,18 @@
  * class AO16_AnalogOutputSubsystem implementation
  */
 
-// {{{ includes
+
 #include <assert.h>
 #include <aiousb.h>
 #include "USBDeviceManager.hpp"
 #include "AO16_AnalogOutputSubsystem.hpp"
-// }}}
+
 
 using namespace std;
 
 namespace AIOUSB {
 
-// {{{ static members
+
 const int AO16_AnalogOutputSubsystem::RANGE_0_5V;
 const int AO16_AnalogOutputSubsystem::RANGE_5V;
 const int AO16_AnalogOutputSubsystem::RANGE_0_10V;
@@ -34,9 +34,9 @@ const char AO16_AnalogOutputSubsystem::RANGE_TEXT[][ 10 ] = {
 	, "0-10V"
 	, "+/-10V"
 };	// AO16_AnalogOutputSubsystem::RANGE_TEXT[][]
-// }}}
 
-// {{{ protected methods
+
+
 
 AO16_AnalogOutputSubsystem::AO16_AnalogOutputSubsystem( USBDevice &parent )
 		: AnalogOutputSubsystem( parent )
@@ -50,9 +50,9 @@ AO16_AnalogOutputSubsystem::~AO16_AnalogOutputSubsystem() {
 	// nothing to do
 }	// AO16_AnalogOutputSubsystem::~AO16_AnalogOutputSubsystem()
 
-// }}}
 
-// {{{ public methods
+
+
 
 /*
  * properties
@@ -144,7 +144,7 @@ AO16_AnalogOutputSubsystem &AO16_AnalogOutputSubsystem::writeVolts( const Output
 	return *this;
 }	// AO16_AnalogOutputSubsystem::writeVolts()
 
-// }}}
+
 
 }	// namespace AIOUSB
 

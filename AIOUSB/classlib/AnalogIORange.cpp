@@ -7,11 +7,11 @@
  * class AnalogIORange implementation
  */
 
-// {{{ includes
+
 #include <assert.h>
 #include <math.h>
 #include "AnalogIORange.hpp"
-// }}}
+
 
 namespace AIOUSB {
 

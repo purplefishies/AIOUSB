@@ -7,10 +7,10 @@
  * class AO16_OutputRange implementation
  */
 
-// {{{ includes
+
 #include "AO16_OutputRange.hpp"
 #include "AO16_AnalogOutputSubsystem.hpp"
-// }}}
+
 
 namespace AIOUSB {
 

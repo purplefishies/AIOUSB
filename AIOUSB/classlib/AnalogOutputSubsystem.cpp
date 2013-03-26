@@ -7,19 +7,19 @@
  * class AnalogOutputSubsystem implementation
  */
 
-// {{{ includes
+
 #include <assert.h>
 #include <math.h>
 #include <aiousb.h>
 #include "USBDeviceManager.hpp"
 #include "AnalogOutputSubsystem.hpp"
-// }}}
+
 
 using namespace std;
 
 namespace AIOUSB {
 
-// {{{ protected methods
+
 
 AnalogOutputSubsystem::AnalogOutputSubsystem( USBDevice &parent )
 		: DeviceSubsystem( parent ) {
@@ -38,9 +38,9 @@ AnalogOutputSubsystem::~AnalogOutputSubsystem() {
 	// nothing to do
 }	// AnalogOutputSubsystem::~AnalogOutputSubsystem()
 
-// }}}
 
-// {{{ public methods
+
+
 
 /*
  * properties
@@ -129,7 +129,7 @@ AnalogOutputSubsystem &AnalogOutputSubsystem::writeCounts( const UShortArray &po
 	return *this;
 }	// AnalogOutputSubsystem::writeCounts()
 
-// }}}
+
 
 }	// namespace AIOUSB
 

@@ -8,7 +8,7 @@
  */
 
 
-// {{{ includes
+
 #include <iostream>
 #include <iterator>
 #include <bits/stl_algo.h>
@@ -23,22 +23,22 @@
 #include "USB_DIO_16_Family.hpp"
 #include "USB_DIO_32_Family.hpp"
 #include "USB_DIO_Family.hpp"
-// }}}
+
 
 using namespace std;
 
 namespace AIOUSB {
 
-// {{{ static members
+
 const std::string USBDeviceManager::VERSION_NUMBER = "1.8";
 const std::string USBDeviceManager::VERSION_DATE = "18 January 2010";
 const int USBDeviceManager::MIN_PRODUCT_ID;
 const int USBDeviceManager::MAX_PRODUCT_ID;
 const unsigned long USBDeviceManager::OPEN_PATTERN;
 const std::string USBDeviceManager::MESSAGE_NOT_OPEN = "Not open, must call open() first";
-// }}}
 
-// {{{ protected methods
+
+
 
 void USBDeviceManager::emptyDeviceList() {
 	for( int index = 0; index < ( int ) deviceList.size(); index++ ) {
@@ -48,9 +48,9 @@ void USBDeviceManager::emptyDeviceList() {
 	deviceList.clear();
 }	// USBDeviceManager::emptyDeviceList()
 
-// }}}
 
-// {{{ public methods
+
+
 
 USBDeviceManager::USBDeviceManager() {
 	openStatus = 0;
@@ -397,7 +397,7 @@ USBDeviceArray USBDeviceManager::getDeviceBySerialNumber( __uint64_t serialNumbe
 	return devices;
 }	// USBDeviceManager::getDeviceBySerialNumber()
 
-// }}}
+
 
 }	// namespace AIOUSB
 

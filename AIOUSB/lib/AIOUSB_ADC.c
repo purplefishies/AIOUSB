@@ -42,7 +42,7 @@ static const struct ADRange {
     {  -2,  4 },                                                  // AD_GAIN_CODE_2V
     {   0,  1 },                                                  // AD_GAIN_CODE_0_1V
     {  -1,  2 }                                                   // AD_GAIN_CODE_1V
-};    // adRanges[]
+}; 
 
 // formerly public in the API
 static unsigned long ADC_GetImmediate(
@@ -67,7 +67,7 @@ static unsigned long ReadConfigBlock( unsigned long DeviceIndex, AIOUSB_BOOL for
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    } 
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     if(
@@ -99,7 +99,7 @@ static unsigned long ReadConfigBlock( unsigned long DeviceIndex, AIOUSB_BOOL for
 		        ) != 0
 		        )
 			configBlock.registers[ AD_CONFIG_GAIN_CODE + channel ] = AD_GAIN_CODE_MIN;
-		}         // for( channel ...
+		} 
 
 		const unsigned char calMode = configBlock.registers[ AD_CONFIG_CAL_MODE ];
 		if(
@@ -126,11 +126,11 @@ static unsigned long ReadConfigBlock( unsigned long DeviceIndex, AIOUSB_BOOL for
 	} else {
 	    result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 	    AIOUSB_UnLock();
-	}       // if( deviceHandle ...
+	} 
     } else
 	AIOUSB_UnLock();
     return result;
-}     // ReadConfigBlock()
+}
 
 
 
@@ -149,7 +149,7 @@ static unsigned long WriteConfigBlock( unsigned long DeviceIndex ) {
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    } 
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     if( deviceDesc->cachedConfigBlock.size > 0 ) {
@@ -169,14 +169,14 @@ static unsigned long WriteConfigBlock( unsigned long DeviceIndex ) {
 	} else {
 	    result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 	    AIOUSB_UnLock();
-	}       // if( deviceHandle ...
+	}
     } else {
 	result = AIOUSB_ERROR_INVALID_DATA;
 	AIOUSB_UnLock();
-    }       // if( deviceDesc->cachedConfigBlock.size ...
+    } 
 
     return result;
-}     // WriteConfigBlock()
+} 
 
 
 
@@ -206,13 +206,13 @@ PRIVATE unsigned long AIOUSB_GetScan(
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    } 
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     if( deviceDesc->bADCStream == AIOUSB_FALSE ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_NOT_SUPPORTED;
-    }       // if( deviceDesc->bADCStream ...
+    } 
 
     libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
     if( deviceHandle != NULL ) {
@@ -251,13 +251,13 @@ PRIVATE unsigned long AIOUSB_GetScan(
 		    AIOUSB_SetScanRange( &deviceDesc->cachedConfigBlock, startChannel, endChannel = startChannel );
 		    numChannels = 1;
 		    configChanged = AIOUSB_TRUE;
-		}         // if( numChannels ...
+		} 
 		if( overSample > 0 ) {
 		    AIOUSB_SetOversample( &deviceDesc->cachedConfigBlock, overSample = 0 );
 		    configChanged = AIOUSB_TRUE;
-		}         // if( overSample ...
+		} 
 		discardFirstSample = AIOUSB_FALSE;            // this feature can't be used in calibration mode either
-	    }         // if( calMode ...
+	    }
 
 	    /*
 	     * turn scan on and turn timer and external trigger off
@@ -269,7 +269,7 @@ PRIVATE unsigned long AIOUSB_GetScan(
 	    if( triggerMode != origTriggerMode ) {
 		AIOUSB_SetTriggerMode( &deviceDesc->cachedConfigBlock, triggerMode );
 		configChanged = AIOUSB_TRUE;
-	    }         // if( triggerMode ...
+	    } 
 
 	    /*
 	     * the oversample setting dictates how many samples to take _in addition_ to the primary
@@ -301,13 +301,13 @@ PRIVATE unsigned long AIOUSB_GetScan(
 	    if( overSample != origOverSample ) {
 		AIOUSB_SetOversample( &deviceDesc->cachedConfigBlock, overSample );
 		configChanged = AIOUSB_TRUE;
-	    }         // if( overSample ...
+	    } 
 
 	    if( configChanged ) {
 		AIOUSB_UnLock();                        // unlock while communicating with device
 		result = WriteConfigBlock( DeviceIndex );
 		AIOUSB_Lock();
-	    }         // if( configChanged )
+	    } 
 	    if( result == AIOUSB_SUCCESS ) {
 		const int numSamples = numChannels * samplesPerChannel;
 		const unsigned short numSamplesHigh = ( unsigned short )( numSamples >> 16 );
@@ -363,8 +363,8 @@ PRIVATE unsigned long AIOUSB_GetScan(
 					sampleSum += sampleBuffer[ sampleIndex++ ];
 				    counts[ channel ] = ( unsigned short )
 				                        ( ( sampleSum + samplesToAverage / 2 ) / samplesToAverage );
-				}             // for( channel ...
-			    }             // else if( bytesTransferred ...
+				}
+			    }  // else if( bytesTransferred ...
 			} else
 			    result = LIBUSB_RESULT_TO_AIOUSB_RESULT( bytesTransferred );
 		    } else
@@ -373,7 +373,7 @@ PRIVATE unsigned long AIOUSB_GetScan(
 		} else {
 		    result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
 		    AIOUSB_UnLock();
-		}         // if( sampleBuffer ...
+		}
 	    } else
 		AIOUSB_UnLock();
 	    if( configChanged ) {
@@ -381,16 +381,16 @@ PRIVATE unsigned long AIOUSB_GetScan(
 		deviceDesc->cachedConfigBlock = origConfigBlock;
 		AIOUSB_UnLock();                        // unlock while communicating with device
 		WriteConfigBlock( DeviceIndex );
-	    }         // if( configChanged )
+	    } 
 	} else
 	    AIOUSB_UnLock();
     } else {
 	result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 	AIOUSB_UnLock();
-    }       // if( deviceHandle ...
+    } 
 
     return result;
-}     // AIOUSB_GetScan()
+}
 
 
 
@@ -419,7 +419,7 @@ PRIVATE unsigned long AIOUSB_ArrayCountsToVolts(
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    } 
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     assert( startChannel >= 0
@@ -436,7 +436,7 @@ PRIVATE unsigned long AIOUSB_ArrayCountsToVolts(
         ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_INVALID_PARAMETER;
-    }       // if( endChannel ...
+    } 
 
     AIOUSB_UnLock();                                        // unlock while communicating with device
     result = ReadConfigBlock( DeviceIndex, AIOUSB_FALSE );
@@ -454,12 +454,12 @@ PRIVATE unsigned long AIOUSB_ArrayCountsToVolts(
 	        * range->range
 	        )
 	          + range->minVolts;
-	}       // for( channel ...
+	} 
 	AIOUSB_UnLock();
-    }       // if( result ...
+    }
 
     return result;
-}     // AIOUSB_ArrayCountsToVolts()
+} 
 
 
 
@@ -488,7 +488,7 @@ PRIVATE unsigned long AIOUSB_ArrayVoltsToCounts(
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    }
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     assert( startChannel >= 0
@@ -505,7 +505,7 @@ PRIVATE unsigned long AIOUSB_ArrayVoltsToCounts(
         ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_INVALID_PARAMETER;
-    }       // if( endChannel ...
+    } 
 
     AIOUSB_UnLock();                                        // unlock while communicating with device
     result = ReadConfigBlock( DeviceIndex, AIOUSB_FALSE );
@@ -527,12 +527,12 @@ PRIVATE unsigned long AIOUSB_ArrayVoltsToCounts(
 	    else if( rawCounts > AI_16_MAX_COUNTS )
 		rawCounts = AI_16_MAX_COUNTS;
 	    counts[ channel ] = ( unsigned short ) rawCounts;
-	}       // for( channel ...
+	} 
 	AIOUSB_UnLock();
-    }       // if( result ...
+    } 
 
     return result;
-}     // AIOUSB_ArrayVoltsToCounts()
+}
 
 
 
@@ -559,20 +559,20 @@ unsigned long ADC_GetChannelV(
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    }
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     if( deviceDesc->bADCStream == AIOUSB_FALSE ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_NOT_SUPPORTED;
-    }       // if( deviceDesc->bADCStream ...
+    }
     if(
         pBuf == NULL
         || ChannelIndex >= deviceDesc->ADCMUXChannels
         ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_INVALID_PARAMETER;
-    }       // if( pBuf ...
+    }
 
     /*
      * there is no guarantee that ChannelIndex, passed by the user, is within the current
@@ -606,15 +606,15 @@ unsigned long ADC_GetChannelV(
 		*pBuf = volts;
 	    else
 		*pBuf = 0.0;
-	}       // if( result ...
+	}
 	AIOUSB_Lock();
 	deviceDesc->cachedConfigBlock = origConfigBlock;
 	AIOUSB_UnLock();                                  // unlock while communicating with device
 	WriteConfigBlock( DeviceIndex );
-    }       // if( result ...
+    } 
 
     return result;
-}     // ADC_GetChannelV()
+}
 
 
 
@@ -672,24 +672,24 @@ unsigned long ADC_GetScanV(
 			    || channel > endChannel
 			    )
 			    pBuf[ channel ] = 0.0;
-		    }           // for( channel ...
+		    }
 
 		    /*
 		     * convert remaining channels to volts
 		     */
 		    result = AIOUSB_ArrayCountsToVolts( DeviceIndex, startChannel, endChannel - startChannel + 1,
 		                                        counts + startChannel, pBuf + startChannel );
-		}         // if( result ...
+		}
 		free( counts );
 	    } else
 		result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
 	} else
 	    result = AIOUSB_ERROR_NOT_SUPPORTED;
-    }       // if( result ...
+    }
 
     AIOUSB_UnLock();
     return result;
-}     // ADC_GetScanV()
+}
 
 
 
@@ -715,13 +715,13 @@ unsigned long ADC_GetScan(
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    }
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     if( deviceDesc->bADCStream == AIOUSB_FALSE ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_NOT_SUPPORTED;
-    }       // if( deviceDesc->bADCStream ...
+    }
 
     /*
      * pBuf[] is expected to contain entries for all the A/D channels, even though we may
@@ -732,7 +732,7 @@ unsigned long ADC_GetScan(
     const unsigned startChannel = AIOUSB_GetStartChannel( &deviceDesc->cachedConfigBlock );
     AIOUSB_UnLock();
     return AIOUSB_GetScan( DeviceIndex, pBuf + startChannel );
-}     // ADC_GetScan()
+}
 
 
 
@@ -763,18 +763,18 @@ unsigned long ADC_GetConfig(
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    } 
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     if( deviceDesc->ConfigBytes == 0 ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_NOT_SUPPORTED;
-    }       // if( deviceDesc->ConfigBytes ...
+    }
     if( *ConfigBufSize < deviceDesc->ConfigBytes ) {
 	*ConfigBufSize = deviceDesc->ConfigBytes;
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_INVALID_PARAMETER;
-    }       // if( *ConfigBufSize ...
+    }
 
     AIOUSB_UnLock();                                        // unlock while communicating with device
     result = ReadConfigBlock( DeviceIndex, AIOUSB_TRUE );
@@ -785,10 +785,10 @@ unsigned long ADC_GetConfig(
 	memcpy( pConfigBuf, deviceDesc->cachedConfigBlock.registers, deviceDesc->cachedConfigBlock.size );
 	*ConfigBufSize = deviceDesc->cachedConfigBlock.size;
 	AIOUSB_UnLock();
-    }       // if( result ...
+    }
 
     return result;
-}     // ADC_GetConfig()
+}
 
 
 
@@ -819,18 +819,18 @@ unsigned long ADC_SetConfig(
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    }
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     if( deviceDesc->ConfigBytes == 0 ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_NOT_SUPPORTED;
-    }       // if( deviceDesc->ConfigBytes ...
+    }
     if( *ConfigBufSize < deviceDesc->ConfigBytes ) {
 	*ConfigBufSize = deviceDesc->ConfigBytes;
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_INVALID_PARAMETER;
-    }       // if( *ConfigBufSize ...
+    }
 
     /*
      * validate settings
@@ -852,8 +852,8 @@ unsigned long ADC_SetConfig(
 	    ) {
 	    AIOUSB_UnLock();
 	    return AIOUSB_ERROR_INVALID_PARAMETER;
-	}       // if( ( configBlock.registers[ ...
-    }       // for( channel ...
+	}
+    }
 
     const unsigned char calMode = configBlock.registers[ AD_CONFIG_CAL_MODE ];
     if(
@@ -863,12 +863,12 @@ unsigned long ADC_SetConfig(
         ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_INVALID_PARAMETER;
-    }       // if( calMode ...
+    }
 
     if( ( configBlock.registers[ AD_CONFIG_TRIG_COUNT ] & ~AD_TRIGGER_VALID_MASK ) != 0 ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_INVALID_PARAMETER;
-    }       // if( ( configBlock.registers[ ...
+    }
 
     const unsigned endChannel = AIOUSB_GetEndChannel( &configBlock );
     if(
@@ -877,7 +877,7 @@ unsigned long ADC_SetConfig(
         ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_INVALID_PARAMETER;
-    }       // if( endChannel ...
+    }
 
     deviceDesc->cachedConfigBlock = configBlock;
     AIOUSB_UnLock();                                        // unlock while communicating with device
@@ -886,7 +886,7 @@ unsigned long ADC_SetConfig(
 	*ConfigBufSize = configBlock.size;
 
     return result;
-}     // ADC_SetConfig()
+}
 
 
 
@@ -920,7 +920,7 @@ unsigned long ADC_RangeAll(
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    }
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     if(
@@ -929,7 +929,7 @@ unsigned long ADC_RangeAll(
         ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_NOT_SUPPORTED;
-    }       // if( deviceDesc->ADCChannels ...
+    } 
 
     /*
      * validate gain codes; they should be just gain codes; single-ended or differential
@@ -940,8 +940,8 @@ unsigned long ADC_RangeAll(
 	if( ( pGainCodes[ AD_CONFIG_GAIN_CODE + channel ] & ~AD_GAIN_CODE_MASK ) != 0 ) {
 	    AIOUSB_UnLock();
 	    return AIOUSB_ERROR_INVALID_PARAMETER;
-	}       // if( ( pGainCodes[ ...
-    }       // for( channel ...
+	} 
+    }
 
     AIOUSB_UnLock();                                        // unlock while communicating with device
     result = ReadConfigBlock( DeviceIndex, AIOUSB_FALSE );
@@ -951,13 +951,13 @@ unsigned long ADC_RangeAll(
 	    AIOUSB_SetGainCode( &deviceDesc->cachedConfigBlock, channel, pGainCodes[ channel ] );
 	    AIOUSB_SetDifferentialMode( &deviceDesc->cachedConfigBlock, channel,
 	                                ( bSingleEnded == AIOUSB_FALSE ) ? AIOUSB_TRUE : AIOUSB_FALSE );
-	}       // for( channel ...
+	}
 	AIOUSB_UnLock();                                  // unlock while communicating with device
 	result = WriteConfigBlock( DeviceIndex );
-    }       // if( result ...
+    } 
 
     return result;
-}     // ADC_RangeAll()
+}
 
 
 
@@ -984,7 +984,7 @@ unsigned long ADC_Range1(
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    }
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     if(
@@ -993,7 +993,7 @@ unsigned long ADC_Range1(
         ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_NOT_SUPPORTED;
-    }       // if( deviceDesc->ADCMUXChannels ...
+    }
 
     if(
         ( GainCode & ~AD_GAIN_CODE_MASK ) != 0
@@ -1005,7 +1005,7 @@ unsigned long ADC_Range1(
         ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_INVALID_PARAMETER;
-    }       // if( ( GainCode ...
+    } 
 
     AIOUSB_UnLock();                                        // unlock while communicating with device
     result = ReadConfigBlock( DeviceIndex, AIOUSB_FALSE );
@@ -1016,10 +1016,10 @@ unsigned long ADC_Range1(
 	                            ( bSingleEnded == AIOUSB_FALSE ) ? AIOUSB_TRUE : AIOUSB_FALSE );
 	AIOUSB_UnLock();                                  // unlock while communicating with device
 	result = WriteConfigBlock( DeviceIndex );
-    }       // if( result ...
+    }
 
     return result;
-}     // ADC_Range1()
+}
 
 
 
@@ -1054,13 +1054,13 @@ unsigned long ADC_ADMode(
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    }
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     if( deviceDesc->bADCStream == AIOUSB_FALSE ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_NOT_SUPPORTED;
-    }       // if( deviceDesc->bADCStream ...
+    }
 
     AIOUSB_UnLock();                                        // unlock while communicating with device
     result = ReadConfigBlock( DeviceIndex, AIOUSB_FALSE );
@@ -1070,10 +1070,10 @@ unsigned long ADC_ADMode(
 	AIOUSB_SetTriggerMode( &deviceDesc->cachedConfigBlock, TriggerMode );
 	AIOUSB_UnLock();                                  // unlock while communicating with device
 	result = WriteConfigBlock( DeviceIndex );
-    }       // if( result ...
+    }
 
     return result;
-}     // ADC_ADMode()
+}
 
 
 
@@ -1096,13 +1096,13 @@ unsigned long ADC_SetOversample(
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    }
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     if( deviceDesc->bADCStream == AIOUSB_FALSE ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_NOT_SUPPORTED;
-    }       // if( deviceDesc->bADCStream ...
+    }
 
     AIOUSB_UnLock();                                        // unlock while communicating with device
     result = ReadConfigBlock( DeviceIndex, AIOUSB_FALSE );
@@ -1111,10 +1111,10 @@ unsigned long ADC_SetOversample(
 	AIOUSB_SetOversample( &deviceDesc->cachedConfigBlock, Oversample );
 	AIOUSB_UnLock();                                  // unlock while communicating with device
 	result = WriteConfigBlock( DeviceIndex );
-    }       // if( result ...
+    }
 
     return result;
-}     // ADC_SetOversample()
+}
 
 
 
@@ -1139,13 +1139,13 @@ unsigned long ADC_SetScanLimits(
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    }
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     if( deviceDesc->bADCStream == AIOUSB_FALSE ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_NOT_SUPPORTED;
-    }       // if( deviceDesc->bADCStream ...
+    }
 
     if(
         EndChannel > deviceDesc->ADCMUXChannels
@@ -1153,7 +1153,7 @@ unsigned long ADC_SetScanLimits(
         ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_INVALID_PARAMETER;
-    }       // if( EndChannel ...
+    }
 
     AIOUSB_UnLock();                                        // unlock while communicating with device
     result = ReadConfigBlock( DeviceIndex, AIOUSB_FALSE );
@@ -1162,10 +1162,10 @@ unsigned long ADC_SetScanLimits(
 	AIOUSB_SetScanRange( &deviceDesc->cachedConfigBlock, StartChannel, EndChannel );
 	AIOUSB_UnLock();                                  // unlock while communicating with device
 	result = WriteConfigBlock( DeviceIndex );
-    }       // if( result ...
+    }
 
     return result;
-}     // ADC_SetScanLimits()
+}
 
 
 
@@ -1197,7 +1197,7 @@ unsigned long ADC_SetCal(
 	result = AIOUSB_ADC_LoadCalTable( DeviceIndex, CalFileName );
 
     return result;
-}     // ADC_SetCal()
+}
 
 
 
@@ -1218,7 +1218,7 @@ unsigned long ADC_QueryCal(
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    }
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
@@ -1236,10 +1236,10 @@ unsigned long ADC_QueryCal(
     } else {
 	result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 	AIOUSB_UnLock();
-    }       // if( deviceHandle ...
+    }
 
     return result;
-}     // ADC_QueryCal()
+}
 
 
 
@@ -1274,7 +1274,7 @@ unsigned long ADC_Initialize(
 	result = ADC_SetCal( DeviceIndex, CalFileName );
 
     return result;
-}     // ADC_Initialize()
+}
 
 
 
@@ -1305,18 +1305,18 @@ unsigned long ADC_BulkAcquire(
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    }
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     if( deviceDesc->bADCStream == AIOUSB_FALSE ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_NOT_SUPPORTED;
-    }       // if( deviceDesc->bADCStream ...
+    }
 
     if( deviceDesc->workerBusy ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_OPEN_FAILED;
-    }       // if( deviceDesc->workerBusy )
+    }
 
     AIOUSB_UnLock();
     struct BulkAcquireWorkerParams *const acquireParams
@@ -1357,14 +1357,14 @@ unsigned long ADC_BulkAcquire(
 	    AIOUSB_UnLock();
 	    free( acquireParams );
 	    result = AIOUSB_ERROR_INVALID_THREAD;
-	}       // if( threadResult ...
+	}
 	pthread_attr_destroy( &workerThreadAttr );
         pthread_detach( workerThreadID );
     } else
 	result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
 
     return result;
-}     // ADC_BulkAcquire()
+}
 
 
 /**
@@ -1425,8 +1425,8 @@ static void *BulkAcquireWorker( void *params ) {
 		    AIOUSB_Lock();
 		    deviceDesc->workerStatus = bytesRemaining;
 		    AIOUSB_UnLock();
-		}         // else if( bytesTransferred ...
-	    }         // while( bytesRemaining ...
+		}  // else if( bytesTransferred ...
+	    }
 	    clockHz = 0;
 	    CTR_StartOutputFreq( acquireParams->DeviceIndex, 0, &clockHz );
 	} else
@@ -1434,7 +1434,7 @@ static void *BulkAcquireWorker( void *params ) {
     } else {
 	result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 	AIOUSB_UnLock();
-    }       // if( deviceHandle ...
+    }  // if( deviceHandle ...
 
     AIOUSB_Lock();
     deviceDesc->workerStatus = 0;
@@ -1443,7 +1443,7 @@ static void *BulkAcquireWorker( void *params ) {
     AIOUSB_UnLock();
     free( params );
     return 0;
-}     // BulkAcquireWorker()
+}
 
 
 
@@ -1470,20 +1470,20 @@ unsigned long ADC_BulkPoll(
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    }
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     if( deviceDesc->bADCStream == AIOUSB_FALSE ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_NOT_SUPPORTED;
-    }       // if( deviceDesc->bADCStream ...
+    }
 
     *BytesLeft = deviceDesc->workerStatus;
     result = deviceDesc->workerResult;
     AIOUSB_UnLock();
 
     return result;
-}     // ADC_BulkPoll()
+}
 
 
 
@@ -1518,13 +1518,13 @@ static unsigned long ADC_GetImmediate(
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    }
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     if( deviceDesc->ImmADCs == 0 ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_NOT_SUPPORTED;
-    }       // if( deviceDesc->ImmADCs ...
+    }
 
     libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
     if( deviceHandle != NULL ) {
@@ -1538,10 +1538,10 @@ static unsigned long ADC_GetImmediate(
     } else {
 	result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 	AIOUSB_UnLock();
-    }       // if( deviceHandle ...
+    }
 
     return result;
-}     // ADC_GetImmediate()
+}
 
 
 
@@ -2017,7 +2017,7 @@ unsigned long GenericVendorRead(
       } else {
         result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
         AIOUSB_UnLock();
-    } /* if( deviceHandle .. */
+    } /* if( deviceHandle != NULL .. */
  RETURN_GenericVendorRead:
     return result;
 }
@@ -2388,8 +2388,6 @@ unsigned long ADC_GetFastITScanV( unsigned long DeviceIndex, double *pData )
     EndChannel   = AIOUSB_GetRegister( deviceDesc->FastITConfig, 0x12 ) >> 4;
     Channels     =  EndChannel - StartChannel + 1;
 
-/*  Stuff I still need to code here */
-
 /*  Result := ADC_BulkAcquire(DeviceIndex, Length(ADBuf) * SizeOf(ADBuf[0]), @ADBuf[0]); */
 
     CTR_8254Mode(DeviceIndex, 0, 2, 0);
@@ -2401,10 +2399,7 @@ unsigned long ADC_GetFastITScanV( unsigned long DeviceIndex, double *pData )
     clockHz = 0;
 
     ADC_SetScanLimits( DeviceIndex, 0, Channels  - 1 );
-    /* bufsize = 100000 * Channels * sizeof( unsigned short ) * 11 /\* 1 sample + 10 oversamples *\/; */
    
-
-    /* bufsize = 8*16*3*sizeof(unsigned short); */
     CLOCK_SPEED = 100000;	// Hz
     AIOUSB_SetStreamingBlockSize( DeviceIndex, 100000 );
     /* dataBuf = ( unsigned short * ) malloc( bufsize ); */
@@ -2447,22 +2442,6 @@ unsigned long ADC_GetFastITScanV( unsigned long DeviceIndex, double *pData )
 
     if( result != AIOUSB_SUCCESS )
       goto CLEANUP_ADC_GetFastITScanV;
-/*     for( int seconds = 0; seconds < 1000; seconds++ ) { */
-/*       usleep(seconds); */
-/*       result = ADC_BulkPoll( DeviceIndex, &BytesLeft ); */
-/*       if( result == AIOUSB_SUCCESS ) { */
-/* /\* #ifdef DEBUG *\/ */
-/* /\*         printf( "  %lu bytes remaining\n", BytesLeft ); *\/ */
-/* /\* #endif *\/ */
-/*         if( BytesLeft == 0 ) */
-/*           break; */
-/*       } else { */
-/* /\* #ifdef DEBUG *\/ */
-/* /\*         printf( "Error '%s' polling bulk acquire progress\n", AIOUSB_GetResultCodeAsString( result ) ); *\/ */
-/* /\* #endif *\/ */
-/*         break; */
-/*       } */
-/*     } */
  
     pBuf = pData;
 
@@ -2541,7 +2520,7 @@ AIOUSB_BOOL AIOUSB_IsDiscardFirstSample(
 
     AIOUSB_UnLock();
     return discard;
-}     // AIOUSB_IsDiscardFirstSample()
+}
 
 
 
@@ -2566,7 +2545,7 @@ unsigned long AIOUSB_SetDiscardFirstSample(
 
     AIOUSB_UnLock();
     return result;
-}     // AIOUSB_SetDiscardFirstSample()
+}
 
 
 
@@ -2588,7 +2567,7 @@ double AIOUSB_CountsToVolts(
     if( AIOUSB_ArrayCountsToVolts( DeviceIndex, channel, 1, &counts, &volts ) != AIOUSB_SUCCESS )
 	volts = 0.0;
     return volts;
-}     // AIOUSB_CountsToVolts()
+}
 
 
 
@@ -2611,7 +2590,7 @@ unsigned long AIOUSB_MultipleCountsToVolts(
     ) {
     return AIOUSB_ArrayCountsToVolts( DeviceIndex, startChannel, endChannel - startChannel + 1,
                                       counts + startChannel, volts + startChannel );
-}     // AIOUSB_MultipleCountsToVolts()
+}
 
 
 
@@ -2633,7 +2612,7 @@ unsigned short AIOUSB_VoltsToCounts(
     if( AIOUSB_ArrayVoltsToCounts( DeviceIndex, channel, 1, &volts, &counts ) != AIOUSB_SUCCESS )
 	counts = 0;
     return counts;
-}     // AIOUSB_VoltsToCounts()
+}
 
 
 
@@ -2656,7 +2635,7 @@ unsigned long AIOUSB_MultipleVoltsToCounts(
     ) {
     return AIOUSB_ArrayVoltsToCounts( DeviceIndex, startChannel, endChannel - startChannel + 1,
                                       volts + startChannel, counts + startChannel );
-}     // AIOUSB_MultipleVoltsToCounts()
+}
 
 
 
@@ -2682,18 +2661,18 @@ unsigned long AIOUSB_ADC_LoadCalTable(
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    }
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     if( deviceDesc->bADCStream == AIOUSB_FALSE ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_NOT_SUPPORTED;
-    }       // if( deviceDesc->bADCStream ...
+    }
 
     if( ( result = ADC_QueryCal( DeviceIndex ) ) != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( ( result ...
+    }
 
     AIOUSB_UnLock();
     unsigned short *const calTable = ( unsigned short * ) malloc( CAL_TABLE_WORDS * sizeof( unsigned short ) );
@@ -2721,7 +2700,7 @@ unsigned long AIOUSB_ADC_LoadCalTable(
 	result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
 
     return result;
-}     // AIOUSB_ADC_LoadCalTable()
+}
 
 
 
@@ -2747,18 +2726,18 @@ unsigned long AIOUSB_ADC_SetCalTable(
     if( result != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( result ...
+    }
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     if( deviceDesc->bADCStream == AIOUSB_FALSE ) {
 	AIOUSB_UnLock();
 	return AIOUSB_ERROR_NOT_SUPPORTED;
-    }       // if( deviceDesc->bADCStream ...
+    }
 
     if( ( result = ADC_QueryCal( DeviceIndex ) ) != AIOUSB_SUCCESS ) {
 	AIOUSB_UnLock();
 	return result;
-    }       // if( ( result ...
+    }
 
     libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
     if( deviceHandle != NULL ) {
@@ -2799,17 +2778,14 @@ unsigned long AIOUSB_ADC_SetCalTable(
 	    }         // else if( bytesTransferred ...
 	    wordsRemaining -= wordsWritten;
 	    sramAddress += wordsWritten;
-	}       // while( wordsRemaining ...
+	}
     } else {
 	result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 	AIOUSB_UnLock();
-    }       // if( deviceHandle ...
+    }
 
     return result;
-}     // AIOUSB_ADC_SetCalTable()
-
-
-
+}
 
 
 /** 
@@ -2921,7 +2897,7 @@ AIOUSB_Acquire_Reference_Counts(
                           else {
                                   result = AIOUSB_ERROR_INVALID_DATA;
                                   goto RETURN_AIOUSB_GetBulkAcquire;
-                          }	/* if( averageCounts ...*/
+                          }
                   } else {
                           if(
                              averageCounts >= MIN_REFERENCE
@@ -3005,9 +2981,9 @@ void AIOUSB_SetRangeSingle( ADConfigBlock *config, unsigned long channel, unsign
       assert( reg < AD_NUM_GAIN_CODE_REGISTERS );
 
       config->registers[ reg ] = gainCode;
-    }	// if( channel ...
+    }
     AIOUSB_UnLock();
-  }	// if( config ...
+  }
 }
 
 
@@ -3022,10 +2998,10 @@ void AIOUSB_SetRangeSingle( ADConfigBlock *config, unsigned long channel, unsign
  * @return
  */
 unsigned long AIOUSB_ADC_InternalCal(
-	unsigned long DeviceIndex
-	, AIOUSB_BOOL autoCal
-	, unsigned short returnCalTable[]
-	, const char *saveFileName
+	unsigned long DeviceIndex,
+	AIOUSB_BOOL autoCal, 
+        unsigned short returnCalTable[], 
+        const char *saveFileName
 ) {
 	if( ! AIOUSB_Lock() )
 		return AIOUSB_ERROR_INVALID_MUTEX;
@@ -3034,18 +3010,18 @@ unsigned long AIOUSB_ADC_InternalCal(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->bADCStream == AIOUSB_FALSE ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->bADCStream ...
+	}
 
 	if( ( result = ADC_QueryCal( DeviceIndex ) ) != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( ( result ...
+	}
 
 	AIOUSB_UnLock();
 	unsigned short *const calTable = ( unsigned short * ) malloc( CAL_TABLE_WORDS * sizeof( unsigned short ) );
@@ -3077,7 +3053,7 @@ unsigned long AIOUSB_ADC_InternalCal(
             //WriteConfigBlock( DeviceIndex );
 
             AIOUSB_UnLock();
-            double groundCounts, referenceCounts;
+            double groundCounts = 0, referenceCounts= 0;
             double averageCounts;
             int reading;
 
@@ -3123,11 +3099,11 @@ unsigned long AIOUSB_ADC_InternalCal(
                   else {
                     result = AIOUSB_ERROR_INVALID_DATA;
                     goto abort;
-                  }	// if( averageCounts ...
-                }	// if( reading ...
+                  } // if( averageCounts ...
+                } // if( reading ...
               } else
                 goto abort;
-            }	// for( readings ...
+            }
 
           abort:
             AIOUSB_Lock();
@@ -3201,16 +3177,16 @@ unsigned long AIOUSB_ADC_InternalCal(
               if( wordsWritten != ( size_t ) CAL_TABLE_WORDS ) {
                 remove( saveFileName );		// file is likely corrupt or incomplete
                 result = AIOUSB_ERROR_FILE_NOT_FOUND;
-              }	// if( wordsWritten ...
+              }
             } else
               result = AIOUSB_ERROR_FILE_NOT_FOUND;
-          }	// if( saveFileName ...
+          }
 
           /*
            * finally, send calibration table to device
            */
           result = AIOUSB_ADC_SetCalTable( DeviceIndex, calTable );
-        }	// if( result ...
+        }
 
         free( calTable );
         
@@ -3272,12 +3248,12 @@ void AIOUSB_InitConfigBlock( ADConfigBlock *config, unsigned long DeviceIndex, A
 		    AIOUSB_SetTriggerMode( config, 0 );
 		    AIOUSB_SetScanRange( config, 0, deviceDesc->ADCMUXChannels - 1 );
 		    AIOUSB_SetOversample( config, 0 );
-		}         // if( defaults )
-	    }         // if( AIOUSB_Validate( ...
+		}
+	    }
 	    AIOUSB_UnLock();
-	}       // if( AIOUSB_Lock() )
-    }       // if( config ...
-}     // AIOUSB_InitConfigBlock()
+	}
+    }
+}
 
 
 /**
@@ -3301,8 +3277,8 @@ void AIOUSB_SetAllGainCodeAndDiffMode( ADConfigBlock *config, unsigned gainCode,
 	unsigned channel;
 	for( channel = 0; channel < AD_NUM_GAIN_CODE_REGISTERS; channel++ )
 	    config->registers[ AD_CONFIG_GAIN_CODE + channel ] = gainCode;
-    }       // if( config ...
-}     // AIOUSB_SetAllGainCodeAndDiffMode()
+    }
+}
 
 
 /**
@@ -3332,11 +3308,11 @@ unsigned AIOUSB_GetGainCode( const ADConfigBlock *config, unsigned channel ) {
 	        config->registers[ AD_CONFIG_GAIN_CODE + channel / deviceDesc->ADCChannelsPerGroup ]
 	        & ( unsigned char ) AD_GAIN_CODE_MASK
 	        );
-	}       // if( channel ...
+	}
 	AIOUSB_UnLock();
-    }       // if( config ...
+    }
     return gainCode;
-}     // AIOUSB_GetGainCode()
+}
 
 
 /**
@@ -3367,10 +3343,10 @@ void AIOUSB_SetGainCode( ADConfigBlock *config, unsigned channel, unsigned gainC
 	    config->registers[ reg ]
 	        = ( config->registers[ reg ] & ~( unsigned char ) AD_GAIN_CODE_MASK )
 	          | ( unsigned char )( gainCode & AD_GAIN_CODE_MASK );
-	}       // if( channel ...
+	}
 	AIOUSB_UnLock();
-    }       // if( config ...
-}     // AIOUSB_SetGainCode()
+    }
+}
 
 
 /**
@@ -3405,11 +3381,11 @@ AIOUSB_BOOL AIOUSB_IsDifferentialMode( const ADConfigBlock *config, unsigned cha
 	        )
 	          ? AIOUSB_TRUE
 		  : AIOUSB_FALSE;
-	}       // if( channel ...
+	}
 	AIOUSB_UnLock();
-    }       // if( config ...
+    }
     return differentialMode;
-}     // AIOUSB_IsDifferentialMode()
+}
 
 
 /**
@@ -3439,10 +3415,10 @@ void AIOUSB_SetDifferentialMode( ADConfigBlock *config, unsigned channel, AIOUSB
 		config->registers[ reg ] |= ( unsigned char ) AD_DIFFERENTIAL_MODE;
 	    else
 		config->registers[ reg ] &= ~( unsigned char ) AD_DIFFERENTIAL_MODE;
-	}       // if( channel ...
+	}
 	AIOUSB_UnLock();
-    }       // if( config ...
-}     // AIOUSB_SetDifferentialMode()
+    }
+}
 
 
 /**
@@ -3466,9 +3442,9 @@ unsigned AIOUSB_GetCalMode( const ADConfigBlock *config ) {
             )
         ) {
 	calMode = config->registers[ AD_CONFIG_CAL_MODE ];
-    }       // if( config ...
+    }
     return calMode;
-}     // AIOUSB_GetCalMode()
+}
 
 
 /**
@@ -3490,8 +3466,8 @@ void AIOUSB_SetCalMode( ADConfigBlock *config, unsigned calMode ) {
             )
         ) {
 	config->registers[ AD_CONFIG_CAL_MODE ] = ( unsigned char ) calMode;
-    }       // if( config ...
-}     // AIOUSB_SetCalMode()
+    }
+}
 
 
 /**
@@ -3510,9 +3486,9 @@ unsigned AIOUSB_GetTriggerMode( const ADConfigBlock *config ) {
         && config->size != 0
         ) {
 	triggerMode = config->registers[ AD_CONFIG_TRIG_COUNT ] & ( unsigned char ) AD_TRIGGER_VALID_MASK;
-    }       // if( config ...
+    }
     return triggerMode;
-}     // AIOUSB_GetTriggerMode()
+}
 
 
 /**
@@ -3530,8 +3506,8 @@ void AIOUSB_SetTriggerMode( ADConfigBlock *config, unsigned triggerMode ) {
         && ( triggerMode & ~AD_TRIGGER_VALID_MASK ) == 0
         ) {
 	config->registers[ AD_CONFIG_TRIG_COUNT ] = ( unsigned char ) triggerMode;
-    }       // if( config ...
-}     // AIOUSB_SetTriggerMode()
+    }
+}
 
 
 /**
@@ -3555,9 +3531,9 @@ unsigned AIOUSB_GetStartChannel( const ADConfigBlock *config ) {
 	          | ( config->registers[ AD_CONFIG_START_END ] & 0xf );
 	else
 	    startChannel = ( config->registers[ AD_CONFIG_START_END ] & 0xf );
-    }       // if( config ...
+    }
     return startChannel;
-}     // AIOUSB_GetStartChannel()
+}
 
 
 /**
@@ -3581,9 +3557,9 @@ unsigned AIOUSB_GetEndChannel( const ADConfigBlock *config ) {
 	          | ( config->registers[ AD_CONFIG_START_END ] >> 4 );
 	else
 	    endChannel = ( config->registers[ AD_CONFIG_START_END ] >> 4 );
-    }       // if( config ...
+    }
     return endChannel;
-}     // AIOUSB_GetEndChannel()
+}
 
 
 /**
@@ -3618,11 +3594,11 @@ void AIOUSB_SetScanRange( ADConfigBlock *config, unsigned startChannel, unsigned
 		 * this board doesn't have a MUX, so support base number of channels
 		 */
 		config->registers[ AD_CONFIG_START_END ] = ( unsigned char )( ( endChannel << 4 ) | startChannel );
-	    }         // if( config->size ...
-	}       // if( endChannel ...
+	    }
+	}
 	AIOUSB_UnLock();
-    }       // if( config ...
-}     // AIOUSB_SetScanRange()
+    }
+}
 
 
 /**
@@ -3641,9 +3617,9 @@ unsigned AIOUSB_GetOversample( const ADConfigBlock *config ) {
         && config->size != 0
         ) {
 	overSample = config->registers[ AD_CONFIG_OVERSAMPLE ];
-    }       // if( config ...
+    }
     return overSample;
-}     // AIOUSB_GetOversample()
+}
 
 
 /**
@@ -3661,8 +3637,8 @@ void AIOUSB_SetOversample( ADConfigBlock *config, unsigned overSample ) {
         && overSample <= 255
         ) {
 	config->registers[ AD_CONFIG_OVERSAMPLE ] = ( unsigned char ) overSample;
-    }       // if( config ...
-}     // AIOUSB_SetOversample()
+    }
+}
 
 
 
@@ -3670,9 +3646,7 @@ void AIOUSB_SetOversample( ADConfigBlock *config, unsigned overSample ) {
 
 
 #ifdef __cplusplus
-}     // namespace AIOUSB
+}  // namespace AIOUSB
 #endif
 
 
-
-/* end of file */

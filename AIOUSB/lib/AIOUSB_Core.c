@@ -35,112 +35,112 @@ static const struct ProductIDName {
 	unsigned int id;
 	char name[ PROD_NAME_SIZE + 2 ];
 } productIDNameTable[] = {
-	  { USB_DA12_8A_REV_A,	"USB-DA12-8A-A" }
-	, { USB_DA12_8A,		"USB-DA12-8A" }
-	, { USB_DA12_8E,		"USB-DA12-8E" }
-	, { USB_DIO_32,			"USB-DIO-32" }
-	, { USB_DIO_48,			"USB-DIO-48" }
-	, { USB_DIO_96,			"USB-DIO-96" }
-	, { USB_DI16A_REV_A1,	"USB-DI16A-A1" }
-	, { USB_DO16A_REV_A1,	"USB-DO16A-A1" }
-	, { USB_DI16A_REV_A2,	"USB-DI16A-A2" }
-	, { USB_DIO_16H,		"USB-DIO-16H" }
-	, { USB_DI16A,			"USB-DI16A" }
-	, { USB_DO16A,			"USB-DO16A" }
-	, { USB_DIO_16A,		"USB-DIO-16A" }
-	, { USB_IIRO_16,		"USB-IIRO-16" }
-	, { USB_II_16,			"USB-II-16" }
-	, { USB_RO_16,			"USB-RO-16" }
-	, { USB_IIRO_8,			"USB-IIRO-8" }
-	, { USB_II_8,			"USB-II-8" }
-	, { USB_IIRO_4,			"USB-IIRO-4" }
-	, { USB_IDIO_16,		"USB-IDIO-16" }
-	, { USB_II_16_OLD,		"USB-II-16-OLD" }
-	, { USB_IDO_16,			"USB-IDO-16" }
-	, { USB_IDIO_8,			"USB-IDIO-8" }
-	, { USB_II_8_OLD,		"USB-II-8-OLD" }
-	, { USB_IDIO_4,			"USB-IDIO-4" }
-	, { USB_CTR_15,			"USB-CTR-15" }
-	, { USB_IIRO4_2SM,		"USB-IIRO4-2SM" }
-	, { USB_IIRO4_COM,		"USB-IIRO4-COM" }
-	, { USB_DIO16RO8,		"USB-DIO16RO8" }
-	, { PICO_DIO16RO8,		"PICO-DIO16RO8" }
-	, { USB_AI16_16A,		"USB-AI16-16A" }
-	, { USB_AI16_16E,		"USB-AI16-16E" }
-	, { USB_AI12_16A,		"USB-AI12-16A" }
-	, { USB_AI12_16,		"USB-AI12-16" }
-	, { USB_AI12_16E,		"USB-AI12-16E" }
-	, { USB_AI16_64MA,		"USB-AI16-64MA" }
-	, { USB_AI16_64ME,		"USB-AI16-64ME" }
-	, { USB_AI12_64MA,		"USB-AI12-64MA" }
-	, { USB_AI12_64M,		"USB-AI12-64M" }
-	, { USB_AI12_64ME,		"USB-AI12-64ME" }
-	, { USB_AI16_32A,		"USB-AI16-32A" }
-	, { USB_AI16_32E,		"USB-AI16-32E" }
-	, { USB_AI12_32A,		"USB-AI12-32A" }
-	, { USB_AI12_32,		"USB-AI12-32" }
-	, { USB_AI12_32E,		"USB-AI12-32E" }
-	, { USB_AI16_64A,		"USB-AI16-64A" }
-	, { USB_AI16_64E,		"USB-AI16-64E" }
-	, { USB_AI12_64A,		"USB-AI12-64A" }
-	, { USB_AI12_64,		"USB-AI12-64" }
-	, { USB_AI12_64E,		"USB-AI12-64E" }
-	, { USB_AI16_96A,		"USB-AI16-96A" }
-	, { USB_AI16_96E,		"USB-AI16-96E" }
-	, { USB_AI12_96A,		"USB-AI12-96A" }
-	, { USB_AI12_96,		"USB-AI12-96" }
-	, { USB_AI12_96E,		"USB-AI12-96E" }
-	, { USB_AI16_128A,		"USB-AI16-128A" }
-	, { USB_AI16_128E,		"USB-AI16-128E" }
-	, { USB_AI12_128A,		"USB-AI12-128A" }
-	, { USB_AI12_128,		"USB-AI12-128" }
-	, { USB_AI12_128E,		"USB-AI12-128E" }
-	, { USB_AO16_16A,		"USB-AO16-16A" }
-	, { USB_AO16_16,		"USB-AO16-16" }
-	, { USB_AO16_12A,		"USB-AO16-12A" }
-	, { USB_AO16_12,		"USB-AO16-12" }
-	, { USB_AO16_8A,		"USB-AO16-8A" }
-	, { USB_AO16_8,			"USB-AO16-8" }
-	, { USB_AO16_4A,		"USB-AO16-4A" }
-	, { USB_AO16_4,			"USB-AO16-4" }
-	, { USB_AO12_16A,		"USB-AO12-16A" }
-	, { USB_AO12_16,		"USB-AO12-16" }
-	, { USB_AO12_12A,		"USB-AO12-12A" }
-	, { USB_AO12_12,		"USB-AO12-12" }
-	, { USB_AO12_8A,		"USB-AO12-8A" }
-	, { USB_AO12_8,			"USB-AO12-8" }
-	, { USB_AO12_4A,		"USB-AO12-4A" }
-	, { USB_AO12_4,			"USB-AO12-4" }
-	, { USB_AIO16_16A,		"USB-AIO16-16A" }
-	, { USB_AIO16_16E,		"USB-AIO16-16E" }
-	, { USB_AIO12_16A,		"USB-AIO12-16A" }
-	, { USB_AIO12_16,		"USB-AIO12-16" }
-	, { USB_AIO12_16E,		"USB-AIO12-16E" }
-	, { USB_AIO16_64MA,		"USB-AIO16-64MA" }
-	, { USB_AIO16_64ME,		"USB-AIO16-64ME" }
-	, { USB_AIO12_64MA,		"USB-AIO12-64MA" }
-	, { USB_AIO12_64M,		"USB-AIO12-64M" }
-	, { USB_AIO12_64ME,		"USB-AIO12-64ME" }
-	, { USB_AIO16_32A,		"USB-AIO16-32A" }
-	, { USB_AIO16_32E,		"USB-AIO16-32E" }
-	, { USB_AIO12_32A,		"USB-AIO12-32A" }
-	, { USB_AIO12_32,		"USB-AIO12-32" }
-	, { USB_AIO12_32E,		"USB-AIO12-32E" }
-	, { USB_AIO16_64A,		"USB-AIO16-64A" }
-	, { USB_AIO16_64E,		"USB-AIO16-64E" }
-	, { USB_AIO12_64A,		"USB-AIO12-64A" }
-	, { USB_AIO12_64,		"USB-AIO12-64" }
-	, { USB_AIO12_64E,		"USB-AIO12-64E" }
-	, { USB_AIO16_96A,		"USB-AIO16-96A" }
-	, { USB_AIO16_96E,		"USB-AIO16-96E" }
-	, { USB_AIO12_96A,		"USB-AIO12-96A" }
-	, { USB_AIO12_96,		"USB-AIO12-96" }
-	, { USB_AIO12_96E,		"USB-AIO12-96E" }
-	, { USB_AIO16_128A,		"USB-AIO16-128A" }
-	, { USB_AIO16_128E,		"USB-AIO16-128E" }
-	, { USB_AIO12_128A,		"USB-AIO12-128A" }
-	, { USB_AIO12_128,		"USB-AIO12-128" }
-	, { USB_AIO12_128E,		"USB-AIO12-128E" }
+	  { USB_DA12_8A_REV_A,          "USB-DA12-8A-A" },
+          { USB_DA12_8A,                "USB-DA12-8A" },
+          { USB_DA12_8E,                "USB-DA12-8E" },
+          { USB_DIO_32,                 "USB-DIO-32" },
+          { USB_DIO_48,                 "USB-DIO-48" },
+          { USB_DIO_96,                 "USB-DIO-96" },
+          { USB_DI16A_REV_A1,           "USB-DI16A-A1" },
+          { USB_DO16A_REV_A1,           "USB-DO16A-A1" },
+          { USB_DI16A_REV_A2,           "USB-DI16A-A2" },
+          { USB_DIO_16H,                "USB-DIO-16H" },
+          { USB_DI16A,                  "USB-DI16A" },
+          { USB_DO16A,                  "USB-DO16A" },
+          { USB_DIO_16A,                "USB-DIO-16A" },
+          { USB_IIRO_16,                "USB-IIRO-16" },
+          { USB_II_16,                  "USB-II-16" },
+          { USB_RO_16,                  "USB-RO-16" },
+          { USB_IIRO_8,                 "USB-IIRO-8" },
+          { USB_II_8,                   "USB-II-8" },
+          { USB_IIRO_4,                 "USB-IIRO-4" },
+          { USB_IDIO_16,                "USB-IDIO-16" },
+          { USB_II_16_OLD,              "USB-II-16-OLD" },
+          { USB_IDO_16,                 "USB-IDO-16" },
+          { USB_IDIO_8,                 "USB-IDIO-8" },
+          { USB_II_8_OLD,               "USB-II-8-OLD" },
+          { USB_IDIO_4,                 "USB-IDIO-4" },
+          { USB_CTR_15,                 "USB-CTR-15" },
+          { USB_IIRO4_2SM,              "USB-IIRO4-2SM" },
+          { USB_IIRO4_COM,              "USB-IIRO4-COM" },
+          { USB_DIO16RO8,               "USB-DIO16RO8" },
+          { PICO_DIO16RO8,              "PICO-DIO16RO8" },
+          { USB_AI16_16A,               "USB-AI16-16A" },
+          { USB_AI16_16E,               "USB-AI16-16E" },
+          { USB_AI12_16A,               "USB-AI12-16A" },
+          { USB_AI12_16,                "USB-AI12-16" },
+          { USB_AI12_16E,               "USB-AI12-16E" },
+          { USB_AI16_64MA,              "USB-AI16-64MA" },
+          { USB_AI16_64ME,              "USB-AI16-64ME" },
+          { USB_AI12_64MA,              "USB-AI12-64MA" },
+          { USB_AI12_64M,               "USB-AI12-64M" },
+          { USB_AI12_64ME,              "USB-AI12-64ME" },
+          { USB_AI16_32A,               "USB-AI16-32A" },
+          { USB_AI16_32E,               "USB-AI16-32E" },
+          { USB_AI12_32A,               "USB-AI12-32A" },
+          { USB_AI12_32,                "USB-AI12-32" },
+          { USB_AI12_32E,               "USB-AI12-32E" },
+          { USB_AI16_64A,               "USB-AI16-64A" },
+          { USB_AI16_64E,               "USB-AI16-64E" },
+          { USB_AI12_64A,               "USB-AI12-64A" },
+          { USB_AI12_64,                "USB-AI12-64" },
+          { USB_AI12_64E,               "USB-AI12-64E" },
+          { USB_AI16_96A,               "USB-AI16-96A" },
+          { USB_AI16_96E,               "USB-AI16-96E" },
+          { USB_AI12_96A,               "USB-AI12-96A" },
+          { USB_AI12_96,                "USB-AI12-96" },
+          { USB_AI12_96E,               "USB-AI12-96E" },
+          { USB_AI16_128A,              "USB-AI16-128A" },
+          { USB_AI16_128E,              "USB-AI16-128E" },
+          { USB_AI12_128A,              "USB-AI12-128A" },
+          { USB_AI12_128,               "USB-AI12-128" },
+          { USB_AI12_128E,              "USB-AI12-128E" },
+          { USB_AO16_16A,               "USB-AO16-16A" },
+          { USB_AO16_16,                "USB-AO16-16" },
+          { USB_AO16_12A,               "USB-AO16-12A" },
+          { USB_AO16_12,                "USB-AO16-12" },
+          { USB_AO16_8A,                "USB-AO16-8A" },
+          { USB_AO16_8,                 "USB-AO16-8" },
+          { USB_AO16_4A,                "USB-AO16-4A" },
+          { USB_AO16_4,                 "USB-AO16-4" },
+          { USB_AO12_16A,               "USB-AO12-16A" },
+          { USB_AO12_16,                "USB-AO12-16" },
+          { USB_AO12_12A,               "USB-AO12-12A" },
+          { USB_AO12_12,                "USB-AO12-12" },
+          { USB_AO12_8A,                "USB-AO12-8A" },
+          { USB_AO12_8,                 "USB-AO12-8" },
+          { USB_AO12_4A,                "USB-AO12-4A" },
+          { USB_AO12_4,                 "USB-AO12-4" },
+          { USB_AIO16_16A,              "USB-AIO16-16A" },
+          { USB_AIO16_16E,              "USB-AIO16-16E" },
+          { USB_AIO12_16A,              "USB-AIO12-16A" },
+          { USB_AIO12_16,               "USB-AIO12-16" },
+          { USB_AIO12_16E,              "USB-AIO12-16E" },
+          { USB_AIO16_64MA,             "USB-AIO16-64MA" },
+          { USB_AIO16_64ME,             "USB-AIO16-64ME" },
+          { USB_AIO12_64MA,             "USB-AIO12-64MA" },
+          { USB_AIO12_64M,              "USB-AIO12-64M" },
+          { USB_AIO12_64ME,             "USB-AIO12-64ME" },
+          { USB_AIO16_32A,              "USB-AIO16-32A" },
+          { USB_AIO16_32E,              "USB-AIO16-32E" },
+          { USB_AIO12_32A,              "USB-AIO12-32A" },
+          { USB_AIO12_32,               "USB-AIO12-32" },
+          { USB_AIO12_32E,              "USB-AIO12-32E" },
+          { USB_AIO16_64A,              "USB-AIO16-64A" },
+          { USB_AIO16_64E,              "USB-AIO16-64E" },
+          { USB_AIO12_64A,              "USB-AIO12-64A" },
+          { USB_AIO12_64,               "USB-AIO12-64" },
+          { USB_AIO12_64E,              "USB-AIO12-64E" },
+          { USB_AIO16_96A,              "USB-AIO16-96A" },
+          { USB_AIO16_96E,              "USB-AIO16-96E" },
+          { USB_AIO12_96A,              "USB-AIO12-96A" },
+          { USB_AIO12_96,               "USB-AIO12-96" },
+          { USB_AIO12_96E,              "USB-AIO12-96E" },
+          { USB_AIO16_128A,             "USB-AIO16-128A" },
+          { USB_AIO16_128E,             "USB-AIO16-128E" },
+          { USB_AIO12_128A,             "USB-AIO12-128A" },
+          { USB_AIO12_128,              "USB-AIO12-128" },
+          { USB_AIO12_128E,             "USB-AIO12-128E" }
 };	// productIDNameTable[]
 #ifdef __cplusplus
 const int NUM_PROD_NAMES = sizeof( productIDNameTable ) / sizeof( productIDNameTable[ 0 ] );
@@ -155,15 +155,10 @@ PRIVATE DeviceDescriptor deviceTable[ MAX_USB_DEVICES ];
 #if defined( AIOUSB_ENABLE_MUTEX )
 static pthread_mutex_t aiousbMutex;
 #endif
-const unsigned long AIOUSB_INIT_PATTERN = 0x9b6773adul;		// random pattern
-static unsigned long aiousbInit = 0;						// == AIOUSB_INIT_PATTERN if AIOUSB module is initialized
+const unsigned long AIOUSB_INIT_PATTERN = 0x9b6773adul;	// random pattern
+static unsigned long aiousbInit = 0;			// == AIOUSB_INIT_PATTERN if AIOUSB module is initialized
 static const char VERSION_NUMBER[] = "1.93";
-static const char VERSION_DATE[] = "18 March 2011";
-
-
-
-
-
+static const char VERSION_DATE[] = "18 March 2013";
 
 /*
  * o Our mutual exclusion scheme is not intended to be bulletproof. It's primarily intended
@@ -195,7 +190,7 @@ PRIVATE AIOUSB_BOOL AIOUSB_Lock() {
 #else
 	return AIOUSB_TRUE;
 #endif
-}	// AIOUSB_Lock()
+}
 
 PRIVATE AIOUSB_BOOL AIOUSB_UnLock() {
 	assert( AIOUSB_IsInit() );
@@ -204,14 +199,14 @@ PRIVATE AIOUSB_BOOL AIOUSB_UnLock() {
 #else
 	return AIOUSB_TRUE;
 #endif
-}	// AIOUSB_UnLock()
+}
 
 
 
 
 PRIVATE AIOUSB_BOOL AIOUSB_IsInit() {
 	return aiousbInit == AIOUSB_INIT_PATTERN;
-}	// AIOUSB_IsInit()
+}
 
 
 
@@ -224,7 +219,7 @@ PRIVATE unsigned long AIOUSB_Validate( unsigned long *DeviceIndex ) {
 	if( ! AIOUSB_IsInit() ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( ! AIOUSB_IsInit() )
+	}
 
 	if( *DeviceIndex == diFirst ) {
 		/*
@@ -237,8 +232,8 @@ PRIVATE unsigned long AIOUSB_Validate( unsigned long *DeviceIndex ) {
 				*DeviceIndex = index;
 				result = AIOUSB_SUCCESS;
 				break;							// from for()
-			}	// if( deviceTable[ ...
-		}	// for( index ...
+			}
+		}
 	} else if( *DeviceIndex == diOnly ) {
 		/*
 		 * find first device on bus, ensuring that it's the only device
@@ -261,9 +256,9 @@ PRIVATE unsigned long AIOUSB_Validate( unsigned long *DeviceIndex ) {
 					 */
 					result = AIOUSB_ERROR_DUP_NAME;
 					break;						// from for()
-				}	// else if( foundIndex ...
-			}	// if( deviceTable[ ...
-		}	// for( index ...
+				}
+			}
+		}
 	} else {
 		/*
 		 * simply verify that the supplied index is valid
@@ -275,15 +270,15 @@ PRIVATE unsigned long AIOUSB_Validate( unsigned long *DeviceIndex ) {
 			result = AIOUSB_SUCCESS;
 		else
 			result = AIOUSB_ERROR_INVALID_INDEX;
-	}	// if( *DeviceIndex ...
+	}
 
 	AIOUSB_UnLock();
 	return result;
-}	// AIOUSB_Validate()
+}
 
 
 
-static void InitDeviceTable() {
+static void InitDeviceTable(void) {
 	int index;
 	for( index = 0; index < MAX_USB_DEVICES; index++ ) {
 		DeviceDescriptor *deviceDesc = &deviceTable[ index ];
@@ -345,12 +340,12 @@ static void InitDeviceTable() {
 		deviceDesc->workerBusy = AIOUSB_FALSE;
 		deviceDesc->workerStatus = 0;
 		deviceDesc->workerResult = AIOUSB_SUCCESS;
-	}	// for( index ...
-}	// InitDeviceTable()
+	}
+}
 
 
 
-static void PopulateDeviceTable() {
+static void PopulateDeviceTable(void) {
 	/*
 	 * populate device table with ACCES devices found on USB bus
 	 */
@@ -536,27 +531,27 @@ static void PopulateDeviceTable() {
 							case 0x0006:
 								deviceDesc->ImmDACs = 4;
 								break;
-						}	// switch( productID ...
+						}
 						if( ( productID & 0x0001 ) == 0 )
 							deviceDesc->ImmADCs = 2;
-					}	// else if( productID ...
+					}
 
 					// allocate I/O image buffers
 					if( deviceDesc->DIOBytes > 0 ) {
 						// calloc() zeros memory
 						deviceDesc->LastDIOData = ( unsigned char * ) calloc( deviceDesc->DIOBytes, sizeof( unsigned char ) );
 						assert( deviceDesc->LastDIOData != 0 );
-					}	// if( deviceDesc->DIOBytes ...
-				}	// if( libusbDeviceDesc.idVendor ...
-			}	// if( libusbResult ...
-		}	// for( index ...
-	}	// if( numDevices ...
+					}
+				}
+			}
+		}
+	}
 	libusb_free_device_list( deviceList, AIOUSB_TRUE );
-}	// PopulateDeviceTable()
+}
 
 
 
-static void CloseAllDevices() {
+static void CloseAllDevices(void) {
 	if( ! AIOUSB_IsInit() )
 		return;
 	int index;
@@ -566,20 +561,20 @@ static void CloseAllDevices() {
 		if( deviceDesc->deviceHandle != NULL ) {
 			libusb_close( deviceDesc->deviceHandle );
 			deviceDesc->deviceHandle = NULL;
-		}	// if( deviceDesc->deviceHandle ...
+		}
 		libusb_unref_device( deviceDesc->device );
 
 		if( deviceDesc->LastDIOData != NULL ) {
 			free( deviceDesc->LastDIOData );
 			deviceDesc->LastDIOData = NULL;
-		}	// if( deviceDesc->LastDIOData ...
+		}
 
 		if( deviceDesc->cachedName != NULL ) {
 			free( deviceDesc->cachedName );
 			deviceDesc->cachedName = NULL;
-		}	// if( deviceDesc->cachedName ...
-	}	// for( index ...
-}	// CloseAllDevices()
+		}
+	}
+}
 
 
 
@@ -636,9 +631,9 @@ PRIVATE const char *ProductIDToName( unsigned int productID ) {
 		if( product != 0 )
 			name = ( *product )->name;
 		AIOUSB_UnLock();
-	}	// if( AIOUSB_Lock() )
+	}
 	return name;
-}	// ProductIDToName()
+}
 
 
 static int CompareProductNames( const void *p1, const void *p2 ) {
@@ -647,7 +642,7 @@ static int CompareProductNames( const void *p1, const void *p2 ) {
 		&& p2 != 0
 		&& ( *( struct ProductIDName ** ) p2 ) != 0 );
 	return strcmp( ( *( struct ProductIDName ** ) p1 )->name, ( *( struct ProductIDName ** ) p2 )->name );
-}	// CompareProductNames()
+}
 
 
 PRIVATE unsigned int ProductNameToID( const char *name ) {
@@ -669,8 +664,8 @@ PRIVATE unsigned int ProductNameToID( const char *name ) {
 		 * (see notes for ProductIDToName())
 		 */
 		static struct ProductIDName const *productNameIndex[ NUM_PROD_NAMES ];	// index of product names in productIDNameTable[]
-		const unsigned long INIT_PATTERN = 0x7e6b2017ul;						// random pattern
-		static unsigned long productNameIndexCreated = 0;						// == INIT_PATTERN if index has been created
+		const unsigned long INIT_PATTERN = 0x7e6b2017ul;			// random pattern
+		static unsigned long productNameIndexCreated = 0;			// == INIT_PATTERN if index has been created
 		if( productNameIndexCreated != INIT_PATTERN ) {
 			/*
 			 * build index of product names
@@ -680,7 +675,7 @@ PRIVATE unsigned int ProductNameToID( const char *name ) {
 				productNameIndex[ index ] = &productIDNameTable[ index ];
 			qsort( productNameIndex, NUM_PROD_NAMES, sizeof( struct ProductIDName * ), CompareProductNames );
 			productNameIndexCreated = INIT_PATTERN;
-		}	// if( productNameIndexCreated ...
+		}
 
 		struct ProductIDName key;				// key.id not used
 		strncpy( key.name, name, PROD_NAME_SIZE );
@@ -691,9 +686,9 @@ PRIVATE unsigned int ProductNameToID( const char *name ) {
 		if( product != 0 )
 			productID = ( *product )->id;
 		AIOUSB_UnLock();
-	}	// if( AIOUSB_Lock() )
+	}
 	return productID;
-}	// ProductNameToID()
+}
 
 
 
@@ -759,7 +754,7 @@ static unsigned long GetDeviceName( unsigned long DeviceIndex, const char **name
 							srcIndex += 2 /* bytes per char */, dstIndex++
 						) {
 							deviceName[ dstIndex ] = descData[ srcIndex ];
-						}	// for( srcIndex ...
+						}
 						deviceName[ dstIndex ] = 0;		// null-terminate
 						AIOUSB_Lock();
 						*name = deviceDesc->cachedName = deviceName;	// do not free( deviceName )
@@ -775,9 +770,9 @@ static unsigned long GetDeviceName( unsigned long DeviceIndex, const char **name
 				free( deviceName );
 		} else
 			result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
-	}	// if( deviceDesc->cachedName ...
+	}
 	return result;
-}	// GetDeviceName()
+}
 
 /*
  * GetSafeDeviceName() returns a null-terminated device name; if GetSafeDeviceName() is unable
@@ -804,7 +799,7 @@ PRIVATE const char *GetSafeDeviceName( unsigned long DeviceIndex ) {
 				AIOUSB_Lock();
 				deviceName = ProductIDToName( deviceDesc->ProductID );
 				AIOUSB_UnLock();
-			}	// if( GetDeviceName( ...
+			}
 		} else {
 			/*
 			 * device doesn't support getting its product name, so use local
@@ -812,12 +807,12 @@ PRIVATE const char *GetSafeDeviceName( unsigned long DeviceIndex ) {
 			 */
 			deviceName = ProductIDToName( deviceDesc->ProductID );
 			AIOUSB_UnLock();
-		}	// if( deviceDesc->bGetName )
+		}
 	} else { 
 		AIOUSB_UnLock();
         }
 	return deviceName;
-}	// GetSafeDeviceName()
+}
 
 
 
@@ -831,7 +826,7 @@ PRIVATE struct libusb_device_handle *AIOUSB_GetDeviceHandle( unsigned long Devic
 	if( AIOUSB_Validate( &DeviceIndex ) != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return deviceHandle;
-	}	// if( AIOUSB_Validate( ...
+	}
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	deviceHandle = deviceDesc->deviceHandle;
@@ -842,11 +837,11 @@ PRIVATE struct libusb_device_handle *AIOUSB_GetDeviceHandle( unsigned long Devic
 			&& deviceHandle != NULL
 		)
 			deviceDesc->deviceHandle = deviceHandle;
-	}	// if( deviceHandle ...
+	}
 
 	AIOUSB_UnLock();
 	return deviceHandle;
-}	// AIOUSB_GetDeviceHandle()
+}
 
 
 
@@ -888,18 +883,42 @@ PRIVATE int AIOUSB_BulkTransfer( struct libusb_device_handle *dev_handle
 				data += bytes;
 				length -= bytes;
 			} else
-				break;							// from while() and return timeout result
+				break;	// from while() and return timeout result
 		} else
-			break;								// from while() and return error result
-	}	// while( length ...
+			break; // from while() and return error result
+	}
 	*transferred = total;
 	return libusbResult;
-}	// AIOUSB_BulkTransfer()
+}
 
 
 
 
+unsigned long AIOUSB_GetDevices( void ) {
+       unsigned long deviceMask = 0;
 
+       if( ! AIOUSB_Lock() )
+       	return deviceMask;
+
+       if( AIOUSB_IsInit() ) {
+       	/*
+       	 * we clear the device table to erase references to devices
+       	 * which may have been unplugged; any device indexes to devices
+       	 * that have not been unplugged, which the user may be using,
+       	 * _should_ still be valid
+       	 */
+       	ClearDevices();
+       	int index;
+       	for( index = 0; index < MAX_USB_DEVICES; index++ ) {
+       		if( deviceTable[ index ].device != NULL )
+       			deviceMask = ( deviceMask << 1 ) | 1;
+       	}
+       }
+
+       AIOUSB_UnLock();
+       return deviceMask;
+
+}
 
 
 unsigned long GetDevices( void ) {
@@ -920,12 +939,12 @@ unsigned long GetDevices( void ) {
 		for( index = 0; index < MAX_USB_DEVICES; index++ ) {
 			if( deviceTable[ index ].device != NULL )
 				deviceMask = ( deviceMask << 1 ) | 1;
-		}	// for( index ...
-	}	// if( AIOUSB_IsInit() )
+		}
+	}
 
 	AIOUSB_UnLock();
 	return deviceMask;
-}	// GetDevices()
+}
 
 
 
@@ -974,11 +993,11 @@ unsigned long QueryDeviceInfo(
 			else
 				*pNameSize = length;
 			memcpy( pName, deviceName, length );	// not null-terminated
-		}	// if( deviceName ...
-	}	// if( pNameSize ...
+		}
+	}
 
 	return result;
-}	// QueryDeviceInfo()
+}
 
 
 
@@ -990,7 +1009,7 @@ unsigned long ClearDevices( void ) {
 	PopulateDeviceTable();
 	AIOUSB_UnLock();
 	return AIOUSB_SUCCESS;
-}	// ClearDevices()
+}
 
 
 
@@ -998,7 +1017,7 @@ unsigned long ResolveDeviceIndex( unsigned long DeviceIndex ) {
 	return ( AIOUSB_Validate( &DeviceIndex ) == AIOUSB_SUCCESS )
 		? DeviceIndex
 		: diNone;
-}	// ResolveDeviceIndex()
+}
 
 
 
@@ -1075,7 +1094,7 @@ unsigned long AIOUSB_GetStreamingBlockSize(
 
 	AIOUSB_UnLock();
 	return result;
-}	// AIOUSB_GetStreamingBlockSize()
+}
 
 
 
@@ -1135,7 +1154,7 @@ unsigned long AIOUSB_ClearFIFO(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
@@ -1161,7 +1180,7 @@ unsigned long AIOUSB_ClearFIFO(
 			case CLEAR_FIFO_METHOD_WAIT:
 				request = AUR_GEN_CLEAR_FIFO_WAIT;
 				break;
-		}	// switch( Method )
+		}
 		const unsigned timeout = deviceDesc->commTimeout;
 		AIOUSB_UnLock();						// unlock while communicating with device
 		const int bytesTransferred = libusb_control_transfer( deviceHandle
@@ -1171,22 +1190,22 @@ unsigned long AIOUSB_ClearFIFO(
 	} else {
 		result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 		AIOUSB_UnLock();
-	}	// if( deviceHandle ...
+	}
 
 	return result;
-}	// AIOUSB_ClearFIFO()
+}
 
 
 
 
 const char *AIOUSB_GetVersion() {
 	return VERSION_NUMBER;
-}	// AIOUSB_GetVersion()
+}
 
 
 const char *AIOUSB_GetVersionDate() {
 	return VERSION_DATE;
-}	// AIOUSB_GetVersionDate()
+}
 
 
 /*
@@ -1213,7 +1232,7 @@ unsigned long AIOUSB_Init() {
 					} else {
 						pthread_mutex_destroy( &aiousbMutex );
 						result = LIBUSB_RESULT_TO_AIOUSB_RESULT( libusbResult );
-					}	// if( libusbResult ...
+					}
 				} else
 					result = AIOUSB_ERROR_INVALID_MUTEX;
 			} else
@@ -1232,11 +1251,11 @@ unsigned long AIOUSB_Init() {
 			PopulateDeviceTable();
 		} else {
 			result = LIBUSB_RESULT_TO_AIOUSB_RESULT( libusbResult );
-		}	// if( libusbResult ...
+		}
 #endif
-	}	// if( ! AIOUSB_IsInit() )
+	}
 	return result;
-}	// AIOUSB_Init()
+}
 
 
 void AIOUSB_Exit() {
@@ -1247,8 +1266,8 @@ void AIOUSB_Exit() {
 		pthread_mutex_destroy( &aiousbMutex );
 #endif
 		aiousbInit = 0;
-	}	// if( AIOUSB_IsInit() )
-}	// AIOUSB_Exit()
+	}
+}
 
 
 unsigned long AIOUSB_Reset(
@@ -1261,7 +1280,7 @@ unsigned long AIOUSB_Reset(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}
 
 	libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
 	if( deviceHandle != NULL ) {
@@ -1273,10 +1292,10 @@ unsigned long AIOUSB_Reset(
 	} else {
 		result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 		AIOUSB_UnLock();
-	}	// if( deviceHandle ...
+	}
 
 	return result;
-}	// AIOUSB_Reset()
+}
 
 
 double AIOUSB_GetMiscClock(
@@ -1287,9 +1306,9 @@ double AIOUSB_GetMiscClock(
 		if( AIOUSB_Validate( &DeviceIndex ) == AIOUSB_SUCCESS )
 			clockHz = deviceTable[ DeviceIndex ].miscClockHz;
 		AIOUSB_UnLock();
-	}	// if( AIOUSB_Lock() )
+	}
 	return clockHz;
-}	// AIOUSB_GetMiscClock()
+}
 
 
 unsigned long AIOUSB_SetMiscClock(
@@ -1308,7 +1327,7 @@ unsigned long AIOUSB_SetMiscClock(
 
 	AIOUSB_UnLock();
 	return result;
-}	// AIOUSB_SetMiscClock()
+}
 
 
 unsigned AIOUSB_GetCommTimeout(
@@ -1319,9 +1338,9 @@ unsigned AIOUSB_GetCommTimeout(
 		if( AIOUSB_Validate( &DeviceIndex ) == AIOUSB_SUCCESS )
 			timeout = deviceTable[ DeviceIndex ].commTimeout;
 		AIOUSB_UnLock();
-	}	// if( AIOUSB_Lock() )
+	}
 	return timeout;
-}	// AIOUSB_GetCommTimeout()
+}
 
 
 unsigned long AIOUSB_SetCommTimeout(

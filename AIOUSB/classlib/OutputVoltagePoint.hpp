@@ -10,9 +10,9 @@
 #if ! defined( OutputVoltagePoint_hpp )
 #define OutputVoltagePoint_hpp
 
-// {{{ includes
+
 #include <vector>
-// }}}
+
 
 namespace AIOUSB {
 
@@ -54,14 +54,14 @@ public:
 
 };	// class OutputVoltagePoint
 
-// {{{ class OutputVoltagePointArray declarations
+
 
 class OutputVoltagePointArray : public std::vector<OutputVoltagePoint> {
 public:
 	OutputVoltagePointArray( int size = 0 ) : std::vector<OutputVoltagePoint>( size ) {}
 };	// class OutputVoltagePointArray
 
-// }}}
+
 
 }	// namespace AIOUSB
 

@@ -7,12 +7,12 @@
  * class AI16_DataPoint declarations
  */
 
-// {{{ includes
+
 #include <sstream>
 #include <iomanip>
 #include "AI16_DataPoint.hpp"
 #include "AnalogInputSubsystem.hpp"
-// }}}
+
 
 using namespace std;
 
@@ -21,7 +21,7 @@ namespace AIOUSB {
 AI16_DataPoint::AI16_DataPoint() {
 	counts = channel = range = 0;
 	differentialMode = false;
-}	// AI16_DataPoint::AI16_DataPoint()
+}
 
 /**
  * Gets the textual representation of the range that was in effect when this data point was captured.
@@ -30,7 +30,7 @@ AI16_DataPoint::AI16_DataPoint() {
 
 std::string AI16_DataPoint::getRangeText() const {
 	return AnalogInputSubsystem::getRangeText( range );
-}	// AI16_DataPoint::getRangeText()
+}
 
 /**
  * Gets the captured data in volts.
@@ -40,7 +40,7 @@ std::string AI16_DataPoint::getRangeText() const {
 double AI16_DataPoint::getVolts() const {
 	return ( AI16_InputRange( AnalogInputSubsystem::MIN_COUNTS, AnalogInputSubsystem::MAX_COUNTS ) )
 		.setRange( range ).countsToVolts( counts );
-}	// AI16_DataPoint::getVolts()
+}
 
 /**
  * Gets a single-line string summary of this data point. Mainly useful for diagnostic purposes.
@@ -55,8 +55,8 @@ std::string AI16_DataPoint::toString() const {
 		<< ", " << getRangeText()
 		<< ", " << ( differentialMode ? "differential" : "single-ended" );
 	return out.str();
-}	// AI16_DataPoint::toString()
+}
 
-}	// namespace AIOUSB
+}
 
 /* end of file */

@@ -11,11 +11,11 @@
 #if ! defined( DA12_AnalogOutputSubsystem_hpp )
 #define DA12_AnalogOutputSubsystem_hpp
 
-// {{{ includes
+
 #include <AnalogOutputSubsystem.hpp>
 #include <DA12_OutputRange.hpp>
 #include <OutputVoltagePoint.hpp>
-// }}}
+
 
 namespace AIOUSB {
 
@@ -29,7 +29,7 @@ class DA12_AnalogOutputSubsystem : public AnalogOutputSubsystem {
 	friend class USB_DA12_8A_Family;
 	friend class USB_DA12_8E_Family;
 
-	// {{{ public constants
+
 public:
 	/*
 	 * range codes passed to setRange()
@@ -57,21 +57,21 @@ public:
 
 	/** Maximum number of counts D/A can output. */
 	static const int MAX_COUNTS = 0xfff;
-	// }}}
 
-	// {{{ protected members
+
+
 protected:
 	static const char RANGE_TEXT[][ 10 ];
 	DA12_OutputRange *outputRange;				// device supports a separate range for each D/A channel
-	// }}}
 
-	// {{{ protected methods
+
+
 protected:
 	DA12_AnalogOutputSubsystem( USBDevice &parent );
 	virtual ~DA12_AnalogOutputSubsystem();
-	// }}}
 
-	// {{{ public methods
+
+
 public:
 
 	/*
@@ -98,7 +98,7 @@ public:
 	DA12_AnalogOutputSubsystem &writeVolts( const OutputVoltagePointArray &points );
 	double countsToVolts( int channel, unsigned short counts ) const;
 	unsigned short voltsToCounts( int channel, double volts ) const;
-	// }}}
+
 
 };	// class DA12_AnalogOutputSubsystem
 

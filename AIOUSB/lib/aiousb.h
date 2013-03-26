@@ -724,12 +724,12 @@ extern unsigned long AIOUSB_ClearFIFO(
 
 
 
-extern const char *AIOUSB_GetVersion();               // returns AIOUSB module version number as a string
-extern const char *AIOUSB_GetVersionDate();           // returns AIOUSB module version date as a string
+extern const char *AIOUSB_GetVersion(void);               // returns AIOUSB module version number as a string
+extern const char *AIOUSB_GetVersionDate(void);           // returns AIOUSB module version date as a string
 extern const char *AIOUSB_GetResultCodeAsString( unsigned long result );      // gets string representation of AIOUSB_xxx result code
-extern void AIOUSB_ListDevices();                     // prints list of USB devices to standard output (useful for debugging)
-extern unsigned long AIOUSB_Init();                         // must be called before use of other functions in AIOUSB
-extern void AIOUSB_Exit();                                  // must be called after last use of other functions in AIOUSB
+extern void AIOUSB_ListDevices(void);                     // prints list of USB devices to standard output (useful for debugging)
+extern unsigned long AIOUSB_Init(void);                         // must be called before use of other functions in AIOUSB
+extern void AIOUSB_Exit(void);                                  // must be called after last use of other functions in AIOUSB
 extern unsigned long AIOUSB_Reset(
     unsigned long DeviceIndex );
 

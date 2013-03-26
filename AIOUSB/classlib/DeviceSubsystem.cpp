@@ -7,10 +7,10 @@
  * class DeviceSubsystem implementation
  */
 
-// {{{ includes
+
 #include "DeviceSubsystem.hpp"
 #include <assert.h>
-// }}}
+
 
 namespace AIOUSB {
 

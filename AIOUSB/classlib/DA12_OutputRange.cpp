@@ -7,10 +7,10 @@
  * class DA12_OutputRange implementation
  */
 
-// {{{ includes
+
 #include "DA12_OutputRange.hpp"
 #include "DA12_AnalogOutputSubsystem.hpp"
-// }}}
+
 
 namespace AIOUSB {
 

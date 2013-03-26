@@ -10,11 +10,11 @@
 #if ! defined( AO16_AnalogOutputSubsystem_hpp )
 #define AO16_AnalogOutputSubsystem_hpp
 
-// {{{ includes
+
 #include <AnalogOutputSubsystem.hpp>
 #include <AO16_OutputRange.hpp>
 #include <OutputVoltagePoint.hpp>
-// }}}
+
 
 namespace AIOUSB {
 
@@ -27,7 +27,7 @@ namespace AIOUSB {
 class AO16_AnalogOutputSubsystem : public AnalogOutputSubsystem {
 	friend class USB_AO16_Family;
 
-	// {{{ public constants
+
 public:
 	/*
 	 * range codes passed to setRange(); these values are defined by the device and must not be changed
@@ -49,21 +49,21 @@ public:
 
 	/** Maximum number of counts D/A can output. */
 	static const int MAX_COUNTS		= 0xffff;
-	// }}}
 
-	// {{{ protected members
+
+
 protected:
 	static const char RANGE_TEXT[][ 10 ];
 	AO16_OutputRange outputRange;				// device supports a single range for all D/A channels
-	// }}}
 
-	// {{{ protected methods
+
+
 protected:
 	AO16_AnalogOutputSubsystem( USBDevice &parent );
 	virtual ~AO16_AnalogOutputSubsystem();
-	// }}}
 
-	// {{{ public methods
+
+
 public:
 
 	/*
@@ -114,7 +114,7 @@ public:
 		return ( unsigned short ) outputRange.voltsToCounts( volts );
 	}	// voltsToCounts()
 
-	// }}}
+
 
 };	// class AO16_AnalogOutputSubsystem
 

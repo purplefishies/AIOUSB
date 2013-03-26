@@ -7,7 +7,7 @@
  * class Counter implementation
  */
 
-// {{{ includes
+
 #include <assert.h>
 #include <typeinfo>
 #include <AIOUSB_Core.h>
@@ -15,22 +15,22 @@
 #include "Counter.hpp"
 #include "CounterSubsystem.hpp"
 #include "USB_CTR_15_Family.hpp"
-// }}}
+
 
 using namespace std;
 
 namespace AIOUSB {
 
-// {{{ static members
+
 const int Counter::MODE_TERMINAL_COUNT;
 const int Counter::MODE_ONE_SHOT;
 const int Counter::MODE_RATE_GENERATOR;
 const int Counter::MODE_SQUARE_WAVE;
 const int Counter::MODE_SW_TRIGGERED;
 const int Counter::MODE_HW_TRIGGERED;
-// }}}
 
-// {{{ protected methods
+
+
 
 Counter::Counter( CounterSubsystem *parent, int counterIndex ) {
 	assert( parent != 0
@@ -39,9 +39,9 @@ Counter::Counter( CounterSubsystem *parent, int counterIndex ) {
 	this->counterIndex = counterIndex;
 }	// Counter::Counter()
 
-// }}}
 
-// {{{ public methods
+
+
 
 /**
  * Gets the index of the parent device on the USB bus. Used internally in calls to the underlying API.
@@ -178,7 +178,7 @@ unsigned short Counter::readCountAndSetModeAndCount( int mode, unsigned short co
 	return prevCount;
 }	// Counter::readCountAndSetModeAndCount()
 
-// }}}
+
 
 }	// namespace AIOUSB
 

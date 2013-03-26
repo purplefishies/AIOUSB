@@ -8,19 +8,19 @@
  */
 
 
-// {{{ includes
+
 #include <iostream>
 #include <bits/stl_algo.h>
 #include <assert.h>
 #include "USBDeviceManager.hpp"
 #include "USB_CTR_15_Family.hpp"
-// }}}
+
 
 using namespace std;
 
 namespace AIOUSB {
 
-// {{{ static members
+
 
 IntArray USB_CTR_15_Family::supportedProductIDs;
 
@@ -31,9 +31,9 @@ void USB_CTR_15_Family::initialize() {
 	}	// if( supportedProductIDs.empty() )
 }	// USB_CTR_15_Family::initialize()
 
-// }}}
 
-// {{{ protected methods
+
+
 
 USB_CTR_15_Family::USB_CTR_15_Family( int productID, int deviceIndex )
 		: USBDevice( productID, deviceIndex )
@@ -46,9 +46,9 @@ USB_CTR_15_Family::~USB_CTR_15_Family() {
 	// nothing to do
 }	// USB_CTR_15_Family::~USB_CTR_15_Family()
 
-// }}}
 
-// {{{ public methods
+
+
 
 /*
  * properties
@@ -103,7 +103,7 @@ ostream &USB_CTR_15_Family::print( ostream &out ) {
 	return out;
 }	// USB_CTR_15_Family::print()
 
-// }}}
+
 
 }	// namespace AIOUSB
 

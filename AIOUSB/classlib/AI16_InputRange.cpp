@@ -7,9 +7,9 @@
  * class AI16_InputRange implementation
  */
 
-// {{{ includes
+
 #include "AnalogInputSubsystem.hpp"
-// }}}
+
 
 namespace AIOUSB {
 

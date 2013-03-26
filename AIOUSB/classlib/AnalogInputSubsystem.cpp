@@ -7,19 +7,19 @@
  * class AnalogInputSubsystem implementation
  */
 
-// {{{ includes
+
 #include <assert.h>
 #include <string.h>
 #include <AIOUSB_Core.h>
 #include "USBDeviceManager.hpp"
 #include "AnalogInputSubsystem.hpp"
-// }}}
+
 
 using namespace std;
 
 namespace AIOUSB {
 
-// {{{ static members
+
 const int AnalogInputSubsystem::CAL_MODE_NORMAL;
 const int AnalogInputSubsystem::CAL_MODE_GROUND;
 const int AnalogInputSubsystem::CAL_MODE_REFERENCE;
@@ -68,9 +68,9 @@ const char AnalogInputSubsystem::RANGE_TEXT[][ 10 ] = {
 	, "0-1V"
 	, "+/-1V"
 };	// AnalogInputSubsystem::RANGE_TEXT[][]
-// }}}
 
-// {{{ protected methods
+
+
 
 AnalogInputSubsystem &AnalogInputSubsystem::setScanRange( int startChannel, int numChannels ) {
 	const int endChannel = startChannel + numChannels - 1;
@@ -145,9 +145,9 @@ AnalogInputSubsystem::~AnalogInputSubsystem() {
 		delete[] readBulkBuffer;				// just in case ...
 }	// AnalogInputSubsystem::~AnalogInputSubsystem()
 
-// }}}
 
-// {{{ public methods
+
+
 
 /*
  * properties
@@ -1158,7 +1158,7 @@ UShortArray AnalogInputSubsystem::voltsToCounts( int startChannel, const DoubleA
 	return counts;
 }	// AnalogInputSubsystem::voltsToCounts()
 
-// }}}
+
 
 }	// namespace AIOUSB
 

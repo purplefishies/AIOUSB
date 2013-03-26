@@ -10,14 +10,14 @@
 #if ! defined( USBDeviceManager_hpp )
 #define USBDeviceManager_hpp
 
-// {{{ includes
+
 #include <iostream>
 #include <stdexcept>
 #include <string>
 #include <vector>
 #include <aiousb.h>
 #include <USBDevice.hpp>
-// }}}
+
 
 namespace AIOUSB {
 
@@ -29,7 +29,7 @@ namespace AIOUSB {
 
 class USBDeviceManager {
 
-	// {{{ public constants
+
 public:
 	/** The version number of this Java class library. */
 	static const std::string VERSION_NUMBER;
@@ -39,22 +39,22 @@ public:
 
 	static const int MIN_PRODUCT_ID				= 0;
 	static const int MAX_PRODUCT_ID				= 0xffff;
-	// }}}
 
-	// {{{ protected members
+
+
 protected:
 	USBDeviceArray deviceList;					// contains all the ACCES devices found on the bus
 	static const unsigned long OPEN_PATTERN = 0x786938f5;	// unique, random value
 	unsigned long openStatus;					// if openStatus == OPEN_PATTERN, module is initialized
 	static const std::string MESSAGE_NOT_OPEN;
-	// }}}
 
-	// {{{ protected methods
+
+
 protected:
 	void emptyDeviceList();
-	// }}}
 
-	// {{{ public methods
+
+
 public:
 	USBDeviceManager();
 	virtual ~USBDeviceManager();
@@ -143,11 +143,11 @@ public:
 	USBDeviceArray getDeviceByProductID( const IntArray &productIDs ) const;
 	USBDeviceArray getDeviceBySerialNumber( __uint64_t serialNumber ) const;
 
-	// }}}
+
 
 };	// class USBDeviceManager
 
-// {{{ class OperationFailedException declarations
+
 
 /**
  * Class OperationFailedException is thrown whenever an operation attempted on a device fails. The
@@ -178,9 +178,9 @@ public:
 
 };	// class OperationFailedException
 
-// }}}
 
-// {{{ class IllegalArgumentException declarations
+
+
 
 /**
  * Class IllegalArgumentException is thrown whenever an invalid argument is passed to a method.
@@ -200,7 +200,7 @@ public:
 
 };	// class IllegalArgumentException
 
-// }}}
+
 
 }	// namespace AIOUSB
 

@@ -7,25 +7,25 @@
  * class USBDevice implementation
  */
 
-// {{{ includes
+
 #include <iomanip>
 #include <assert.h>
 #include <AIOUSB_Core.h>
 #include "USBDevice.hpp"
 #include "USBDeviceManager.hpp"
-// }}}
+
 
 using namespace std;
 
 namespace AIOUSB {
 
-// {{{ static members
+
 const int USBDevice::CUSTOM_EEPROM_SIZE;
 const int USBDevice::CLEAR_FIFO_METHOD_IMMEDIATE;
 const int USBDevice::CLEAR_FIFO_METHOD_AUTO;
 const int USBDevice::CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT;
 const int USBDevice::CLEAR_FIFO_METHOD_WAIT;
-// }}}
+
 
 USBDevice::USBDevice( int productID, int deviceIndex ) {
 	if(
@@ -217,9 +217,9 @@ UCharArray USBDevice::customEEPROMRead( int address, int numBytes ) {
 	return data;
 }	// USBDevice::customEEPROMRead()
 
-// }}}
 
-// {{{ function implementation
+
+
 
 ostream &operator<<( ostream &out, USBDevice &device ) {
 	assert( &device != 0 );
@@ -234,7 +234,7 @@ ostream &operator<<( ostream &out, USBDevice *device ) {
 	return out;
 }	// operator<<()
 
-// }}}
+
 
 }	// namespace AIOUSB
 

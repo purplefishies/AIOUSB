@@ -7,18 +7,18 @@
  * class DigitalIOSubsystem implementation
  */
 
-// {{{ includes
+
 #include <assert.h>
 #include <AIOUSB_Core.h>
 #include "USBDeviceManager.hpp"
 #include "DigitalIOSubsystem.hpp"
-// }}}
+
 
 using namespace std;
 
 namespace AIOUSB {
 
-// {{{ protected methods
+
 
 UCharArray &DigitalIOSubsystem::bitsToBytes( UCharArray &dest, int bit, const BoolArray &src ) {
 	assert( &dest != 0
@@ -92,9 +92,9 @@ DigitalIOSubsystem::~DigitalIOSubsystem() {
 	// nothing to do
 }	// DigitalIOSubsystem::~DigitalIOSubsystem()
 
-// }}}
 
-// {{{ public methods
+
+
 
 /*
  * properties
@@ -335,7 +335,7 @@ DigitalIOSubsystem &DigitalIOSubsystem::write( int startChannel, const BoolArray
 	return *this;
 }	// DigitalIOSubsystem::write()
 
-// }}}
+
 
 }	// namespace AIOUSB
 

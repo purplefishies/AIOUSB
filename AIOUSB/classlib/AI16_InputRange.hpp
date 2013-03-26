@@ -10,9 +10,9 @@
 #if ! defined( AI16_InputRange_hpp )
 #define AI16_InputRange_hpp
 
-// {{{ includes
+
 #include <AnalogIORange.hpp>
-// }}}
+
 
 namespace AIOUSB {
 

@@ -7,18 +7,18 @@
  * class DA12_AnalogOutputSubsystem implementation
  */
 
-// {{{ includes
+
 #include <assert.h>
 #include <aiousb.h>
 #include "USBDeviceManager.hpp"
 #include "DA12_AnalogOutputSubsystem.hpp"
-// }}}
+
 
 using namespace std;
 
 namespace AIOUSB {
 
-// {{{ static members
+
 const int DA12_AnalogOutputSubsystem::RANGE_0_2_5V;
 const int DA12_AnalogOutputSubsystem::RANGE_2_5V;
 const int DA12_AnalogOutputSubsystem::RANGE_0_5V;
@@ -38,9 +38,9 @@ const char DA12_AnalogOutputSubsystem::RANGE_TEXT[][ 10 ] = {
 	, "0-10V"
 	, "+/-10V"
 };	// DA12_AnalogOutputSubsystem::RANGE_TEXT[][]
-// }}}
 
-// {{{ protected methods
+
+
 
 DA12_AnalogOutputSubsystem::DA12_AnalogOutputSubsystem( USBDevice &parent )
 		: AnalogOutputSubsystem( parent ) {
@@ -56,9 +56,9 @@ DA12_AnalogOutputSubsystem::~DA12_AnalogOutputSubsystem() {
 		delete[] outputRange;
 }	// DA12_AnalogOutputSubsystem::~DA12_AnalogOutputSubsystem()
 
-// }}}
 
-// {{{ public methods
+
+
 
 /*
  * properties
@@ -277,7 +277,7 @@ unsigned short DA12_AnalogOutputSubsystem::voltsToCounts( int channel, double vo
 	return ( unsigned short ) outputRange[ channel ].voltsToCounts( volts );
 }	// DA12_AnalogOutputSubsystem::voltsToCounts()
 
-// }}}
+
 
 }	// namespace AIOUSB
 

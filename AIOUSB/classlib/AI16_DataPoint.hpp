@@ -10,18 +10,21 @@
 #if ! defined( AI16_DataPoint_hpp )
 #define AI16_DataPoint_hpp
 
-// {{{ includes
+
 #include <string>
 #include <vector>
-// }}}
+
 
 namespace AIOUSB {
 
 /**
- * Class AI16_DataPoint represents a single data point captured from a USB_AI16_Family device. It encapsulates
- * not only the captured sample, but the channel from which the sample was captured and the range and differential mode
- * in effect when the sample was captured, providing a fairly complete representation of the captured data. This class
- * also provides methods to retrieve the captured data in either A/D counts or volts.
+ * Class AI16_DataPoint represents a single data point captured from a
+ * USB_AI16_Family device. It encapsulates not only the captured
+ * sample, but the channel from which the sample was captured and the
+ * range and differential mode in effect when the sample was captured,
+ * providing a fairly complete representation of the captured
+ * data. This class also provides methods to retrieve the captured
+ * data in either A/D counts or volts.
  */
 
 class AI16_DataPoint {
@@ -31,10 +34,10 @@ class AI16_DataPoint {
 	friend class std::vector<AI16_DataPoint>;
 
 protected:
-	int counts;									// A/D count data
-	int channel;								// channel associated with count data
-	int range;									// range associated with count data
-	bool differentialMode;						// differential mode associated with count data
+	int counts;            // A/D count data
+	int channel;           // channel associated with count data
+	int range;             // range associated with count data
+	bool differentialMode; // differential mode associated with count data
 
 	AI16_DataPoint();
 
@@ -84,16 +87,16 @@ public:
 	std::string toString() const;
 };	// class AI16_DataPoint
 
-// {{{ class AI16_DataPointArray declarations
+
 
 class AI16_DataPointArray : public std::vector<AI16_DataPoint> {
 public:
 	AI16_DataPointArray( int size = 0 ) : std::vector<AI16_DataPoint>( size ) {}
-};	// class AI16_DataPointArray
+};
 
-// }}}
 
-}	// namespace AIOUSB
+
+}
 
 #endif
 

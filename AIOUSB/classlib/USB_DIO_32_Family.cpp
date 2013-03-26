@@ -7,19 +7,19 @@
  * class USB_DIO_32_Family implementation
  */
 
-// {{{ includes
+
 #include <iostream>
 #include <bits/stl_algo.h>
 #include <assert.h>
 #include "USBDeviceManager.hpp"
 #include "USB_DIO_32_Family.hpp"
-// }}}
+
 
 using namespace std;
 
 namespace AIOUSB {
 
-// {{{ static members
+
 
 IntArray USB_DIO_32_Family::supportedProductIDs;
 
@@ -30,9 +30,9 @@ void USB_DIO_32_Family::initialize() {
 	}	// if( supportedProductIDs.empty() )
 }	// USB_DIO_32_Family::initialize()
 
-// }}}
 
-// {{{ protected methods
+
+
 
 USB_DIO_32_Family::USB_DIO_32_Family( int productID, int deviceIndex )
 		: USBDevice( productID, deviceIndex )
@@ -46,9 +46,9 @@ USB_DIO_32_Family::~USB_DIO_32_Family() {
 	// nothing to do
 }	// USB_DIO_32_Family::~USB_DIO_32_Family()
 
-// }}}
 
-// {{{ public methods
+
+
 
 /*
  * properties
@@ -104,7 +104,7 @@ ostream &USB_DIO_32_Family::print( ostream &out ) {
 	return out;
 }	// USB_DIO_32_Family::print()
 
-// }}}
+
 
 }	// namespace AIOUSB
 

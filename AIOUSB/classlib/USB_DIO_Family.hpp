@@ -11,10 +11,10 @@
 #if ! defined( USB_DIO_Family_hpp )
 #define USB_DIO_Family_hpp
 
-// {{{ includes
+
 #include <USBDevice.hpp>
 #include <DigitalIOSubsystem.hpp>
-// }}}
+
 
 namespace AIOUSB {
 
@@ -37,25 +37,25 @@ namespace AIOUSB {
 class USB_DIO_Family : public USBDevice {
 	friend class USBDeviceManager;
 
-	// {{{ static members
+
 private:
 	static IntArray supportedProductIDs;
 
 	static void initialize();
-	// }}}
 
-	// {{{ protected members
+
+
 protected:
 	DigitalIOSubsystem digitalIOSubsystem;
-	// }}}
 
-	// {{{ protected methods
+
+
 protected:
 	USB_DIO_Family( int productID, int deviceIndex );
 	virtual ~USB_DIO_Family();
-	// }}}
 
-	// {{{ public methods
+
+
 public:
 
 	/*
@@ -80,7 +80,7 @@ public:
 		return digitalIOSubsystem;
 	}	// dio()
 
-	// }}}
+
 
 };	// class USB_DIO_Family
 

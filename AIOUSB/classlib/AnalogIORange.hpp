@@ -10,9 +10,9 @@
 #if ! defined( AnalogIORange_hpp )
 #define AnalogIORange_hpp
 
-// {{{ includes
+
 #include <USBDeviceManager.hpp>
-// }}}
+
 
 namespace AIOUSB {
 
@@ -29,7 +29,7 @@ namespace AIOUSB {
 
 class AnalogIORange {
 
-	// {{{ protected members
+
 protected:
 	int range;									// current range (meaning defined by class that owns this instance)
 	int minCounts;								// minimum A/D or D/A counts for current range (typically 0)
@@ -38,7 +38,7 @@ protected:
 	double minVolts;							// minimum volts for current range
 	double maxVolts;							// maximum volts for current range
 	double rangeVolts;							// voltage range (maxVolts - minVolts), to avoid repeatedly calculating this
-	// }}}
+
 
 public:
 	AnalogIORange();

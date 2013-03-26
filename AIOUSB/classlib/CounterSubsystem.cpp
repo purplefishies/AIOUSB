@@ -8,24 +8,24 @@
  */
 
 
-// {{{ includes
+
 #include <assert.h>
 #include <typeinfo>
 #include <AIOUSB_Core.h>
 #include "USBDeviceManager.hpp"
 #include "CounterSubsystem.hpp"
 #include "USB_CTR_15_Family.hpp"
-// }}}
+
 
 using namespace std;
 
 namespace AIOUSB {
 
-// {{{ static members
-const int CounterSubsystem::COUNTERS_PER_BLOCK;
-// }}}
 
-// {{{ protected methods
+const int CounterSubsystem::COUNTERS_PER_BLOCK;
+
+
+
 
 CounterSubsystem::CounterSubsystem( USBDevice &parent )
 		: DeviceSubsystem( parent ) {
@@ -53,9 +53,9 @@ CounterSubsystem::~CounterSubsystem() {
 	counters.clear();
 }	// CounterSubsystem::~CounterSubsystem()
 
-// }}}
 
-// {{{ public methods
+
+
 
 /*
  * properties
@@ -181,7 +181,7 @@ double CounterSubsystem::startClock( int counterBlock, double clockHz ) {
 	return clockHz;
 }	// CounterSubsystem::startClock()
 
-// }}}
+
 
 }	// namespace AIOUSB
 

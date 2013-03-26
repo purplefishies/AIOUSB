@@ -10,10 +10,10 @@
 #if ! defined( USB_CTR_15_Family_hpp )
 #define USB_CTR_15_Family_hpp
 
-// {{{ includes
+
 #include <USBDevice.hpp>
 #include <CounterSubsystem.hpp>
-// }}}
+
 
 namespace AIOUSB {
 
@@ -33,25 +33,25 @@ namespace AIOUSB {
 class USB_CTR_15_Family : public USBDevice {
 	friend class USBDeviceManager;
 
-	// {{{ static members
+
 private:
 	static IntArray supportedProductIDs;
 
 	static void initialize();
-	// }}}
 
-	// {{{ protected members
+
+
 protected:
 	CounterSubsystem counterSubsystem;
-	// }}}
 
-	// {{{ protected methods
+
+
 protected:
 	USB_CTR_15_Family( int productID, int deviceIndex );
 	virtual ~USB_CTR_15_Family();
-	// }}}
 
-	// {{{ public methods
+
+
 public:
 
 	/*
@@ -76,7 +76,7 @@ public:
 		return counterSubsystem;
 	}	// ctr()
 
-	// }}}
+
 
 };	// class USB_CTR_15_Family
 

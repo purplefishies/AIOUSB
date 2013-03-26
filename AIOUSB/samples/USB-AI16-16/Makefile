@@ -1,8 +1,7 @@
 #
-# $RCSfile: Makefile,v $
-# $Revision: 1.18 $
-# $Date: 2009/12/21 00:33:29 $
-# jEdit:tabSize=4:indentSize=4:collapseFolds=1:
+# $Revision$
+# $Date$
+# $Author$
 #
 # make file for AIOUSB library sample programs
 #
@@ -29,7 +28,7 @@ ifdef AIOUSBLIBDIR
 	AIOUSBLIB_BUILD		= $(LIBAIOUSB): $(ALL_AIOUSBLIBDIR_CFILES) ; cd $(AIOUSBLIBDIR) && $(MAKE) $(DEBUG_ARGS)
 else
 	LIBAIOUSB 		:= -laiousbdbg			# use default library search path
-	LIBAIOUSBCPP 		:= -laiousbcppdbg			# use default library search path
+	LIBAIOUSBCPP 		:= -laiousbcppdbg		# "     "      "       "      "
 endif
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -126,7 +125,7 @@ clean:
 $(eval $(call AIOUSBLIB_BUILD))
 $(eval $(call CLASSLIB_BUILD))
 
-testthing:
+test:
 	@echo "$(call CLASSLIB_BUILD)"
 
 

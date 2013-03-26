@@ -10,11 +10,11 @@
 #if ! defined( AnalogInputSubsystem_hpp )
 #define AnalogInputSubsystem_hpp
 
-// {{{ includes
+
 #include <AI16_InputRange.hpp>
 #include <AI16_DataSet.hpp>
 #include <DeviceSubsystem.hpp>
-// }}}
+
 
 namespace AIOUSB {
 
@@ -29,7 +29,7 @@ class AI16_DataSet;
 class AnalogInputSubsystem : public DeviceSubsystem {
 	friend class USB_AI16_Family;
 
-	// {{{ public constants
+
 public:
 	/*
 	 * A/D calibration modes; if ground or reference mode is selected, only one A/D
@@ -85,14 +85,14 @@ public:
 
 	/** Number of 16-bit words in an A/D calibration table (65,536 16-bit words). */
 	static const int CAL_TABLE_WORDS				= 64 * 1024;
-	// }}}
 
-	// {{{ protected constants
+
+
 protected:
 	static const char RANGE_TEXT[][ 10 ];
-	// }}}
 
-	// {{{ protected members
+
+
 protected:
 	/*
 	 * register indexes
@@ -139,16 +139,16 @@ protected:
 	int readBulkSamplesRequested;								// total number of samples requested during bulk read procedure
 	int readBulkSamplesRetrieved;								// number of samples retrieved so far during  bulk read procedure
 	bool autoConfig;											// true == automatically send modified configuration to device
-	// }}}
 
-	// {{{ protected methods
+
+
 protected:
 	AnalogInputSubsystem &setScanRange( int startChannel, int numChannels );
 	AnalogInputSubsystem( USBDevice &parent );
 	virtual ~AnalogInputSubsystem();
-	// }}}
 
-	// {{{ public methods
+
+
 public:
 
 	/*
@@ -368,7 +368,7 @@ public:
 	unsigned short voltsToCounts( int channel, double volts ) const;
 	UShortArray voltsToCounts( int startChannel, const DoubleArray &volts ) const;
 
-	// }}}
+
 
 };	// class AnalogInputSubsystem
 

@@ -10,9 +10,9 @@
 #if ! defined( Counter_hpp )
 #define Counter_hpp
 
-// {{{ includes
+
 #include <vector>
-// }}}
+
 
 namespace AIOUSB {
 
@@ -26,7 +26,7 @@ class CounterSubsystem;
 class Counter {
 	friend class CounterSubsystem;
 
-	// {{{ public constants
+
 public:
 	/*
 	 * 8254 counter/timer modes
@@ -43,19 +43,19 @@ public:
 	static const int MODE_SW_TRIGGERED				= 4;	// mode 4: software triggered mode
 	/** Mode 5: hardware triggered strobe (retriggerable) <i>(see setMode( int mode ))</i>. */
 	static const int MODE_HW_TRIGGERED				= 5;	// mode 5: hardware triggered strobe (retriggerable)
-	// }}}
 
-	// {{{ protected members
+
+
 protected:
 	CounterSubsystem *parent;					// subsystem that this counter belongs to
 	int counterIndex;							// counter index (using 0-based counter addressing)
-	// }}}
 
-	// {{{ protected methods
+
+
 	Counter( CounterSubsystem *parent, int counterIndex );
-	// }}}
 
-	// {{{ public methods
+
+
 public:
 	int getDeviceIndex() const;
 	Counter &setMode( int mode );
@@ -64,16 +64,16 @@ public:
 	unsigned short readCount();
 	UShortArray readCountAndStatus();
 	unsigned short readCountAndSetModeAndCount( int mode, unsigned short count );
-	// }}}
+
 
 };	// class Counter
 
-// {{{ class CounterList declarations
+
 
 class CounterList : public std::vector<Counter*> {
 };	// class CounterList
 
-// }}}
+
 
 }	// namespace AIOUSB
 

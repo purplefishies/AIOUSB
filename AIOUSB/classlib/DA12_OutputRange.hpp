@@ -10,9 +10,9 @@
 #if ! defined( DA12_OutputRange_hpp )
 #define DA12_OutputRange_hpp
 
-// {{{ includes
+
 #include <AnalogIORange.hpp>
-// }}}
+
 
 namespace AIOUSB {
 

@@ -8,16 +8,16 @@
  */
 
 
-// {{{ includes
+
 #include "AIOUSB_Core.h"
 #include <stdio.h>
-// }}}
 
-// {{{ C++ support
+
+
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
-// }}}
+
 
 void AIOUSB_ListDevices() {
 	AIOUSB_BOOL found = AIOUSB_FALSE;
@@ -53,23 +53,21 @@ void AIOUSB_ListDevices() {
 							, numDIOBytes
 							, numCounters
 						);
-					}	// if( result ...
+					}
 					// else, unknown error occurred; a device was detected, but query failed
 					AIOUSB_Lock();
-				}	// if( deviceTable[ ...
-			}	// for( index ...
-		}	// if( AIOUSB_IsInit() )
+				}
+			}
+		}
 		AIOUSB_UnLock();
-	}	// if( AIOUSB_Lock() )
+	}
 	if( ! found )
 		printf( "No ACCES devices found\n" );
-}	// AIOUSB_ListDevices()
+}
 
-// {{{ C++ support
+
 #ifdef __cplusplus
 }	// namespace AIOUSB
 #endif
-// }}}
 
 
-/* end of file */

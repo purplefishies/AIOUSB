@@ -10,9 +10,9 @@
 #if ! defined( AnalogOutputSubsystem_hpp )
 #define AnalogOutputSubsystem_hpp
 
-// {{{ includes
+
 #include <DeviceSubsystem.hpp>
-// }}}
+
 
 namespace AIOUSB {
 
@@ -25,20 +25,20 @@ namespace AIOUSB {
 
 class AnalogOutputSubsystem : public DeviceSubsystem {
 
-	// {{{ protected members
+
 protected:
 	int numChannels;							// number of D/A channels
 	int minCounts;								// minimum counts D/A can output (typically 0)
 	int maxCounts;								// maximum counts D/A can output (typically 0xfff or 0xffff)
-	// }}}
 
-	// {{{ protected methods
+
+
 protected:
 	AnalogOutputSubsystem( USBDevice &parent );
 	virtual ~AnalogOutputSubsystem();
-	// }}}
 
-	// {{{ public methods
+
+
 public:
 
 	/*
@@ -63,7 +63,7 @@ public:
 	AnalogOutputSubsystem &writeCounts( int channel, unsigned short counts );
 	AnalogOutputSubsystem &writeCounts( const UShortArray &points );
 
-	// }}}
+
 
 };	// class AnalogOutputSubsystem
 

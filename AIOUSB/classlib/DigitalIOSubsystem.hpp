@@ -10,9 +10,9 @@
 #if ! defined( DigitalIOSubsystem_hpp )
 #define DigitalIOSubsystem_hpp
 
-// {{{ includes
+
 #include <DeviceSubsystem.hpp>
-// }}}
+
 
 namespace AIOUSB {
 
@@ -29,29 +29,29 @@ class DigitalIOSubsystem : public DeviceSubsystem {
 	friend class USB_DIO_16_Family;
 	friend class USB_DIO_32_Family;
 
-	// {{{ public constants
+
 public:
 	/** Number of bits in one byte. A handy number. */
 	static const int BITS_PER_BYTE = 8;
-	// }}}
 
-	// {{{ protected members
+
+
 protected:
 	int numPorts;								// number of digital I/O ports (bytes)
 	int numChannels;							// number of digital I/O channels (bits)
 	int numTristateGroups;						// number of tristate groups (bytes)
 	int numTristateChannels;					// number of tristate channels (bits)
 	UCharArray writeValues;						// last values written to device
-	// }}}
 
-	// {{{ protected methods
+
+
 	UCharArray &bitsToBytes( UCharArray &dest, int bit, const BoolArray &src );
 	BoolArray &bytesToBits( BoolArray &dest, const UCharArray &src, int bit );
 	DigitalIOSubsystem( USBDevice &parent );
 	virtual ~DigitalIOSubsystem();
-	// }}}
 
-	// {{{ public methods
+
+
 public:
 
 	/*
@@ -116,7 +116,7 @@ public:
 	DigitalIOSubsystem &write( int startChannel, const BoolArray &values );
 };	// class DigitalIOSubsystem
 
-// }}}
+
 
 }	// namespace AIOUSB
 

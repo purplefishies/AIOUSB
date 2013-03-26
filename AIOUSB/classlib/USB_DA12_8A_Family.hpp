@@ -11,11 +11,11 @@
 #if ! defined( USB_DA12_8A_Family_hpp )
 #define USB_DA12_8A_Family_hpp
 
-// {{{ includes
+
 #include <USBDevice.hpp>
 #include <DA12_AnalogOutputSubsystem.hpp>
 #include <DigitalIOSubsystem.hpp>
-// }}}
+
 
 namespace AIOUSB {
 
@@ -35,25 +35,25 @@ namespace AIOUSB {
 class USB_DA12_8A_Family : public USBDevice {
 	friend class USBDeviceManager;
 
-	// {{{ static members
+
 private:
 	static IntArray supportedProductIDs;
 
 	static void initialize();
-	// }}}
 
-	// {{{ protected members
+
+
 protected:
 	DA12_AnalogOutputSubsystem analogOutputSubsystem;
-	// }}}
 
-	// {{{ protected methods
+
+
 protected:
 	USB_DA12_8A_Family( int productID, int deviceIndex );
 	virtual ~USB_DA12_8A_Family();
-	// }}}
 
-	// {{{ public methods
+
+
 public:
 
 	/*
@@ -78,7 +78,7 @@ public:
 		return analogOutputSubsystem;
 	}	// adc()
 
-	// }}}
+
 
 };	// class USB_DA12_8A_Family
 

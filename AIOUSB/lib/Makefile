@@ -90,19 +90,29 @@ $(SHCPPDBGLIB) : $(CPPDBGOBJS)
 
 $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) : aiousb.h AIOUSB_Core.h
 
-COMMONOPTS := -c -Wall -pthread -fPIC
+OBJOPTS		:= -c 
+COMMONOPTS 	:= -Wall -pthread -fPIC 
+EXTRA_COPTS	:= -std=gnu99 -D_GNU_SOURCE
+
+
+CFLAGS		= $(DEBUGOPTS) $(COMMONOPTS)
+COPTS		:= $(DEBUGOPTS) $(COMMONOPTS) $(EXTRA_COPTS)
+CPPOPTS		:= $(DEBUGOPTS) $(COMMONOPTS)
 
 $(COBJS) : %.o : %.c
-	$(CC) $(DEBUGOPTS) -std=gnu99 -D_GNU_SOURCE $(COMMONOPTS) $(COPTS) $< -o $@
+	$(CC) $(OBJOPTS) $(COPTS) $< -o $@
 
 $(CDBGOBJS) : %.dbg.o : %.c
-	$(CC) $(DEBUGOPTS) -std=gnu99 -D_GNU_SOURCE $(COMMONOPTS) $(COPTS) $< -o $@
+	$(CC) $(OBJOPTS) $(COPTS) $< -o $@
 
 $(CPPOBJS) : %.cpp.o : %.c
-	g++ $(DEBUGOPTS) $(COMMONOPTS) $(CPPOPTS) $< -o $@
+	g++ $(OBJOPTS) $(CPPOPTS) $< -o $@
 
 $(CPPDBGOBJS) : %.cpp.dbg.o : %.c
-	g++ $(DEBUGOPTS) $(COMMONOPTS) $(CPPOPTS) $< -o $@
+	g++ $(OBJOPTS) $(CPPOPTS) $< -o $@
+
+pywrapper:
+	CC=$(CC) CFLAGS="$(EXTRA_COPTS)  -lusb-1.0" python setup.py build_ext
 
 mostlyclean:
 	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS)

@@ -10,9 +10,9 @@
 #if ! defined( DIOStreamSubsystem_hpp )
 #define DIOStreamSubsystem_hpp
 
-// {{{ includes
+
 #include <DeviceSubsystem.hpp>
-// }}}
+
 
 namespace AIOUSB {
 
@@ -25,18 +25,18 @@ namespace AIOUSB {
 class DIOStreamSubsystem : public DeviceSubsystem {
 	friend class USB_DIO_16_Family;
 
-	// {{{ protected members
+
 protected:
 	double clockHz;								// last actual frequency set by setClock()
-	// }}}
 
-	// {{{ protected methods
+
+
 protected:
 	DIOStreamSubsystem( USBDevice &parent );
 	virtual ~DIOStreamSubsystem();
-	// }}}
 
-	// {{{ public methods
+
+
 public:
 
 	/*
@@ -121,7 +121,7 @@ public:
 		return *this;
 	}	// clearFIFO()
 
-	// }}}
+
 
 };	// class DIOStreamSubsystem
 

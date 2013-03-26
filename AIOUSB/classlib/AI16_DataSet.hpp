@@ -10,11 +10,11 @@
 #if ! defined( AI16_DataSet_hpp )
 #define AI16_DataSet_hpp
 
-// {{{ includes
+
 #include <ostream>
 #include <time.h>
 #include <AI16_DataPoint.hpp>
-// }}}
+
 
 namespace AIOUSB {
 

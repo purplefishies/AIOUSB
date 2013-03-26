@@ -7,19 +7,19 @@
  * class USB_AI16_Family implementation
  */
 
-// {{{ includes
+
 #include <iostream>
 #include <bits/stl_algo.h>
 #include <assert.h>
 #include "USBDeviceManager.hpp"
 #include "USB_AI16_Family.hpp"
-// }}}
+
 
 using namespace std;
 
 namespace AIOUSB {
 
-// {{{ static members
+
 
 IntArray USB_AI16_Family::supportedProductIDs;
 
@@ -59,9 +59,9 @@ void USB_AI16_Family::initialize() {
 	}	// if( supportedProductIDs.empty() )
 }	// USB_AI16_Family::initialize()
 
-// }}}
 
-// {{{ protected methods
+
+
 
 USB_AI16_Family::USB_AI16_Family( int productID, int deviceIndex )
 		: USBDevice( productID, deviceIndex )
@@ -76,9 +76,9 @@ USB_AI16_Family::~USB_AI16_Family() {
 	// nothing to do
 }	// USB_AI16_Family::~USB_AI16_Family()
 
-// }}}
 
-// {{{ public methods
+
+
 
 /*
  * properties
@@ -135,7 +135,7 @@ ostream &USB_AI16_Family::print( ostream &out ) {
 	return out;
 }	// USB_AI16_Family::print()
 
-// }}}
+
 
 }	// namespace AIOUSB
 

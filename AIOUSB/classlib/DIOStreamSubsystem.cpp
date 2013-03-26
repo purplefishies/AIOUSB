@@ -7,18 +7,18 @@
  * class DIOStreamSubsystem implementation
  */
 
-// {{{ includes
+
 #include <assert.h>
 #include <aiousb.h>
 #include "USBDeviceManager.hpp"
 #include "DIOStreamSubsystem.hpp"
-// }}}
+
 
 using namespace std;
 
 namespace AIOUSB {
 
-// {{{ protected methods
+
 
 DIOStreamSubsystem::DIOStreamSubsystem( USBDevice &parent )
 		: DeviceSubsystem( parent ) {
@@ -29,9 +29,9 @@ DIOStreamSubsystem::~DIOStreamSubsystem() {
 	// nothing to do
 }	// DIOStreamSubsystem::~DIOStreamSubsystem()
 
-// }}}
 
-// {{{ public methods
+
+
 
 /*
  * properties
@@ -154,7 +154,7 @@ int DIOStreamSubsystem::write( const UShortArray &values ) {
 	return bytesTransferred / sizeof( unsigned short );
 }	// DIOStreamSubsystem::write()
 
-// }}}
+
 
 }	// namespace AIOUSB
 

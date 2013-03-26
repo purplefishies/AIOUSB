@@ -11,13 +11,13 @@
 #if ! defined( DeviceSubsystem_hpp )
 #define DeviceSubsystem_hpp
 
-// {{{ includes
+
 #include <USBDevice.hpp>
-// }}}
+
 
 namespace AIOUSB {
 
-// {{{ class DeviceSubsystem declarations
+
 
 /**
  * Class DeviceSubsystem is the abstract super class for all device subsystems.
@@ -26,15 +26,15 @@ namespace AIOUSB {
 class DeviceSubsystem {
 protected:
 
-	// {{{ protected members
-	USBDevice *parent;							// parent device that this subsystem is part of
-	// }}}
 
-	// {{{ protected methods
+	USBDevice *parent;							// parent device that this subsystem is part of
+
+
+
 	DeviceSubsystem( USBDevice &parent );
 	virtual ~DeviceSubsystem();
 	int getDeviceIndex() const;
-	// }}}
+
 
 public:
 
@@ -55,7 +55,7 @@ public:
 
 };	// class DeviceSubsystem
 
-// }}}
+
 
 }	// namespace AIOUSB
 

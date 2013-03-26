@@ -7,12 +7,12 @@
  * class AI16_DataSet declarations
  */
 
-// {{{ includes
+
 #include <iomanip>
 #include <assert.h>
 #include "AI16_DataSet.hpp"
 #include "AnalogInputSubsystem.hpp"
-// }}}
+
 
 using namespace std;
 

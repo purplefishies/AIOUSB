@@ -10,16 +10,16 @@
 #if ! defined( USBDevice_hpp )
 #define USBDevice_hpp
 
-// {{{ includes
+
 #include <vector>
 #include <string>
 #include <iostream>
 #include <aiousb.h>
-// }}}
+
 
 namespace AIOUSB {
 
-// {{{ class BoolArray, UCharArray, UShortArray, IntArray, DoubleArray, USBDeviceArray declarations
+
 
 class BoolArray : public std::vector<bool> {
 public:
@@ -57,9 +57,9 @@ public:
 	USBDeviceArray( int size = 0 ) : std::vector<USBDevice*>( size ) {}
 };	// class USBDeviceArray
 
-// }}}
 
-// {{{ class USBDevice declarations
+
+
 
 /**
  * Class USBDevice is the abstract super class of all USB device families.
@@ -70,7 +70,7 @@ class USBDevice {
 	friend class DIOStreamSubsystem;
 	friend class AnalogInputSubsystem;
 
-	// {{{ public constants
+
 public:
 	/** Size of custom EEPROM area (bytes). */
 	static const int CUSTOM_EEPROM_SIZE = 0x200;
@@ -83,17 +83,17 @@ public:
 	static const int CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT	= 5;
 	/** Clear FIFO and wait for it to be emptied. */
 	static const int CLEAR_FIFO_METHOD_WAIT					= 86;
-	// }}}
 
-	// {{{ protected members
+
+
 protected:
 	int deviceIndex;							// device index on bus
 	int productID;								// 16-bit product ID
 	std::string name;							// device name
 	__uint64_t serialNumber;					// 64-bit serial number or 0
-	// }}}
 
-	// {{{ protected methods
+
+
 protected:
 	USBDevice( int productID, int deviceIndex );
 	virtual ~USBDevice();
@@ -106,9 +106,9 @@ protected:
 	USBDevice &setMiscClock( double clockHz );
 	int getStreamingBlockSize();
 	USBDevice &setStreamingBlockSize( int blockSize );
-	// }}}
 
-	// {{{ public methods
+
+
 public:
 
 	/*
@@ -171,18 +171,18 @@ public:
 	USBDevice &customEEPROMWrite( int address, const UCharArray &data );
 	UCharArray customEEPROMRead( int address, int numBytes );
 
-	// }}}
+
 
 };	// class USBDevice
 
-// }}}
 
-// {{{ function declarations
+
+
 
 extern std::ostream &operator<<( std::ostream &out, USBDevice &device );
 extern std::ostream &operator<<( std::ostream &out, USBDevice *device );
 
-// }}}
+
 
 }	// namespace AIOUSB
 

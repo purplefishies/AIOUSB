@@ -10,11 +10,11 @@
 #if ! defined( USB_AO16_Family_hpp )
 #define USB_AO16_Family_hpp
 
-// {{{ includes
+
 #include <USBDevice.hpp>
 #include <AO16_AnalogOutputSubsystem.hpp>
 #include <DigitalIOSubsystem.hpp>
-// }}}
+
 
 namespace AIOUSB {
 
@@ -35,26 +35,26 @@ namespace AIOUSB {
 class USB_AO16_Family : public USBDevice {
 	friend class USBDeviceManager;
 
-	// {{{ static members
+
 private:
 	static IntArray supportedProductIDs;
 
 	static void initialize();
-	// }}}
 
-	// {{{ protected members
+
+
 protected:
 	AO16_AnalogOutputSubsystem analogOutputSubsystem;
 	DigitalIOSubsystem digitalIOSubsystem;
-	// }}}
 
-	// {{{ protected methods
+
+
 protected:
 	USB_AO16_Family( int productID, int deviceIndex );
 	virtual ~USB_AO16_Family();
-	// }}}
 
-	// {{{ public methods
+
+
 public:
 
 	/*
@@ -88,7 +88,7 @@ public:
 		return digitalIOSubsystem;
 	}	// dio()
 
-	// }}}
+
 
 };	// class USB_AO16_Family
 

@@ -7,19 +7,19 @@
  * class USB_DA12_8A_Family implementation
  */
 
-// {{{ includes
+
 #include <iostream>
 #include <bits/stl_algo.h>
 #include <assert.h>
 #include "USBDeviceManager.hpp"
 #include "USB_DA12_8A_Family.hpp"
-// }}}
+
 
 using namespace std;
 
 namespace AIOUSB {
 
-// {{{ static members
+
 
 IntArray USB_DA12_8A_Family::supportedProductIDs;
 
@@ -31,9 +31,9 @@ void USB_DA12_8A_Family::initialize() {
 	}	// if( supportedProductIDs.empty() )
 }	// USB_DA12_8A_Family::initialize()
 
-// }}}
 
-// {{{ protected methods
+
+
 
 USB_DA12_8A_Family::USB_DA12_8A_Family( int productID, int deviceIndex )
 		: USBDevice( productID, deviceIndex )
@@ -46,9 +46,9 @@ USB_DA12_8A_Family::~USB_DA12_8A_Family() {
 	// nothing to do
 }	// USB_DA12_8A_Family::~USB_DA12_8A_Family()
 
-// }}}
 
-// {{{ public methods
+
+
 
 /*
  * properties
@@ -103,7 +103,7 @@ ostream &USB_DA12_8A_Family::print( ostream &out ) {
 	return out;
 }	// USB_DA12_8A_Family::print()
 
-// }}}
+
 
 }	// namespace AIOUSB
 

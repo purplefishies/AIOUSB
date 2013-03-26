@@ -11,10 +11,10 @@
 #if ! defined( CounterSubsystem_hpp )
 #define CounterSubsystem_hpp
 
-// {{{ includes
+
 #include <DeviceSubsystem.hpp>
 #include <Counter.hpp>
-// }}}
+
 
 namespace AIOUSB {
 
@@ -30,22 +30,22 @@ class CounterSubsystem : public DeviceSubsystem {
 	friend class USB_CTR_15_Family;
 	friend class USB_DIO_32_Family;
 
-	// {{{ protected members
+
 protected:
 	static const int COUNTERS_PER_BLOCK = 3;
 
 	int numCounterBlocks;						// number of counter blocks
 	int numCounters;							// number of individual counters
 	CounterList counters;						// list of counters
-	// }}}
 
-	// {{{ protected methods
+
+
 protected:
 	CounterSubsystem( USBDevice &parent );
 	virtual ~CounterSubsystem();
-	// }}}
 
-	// {{{ public methods
+
+
 public:
 
 	/*
@@ -92,7 +92,7 @@ public:
 		return *this;
 	}	// stopClock()
 
-	// }}}
+
 
 };	// class CounterSubsystem
 
