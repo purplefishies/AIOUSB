@@ -1,10 +1,9 @@
 /**
  * @file   aiousb.h
- * @author Jimi Damon <jdamon@accesio.com>
- * @date   Tue Feb 12 13:39:34 2013
- *
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @release $Format: %at$
  * @brief  General header files for the AIOUSB library
- *
  *
  */
 

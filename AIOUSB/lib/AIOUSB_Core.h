@@ -1,14 +1,12 @@
 /**
  * @file   AIOUSB_Core.h
- * @author $Author $Format: %an <%ae>$$
- * @date   $Date $Format: %ad$$
- * 
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @release $Format: %t$
  * @brief  
  * 
  * 
  */
-
-
 
 #if !defined( AIOUSB_Core_h )
 #define AIOUSB_Core_h
