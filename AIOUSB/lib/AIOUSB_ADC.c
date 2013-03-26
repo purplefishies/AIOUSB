@@ -1,7 +1,7 @@
 /**
  * @file   AIOUSB_ADC.c
- * @author Jimi Damon <jdamon@accesio.com>
- * @date   Thu Feb 14 13:34:49 2013
+ * @author $Author$
+ * @date   $Date$
  * @copy
  * @brief
  *  ACCES I/O USB API for Linux

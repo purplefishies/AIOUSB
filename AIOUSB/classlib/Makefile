@@ -1,8 +1,7 @@
 #
-# $RCSfile: Makefile,v $
-# $Revision: 1.13 $
-# $Date: 2009/12/20 22:28:25 $
-# jEdit:tabSize=4:indentSize=4:collapseFolds=1:
+# $Revision$
+# $Date$
+# $Author$
 #
 # make file for AIOUSB C++ class library and documentation
 #
