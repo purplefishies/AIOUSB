@@ -12,12 +12,15 @@ HPPSOURCES 	:= $(wildcard *.hpp)
 CPPOBJS 	:= $(subst .cpp,.o,$(CPPSOURCES))
 CPPDBGOBJS 	:= $(subst .o,.dbg.o,$(CPPOBJS))
 LIBS 		:= libclassaiousb.a libclassaiousbdbg.a
-INCLUDES	:= -I.
 
-DOCDIR := doc
-DOCINDEX := $(DOCDIR)/index.html				# use index.html as a proxy for all documentation files
 
-COMMONOPTS := -c -Wall -pthread -fPIC
+DOCDIR 		:= doc
+DOCINDEX 	:= $(DOCDIR)/index.html				# use index.html as a proxy for all documentation files
+
+COMMONOPTS 	:= -c -Wall -pthread -fPIC
+CFLAGS		+= -I. -I../lib 
+
+INCLUDES	:= $(CFLAGS) 
 
 ifdef DEBUG
         DEBUGOPTS       += -ggdb $(DEBUG)

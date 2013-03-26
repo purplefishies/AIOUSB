@@ -136,17 +136,48 @@ AIOUSBCLASSLIBDIR for your program to compile correctly.
 
 
 Hard Coded Libraries
+=====================
+
+1. First you need to specify the path to your USB header files. On a typical Ubuntu / Debian system 
+you would first run 
+sudo apt-get install libusb-1.0-0-dev 
+). 
 
 
-make test_fastscan AIOUSBLIBDIR=../../lib   AIOUSBCLASSLIBDIR=../../classlib
+2. Next you should source the file sourceme.sh in the directory
+$ROOT_INSTALL/USB/AIOUSB/sourceme.sh . This assumes  that you are
+using a Bash or Korn shell.
 
+cd $ROOT_INSTALL
+. sourceme.sh
+
+
+
+3. You should export CPATH variable as follows  
+
+export CPATH=/usr/include/libusb-1.0:$AIOUSB_ROOT/lib:$AIOUSB_ROOT/classlib
+
+( If you have installed your libusb.h header file elsewhere, please
+alter the CPATH variable accordingly. ) 
+
+
+
+4. Now compile the sample as follows
+
+make sample  AIOUSBLIBDIR=../../lib   AIOUSBCLASSLIBDIR=../../classlib
+
+
+
+Shared Libraries.
+==================
 
 If you want to build your binary with shared libraries , please 
 run "make" in the directories ../../lib and ../../classlib before you
-perform this step.
+perform this step. You will also have to set the CPATH variable to point
+to the correct location for this to work.
 
 
-1. make test_fastscan LDFLAGS="-L../../lib -L../../classlib" 
+1. make sample  LDFLAGS="-L../../lib -L../../classlib" 
 
 
 2. Set your LD_LIBRARY_PATH to include these directories

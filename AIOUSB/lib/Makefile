@@ -51,7 +51,8 @@ else
 endif
 
 
-LIBS := $(CLIB) $(CDBGLIB) $(CPPLIB) $(CPPDBGLIB)  $(SHCLIB) $(SHCDBGLIB) $(SHCPPLIB) $(SHCPPDBGLIB)
+LIBS 		:= $(CLIB) $(CDBGLIB) $(CPPLIB) $(CPPDBGLIB)  $(SHCLIB) $(SHCDBGLIB) $(SHCPPLIB) $(SHCPPDBGLIB)
+CFLAGS		+= -I.
 
 .PHONY : all
 all : $(LIBS)
@@ -91,7 +92,7 @@ $(SHCPPDBGLIB) : $(CPPDBGOBJS)
 $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) : aiousb.h AIOUSB_Core.h
 
 OBJOPTS		:= -c 
-COMMONOPTS 	:= -Wall -pthread -fPIC 
+COMMONOPTS 	:= -Wall -pthread -fPIC  $(CFLAGS)
 EXTRA_COPTS	:= -std=gnu99 -D_GNU_SOURCE
 
 

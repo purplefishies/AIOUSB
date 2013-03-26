@@ -23,6 +23,7 @@ ifdef AIOUSBLIBDIR
 
 	ALL_AIOUSBLIBDIR_CFILES	:= $(wildcard $(AIOUSBLIBDIR)/*.c )
 	LIBAIOUSB_CDEP		:= $(LIBAIOUSB) $(wildcard $(AIOUSBLIBDIR)/*.c )
+	CFLAGS			+= -I$(AIOUSBLIBDIR) 
 
 #       Dynamic Build Rule for aiousblib
 	AIOUSBLIB_BUILD		= $(LIBAIOUSB): $(ALL_AIOUSBLIBDIR_CFILES) ; cd $(AIOUSBLIBDIR) && $(MAKE) $(DEBUG_ARGS)
@@ -151,7 +152,7 @@ mostlyclean:
 
 
 lib/TestCaseSetup.o: lib/TestCaseSetup.cpp lib/TestCaseSetup.h  $(LIBRARY_DEPS)
-	$(CPP) $(DEBUGOPTS) $(LIBPATH) $(OBJFILE_OPTS) $(COMMONOPTS) $(CPPOPTS) $<  $(LIBAIOUSBCPP) $(LIBUSB) -o $@
+	$(CPP) $(DEBUGOPTS) $(LIBPATH) $(INCPATH) $(OBJFILE_OPTS) $(COMMONOPTS) $(CPPOPTS) $<  $(LIBAIOUSBCPP) $(LIBUSB) -o $@
 
 #
 # Smart Generic rules that can build any NEW C or C++ file that 
@@ -172,7 +173,7 @@ lib/TestCaseSetup.o: lib/TestCaseSetup.cpp lib/TestCaseSetup.h  $(LIBRARY_DEPS)
 # C Rules
 #
 %.c.o:%.c	$(COMMON_DEPS)
-	$(CC) -std=gnu99  -D_GNU_SOURCE $(OBJFILE_OPTS) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $(COPTS) $<  -lm -o $@
+	$(CC) -std=gnu99  -D_GNU_SOURCE $(OBJFILE_OPTS) $(INCPATH) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $(COPTS) $<  -lm -o $@
 
 %:%.c.o
 	$(CC) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $< $(LIBUSB) -o $@ $(LIBAIOUSB) $(LIBUSB) -lm 
