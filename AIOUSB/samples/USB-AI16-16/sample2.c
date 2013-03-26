@@ -1,7 +1,7 @@
 /*
  * $Date $Format: %ad$$
  * $Author $Format: %an <%ae>$
- *
+ * $Release $Format: %t$$
  * AIOUSB library sample program
  */
 

@@ -1,7 +1,7 @@
 /**
  * @file   AIOUSB_Core.h
- * @author JImi Damon <jdamon@accesio.com>
- * @date   Thu Feb 14 15:40:08 2013
+ * @author $Author $Format: %an <%ae>$$
+ * @date   $Date $Format: %ad$$
  * 
  * @brief  
  * 
