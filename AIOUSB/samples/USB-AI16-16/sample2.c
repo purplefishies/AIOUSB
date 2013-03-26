@@ -1,8 +1,6 @@
 /*
- * $RCSfile: sample2.c,v $
- * $Revision: 1.3 $
- * $Date: 2009/12/22 22:23:35 $
- * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
+ * $Date $Format: %ad$$
+ * $Author $Format: %an <%ae>$
  *
  * AIOUSB library sample program
  */
