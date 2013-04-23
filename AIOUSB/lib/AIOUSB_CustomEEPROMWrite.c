@@ -8,15 +8,15 @@
  */
 
 
-// {{{ includes
-#include "AIOUSB_Core.h"
-// }}}
 
-// {{{ C++ support
+#include "AIOUSB_Core.h"
+
+
+
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
-// }}}
+
 
 unsigned long CustomEEPROMWrite(
 	unsigned long DeviceIndex
@@ -65,11 +65,11 @@ unsigned long CustomEEPROMWrite(
 	return result;
 }	// CustomEEPROMWrite()
 
-// {{{ C++ support
+
 #ifdef __cplusplus
 }	// namespace AIOUSB
 #endif
-// }}}
+
 
 
 /* end of file */

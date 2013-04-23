@@ -8,22 +8,22 @@
  */
 
 
-// {{{ includes
+
 #include "AIOUSB_Core.h"
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-// }}}
 
-// {{{ C++ support
+
+
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
-// }}}
 
-// {{{ ComparePoints(), AIOUSB_ADC_ExternalCal()
+
+
 
 static int CompareVoltage( const void *p1, const void *p2 ) {
 	assert( p1 != 0
@@ -315,13 +315,13 @@ unsigned long AIOUSB_ADC_ExternalCal(
 	return result;
 }	// AIOUSB_ADC_ExternalCal()
 
-// }}}
 
-// {{{ C++ support
+
+
 #ifdef __cplusplus
 }	// namespace AIOUSB
 #endif
-// }}}
+
 
 
 /* end of file */

@@ -1,23 +1,23 @@
-/*
- * $RCSfile: AIOUSB_GetDeviceByProductID.c,v $
- * $Revision: 1.2 $
- * $Date: 2009/11/25 21:37:43 $
- * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
+/**
+ * @file   AIOUSB_ADC.c
+ * @author $Author$
+ * @date   $Date$
+ * @copy
+ * @brief
+ *  ACCES I/O USB API for Linux
  *
- * ACCES I/O USB API for Linux
  */
 
 
-// {{{ includes
 #include "AIOUSB_Core.h"
 #include <stdio.h>
-// }}}
 
-// {{{ C++ support
+
+
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
-// }}}
+
 
 unsigned long AIOUSB_GetDeviceByProductID( int minProductID, int maxProductID
 		, int maxDevices, int *deviceList /* [ 1 + maxDevices * 2 ] */ ) {
@@ -62,11 +62,11 @@ unsigned long AIOUSB_GetDeviceByProductID( int minProductID, int maxProductID
 	return AIOUSB_SUCCESS;
 }	// AIOUSB_GetDeviceByProductID()
 
-// {{{ C++ support
+
 #ifdef __cplusplus
 }	// namespace AIOUSB
 #endif
-// }}}
+
 
 
 /* end of file */

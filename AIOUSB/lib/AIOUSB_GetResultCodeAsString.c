@@ -8,19 +8,19 @@
  */
 
 
-// {{{ includes
+
 #include "AIOUSB_Core.h"
 #include <assert.h>
 #include <stdlib.h>
-// }}}
 
-// {{{ C++ support
+
+
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
-// }}}
 
-// {{{ resultCodeTable[]
+
+
 #ifdef __cplusplus
 const int RESULT_TEXT_SIZE = 40;
 #else
@@ -67,7 +67,7 @@ const int NUM_RESULT_CODES = sizeof( resultCodeTable ) / sizeof( resultCodeTable
 #else
 #define NUM_RESULT_CODES ( sizeof( resultCodeTable ) / sizeof( resultCodeTable[ 0 ] ) )
 #endif
-// }}}
+
 
 static int CompareResultCodes( const void *p1, const void *p2 ) {
 	assert( p1 != 0
@@ -119,11 +119,11 @@ const char *AIOUSB_GetResultCodeAsString( unsigned long result ) {
 	return resultText;
 }	// AIOUSB_GetResultCodeAsString()
 
-// {{{ C++ support
+
 #ifdef __cplusplus
 }	// namespace AIOUSB
 #endif
-// }}}
+
 
 
 /* end of file */

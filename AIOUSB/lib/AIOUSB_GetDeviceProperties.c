@@ -8,15 +8,15 @@
  */
 
 
-// {{{ includes
-#include "AIOUSB_Core.h"
-// }}}
 
-// {{{ C++ support
+#include "AIOUSB_Core.h"
+
+
+
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
-// }}}
+
 
 /*
  * AIOUSB_GetDeviceProperties() returns a richer amount of information than QueryDeviceInfo()
@@ -58,11 +58,11 @@ unsigned long AIOUSB_GetDeviceProperties(
 	return result;
 }	// AIOUSB_GetDeviceProperties()
 
-// {{{ C++ support
+
 #ifdef __cplusplus
 }	// namespace AIOUSB
 #endif
-// }}}
+
 
 
 /* end of file */

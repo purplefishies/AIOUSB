@@ -52,6 +52,8 @@ endif
 
 LIBS 		:= $(CLIB) $(CDBGLIB) $(CPPLIB) $(CPPDBGLIB)  $(SHCLIB) $(SHCDBGLIB) $(SHCPPLIB) $(SHCPPDBGLIB)
 CFLAGS		+= -I.
+SHARED_LIBS	:=  -lusb-1.0 -pthread
+
 
 .PHONY : all
 all : $(LIBS)
@@ -63,27 +65,27 @@ all_cscope: $(LIBS) cscope
 $(CLIB) : $(COBJS)
 	$(AR) cr $(CLIB) $(COBJS)
 $(SHCLIB) : $(COBJS)
-	$(CC) $(CC_SHFLAGS),$@ -o $@ $(COBJS)
+	$(CC) $(CC_SHFLAGS),$@ -o $@ $(COBJS) $(SHARED_LIBS)
 
 
 $(CDBGLIB) : $(CDBGOBJS)
 	$(AR) cr $(CDBGLIB) $(CDBGOBJS)
 $(SHCDBGLIB): 	$(CDBGOBJS)
-	$(CC) $(CC_SHFLAGS),$@ -o $@ $(COBJS)
+	$(CC) $(CC_SHFLAGS),$@ -o $@ $(COBJS) $(SHARED_LIBS) 
 
 
 $(CPPLIB) : $(CPPOBJS)
 	$(AR) cr $(CPPLIB) $(CPPOBJS)
 
 $(SHCPPLIB) : $(CPPOBJS)
-	$(CPP) $(CC_SHFLAGS),$@ -o $@ $(CPPOBJS)
+	$(CPP) $(CC_SHFLAGS),$@ -o $@ $(CPPOBJS) $(SHARED_LIBS)
 
 
 $(CPPDBGLIB) : $(CPPDBGOBJS)
 	$(AR) cr $(CPPDBGLIB) $(CPPDBGOBJS)
 
 $(SHCPPDBGLIB) : $(CPPDBGOBJS)
-	$(CPP) $(CC_SHFLAGS),$@ -o $@ $(CPPOBJS)
+	$(CPP) $(CC_SHFLAGS),$@ -o $@ $(CPPOBJS) $(SHARED_LIBS)
 
 
 #********************************  OBJECTS  *********************************
@@ -118,8 +120,10 @@ mostlyclean:
 	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS)
 
 clean:
-	-rm -f $(LIBS) $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) cscope.out
+	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) cscope.out
 
+distclean: 
+	-rm -f $(LIBS) $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) cscope.out
 cscope:	
 	cscope -b 
 

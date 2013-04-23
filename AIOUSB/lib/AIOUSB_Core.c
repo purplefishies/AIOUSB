@@ -1,13 +1,12 @@
-/*
- * $RCSfile: AIOUSB_Core.c,v $
- * $Revision: 1.90 $
- * $Date: 2010/07/10 18:45:25 $
- * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
+/**
+ * @file   AIOUSB_ADC.c
+ * @author $Author$
+ * @date   $Date$
+ * @copy
+ * @brief
+ *  ACCES I/O USB API for Linux
  *
- * ACCES I/O USB API for Linux
  */
-
-
 
 #include "AIOUSB_Core.h"
 #include <assert.h>
@@ -17,6 +16,22 @@
 #include <string.h>
 #include <unistd.h>
 
+#ifdef BACKTRACE
+#include <execinfo.h>
+
+#define BACKTRACE_DEBUG(n) do { \
+  int j,nptrs;\
+  void *buffer[100]; \
+  char **strings; \
+  nptrs = backtrace(buffer, 100);\
+  nptrs = ( nptrs > n ? n : nptrs );\
+  strings = backtrace_symbols( buffer , nptrs ); \
+  for (j = 0; j < nptrs; j++) \
+    printf("%s\n", strings[j]);\
+} while(0);
+#else 
+#define BACKTRACE_DEBUG(n) {}
+#endif
 
 
 #ifdef __cplusplus
@@ -141,7 +156,7 @@ static const struct ProductIDName {
           { USB_AIO12_128A,             "USB-AIO12-128A" },
           { USB_AIO12_128,              "USB-AIO12-128" },
           { USB_AIO12_128E,             "USB-AIO12-128E" }
-};	// productIDNameTable[]
+};
 #ifdef __cplusplus
 const int NUM_PROD_NAMES = sizeof( productIDNameTable ) / sizeof( productIDNameTable[ 0 ] );
 #else
@@ -596,34 +611,46 @@ static int CompareProductIDs( const void *p1, const void *p2 ) {
 
 
 PRIVATE const char *ProductIDToName( unsigned int productID ) {
+
 	/*
-	 * this function returns the name of a product ID; generally, it's best to use this only as
-	 * a last resort, since most devices return their name when asked in QueryDeviceInfo()
+	 * this function returns the name of a product ID; generally,
+	 * it's best to use this only as a last resort, since most
+	 * devices return their name when asked in QueryDeviceInfo()
 	 */
+
 	const char *name = "UNKNOWN";
 	if( AIOUSB_Lock() ) {
+
 		/*
-		 * productIDIndex[] represents an index into productIDNameTable[], sorted by product ID;
-		 * specifically, it contains pointers into productIDNameTable[]; to get the actual product
-		 * ID, the pointer in productIDIndex[] must be dereferenced; using a separate index table
-		 * instead of sorting productIDNameTable[] directly permits us to create multiple indexes,
-		 * in particular, a second index sorted by product name
+		 * productIDIndex[] represents an index into
+		 * productIDNameTable[], sorted by product ID;
+		 * specifically, it contains pointers into
+		 * productIDNameTable[]; to get the actual product ID,
+		 * the pointer in productIDIndex[] must be
+		 * dereferenced; using a separate index table instead
+		 * of sorting productIDNameTable[] directly permits us
+		 * to create multiple indexes, in particular, a second
+		 * index sorted by product name
 		 */
-		static struct ProductIDName const *productIDIndex[ NUM_PROD_NAMES ];	// index of product IDs in productIDNameTable[]
-		const unsigned long INIT_PATTERN = 0xe697f8acul;						// random pattern
-		static unsigned long productIDIndexCreated = 0;							// == INIT_PATTERN if index has been created
+
+
+                                /* index of product IDs in productIDNameTable[] */
+		static struct ProductIDName const *productIDIndex[ NUM_PROD_NAMES ];	
+                                /* random pattern */
+		const unsigned long INIT_PATTERN = 0xe697f8acul;
+
+                                /* == INIT_PATTERN if index has been created */
+		static unsigned long productIDIndexCreated = 0;
 		if( productIDIndexCreated != INIT_PATTERN ) {
-			/*
-			 * build index of product IDs
-			 */
+                  /* build index of product IDs */
 			int index;
 			for( index = 0; index < NUM_PROD_NAMES; index++ )
 				productIDIndex[ index ] = &productIDNameTable[ index ];
 			qsort( productIDIndex, NUM_PROD_NAMES, sizeof( struct ProductIDName * ), CompareProductIDs );
 			productIDIndexCreated = INIT_PATTERN;
-		}	// if( productIDIndexCreated ...
+		}
 
-		struct ProductIDName key;				// key.name not used
+		struct ProductIDName key;
 		key.id = productID;
 		const struct ProductIDName *const pKey = &key;
 		const struct ProductIDName **product
@@ -644,32 +671,47 @@ static int CompareProductNames( const void *p1, const void *p2 ) {
 	return strcmp( ( *( struct ProductIDName ** ) p1 )->name, ( *( struct ProductIDName ** ) p2 )->name );
 }
 
-
-PRIVATE unsigned int ProductNameToID( const char *name ) {
+/** 
+ * @details This function is the complement of ProductIDToName() and
+ * returns the product ID for a given name; this function should be
+ * used with care; it will work reliably if passed a name obtained
+ * from ProductIDToName(); however, if passed a name obtained from the
+ * device itself it may not work; the reason is that devices contain
+ * their own name strings, which are most likely identical to the
+ * names defined in this module, but not guaranteed to be so; that's
+ * not as big a problem as it sounds, however, because if one has the
+ * means to obtain the name from the device, then they also have
+ * access to the device's product ID, so calling this function is
+ * unnecessary; this function is mainly for performing simple
+ * conversions between product names and IDs, primarily to support
+ * user interfaces
+ * 
+ * @param name
+ * 
+ * @return 
+ */
+PRIVATE unsigned int 
+ProductNameToID( const char *name ) {
 	assert( name != 0 );
-	/*
-	 * this function is the complement of ProductIDToName() and returns the product ID for a given name;
-	 * this function should be used with care; it will work reliably if passed a name obtained from
-	 * ProductIDToName(); however, if passed a name obtained from the device itself it may not work; the
-	 * reason is that devices contain their own name strings, which are most likely identical to the names
-	 * defined in this module, but not guaranteed to be so; that's not as big a problem as it sounds,
-	 * however, because if one has the means to obtain the name from the device, then they also have access
-	 * to the device's product ID, so calling this function is unnecessary; this function is mainly for
-	 * performing simple conversions between product names and IDs, primarily to support user interfaces
-	 */
+
 	unsigned int productID = 0;
 	if( AIOUSB_Lock() ) {
 		/*
 		 * productNameIndex[] represents an index into productIDNameTable[], sorted by product name
 		 * (see notes for ProductIDToName())
 		 */
-		static struct ProductIDName const *productNameIndex[ NUM_PROD_NAMES ];	// index of product names in productIDNameTable[]
-		const unsigned long INIT_PATTERN = 0x7e6b2017ul;			// random pattern
-		static unsigned long productNameIndexCreated = 0;			// == INIT_PATTERN if index has been created
+
+		static struct ProductIDName const *productNameIndex[ NUM_PROD_NAMES ];	
+                                /** index of product names in productIDNameTable[] */
+
+		const unsigned long INIT_PATTERN = 0x7e6b2017ul;		
+                                /** random pattern */
+
+		static unsigned long productNameIndexCreated = 0;			
+                                /** == INIT_PATTERN if index has been created */
+
 		if( productNameIndexCreated != INIT_PATTERN ) {
-			/*
-			 * build index of product names
-			 */
+                                /* build index of product names */
 			int index;
 			for( index = 0; index < NUM_PROD_NAMES; index++ )
 				productNameIndex[ index ] = &productIDNameTable[ index ];
@@ -694,7 +736,8 @@ PRIVATE unsigned int ProductNameToID( const char *name ) {
 
 
 
-static unsigned long GetDeviceName( unsigned long DeviceIndex, const char **name ) {
+static unsigned long 
+GetDeviceName( unsigned long DeviceIndex, const char **name ) {
 	assert( name != 0 );
 	if( ! AIOUSB_Lock() )
 		return AIOUSB_ERROR_INVALID_MUTEX;
@@ -724,7 +767,7 @@ static unsigned long GetDeviceName( unsigned long DeviceIndex, const char **name
 				 * two bytes per character, so we need to handle our maximum lengths accordingly
 				 */
 				const int CYPRESS_GET_DESC = 0x06;
-				const int DESC_PARAMS = 0x0302;	// 03 = descriptor type: string; 02 = index
+				const int DESC_PARAMS = 0x0302;	/**03 = descriptor type: string; 02 = index */
 				const int MAX_DESC_SIZE = 256;	// bytes, not characters
 				unsigned char *const descData = ( unsigned char * ) malloc( MAX_DESC_SIZE );
 				assert( descData != 0 );
@@ -733,6 +776,7 @@ static unsigned long GetDeviceName( unsigned long DeviceIndex, const char **name
 						, USB_READ_FROM_DEVICE, CYPRESS_GET_DESC
 						, DESC_PARAMS, 0, descData, MAX_DESC_SIZE, timeout );
 					if( bytesTransferred == MAX_DESC_SIZE ) {
+
 						/*
 						 * extract device name from descriptor and copy to cached name buffer
 						 *
@@ -746,6 +790,7 @@ static unsigned long GetDeviceName( unsigned long DeviceIndex, const char **name
 						 * descData[ string_length * 2 ] = low byte of last character of string
 						 * descData[ string_length * 2 + 1 ] = \0 (high byte)
 						 */
+
 						const int srcLength = ( int ) ( ( descData[ 0 ] - 2 ) / 2 );	// characters, not bytes
 						int srcIndex, dstIndex;
 						for( srcIndex = 2 /* low byte first char */, dstIndex = 0;
@@ -817,7 +862,16 @@ PRIVATE const char *GetSafeDeviceName( unsigned long DeviceIndex ) {
 
 
 
-PRIVATE struct libusb_device_handle *AIOUSB_GetDeviceHandle( unsigned long DeviceIndex ) {
+/** 
+ * 
+ * 
+ * @param DeviceIndex 
+ * 
+ * @return struct libusb_device_handle *
+ */
+PRIVATE struct libusb_device_handle *
+AIOUSB_GetDeviceHandle( unsigned long DeviceIndex ) 
+{
 	libusb_device_handle *deviceHandle = NULL;
 
 	if( ! AIOUSB_Lock() )
@@ -846,17 +900,20 @@ PRIVATE struct libusb_device_handle *AIOUSB_GetDeviceHandle( unsigned long Devic
 
 
 /*
- * this function is intended to improve upon libusb_bulk_transfer() by receiving or transmitting
- * packets until the entire transfer request has been satisfied; it intentionally restarts the
- * timeout each time a packet is received, so the timeout parameter specifies the longest permitted
- * delay between packets, not the total time to complete the transfer request
+ * @details This function is intended to improve upon
+ * libusb_bulk_transfer() by receiving or transmitting packets until
+ * the entire transfer request has been satisfied; it intentionally
+ * restarts the timeout each time a packet is received, so the timeout
+ * parameter specifies the longest permitted delay between packets,
+ * not the total time to complete the transfer request
  */
-PRIVATE int AIOUSB_BulkTransfer( struct libusb_device_handle *dev_handle
-	, unsigned char endpoint
-	, unsigned char *data
-	, int length
-	, int *transferred
-	, unsigned int timeout
+PRIVATE int
+AIOUSB_BulkTransfer( struct libusb_device_handle *dev_handle, 
+                     unsigned char endpoint, 
+                     unsigned char *data, 
+                     int length, 
+                     int *transferred, 
+                     unsigned int timeout
 ) {
 	assert( dev_handle != 0
 		&& data != 0
@@ -1022,8 +1079,8 @@ unsigned long ResolveDeviceIndex( unsigned long DeviceIndex ) {
 
 
 unsigned long GetDeviceSerialNumber(
-	unsigned long DeviceIndex
-	, __uint64_t *pSerialNumber
+	unsigned long DeviceIndex, 
+        __uint64_t *pSerialNumber
 ) {
 	if( pSerialNumber == NULL )
 		return AIOUSB_ERROR_INVALID_PARAMETER;
@@ -1067,40 +1124,46 @@ unsigned long GetDeviceSerialNumber(
 
 
 
-unsigned long AIOUSB_GetStreamingBlockSize(
-	unsigned long DeviceIndex
-	, unsigned long *BlockSize
-) {
-	if( BlockSize == NULL )
-		return AIOUSB_ERROR_INVALID_PARAMETER;
+/** 
+ * @desc This function is deprecated. 
+ * @param DeviceIndex 
+ * @param BlockSize 
+ * 
+ * @return 0 or greater if the blocksize is correct, negative number on 
+ *              error
+ */
+long 
+AIOUSB_GetStreamingBlockSize(unsigned long DeviceIndex ) 
+{
+     long BlockSize;
 
-	if( ! AIOUSB_Lock() )
-		return AIOUSB_ERROR_INVALID_MUTEX;
+     if( ! AIOUSB_Lock() )
+          return - AIOUSB_ERROR_INVALID_MUTEX;
 
-	unsigned long result = AIOUSB_Validate( &DeviceIndex );
-	if( result != AIOUSB_SUCCESS ) {
-		AIOUSB_UnLock();
-		return result;
-	}	// if( result ...
+     unsigned long result = AIOUSB_Validate( &DeviceIndex );
+     if( result != AIOUSB_SUCCESS ) {
+          AIOUSB_UnLock();
+          return - result;
+     }
 
-	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
-	if(
-		deviceDesc->bADCStream
-		|| deviceDesc->bDIOStream
-	)
-		*BlockSize = deviceDesc->StreamingBlockSize;
-	else
-		result = AIOUSB_ERROR_NOT_SUPPORTED;
+     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
+     if( deviceDesc->bADCStream || deviceDesc->bDIOStream )
+          BlockSize = deviceDesc->StreamingBlockSize;
+     else
+          BlockSize = - AIOUSB_ERROR_NOT_SUPPORTED;
 
-	AIOUSB_UnLock();
-	return result;
+     AIOUSB_UnLock();
+     return BlockSize;
 }
 
 
 
+
+
+
 unsigned long AIOUSB_SetStreamingBlockSize(
-	unsigned long DeviceIndex
-	, unsigned long BlockSize
+	unsigned long DeviceIndex, 
+        unsigned long BlockSize
 ) {
 	if(
 		BlockSize == 0
@@ -1136,16 +1199,12 @@ unsigned long AIOUSB_SetStreamingBlockSize(
 
 
 unsigned long AIOUSB_ClearFIFO(
-	unsigned long DeviceIndex
-	, unsigned long Method
-) {
-	if(
-		Method != CLEAR_FIFO_METHOD_IMMEDIATE
-		&& Method != CLEAR_FIFO_METHOD_AUTO
-		&& Method != CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT
-		&& Method != CLEAR_FIFO_METHOD_WAIT
-	)
-		return AIOUSB_ERROR_INVALID_PARAMETER;
+     unsigned long DeviceIndex, 
+     FIFO_Method Method
+     ) 
+{
+     if( Method < CLEAR_FIFO_METHOD_IMMEDIATE || Method > num_FIFO_Method ) 
+          return AIOUSB_ERROR_INVALID_PARAMETER;
 
 	if( ! AIOUSB_Lock() )
 		return AIOUSB_ERROR_INVALID_MUTEX;
@@ -1312,8 +1371,8 @@ double AIOUSB_GetMiscClock(
 
 
 unsigned long AIOUSB_SetMiscClock(
-	unsigned long DeviceIndex
-	, double clockHz
+	unsigned long DeviceIndex, 
+        double clockHz
 ) {
 	if( clockHz <= 0 )
 		return AIOUSB_ERROR_INVALID_PARAMETER;

@@ -159,24 +159,23 @@ enum {
 /*
  * range codes passed to DACSetBoardRange()
  */
-enum DACRange {
-    DAC_RANGE_MIN                 = 0,
+typedef enum {
     DAC_RANGE_0_5V                = 0,                // 0-5V
     DAC_RANGE_5V                  = 1,                // +/-5V
     DAC_RANGE_0_10V               = 2,                // 0-10V
     DAC_RANGE_10V                 = 3,                // +/-10V
-    DAC_RANGE_MAX                 = 3,
-};    // enum DACRange
+} DACRange ;
 
 /*
  * FIFO clearing methods passed to AIOUSB_ClearFIFO()
  */
-enum ClearFIFOMethod {
+typedef enum {
     CLEAR_FIFO_METHOD_IMMEDIATE               = 0,
     CLEAR_FIFO_METHOD_AUTO                    = 1,
     CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT     = 5,
-    CLEAR_FIFO_METHOD_WAIT                    = 86
-};    // enum ClearFIFOMethod
+    CLEAR_FIFO_METHOD_WAIT                    = 86,
+    num_FIFO_Method
+} FIFO_Method;
 
 
 
@@ -386,11 +385,11 @@ const bool FALSE = false;
 const bool TRUE = true;
 #endif
 #else
-enum AIOUSB_BOOL {
+enum AIOUSB_BOOL_VAL {
     AIOUSB_FALSE                        = 0,
     AIOUSB_TRUE                         = 1
 };    // enum AIOUSB_BOOL
-typedef enum AIOUSB_BOOL AIOUSB_BOOL;
+typedef enum AIOUSB_BOOL_VAL AIOUSB_BOOL;
 #if defined( ENABLE_BOOL_TYPE )
 enum BOOL {
     FALSE                               = 0,
@@ -709,17 +708,19 @@ extern unsigned long CustomEEPROMRead(
     unsigned long *DataSize,
     void *Data );
 
-extern unsigned long AIOUSB_GetStreamingBlockSize(
-    unsigned long DeviceIndex,
-    unsigned long *BlockSize );
+extern long AIOUSB_GetStreamingBlockSize(
+                                         unsigned long DeviceIndex 
+                                         );
+
 
 extern unsigned long AIOUSB_SetStreamingBlockSize(
     unsigned long DeviceIndex,
     unsigned long BlockSize );
 
 extern unsigned long AIOUSB_ClearFIFO(
-    unsigned long DeviceIndex,
-    unsigned long Method );
+                                      unsigned long DeviceIndex,
+                                      FIFO_Method Method
+                                      );
 
 
 

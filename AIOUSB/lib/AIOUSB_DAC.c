@@ -8,20 +8,20 @@
  */
 
 
-// {{{ includes
+
 #include "AIOUSB_Core.h"
 #include <assert.h>
 #include <math.h>
 #include <string.h>
-// }}}
 
-// {{{ C++ support
+
+
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
-// }}}
 
-// {{{ DACDirect()
+
+
 unsigned long DACDirect(
 	unsigned long DeviceIndex
 	, unsigned short Channel
@@ -73,10 +73,10 @@ unsigned long DACDirect(
 
 	return result;
 }	// DACDirect()
-// }}}
 
-// {{{ DACMultiDirect()
-// {{{ notes
+
+
+
 /*
  * pDACData is an array of DACDataCount channel/count 16-bit word pairs:
  *   +----------------+
@@ -144,7 +144,7 @@ unsigned long DACDirect(
  * when sending the DAC configuration blocks to the device we have to send all the
  * blocks from block 0 up to the block containing the highest channel number being set
  */
-// }}}
+
 unsigned long DACMultiDirect(
 	unsigned long DeviceIndex
 	, unsigned short *pDACData
@@ -241,16 +241,16 @@ unsigned long DACMultiDirect(
 
 	return result;
 }	// DACMultiDirect()
-// }}}
 
-// {{{ DACSetBoardRange()
+
+
 unsigned long DACSetBoardRange(
 	unsigned long DeviceIndex
 	, unsigned long RangeCode
 ) {
 	if(
-		RangeCode < DAC_RANGE_MIN
-		|| RangeCode > DAC_RANGE_MAX
+		RangeCode < DAC_RANGE_0_5V
+		|| RangeCode > DAC_RANGE_10V
 	)
 		return AIOUSB_ERROR_INVALID_PARAMETER;
 
@@ -284,9 +284,9 @@ unsigned long DACSetBoardRange(
 
 	return result;
 }	// DACSetBoardRange()
-// }}}
 
-// {{{ DACOutputOpen()
+
+
 unsigned long DACOutputOpen(
 	unsigned long DeviceIndex
 	, double *pClockHz
@@ -294,9 +294,9 @@ unsigned long DACOutputOpen(
 	// TODO: this function is not yet implemented
 	return AIOUSB_ERROR_NOT_SUPPORTED;
 }	// DACOutputOpen()
-// }}}
 
-// {{{ DACOutputClose()
+
+
 unsigned long DACOutputClose(
 	unsigned long DeviceIndex
 	, unsigned long bWait
@@ -304,9 +304,9 @@ unsigned long DACOutputClose(
 	// TODO: this function is not yet implemented
 	return AIOUSB_ERROR_NOT_SUPPORTED;
 }	// DACOutputClose()
-// }}}
 
-// {{{ DACOutputCloseNoEnd()
+
+
 unsigned long DACOutputCloseNoEnd(
 	unsigned long DeviceIndex
 	, unsigned long bWait
@@ -314,9 +314,9 @@ unsigned long DACOutputCloseNoEnd(
 	// TODO: this function is not yet implemented
 	return AIOUSB_ERROR_NOT_SUPPORTED;
 }	// DACOutputCloseNoEnd()
-// }}}
 
-// {{{ DACOutputSetCount()
+
+
 unsigned long DACOutputSetCount(
 	unsigned long DeviceIndex
 	, unsigned long NewCount
@@ -324,9 +324,9 @@ unsigned long DACOutputSetCount(
 	// TODO: this function is not yet implemented
 	return AIOUSB_ERROR_NOT_SUPPORTED;
 }	// DACOutputSetCount()
-// }}}
 
-// {{{ DACOutputFrame()
+
+
 unsigned long DACOutputFrame(
 	unsigned long DeviceIndex
 	, unsigned long FramePoints
@@ -335,9 +335,9 @@ unsigned long DACOutputFrame(
 	// TODO: this function is not yet implemented
 	return AIOUSB_ERROR_NOT_SUPPORTED;
 }	// DACOutputFrame()
-// }}}
 
-// {{{ DACOutputFrameRaw()
+
+
 unsigned long DACOutputFrameRaw(
 	unsigned long DeviceIndex
 	, unsigned long FramePoints
@@ -346,18 +346,18 @@ unsigned long DACOutputFrameRaw(
 	// TODO: this function is not yet implemented
 	return AIOUSB_ERROR_NOT_SUPPORTED;
 }	// DACOutputFrameRaw()
-// }}}
 
-// {{{ DACOutputStart()
+
+
 unsigned long DACOutputStart(
 	unsigned long DeviceIndex
 ) {
 	// TODO: this function is not yet implemented
 	return AIOUSB_ERROR_NOT_SUPPORTED;
 }	// DACOutputStart()
-// }}}
 
-// {{{ DACOutputSetInterlock()
+
+
 unsigned long DACOutputSetInterlock(
 	unsigned long DeviceIndex
 	, unsigned long bInterlock
@@ -365,13 +365,13 @@ unsigned long DACOutputSetInterlock(
 	// TODO: this function is not yet implemented
 	return AIOUSB_ERROR_NOT_SUPPORTED;
 }	// DACOutputSetInterlock()
-// }}}
 
-// {{{ C++ support
+
+
 #ifdef __cplusplus
 }	// namespace AIOUSB
 #endif
-// }}}
+
 
 
 /* end of file */

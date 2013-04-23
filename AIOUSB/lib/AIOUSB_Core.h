@@ -215,9 +215,8 @@ typedef struct {
  
 } DeviceDescriptor;
 
+#ifndef SWIG
 PRIVATE_EXTERN DeviceDescriptor deviceTable[ MAX_USB_DEVICES ];
-
-
 PRIVATE_EXTERN AIOUSB_BOOL AIOUSB_Lock(void);
 PRIVATE_EXTERN AIOUSB_BOOL AIOUSB_UnLock(void);
 PRIVATE_EXTERN AIOUSB_BOOL AIOUSB_IsInit(void);
@@ -228,7 +227,11 @@ PRIVATE_EXTERN unsigned int ProductNameToID( const char *name );
 PRIVATE_EXTERN const char *GetSafeDeviceName( unsigned long DeviceIndex );
 PRIVATE_EXTERN struct libusb_device_handle *AIOUSB_GetDeviceHandle( unsigned long DeviceIndex );
 PRIVATE_EXTERN int AIOUSB_BulkTransfer( struct libusb_device_handle *dev_handle,
-                                        unsigned char endpoint, unsigned char *data, int length, int *transferred, unsigned int timeout );
+                                        unsigned char endpoint, unsigned char *data, 
+                                        int length, int *transferred, unsigned int timeout );
+
+
+
 PRIVATE_EXTERN unsigned long AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short counts[] );
 PRIVATE_EXTERN unsigned long AIOUSB_ArrayCountsToVolts( unsigned long DeviceIndex, int startChannel,
                                                         int numChannels, const unsigned short counts[], double volts[] );
@@ -236,6 +239,7 @@ PRIVATE_EXTERN unsigned long AIOUSB_ArrayVoltsToCounts( unsigned long DeviceInde
                                                         int numChannels, const double volts[], unsigned short counts[] );
 
 
+#endif
 
 #if 0
 /*

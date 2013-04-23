@@ -8,16 +8,16 @@
  */
 
 
-// {{{ includes
+
 #include "AIOUSB_Core.h"
 #include <stdio.h>
-// }}}
 
-// {{{ C++ support
+
+
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
-// }}}
+
 
 unsigned long GetDeviceBySerialNumber( const __uint64_t *pSerialNumber ) {
 	unsigned long deviceIndex = diNone;
@@ -58,11 +58,11 @@ unsigned long GetDeviceBySerialNumber( const __uint64_t *pSerialNumber ) {
 	return deviceIndex;
 }	// GetDeviceBySerialNumber()
 
-// {{{ C++ support
+
 #ifdef __cplusplus
 }	// namespace AIOUSB
 #endif
-// }}}
+
 
 
 /* end of file */

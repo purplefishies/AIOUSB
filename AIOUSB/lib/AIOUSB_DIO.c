@@ -7,22 +7,17 @@
  * ACCES I/O USB API for Linux
  */
 
-
-// {{{ includes
 #include "AIOUSB_Core.h"
 #include <arpa/inet.h>
 #include <assert.h>
 #include <math.h>
 #include <string.h>
-// }}}
 
-// {{{ C++ support
+
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
-// }}}
 
-// {{{ local variables and functions
 
 static unsigned short OctaveDacFromFreq( double *Hz ) {
 	assert( Hz != 0 );
@@ -44,14 +39,12 @@ static unsigned short OctaveDacFromFreq( double *Hz ) {
 	return octaveOffset;
 }	// OctaveDacFromFreq()
 
-// }}}
 
-// {{{ DIO_Configure()
 unsigned long DIO_Configure(
-	unsigned long DeviceIndex
-	, unsigned char bTristate
-	, void *pOutMask
-	, void *pData
+	unsigned long DeviceIndex, 
+        unsigned char bTristate, 
+        void *pOutMask, 
+        void *pData
 ) {
 	if(
 		pOutMask == NULL
@@ -104,26 +97,26 @@ unsigned long DIO_Configure(
 			} else {
 				result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
 				AIOUSB_UnLock();
-			}	// if( configBuffer ...
+			}
 		} else {
 			result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 			AIOUSB_UnLock();
-		}	// if( deviceHandle ...
+		}
 	} else {
 		result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
 		AIOUSB_UnLock();
-	}	// if( deviceDesc->LastDIOData ...
+	}
 
 	return result;
-}	// DIO_Configure()
-// }}}
+}
 
-// {{{ DIO_ConfigureEx()
+
+
 unsigned long DIO_ConfigureEx(
-	unsigned long DeviceIndex
-	, void *pOutMask
-	, void *pData
-	, void *pTristateMask
+	unsigned long DeviceIndex, 
+        void *pOutMask, 
+        void *pData, 
+        void *pTristateMask
 ) {
 	if(
 		pOutMask == NULL
@@ -148,7 +141,7 @@ unsigned long DIO_ConfigureEx(
 	) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->DIOBytes ...
+	}
 
 	if( deviceDesc->LastDIOData != 0 ) {
 		assert( deviceDesc->DIOBytes <= 1000 );	// arbitrary sanity check
@@ -178,25 +171,25 @@ unsigned long DIO_ConfigureEx(
 			} else {
 				result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
 				AIOUSB_UnLock();
-			}	// if( configBuffer ...
+			}
 		} else {
 			result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 			AIOUSB_UnLock();
-		}	// if( deviceHandle ...
+		}
 	} else {
 		result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
 		AIOUSB_UnLock();
-	}	// if( deviceDesc->LastDIOData ...
+	}
 
 	return result;
-}	// DIO_ConfigureEx()
-// }}}
+}
 
-// {{{ DIO_ConfigurationQuery()
+
+
 unsigned long DIO_ConfigurationQuery(
-	unsigned long DeviceIndex
-	, void *pOutMask
-	, void *pTristateMask
+	unsigned long DeviceIndex, 
+        void *pOutMask, 
+        void *pTristateMask
 ) {
 	if(
 		pOutMask == NULL
@@ -250,30 +243,33 @@ unsigned long DIO_ConfigurationQuery(
 
 	return result;
 }	// DIO_ConfigurationQuery()
-// }}}
 
-// {{{ DIO_WriteAll()
+
+
 unsigned long DIO_WriteAll(
-	unsigned long DeviceIndex
-	, void *pData
+	unsigned long DeviceIndex, 
+        void *pData
 ) {
 	if( pData == NULL )
 		return AIOUSB_ERROR_INVALID_PARAMETER;
-
-	if( ! AIOUSB_Lock() )
-		return AIOUSB_ERROR_INVALID_MUTEX;
+        int tmp = AIOUSB_Lock();
+        if( !tmp ) {
+          AIOUSB_UnLock();
+          AIOUSB_Lock();
+        }
+		/* return AIOUSB_ERROR_INVALID_MUTEX; */
 
 	unsigned long result = AIOUSB_Validate( &DeviceIndex );
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->DIOBytes == 0 ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->DIOBytes ...
+	}
 
 	if( deviceDesc->LastDIOData != 0 ) {
 		assert( deviceDesc->DIOBytes <= 1000 );	// arbitrary sanity check
@@ -290,21 +286,21 @@ unsigned long DIO_WriteAll(
 		} else {
 			result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 			AIOUSB_UnLock();
-		}	// if( deviceHandle ...
+		}
 	} else {
 		result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
 		AIOUSB_UnLock();
-	}	// if( deviceDesc->LastDIOData ...
+	}
 
 	return result;
-}	// DIO_WriteAll()
-// }}}
+}
 
-// {{{ DIO_Write8()
+
+
 unsigned long DIO_Write8(
-	unsigned long DeviceIndex
-	, unsigned long ByteIndex
-	, unsigned char Data
+	unsigned long DeviceIndex, 
+        unsigned long ByteIndex, 
+        unsigned char Data
 ) {
 	if( ! AIOUSB_Lock() )
 		return AIOUSB_ERROR_INVALID_MUTEX;
@@ -358,13 +354,13 @@ unsigned long DIO_Write8(
 
 	return result;
 }	// DIO_Write8()
-// }}}
 
-// {{{ DIO_Write1()
+
+
 unsigned long DIO_Write1(
-	unsigned long DeviceIndex
-	, unsigned long BitIndex
-	, unsigned char bData
+	unsigned long DeviceIndex, 
+        unsigned long BitIndex, 
+        unsigned char bData
 ) {
 	if( ! AIOUSB_Lock() )
 		return AIOUSB_ERROR_INVALID_MUTEX;
@@ -408,13 +404,12 @@ unsigned long DIO_Write1(
 	}	// if( deviceDesc->LastDIOData ...
 
 	return result;
-}	// DIO_Write1()
-// }}}
+}
 
-// {{{ DIO_ReadAll()
+
 unsigned long DIO_ReadAll(
-	unsigned long DeviceIndex
-	, void *Buffer
+	unsigned long DeviceIndex, 
+        void *Buffer
 ) {
 	if( Buffer == NULL )
 		return AIOUSB_ERROR_INVALID_PARAMETER;
@@ -450,14 +445,14 @@ unsigned long DIO_ReadAll(
 	}	// if( deviceHandle ...
 
 	return result;
-}	// DIO_ReadAll()
-// }}}
+}
 
-// {{{ DIO_Read8()
+
+
 unsigned long DIO_Read8(
-	unsigned long DeviceIndex
-	, unsigned long ByteIndex
-	, unsigned char *pBuffer
+	unsigned long DeviceIndex, 
+        unsigned long ByteIndex, 
+        unsigned char *pBuffer
 ) {
 	if( ! AIOUSB_Lock() )
 		return AIOUSB_ERROR_INVALID_MUTEX;
@@ -496,14 +491,14 @@ unsigned long DIO_Read8(
 	}	// if( readBuffer ...
 
 	return result;
-}	// DIO_Read8()
-// }}}
+}
 
-// {{{ DIO_Read1()
+
+
 unsigned long DIO_Read1(
-	unsigned long DeviceIndex
-	, unsigned long BitIndex
-	, unsigned char *pBuffer
+	unsigned long DeviceIndex, 
+        unsigned long BitIndex, 
+        unsigned char *pBuffer
 ) {
 	if( ! AIOUSB_Lock() )
 		return AIOUSB_ERROR_INVALID_MUTEX;
@@ -539,13 +534,12 @@ unsigned long DIO_Read1(
 	}	// if( ( result ...
 
 	return result;
-}	// DIO_Read1()
-// }}}
+}
 
-// {{{ DIO_StreamOpen()
+
 unsigned long DIO_StreamOpen(
-	unsigned long DeviceIndex
-	, unsigned long bIsRead
+	unsigned long DeviceIndex, 
+        unsigned long bIsRead
 ) {
 	if( ! AIOUSB_Lock() )
 		return AIOUSB_ERROR_INVALID_MUTEX;
@@ -593,10 +587,10 @@ unsigned long DIO_StreamOpen(
 	}	// if( deviceHandle ...
 
 	return result;
-}	// DIO_StreamOpen()
-// }}}
+}
 
-// {{{ DIO_StreamClose()
+
+
 unsigned long DIO_StreamClose(
 	unsigned long DeviceIndex
 ) {
@@ -624,14 +618,14 @@ unsigned long DIO_StreamClose(
 
 	AIOUSB_UnLock();
 	return result;
-}	// DIO_StreamClose()
-// }}}
+}
 
-// {{{ DIO_StreamSetClocks()
+
+
 unsigned long DIO_StreamSetClocks(
-	unsigned long DeviceIndex
-	, double *ReadClockHz
-	, double *WriteClockHz
+	unsigned long DeviceIndex, 
+        double *ReadClockHz, 
+        double *WriteClockHz
 ) {
 	if(
 		*ReadClockHz < 0
@@ -688,15 +682,14 @@ unsigned long DIO_StreamSetClocks(
 	}	// if( deviceHandle ...
 
 	return result;
-}	// DIO_StreamSetClocks()
-// }}}
+}
 
-// {{{ DIO_StreamFrame()
+
 unsigned long DIO_StreamFrame(
-	unsigned long DeviceIndex
-	, unsigned long FramePoints
-	, unsigned short *pFrameData
-	, unsigned long *BytesTransferred
+	unsigned long DeviceIndex, 
+        unsigned long FramePoints, 
+        unsigned short *pFrameData, 
+        unsigned long *BytesTransferred
 ) {
 	if(
 		FramePoints == 0
@@ -767,14 +760,13 @@ unsigned long DIO_StreamFrame(
 	}	// if( deviceHandle ...
 
 	return result;
-}	// DIO_StreamFrame()
-// }}}
+}
 
-// {{{ C++ support
+
 #ifdef __cplusplus
 }	// namespace AIOUSB
 #endif
-// }}}
+
 
 
 /* end of file */

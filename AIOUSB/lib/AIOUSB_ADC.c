@@ -2256,7 +2256,8 @@ unsigned long ADC_SetFastITScanVChannels(
 void 
 ADC_Debug_Register_Settings( ADConfigBlock *config )
 {
-  for( int i = 0 ; i <= 15; i ++ )  { 
+  int i;
+  for( i = 0 ; i <= 15; i ++ )  { 
     printf("Channel %d:\t",i);
     switch(  config->registers[i] ) { 
     case AD_GAIN_CODE_MIN:
@@ -2365,6 +2366,7 @@ unsigned long ADC_GetFastITScanV( unsigned long DeviceIndex, double *pData )
     double *pBuf;
     int numsleep = 100;
     double CLOCK_SPEED = 100000;
+    int i, ch;
 
     result = AIOUSB_Validate( &DeviceIndex );
     if( result != AIOUSB_SUCCESS ) 
@@ -2445,7 +2447,7 @@ unsigned long ADC_GetFastITScanV( unsigned long DeviceIndex, double *pData )
  
     pBuf = pData;
 
-    for( int i=0, ch = StartChannel; ch <= EndChannel; i ++ , ch ++ ) {
+    for( i=0, ch = StartChannel; ch <= EndChannel; i ++ , ch ++ ) {
       int RangeCode = AIOUSB_GetRegister( deviceDesc->FastITConfig, ch >> deviceDesc->RangeShift );
       int Tot = 0, Wt = 0;
       float V;
@@ -3003,6 +3005,7 @@ unsigned long AIOUSB_ADC_InternalCal(
         unsigned short returnCalTable[], 
         const char *saveFileName
 ) {
+  int k;
 	if( ! AIOUSB_Lock() )
 		return AIOUSB_ERROR_INVALID_MUTEX;
 
@@ -3046,7 +3049,7 @@ unsigned long AIOUSB_ADC_InternalCal(
             AIOUSB_SetOversample( &deviceDesc->cachedConfigBlock, 0 );
             // ADC_Range1( DeviceIndex , 0x00 , 0x01, AIOUSB_FALSE );
             int rangeChannel = 0x00;
-            int rangeValue   = DAC_RANGE_MAX;
+            int rangeValue   = DAC_RANGE_10V;
                                                                                                // See page 21 of the USB manual
             AIOUSB_SetCalMode( &deviceDesc->cachedConfigBlock , AD_CAL_MODE_BIP_GROUND );      // select bip low, to select 
             AIOUSB_SetRangeSingle( &deviceDesc->cachedConfigBlock, rangeChannel, rangeValue ); // Select ±10 range for channel 0
@@ -3110,7 +3113,7 @@ unsigned long AIOUSB_ADC_InternalCal(
             deviceDesc->cachedConfigBlock = origConfigBlock;
             AIOUSB_UnLock();				// unlock while communicating with device
 
-            for( int k =0 ; k <= 1 ; k ++ ) {
+            for( k =0 ; k <= 1 ; k ++ ) {
               WriteConfigBlock( DeviceIndex );
               /*result = ADC_SetConfig( deviceIndex, configBlock.registers, &configBlock.size );*/
 

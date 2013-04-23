@@ -8,18 +8,18 @@
  */
 
 
-// {{{ includes
+
 #include "AIOUSB_Core.h"
 #include <math.h>
-// }}}
 
-// {{{ C++ support
+
+
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
-// }}}
 
-// {{{ CTR_8254Mode()
+
+
 unsigned long CTR_8254Mode(
 	unsigned long DeviceIndex
 	, unsigned long BlockIndex
@@ -82,9 +82,9 @@ unsigned long CTR_8254Mode(
 
 	return result;
 }	// CTR_8254Mode()
-// }}}
 
-// {{{ CTR_8254Load()
+
+
 unsigned long CTR_8254Load(
 	unsigned long DeviceIndex
 	, unsigned long BlockIndex
@@ -144,9 +144,9 @@ unsigned long CTR_8254Load(
 
 	return result;
 }	// CTR_8254Load()
-// }}}
 
-// {{{ CTR_8254ModeLoad()
+
+
 unsigned long CTR_8254ModeLoad(
 	unsigned long DeviceIndex
 	, unsigned long BlockIndex
@@ -210,9 +210,9 @@ unsigned long CTR_8254ModeLoad(
 
 	return result;
 }	// CTR_8254ModeLoad()
-// }}}
 
-// {{{ CTR_8254ReadModeLoad()
+
+
 unsigned long CTR_8254ReadModeLoad(
 	unsigned long DeviceIndex
 	, unsigned long BlockIndex
@@ -284,9 +284,9 @@ unsigned long CTR_8254ReadModeLoad(
 
 	return result;
 }	// CTR_8254ReadModeLoad()
-// }}}
 
-// {{{ CTR_8254Read()
+
+
 unsigned long CTR_8254Read(
 	unsigned long DeviceIndex
 	, unsigned long BlockIndex
@@ -351,9 +351,9 @@ unsigned long CTR_8254Read(
 
 	return result;
 }	// CTR_8254Read()
-// }}}
 
-// {{{ CTR_8254ReadAll()
+
+
 unsigned long CTR_8254ReadAll(
 	unsigned long DeviceIndex
 	, unsigned short *pData
@@ -392,9 +392,9 @@ unsigned long CTR_8254ReadAll(
 
 	return result;
 }	// CTR_8254ReadAll()
-// }}}
 
-// {{{ CTR_8254ReadStatus()
+
+
 unsigned long CTR_8254ReadStatus(
 	unsigned long DeviceIndex
 	, unsigned long BlockIndex
@@ -465,9 +465,9 @@ unsigned long CTR_8254ReadStatus(
 
 	return result;
 }	// CTR_8254ReadStatus()
-// }}}
 
-// {{{ CTR_StartOutputFreq()
+
+
 unsigned long CTR_StartOutputFreq(
 	unsigned long DeviceIndex
 	, unsigned long BlockIndex
@@ -569,9 +569,9 @@ unsigned long CTR_StartOutputFreq(
 
 	return result;
 }	// CTR_StartOutputFreq()
-// }}}
 
-// {{{ CTR_8254SelectGate()
+
+
 unsigned long CTR_8254SelectGate(
 	unsigned long DeviceIndex
 	, unsigned long GateIndex
@@ -614,9 +614,9 @@ unsigned long CTR_8254SelectGate(
 
 	return result;
 }	// CTR_8254SelectGate()
-// }}}
 
-// {{{ CTR_8254ReadLatched()
+
+
 unsigned long CTR_8254ReadLatched(
 	unsigned long DeviceIndex
 	, unsigned short *pData
@@ -655,13 +655,13 @@ unsigned long CTR_8254ReadLatched(
 
 	return result;
 }	// CTR_8254ReadLatched()
-// }}}
 
-// {{{ C++ support
+
+
 #ifdef __cplusplus
 }	// namespace AIOUSB
 #endif
-// }}}
+
 
 
 /* end of file */
