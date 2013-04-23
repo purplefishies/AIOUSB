@@ -90,6 +90,9 @@ class TestCaseSetup {
   void doPreReadImmediateVoltages();
   void doCSVReadVoltages();
   void doCleanupAfterBulk();
+  void doDACDirect(int channel, unsigned short voltage);
+  void doDACDirectSetup();
+
   void ThrowError(unsigned long, int);
 
   void doFastITScanSetup();

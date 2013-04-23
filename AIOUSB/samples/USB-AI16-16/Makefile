@@ -6,11 +6,11 @@
 # make file for AIOUSB library sample programs
 #
 ifdef DEBUG
-	DEBUGOPTS 	:= -ggdb
+	DEBUGOPTS 	+= -ggdb
 	DEBUGSTEM 	:= dbg
 	DEBUG_ARGS	:= DEBUG=-DDEBUG
 else
-	DEBUGOPTS	:= -DNDEBUG
+	DEBUGOPTS	+= -DNDEBUG
 	DEBUGSTEM	:=
 endif
 
@@ -125,9 +125,6 @@ clean:
 
 $(eval $(call AIOUSBLIB_BUILD))
 $(eval $(call CLASSLIB_BUILD))
-
-test:
-	@echo "$(call CLASSLIB_BUILD)"
 
 
 Sample.jar: Sample.class

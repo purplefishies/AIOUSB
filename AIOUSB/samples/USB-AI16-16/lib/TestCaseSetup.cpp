@@ -81,6 +81,58 @@ void TestCaseSetup::doPreSetup()
     throw Error( er.str().c_str() );
   }
 }
+void TestCaseSetup::doDACDirectSetup()
+{
+  unsigned long result;
+  const int BITS_PER_BYTE = 8;
+  const int MAX_DIO_BYTES = 4;
+  const int MASK_BYTES = ( MAX_DIO_BYTES + BITS_PER_BYTE - 1 ) / BITS_PER_BYTE;
+  const int MAX_NAME_SIZE = 20;
+  unsigned char outputMask[ MASK_BYTES ];
+  unsigned char writeBuffer[ MAX_DIO_BYTES ];
+  char name[ MAX_NAME_SIZE + 2 ];
+  unsigned long productID;
+  unsigned long nameSize;
+  unsigned long numDIOBytes;
+  unsigned long numCounters;
+
+  AIOUSB_SetCommTimeout(  DeviceIndex, 1000 );
+
+  result = QueryDeviceInfo( DeviceIndex , &productID , &nameSize, name, &numDIOBytes, &numCounters );  
+
+  for( int port = 0; port < (int)numDIOBytes; port++ ) { 
+    writeBuffer[ port ] = 0x11 * ( port + 1 );
+  }
+
+  result = DIO_Configure( DeviceIndex, AIOUSB_FALSE , outputMask, writeBuffer );
+
+  printf( "Writing patterns to devices:" );
+  fflush( stdout );				// must do for "real-time" feedback
+
+  for( int pattern = 0x00; pattern <= 0xf0; pattern += 0x10 ) {
+    for( int port = 0; port < (int)numDIOBytes; port++ )
+      writeBuffer[ port ] = pattern + DeviceIndex * 0x04 + port;
+          
+    result = DIO_WriteAll( DeviceIndex , writeBuffer );
+          
+    if( result != AIOUSB_SUCCESS )
+      throw("Error performing DIO_WriteAll");
+  }
+}
+
+
+void TestCaseSetup::doDACDirect(int channel, unsigned short value )
+{
+  //DACDirect( DeviceIndex, channel, value  );
+  int result =   DIO_WriteAll(DeviceIndex, &value );
+  std::ostringstream err; 
+  if( result != AIOUSB_SUCCESS ) {
+    err << "Error on DIO_WriteAll result='" << result << "'";
+    throw(err.str());
+  }
+
+}
+
 
 
 /** 
