@@ -215,12 +215,28 @@ typedef struct {
  
 } DeviceDescriptor;
 
+DeviceDescriptor *AIOUSB_getDevice( unsigned long DeviceIndex );
+
+extern unsigned long AIOUSB_INIT_PATTERN;
+extern unsigned long aiousbInit ;
+
+
 #ifndef SWIG
 PRIVATE_EXTERN DeviceDescriptor deviceTable[ MAX_USB_DEVICES ];
+
 PRIVATE_EXTERN AIOUSB_BOOL AIOUSB_Lock(void);
 PRIVATE_EXTERN AIOUSB_BOOL AIOUSB_UnLock(void);
-PRIVATE_EXTERN AIOUSB_BOOL AIOUSB_IsInit(void);
+
+#define AIOUSB_IsInit()  ( aiousbInit == AIOUSB_INIT_PATTERN )
+
+/* PRIVATE_EXTERN AIOUSB_BOOL AIOUSB_IsInit(void); */
 PRIVATE_EXTERN unsigned long AIOUSB_Validate( unsigned long *DeviceIndex );
+PRIVATE_EXTERN unsigned long AIOUSB_Validate_Lock(  unsigned long *DeviceIndex ) ;
+PRIVATE_EXTERN DeviceDescriptor *AIOUSB_GetDevice_Lock( unsigned long DeviceIndex , 
+                                                        unsigned long *result
+                                                        );
+
+
 PRIVATE_EXTERN unsigned long AIOUSB_EnsureOpen( unsigned long DeviceIndex );
 PRIVATE_EXTERN const char *ProductIDToName( unsigned int productID );
 PRIVATE_EXTERN unsigned int ProductNameToID( const char *name );

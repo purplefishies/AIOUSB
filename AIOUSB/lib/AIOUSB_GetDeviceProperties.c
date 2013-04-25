@@ -1,12 +1,11 @@
-/*
- * $RCSfile: AIOUSB_GetDeviceProperties.c,v $
- * $Revision: 1.9 $
- * $Date: 2009/12/23 22:41:21 $
- * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
+/**
+ * @file   AIOUSB_GetDeviceProperties.c
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @release $Format: %at$
+ * @brief  Gets more in depth information about the devices attached
  *
- * ACCES I/O USB API for Linux
  */
-
 
 
 #include "AIOUSB_Core.h"
@@ -22,8 +21,8 @@ namespace AIOUSB {
  * AIOUSB_GetDeviceProperties() returns a richer amount of information than QueryDeviceInfo()
  */
 unsigned long AIOUSB_GetDeviceProperties(
-	unsigned long DeviceIndex
-	, DeviceProperties *properties
+	unsigned long DeviceIndex, 
+        DeviceProperties *properties
 ) {
 	if( properties == 0 )
 		return AIOUSB_ERROR_INVALID_PARAMETER;
@@ -35,7 +34,7 @@ unsigned long AIOUSB_GetDeviceProperties(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	properties->Name = deviceDesc->cachedName;	// if NULL, name will be requested from device

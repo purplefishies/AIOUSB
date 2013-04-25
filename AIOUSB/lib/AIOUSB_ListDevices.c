@@ -40,7 +40,7 @@ void AIOUSB_ListDevices() {
 							// print a heading before the first device found
 							printf( "ACCES devices found:\n" );
 							found = AIOUSB_TRUE;
-						}	// if( ! found )
+						}	
 						printf(
 							"  Device at index %d:\n"
 							"    Product ID: %#lx\n"
@@ -54,7 +54,7 @@ void AIOUSB_ListDevices() {
 							, numCounters
 						);
 					}
-					// else, unknown error occurred; a device was detected, but query failed
+					
 					AIOUSB_Lock();
 				}
 			}

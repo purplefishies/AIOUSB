@@ -33,9 +33,9 @@ static unsigned short OctaveDacFromFreq( double *Hz ) {
 			offset = ( int ) round( 2048.0 - ( ldexp( 2078, 10 + octave ) / *Hz ) );
 			octaveOffset = ( ( unsigned short ) octave << 12 ) | ( ( unsigned short ) offset << 2 );
 			octaveOffset = htons( octaveOffset );	// oscillator wants the value in big-endian format
-		}	// if( octave ...
+		}	
 		*Hz = ( 2078 << octave ) / ( 2.0 - offset / 1024.0 );
-	}	// if( *Hz ...
+	}	
 	return octaveOffset;
 }	// OctaveDacFromFreq()
 
@@ -63,13 +63,13 @@ unsigned long DIO_Configure(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->DIOBytes == 0 ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->DIOBytes ...
+	}	
 
 	if( deviceDesc->LastDIOData != 0 ) {
 		assert( deviceDesc->DIOBytes <= 1000 );	// arbitrary sanity check
@@ -132,7 +132,7 @@ unsigned long DIO_ConfigureEx(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if(
@@ -204,13 +204,13 @@ unsigned long DIO_ConfigurationQuery(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->Tristates == 0 ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->Tristates ...
+	}	
 
 	libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
 	if( deviceHandle != NULL ) {
@@ -235,11 +235,11 @@ unsigned long DIO_ConfigurationQuery(
 		} else {
 			result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
 			AIOUSB_UnLock();
-		}	// if( configBuffer ...
+		}	
 	} else {
 		result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 		AIOUSB_UnLock();
-	}	// if( deviceHandle ...
+	}	
 
 	return result;
 }	// DIO_ConfigurationQuery()
@@ -309,18 +309,18 @@ unsigned long DIO_Write8(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->DIOBytes == 0 ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->DIOBytes ...
+	}	
 
 	if( ByteIndex >= deviceDesc->DIOBytes ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_INVALID_PARAMETER;
-	}	// if( ByteIndex ...
+	}	
 
 	if( deviceDesc->LastDIOData != 0 ) {
 		assert( deviceDesc->DIOBytes <= 1000 );	// arbitrary sanity check
@@ -342,15 +342,15 @@ unsigned long DIO_Write8(
 			} else {
 				result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
 				AIOUSB_UnLock();
-			}	// if( dataBuffer ...
+			}	
 		} else {
 			result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 			AIOUSB_UnLock();
-		}	// if( deviceHandle ...
+		}	
 	} else {
 		result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
 		AIOUSB_UnLock();
-	}	// if( deviceDesc->LastDIOData ...
+	}	
 
 	return result;
 }	// DIO_Write8()
@@ -369,13 +369,13 @@ unsigned long DIO_Write1(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->DIOBytes == 0 ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->DIOBytes ...
+	}	
 
 	const unsigned byteIndex = BitIndex / BITS_PER_BYTE;
 	if(
@@ -387,7 +387,7 @@ unsigned long DIO_Write1(
 	) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_INVALID_PARAMETER;
-	}	// if( ( bData ...
+	}	
 
 	if( deviceDesc->LastDIOData != 0 ) {
 		unsigned char value = deviceDesc->LastDIOData[ byteIndex ];
@@ -401,7 +401,7 @@ unsigned long DIO_Write1(
 	} else {
 		result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
 		AIOUSB_UnLock();
-	}	// if( deviceDesc->LastDIOData ...
+	}	
 
 	return result;
 }
@@ -421,13 +421,13 @@ unsigned long DIO_ReadAll(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->DIOBytes == 0 ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->DIOBytes ...
+	}	
 
 	libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
 	if( deviceHandle != NULL ) {
@@ -442,7 +442,7 @@ unsigned long DIO_ReadAll(
 	} else {
 		result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 		AIOUSB_UnLock();
-	}	// if( deviceHandle ...
+	}	
 
 	return result;
 }
@@ -461,13 +461,13 @@ unsigned long DIO_Read8(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->DIOBytes == 0 ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->DIOBytes ...
+	}	
 
 	if(
 		pBuffer == NULL
@@ -475,7 +475,7 @@ unsigned long DIO_Read8(
 	) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_INVALID_PARAMETER;
-	}	// if( pBuffer ...
+	}	
 
 	assert( deviceDesc->DIOBytes <= 1000 );		// arbitrary sanity check
 	unsigned char *const readBuffer = ( unsigned char * ) malloc( deviceDesc->DIOBytes );
@@ -488,7 +488,7 @@ unsigned long DIO_Read8(
 	} else {
 		result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
 		AIOUSB_UnLock();
-	}	// if( readBuffer ...
+	}	
 
 	return result;
 }
@@ -507,13 +507,13 @@ unsigned long DIO_Read1(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->DIOBytes == 0 ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->DIOBytes ...
+	}	
 
 	if(
 		pBuffer == NULL
@@ -521,7 +521,7 @@ unsigned long DIO_Read1(
 	) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_INVALID_PARAMETER;
-	}	// if( pBuffer ...
+	}	
 
 	AIOUSB_UnLock();							// unlock while communicating with device
 	unsigned char readBuffer;
@@ -531,7 +531,7 @@ unsigned long DIO_Read1(
 			*pBuffer = AIOUSB_TRUE;
 		else
 			*pBuffer = AIOUSB_FALSE;
-	}	// if( ( result ...
+	}	
 
 	return result;
 }
@@ -548,18 +548,18 @@ unsigned long DIO_StreamOpen(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->bDIOStream == AIOUSB_FALSE ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->bDIOStream ...
+	}	
 
 	if( deviceDesc->bDIOOpen ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_OPEN_FAILED;
-	}	// if( deviceDesc->bDIOOpen )
+	}	
 
 	libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
 	if( deviceHandle != NULL ) {
@@ -584,7 +584,7 @@ unsigned long DIO_StreamOpen(
 	} else {
 		result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 		AIOUSB_UnLock();
-	}	// if( deviceHandle ...
+	}	
 
 	return result;
 }
@@ -601,18 +601,18 @@ unsigned long DIO_StreamClose(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->bDIOStream == AIOUSB_FALSE ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->bDIOStream ...
+	}	
 
 	if( deviceDesc->bDIOOpen == AIOUSB_FALSE ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_FILE_NOT_FOUND;
-	}	// if( deviceDesc->bDIOOpen ...
+	}	
 
 	deviceDesc->bDIOOpen = AIOUSB_FALSE;
 
@@ -640,13 +640,13 @@ unsigned long DIO_StreamSetClocks(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->bDIOStream == AIOUSB_FALSE ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->bDIOStream ...
+	}	
 
 	libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
 	if( deviceHandle != NULL ) {
@@ -679,7 +679,7 @@ unsigned long DIO_StreamSetClocks(
 	} else {
 		result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 		AIOUSB_UnLock();
-	}	// if( deviceHandle ...
+	}	
 
 	return result;
 }
@@ -705,18 +705,18 @@ unsigned long DIO_StreamFrame(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->bDIOStream == AIOUSB_FALSE ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->bDIOStream ...
+	}	
 
 	if( deviceDesc->bDIOOpen == AIOUSB_FALSE ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_FILE_NOT_FOUND;
-	}	// if( deviceDesc->bDIOOpen ...
+	}	
 
 	libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
 	if( deviceHandle != NULL ) {
@@ -746,18 +746,18 @@ unsigned long DIO_StreamFrame(
 					total += bytes;
 					data += bytes;
 					remaining -= bytes;
-				}	// if( bytes ...
+				}	
 			} else {
 				result = LIBUSB_RESULT_TO_AIOUSB_RESULT( libusbResult );
 				break;							// from while()
-			}	// if( libusbResult ...
+			}	
 		}	// while( remaining ...
 		if( result == AIOUSB_SUCCESS )
 			*BytesTransferred = total;
 	} else {
 		result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 		AIOUSB_UnLock();
-	}	// if( deviceHandle ...
+	}	
 
 	return result;
 }

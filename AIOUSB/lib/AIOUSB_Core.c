@@ -1,10 +1,9 @@
 /**
- * @file   AIOUSB_ADC.c
- * @author $Author$
- * @date   $Date$
- * @copy
- * @brief
- *  ACCES I/O USB API for Linux
+ * @file   aiousb.h
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @release $Format: %at$
+ * @brief  General header files for the AIOUSB library
  *
  */
 
@@ -170,10 +169,18 @@ PRIVATE DeviceDescriptor deviceTable[ MAX_USB_DEVICES ];
 #if defined( AIOUSB_ENABLE_MUTEX )
 static pthread_mutex_t aiousbMutex;
 #endif
-const unsigned long AIOUSB_INIT_PATTERN = 0x9b6773adul;	// random pattern
-static unsigned long aiousbInit = 0;			// == AIOUSB_INIT_PATTERN if AIOUSB module is initialized
-static const char VERSION_NUMBER[] = "1.93";
-static const char VERSION_DATE[] = "18 March 2013";
+
+
+unsigned long AIOUSB_INIT_PATTERN = 0x9b6773adul;	// random pattern
+unsigned long aiousbInit = 0;			// == AIOUSB_INIT_PATTERN if AIOUSB module is initialized
+
+static const char VERSION_NUMBER[] = "$Format: %at$  1.93";
+static const char VERSION_DATE[] = "$Format: %ad$";
+
+/* Possible change, needs to be short circuited */
+/* PRIVATE AIOUSB_BOOL AIOUSB_IsInit() { */
+/* 	return aiousbInit == AIOUSB_INIT_PATTERN; */
+/* } */
 
 /*
  * o Our mutual exclusion scheme is not intended to be bulletproof. It's primarily intended
@@ -219,10 +226,85 @@ PRIVATE AIOUSB_BOOL AIOUSB_UnLock() {
 
 
 
-PRIVATE AIOUSB_BOOL AIOUSB_IsInit() {
-	return aiousbInit == AIOUSB_INIT_PATTERN;
-}
+/* DeviceDescriptor *AIOUSB_GetDevice_Lock( unsigned long DeviceIndex , unsigned long *result) */
+/* { */
+/*      *result = AIOUSB_Validate( &DeviceIndex ); */
+/*     if( result != AIOUSB_SUCCESS ) { */
+/* 	AIOUSB_UnLock(); */
+/* 	return NULL; */
+/*     } */
+/*     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ]; */
+/*      return &deviceTable[ DeviceIndex ]; */
+/* } */
 
+
+PRIVATE unsigned long AIOUSB_Validate_Lock(  unsigned long *DeviceIndex ) 
+{
+     unsigned long result;
+
+     assert( DeviceIndex != 0 );
+
+     if( ! AIOUSB_Lock() )
+          return AIOUSB_ERROR_INVALID_MUTEX;
+
+     if( ! AIOUSB_IsInit() ) 
+          goto unlock_mutex;
+     
+     if( *DeviceIndex == diFirst ) {
+          /*
+           * find first device on bus
+           */
+          result = AIOUSB_ERROR_FILE_NOT_FOUND;
+          int index;
+          for( index = 0; index < MAX_USB_DEVICES; index++ ) {
+               if( deviceTable[ index ].device != NULL ) {
+                    *DeviceIndex = index;
+                    result = AIOUSB_SUCCESS;
+                    break;							// from for()
+               }
+          }
+     } else if( *DeviceIndex == diOnly ) {
+          /*
+           * find first device on bus, ensuring that it's the only device
+           */
+          result = AIOUSB_ERROR_FILE_NOT_FOUND;
+          int index;
+          for( index = 0; index < MAX_USB_DEVICES; index++ ) {
+               if( deviceTable[ index ].device != NULL ) {
+                    // found a device
+                    if( result != AIOUSB_SUCCESS ) {
+                         /*
+                          * this is the first device found; save this index, but
+                          * keep checking to see that this is the only device
+                          */
+                         *DeviceIndex = index;
+                         result = AIOUSB_SUCCESS;
+                    } else {
+                         /*
+                          * there are multiple devices on the bus
+                          */
+                         result = AIOUSB_ERROR_DUP_NAME;
+                         break;						// from for()
+                    }
+               }
+          }
+     } else {
+          /*
+           * simply verify that the supplied index is valid
+           */
+          if(
+               *DeviceIndex < MAX_USB_DEVICES
+               && deviceTable[ *DeviceIndex ].device != NULL
+               )
+               result = AIOUSB_SUCCESS;
+          else
+               result = AIOUSB_ERROR_INVALID_INDEX;
+     }
+
+unlock_mutex:
+     AIOUSB_UnLock();
+     return result;
+}
 
 
 PRIVATE unsigned long AIOUSB_Validate( unsigned long *DeviceIndex ) {
@@ -772,24 +854,32 @@ GetDeviceName( unsigned long DeviceIndex, const char **name ) {
 				unsigned char *const descData = ( unsigned char * ) malloc( MAX_DESC_SIZE );
 				assert( descData != 0 );
 				if( descData != 0 ) {
-					const int bytesTransferred = libusb_control_transfer( deviceHandle
-						, USB_READ_FROM_DEVICE, CYPRESS_GET_DESC
-						, DESC_PARAMS, 0, descData, MAX_DESC_SIZE, timeout );
+					const int bytesTransferred = libusb_control_transfer( deviceHandle, 
+                                                                                              USB_READ_FROM_DEVICE, 
+                                                                                              CYPRESS_GET_DESC, 
+                                                                                              DESC_PARAMS, 
+                                                                                              0, 
+                                                                                              descData, 
+                                                                                              MAX_DESC_SIZE, 
+                                                                                              timeout 
+                                                                     );
 					if( bytesTransferred == MAX_DESC_SIZE ) {
 
-						/*
-						 * extract device name from descriptor and copy to cached name buffer
-						 *
-						 * descData[ 0 ] = 1 (descriptor length) + 1 (descriptor type) + 2 (Unicode) * string_length
-						 * descData[ 1 ] = \x03 (descriptor type: string)
-						 * descData[ 2 ] = low byte of first character of Unicode string
-						 * descData[ 3 ] = \0 (high byte)
-						 * descData[ 4 ] = low byte of second character of string
-						 * descData[ 5 ] = \0 (high byte)
-						 * ...
-						 * descData[ string_length * 2 ] = low byte of last character of string
-						 * descData[ string_length * 2 + 1 ] = \0 (high byte)
-						 */
+                                             /**
+                                              * @verbatim
+                                              * extract device name from descriptor and copy to cached name buffer
+                                              *
+                                              * descData[ 0 ] = 1 (descriptor length) + 1 (descriptor type) + 2 (Unicode) * string_length
+                                              * descData[ 1 ] = \x03 (descriptor type: string)
+                                              * descData[ 2 ] = low byte of first character of Unicode string
+                                              * descData[ 3 ] = \0 (high byte)
+                                              * descData[ 4 ] = low byte of second character of string
+                                              * descData[ 5 ] = \0 (high byte)
+                                              * ...
+                                              * descData[ string_length * 2 ] = low byte of last character of string
+                                              * descData[ string_length * 2 + 1 ] = \0 (high byte)
+                                              * @endverbatim
+                                              */
 
 						const int srcLength = ( int ) ( ( descData[ 0 ] - 2 ) / 2 );	// characters, not bytes
 						int srcIndex, dstIndex;
@@ -928,7 +1018,7 @@ AIOUSB_BulkTransfer( struct libusb_device_handle *dev_handle,
 				total += bytes;
 				data += bytes;
 				length -= bytes;
-			}	// if( bytes ...
+			}	
 		} else if( libusbResult == LIBUSB_ERROR_TIMEOUT ) {
 			/*
 			 * even if we get a timeout, some data may have been transferred; if so, then
@@ -1006,12 +1096,12 @@ unsigned long GetDevices( void ) {
 
 
 unsigned long QueryDeviceInfo(
-	unsigned long DeviceIndex
-	, unsigned long *pPID
-	, unsigned long *pNameSize
-	, char *pName
-	, unsigned long *pDIOBytes
-	, unsigned long *pCounters
+	unsigned long DeviceIndex, 
+        unsigned long *pPID, 
+        unsigned long *pNameSize, 
+        char *pName, 
+        unsigned long *pDIOBytes, 
+        unsigned long *pCounters
 ) {
 	if( ! AIOUSB_Lock() )
 		return AIOUSB_ERROR_INVALID_MUTEX;
@@ -1020,7 +1110,7 @@ unsigned long QueryDeviceInfo(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( pPID != NULL )
@@ -1092,7 +1182,7 @@ unsigned long GetDeviceSerialNumber(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
@@ -1117,7 +1207,7 @@ unsigned long GetDeviceSerialNumber(
 	} else {
 		result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 		AIOUSB_UnLock();
-	}	// if( deviceHandle ...
+	}	
 
 	return result;
 }	// GetDeviceSerialNumber()
@@ -1178,7 +1268,7 @@ unsigned long AIOUSB_SetStreamingBlockSize(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->bADCStream ) {
@@ -1203,7 +1293,8 @@ unsigned long AIOUSB_ClearFIFO(
      FIFO_Method Method
      ) 
 {
-     if( Method < CLEAR_FIFO_METHOD_IMMEDIATE || Method > num_FIFO_Method ) 
+  if( ! VALID_ENUM(FIFO_Method , Method ) )
+     /* if( Method < CLEAR_FIFO_METHOD_IMMEDIATE || Method > num_FIFO_Method )  */
           return AIOUSB_ERROR_INVALID_PARAMETER;
 
 	if( ! AIOUSB_Lock() )

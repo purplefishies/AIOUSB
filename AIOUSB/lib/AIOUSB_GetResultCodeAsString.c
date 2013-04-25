@@ -105,7 +105,7 @@ const char *AIOUSB_GetResultCodeAsString( unsigned long result ) {
 				resultCodeIndex[ index ] = &resultCodeTable[ index ];
 			qsort( resultCodeIndex, NUM_RESULT_CODES, sizeof( struct ResultCodeName * ), CompareResultCodes );
 			resultCodeIndexCreated = INIT_PATTERN;
-		}	// if( resultCodeIndexCreated ...
+		}	
 
 		struct ResultCodeName key;				// key.name not used
 		key.result = result;
@@ -115,7 +115,7 @@ const char *AIOUSB_GetResultCodeAsString( unsigned long result ) {
 		if( resultCode != 0 )
 			resultText = ( *resultCode )->text;
 		AIOUSB_UnLock();
-	}	// if( AIOUSB_Lock() )
+	}	
 	return resultText;
 }	// AIOUSB_GetResultCodeAsString()
 

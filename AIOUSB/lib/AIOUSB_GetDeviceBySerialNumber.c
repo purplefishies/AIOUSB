@@ -31,7 +31,7 @@ unsigned long GetDeviceBySerialNumber( const __uint64_t *pSerialNumber ) {
 	if( ! AIOUSB_IsInit() ) {
 		AIOUSB_UnLock();
 		return deviceIndex;
-	}	// if( ! AIOUSB_IsInit() )
+	}	
 
 	int index;
 	for( index = 0; index < MAX_USB_DEVICES; index++ ) {
@@ -46,13 +46,13 @@ unsigned long GetDeviceBySerialNumber( const __uint64_t *pSerialNumber ) {
 			) {
 				deviceIndex = index;
 				break;							// from for()
-			}	// if( result ...
+			}	
 			/*
 			 * else, even if we get an error requesting the serial number from
 			 * this device, keep searching
 			 */
-		}	// if( deviceTable[ ...
-	}	// for( index ...
+		}	
+	}	
 
 	AIOUSB_UnLock();
 	return deviceIndex;

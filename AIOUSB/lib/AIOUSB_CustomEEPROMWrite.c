@@ -44,7 +44,7 @@ unsigned long CustomEEPROMWrite(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
@@ -60,7 +60,7 @@ unsigned long CustomEEPROMWrite(
 	} else {
 		result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 		AIOUSB_UnLock();
-	}	// if( deviceHandle ...
+	}	
 
 	return result;
 }	// CustomEEPROMWrite()

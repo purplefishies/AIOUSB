@@ -19,10 +19,17 @@ namespace AIOUSB
 {
 #endif
 
+#define CREATE_ENUM(name, ...) typedef enum { name ## _begin , __VA_ARGS__  , name ## _end } name;
+#define CREATE_ENUM_W_START(name,num, ...) typedef enum { name ## _begin = (num-1), __VA_ARGS__  , name ## _end } name;
+#define LAST_ENUM(name ) (name ## _end-1 )
+#define FIRST_ENUM(name ) (name ## _begin+1)
+#define MIN_VALUE(name ) (name ## _begin+1)
+#define MAX_VALUE(name ) (name ## _end-1)
+#define VALID_ENUM(name,value ) ( value >= FIRST_ENUM(name) && value <= LAST_ENUM(name ))
 
 //@}
 //
-enum {
+typedef enum {
     ACCES_VENDOR_ID                 = 0x1605,
     /**
      * these product IDs are constant
@@ -139,7 +146,7 @@ enum {
     USB_AIO12_128A                  = 0x815b,
     USB_AIO12_128                   = 0x815c,
     USB_AIO12_128E                  = 0x815d
-};    // enum
+} ProductIDS;
 
 
 
@@ -159,25 +166,24 @@ enum {
 /*
  * range codes passed to DACSetBoardRange()
  */
-typedef enum {
-    DAC_RANGE_0_5V                = 0,                // 0-5V
-    DAC_RANGE_5V                  = 1,                // +/-5V
-    DAC_RANGE_0_10V               = 2,                // 0-10V
-    DAC_RANGE_10V                 = 3,                // +/-10V
-} DACRange ;
+CREATE_ENUM_W_START(DACRange,0, 
+                    DAC_RANGE_0_5V,
+                    DAC_RANGE_5V, 
+                    DAC_RANGE_0_10V, 
+                    DAC_RANGE_10V 
+                    );
+
+
 
 /*
  * FIFO clearing methods passed to AIOUSB_ClearFIFO()
  */
-typedef enum {
-    CLEAR_FIFO_METHOD_IMMEDIATE               = 0,
-    CLEAR_FIFO_METHOD_AUTO                    = 1,
-    CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT     = 5,
-    CLEAR_FIFO_METHOD_WAIT                    = 86,
-    num_FIFO_Method
-} FIFO_Method;
-
-
+CREATE_ENUM_W_START(FIFO_Method,0, 
+                    CLEAR_FIFO_METHOD_IMMEDIATE,
+                    CLEAR_FIFO_METHOD_AUTO, 
+                    CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT = 5, 
+                    CLEAR_FIFO_METHOD_WAIT = 86
+                    )
 
 
 
@@ -214,32 +220,35 @@ typedef enum {
  * o we provide an extended AIOUSB API function named AIOUSB_GetResultCodeAsString() that returns a
  *   string representation of the result code, including those derived from a libusb result code
  */
+CREATE_ENUM_W_START( ResultCode, 0 , 
+                     AIOUSB_SUCCESS,
+                     AIOUSB_ERROR_DEVICE_NOT_CONNECTED,
+                     AIOUSB_ERROR_DUP_NAME,
+                     AIOUSB_ERROR_FILE_NOT_FOUND,
+                     AIOUSB_ERROR_INVALID_DATA,
+                     AIOUSB_ERROR_INVALID_INDEX,
+                     AIOUSB_ERROR_INVALID_MUTEX,
+                     AIOUSB_ERROR_INVALID_PARAMETER,
+                     AIOUSB_ERROR_INVALID_THREAD,
+                     AIOUSB_ERROR_NOT_ENOUGH_MEMORY,
+                     AIOUSB_ERROR_NOT_SUPPORTED,
+                     AIOUSB_ERROR_OPEN_FAILED,
+                     AIOUSB_ERROR_BAD_TOKEN_TYPE,
+                     AIOUSB_ERROR_TIMEOUT,
+                     AIOUSB_ERROR_HANDLE_EOF,
+                     AIOUSB_ERROR_DEVICE_NOT_FOUND,
+                     AIOUSB_ERROR_LIBUSB /* Always make the LIBUSB the last element */
+                     );
 
-enum ResultCode {
-    AIOUSB_SUCCESS                                  = 0,
-    AIOUSB_ERROR_DEVICE_NOT_CONNECTED               = 1,
-    AIOUSB_ERROR_DUP_NAME                           = 2,
-    AIOUSB_ERROR_FILE_NOT_FOUND                     = 3,
-    AIOUSB_ERROR_INVALID_DATA                       = 4,
-    AIOUSB_ERROR_INVALID_INDEX                      = 5,
-    AIOUSB_ERROR_INVALID_MUTEX                      = 6,
-    AIOUSB_ERROR_INVALID_PARAMETER                  = 7,
-    AIOUSB_ERROR_INVALID_THREAD                     = 8,
-    AIOUSB_ERROR_NOT_ENOUGH_MEMORY                  = 9,
-    AIOUSB_ERROR_NOT_SUPPORTED                      = 10,
-    AIOUSB_ERROR_OPEN_FAILED                        = 11,
-    AIOUSB_ERROR_BAD_TOKEN_TYPE                     = 12,
-    AIOUSB_ERROR_TIMEOUT                            = 13,
-    AIOUSB_ERROR_HANDLE_EOF                         = 14,
-    AIOUSB_ERROR_LIBUSB                                   = 100
-};    // enum ResultCode
+#define AIOUSB_ERROR_OFFSET 100
 
-#define LIBUSB_RESULT_TO_AIOUSB_RESULT( code )  ( unsigned long )( AIOUSB_ERROR_LIBUSB + -( int )( code ) )
-#define AIOUSB_RESULT_TO_LIBUSB_RESULT( code )  ( -( ( int )( code ) - AIOUSB_ERROR_LIBUSB ) )
+
+#define LIBUSB_RESULT_TO_AIOUSB_RESULT( code )  ( unsigned long )( AIOUSB_ERROR_OFFSET + -( int )( code ) )
+#define AIOUSB_RESULT_TO_LIBUSB_RESULT( code )  ( -( ( int )( code ) - AIOUSB_ERROR_OFFSET ) )
 
 
 #if defined( ENABLE_WINDOWS_RESULT_CODES )
-enum WindowsResultCode {
+typedef enum {
     ERROR_SUCCESS                               = AIOUSB_SUCCESS,
     ERROR_DEVICE_NOT_CONNECTED                  = AIOUSB_ERROR_DEVICE_NOT_CONNECTED,
     ERROR_DUP_NAME                              = AIOUSB_ERROR_DUP_NAME,
@@ -253,11 +262,17 @@ enum WindowsResultCode {
     ERROR_NOT_SUPPORTED                         = AIOUSB_ERROR_NOT_SUPPORTED,
     ERROR_OPEN_FAILED                           = AIOUSB_ERROR_OPEN_FAILED,
     ERROR_TIMEOUT                               = AIOUSB_ERROR_TIMEOUT
-};    // enum WindowsResultCode
+}  WindowsResultCode;
 #endif
 
 
-
+CREATE_ENUM_W_START( ADRegister, 16,
+                     AD_REGISTER_CAL_MODE,
+                     AD_REGISTER_TRIG_COUNT,
+                     AD_REGISTER_START_END,
+                     AD_REGISTER_OVERSAMPLE,
+                     AD_REGISTER_MUX_START_END
+                     );
 
 
 /*
@@ -273,25 +288,14 @@ enum {
     AD_REGISTER_GAIN_CODE               = 0,
 
     AD_CONFIG_CAL_MODE                  = 16,       // calibration mode (one of AD_CAL_MODE_* settings below)
-    AD_REGISTER_CAL_MODE                = 16,
-    
-    
     AD_CONFIG_TRIG_COUNT                = 17,         // trigger and counter clock (one of AD_TRIG_* settings below)
-    AD_REGISTER_TRIG_COUNT              = 17,
-
     AD_CONFIG_START_END                 = 18,         // start and end channels for scan (bits 7-4 contain end channel, bits 3-0 contain start channel)
-    AD_REGISTER_START_END               = 18,
-
     AD_CONFIG_OVERSAMPLE                = 19,         // oversample setting (0-255 samples in addition to single sample)
-    AD_REGISTER_OVERSAMPLE              = 19,
-
     AD_CONFIG_MUX_START_END             = 20,          // MUX start and end channels for scan (bits 7-4 contain end channel MS-nibble, bits 3-0 contain start channel MS-nibble)
 
     // A/D gain codes
     AD_NUM_GAIN_CODES                   = 8,
     AD_DIFFERENTIAL_MODE                = 8,                 // OR with gain code to enable differential mode for channels 0-7
-
-
 
     // A/D trigger and counter bits
     AD_TRIGGER_CTR0_EXT                 = 0x10,             // 1==counter 0 externally triggered
@@ -307,23 +311,22 @@ enum {
                                             | AD_TRIGGER_SCAN
                                             | AD_TRIGGER_EXTERNAL
                                             | AD_TRIGGER_TIMER )
-};    // enum
+};
 
 /*
  * A/D gain codes
  */
-enum ADGainCode {
-    AD_GAIN_CODE_MIN                    = 0,              // 0-10V
-    AD_GAIN_CODE_0_10V                  = 0,                // 0-10V
-    AD_GAIN_CODE_10V                    = 1,                // +/-10V
-    AD_GAIN_CODE_0_5V                   = 2,                // 0-5V
-    AD_GAIN_CODE_5V                     = 3,                // +/-5V
-    AD_GAIN_CODE_0_2V                   = 4,                // 0-2V
-    AD_GAIN_CODE_2V                     = 5,                // +/-2V
-    AD_GAIN_CODE_0_1V                   = 6,                // 0-1V
-    AD_GAIN_CODE_1V                     = 7,                // +/-1V
-    AD_GAIN_CODE_MAX                    = 7                 // +/-1V
-};    // enum ADGainCode
+ CREATE_ENUM_W_START( ADGainCode , 0 ,
+                      AD_GAIN_CODE_0_10V                 ,                // 0-10V
+                      AD_GAIN_CODE_10V                   ,                // +/-10V
+                      AD_GAIN_CODE_0_5V                  ,                // 0-5V
+                      AD_GAIN_CODE_5V                    ,                // +/-5V
+                      AD_GAIN_CODE_0_2V                  ,                // 0-2V
+                      AD_GAIN_CODE_2V                    ,                // +/-2V
+                      AD_GAIN_CODE_0_1V                  ,                // 0-1V
+                      AD_GAIN_CODE_1V                                     // +/-1V
+                      );
+
 
 /*
  * A/D calibration modes; if ground or reference mode is selected, only one A/D
@@ -331,18 +334,19 @@ enum ADGainCode {
  * attempting to read more than one channel or use an oversample setting of more
  * than zero will result in a timeout error
  */
-enum ADCalMode {
+typedef enum  {
     AD_CAL_MODE_NORMAL                  = 0,                // normal measurement
     AD_CAL_MODE_GROUND                  = 1,                // measure ground
     AD_CAL_MODE_REFERENCE               = 3,                // measure reference
     AD_CAL_MODE_BIP_GROUND              = 5,
-};    // enum ADCalMode
+} ADCalMode;
 
 struct ADConfigBlock {
     const void *device;
     unsigned long size;
     unsigned char registers[ AD_MAX_CONFIG_REGISTERS ];
-};    // struct ADConfigBlock
+};
+
 #ifndef __cplusplus
 typedef struct ADConfigBlock ADConfigBlock;
 #endif

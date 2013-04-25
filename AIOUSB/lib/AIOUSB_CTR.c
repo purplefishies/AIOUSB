@@ -1,13 +1,12 @@
-/*
- * $RCSfile: AIOUSB_CTR.c,v $
- * $Revision: 1.7 $
- * $Date: 2009/11/11 19:33:26 $
- * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
+/**
+ * @file   
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @copy
+ * @brief
+ *  ACCES I/O USB API for Linux
  *
- * ACCES I/O USB API for Linux
  */
-
-
 
 #include "AIOUSB_Core.h"
 #include <math.h>
@@ -21,10 +20,10 @@ namespace AIOUSB {
 
 
 unsigned long CTR_8254Mode(
-	unsigned long DeviceIndex
-	, unsigned long BlockIndex
-	, unsigned long CounterIndex
-	, unsigned long Mode
+	unsigned long DeviceIndex, 
+        unsigned long BlockIndex, 
+        unsigned long CounterIndex, 
+        unsigned long Mode
 ) {
 	if( Mode >= COUNTER_NUM_MODES )
 		return AIOUSB_ERROR_INVALID_PARAMETER;
@@ -36,13 +35,13 @@ unsigned long CTR_8254Mode(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->Counters == 0 ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->Counters ...
+	}	
 
 	if( BlockIndex == 0 ) {
 		// contiguous counter addressing
@@ -51,7 +50,7 @@ unsigned long CTR_8254Mode(
 		if( BlockIndex >= deviceDesc->Counters ) {
 			AIOUSB_UnLock();
 			return AIOUSB_ERROR_INVALID_PARAMETER;
-		}	// if( BlockIndex ...
+		}
 	} else {
 		if(
 			BlockIndex >= deviceDesc->Counters
@@ -59,8 +58,8 @@ unsigned long CTR_8254Mode(
 		) {
 			AIOUSB_UnLock();
 			return AIOUSB_ERROR_INVALID_PARAMETER;
-		}	// if( BlockIndex ...
-	}	// if( BlockIndex ...
+		}
+	}
 
 	libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
 	if( deviceHandle != NULL ) {
@@ -71,14 +70,21 @@ unsigned long CTR_8254Mode(
 			| ( 0x3u << ( 4 + 8 ) )
 			| ( ( unsigned short ) Mode << ( 1 + 8 ) )
 			| ( unsigned short ) BlockIndex;
-		const int bytesTransferred = libusb_control_transfer( deviceHandle, USB_WRITE_TO_DEVICE, AUR_CTR_MODE
-			, controlValue, 0, 0, 0 /* wLength */, timeout );
+		const int bytesTransferred = libusb_control_transfer( deviceHandle, 
+                                                                      USB_WRITE_TO_DEVICE, 
+                                                                      AUR_CTR_MODE,
+                                                                      controlValue, 
+                                                                      0, 
+                                                                      0, 
+                                                                      0 /* wLength */, 
+                                                                      timeout 
+                                                                      );
 		if( bytesTransferred != 0 )
 			result = LIBUSB_RESULT_TO_AIOUSB_RESULT( bytesTransferred );
 	} else {
 		result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 		AIOUSB_UnLock();
-	}	// if( deviceHandle ...
+	}	
 
 	return result;
 }	// CTR_8254Mode()
@@ -86,10 +92,10 @@ unsigned long CTR_8254Mode(
 
 
 unsigned long CTR_8254Load(
-	unsigned long DeviceIndex
-	, unsigned long BlockIndex
-	, unsigned long CounterIndex
-	, unsigned short LoadValue
+	unsigned long DeviceIndex, 
+        unsigned long BlockIndex, 
+        unsigned long CounterIndex, 
+        unsigned short LoadValue
 ) {
 	if( ! AIOUSB_Lock() )
 		return AIOUSB_ERROR_INVALID_MUTEX;
@@ -98,13 +104,13 @@ unsigned long CTR_8254Load(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->Counters == 0 ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->Counters ...
+	}	
 
 	if( BlockIndex == 0 ) {
 		// contiguous counter addressing
@@ -113,7 +119,7 @@ unsigned long CTR_8254Load(
 		if( BlockIndex >= deviceDesc->Counters ) {
 			AIOUSB_UnLock();
 			return AIOUSB_ERROR_INVALID_PARAMETER;
-		}	// if( BlockIndex ...
+		}
 	} else {
 		if(
 			BlockIndex >= deviceDesc->Counters
@@ -121,13 +127,13 @@ unsigned long CTR_8254Load(
 		) {
 			AIOUSB_UnLock();
 			return AIOUSB_ERROR_INVALID_PARAMETER;
-		}	// if( BlockIndex ...
-	}	// if( BlockIndex ...
+		}
+	}
 
 	libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
 	if( deviceHandle != NULL ) {
 		const unsigned timeout = deviceDesc->commTimeout;
-		AIOUSB_UnLock();						// unlock while communicating with device
+		AIOUSB_UnLock(); // unlock while communicating with device
 		const unsigned short controlValue
 			= ( ( unsigned short ) CounterIndex << ( 6 + 8 ) )
 			// | ( 0x3u << ( 4 + 8 ) )
@@ -140,19 +146,19 @@ unsigned long CTR_8254Load(
 	} else {
 		result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 		AIOUSB_UnLock();
-	}	// if( deviceHandle ...
+	}
 
 	return result;
-}	// CTR_8254Load()
+}
 
 
 
 unsigned long CTR_8254ModeLoad(
-	unsigned long DeviceIndex
-	, unsigned long BlockIndex
-	, unsigned long CounterIndex
-	, unsigned long Mode
-	, unsigned short LoadValue
+	unsigned long DeviceIndex, 
+        unsigned long BlockIndex, 
+        unsigned long CounterIndex, 
+        unsigned long Mode, 
+        unsigned short LoadValue
 ) {
 	if( Mode >= COUNTER_NUM_MODES )
 		return AIOUSB_ERROR_INVALID_PARAMETER;
@@ -164,13 +170,13 @@ unsigned long CTR_8254ModeLoad(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->Counters == 0 ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->Counters ...
+	}
 
 	if( BlockIndex == 0 ) {
 		// contiguous counter addressing
@@ -179,7 +185,7 @@ unsigned long CTR_8254ModeLoad(
 		if( BlockIndex >= deviceDesc->Counters ) {
 			AIOUSB_UnLock();
 			return AIOUSB_ERROR_INVALID_PARAMETER;
-		}	// if( BlockIndex ...
+		}
 	} else {
 		if(
 			BlockIndex >= deviceDesc->Counters
@@ -187,8 +193,8 @@ unsigned long CTR_8254ModeLoad(
 		) {
 			AIOUSB_UnLock();
 			return AIOUSB_ERROR_INVALID_PARAMETER;
-		}	// if( BlockIndex ...
-	}	// if( BlockIndex ...
+		}
+	}
 
 	libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
 	if( deviceHandle != NULL ) {
@@ -206,20 +212,20 @@ unsigned long CTR_8254ModeLoad(
 	} else {
 		result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 		AIOUSB_UnLock();
-	}	// if( deviceHandle ...
+	}
 
 	return result;
-}	// CTR_8254ModeLoad()
+}
 
 
 
 unsigned long CTR_8254ReadModeLoad(
-	unsigned long DeviceIndex
-	, unsigned long BlockIndex
-	, unsigned long CounterIndex
-	, unsigned long Mode
-	, unsigned short LoadValue
-	, unsigned short *pReadValue
+	unsigned long DeviceIndex, 
+        unsigned long BlockIndex, 
+        unsigned long CounterIndex, 
+        unsigned long Mode, 
+        unsigned short LoadValue, 
+        unsigned short *pReadValue
 ) {
 	if(
 		Mode >= COUNTER_NUM_MODES
@@ -234,13 +240,13 @@ unsigned long CTR_8254ReadModeLoad(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->Counters == 0 ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->Counters ...
+	}
 
 	if( BlockIndex == 0 ) {
 		// contiguous counter addressing
@@ -249,7 +255,7 @@ unsigned long CTR_8254ReadModeLoad(
 		if( BlockIndex >= deviceDesc->Counters ) {
 			AIOUSB_UnLock();
 			return AIOUSB_ERROR_INVALID_PARAMETER;
-		}	// if( BlockIndex ...
+		}
 	} else {
 		if(
 			BlockIndex >= deviceDesc->Counters
@@ -257,8 +263,8 @@ unsigned long CTR_8254ReadModeLoad(
 		) {
 			AIOUSB_UnLock();
 			return AIOUSB_ERROR_INVALID_PARAMETER;
-		}	// if( BlockIndex ...
-	}	// if( BlockIndex ...
+		}
+	}
 
 	libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
 	if( deviceHandle != NULL ) {
@@ -280,18 +286,18 @@ unsigned long CTR_8254ReadModeLoad(
 	} else {
 		result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 		AIOUSB_UnLock();
-	}	// if( deviceHandle ...
+	}
 
 	return result;
-}	// CTR_8254ReadModeLoad()
+}
 
 
 
 unsigned long CTR_8254Read(
-	unsigned long DeviceIndex
-	, unsigned long BlockIndex
-	, unsigned long CounterIndex
-	, unsigned short *pReadValue
+	unsigned long DeviceIndex, 
+        unsigned long BlockIndex, 
+        unsigned long CounterIndex, 
+        unsigned short *pReadValue
 ) {
 	if( pReadValue == NULL )
 		return AIOUSB_ERROR_INVALID_PARAMETER;
@@ -303,13 +309,13 @@ unsigned long CTR_8254Read(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->Counters == 0 ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->Counters ...
+	}
 
 	if( BlockIndex == 0 ) {
 		// contiguous counter addressing
@@ -318,7 +324,7 @@ unsigned long CTR_8254Read(
 		if( BlockIndex >= deviceDesc->Counters ) {
 			AIOUSB_UnLock();
 			return AIOUSB_ERROR_INVALID_PARAMETER;
-		}	// if( BlockIndex ...
+		}
 	} else {
 		if(
 			BlockIndex >= deviceDesc->Counters
@@ -326,19 +332,24 @@ unsigned long CTR_8254Read(
 		) {
 			AIOUSB_UnLock();
 			return AIOUSB_ERROR_INVALID_PARAMETER;
-		}	// if( BlockIndex ...
-	}	// if( BlockIndex ...
+		}
+	}
 
 	libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
 	if( deviceHandle != NULL ) {
 		const unsigned timeout = deviceDesc->commTimeout;
 		AIOUSB_UnLock();						// unlock while communicating with device
 		unsigned short readValue;
-		const unsigned short controlValue
-			= ( ( unsigned short ) CounterIndex << 8 )
-			| ( unsigned short ) BlockIndex;
-		const int bytesTransferred = libusb_control_transfer( deviceHandle, USB_READ_FROM_DEVICE, AUR_CTR_READ
-			, controlValue, 0, ( unsigned char * ) &readValue, sizeof( readValue ), timeout );
+		const unsigned short controlValue = (( unsigned short ) CounterIndex << 8 ) | ( unsigned short ) BlockIndex;
+		const int bytesTransferred = libusb_control_transfer( deviceHandle, 
+                                                                      USB_READ_FROM_DEVICE, 
+                                                                      AUR_CTR_READ,			
+                                                                      controlValue, 
+                                                                      0, 
+                                                                      ( unsigned char * ) &readValue, 
+                                                                      sizeof( readValue ), 
+                                                                      timeout 
+                                                                      );
 		if( bytesTransferred == sizeof( readValue ) ) {
 			// TODO: verify endian mode; original code had it reversed
 			*pReadValue = readValue;
@@ -347,16 +358,16 @@ unsigned long CTR_8254Read(
 	} else {
 		result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 		AIOUSB_UnLock();
-	}	// if( deviceHandle ...
+	}
 
 	return result;
-}	// CTR_8254Read()
+}
 
 
 
 unsigned long CTR_8254ReadAll(
-	unsigned long DeviceIndex
-	, unsigned short *pData
+	unsigned long DeviceIndex, 
+        unsigned short *pData
 ) {
 	if( pData == NULL )
 		return AIOUSB_ERROR_INVALID_PARAMETER;
@@ -368,13 +379,13 @@ unsigned long CTR_8254ReadAll(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->Counters == 0 ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->Counters ...
+	}	
 
 	libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
 	if( deviceHandle != NULL ) {
@@ -388,7 +399,7 @@ unsigned long CTR_8254ReadAll(
 	} else {
 		result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 		AIOUSB_UnLock();
-	}	// if( deviceHandle ...
+	}	
 
 	return result;
 }	// CTR_8254ReadAll()
@@ -415,13 +426,13 @@ unsigned long CTR_8254ReadStatus(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->Counters == 0 ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->Counters ...
+	}	
 
 	if( BlockIndex == 0 ) {
 		// contiguous counter addressing
@@ -430,7 +441,7 @@ unsigned long CTR_8254ReadStatus(
 		if( BlockIndex >= deviceDesc->Counters ) {
 			AIOUSB_UnLock();
 			return AIOUSB_ERROR_INVALID_PARAMETER;
-		}	// if( BlockIndex ...
+		}	
 	} else {
 		if(
 			BlockIndex >= deviceDesc->Counters
@@ -438,8 +449,8 @@ unsigned long CTR_8254ReadStatus(
 		) {
 			AIOUSB_UnLock();
 			return AIOUSB_ERROR_INVALID_PARAMETER;
-		}	// if( BlockIndex ...
-	}	// if( BlockIndex ...
+		}	
+	}	
 
 	libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
 	if( deviceHandle != NULL ) {
@@ -461,7 +472,7 @@ unsigned long CTR_8254ReadStatus(
 	} else {
 		result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 		AIOUSB_UnLock();
-	}	// if( deviceHandle ...
+	}	
 
 	return result;
 }	// CTR_8254ReadStatus()
@@ -480,13 +491,13 @@ unsigned long CTR_StartOutputFreq(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	const DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->Counters == 0 ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->Counters ...
+	}	
 
 	if(
 		BlockIndex >= deviceDesc->Counters
@@ -494,7 +505,7 @@ unsigned long CTR_StartOutputFreq(
 	) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_INVALID_PARAMETER;
-	}	// if( BlockIndex ...
+	}	
 
     if( *pHz <= 0 ) {
     	/*
@@ -552,9 +563,9 @@ unsigned long CTR_StartOutputFreq(
 					minFreqError = freqError;
 					bestHighDivisor = highDivisor;
 					bestLowDivisor = lowDivisor;
-				}	// else if( ! minFreqErrorValid ...
-			}	// for( lowDivisor ...
-		}	// if( divisor ...
+				}	
+			}	
+		}	
 #if defined( DEBUG_START_CLOCK )
 		printf( "  %8ld  %8ld  %8ld (final)\n", bestHighDivisor, bestLowDivisor, minFreqError );
 #endif
@@ -565,7 +576,7 @@ unsigned long CTR_StartOutputFreq(
 		if( result != AIOUSB_SUCCESS )
 			return result;
 		*pHz = rootClock / ( bestHighDivisor * bestLowDivisor );	// actual clock speed
-	}	// if( *pHz ...
+	}	
 
 	return result;
 }	// CTR_StartOutputFreq()
@@ -583,7 +594,7 @@ unsigned long CTR_8254SelectGate(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if(
@@ -592,12 +603,12 @@ unsigned long CTR_8254SelectGate(
 	) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->Counters ...
+	}	
 
 	if( GateIndex >= deviceDesc->Counters * COUNTERS_PER_BLOCK ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_INVALID_PARAMETER;
-	}	// if( GateIndex ...
+	}	
 
 	libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
 	if( deviceHandle != NULL ) {
@@ -610,7 +621,7 @@ unsigned long CTR_8254SelectGate(
 	} else {
 		result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 		AIOUSB_UnLock();
-	}	// if( deviceHandle ...
+	}	
 
 	return result;
 }	// CTR_8254SelectGate()
@@ -618,8 +629,8 @@ unsigned long CTR_8254SelectGate(
 
 
 unsigned long CTR_8254ReadLatched(
-	unsigned long DeviceIndex
-	, unsigned short *pData
+	unsigned long DeviceIndex, 
+        unsigned short *pData
 ) {
 	if( pData == NULL )
 		return AIOUSB_ERROR_INVALID_PARAMETER;
@@ -631,13 +642,13 @@ unsigned long CTR_8254ReadLatched(
 	if( result != AIOUSB_SUCCESS ) {
 		AIOUSB_UnLock();
 		return result;
-	}	// if( result ...
+	}	
 
 	DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 	if( deviceDesc->Counters == 0 ) {
 		AIOUSB_UnLock();
 		return AIOUSB_ERROR_NOT_SUPPORTED;
-	}	// if( deviceDesc->Counters ...
+	}	
 
 	libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex );
 	if( deviceHandle != NULL ) {
@@ -651,7 +662,7 @@ unsigned long CTR_8254ReadLatched(
 	} else {
 		result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
 		AIOUSB_UnLock();
-	}	// if( deviceHandle ...
+	}	
 
 	return result;
 }	// CTR_8254ReadLatched()
