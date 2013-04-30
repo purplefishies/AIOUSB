@@ -17,13 +17,10 @@
  /* ALternative using pointer wrappers */
 
 
-
-
 %{
   #include "AIOUSB_Core.h"
   #include "aiousb.h"
   #include "libusb.h"
-
 %}
 
 %include "AIOUSB_Core.h"

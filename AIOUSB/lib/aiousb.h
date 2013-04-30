@@ -2,7 +2,7 @@
  * @file   aiousb.h
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %at$
+ * @release $Format: %t$
  * @brief  General header files for the AIOUSB library
  *
  */
@@ -155,13 +155,13 @@ typedef enum {
  * generic device indexes
  */
 enum {
-    // passed to ResolveDeviceIndex()
-    diFirst                       = 0xFFFFFFFEul,     // -2
-    diOnly                        = 0xFFFFFFFDul,     // -3
+     /* passed to ResolveDeviceIndex() */
+    diFirst                       = 0xFFFFFFFEul,      /* -2 */
+    diOnly                        = 0xFFFFFFFDul,      /* -3 */
 
-    // returned by ResolveDeviceIndex()
-    diNone                        = 0xFFFFFFFFul      // -1
-};    // enum
+     /* returned by ResolveDeviceIndex() */
+    diNone                        = 0xFFFFFFFFul       /* -1 */
+};
 
 /*
  * range codes passed to DACSetBoardRange()
@@ -187,8 +187,8 @@ CREATE_ENUM_W_START(FIFO_Method,0,
 
 
 
-/*
- * the AIOUSB function result codes are a bit confusing; the result codes used in the Windows
+/**
+ * The AIOUSB function result codes are a bit confusing; the result codes used in the Windows
  * implementation of the API are defined in a system file, winerror.h; these result codes
  * are generic and can apply to many applications; the very first result code, ERROR_SUCCESS,
  * sounds like an oxymoron; the result codes used in libusb, on the other hand, are a lot
@@ -200,24 +200,24 @@ CREATE_ENUM_W_START(FIFO_Method,0,
  * an AIOUSB API function to fail; so to satisfy all these requirements, we've employed the
  * following scheme:
  *
- * o AIOUSB result codes in Linux start with "AIOUSB_"; the result code for success is
+ * - AIOUSB result codes in Linux start with "AIOUSB_"; the result code for success is
  *   AIOUSB_SUCCESS, which has a value of zero; the result codes for errors are AIOUSB_ERROR_xxx,
  *   which have positive values, starting with one (1)
  *
- * o in order to offer users the option of using result codes whose names are similar to those
+ * - in order to offer users the option of using result codes whose names are similar to those
  *   cited in the AIOUSB API specification, we define a second set of result codes with names
  *   similar to those in API specification but which map to the same values as the AIOUSB_xxx
  *   result codes; these alternate result code names can be enabled by defining the macro
  *   ENABLE_WINDOWS_RESULT_CODES, which is not enabled by default
  *
- * o in order to preserve the original libusb result codes and pass them back from an AIOUSB API
+ * - in order to preserve the original libusb result codes and pass them back from an AIOUSB API
  *   function, we translate the libusb result codes to a format that conforms to the one
  *   AIOUSB employs and provide macros for converting the AIOUSB result code back to a libusb
  *   result code; LIBUSB_RESULT_TO_AIOUSB_RESULT() converts a libusb result code to an AIOUSB
  *   result code; AIOUSB_RESULT_TO_LIBUSB_RESULT() does the reverse; these macros cannot be
  *   used with LIBUSB_SUCCESS
  *
- * o we provide an extended AIOUSB API function named AIOUSB_GetResultCodeAsString() that returns a
+ * - we provide an extended AIOUSB API function named AIOUSB_GetResultCodeAsString() that returns a
  *   string representation of the result code, including those derived from a libusb result code
  */
 CREATE_ENUM_W_START( ResultCode, 0 , 
@@ -279,32 +279,32 @@ CREATE_ENUM_W_START( ADRegister, 16,
  * general constants
  */
 enum {
-    AD_MAX_CONFIG_REGISTERS             = 21,       // maximum number of "registers" (bytes) in A/D config. block
-    AD_NUM_GAIN_CODE_REGISTERS          = 16,          // number of gain code registers in A/D config. block
+    AD_MAX_CONFIG_REGISTERS             = 21, /* maximum number of "registers" (bytes) in A/D config. block */
+    AD_NUM_GAIN_CODE_REGISTERS          = 16, /* number of gain code registers in A/D config. block */
 
-    // A/D configuration block indexes
-    AD_CONFIG_GAIN_CODE                 = 0, // gain code for A/D channel 0 (one of GAIN_CODE_* settings below)
-                                             // gain codes for channels 1-15 occupy configuration block indexes 1-15
+     /* A/D configuration block indexes */
+    AD_CONFIG_GAIN_CODE                 = 0,  /* gain code for A/D channel 0 (one of GAIN_CODE_* settings below) */
+                                              /* gain codes for channels 1-15 occupy configuration block indexes 1-15 */
     AD_REGISTER_GAIN_CODE               = 0,
 
-    AD_CONFIG_CAL_MODE                  = 16,       // calibration mode (one of AD_CAL_MODE_* settings below)
-    AD_CONFIG_TRIG_COUNT                = 17,         // trigger and counter clock (one of AD_TRIG_* settings below)
-    AD_CONFIG_START_END                 = 18,         // start and end channels for scan (bits 7-4 contain end channel, bits 3-0 contain start channel)
-    AD_CONFIG_OVERSAMPLE                = 19,         // oversample setting (0-255 samples in addition to single sample)
-    AD_CONFIG_MUX_START_END             = 20,          // MUX start and end channels for scan (bits 7-4 contain end channel MS-nibble, bits 3-0 contain start channel MS-nibble)
+    AD_CONFIG_CAL_MODE                  = 16, /* calibration mode (one of AD_CAL_MODE_* settings below) */
+    AD_CONFIG_TRIG_COUNT                = 17, /* trigger and counter clock (one of AD_TRIG_* settings below) */
+    AD_CONFIG_START_END                 = 18, /* start and end channels for scan (bits 7-4 contain end channel, bits 3-0 contain start channel) */
+    AD_CONFIG_OVERSAMPLE                = 19, /* oversample setting (0-255 samples in addition to single sample) */
+    AD_CONFIG_MUX_START_END             = 20, /* MUX start and end channels for scan (bits 7-4 contain end channel MS-nibble, bits 3-0 contain start channel MS-nibble) */
 
-    // A/D gain codes
+     /* A/D gain codes */
     AD_NUM_GAIN_CODES                   = 8,
-    AD_DIFFERENTIAL_MODE                = 8,                 // OR with gain code to enable differential mode for channels 0-7
+    AD_DIFFERENTIAL_MODE                = 8, /* OR with gain code to enable differential mode for channels 0-7 */
 
-    // A/D trigger and counter bits
-    AD_TRIGGER_CTR0_EXT                 = 0x10,             // 1==counter 0 externally triggered
-    AD_TRIGGER_FALLING_EDGE             = 0x08,             // 1==triggered by falling edge
-    AD_TRIGGER_SCAN                     = 0x04,             // 1==scan all channels, 0==single channel
+     /* A/D trigger and counter bits */
+    AD_TRIGGER_CTR0_EXT                 = 0x10, /* 1==counter 0 externally triggered */
+    AD_TRIGGER_FALLING_EDGE             = 0x08, /* 1==triggered by falling edge */
+    AD_TRIGGER_SCAN                     = 0x04, /* 1==scan all channels, 0==single channel */
 
     /* mutually exclusive for now */
-    AD_TRIGGER_EXTERNAL                 = 0x02,             // 1==triggered by external pin on board
-    AD_TRIGGER_TIMER                    = 0x01,             // 1==triggered by counter 2
+    AD_TRIGGER_EXTERNAL                 = 0x02,              /* 1==triggered by external pin on board */
+    AD_TRIGGER_TIMER                    = 0x01,              /* 1==triggered by counter 2 */
 
     AD_TRIGGER_VALID_MASK               = ( AD_TRIGGER_CTR0_EXT
                                             | AD_TRIGGER_FALLING_EDGE
@@ -316,28 +316,27 @@ enum {
 /*
  * A/D gain codes
  */
- CREATE_ENUM_W_START( ADGainCode , 0 ,
-                      AD_GAIN_CODE_0_10V                 ,                // 0-10V
-                      AD_GAIN_CODE_10V                   ,                // +/-10V
-                      AD_GAIN_CODE_0_5V                  ,                // 0-5V
-                      AD_GAIN_CODE_5V                    ,                // +/-5V
-                      AD_GAIN_CODE_0_2V                  ,                // 0-2V
-                      AD_GAIN_CODE_2V                    ,                // +/-2V
-                      AD_GAIN_CODE_0_1V                  ,                // 0-1V
-                      AD_GAIN_CODE_1V                                     // +/-1V
-                      );
-
+CREATE_ENUM_W_START( ADGainCode , 0      ,
+                     AD_GAIN_CODE_0_10V  ,  /* 0-10V */
+                     AD_GAIN_CODE_10V    ,  /* +/-10V */
+                     AD_GAIN_CODE_0_5V   ,  /* 0-5V */
+                     AD_GAIN_CODE_5V     ,  /* +/-5V */
+                     AD_GAIN_CODE_0_2V   ,  /* 0-2V */
+                     AD_GAIN_CODE_2V     ,  /* +/-2V */
+                     AD_GAIN_CODE_0_1V   ,  /* 0-1V */
+                     AD_GAIN_CODE_1V        /* +/-1V */
+                     )
 
 /*
  * A/D calibration modes; if ground or reference mode is selected, only one A/D
- * sample may be taken at a time; that means, one channel and no oversampling;
+ * sample may be taken at a time; that means, one channel and no oversampling
  * attempting to read more than one channel or use an oversample setting of more
  * than zero will result in a timeout error
  */
 typedef enum  {
-    AD_CAL_MODE_NORMAL                  = 0,                // normal measurement
-    AD_CAL_MODE_GROUND                  = 1,                // measure ground
-    AD_CAL_MODE_REFERENCE               = 3,                // measure reference
+    AD_CAL_MODE_NORMAL                  = 0,                 /* normal measurement */
+    AD_CAL_MODE_GROUND                  = 1,                 /* measure ground */
+    AD_CAL_MODE_REFERENCE               = 3,                 /* measure reference */
     AD_CAL_MODE_BIP_GROUND              = 5,
 } ADCalMode;
 
@@ -356,18 +355,18 @@ typedef struct ADConfigBlock ADConfigBlock;
 
 
 struct DeviceProperties {
-    const char *Name;               // null-terminated device name or 0
-    __uint64_t SerialNumber;        // 64-bit serial number or 0
-    unsigned ProductID;             // 16-bit product ID
-    unsigned DIOPorts;              // number of digital I/O ports (bytes)
-    unsigned Counters;              // number of 8254 counter blocks
-    unsigned Tristates;             // number of tristates
-    long RootClock;                 // base clock frequency
-    unsigned DACChannels;           // number of D/A channels
-    unsigned ADCChannels;           // number of A/D channels
-    unsigned ADCMUXChannels;        // number of MUXed A/D channels
-    unsigned ADCChannelsPerGroup;   // number of A/D channels in each config. group
-};    // struct DeviceProperties
+    const char *Name;                /* null-terminated device name or 0 */
+    __uint64_t SerialNumber;         /* 64-bit serial number or 0 */
+    unsigned ProductID;              /* 16-bit product ID */
+    unsigned DIOPorts;               /* number of digital I/O ports (bytes) */
+    unsigned Counters;               /* number of 8254 counter blocks */
+    unsigned Tristates;              /* number of tristates */
+    long RootClock;                  /* base clock frequency */
+    unsigned DACChannels;            /* number of D/A channels */
+    unsigned ADCChannels;            /* number of A/D channels */
+    unsigned ADCMUXChannels;         /* number of MUXed A/D channels */
+    unsigned ADCChannelsPerGroup;    /* number of A/D channels in each config. group */
+};     /* struct DeviceProperties */
 #ifndef __cplusplus
 typedef struct DeviceProperties DeviceProperties;
 #endif
@@ -392,13 +391,13 @@ const bool TRUE = true;
 enum AIOUSB_BOOL_VAL {
     AIOUSB_FALSE                        = 0,
     AIOUSB_TRUE                         = 1
-};    // enum AIOUSB_BOOL
+};     /* enum AIOUSB_BOOL */
 typedef enum AIOUSB_BOOL_VAL AIOUSB_BOOL;
 #if defined( ENABLE_BOOL_TYPE )
 enum BOOL {
     FALSE                               = 0,
     TRUE                                = 1
-};    // enum BOOL
+};     /* enum BOOL */
 typedef enum BOOL BOOL;
 #endif
 #endif
@@ -584,6 +583,11 @@ extern unsigned long ADC_SetOversample(
     unsigned long DeviceIndex,
     unsigned char Oversample );
 
+extern unsigned ADC_GetOversample(
+    unsigned long DeviceIndex);
+
+
+
 extern unsigned long ADC_SetScanLimits(
     unsigned long DeviceIndex,
     unsigned long StartChannel,
@@ -728,12 +732,12 @@ extern unsigned long AIOUSB_ClearFIFO(
 
 
 
-extern const char *AIOUSB_GetVersion(void);               // returns AIOUSB module version number as a string
-extern const char *AIOUSB_GetVersionDate(void);           // returns AIOUSB module version date as a string
-extern const char *AIOUSB_GetResultCodeAsString( unsigned long result );      // gets string representation of AIOUSB_xxx result code
-extern void AIOUSB_ListDevices(void);                     // prints list of USB devices to standard output (useful for debugging)
-extern unsigned long AIOUSB_Init(void);                         // must be called before use of other functions in AIOUSB
-extern void AIOUSB_Exit(void);                                  // must be called after last use of other functions in AIOUSB
+extern const char *AIOUSB_GetVersion(void);                /* returns AIOUSB module version number as a string */
+extern const char *AIOUSB_GetVersionDate(void);            /* returns AIOUSB module version date as a string */
+extern const char *AIOUSB_GetResultCodeAsString( unsigned long result );       /* gets string representation of AIOUSB_xxx result code */
+extern void AIOUSB_ListDevices(void);                      /* prints list of USB devices to standard output (useful for debugging) */
+extern unsigned long AIOUSB_Init(void);                          /* must be called before use of other functions in AIOUSB */
+extern void AIOUSB_Exit(void);                                   /* must be called after last use of other functions in AIOUSB */
 extern unsigned long AIOUSB_Reset(
     unsigned long DeviceIndex );
 
@@ -831,10 +835,10 @@ extern unsigned long AIOUSB_ADC_ExternalCal(
  * AIOUSB_InitConfigBlock() is akin to a class "constructor"; below is an example of how
  * to use these functions/methods
  *
- * ADConfigBlock configBlock;	// create "instance"
- * AIOUSB_InitConfigBlock( &configBlock, DeviceIndex, AIOUSB_TRUE );		// call "constructor"
+ * ADConfigBlock configBlock;
+ * AIOUSB_InitConfigBlock( &configBlock, DeviceIndex, AIOUSB_TRUE );		 //call "constructor"
  *   ... set up other properties ...
- * ADC_SetConfig( DeviceIndex, configBlock.registers, &configBlock.size );	// send configuration block to device
+ * ADC_SetConfig( DeviceIndex, configBlock.registers, &configBlock.size );	 //send configuration block to device
  */
 extern void AIOUSB_InitConfigBlock( ADConfigBlock *config, unsigned long DeviceIndex, AIOUSB_BOOL defaults );
 extern void AIOUSB_SetAllGainCodeAndDiffMode( ADConfigBlock *config, unsigned gainCode, AIOUSB_BOOL differentialMode );
@@ -854,7 +858,7 @@ extern void AIOUSB_SetOversample( ADConfigBlock *config, unsigned overSample );
 
 
 #ifdef __cplusplus
-}     // namespace AIOUSB
+}      /* namespace AIOUSB */
 #endif
 
 
