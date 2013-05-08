@@ -38,7 +38,7 @@ namespace AIOUSB {
 #endif
 
 
-
+int aio_errno;
 
 #ifdef __cplusplus
 const int PROD_NAME_SIZE = 40;
@@ -1265,41 +1265,39 @@ AIOUSB_GetStreamingBlockSize(unsigned long DeviceIndex)
 
 
 
-unsigned long AIOUSB_SetStreamingBlockSize(
-    unsigned long DeviceIndex,
-    unsigned long BlockSize
-    )
+unsigned long 
+AIOUSB_SetStreamingBlockSize(
+     unsigned long DeviceIndex,
+     unsigned long BlockSize
+     )
 {
-    if(
-        BlockSize == 0 ||
-        BlockSize > 31ul * 1024ul * 1024ul
-        )
-        return AIOUSB_ERROR_INVALID_PARAMETER;
+     if( BlockSize == 0 || BlockSize > 31ul * 1024ul * 1024ul )
+          return AIOUSB_ERROR_INVALID_PARAMETER;
+     
+     if(!AIOUSB_Lock())
+          return AIOUSB_ERROR_INVALID_MUTEX;
 
-    if(!AIOUSB_Lock())
-        return AIOUSB_ERROR_INVALID_MUTEX;
-
-    unsigned long result = AIOUSB_Validate(&DeviceIndex);
-    if(result != AIOUSB_SUCCESS) {
+     unsigned long result = AIOUSB_Validate(&DeviceIndex);
+     if(result != AIOUSB_SUCCESS) {
           AIOUSB_UnLock();
           return result;
-      }
+     }
 
-    DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
-    if(deviceDesc->bADCStream) {
+     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
+     if(deviceDesc->bADCStream) {
           if((BlockSize & 0x1FF) != 0)
-              BlockSize = (BlockSize & 0xFFFFFE00ul) + 0x200;
+               BlockSize = (BlockSize & 0xFFFFFE00ul) + 0x200;
           deviceDesc->StreamingBlockSize = BlockSize;
-      }else if(deviceDesc->bDIOStream) {
+     } else if(deviceDesc->bDIOStream) {
           if((BlockSize & 0xFF) != 0)
-              BlockSize = (BlockSize & 0xFFFFFF00ul) + 0x100;
+               BlockSize = (BlockSize & 0xFFFFFF00ul) + 0x100;
           deviceDesc->StreamingBlockSize = BlockSize;
-      }else
-        result = AIOUSB_ERROR_NOT_SUPPORTED;
+     } else
+          result = AIOUSB_ERROR_NOT_SUPPORTED;
 
-    AIOUSB_UnLock();
-    return result;
-}       // AIOUSB_SetStreamingBlockSize()
+     AIOUSB_UnLock();
+     return result;
+}
 
 
 

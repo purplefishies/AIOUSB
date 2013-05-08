@@ -471,7 +471,7 @@ unsigned long CTR_8254ReadStatus(
           const int bytesTransferred = libusb_control_transfer(deviceHandle, USB_READ_FROM_DEVICE, AUR_CTR_READ,
                                                                controlValue, 0, readData, READ_BYTES, timeout);
           if(bytesTransferred == READ_BYTES) {
-// TODO: verify endian mode; original code had it reversed
+            /* @todo: verify endian mode; original code had it reversed */
                 *pReadValue = *( unsigned short* )readData;
                 *pStatus = readData[ 2 ];
             }else
@@ -482,7 +482,7 @@ unsigned long CTR_8254ReadStatus(
       }
 
     return result;
-}       // CTR_8254ReadStatus()
+}   /* CTR_8254ReadStatus() */
 
 
 
@@ -516,9 +516,8 @@ unsigned long CTR_StartOutputFreq(
       }
 
     if(*pHz <= 0) {
-/*
- * turn off counters
- */
+                                /* turn off counters */
+
           AIOUSB_UnLock();                                                    // unlock while communicating with device
           result = CTR_8254Mode(DeviceIndex, BlockIndex, 1, 2);
           if(result != AIOUSB_SUCCESS)
@@ -622,9 +621,15 @@ unsigned long CTR_8254SelectGate(
     libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
     if(deviceHandle != NULL) {
           const unsigned timeout = deviceDesc->commTimeout;
-          AIOUSB_UnLock();                                                    // unlock while communicating with device
-          const int bytesTransferred = libusb_control_transfer(deviceHandle, USB_WRITE_TO_DEVICE, AUR_CTR_SELGATE,
-                                                               GateIndex, 0, 0, 0 /* wLength */, timeout);
+          AIOUSB_UnLock();   // unlock while communicating with device
+          const int bytesTransferred = libusb_control_transfer(deviceHandle, 
+                                                               USB_WRITE_TO_DEVICE, 
+                                                               AUR_CTR_SELGATE,
+                                                               GateIndex, 
+                                                               0, 
+                                                               0, 
+                                                               0 /* wLength */, 
+                                                               timeout);
           if(bytesTransferred != 0)
               result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
       }else {

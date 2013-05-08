@@ -25,8 +25,15 @@
 
 %}
 
+%newobject CreateSmartBuffer;
+%newobject NewBuffer;
+%delobject AIOBuf::DeleteBuffer;
+
 %include "AIOUSB_Core.h"
 %include "aiousb.h"
+
+
+
 %extend AIOBuf {
   AIOBuf(int bufsize)  {
     return (AIOBuf *)NewBuffer( bufsize );
@@ -36,5 +43,7 @@
   }
 
 }
+
+
 
 

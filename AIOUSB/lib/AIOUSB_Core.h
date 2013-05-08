@@ -29,6 +29,9 @@ namespace AIOUSB {
 #define PRIVATE
 
 
+PRIVATE_EXTERN int aio_errno;
+
+
 
 enum {
     // partially defined in "Low-Level Vendor Request Reference.pdf"
@@ -223,6 +226,8 @@ extern unsigned long aiousbInit ;
 
 PRIVATE_EXTERN ADConfigBlock *AIOUSB_GetConfigBlock( unsigned long DeviceIndex );
 PRIVATE_EXTERN unsigned long AIOUSB_SetConfigBlock( unsigned long DeviceIndex , ADConfigBlock *entry);
+PRIVATE_EXTERN AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex );
+
 
 #ifndef SWIG
 PRIVATE_EXTERN DeviceDescriptor deviceTable[ MAX_USB_DEVICES ];

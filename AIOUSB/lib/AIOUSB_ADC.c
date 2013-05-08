@@ -283,6 +283,8 @@ AIOUSB_SetConfigBlock( unsigned long DeviceIndex , ADConfigBlock *entry )
 {
      unsigned long result = AIOUSB_SUCCESS;
      DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock( DeviceIndex, &result);
+     if( !entry ) 
+          return AIOUSB_ERROR_INVALID_DATA;
      if(!deviceDesc || result != AIOUSB_SUCCESS)
           return AIOUSB_ERROR_INVALID_DATA;
 
@@ -1641,12 +1643,24 @@ static void *BulkAcquireWorker(void *params)
 AIOBuf *
 NewBuffer( int bufsize )
 {
-  AIOBuf *tmp = (AIOBuf*)malloc( sizeof( AIOBuf) );
-  tmp->bufsize = bufsize;
-  printf("allocating space %d bytes\n",(int)sizeof(unsigned short)*tmp->bufsize );
-  tmp->buffer = (unsigned short *)malloc( sizeof(unsigned short)*tmp->bufsize );
-  tmp->bytes_remaining = 0;
-  return tmp;
+     AIOBuf *tmp = (AIOBuf*)malloc( sizeof( AIOBuf) );
+     if( !tmp ) {
+          aio_errno = -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+          goto out_ret;
+     }
+
+     tmp->bytes_remaining = 0;
+     tmp->bufsize = bufsize;
+  
+     printf("allocating space %d bytes\n",(int)sizeof(unsigned short)*tmp->bufsize );
+     tmp->buffer = (unsigned short *)malloc( sizeof(unsigned short)*tmp->bufsize );
+     if( !tmp->buffer ) {
+          aio_errno = -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+          free(tmp);
+          tmp = NULL;
+     }
+out_ret:
+     return tmp;
 }
 
 void
@@ -1655,18 +1669,38 @@ DeleteBuffer( AIOBuf *buf )
   if( !buf ) 
     return;
 
-  printf("Freeing buffer of size  %d bytes\n",buf->bufsize );
+  printf("Freeing buffer of size  %d bytes\n",(int)(buf->bufsize*sizeof(unsigned short)) );
 
   if( buf->buffer ) 
     free(buf->buffer );
   free(buf);
 }
 
+/* CreateSmartBuffer(unsigned int num_scans, unsigned int num_channels, unsigned int num_oversamples )  */
+
+
+/** 
+ * @desc After setting up your oversamples and such, creates a new
+ * AIOBuf object that can be used for BulkAcquiring.
+ * 
+ * @param DeviceIndex 
+ * 
+ * @return AIOBuf * new Buffer object for BulkAcquire methods
+ * @todo Replace 16 with correct channels returned by probing the device
+ */
 AIOBuf *
-CreateSmartBuffer(unsigned int num_scans, unsigned int num_channels, unsigned int num_oversamples ) 
+CreateSmartBuffer( unsigned long DeviceIndex )
 {
-  assert( num_oversamples < 0 || num_oversamples > 255 );
-  return NewBuffer( num_scans*num_channels*(1+num_oversamples)*sizeof(unsigned short) );
+  unsigned long result;
+  DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
+  if(!deviceDesc || result != AIOUSB_SUCCESS) {
+       aio_errno = -result;
+       return (AIOBuf*)NULL;
+  }
+  
+  long size = ((1 + ADC_GetOversample( DeviceIndex ) ) * 16 * sizeof( unsigned short ) * AIOUSB_GetStreamingBlockSize(DeviceIndex)) ;
+
+  return NewBuffer( size );
 }
 
 
