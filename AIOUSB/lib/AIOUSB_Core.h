@@ -221,6 +221,9 @@ extern unsigned long AIOUSB_INIT_PATTERN;
 extern unsigned long aiousbInit ;
 
 
+PRIVATE_EXTERN ADConfigBlock *AIOUSB_GetConfigBlock( unsigned long DeviceIndex );
+PRIVATE_EXTERN unsigned long AIOUSB_SetConfigBlock( unsigned long DeviceIndex , ADConfigBlock *entry);
+
 #ifndef SWIG
 PRIVATE_EXTERN DeviceDescriptor deviceTable[ MAX_USB_DEVICES ];
 
@@ -235,6 +238,8 @@ PRIVATE_EXTERN unsigned long AIOUSB_Validate_Lock(  unsigned long *DeviceIndex )
 PRIVATE_EXTERN DeviceDescriptor *AIOUSB_GetDevice_Lock( unsigned long DeviceIndex , 
                                                         unsigned long *result
                                                         );
+
+
 
 
 PRIVATE_EXTERN unsigned long AIOUSB_EnsureOpen( unsigned long DeviceIndex );

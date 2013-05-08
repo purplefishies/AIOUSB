@@ -27,9 +27,9 @@ clean:
 	-rm -rf build
 	if [ -f Makefile ] ;  then  $(MAKE) -f Makefile clean ; fi
 	-rm -f *~	
-	-rm AIOUSB_wrap.c
-	-rm *.pyc
-	-rm Makefile.old
+	-rm -f AIOUSB_wrap.c
+	-rm -f *.pyc
+	-rm -f Makefile.old
 
 perl:
 	$(SWIG) -I${LIBDIR}  -perl5 AIOUSB.i 

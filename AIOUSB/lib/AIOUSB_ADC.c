@@ -129,6 +129,7 @@ static unsigned long ADC_GetImmediate(
 
 /* } */
 
+
 /**
  *
  *
@@ -217,7 +218,6 @@ ReadConfigBlock(unsigned long DeviceIndex,
 }
 
 
-
 /**
  *
  *
@@ -266,7 +266,34 @@ WriteConfigBlock(unsigned long DeviceIndex)
 
 
 
+ADConfigBlock *
+AIOUSB_GetConfigBlock( unsigned long DeviceIndex )
+{
+     unsigned long result = ReadConfigBlock( DeviceIndex, AIOUSB_TRUE );
+     DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
+     if(!deviceDesc || result != AIOUSB_SUCCESS)
+          return (ADConfigBlock *)NULL;
+     
+     AIOUSB_UnLock();
+     return &deviceDesc->cachedConfigBlock;
+}
 
+unsigned long
+AIOUSB_SetConfigBlock( unsigned long DeviceIndex , ADConfigBlock *entry )
+{
+     unsigned long result = AIOUSB_SUCCESS;
+     DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock( DeviceIndex, &result);
+     if(!deviceDesc || result != AIOUSB_SUCCESS)
+          return AIOUSB_ERROR_INVALID_DATA;
+
+    
+     memcpy(&(deviceDesc->cachedConfigBlock), entry, sizeof( ADConfigBlock ) );
+
+     AIOUSB_UnLock();
+     result = WriteConfigBlock(  DeviceIndex );
+
+     return result;
+}
 
 
 
@@ -315,19 +342,27 @@ AIOUSB_GetScan(
                 assert(startChannel <= endChannel);
                 int numChannels = endChannel - startChannel + 1;
 
-/*
- * in theory, all the A/D functions, including AIOUSB_GetScan(), should work in all
- * measurement modes, including calibration mode; in practice, however, the device
- * will return only a single sample in calibration mode; therefore, users must be
- * careful to select a single channel and set oversample to zero during calibration
- * mode; attempting to read more than one channel or use an oversample setting of
- * more than zero in calibration mode will result in a timeout error; as a convenience
- * to the user we automatically impose this restriction here in AIOUSB_GetScan(); if
- * the device is changed to permit normal use of the A/D functions in calibration
- * mode, we will have to modify this function to somehow recognize which devices
- * support that capability, or simply delete this restriction altogether and rely on
- * the users' good judgment
- */
+                /**
+                 * in theory, all the A/D functions, including
+                 * AIOUSB_GetScan(), should work in all measurement
+                 * modes, including calibration mode; in practice,
+                 * however, the device will return only a single
+                 * sample in calibration mode; therefore, users must
+                 * be careful to select a single channel and set
+                 * oversample to zero during calibration mode;
+                 * attempting to read more than one channel or use an
+                 * oversample setting of more than zero in calibration
+                 * mode will result in a timeout error; as a
+                 * convenience to the user we automatically impose
+                 * this restriction here in AIOUSB_GetScan(); if the
+                 * device is changed to permit normal use of the A/D
+                 * functions in calibration mode, we will have to
+                 * modify this function to somehow recognize which
+                 * devices support that capability, or simply delete
+                 * this restriction altogether and rely on the users'
+                 * good judgment
+                 */
+
                 const unsigned calMode = AIOUSB_GetCalMode(&deviceDesc->cachedConfigBlock);
                 if(calMode == AD_CAL_MODE_GROUND || calMode == AD_CAL_MODE_REFERENCE) {
                       if(numChannels > 1) {
@@ -342,9 +377,10 @@ AIOUSB_GetScan(
                       discardFirstSample = AIOUSB_FALSE;           // this feature can't be used in calibration mode either
                   }
 
-/*
- * turn scan on and turn timer and external trigger off
- */
+                /**
+                 * turn scan on and turn timer and external trigger
+                 * off
+                 */
                 const unsigned origTriggerMode = AIOUSB_GetTriggerMode(&deviceDesc->cachedConfigBlock);
                 unsigned triggerMode = origTriggerMode;
                 triggerMode |= AD_TRIGGER_SCAN;                                              // enable scan
@@ -354,19 +390,30 @@ AIOUSB_GetScan(
                       configChanged = AIOUSB_TRUE;
                   }
 
-/*
- * the oversample setting dictates how many samples to take _in addition_ to the primary
- * sample; if oversample is zero, we take just one sample for each channel; if oversample
- * is greater than zero then we average the primary sample and all of its over-samples; if
- * the discardFirstSample setting is enabled, then we discard the primary sample, leaving
- * just the over-samples; thus, if discardFirstSample is enabled, we must take at least one
- * over-sample in order to have any data left; there's another complication: the device
- * buffer is limited to a small number of samples, so we have to limit the number of
- * over-samples to what the device buffer can accommodate, so the actual oversample setting
- * depends on the number of channels being scanned; we also preserve and restore the original
- * oversample setting specified by the user; since the user is expecting to average
- * (1 + oversample) samples, then if discardFirstSample is enabled we simply always add one
- */
+                /**
+                 * the oversample setting dictates how many samples to
+                 * take _in addition_ to the primary sample; if
+                 * oversample is zero, we take just one sample for
+                 * each channel; if oversample is greater than zero
+                 * then we average the primary sample and all of its
+                 * over-samples; if the discardFirstSample setting is
+                 * enabled, then we discard the primary sample,
+                 * leaving just the over-samples; thus, if
+                 * discardFirstSample is enabled, we must take at
+                 * least one over-sample in order to have any data
+                 * left; there's another complication: the device
+                 * buffer is limited to a small number of samples, so
+                 * we have to limit the number of over-samples to what
+                 * the device buffer can accommodate, so the actual
+                 * oversample setting depends on the number of
+                 * channels being scanned; we also preserve and
+                 * restore the original oversample setting specified
+                 * by the user; since the user is expecting to average
+                 * (1 + oversample) samples, then if
+                 * discardFirstSample is enabled we simply always add
+                 * one
+                 */
+
                 const unsigned origOverSample = overSample;
                 int samplesPerChannel = 1 + origOverSample;
                 if(discardFirstSample)
@@ -374,10 +421,11 @@ AIOUSB_GetScan(
                 if(samplesPerChannel > 256)
                     samplesPerChannel = 256;              // constrained by maximum oversample of 255
 
-/*
- * make sure device buffer can accommodate this number of samples
- */
-                const int DEVICE_SAMPLE_BUFFER_SIZE = 1024;          // number of samples device can buffer
+                /**
+                 * make sure device buffer can accommodate this number
+                 * of samples
+                 */
+                const int DEVICE_SAMPLE_BUFFER_SIZE = 1024;   /* number of samples device can buffer */
                 if((numChannels * samplesPerChannel) > DEVICE_SAMPLE_BUFFER_SIZE)
                     samplesPerChannel = DEVICE_SAMPLE_BUFFER_SIZE / numChannels;
                 overSample = samplesPerChannel - 1;
@@ -1470,11 +1518,11 @@ unsigned long ADC_BulkAcquire(
         = ( struct BulkAcquireWorkerParams* )malloc(sizeof(struct BulkAcquireWorkerParams));
     assert(acquireParams != 0);
     if(acquireParams != 0) {
-/*
- * we initialize the worker thread status here in case the thread doesn't start for some reason,
- * such as an improperly locked mutex; this pre-initialization is necessary so that the thread
- * status doesn't make it appear as though the worker thread has completed successfully
- */
+      /**
+       * we initialize the worker thread status here in case the thread doesn't start for some reason,
+       * such as an improperly locked mutex; this pre-initialization is necessary so that the thread
+       * status doesn't make it appear as though the worker thread has completed successfully
+       */
           AIOUSB_Lock();
           deviceDesc->workerStatus = BufSize;       // deviceDesc->workerStatus == bytes remaining to receive
           deviceDesc->workerResult = AIOUSB_ERROR_INVALID_DATA;
@@ -1514,19 +1562,16 @@ unsigned long ADC_BulkAcquire(
 }
 
 
+
 /**
- *
- *
+ * @desc we assume the parameters passed to BulkAcquireWorker() have
+ * been validated by ADC_BulkAcquire()
  * @param params
- *
  * @return
  */
 static void *BulkAcquireWorker(void *params)
 {
-/*
- * we assume the parameters passed to BulkAcquireWorker() have
- * been validated by ADC_BulkAcquire()
- */
+
     assert(params != 0);
     unsigned long result = AIOUSB_SUCCESS;
     struct BulkAcquireWorkerParams *const acquireParams = ( struct BulkAcquireWorkerParams* )params;
@@ -1593,6 +1638,64 @@ static void *BulkAcquireWorker(void *params)
     return 0;
 }
 
+AIOBuf *
+NewBuffer( int bufsize )
+{
+  AIOBuf *tmp = (AIOBuf*)malloc( sizeof( AIOBuf) );
+  tmp->bufsize = bufsize;
+  printf("allocating space %d bytes\n",(int)sizeof(unsigned short)*tmp->bufsize );
+  tmp->buffer = (unsigned short *)malloc( sizeof(unsigned short)*tmp->bufsize );
+  tmp->bytes_remaining = 0;
+  return tmp;
+}
+
+void
+DeleteBuffer( AIOBuf *buf )
+{
+  if( !buf ) 
+    return;
+
+  printf("Freeing buffer of size  %d bytes\n",buf->bufsize );
+
+  if( buf->buffer ) 
+    free(buf->buffer );
+  free(buf);
+}
+
+AIOBuf *
+CreateSmartBuffer(unsigned int num_scans, unsigned int num_channels, unsigned int num_oversamples ) 
+{
+  assert( num_oversamples < 0 || num_oversamples > 255 );
+  return NewBuffer( num_scans*num_channels*(1+num_oversamples)*sizeof(unsigned short) );
+}
+
+
+AIORET_TYPE  
+BulkAcquire(
+            unsigned long DeviceIndex,
+            AIOBuf *aiobuf
+            )
+{
+  AIORET_TYPE result = 0;
+  ADC_BulkAcquire( DeviceIndex, aiobuf->bufsize, &aiobuf->buffer );
+  return result;
+
+}
+
+
+AIORET_TYPE  
+BulkPoll(
+         unsigned long DeviceIndex,
+         AIOBuf *aiobuf
+         )
+{
+  AIORET_TYPE result= AIOUSB_SUCCESS;
+  unsigned long retval = ADC_BulkPoll( DeviceIndex, &aiobuf->bytes_remaining );
+  if( retval != AIOUSB_SUCCESS ) 
+    result = - retval;
+
+  return result;
+}
 
 
 

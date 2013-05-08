@@ -177,10 +177,6 @@ unsigned long aiousbInit = 0;                   // == AIOUSB_INIT_PATTERN if AIO
 static const char VERSION_NUMBER[] = "$Format: %t$";
 static const char VERSION_DATE[] = "$Format: %ad$";
 
-/* Possible change, needs to be short circuited */
-/* PRIVATE AIOUSB_BOOL AIOUSB_IsInit() { */
-/*      return aiousbInit == AIOUSB_INIT_PATTERN; */
-/* } */
 
 /*
  * o Our mutual exclusion scheme is not intended to be bulletproof. It's primarily intended
