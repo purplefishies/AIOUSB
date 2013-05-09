@@ -8,6 +8,7 @@
 /* } */
 %pointer_functions( unsigned long,  ulp );
 %pointer_functions( unsigned short, usp );
+%pointer_functions( double , dp );
 
 
 %include typemaps.i

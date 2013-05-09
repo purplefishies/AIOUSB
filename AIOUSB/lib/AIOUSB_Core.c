@@ -40,121 +40,113 @@ namespace AIOUSB {
 
 int aio_errno;
 
-#ifdef __cplusplus
-const int PROD_NAME_SIZE = 40;
-#else
-#define PROD_NAME_SIZE 40
-#endif
-static const struct ProductIDName {
-    unsigned int id;
-    char name[ PROD_NAME_SIZE + 2 ];
-} productIDNameTable[] = {
-    { USB_DA12_8A_REV_A, "USB-DA12-8A-A" },
-    { USB_DA12_8A, "USB-DA12-8A" },
-    { USB_DA12_8E, "USB-DA12-8E" },
-    { USB_DIO_32, "USB-DIO-32" },
-    { USB_DIO_48, "USB-DIO-48" },
-    { USB_DIO_96, "USB-DIO-96" },
-    { USB_DI16A_REV_A1, "USB-DI16A-A1" },
-    { USB_DO16A_REV_A1, "USB-DO16A-A1" },
-    { USB_DI16A_REV_A2, "USB-DI16A-A2" },
-    { USB_DIO_16H, "USB-DIO-16H" },
-    { USB_DI16A, "USB-DI16A" },
-    { USB_DO16A, "USB-DO16A" },
-    { USB_DIO_16A, "USB-DIO-16A" },
-    { USB_IIRO_16, "USB-IIRO-16" },
-    { USB_II_16, "USB-II-16" },
-    { USB_RO_16, "USB-RO-16" },
-    { USB_IIRO_8, "USB-IIRO-8" },
-    { USB_II_8, "USB-II-8" },
-    { USB_IIRO_4, "USB-IIRO-4" },
-    { USB_IDIO_16, "USB-IDIO-16" },
-    { USB_II_16_OLD, "USB-II-16-OLD" },
-    { USB_IDO_16, "USB-IDO-16" },
-    { USB_IDIO_8, "USB-IDIO-8" },
-    { USB_II_8_OLD, "USB-II-8-OLD" },
-    { USB_IDIO_4, "USB-IDIO-4" },
-    { USB_CTR_15, "USB-CTR-15" },
-    { USB_IIRO4_2SM, "USB-IIRO4-2SM" },
-    { USB_IIRO4_COM, "USB-IIRO4-COM" },
-    { USB_DIO16RO8, "USB-DIO16RO8" },
-    { PICO_DIO16RO8, "PICO-DIO16RO8" },
-    { USB_AI16_16A, "USB-AI16-16A" },
-    { USB_AI16_16E, "USB-AI16-16E" },
-    { USB_AI12_16A, "USB-AI12-16A" },
-    { USB_AI12_16, "USB-AI12-16" },
-    { USB_AI12_16E, "USB-AI12-16E" },
-    { USB_AI16_64MA, "USB-AI16-64MA" },
-    { USB_AI16_64ME, "USB-AI16-64ME" },
-    { USB_AI12_64MA, "USB-AI12-64MA" },
-    { USB_AI12_64M, "USB-AI12-64M" },
-    { USB_AI12_64ME, "USB-AI12-64ME" },
-    { USB_AI16_32A, "USB-AI16-32A" },
-    { USB_AI16_32E, "USB-AI16-32E" },
-    { USB_AI12_32A, "USB-AI12-32A" },
-    { USB_AI12_32, "USB-AI12-32" },
-    { USB_AI12_32E, "USB-AI12-32E" },
-    { USB_AI16_64A, "USB-AI16-64A" },
-    { USB_AI16_64E, "USB-AI16-64E" },
-    { USB_AI12_64A, "USB-AI12-64A" },
-    { USB_AI12_64, "USB-AI12-64" },
-    { USB_AI12_64E, "USB-AI12-64E" },
-    { USB_AI16_96A, "USB-AI16-96A" },
-    { USB_AI16_96E, "USB-AI16-96E" },
-    { USB_AI12_96A, "USB-AI12-96A" },
-    { USB_AI12_96, "USB-AI12-96" },
-    { USB_AI12_96E, "USB-AI12-96E" },
-    { USB_AI16_128A, "USB-AI16-128A" },
-    { USB_AI16_128E, "USB-AI16-128E" },
-    { USB_AI12_128A, "USB-AI12-128A" },
-    { USB_AI12_128, "USB-AI12-128" },
-    { USB_AI12_128E, "USB-AI12-128E" },
-    { USB_AO16_16A, "USB-AO16-16A" },
-    { USB_AO16_16, "USB-AO16-16" },
-    { USB_AO16_12A, "USB-AO16-12A" },
-    { USB_AO16_12, "USB-AO16-12" },
-    { USB_AO16_8A, "USB-AO16-8A" },
-    { USB_AO16_8, "USB-AO16-8" },
-    { USB_AO16_4A, "USB-AO16-4A" },
-    { USB_AO16_4, "USB-AO16-4" },
-    { USB_AO12_16A, "USB-AO12-16A" },
-    { USB_AO12_16, "USB-AO12-16" },
-    { USB_AO12_12A, "USB-AO12-12A" },
-    { USB_AO12_12, "USB-AO12-12" },
-    { USB_AO12_8A, "USB-AO12-8A" },
-    { USB_AO12_8, "USB-AO12-8" },
-    { USB_AO12_4A, "USB-AO12-4A" },
-    { USB_AO12_4, "USB-AO12-4" },
-    { USB_AIO16_16A, "USB-AIO16-16A" },
-    { USB_AIO16_16E, "USB-AIO16-16E" },
-    { USB_AIO12_16A, "USB-AIO12-16A" },
-    { USB_AIO12_16, "USB-AIO12-16" },
-    { USB_AIO12_16E, "USB-AIO12-16E" },
-    { USB_AIO16_64MA, "USB-AIO16-64MA" },
-    { USB_AIO16_64ME, "USB-AIO16-64ME" },
-    { USB_AIO12_64MA, "USB-AIO12-64MA" },
-    { USB_AIO12_64M, "USB-AIO12-64M" },
-    { USB_AIO12_64ME, "USB-AIO12-64ME" },
-    { USB_AIO16_32A, "USB-AIO16-32A" },
-    { USB_AIO16_32E, "USB-AIO16-32E" },
-    { USB_AIO12_32A, "USB-AIO12-32A" },
-    { USB_AIO12_32, "USB-AIO12-32" },
-    { USB_AIO12_32E, "USB-AIO12-32E" },
-    { USB_AIO16_64A, "USB-AIO16-64A" },
-    { USB_AIO16_64E, "USB-AIO16-64E" },
-    { USB_AIO12_64A, "USB-AIO12-64A" },
-    { USB_AIO12_64, "USB-AIO12-64" },
-    { USB_AIO12_64E, "USB-AIO12-64E" },
-    { USB_AIO16_96A, "USB-AIO16-96A" },
-    { USB_AIO16_96E, "USB-AIO16-96E" },
-    { USB_AIO12_96A, "USB-AIO12-96A" },
-    { USB_AIO12_96, "USB-AIO12-96" },
-    { USB_AIO12_96E, "USB-AIO12-96E" },
-    { USB_AIO16_128A, "USB-AIO16-128A" },
-    { USB_AIO16_128E, "USB-AIO16-128E" },
-    { USB_AIO12_128A, "USB-AIO12-128A" },
-    { USB_AIO12_128, "USB-AIO12-128" },
-    { USB_AIO12_128E, "USB-AIO12-128E" }
+static const ProductIDName productIDNameTable[] = {
+    { USB_DA12_8A_REV_A , "USB-DA12-8A-A"  },
+    { USB_DA12_8A       , "USB-DA12-8A"    },
+    { USB_DA12_8E       , "USB-DA12-8E"    },
+    { USB_DIO_32        , "USB-DIO-32"     },
+    { USB_DIO_48        , "USB-DIO-48"     },
+    { USB_DIO_96        , "USB-DIO-96"     },
+    { USB_DI16A_REV_A1  , "USB-DI16A-A1"   },
+    { USB_DO16A_REV_A1  , "USB-DO16A-A1"   },
+    { USB_DI16A_REV_A2  , "USB-DI16A-A2"   },
+    { USB_DIO_16H       , "USB-DIO-16H"    },
+    { USB_DI16A         , "USB-DI16A"      },
+    { USB_DO16A         , "USB-DO16A"      },
+    { USB_DIO_16A       , "USB-DIO-16A"    },
+    { USB_IIRO_16       , "USB-IIRO-16"    },
+    { USB_II_16         , "USB-II-16"      },
+    { USB_RO_16         , "USB-RO-16"      },
+    { USB_IIRO_8        , "USB-IIRO-8"     },
+    { USB_II_8          , "USB-II-8"       },
+    { USB_IIRO_4        , "USB-IIRO-4"     },
+    { USB_IDIO_16       , "USB-IDIO-16"    },
+    { USB_II_16_OLD     , "USB-II-16-OLD"  },
+    { USB_IDO_16        , "USB-IDO-16"     },
+    { USB_IDIO_8        , "USB-IDIO-8"     },
+    { USB_II_8_OLD      , "USB-II-8-OLD"   },
+    { USB_IDIO_4        , "USB-IDIO-4"     },
+    { USB_CTR_15        , "USB-CTR-15"     },
+    { USB_IIRO4_2SM     , "USB-IIRO4-2SM"  },
+    { USB_IIRO4_COM     , "USB-IIRO4-COM"  },
+    { USB_DIO16RO8      , "USB-DIO16RO8"   },
+    { PICO_DIO16RO8     , "PICO-DIO16RO8"  },
+    { USB_AI16_16A      , "USB-AI16-16A"   },
+    { USB_AI16_16E      , "USB-AI16-16E"   },
+    { USB_AI12_16A      , "USB-AI12-16A"   },
+    { USB_AI12_16       , "USB-AI12-16"    },
+    { USB_AI12_16E      , "USB-AI12-16E"   },
+    { USB_AI16_64MA     , "USB-AI16-64MA"  },
+    { USB_AI16_64ME     , "USB-AI16-64ME"  },
+    { USB_AI12_64MA     , "USB-AI12-64MA"  },
+    { USB_AI12_64M      , "USB-AI12-64M"   },
+    { USB_AI12_64ME     , "USB-AI12-64ME"  },
+    { USB_AI16_32A      , "USB-AI16-32A"   },
+    { USB_AI16_32E      , "USB-AI16-32E"   },
+    { USB_AI12_32A      , "USB-AI12-32A"   },
+    { USB_AI12_32       , "USB-AI12-32"    },
+    { USB_AI12_32E      , "USB-AI12-32E"   },
+    { USB_AI16_64A      , "USB-AI16-64A"   },
+    { USB_AI16_64E      , "USB-AI16-64E"   },
+    { USB_AI12_64A      , "USB-AI12-64A"   },
+    { USB_AI12_64       , "USB-AI12-64"    },
+    { USB_AI12_64E      , "USB-AI12-64E"   },
+    { USB_AI16_96A      , "USB-AI16-96A"   },
+    { USB_AI16_96E      , "USB-AI16-96E"   },
+    { USB_AI12_96A      , "USB-AI12-96A"   },
+    { USB_AI12_96       , "USB-AI12-96"    },
+    { USB_AI12_96E      , "USB-AI12-96E"   },
+    { USB_AI16_128A     , "USB-AI16-128A"  },
+    { USB_AI16_128E     , "USB-AI16-128E"  },
+    { USB_AI12_128A     , "USB-AI12-128A"  },
+    { USB_AI12_128      , "USB-AI12-128"   },
+    { USB_AI12_128E     , "USB-AI12-128E"  },
+    { USB_AO16_16A      , "USB-AO16-16A"   },
+    { USB_AO16_16       , "USB-AO16-16"    },
+    { USB_AO16_12A      , "USB-AO16-12A"   },
+    { USB_AO16_12       , "USB-AO16-12"    },
+    { USB_AO16_8A       , "USB-AO16-8A"    },
+    { USB_AO16_8        , "USB-AO16-8"     },
+    { USB_AO16_4A       , "USB-AO16-4A"    },
+    { USB_AO16_4        , "USB-AO16-4"     },
+    { USB_AO12_16A      , "USB-AO12-16A"   },
+    { USB_AO12_16       , "USB-AO12-16"    },
+    { USB_AO12_12A      , "USB-AO12-12A"   },
+    { USB_AO12_12       , "USB-AO12-12"    },
+    { USB_AO12_8A       , "USB-AO12-8A"    },
+    { USB_AO12_8        , "USB-AO12-8"     },
+    { USB_AO12_4A       , "USB-AO12-4A"    },
+    { USB_AO12_4        , "USB-AO12-4"     },
+    { USB_AIO16_16A     , "USB-AIO16-16A"  },
+    { USB_AIO16_16E     , "USB-AIO16-16E"  },
+    { USB_AIO12_16A     , "USB-AIO12-16A"  },
+    { USB_AIO12_16      , "USB-AIO12-16"   },
+    { USB_AIO12_16E     , "USB-AIO12-16E"  },
+    { USB_AIO16_64MA    , "USB-AIO16-64MA" },
+    { USB_AIO16_64ME    , "USB-AIO16-64ME" },
+    { USB_AIO12_64MA    , "USB-AIO12-64MA" },
+    { USB_AIO12_64M     , "USB-AIO12-64M"  },
+    { USB_AIO12_64ME    , "USB-AIO12-64ME" },
+    { USB_AIO16_32A     , "USB-AIO16-32A"  },
+    { USB_AIO16_32E     , "USB-AIO16-32E"  },
+    { USB_AIO12_32A     , "USB-AIO12-32A"  },
+    { USB_AIO12_32      , "USB-AIO12-32"   },
+    { USB_AIO12_32E     , "USB-AIO12-32E"  },
+    { USB_AIO16_64A     , "USB-AIO16-64A"  },
+    { USB_AIO16_64E     , "USB-AIO16-64E"  },
+    { USB_AIO12_64A     , "USB-AIO12-64A"  },
+    { USB_AIO12_64      , "USB-AIO12-64"   },
+    { USB_AIO12_64E     , "USB-AIO12-64E"  },
+    { USB_AIO16_96A     , "USB-AIO16-96A"  },
+    { USB_AIO16_96E     , "USB-AIO16-96E"  },
+    { USB_AIO12_96A     , "USB-AIO12-96A"  },
+    { USB_AIO12_96      , "USB-AIO12-96"   },
+    { USB_AIO12_96E     , "USB-AIO12-96E"  },
+    { USB_AIO16_128A    , "USB-AIO16-128A" },
+    { USB_AIO16_128E    , "USB-AIO16-128E" },
+    { USB_AIO12_128A    , "USB-AIO12-128A" },
+    { USB_AIO12_128     , "USB-AIO12-128"  },
+    { USB_AIO12_128E    , "USB-AIO12-128E" }
 };
 #ifdef __cplusplus
 const int NUM_PROD_NAMES = sizeof(productIDNameTable) / sizeof(productIDNameTable[ 0 ]);
@@ -682,11 +674,11 @@ static void CloseAllDevices(void)
 static int CompareProductIDs(const void *p1, const void *p2)
 {
     assert(p1 != 0 &&
-           (*( struct ProductIDName** )p1) != 0 &&
+           (*( ProductIDName** )p1) != 0 &&
            p2 != 0 &&
-           (*( struct ProductIDName** )p2) != 0);
-    const unsigned int productID1 = (*( struct ProductIDName** )p1)->id,
-                       productID2 = (*( struct ProductIDName** )p2)->id;
+           (*( ProductIDName** )p2) != 0);
+    const unsigned int productID1 = (*( ProductIDName** )p1)->id,
+                       productID2 = (*( ProductIDName** )p2)->id;
     if(productID1 < productID2)
         return -1;
     else if(productID1 > productID2)
@@ -721,7 +713,7 @@ PRIVATE const char *ProductIDToName(unsigned int productID)
 
 
 /* index of product IDs in productIDNameTable[] */
-          static struct ProductIDName const *productIDIndex[ NUM_PROD_NAMES ];
+          static ProductIDName const *productIDIndex[ NUM_PROD_NAMES ];
 /* random pattern */
           const unsigned long INIT_PATTERN = 0xe697f8acul;
 
@@ -732,15 +724,15 @@ PRIVATE const char *ProductIDToName(unsigned int productID)
                 int index;
                 for(index = 0; index < NUM_PROD_NAMES; index++)
                     productIDIndex[ index ] = &productIDNameTable[ index ];
-                qsort(productIDIndex, NUM_PROD_NAMES, sizeof(struct ProductIDName *), CompareProductIDs);
+                qsort(productIDIndex, NUM_PROD_NAMES, sizeof(ProductIDName *), CompareProductIDs);
                 productIDIndexCreated = INIT_PATTERN;
             }
 
-          struct ProductIDName key;
+          ProductIDName key;
           key.id = productID;
-          const struct ProductIDName *const pKey = &key;
-          const struct ProductIDName **product
-              = ( const struct ProductIDName** )bsearch(&pKey, productIDIndex, NUM_PROD_NAMES, sizeof(struct ProductIDName *), CompareProductIDs);
+          const ProductIDName *const pKey = &key;
+          const ProductIDName **product
+              = ( const ProductIDName** )bsearch(&pKey, productIDIndex, NUM_PROD_NAMES, sizeof(ProductIDName *), CompareProductIDs);
           if(product != 0)
               name = (*product)->name;
           AIOUSB_UnLock();
@@ -752,10 +744,10 @@ PRIVATE const char *ProductIDToName(unsigned int productID)
 static int CompareProductNames(const void *p1, const void *p2)
 {
     assert(p1 != 0 &&
-           (*( struct ProductIDName** )p1) != 0 &&
+           (*( ProductIDName** )p1) != 0 &&
            p2 != 0 &&
-           (*( struct ProductIDName** )p2) != 0);
-    return strcmp((*( struct ProductIDName** )p1)->name, (*( struct ProductIDName** )p2)->name);
+           (*( ProductIDName** )p2) != 0);
+    return strcmp((*( ProductIDName** )p1)->name, (*( ProductIDName** )p2)->name);
 }
 
 /**
@@ -789,7 +781,7 @@ ProductNameToID(const char *name)
  * (see notes for ProductIDToName())
  */
 
-          static struct ProductIDName const *productNameIndex[ NUM_PROD_NAMES ];
+          static ProductIDName const *productNameIndex[ NUM_PROD_NAMES ];
 /** index of product names in productIDNameTable[] */
 
           const unsigned long INIT_PATTERN = 0x7e6b2017ul;
@@ -803,16 +795,16 @@ ProductNameToID(const char *name)
                 int index;
                 for(index = 0; index < NUM_PROD_NAMES; index++)
                     productNameIndex[ index ] = &productIDNameTable[ index ];
-                qsort(productNameIndex, NUM_PROD_NAMES, sizeof(struct ProductIDName *), CompareProductNames);
+                qsort(productNameIndex, NUM_PROD_NAMES, sizeof(ProductIDName *), CompareProductNames);
                 productNameIndexCreated = INIT_PATTERN;
             }
 
-          struct ProductIDName key;                                   // key.id not used
+          ProductIDName key;                                   // key.id not used
           strncpy(key.name, name, PROD_NAME_SIZE);
           key.name[ PROD_NAME_SIZE ] = 0;                     // in case strncpy() doesn't copy null
-          const struct ProductIDName *const pKey = &key;
-          const struct ProductIDName **product
-              = ( const struct ProductIDName** )bsearch(&pKey, productNameIndex, NUM_PROD_NAMES, sizeof(struct ProductIDName *), CompareProductNames);
+          const ProductIDName *const pKey = &key;
+          const ProductIDName **product
+              = ( const ProductIDName** )bsearch(&pKey, productNameIndex, NUM_PROD_NAMES, sizeof(ProductIDName *), CompareProductNames);
           if(product != 0)
               productID = (*product)->id;
           AIOUSB_UnLock();

@@ -218,6 +218,16 @@ typedef struct {
  
 } DeviceDescriptor;
 
+
+#define PROD_NAME_SIZE 40
+
+typedef struct  {
+     unsigned int id;
+     char name[ PROD_NAME_SIZE + 2 ];
+} ProductIDName;
+
+
+
 DeviceDescriptor *AIOUSB_getDevice( unsigned long DeviceIndex );
 
 extern unsigned long AIOUSB_INIT_PATTERN;

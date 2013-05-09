@@ -241,6 +241,7 @@ CREATE_ENUM_W_START( ResultCode, 0,
                      AIOUSB_ERROR_TIMEOUT,
                      AIOUSB_ERROR_HANDLE_EOF,
                      AIOUSB_ERROR_DEVICE_NOT_FOUND,
+                     AIOUSB_ERROR_INVALID_ADCONFIG_SETTING,
                      AIOUSB_ERROR_LIBUSB /* Always make the LIBUSB the last element */
                      );
 
@@ -338,10 +339,12 @@ CREATE_ENUM_W_START( ADGainCode, 0,
  * than zero will result in a timeout error
  */
 typedef enum  {
-    AD_CAL_MODE_NORMAL = 0,                                  /* normal measurement */
-    AD_CAL_MODE_GROUND = 1,                                  /* measure ground */
-    AD_CAL_MODE_REFERENCE = 3,                               /* measure reference */
-    AD_CAL_MODE_BIP_GROUND = 5,
+  ADCalMode_begin         = -1,
+  AD_CAL_MODE_NORMAL      = 0, /* normal measurement */
+  AD_CAL_MODE_GROUND      = 1, /* measure ground */
+  AD_CAL_MODE_REFERENCE   = 3, /* measure reference */
+  AD_CAL_MODE_BIP_GROUND  = 5,
+  ADCalMode_end           = 6
 } ADCalMode;
 
 struct ADConfigBlock {
@@ -635,14 +638,18 @@ extern unsigned long ADC_BulkPoll(
     );
 
 
-extern AIOBuf *NewBuffer( int bufsize );
+extern AIOBuf *NewBuffer( unsigned int bufsize );
 
 extern void DeleteBuffer( AIOBuf *buf );
 
+extern AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex );
 
+extern ADConfigBlock *AIOUSB_GetConfigBlock( unsigned long DeviceIndex );
+extern unsigned long AIOUSB_SetConfigBlock( unsigned long DeviceIndex , ADConfigBlock *entry );
 extern AIORET_TYPE  BulkAcquire(
     unsigned long DeviceIndex,
-    AIOBuf *
+    AIOBuf *buf,
+    int size
                                 );
 
 extern AIORET_TYPE  BulkPoll(
