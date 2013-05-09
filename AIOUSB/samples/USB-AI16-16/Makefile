@@ -71,8 +71,9 @@ OBJFILE_OPTS		:= -c
 INCPATH			:= -Ilib $(CFLAGS)
 LIBPATH			:= -Llib $(LDFLAGS)
 
-LIBS			+= $(LIBCLASSAIOUSB) $(LIBAIOUSBCPP) $(LIBUSB)
-
+# LIBS			+= $(LIBAIOUSB) $(LIBAIOUSBCPP)  $(LIBCLASSAIOUSB) $(LIBAIOUSBCPP) $(LIBUSB) -lm
+CPPLIBS			+= $(LIBAIOUSB) $(LIBAIOUSBCPP)  $(LIBCLASSAIOUSB)  $(LIBUSB) -lm $(LIBS)
+CLIBS			+= $(LIBAIOUSB) $(LIBUSB) -lm $(LIBS)
 
 TARGETS			:= $(wildcard *.cpp)
 CTARGETS		:= $(wildcard *.c)
@@ -163,16 +164,16 @@ lib/TestCaseSetup.o: lib/TestCaseSetup.cpp lib/TestCaseSetup.h  $(LIBRARY_DEPS)
 	$(CPP) $(DEBUGOPTS) $(OBJFILE_OPTS) $(INCPATH) $(COMMONOPTS) $(CPPOPTS) $< $(LIBPATH) -o $@
 
 %:%.o	$(COMMON_DEPS) $(LIBRARY_DEPS) 
-	$(CPP)  $(LDFLAGS) $(DEBUGOPTS) $(INCPATH) $(COMMONOPTS) $(CPPOPTS) $< $(COMMON_DEPS) $(LIBS)  -o $@
+	$(CPP)  $(LDFLAGS) $(DEBUGOPTS) $(INCPATH) $(COMMONOPTS) $(CPPOPTS) $< $(COMMON_DEPS) $(CPPLIBS)  -o $@
 
 
 #
 # C Rules
 #
 %.c.o:%.c	$(COMMON_DEPS)
-	$(CC) -std=gnu99  -D_GNU_SOURCE $(OBJFILE_OPTS) $(INCPATH) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $(COPTS) $<  -lm -o $@
+	$(CC) -std=gnu99  -D_GNU_SOURCE $(OBJFILE_OPTS) $(INCPATH) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $(COPTS) $<  -o $@
 
 %:%.c.o
-	$(CC) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $< $(LIBUSB) -o $@ $(LIBAIOUSB) $(LIBUSB) -lm 
+	$(CC) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $< $(CLIBS) -o $@
 
 
