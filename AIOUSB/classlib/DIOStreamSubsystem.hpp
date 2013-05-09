@@ -116,7 +116,7 @@ public:
 	 * @return This subsystem, useful for chaining together multiple operations.
 	 */
 
-	DIOStreamSubsystem &clearFIFO( int method ) {
+	DIOStreamSubsystem &clearFIFO( FIFO_Method method ) {
 		parent->clearFIFO( method );
 		return *this;
 	}	// clearFIFO()

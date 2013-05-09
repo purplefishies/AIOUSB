@@ -97,7 +97,7 @@ protected:
 protected:
 	USBDevice( int productID, int deviceIndex );
 	virtual ~USBDevice();
-	USBDevice &clearFIFO( int method );
+	USBDevice &clearFIFO( FIFO_Method method );
 
 	double getMiscClock() {
 		return AIOUSB_GetMiscClock( deviceIndex );

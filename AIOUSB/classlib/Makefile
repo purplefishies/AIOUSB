@@ -53,7 +53,7 @@ libclassaiousbdbg.a : $(CPPDBGOBJS)
 $(CPPOBJS) $(CPPDBGOBJS) : $(HPPSOURCES)
 
 %.o : %.cpp
-	g++ $(DEBUGOPTS) $(INCLUDES) -DNDEBUG $(COMMONOPTS) $(CPPOPTS) $< -o $@
+	g++ $(DEBUGOPTS) $(INCLUDES) $(COMMONOPTS) $(CPPOPTS) $< -o $@
 
 %.dbg.o : %.cpp
 	g++  $(DEBUGOPTS) $(INCLUDES) $(COMMONOPTS) $(CPPOPTS) $< -o $@

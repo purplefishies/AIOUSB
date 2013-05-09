@@ -354,7 +354,7 @@ public:
 	 * @return This subsystem, useful for chaining together multiple operations.
 	 */
 
-	AnalogInputSubsystem &clearFIFO( int method ) {
+	AnalogInputSubsystem &clearFIFO( FIFO_Method method ) {
 		parent->clearFIFO( method );
 		return *this;
 	}	// clearFIFO()

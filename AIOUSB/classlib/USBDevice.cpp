@@ -74,14 +74,7 @@ ostream &USBDevice::print( ostream &out ) {
  * configuration
  */
 
-USBDevice &USBDevice::clearFIFO( int method ) {
-	if(
-		method != CLEAR_FIFO_METHOD_IMMEDIATE
-		&& method != CLEAR_FIFO_METHOD_AUTO
-		&& method != CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT
-		&& method != CLEAR_FIFO_METHOD_WAIT
-	)
-		throw IllegalArgumentException( "Invalid method" );
+USBDevice &USBDevice::clearFIFO( FIFO_Method  method ) {
 	const int result = AIOUSB_ClearFIFO( deviceIndex, method );
 	if( result != AIOUSB_SUCCESS )
 		throw OperationFailedException( result );
@@ -98,10 +91,7 @@ USBDevice &USBDevice::setMiscClock( double clockHz ) {
 }	// USBDevice::setMiscClock()
 
 int USBDevice::getStreamingBlockSize() {
-	unsigned long blockSize;
-	const int result = AIOUSB_GetStreamingBlockSize( deviceIndex, &blockSize );
-	if( result != AIOUSB_SUCCESS )
-		throw OperationFailedException( result );
+	unsigned long blockSize = AIOUSB_GetStreamingBlockSize( deviceIndex );
 	return ( int ) blockSize;
 }	// USBDevice::getStreamingBlockSize()
 
