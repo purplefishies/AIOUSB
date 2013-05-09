@@ -242,6 +242,8 @@ CREATE_ENUM_W_START( ResultCode, 0,
                      AIOUSB_ERROR_HANDLE_EOF,
                      AIOUSB_ERROR_DEVICE_NOT_FOUND,
                      AIOUSB_ERROR_INVALID_ADCONFIG_SETTING,
+                     AIOUSB_ERROR_INVALID_ADCONFIG_CAL_SETTING,
+                     AIOUSB_ERROR_INVALID_ADCONFIG_CHANNEL_SETTING,
                      AIOUSB_ERROR_LIBUSB /* Always make the LIBUSB the last element */
                      );
 
