@@ -34,7 +34,7 @@ clean:
 	if [ -f Makefile ] ;  then  $(MAKE) -f Makefile clean ; fi
 	-rm -f *~	
 	-rm -f AIOUSB_wrap.c
-	-rm -f *.py
+	-rm -f AIOUSB.py
 	-rm -f *.pm
 	-rm -f Makefile.old
 	-rm -f *.log
@@ -58,7 +58,7 @@ python:
 	$(SWIG) -I${LIBDIR}  -python AIOUSB.i
 	LDFLAGS="$(PYTHON_LDFLAGS)"  python setup.py build
 
-python_install:
+python_install: python
 	$(PYTHON) setup.py install --prefix=$(PYTHON_PREFIX)
 
 ruby:
@@ -67,5 +67,5 @@ ruby:
 	$(RUBY) extconf.rb --with-ldflags="$(RUBY_LDFLAGS)" --with-name-include="$(RUBY_INCLUDES)"
 	$(MAKE) -f Makefile 
 
-ruby_install:
+ruby_install: ruby
 	$(MAKE) -f Makefile install

@@ -19,7 +19,7 @@
 
 
 
-#ifdef __cplusplus
+#ifdef __aiousb_cplusplus
 namespace AIOUSB {
 #endif
 
@@ -288,8 +288,8 @@ extern unsigned long DACOutputProcess( unsigned long DeviceIndex, double *ClockH
 
 
 
-#ifdef __cplusplus
-}     // namespace AIOUSB
+#ifdef __aiousb_cplusplus
+}
 #endif
 
 

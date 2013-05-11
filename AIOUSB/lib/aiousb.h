@@ -14,7 +14,7 @@
 
 
 
-#ifdef __cplusplus
+#ifdef __aiousb_cplusplus
 namespace AIOUSB
 {
 #endif
@@ -349,11 +349,11 @@ typedef enum  {
   ADCalMode_end           = 6
 } ADCalMode;
 
-struct ADConfigBlock {
+typedef struct  {
     const void *device;
     unsigned long size;
     unsigned char registers[ AD_MAX_CONFIG_REGISTERS ];
-};
+} ADConfigBlock;
 
 
 /** 
@@ -369,15 +369,15 @@ typedef struct {
 
 
 
-#ifndef __cplusplus
-typedef struct ADConfigBlock ADConfigBlock;
-#endif
+/* #ifndef __aiousb_cplusplus */
+/* typedef struct ADConfigBlock ADConfigBlock; */
+/* #endif */
 
 
 
 
 
-struct DeviceProperties {
+typedef struct  {
     const char *Name;                /* null-terminated device name or 0 */
     __uint64_t SerialNumber;         /* 64-bit serial number or 0 */
     unsigned ProductID;              /* 16-bit product ID */
@@ -389,10 +389,10 @@ struct DeviceProperties {
     unsigned ADCChannels;            /* number of A/D channels */
     unsigned ADCMUXChannels;         /* number of MUXed A/D channels */
     unsigned ADCChannelsPerGroup;    /* number of A/D channels in each config. group */
-};
-#ifndef __cplusplus
-typedef struct DeviceProperties DeviceProperties;
-#endif
+} DeviceProperties;
+/* #ifndef __aiousb_cplusplus */
+/* typedef struct DeviceProperties DeviceProperties; */
+/* #endif */
 
 /*
  * other libraries often declare BOOL, TRUE and FALSE, and worse, they declare these
@@ -901,8 +901,8 @@ extern unsigned AIOUSB_GetOversample( const ADConfigBlock *config );
 extern void AIOUSB_SetOversample( ADConfigBlock *config, unsigned overSample );
 
 
-#ifdef __cplusplus
-}      /* namespace AIOUSB */
+#ifdef __aiousb_cplusplus
+}
 #endif
 
 

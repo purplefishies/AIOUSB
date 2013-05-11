@@ -53,7 +53,7 @@ endif
 LIBS 		:= $(CLIB) $(CDBGLIB) $(CPPLIB) $(CPPDBGLIB)  $(SHCLIB) $(SHCDBGLIB) $(SHCPPLIB) $(SHCPPDBGLIB)
 CFLAGS		+= -I.
 SHARED_LIBS	:=  -lusb-1.0 -pthread
-
+CPPFLAGS	:= -D__aiousb_cplusplus
 
 .PHONY : all
 all : $(LIBS)
@@ -78,14 +78,14 @@ $(CPPLIB) : $(CPPOBJS)
 	$(AR) cr $(CPPLIB) $(CPPOBJS)
 
 $(SHCPPLIB) : $(CPPOBJS)
-	$(CPP) $(CC_SHFLAGS),$@ -o $@ $(CPPOBJS) $(SHARED_LIBS)
+	$(CPP) $(CPPFLAGS) $(CC_SHFLAGS),$@ -o $@ $(CPPOBJS) $(SHARED_LIBS)
 
 
 $(CPPDBGLIB) : $(CPPDBGOBJS)
 	$(AR) cr $(CPPDBGLIB) $(CPPDBGOBJS)
 
 $(SHCPPDBGLIB) : $(CPPDBGOBJS)
-	$(CPP) $(CC_SHFLAGS),$@ -o $@ $(CPPOBJS) $(SHARED_LIBS)
+	$(CPP) $(CPPFLAGS) $(CC_SHFLAGS),$@ -o $@ $(CPPOBJS) $(SHARED_LIBS)
 
 
 #********************************  OBJECTS  *********************************
@@ -108,10 +108,10 @@ $(CDBGOBJS) : %.dbg.o : %.c
 	$(CC) $(OBJOPTS) $(COPTS) $< -o $@
 
 $(CPPOBJS) : %.cpp.o : %.c
-	g++ $(OBJOPTS) $(CPPOPTS) $< -o $@
+	g++ $(CPPFLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
 
 $(CPPDBGOBJS) : %.cpp.dbg.o : %.c
-	g++ $(OBJOPTS) $(CPPOPTS) $< -o $@
+	g++ $(CPPFLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
 
 pywrapper:
 	CC=$(CC) CFLAGS="$(EXTRA_COPTS)  -lusb-1.0" python setup.py build_ext
