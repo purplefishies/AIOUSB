@@ -209,6 +209,8 @@ int main( int argc, char **argv ) {
 						* sizeof( unsigned short ) /* bytes / sample */
 						* 11 /* 1 sample + 10 oversamples */;
 					const double CLOCK_SPEED = 100000;	// Hz
+
+                                        printf("Allocating %d Bytes\n", BULK_BYTES );
 					unsigned short *const dataBuf = ( unsigned short * ) malloc( BULK_BYTES );
 					if( dataBuf != 0 ) {
 						/*

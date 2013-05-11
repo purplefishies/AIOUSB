@@ -67,6 +67,66 @@ except AttributeError:
     _newclass = 0
 
 
+
+def new_ulp():
+  return _AIOUSB.new_ulp()
+new_ulp = _AIOUSB.new_ulp
+
+def copy_ulp(*args):
+  return _AIOUSB.copy_ulp(*args)
+copy_ulp = _AIOUSB.copy_ulp
+
+def delete_ulp(*args):
+  return _AIOUSB.delete_ulp(*args)
+delete_ulp = _AIOUSB.delete_ulp
+
+def ulp_assign(*args):
+  return _AIOUSB.ulp_assign(*args)
+ulp_assign = _AIOUSB.ulp_assign
+
+def ulp_value(*args):
+  return _AIOUSB.ulp_value(*args)
+ulp_value = _AIOUSB.ulp_value
+
+def new_usp():
+  return _AIOUSB.new_usp()
+new_usp = _AIOUSB.new_usp
+
+def copy_usp(*args):
+  return _AIOUSB.copy_usp(*args)
+copy_usp = _AIOUSB.copy_usp
+
+def delete_usp(*args):
+  return _AIOUSB.delete_usp(*args)
+delete_usp = _AIOUSB.delete_usp
+
+def usp_assign(*args):
+  return _AIOUSB.usp_assign(*args)
+usp_assign = _AIOUSB.usp_assign
+
+def usp_value(*args):
+  return _AIOUSB.usp_value(*args)
+usp_value = _AIOUSB.usp_value
+
+def new_dp():
+  return _AIOUSB.new_dp()
+new_dp = _AIOUSB.new_dp
+
+def copy_dp(*args):
+  return _AIOUSB.copy_dp(*args)
+copy_dp = _AIOUSB.copy_dp
+
+def delete_dp(*args):
+  return _AIOUSB.delete_dp(*args)
+delete_dp = _AIOUSB.delete_dp
+
+def dp_assign(*args):
+  return _AIOUSB.dp_assign(*args)
+dp_assign = _AIOUSB.dp_assign
+
+def dp_value(*args):
+  return _AIOUSB.dp_value(*args)
+dp_value = _AIOUSB.dp_value
 AUR_DIO_WRITE = _AIOUSB.AUR_DIO_WRITE
 AUR_DIO_READ = _AIOUSB.AUR_DIO_READ
 AUR_DIO_CONFIG = _AIOUSB.AUR_DIO_CONFIG
@@ -155,6 +215,7 @@ class BulkAcquireWorkerParams(_object):
     __del__ = lambda self : None;
 BulkAcquireWorkerParams_swigregister = _AIOUSB.BulkAcquireWorkerParams_swigregister
 BulkAcquireWorkerParams_swigregister(BulkAcquireWorkerParams)
+cvar = _AIOUSB.cvar
 
 MAX_USB_DEVICES = _AIOUSB.MAX_USB_DEVICES
 class DeviceDescriptor(_object):
@@ -346,10 +407,44 @@ class DeviceDescriptor(_object):
 DeviceDescriptor_swigregister = _AIOUSB.DeviceDescriptor_swigregister
 DeviceDescriptor_swigregister(DeviceDescriptor)
 
+PROD_NAME_SIZE = _AIOUSB.PROD_NAME_SIZE
+class ProductIDName(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, ProductIDName, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, ProductIDName, name)
+    __repr__ = _swig_repr
+    __swig_setmethods__["id"] = _AIOUSB.ProductIDName_id_set
+    __swig_getmethods__["id"] = _AIOUSB.ProductIDName_id_get
+    if _newclass:id = _swig_property(_AIOUSB.ProductIDName_id_get, _AIOUSB.ProductIDName_id_set)
+    __swig_setmethods__["name"] = _AIOUSB.ProductIDName_name_set
+    __swig_getmethods__["name"] = _AIOUSB.ProductIDName_name_get
+    if _newclass:name = _swig_property(_AIOUSB.ProductIDName_name_get, _AIOUSB.ProductIDName_name_set)
+    def __init__(self): 
+        this = _AIOUSB.new_ProductIDName()
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _AIOUSB.delete_ProductIDName
+    __del__ = lambda self : None;
+ProductIDName_swigregister = _AIOUSB.ProductIDName_swigregister
+ProductIDName_swigregister(ProductIDName)
 
-def AIOUSB_getDevice(*args):
-  return _AIOUSB.AIOUSB_getDevice(*args)
-AIOUSB_getDevice = _AIOUSB.AIOUSB_getDevice
+
+def AIOUSB_GetConfigBlock(*args):
+  return _AIOUSB.AIOUSB_GetConfigBlock(*args)
+AIOUSB_GetConfigBlock = _AIOUSB.AIOUSB_GetConfigBlock
+
+def AIOUSB_SetConfigBlock(*args):
+  return _AIOUSB.AIOUSB_SetConfigBlock(*args)
+AIOUSB_SetConfigBlock = _AIOUSB.AIOUSB_SetConfigBlock
+
+def CreateSmartBuffer(*args):
+  return _AIOUSB.CreateSmartBuffer(*args)
+CreateSmartBuffer = _AIOUSB.CreateSmartBuffer
+
+def ADC_CopyConfig(*args):
+  return _AIOUSB.ADC_CopyConfig(*args)
+ADC_CopyConfig = _AIOUSB.ADC_CopyConfig
 ACCES_VENDOR_ID = _AIOUSB.ACCES_VENDOR_ID
 USB_DA12_8A_REV_A = _AIOUSB.USB_DA12_8A_REV_A
 USB_DA12_8A = _AIOUSB.USB_DA12_8A
@@ -489,6 +584,9 @@ AIOUSB_ERROR_BAD_TOKEN_TYPE = _AIOUSB.AIOUSB_ERROR_BAD_TOKEN_TYPE
 AIOUSB_ERROR_TIMEOUT = _AIOUSB.AIOUSB_ERROR_TIMEOUT
 AIOUSB_ERROR_HANDLE_EOF = _AIOUSB.AIOUSB_ERROR_HANDLE_EOF
 AIOUSB_ERROR_DEVICE_NOT_FOUND = _AIOUSB.AIOUSB_ERROR_DEVICE_NOT_FOUND
+AIOUSB_ERROR_INVALID_ADCONFIG_SETTING = _AIOUSB.AIOUSB_ERROR_INVALID_ADCONFIG_SETTING
+AIOUSB_ERROR_INVALID_ADCONFIG_CAL_SETTING = _AIOUSB.AIOUSB_ERROR_INVALID_ADCONFIG_CAL_SETTING
+AIOUSB_ERROR_INVALID_ADCONFIG_CHANNEL_SETTING = _AIOUSB.AIOUSB_ERROR_INVALID_ADCONFIG_CHANNEL_SETTING
 AIOUSB_ERROR_LIBUSB = _AIOUSB.AIOUSB_ERROR_LIBUSB
 ResultCode_end = _AIOUSB.ResultCode_end
 AIOUSB_ERROR_OFFSET = _AIOUSB.AIOUSB_ERROR_OFFSET
@@ -526,10 +624,12 @@ AD_GAIN_CODE_2V = _AIOUSB.AD_GAIN_CODE_2V
 AD_GAIN_CODE_0_1V = _AIOUSB.AD_GAIN_CODE_0_1V
 AD_GAIN_CODE_1V = _AIOUSB.AD_GAIN_CODE_1V
 ADGainCode_end = _AIOUSB.ADGainCode_end
+ADCalMode_begin = _AIOUSB.ADCalMode_begin
 AD_CAL_MODE_NORMAL = _AIOUSB.AD_CAL_MODE_NORMAL
 AD_CAL_MODE_GROUND = _AIOUSB.AD_CAL_MODE_GROUND
 AD_CAL_MODE_REFERENCE = _AIOUSB.AD_CAL_MODE_REFERENCE
 AD_CAL_MODE_BIP_GROUND = _AIOUSB.AD_CAL_MODE_BIP_GROUND
+ADCalMode_end = _AIOUSB.ADCalMode_end
 class ADConfigBlock(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, ADConfigBlock, name, value)
@@ -553,7 +653,30 @@ class ADConfigBlock(_object):
     __del__ = lambda self : None;
 ADConfigBlock_swigregister = _AIOUSB.ADConfigBlock_swigregister
 ADConfigBlock_swigregister(ADConfigBlock)
-cvar = _AIOUSB.cvar
+
+class AIOBuf(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, AIOBuf, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, AIOBuf, name)
+    __repr__ = _swig_repr
+    __swig_setmethods__["bufsize"] = _AIOUSB.AIOBuf_bufsize_set
+    __swig_getmethods__["bufsize"] = _AIOUSB.AIOBuf_bufsize_get
+    if _newclass:bufsize = _swig_property(_AIOUSB.AIOBuf_bufsize_get, _AIOUSB.AIOBuf_bufsize_set)
+    __swig_setmethods__["buffer"] = _AIOUSB.AIOBuf_buffer_set
+    __swig_getmethods__["buffer"] = _AIOUSB.AIOBuf_buffer_get
+    if _newclass:buffer = _swig_property(_AIOUSB.AIOBuf_buffer_get, _AIOUSB.AIOBuf_buffer_set)
+    __swig_setmethods__["bytes_remaining"] = _AIOUSB.AIOBuf_bytes_remaining_set
+    __swig_getmethods__["bytes_remaining"] = _AIOUSB.AIOBuf_bytes_remaining_get
+    if _newclass:bytes_remaining = _swig_property(_AIOUSB.AIOBuf_bytes_remaining_get, _AIOUSB.AIOBuf_bytes_remaining_set)
+    def __init__(self, *args): 
+        this = _AIOUSB.new_AIOBuf(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _AIOUSB.delete_AIOBuf
+    __del__ = lambda self : None;
+AIOBuf_swigregister = _AIOUSB.AIOBuf_swigregister
+AIOBuf_swigregister(AIOBuf)
 
 class DeviceProperties(_object):
     __swig_setmethods__ = {}
@@ -750,6 +873,10 @@ def ADC_SetOversample(*args):
   return _AIOUSB.ADC_SetOversample(*args)
 ADC_SetOversample = _AIOUSB.ADC_SetOversample
 
+def ADC_GetOversample(*args):
+  return _AIOUSB.ADC_GetOversample(*args)
+ADC_GetOversample = _AIOUSB.ADC_GetOversample
+
 def ADC_SetScanLimits(*args):
   return _AIOUSB.ADC_SetScanLimits(*args)
 ADC_SetScanLimits = _AIOUSB.ADC_SetScanLimits
@@ -773,6 +900,22 @@ ADC_BulkAcquire = _AIOUSB.ADC_BulkAcquire
 def ADC_BulkPoll(*args):
   return _AIOUSB.ADC_BulkPoll(*args)
 ADC_BulkPoll = _AIOUSB.ADC_BulkPoll
+
+def NewBuffer(*args):
+  return _AIOUSB.NewBuffer(*args)
+NewBuffer = _AIOUSB.NewBuffer
+
+def DeleteBuffer(*args):
+  return _AIOUSB.DeleteBuffer(*args)
+DeleteBuffer = _AIOUSB.DeleteBuffer
+
+def BulkAcquire(*args):
+  return _AIOUSB.BulkAcquire(*args)
+BulkAcquire = _AIOUSB.BulkAcquire
+
+def BulkPoll(*args):
+  return _AIOUSB.BulkPoll(*args)
+BulkPoll = _AIOUSB.BulkPoll
 
 def ADC_GetADConfigBlock_Registers(*args):
   return _AIOUSB.ADC_GetADConfigBlock_Registers(*args)

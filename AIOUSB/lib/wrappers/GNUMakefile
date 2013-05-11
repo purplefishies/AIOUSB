@@ -13,7 +13,13 @@ RUBY		:= ruby
 LIBDIR		:= $(shell printenv AIOUSB_ROOT)/lib
 CLASSLIBDIR	:= $(shell printenv AIOUSB_ROOT)/classlib
 
+
 PYTHON_LDFLAGS	:= -L$(LIBDIR) -L$(CLASSLIBDIR)
+RUBY_LDFLAGS	:= $(PYTHON_LDFLAGS)
+
+RUBY_INCLUDES	:= -I$(LIBDIR)
+PERL_INCLUDES	:= -I$(shell printenv AIOUSB_ROOT)/lib
+
 
 ifdef PERL_PREFIX
 PERL_PREFIX_INSTALL	:= PREFIX=$(PERL_PREFIX)
@@ -28,11 +34,19 @@ clean:
 	if [ -f Makefile ] ;  then  $(MAKE) -f Makefile clean ; fi
 	-rm -f *~	
 	-rm -f AIOUSB_wrap.c
-	-rm -f *.pyc
+	-rm -f *.py
+	-rm -f *.pm
 	-rm -f Makefile.old
+	-rm -f *.log
+	-rm -f *.o
+
+all:
+	$(MAKE)	-f GNUMakefile perl_install
+	$(MAKE) -f GNUMakefile python_install
+	$(MAKE) -f GNUMakefile ruby_install
 
 perl:
-	$(SWIG) -I${LIBDIR}  -perl5 AIOUSB.i 
+	$(SWIG) $(PERL_INCLUDES)  -perl5 AIOUSB.i 
 	$(PERL) Makefile.PL $(PERL_PREFIX_INSTALL)
 	$(MAKE) -f Makefile 
 
@@ -48,6 +62,10 @@ python_install:
 	$(PYTHON) setup.py install --prefix=$(PYTHON_PREFIX)
 
 ruby:
+	$(RM) -f Makefile
+	$(SWIG) -I../ -ruby AIOUSB.i
+	$(RUBY) extconf.rb --with-ldflags="$(RUBY_LDFLAGS)" --with-name-include="$(RUBY_INCLUDES)"
+	$(MAKE) -f Makefile 
 
 ruby_install:
-	$(RUBY) 
+	$(MAKE) -f Makefile install

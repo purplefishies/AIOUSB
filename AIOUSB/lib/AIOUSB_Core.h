@@ -228,7 +228,7 @@ typedef struct  {
 
 
 
-DeviceDescriptor *AIOUSB_getDevice( unsigned long DeviceIndex );
+
 
 extern unsigned long AIOUSB_INIT_PATTERN;
 extern unsigned long aiousbInit ;
@@ -237,7 +237,7 @@ extern unsigned long aiousbInit ;
 PRIVATE_EXTERN ADConfigBlock *AIOUSB_GetConfigBlock( unsigned long DeviceIndex );
 PRIVATE_EXTERN unsigned long AIOUSB_SetConfigBlock( unsigned long DeviceIndex , ADConfigBlock *entry);
 PRIVATE_EXTERN AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex );
-
+PRIVATE_EXTERN unsigned long ADC_CopyConfig(unsigned long DeviceIndex, ADConfigBlock *config  );
 
 #ifndef SWIG
 PRIVATE_EXTERN DeviceDescriptor deviceTable[ MAX_USB_DEVICES ];
