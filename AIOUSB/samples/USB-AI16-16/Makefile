@@ -89,6 +89,7 @@ ALL_CLEAN_TARGETS	:=	$(JAVA_OBJECT_FILES) \
 			  	$(COMMON_DEPS) \
 				$(FINAL_TARGETS)
 
+CPPFLAGS        := -D__aiousb_cplusplus
 
 #*********************************  RULES  **********************************
 
@@ -150,7 +151,7 @@ mostlyclean:
 
 
 lib/TestCaseSetup.o: lib/TestCaseSetup.cpp lib/TestCaseSetup.h  $(LIBRARY_DEPS)
-	$(CPP) $(DEBUGOPTS) $(LIBPATH) $(INCPATH) $(OBJFILE_OPTS) $(COMMONOPTS) $(CPPOPTS) $<  $(LIBAIOUSBCPP) $(LIBUSB) -o $@
+	$(CPP) $(DEBUGOPTS) $(CPPFLAGS) $(LIBPATH) $(INCPATH) $(OBJFILE_OPTS) $(COMMONOPTS) $(CPPOPTS) $<  $(LIBAIOUSBCPP) $(LIBUSB) -o $@
 
 #
 # Smart Generic rules that can build any NEW C or C++ file that 
@@ -161,7 +162,7 @@ lib/TestCaseSetup.o: lib/TestCaseSetup.cpp lib/TestCaseSetup.h  $(LIBRARY_DEPS)
 # C++ Rules
 #
 %.o:%.cpp $(COMMON_DEPS) $(LIBRARY_DEPS)
-	$(CPP) $(DEBUGOPTS) $(OBJFILE_OPTS) $(INCPATH) $(COMMONOPTS) $(CPPOPTS) $< $(LIBPATH) -o $@
+	$(CPP) $(DEBUGOPTS) $(CPPFLAGS) $(OBJFILE_OPTS) $(INCPATH) $(COMMONOPTS) $(CPPOPTS) $< $(LIBPATH) -o $@
 
 %:%.o	$(COMMON_DEPS) $(LIBRARY_DEPS) 
 	$(CPP)  $(LDFLAGS) $(DEBUGOPTS) $(INCPATH) $(COMMONOPTS) $(CPPOPTS) $< $(COMMON_DEPS) $(CPPLIBS)  -o $@
