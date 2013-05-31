@@ -108,10 +108,10 @@ $(CDBGOBJS) : %.dbg.o : %.c
 	$(CC) $(OBJOPTS) $(COPTS) $< -o $@
 
 $(CPPOBJS) : %.cpp.o : %.c
-	g++ $(CPPFLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
+	$(CPP) $(CPPFLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
 
 $(CPPDBGOBJS) : %.cpp.dbg.o : %.c
-	g++ $(CPPFLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
+	$(CPP) $(CPPFLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
 
 pywrapper:
 	CC=$(CC) CFLAGS="$(EXTRA_COPTS)  -lusb-1.0" python setup.py build_ext

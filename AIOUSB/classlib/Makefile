@@ -28,6 +28,9 @@ else
 endif
 
 
+CC	:=	gcc
+CPP	:=	g++
+AR	:=	ar
 
 
 .PHONY : all
@@ -45,18 +48,18 @@ clean:
 	-rm -f $(LIBS) $(CPPOBJS) $(CPPDBGOBJS) $(DOCDIR)/*
 
 libclassaiousb.a : $(CPPOBJS)
-	ar cr libclassaiousb.a $(CPPOBJS)
+	$(AR) cr libclassaiousb.a $(CPPOBJS)
 
 libclassaiousbdbg.a : $(CPPDBGOBJS)
-	ar cr libclassaiousbdbg.a $(CPPDBGOBJS)
+	$(AR) cr libclassaiousbdbg.a $(CPPDBGOBJS)
 
 $(CPPOBJS) $(CPPDBGOBJS) : $(HPPSOURCES)
 
 %.o : %.cpp
-	g++ $(DEBUGOPTS) $(INCLUDES) $(COMMONOPTS) $(CPPOPTS) $< -o $@
+	$(CPP) $(DEBUGOPTS) $(INCLUDES) $(COMMONOPTS) $(CPPOPTS) $< -o $@
 
 %.dbg.o : %.cpp
-	g++  $(DEBUGOPTS) $(INCLUDES) $(COMMONOPTS) $(CPPOPTS) $< -o $@
+	$(CPP)  $(DEBUGOPTS) $(INCLUDES) $(COMMONOPTS) $(CPPOPTS) $< -o $@
 
 $(DOCINDEX) : Doxyfile $(HPPSOURCES) $(CPPSOURCES)
 	doxygen
