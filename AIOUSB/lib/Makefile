@@ -21,9 +21,6 @@ AIOUSB_GetDeviceProperties.o \
 AIOUSB_GetResultCodeAsString.o \
 AIOUSB_ListDevices.o
 
-AR		:= ar
-CC		:= gcc
-CPP		:= g++
 CCINC		:= 
 CC_SHFLAGS	:= -shared -Wl,-soname
 
@@ -51,7 +48,7 @@ endif
 
 
 LIBS 		:= $(CLIB) $(CDBGLIB) $(CPPLIB) $(CPPDBGLIB)  $(SHCLIB) $(SHCDBGLIB) $(SHCPPLIB) $(SHCPPDBGLIB)
-CFLAGS		+= -I.
+override CFLAGS	+= -I.
 SHARED_LIBS	:=  -lusb-1.0 -pthread
 CPPFLAGS	:= -D__aiousb_cplusplus
 
@@ -65,27 +62,27 @@ all_cscope: $(LIBS) cscope
 $(CLIB) : $(COBJS)
 	$(AR) cr $(CLIB) $(COBJS)
 $(SHCLIB) : $(COBJS)
-	$(CC) $(CC_SHFLAGS),$@ -o $@ $(COBJS) $(SHARED_LIBS)
+	$(CC)  $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $(COBJS) $(SHARED_LIBS)
 
 
 $(CDBGLIB) : $(CDBGOBJS)
 	$(AR) cr $(CDBGLIB) $(CDBGOBJS)
 $(SHCDBGLIB): 	$(CDBGOBJS)
-	$(CC) $(CC_SHFLAGS),$@ -o $@ $(COBJS) $(SHARED_LIBS) 
+	$(CC) $(CC_SHFLAGS),$@ $(LDFLAGS) -o $@ $(COBJS) $(SHARED_LIBS) 
 
 
 $(CPPLIB) : $(CPPOBJS)
 	$(AR) cr $(CPPLIB) $(CPPOBJS)
 
 $(SHCPPLIB) : $(CPPOBJS)
-	$(CPP) $(CPPFLAGS) $(CC_SHFLAGS),$@ -o $@ $(CPPOBJS) $(SHARED_LIBS)
+	$(CXX) $(CPPFLAGS) $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $(CPPOBJS) $(SHARED_LIBS)
 
 
 $(CPPDBGLIB) : $(CPPDBGOBJS)
 	$(AR) cr $(CPPDBGLIB) $(CPPDBGOBJS)
 
 $(SHCPPDBGLIB) : $(CPPDBGOBJS)
-	$(CPP) $(CPPFLAGS) $(CC_SHFLAGS),$@ -o $@ $(CPPOBJS) $(SHARED_LIBS)
+	$(CXX) $(CPPFLAGS)  $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $(CPPOBJS) $(SHARED_LIBS)
 
 
 #********************************  OBJECTS  *********************************
@@ -97,21 +94,21 @@ COMMONOPTS 	:= -Wall -pthread -fPIC  $(CFLAGS)
 EXTRA_COPTS	:= -std=gnu99 -D_GNU_SOURCE
 
 
-CFLAGS		= $(DEBUGOPTS) $(COMMONOPTS)
+PYCFLAGS	= $(DEBUGOPTS) $(COMMONOPTS)
 COPTS		:= $(DEBUGOPTS) $(COMMONOPTS) $(EXTRA_COPTS)
 CPPOPTS		:= $(DEBUGOPTS) $(COMMONOPTS)
 
 $(COBJS) : %.o : %.c
-	$(CC) $(OBJOPTS) $(COPTS) $< -o $@
+	$(CC) $(OBJOPTS) $(CFLAGS) $(COPTS) $< -o $@
 
 $(CDBGOBJS) : %.dbg.o : %.c
-	$(CC) $(OBJOPTS) $(COPTS) $< -o $@
+	$(CC) $(OBJOPTS) $(CFLAGS) $(COPTS) $< -o $@
 
 $(CPPOBJS) : %.cpp.o : %.c
-	$(CPP) $(CPPFLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
+	$(CXX) $(CPPFLAGS) $(CFLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
 
 $(CPPDBGOBJS) : %.cpp.dbg.o : %.c
-	$(CPP) $(CPPFLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
+	$(CXX) $(CPPFLAGS) $(CFLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
 
 pywrapper:
 	CC=$(CC) CFLAGS="$(EXTRA_COPTS)  -lusb-1.0" python setup.py build_ext

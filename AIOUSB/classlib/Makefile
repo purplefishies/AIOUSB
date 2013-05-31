@@ -17,9 +17,8 @@ DOCDIR 		:= doc
 DOCINDEX 	:= $(DOCDIR)/index.html				# use index.html as a proxy for all documentation files
 
 COMMONOPTS 	:= -c -Wall -pthread -fPIC
-CFLAGS		+= -I. -I../lib 
 
-INCLUDES	:= $(CFLAGS) 
+override CXXFLAGS += -I. -I../lib 
 
 ifdef DEBUG
         DEBUGOPTS       += -ggdb $(DEBUG)
@@ -28,12 +27,8 @@ else
 endif
 
 
-CC	:=	gcc
-CPP	:=	g++
-AR	:=	ar
-
-
 .PHONY : all
+
 all : $(LIBS) 
 
 
@@ -56,10 +51,10 @@ libclassaiousbdbg.a : $(CPPDBGOBJS)
 $(CPPOBJS) $(CPPDBGOBJS) : $(HPPSOURCES)
 
 %.o : %.cpp
-	$(CPP) $(DEBUGOPTS) $(INCLUDES) $(COMMONOPTS) $(CPPOPTS) $< -o $@
+	$(CXX) $(DEBUGOPTS) $(CXXFLAGS) $(COMMONOPTS) $(CPPOPTS) $< -o $@
 
 %.dbg.o : %.cpp
-	$(CPP)  $(DEBUGOPTS) $(INCLUDES) $(COMMONOPTS) $(CPPOPTS) $< -o $@
+	$(CXX)  $(DEBUGOPTS) $(CXXFLAGS) $(COMMONOPTS) $(CPPOPTS) $< -o $@
 
 $(DOCINDEX) : Doxyfile $(HPPSOURCES) $(CPPSOURCES)
 	doxygen
