@@ -175,7 +175,7 @@ USBDevice &USBDevice::customEEPROMWrite( int address, const UCharArray &data ) {
 		|| address + ( int ) data.size() > CUSTOM_EEPROM_SIZE
 	)
 		throw IllegalArgumentException( "Invalid data or address" );
-	const int result = AIOUSB::CustomEEPROMWrite( deviceIndex, address, data.size(), ( void * ) data.data() );
+	const int result = CustomEEPROMWrite( deviceIndex, address, data.size(), ( void * ) data.data() );
 	if( result != AIOUSB_SUCCESS )
 		throw OperationFailedException( result );
 	return *this;
@@ -201,7 +201,7 @@ UCharArray USBDevice::customEEPROMRead( int address, int numBytes ) {
 		throw IllegalArgumentException( "Invalid data or address" );
 	UCharArray data( numBytes );
 	unsigned long size = data.size();
-	const int result = AIOUSB::CustomEEPROMRead( deviceIndex, address, &size, data.data() );
+	const int result = CustomEEPROMRead( deviceIndex, address, &size, data.data() );
 	if( result != AIOUSB_SUCCESS )
 		throw OperationFailedException( result );
 	return data;
