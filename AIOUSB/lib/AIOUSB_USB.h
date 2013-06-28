@@ -15,3 +15,5 @@
 #define usb_get_devices     libusb_get_device_list
 
 #endif
+
+#endif

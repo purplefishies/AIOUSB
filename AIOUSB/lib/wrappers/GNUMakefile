@@ -39,6 +39,8 @@ clean:
 	-rm -f Makefile.old
 	-rm -f *.log
 	-rm -f *.o
+	-rm -f *.oct
+	-rm -f *wrap.*
 
 all:
 	$(MAKE)	-f GNUMakefile perl_install
@@ -69,3 +71,9 @@ ruby:
 
 ruby_install: ruby
 	$(MAKE) -f Makefile install
+
+
+octave:
+	$(SWIG) -I../ -octave -o AIOUSB_wrap.cpp AIOUSB.i
+	mkoctfile -o AIOUSB.oct  -I.. AIOUSB_wrap.cpp -L$$AIO_LIB_DIR -laiousb
+

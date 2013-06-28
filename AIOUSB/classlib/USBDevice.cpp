@@ -8,6 +8,7 @@
  */
 
 
+#include "CppCommon.h"
 #include <iomanip>
 #include <assert.h>
 #include <AIOUSB_Core.h>

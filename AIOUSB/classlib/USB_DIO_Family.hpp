@@ -11,7 +11,7 @@
 #if ! defined( USB_DIO_Family_hpp )
 #define USB_DIO_Family_hpp
 
-
+#include "CppCommon.h"
 #include <USBDevice.hpp>
 #include <DigitalIOSubsystem.hpp>
 

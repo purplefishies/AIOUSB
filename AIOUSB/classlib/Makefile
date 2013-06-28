@@ -16,9 +16,9 @@ LIBS 		:= libclassaiousb.a libclassaiousbdbg.a
 DOCDIR 		:= doc
 DOCINDEX 	:= $(DOCDIR)/index.html				# use index.html as a proxy for all documentation files
 
-COMMONOPTS 	:= -c -Wall -pthread -fPIC
+COMMONOPTS 	:= -c -Wall -pthread -fPIC 
 
-override CXXFLAGS += -I. -I../lib 
+override CXXFLAGS += -I. -I../lib -D__aiousb_cplusplus
 
 ifdef DEBUG
         DEBUGOPTS       += -ggdb $(DEBUG)
@@ -51,10 +51,10 @@ libclassaiousbdbg.a : $(CPPDBGOBJS)
 $(CPPOBJS) $(CPPDBGOBJS) : $(HPPSOURCES)
 
 %.o : %.cpp
-	$(CXX) $(DEBUGOPTS) $(CXXFLAGS) $(COMMONOPTS) $(CPPOPTS) $< -o $@
+	$(CXX) $(DEBUGOPTS) $(CXXFLAGS) $(CFLAGS) $(COMMONOPTS) $(CPPOPTS) $< -o $@
 
 %.dbg.o : %.cpp
-	$(CXX)  $(DEBUGOPTS) $(CXXFLAGS) $(COMMONOPTS) $(CPPOPTS) $< -o $@
+	$(CXX)  $(DEBUGOPTS) $(CXXFLAGS) $(CFLAGS) $(COMMONOPTS) $(CPPOPTS) $< -o $@
 
 $(DOCINDEX) : Doxyfile $(HPPSOURCES) $(CPPSOURCES)
 	doxygen

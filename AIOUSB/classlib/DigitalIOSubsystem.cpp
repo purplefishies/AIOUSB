@@ -1,13 +1,13 @@
-/*
- * $RCSfile: DigitalIOSubsystem.cpp,v $
- * $Revision: 1.13 $
- * $Date: 2010/01/27 00:11:42 $
- * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
+/**
+ * @file   DigitalIOSubsystem.cpp
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @release $Format: %t$
+ * @brief class DigitalIOSubsystem implementation
  *
- * class DigitalIOSubsystem implementation
  */
 
-
+#include "CppCommon.h"
 #include <assert.h>
 #include <AIOUSB_Core.h>
 #include "USBDeviceManager.hpp"

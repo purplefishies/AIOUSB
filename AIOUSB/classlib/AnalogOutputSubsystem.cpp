@@ -7,7 +7,7 @@
  * class AnalogOutputSubsystem implementation
  */
 
-
+#include "CppCommon.h"
 #include <assert.h>
 #include <math.h>
 #include <aiousb.h>

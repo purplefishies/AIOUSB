@@ -1,14 +1,13 @@
-/*
- * $RCSfile: CounterSubsystem.cpp,v $
- * $Revision: 1.11 $
- * $Date: 2009/12/20 22:27:19 $
- * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
+/**
+ * @file   CounterSubsystem.cpp
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @release $Format: %t$
+ * @brief  class CounterSubsystem implementation
  *
- * class CounterSubsystem implementation
  */
 
-
-
+#include "CppCommon.h"
 #include <assert.h>
 #include <typeinfo>
 #include <AIOUSB_Core.h>

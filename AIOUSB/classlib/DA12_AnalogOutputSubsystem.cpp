@@ -1,13 +1,15 @@
-/*
- * $RCSfile: DA12_AnalogOutputSubsystem.cpp,v $
- * $Revision: 1.7 $
- * $Date: 2010/01/25 20:09:23 $
- * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
+/**
+ * @file   DA12_AnalogOutputSubsystem.cpp
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @release $Format: %t$
+ * @brief class DA12_AnalogOutputSubsystem implementation
  *
- * class DA12_AnalogOutputSubsystem implementation
  */
 
 
+
+#include "CppCommon.h"
 #include <assert.h>
 #include <aiousb.h>
 #include "USBDeviceManager.hpp"

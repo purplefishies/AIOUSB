@@ -1,16 +1,15 @@
-/*
- * $RCSfile: USBDeviceManager.hpp,v $
- * $Revision: 1.10 $
- * $Date: 2009/12/23 22:39:10 $
- * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
- *
- * class USBDeviceManager, OperationFailedException, IllegalArgumentException declarations
+/**
+ * @file   USBDeviceManager.hpp
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @release $Format: %t$
+ * @brief class USBDeviceManager, OperationFailedException, IllegalArgumentException declarations
  */
 
 #if ! defined( USBDeviceManager_hpp )
 #define USBDeviceManager_hpp
 
-
+#include "CppCommon.h"
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -122,7 +121,7 @@ public:
 	 */
 
 	static std::string getResultCodeAsString( int result ) {
-		return AIOUSB_GetResultCodeAsString( result );
+          return AIOUSB_GetResultCodeAsString( result );
 	}	// getResultCodeAsString()
 
 	/**

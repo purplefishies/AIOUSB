@@ -1,13 +1,13 @@
-/*
- * $RCSfile: Counter.cpp,v $
- * $Revision: 1.2 $
- * $Date: 2009/12/20 20:54:52 $
- * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
+/**
+ * @file   Counter.cpp
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @release $Format: %t$
+ * @brief  class Counter implementation
  *
- * class Counter implementation
  */
 
-
+#include "CppCommon.h"
 #include <assert.h>
 #include <typeinfo>
 #include <AIOUSB_Core.h>

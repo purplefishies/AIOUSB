@@ -1,13 +1,15 @@
-/*
- * $RCSfile: DIOStreamSubsystem.cpp,v $
- * $Revision: 1.9 $
- * $Date: 2010/01/29 00:08:11 $
- * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
+/**
+ * @file   DIOStreamSubsystem.cpp
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @release $Format: %t$
+ * @brief  class DIOStreamSubsystem implementation
  *
- * class DIOStreamSubsystem implementation
  */
 
 
+
+#include "CppCommon.h"
 #include <assert.h>
 #include <aiousb.h>
 #include "USBDeviceManager.hpp"

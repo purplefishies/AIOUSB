@@ -7,7 +7,7 @@
  * class AO16_AnalogOutputSubsystem implementation
  */
 
-
+#include "CppCommon.h"
 #include <assert.h>
 #include <aiousb.h>
 #include "USBDeviceManager.hpp"

@@ -1,13 +1,13 @@
-/*
- * $RCSfile: AnalogInputSubsystem.cpp,v $
- * $Revision: 1.34 $
- * $Date: 2010/01/20 19:03:24 $
- * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
+/**
+ * @file   AnalogInputSubsystem.cpp
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @release $Format: %t$
+ * @brief class AnalogInputSubsystem implementation
  *
- * class AnalogInputSubsystem implementation
  */
 
-
+#include "CppCommon.h"
 #include <assert.h>
 #include <string.h>
 #include <AIOUSB_Core.h>

@@ -1,14 +1,13 @@
-/*
- * $RCSfile: USBDeviceManager.cpp,v $
- * $Revision: 1.23 $
- * $Date: 2010/01/18 19:40:28 $
- * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
+/**
+ * @file   USBDeviceManager.cpp
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @release $Format: %t$
+ * @brief class USBDeviceManager implementation
  *
- * class USBDeviceManager implementation
  */
 
-
-
+#include "CppCommon.h"
 #include <iostream>
 #include <iterator>
 #include <bits/stl_algo.h>
