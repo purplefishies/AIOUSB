@@ -10,7 +10,7 @@ CPPSOURCES 	:= $(wildcard *.cpp)
 HPPSOURCES 	:= $(wildcard *.hpp)
 CPPOBJS 	:= $(subst .cpp,.o,$(CPPSOURCES))
 CPPDBGOBJS 	:= $(subst .o,.dbg.o,$(CPPOBJS))
-LIBS 		:= libclassaiousb.a libclassaiousbdbg.a
+LIBS 		:= libclassaiousb.a libclassaiousbdbg.a libclassaiousbdbg.so libclassaiousb.so
 
 
 DOCDIR 		:= doc
@@ -25,6 +25,10 @@ ifdef DEBUG
 else
         DEBUGOPTS       += -DNDEBUG
 endif
+
+CXX_SHFLAGS      := -shared -Wl,-soname
+
+
 
 
 .PHONY : all
@@ -42,11 +46,23 @@ mostlyclean:
 clean:
 	-rm -f $(LIBS) $(CPPOBJS) $(CPPDBGOBJS) $(DOCDIR)/*
 
+distclean: clean
+	-rm -f $(LIBS)
+
 libclassaiousb.a : $(CPPOBJS)
 	$(AR) cr libclassaiousb.a $(CPPOBJS)
 
+libclassaiousb.so : $(CPPOBJS)
+	$(CXX) $(CXXFLAGS) $(CFLAGS) $(LDFLAGS) $(CXX_SHFLAGS),$@ -o $@ $(CPPOBJS) $(SHARED_LIBS)
+
 libclassaiousbdbg.a : $(CPPDBGOBJS)
 	$(AR) cr libclassaiousbdbg.a $(CPPDBGOBJS)
+
+libclassaiousbdbg.so : $(CPPDBGOBJS)
+	$(CXX) $(CXXFLAGS) $(CFLAGS) $(LDFLAGS) $(CXX_SHFLAGS),$@ -o $@ $(CPPDBGOBJS) $(SHARED_LIBS)
+
+
+
 
 $(CPPOBJS) $(CPPDBGOBJS) : $(HPPSOURCES)
 

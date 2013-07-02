@@ -39,14 +39,9 @@ protected:
 	CounterList counters;						// list of counters
 
 
-
-protected:
+public:
 	CounterSubsystem( USBDevice &parent );
 	virtual ~CounterSubsystem();
-
-
-
-public:
 
 	/*
 	 * properties

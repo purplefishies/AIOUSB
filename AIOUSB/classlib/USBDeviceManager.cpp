@@ -22,6 +22,7 @@
 #include "USB_DIO_16_Family.hpp"
 #include "USB_DIO_32_Family.hpp"
 #include "USB_DIO_Family.hpp"
+#include "USB_AIO16_Family.hpp"
 
 
 using namespace std;
@@ -268,7 +269,9 @@ USBDeviceManager &USBDeviceManager::scanForDevices() {
 				device = new USB_AI16_Family( productID, deviceIndex );
 			} else if( USB_AO16_Family::isSupportedProductID( productID ) ) {
 				device = new USB_AO16_Family( productID, deviceIndex );
-			} else if( USB_CTR_15_Family::isSupportedProductID( productID ) ) {
+			} else if( USB_AIO16_Family::isSupportedProductID( productID ) ) { 
+				device = new USB_AIO16_Family( productID, deviceIndex );
+                        } else if( USB_CTR_15_Family::isSupportedProductID( productID ) ) {
 				device = new USB_CTR_15_Family( productID, deviceIndex );
 			} else if( USB_DA12_8A_Family::isSupportedProductID( productID ) ) {
 				device = new USB_DA12_8A_Family( productID, deviceIndex );

@@ -31,15 +31,9 @@ protected:
 	int minCounts;								// minimum counts D/A can output (typically 0)
 	int maxCounts;								// maximum counts D/A can output (typically 0xfff or 0xffff)
 
-
-
-protected:
+public:
 	AnalogOutputSubsystem( USBDevice &parent );
 	virtual ~AnalogOutputSubsystem();
-
-
-
-public:
 
 	/*
 	 * properties

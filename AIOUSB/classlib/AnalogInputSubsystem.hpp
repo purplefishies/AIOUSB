@@ -142,7 +142,7 @@ protected:
 
 
 
-protected:
+public:
 	AnalogInputSubsystem &setScanRange( int startChannel, int numChannels );
 	AnalogInputSubsystem( USBDevice &parent );
 	virtual ~AnalogInputSubsystem();
