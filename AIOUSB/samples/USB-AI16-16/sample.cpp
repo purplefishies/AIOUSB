@@ -85,7 +85,7 @@ int main( int argc, char **argv ) {
 					if( result == AIOUSB_SUCCESS ) {
 						if(
 							productID >= USB_AI16_16A
-							&& productID <= USB_AI12_128E
+							&& productID <= USB_AIO12_128E
 						) {
 							// found a USB-AI16-16A family device
 							deviceFound = true;

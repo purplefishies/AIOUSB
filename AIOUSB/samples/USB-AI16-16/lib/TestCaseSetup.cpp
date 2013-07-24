@@ -51,8 +51,7 @@ void TestCaseSetup::findDevice(void) {
       nameSize = MAX_NAME_SIZE;
       result = QueryDeviceInfo( this->DeviceIndex, &productID, &nameSize, name, &numDIOBytes, &numCounters );
       if( result == AIOUSB_SUCCESS ) {
-        if( productID >= USB_AI16_16A && 
-            productID <= USB_AI12_128E ) { 
+        if( VALID_PRODUCT( productID ) ) {
           deviceFound = true;
           break;
         }
