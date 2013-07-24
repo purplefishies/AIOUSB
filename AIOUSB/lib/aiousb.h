@@ -27,13 +27,10 @@ namespace AIOUSB
 #define MAX_VALUE(name ) (name ## _end-1)
 #define VALID_ENUM(name,value ) ( value >= FIRST_ENUM(name) && value <= LAST_ENUM(name ))
 
-
+#define VALID_PRODUCT(product) ( VALID_ENUM(  ProductIDS, product ) )
 typedef int AIORET_TYPE;        /* New return type is signed, negative indicates error */
 
-
-//@}
-//
-typedef enum {
+CREATE_ENUM_W_START(ProductIDS,0,
     ACCES_VENDOR_ID    = 0x1605,
     /**
      * these product IDs are constant
@@ -150,9 +147,7 @@ typedef enum {
     USB_AIO12_128A     = 0x815b,
     USB_AIO12_128      = 0x815c,
     USB_AIO12_128E     = 0x815d
-} ProductIDS;
-
-
+    )
 
 
 /*
