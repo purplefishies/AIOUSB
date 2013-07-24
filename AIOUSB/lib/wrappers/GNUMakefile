@@ -41,6 +41,8 @@ clean:
 	-rm -f *.o
 	-rm -f *.oct
 	-rm -f *wrap.*
+	-rm -f *.java
+	-rm -f *.php
 
 all:
 	$(MAKE)	-f GNUMakefile perl_install
@@ -71,6 +73,12 @@ ruby:
 
 ruby_install: ruby
 	$(MAKE) -f Makefile install
+
+
+php:
+	$(SWIG) -I../ -php AIOUSB.i
+	$(CC) -I. -I../  $$(php-config --includes) -fpic -c AIOUSB_wrap.c
+	$(CC) -shared AIOUSB_wrap.o -o AIOUSB.so
 
 
 octave:

@@ -49,7 +49,7 @@ endif
 
 LIBS 		:= $(CLIB) $(CDBGLIB) $(CPPLIB) $(CPPDBGLIB)  $(SHCLIB) $(SHCDBGLIB) $(SHCPPLIB) $(SHCPPDBGLIB)
 override CFLAGS	+= -I.
-SHARED_LIBS	:=  -lusb-1.0 -pthread
+SHARED_LIBS	:=  -lusb-1.0 -pthread -lm
 CPPFLAGS	:= -D__aiousb_cplusplus
 
 .PHONY : all
