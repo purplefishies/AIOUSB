@@ -32,64 +32,59 @@ namespace AIOUSB {
 PRIVATE_EXTERN int aio_errno;
 
 
+/* partially defined in "Low-Level Vendor Request Reference.pdf" */
 
-enum {
-    // partially defined in "Low-Level Vendor Request Reference.pdf"
-    AUR_DIO_WRITE                           = 0x10,
-    AUR_DIO_READ                            = 0x11,
-    AUR_DIO_CONFIG                          = 0x12,
-    AUR_DIO_CONFIG_QUERY                    = 0x13,
-    AUR_CTR_READ                            = 0x20,
-    AUR_CTR_MODE                            = 0x21,
-    AUR_CTR_LOAD                            = 0x22,
-    AUR_CTR_MODELOAD                        = 0x23,
-    AUR_CTR_SELGATE                         = 0x24,
-    AUR_CTR_READALL                         = 0x25,
-    AUR_CTR_READLATCHED                     = 0x26,
-    AUR_CTR_COS_BULK_GATE2                  = 0x27,
-    AUR_CTR_PUR_FIRST                       = 0x28,   // 0x28 is correct; not used with device, for index offsetting
-    AUR_CTR_PUR_OFRQ                        = 0x28,   // 0x28 is correct
-    AUR_CTR_COS_BULK_ABORT                  = 0x29,
-    AUR_CTR_PUR_MFRQ                        = 0x2C,
-    AUR_CTR_PUR_EVCT                        = 0x2D,
-
-    AUR_WDG_STATUS                          = 0x2E,
-
-    AUR_CTR_PUR_MPUL                        = 0x2E,
-    AUR_DIO_WDG16_DEPREC                    = 0x2F,
-    AUR_READBACK_GLOBAL_STATE               = 0x30,
-    AUR_SAVE_GLOBAL_STATE                   = 0x31,
-    AUR_GEN_CLEAR_FIFO_NEXT                 = 0x34,
-    AUR_GEN_CLEAR_FIFO                      = 0x35,
-    AUR_GEN_CLEAR_FIFO_WAIT                 = 0x36,
-    AUR_GEN_ABORT_AND_CLEAR                 = 0x38,
-    AUR_WDG                                 = 0x44,
-    AUR_OFFLINE_READWRITE                   = 0x50,
-    AUR_SELF_TEST_1                         = 0x91,
-    AUR_EEPROM_READ                         = 0xA2,
-    AUR_EEPROM_WRITE                        = 0XA2,
-    AUR_DAC_CONTROL                         = 0xB0,
-    AUR_DAC_DATAPTR                         = 0xB1,
-    AUR_DAC_DIVISOR                         = 0xB2,
-    AUR_DAC_IMMEDIATE                       = 0xB3,
-    AUR_GEN_STREAM_STATUS                   = 0xB4,
-    AUR_FLASH_READWRITE                     = 0xB5,
-    AUR_DAC_RANGE                           = 0xB7,
-    AUR_PROBE_CALFEATURE                    = 0xBA,
-    AUR_LOAD_BULK_CALIBRATION_BLOCK         = 0xBB,
-    AUR_DIO_STREAM_OPEN_OUTPUT              = 0xBB,
-    AUR_START_ACQUIRING_BLOCK               = 0xBC,
-    AUR_DIO_STREAM_OPEN_INPUT               = 0xBC,
-    AUR_DIO_SETCLOCKS                       = 0xBD,
-    AUR_ADC_SET_CONFIG                      = 0xBE,
-    AUR_ADC_IMMEDIATE                       = 0xBF,
-    AUR_DIO_SPI_WRITE                       = 0xC0,
-    AUR_DIO_SPI_READ                        = 0xC1,
-    AUR_ADC_GET_CONFIG                      = 0xD2,
-
-};
-
-
+ CREATE_ENUM_W_START(VENDOR_REQUEST,0,
+                     AUR_DIO_WRITE                           = 0x10,
+                     AUR_DIO_READ                            = 0x11,
+                     AUR_DIO_CONFIG                          = 0x12,
+                     AUR_DIO_CONFIG_QUERY                    = 0x13,
+                     AUR_CTR_READ                            = 0x20,
+                     AUR_CTR_MODE                            = 0x21,
+                     AUR_CTR_LOAD                            = 0x22,
+                     AUR_CTR_MODELOAD                        = 0x23,
+                     AUR_CTR_SELGATE                         = 0x24,
+                     AUR_CTR_READALL                         = 0x25,
+                     AUR_CTR_READLATCHED                     = 0x26,
+                     AUR_CTR_COS_BULK_GATE2                  = 0x27,
+                     AUR_CTR_PUR_FIRST                       = 0x28,   // 0x28 is correct; not used with device, for index offsetting
+                     AUR_CTR_PUR_OFRQ                        = 0x28,   // 0x28 is correct
+                     AUR_CTR_COS_BULK_ABORT                  = 0x29,
+                     AUR_CTR_PUR_MFRQ                        = 0x2C,
+                     AUR_CTR_PUR_EVCT                        = 0x2D,
+                     AUR_CTR_PUR_MPUL                        = 0x2E,
+                     AUR_WDG_STATUS                          = 0x2E,
+                     AUR_DIO_WDG16_DEPREC                    = 0x2F,
+                     AUR_READBACK_GLOBAL_STATE               = 0x30,
+                     AUR_SAVE_GLOBAL_STATE                   = 0x31,
+                     AUR_GEN_CLEAR_FIFO_NEXT                 = 0x34,
+                     AUR_GEN_CLEAR_FIFO                      = 0x35,
+                     AUR_GEN_CLEAR_FIFO_WAIT                 = 0x36,
+                     AUR_GEN_ABORT_AND_CLEAR                 = 0x38,
+                     AUR_WDG                                 = 0x44,
+                     AUR_OFFLINE_READWRITE                   = 0x50,
+                     AUR_SELF_TEST_1                         = 0x91,
+                     AUR_EEPROM_READ                         = 0xA2,
+                     AUR_EEPROM_WRITE                        = 0XA2,
+                     AUR_DAC_CONTROL                         = 0xB0,
+                     AUR_DAC_DATAPTR                         = 0xB1,
+                     AUR_DAC_DIVISOR                         = 0xB2,
+                     AUR_DAC_IMMEDIATE                       = 0xB3,
+                     AUR_GEN_STREAM_STATUS                   = 0xB4,
+                     AUR_FLASH_READWRITE                     = 0xB5,
+                     AUR_DAC_RANGE                           = 0xB7,
+                     AUR_PROBE_CALFEATURE                    = 0xBA,
+                     AUR_LOAD_BULK_CALIBRATION_BLOCK         = 0xBB,
+                     AUR_DIO_STREAM_OPEN_OUTPUT              = 0xBB,
+                     AUR_START_ACQUIRING_BLOCK               = 0xBC,
+                     AUR_DIO_STREAM_OPEN_INPUT               = 0xBC,
+                     AUR_DIO_SETCLOCKS                       = 0xBD,
+                     AUR_ADC_SET_CONFIG                      = 0xBE,
+                     AUR_ADC_IMMEDIATE                       = 0xBF,
+                     AUR_DIO_SPI_WRITE                       = 0xC0,
+                     AUR_DIO_SPI_READ                        = 0xC1,
+                     AUR_ADC_GET_CONFIG                      = 0xD2
+                     )
 
 enum {
     BITS_PER_BYTE                 = 8,
@@ -281,9 +276,11 @@ PRIVATE_EXTERN unsigned long AIOUSB_ArrayVoltsToCounts( unsigned long DeviceInde
 
 PRIVATE_EXTERN unsigned long GenericVendorRead( unsigned long DeviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, unsigned long *DataSize, void *Data );
 PRIVATE_EXTERN unsigned long GenericVendorWrite( unsigned long DeviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, unsigned long DataSize, void *Data );
-
+PRIVATE_EXTERN unsigned long AIOUSB_Validate_Device( unsigned long DeviceIndex );
 
 #endif
+
+
 
 
 #if 0

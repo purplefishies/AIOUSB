@@ -50,85 +50,6 @@ static unsigned long ADC_GetImmediate(
 
 
 
-/**
- *
- * @desc Reads a config block
- * @param deviceDesc
- * @param forceRead
- *
- * @return success if 0, else failure . Retains Lock at end of call
- *
- */
-/* unsigned long */
-/* AIOUSB_ReadConfigBlock_Locked( DeviceDescriptor *deviceDesc ,  */
-/*                                AIOUSB_BOOL forceRead */
-/*      ) */
-/* { */
-/*      unsigned long result; */
-
-/*      if( forceRead || deviceDesc->cachedConfigBlock.size == 0 ) { */
-/*           libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle( DeviceIndex ); */
-/*           if( deviceHandle != NULL ) { */
-
-/*                // request A/D configuration block from device */
-
-/*                ADConfigBlock configBlock; */
-/*                configBlock.device = deviceDesc; */
-/*                configBlock.size = deviceDesc->ConfigBytes; */
-/*                const unsigned timeout = deviceDesc->commTimeout; */
-
-/*                AIOUSB_UnLock(); // unlock while communicating with device */
-/*                const int bytesTransferred = libusb_control_transfer( deviceHandle, */
-/*                                                                      USB_READ_FROM_DEVICE,  */
-/*                                                                      AUR_ADC_GET_CONFIG, */
-/*                                                                      0,  */
-/*                                                                      0,  */
-/*                                                                      configBlock.registers,  */
-/*                                                                      configBlock.size,  */
-/*                                                                      timeout  */
-/*                     ); */
-/*                if( bytesTransferred == ( int ) configBlock.size ) { */
-/*                     /\* */
-/*                      * check and correct settings read from device */
-/*                      *\/ */
-/*                     AIOUSB_Lock(); */
-/*                     unsigned channel; */
-/*                     /\* for( channel = 0; channel < AD_NUM_GAIN_CODE_REGISTERS; channel++ ) /\\* { *\\/ *\/ */
-/*                     /\*      if( *\/ */
-/*                     /\*           ( *\/ */
-/*                     /\*                configBlock.registers[ AD_CONFIG_GAIN_CODE + channel ]  *\/ */
-/*                     /\*                & ~( unsigned char )( AD_DIFFERENTIAL_MODE | AD_GAIN_CODE_MASK ) *\/ */
-/*                     /\*                ) != 0 *\/ */
-/*                     /\*           ) *\/ */
-/*                     /\*           configBlock.registers[ AD_CONFIG_GAIN_CODE + channel ] = FIRST_ENUM(ADGainCode); *\/ */
-/*                     /\* } *\/  */
-
-/*                     const unsigned char calMode = configBlock.registers[ AD_CONFIG_CAL_MODE ]; */
-/*                     if( calMode != AD_CAL_MODE_NORMAL && calMode != AD_CAL_MODE_GROUND && calMode != AD_CAL_MODE_REFERENCE ) */
-/*                          configBlock.registers[ AD_CONFIG_CAL_MODE ] = AD_CAL_MODE_NORMAL; */
-
-/*                     if( ( configBlock.registers[ AD_CONFIG_TRIG_COUNT ] & ~AD_TRIGGER_VALID_MASK ) != 0 ) */
-/*                          configBlock.registers[ AD_CONFIG_TRIG_COUNT ] = 0; */
-
-/*                     const unsigned endChannel = AIOUSB_GetEndChannel( &configBlock ); */
-/*                     if( */
-/*                          endChannel >= ( unsigned ) deviceDesc->ADCMUXChannels */
-/*                          || AIOUSB_GetStartChannel( &configBlock ) > endChannel */
-/*                          ) */
-/*                          AIOUSB_SetScanRange( &configBlock, 0, deviceDesc->ADCMUXChannels - 1 ); */
-
-/*                     deviceDesc->cachedConfigBlock = configBlock; */
-/*                } else */
-/*                     result = LIBUSB_RESULT_TO_AIOUSB_RESULT( bytesTransferred ); */
-/*           } else { */
-/*                result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED; */
-/*           }  */
-/*      }  */
-
-/*      return result; */
-
-/* } */
-
 
 /**
  *
@@ -251,7 +172,7 @@ WriteConfigBlock(unsigned long DeviceIndex)
                                                                      0, 0, configBlock.registers, configBlock.size, timeout);
                 if(bytesTransferred != ( int )configBlock.size)
                     result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-            }else {
+            } else {
                 result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
                 AIOUSB_UnLock();
             }
@@ -1863,7 +1784,8 @@ unsigned long ADC_BulkPoll(
 
 
 
-/*
+/**
+ * @desc
  * o this function is erroneously documented in the API specification, but it should
  *   not be made public; it is useful internally, however, for such things as
  *   calibrating the A/D converter
@@ -1917,496 +1839,6 @@ static unsigned long ADC_GetImmediate(
           AIOUSB_UnLock();
       }
 
-    return result;
-}
-
-
-
-PRIVATE void _Initialize_Device_Desc(unsigned long DeviceIndex)
-{
-    DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
-
-    deviceDesc->DIOBytes = 0;
-    deviceDesc->DIOConfigBits = 0;
-    deviceDesc->Counters = 0;
-    deviceDesc->RootClock = 0;
-    deviceDesc->Tristates = 0;
-    deviceDesc->bGetName = AIOUSB_FALSE;
-    deviceDesc->ConfigBytes = 0;
-    deviceDesc->bGateSelectable = AIOUSB_FALSE;
-    deviceDesc->bDACBoardRange = AIOUSB_FALSE;
-    deviceDesc->bDACChannelCal = AIOUSB_FALSE;
-    deviceDesc->ImmDACs = 0;
-    deviceDesc->ImmADCs = 0;
-    deviceDesc->ADCChannels = 0;
-    deviceDesc->ADCMUXChannels = 0;
-    deviceDesc->bDACStream = AIOUSB_FALSE;
-    deviceDesc->bADCStream = AIOUSB_FALSE;
-    deviceDesc->RangeShift = 0;
-    deviceDesc->bDIOStream = AIOUSB_FALSE;
-    deviceDesc->StreamingBlockSize = 31 * 1024;
-    deviceDesc->bDIODebounce = AIOUSB_FALSE;
-    deviceDesc->bDIOSPI = AIOUSB_FALSE;
-    deviceDesc->bClearFIFO = AIOUSB_FALSE;
-    deviceDesc->FlashSectors = 0;
-    deviceDesc->WDGBytes = 0;
-    deviceDesc->bSetCustomClocks = AIOUSB_FALSE;
-}
-
-
-PRIVATE unsigned long  _Card_Specific_Settings(unsigned long DeviceIndex)
-{
-    DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
-    unsigned long result = AIOUSB_SUCCESS;
-
-    switch(deviceDesc->ProductID) {
-      case 0x8001:
-          deviceDesc->DIOBytes = 4;
-          deviceDesc->Counters = 3;
-          deviceDesc->RootClock = 3000000;
-          deviceDesc->bGetName = AIOUSB_TRUE;
-          deviceDesc->bSetCustomClocks = AIOUSB_TRUE;
-          deviceDesc->bDIODebounce = AIOUSB_TRUE;
-          break;
-
-      case 0x8004:
-          deviceDesc->DIOBytes = 4;
-          deviceDesc->DIOConfigBits = 32;
-          deviceDesc->bGetName = AIOUSB_TRUE;
-          deviceDesc->bSetCustomClocks = AIOUSB_TRUE;
-          break;
-
-      case 0x8002:
-          deviceDesc->DIOBytes = 6;
-          deviceDesc->bGetName = AIOUSB_TRUE;
-          break;
-
-      case 0x8003:
-          deviceDesc->DIOBytes = 12;
-          deviceDesc->bGetName = AIOUSB_TRUE;
-          break;
-
-      case 0x8008:
-      case 0x8009:
-      case 0x800A:
-          deviceDesc->DIOBytes = 1;
-          deviceDesc->bGetName = AIOUSB_TRUE;
-          deviceDesc->bDIOStream = AIOUSB_TRUE;
-          deviceDesc->bDIOSPI = AIOUSB_TRUE;
-          deviceDesc->bClearFIFO = AIOUSB_TRUE;
-          break;
-
-      case 0x800C:
-      case 0x800D:
-      case 0x800E:
-      case 0x800F:
-          deviceDesc->DIOBytes = 4;
-          deviceDesc->Tristates = 2;
-          deviceDesc->bGetName = AIOUSB_TRUE;
-          deviceDesc->bDIOStream = AIOUSB_TRUE;
-          deviceDesc->bDIOSPI = AIOUSB_TRUE;
-          deviceDesc->bClearFIFO = AIOUSB_TRUE;
-          break;
-
-//USB-IIRO-16 family
-      case 0x8010:
-      case 0x8011:
-      case 0x8012:
-      case 0x8014:
-      case 0x8015:
-      case 0x8016:
-//USB-IDIO-16 family
-      case 0x8018:
-      case 0x801a:
-      case 0x801c:
-      case 0x801e:
-      case 0x8019:
-      case 0x801d:
-      case 0x801f:
-          deviceDesc->DIOBytes = 4;
-          deviceDesc->bGetName = AIOUSB_TRUE;
-          deviceDesc->WDGBytes = 2;
-          break;
-
-      case 0x4001:
-      case 0x4002:
-          deviceDesc->bGetName = AIOUSB_FALSE;
-          deviceDesc->bDACStream = AIOUSB_TRUE;
-          deviceDesc->ImmDACs = 8;
-          deviceDesc->DACsUsed = 5;
-          deviceDesc->bGetName = AIOUSB_TRUE;
-          break;
-
-      case 0x4003:
-          deviceDesc->bGetName = AIOUSB_FALSE;
-          deviceDesc->ImmDACs = 8;
-          deviceDesc->bGetName = AIOUSB_TRUE;
-          break;
-
-      case 0x8020:
-          deviceDesc->Counters = 5;
-          deviceDesc->bGateSelectable = AIOUSB_TRUE;
-          deviceDesc->RootClock = 10000000;
-          deviceDesc->bGetName = AIOUSB_TRUE;
-          break;
-
-      case 0x8030:
-      case 0x8031:
-          deviceDesc->DIOBytes = 2;
-          deviceDesc->bGetName = AIOUSB_TRUE;
-          break;
-
-      case 0x8032:
-          deviceDesc->DIOBytes = 3;
-          deviceDesc->bGetName = AIOUSB_TRUE;
-          break;
-
-      case 0x8033:
-          deviceDesc->DIOBytes = 3;
-          deviceDesc->bGetName = AIOUSB_TRUE;
-          break;
-
-      case 0x8036:
-          deviceDesc->DIOBytes = 2;
-          deviceDesc->bGetName = AIOUSB_TRUE;
-          deviceDesc->ImmADCs = 2;
-          break;
-
-      case 0x8037:
-          deviceDesc->DIOBytes = 2;
-          deviceDesc->bGetName = AIOUSB_TRUE;
-          deviceDesc->ImmADCs = 2;
-          break;
-
-      case 0x8040:
-      case 0x8041:
-      case 0x8042:
-      case 0x8043:
-      case 0x8044:
-      case 0x8140:
-      case 0x8141:
-      case 0x8142:
-      case 0x8143:
-      case 0x8144:
-          deviceDesc->DIOBytes = 2;
-          deviceDesc->Counters = 1;
-          deviceDesc->RootClock = 10000000;
-          deviceDesc->bGetName = AIOUSB_TRUE;
-          deviceDesc->bADCStream = AIOUSB_TRUE;
-          deviceDesc->ADCChannels = 16;
-          deviceDesc->ADCMUXChannels = 16;
-          deviceDesc->ConfigBytes = 20;
-          deviceDesc->RangeShift = 0;
-          deviceDesc->bClearFIFO = AIOUSB_TRUE;
-          if((deviceDesc->ProductID & 0x0100) != 0) {
-                deviceDesc->bDACBoardRange = AIOUSB_TRUE;
-                deviceDesc->ImmDACs = 2;
-            }
-          break;
-
-      case 0x8045:
-      case 0x8046:
-      case 0x8047:
-      case 0x8048:
-      case 0x8049:
-      case 0x8145:
-      case 0x8146:
-      case 0x8147:
-      case 0x8148:
-      case 0x8149:
-          deviceDesc->DIOBytes = 2;
-          deviceDesc->Counters = 1;
-          deviceDesc->RootClock = 10000000;
-          deviceDesc->bGetName = AIOUSB_TRUE;
-          deviceDesc->bADCStream = AIOUSB_TRUE;
-          deviceDesc->ADCChannels = 16;
-          deviceDesc->ADCMUXChannels = 64;
-          deviceDesc->ConfigBytes = 21;
-          deviceDesc->RangeShift = 2;
-          deviceDesc->bClearFIFO = AIOUSB_TRUE;
-          if((deviceDesc->ProductID & 0x0100) != 0) {
-                deviceDesc->bDACBoardRange = AIOUSB_TRUE;
-                deviceDesc->ImmDACs = 2;
-            }
-          break;
-
-      case 0x804a:
-      case 0x804b:
-      case 0x804c:
-      case 0x804d:
-      case 0x804e:
-      case 0x804f:
-      case 0x8050:
-      case 0x8051:
-      case 0x8052:
-      case 0x8053:
-      case 0x8054:
-      case 0x8055:
-      case 0x8056:
-      case 0x8057:
-      case 0x8058:
-      case 0x8059:
-      case 0x805a:
-      case 0x805b:
-      case 0x805c:
-      case 0x805d:
-      case 0x805e:
-      case 0x805f:
-      case 0x814a:
-      case 0x814b:
-      case 0x814c:
-      case 0x814d:
-      case 0x814e:
-      case 0x814f:
-      case 0x8150:
-      case 0x8151:
-      case 0x8152:
-      case 0x8153:
-      case 0x8154:
-      case 0x8155:
-      case 0x8156:
-      case 0x8157:
-      case 0x8158:
-      case 0x8159:
-      case 0x815a:
-      case 0x815b:
-      case 0x815c:
-      case 0x815d:
-      case 0x815e:
-      case 0x815f:
-          deviceDesc->DIOBytes = 2;
-          deviceDesc->Counters = 1;
-          deviceDesc->RootClock = 10000000;
-          deviceDesc->bGetName = AIOUSB_TRUE;
-          deviceDesc->bADCStream = AIOUSB_TRUE;
-          deviceDesc->ADCChannels = 16;
-          deviceDesc->ADCMUXChannels = 32 * ((((deviceDesc->ProductID - 0x804A) & (~0x0100)) / 5) + 1);
-          deviceDesc->ConfigBytes = 21;
-          deviceDesc->RangeShift = 3;
-          deviceDesc->bClearFIFO = AIOUSB_TRUE;
-          if((deviceDesc->ProductID & 0x0100) != 0) {
-                deviceDesc->bDACBoardRange = AIOUSB_TRUE;
-                deviceDesc->ImmDACs = 2;
-            }
-          break;
-
-      case 0x8060:
-      case 0x8070:
-      case 0x8071:
-      case 0x8072:
-      case 0x8073:
-      case 0x8074:
-      case 0x8075:
-      case 0x8076:
-      case 0x8077:
-      case 0x8078:
-      case 0x8079:
-      case 0x807a:
-      case 0x807b:
-      case 0x807c:
-      case 0x807d:
-      case 0x807e:
-      case 0x807f:
-          deviceDesc->DIOBytes = 2;
-          deviceDesc->bGetName = AIOUSB_TRUE;
-          deviceDesc->FlashSectors = 32;
-          deviceDesc->bDACBoardRange = AIOUSB_TRUE;
-          deviceDesc->bDACChannelCal = AIOUSB_TRUE;
-//deviceDesc->bClearFIFO = AIOUSB_TRUE;
-//Add a new-style DAC streaming
-          switch(deviceDesc->ProductID & 0x06) {
-            case 0x00:
-                deviceDesc->ImmDACs = 16;
-                break;
-
-            case 0x02:
-                deviceDesc->ImmDACs = 12;
-                break;
-
-            case 0x04:
-                deviceDesc->ImmDACs = 8;
-                break;
-
-            case 0x06:
-                deviceDesc->ImmDACs = 4;
-                break;
-            }
-          if((deviceDesc->ProductID & 1) == 0)
-              deviceDesc->ImmADCs = 2;
-          break;
-
-      default:
-          deviceDesc->bADCStream = AIOUSB_TRUE;
-          deviceDesc->bDIOStream = AIOUSB_TRUE;
-          deviceDesc->bDIOSPI = AIOUSB_TRUE;
-          result = AIOUSB_SUCCESS;
-          break;
-      }
-    return result;
-}
-
-/**
- *
- *
- * @param DeviceIndex
- *
- * @return
- */
-unsigned long AIOUSB_EnsureOpen(unsigned long DeviceIndex)
-{
-    DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
-
-    unsigned long result = AIOUSB_SUCCESS;
-
-    if(deviceDesc->deviceHandle == 0) {
-          if(deviceDesc->bDeviceWasHere)
-              result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-          else
-              result = AIOUSB_ERROR_FILE_NOT_FOUND;
-          goto RETURN_AIOUSB_EnsureOpen;
-      }
-
-    if(deviceDesc->bOpen) {
-          result = AIOUSB_ERROR_OPEN_FAILED;
-          goto RETURN_AIOUSB_EnsureOpen;
-      }
-
-    if(result == AIOUSB_SUCCESS) {
-          _Initialize_Device_Desc(DeviceIndex);
-
-          result |= _Card_Specific_Settings(DeviceIndex);
-          if(result != AIOUSB_SUCCESS)
-              goto RETURN_AIOUSB_EnsureOpen;
-
-          if(deviceDesc->DIOConfigBits == 0)
-              deviceDesc->DIOConfigBits = deviceDesc->DIOBytes;
-      }
-
-RETURN_AIOUSB_EnsureOpen:
-    return result;
-}
-
-
-/**
- *
- *
- * @param deviceIndex
- * @param Request
- * @param Value
- * @param Index
- * @param DataSize
- * @param pData
- *
- * @return
- */
-unsigned long GenericVendorWrite(
-    unsigned long deviceIndex,
-    unsigned char Request,
-    unsigned short Value,
-    unsigned short Index,
-    unsigned long DataSize,
-    void *pData
-    )
-{
-    unsigned long result;
-/* DeviceDescriptor *const deviceDesc; */
-/* libusb_device_handle *const deviceHandle; */
-    DeviceDescriptor *const deviceDesc = &deviceTable[ deviceIndex ];
-    libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle(deviceIndex);
-
-    if(!AIOUSB_Lock()) {
-          result = AIOUSB_ERROR_INVALID_MUTEX;
-          goto RETURN_GenericVendorWrite;
-      }
-
-    result = AIOUSB_Validate(&deviceIndex);
-    if(result != AIOUSB_SUCCESS) {
-          AIOUSB_UnLock();
-          goto RETURN_GenericVendorWrite;
-/* return result; */
-      }
-
-    if(deviceHandle != NULL) {
-          const unsigned timeout = deviceDesc->commTimeout;
-          AIOUSB_UnLock();       // unlock while communicating with device
-          const int bytesTransferred = libusb_control_transfer(deviceHandle,
-                                                               USB_WRITE_TO_DEVICE,
-                                                               Request,
-                                                               Value,
-                                                               Index,
-                                                               (unsigned char*)pData,
-                                                               DataSize,
-                                                               timeout);
-          if(bytesTransferred != (int)DataSize) {
-                result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-            }
-      }else {
-          result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-          AIOUSB_UnLock();
-      }
-RETURN_GenericVendorWrite:
-    return result;
-}
-
-/**
- * @param deviceIndex
- * @param Request
- * @param Value
- * @param Index
- * @param DataSize
- * @param pData
- *
- * @return
- */
-unsigned long GenericVendorRead(
-    unsigned long deviceIndex,
-    unsigned char Request,
-    unsigned short Value,
-    unsigned short Index,
-    unsigned long *DataSize,
-    void *pData
-    )
-{
-    unsigned long result;
-    DeviceDescriptor *const deviceDesc = &deviceTable[ deviceIndex ];
-    libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle(deviceIndex);
-
-    if(!AIOUSB_Lock()) {
-          result = AIOUSB_ERROR_INVALID_MUTEX;
-          goto RETURN_GenericVendorRead;
-      }
-
-    result = AIOUSB_Validate(&deviceIndex);
-    if(result != AIOUSB_SUCCESS) {
-          AIOUSB_UnLock();
-          goto RETURN_GenericVendorRead;
-      }
-
-    result = AIOUSB_EnsureOpen(deviceIndex);
-    if(result != AIOUSB_SUCCESS) {
-          AIOUSB_UnLock();
-          goto RETURN_GenericVendorRead;
-      }
-
-    if(deviceHandle != NULL) {
-          const unsigned timeout = deviceDesc->commTimeout;
-          AIOUSB_UnLock();       // unlock while communicating with device
-          const int bytesTransferred = libusb_control_transfer(deviceHandle,
-                                                               USB_READ_FROM_DEVICE,
-                                                               Request,
-                                                               Value,
-                                                               Index,
-                                                               (unsigned char*)pData,
-                                                               *DataSize,
-                                                               timeout
-                                                               );
-          if(bytesTransferred != (int)*DataSize)
-              result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-      }else {
-          result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-          AIOUSB_UnLock();
-      }   /* if( deviceHandle != NULL .. */
-RETURN_GenericVendorRead:
     return result;
 }
 
@@ -2537,10 +1969,10 @@ unsigned long ADC_InitFastITScanV(
           goto RETURN_ADC_InitFastITScanV;
       }
 
-/* Copy old config */
+    /* Copy old config */
     memcpy(&deviceDesc->FastITConfig->registers[0], &deviceDesc->FastITBakConfig->registers[0], deviceDesc->FastITBakConfig->size);
 
-/* Make changes to the config block */
+    /* Make changes to the config block */
     Dat = AIOUSB_GetRegister(deviceDesc->FastITBakConfig, 0x10);
     AIOUSB_SetRegister(deviceDesc->FastITConfig, 0x11, (0x05 | (Dat & 0x10)));
     Dat = (3 > AIOUSB_GetRegister(deviceDesc->FastITBakConfig, 0x13) ? 3 : AIOUSB_GetRegister(deviceDesc->FastITBakConfig, 0x13));
@@ -2643,6 +2075,10 @@ RETURN_ADC_SetFastITScanVChannels:
     return result;
 }
 
+/**
+ * @desc Just a debugging function for listing all attributes of a 
+ *       config object
+ **/
 void
 ADC_Debug_Register_Settings(ADConfigBlock *config)
 {
@@ -2712,25 +2148,25 @@ ADC_Debug_Register_Settings(ADConfigBlock *config)
       }
 
     printf("Trig/Counter clk\t");
-    if(config->registers[AD_REGISTER_TRIG_COUNT] & AD_TRIGGER_CTR0_EXT) {
+    if (config->registers[AD_REGISTER_TRIG_COUNT] & AD_TRIGGER_CTR0_EXT) {
           printf("(counter)              ");
       }else {
           printf("(externally triggered) ");
       }
 
-    if(config->registers[AD_REGISTER_TRIG_COUNT] & AD_TRIGGER_FALLING_EDGE) {
+    if (config->registers[AD_REGISTER_TRIG_COUNT] & AD_TRIGGER_FALLING_EDGE) {
           printf("(triggered by falling edge) ");
       }
 
-    if(config->registers[AD_REGISTER_TRIG_COUNT] & AD_TRIGGER_SCAN) {
+    if (config->registers[AD_REGISTER_TRIG_COUNT] & AD_TRIGGER_SCAN) {
           printf("(scan all channels) ");
       }else {
           printf("(single channel) ");
       }
 
-    if(config->registers[AD_REGISTER_TRIG_COUNT] & AD_TRIGGER_EXTERNAL) {
+    if (config->registers[AD_REGISTER_TRIG_COUNT] & AD_TRIGGER_EXTERNAL) {
           printf("(triggered by external ) ");
-      }else if(config->registers[AD_REGISTER_TRIG_COUNT] & AD_TRIGGER_TIMER) {
+      }else if (config->registers[AD_REGISTER_TRIG_COUNT] & AD_TRIGGER_TIMER) {
           printf("(triggered by counter 2) ");
       }else
         printf("(triggered by sw       ) ");
@@ -3229,33 +2665,19 @@ AIOUSB_Copy_Config_Block(ADConfigBlock *to, ADConfigBlock *from)
 }
 
 
+
 unsigned long
-AIOUSB_Validate_Device(unsigned long DeviceIndex)
+AIOUSB_Validate_ADC_Device(unsigned long DeviceIndex)
 {
     unsigned long result;
-    DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
 
-    if(!AIOUSB_Lock()) {
-          result = AIOUSB_ERROR_INVALID_MUTEX;
-          goto RETURN_AIOUSB_Validate_Device;
-      }
+    if( (result = AIOUSB_Validate_Device( DeviceIndex ) ) != AIOUSB_SUCCESS )
+        goto RETURN_AIOUSB_Validate_ADC_Device;
+    
+    result = ADC_QueryCal(DeviceIndex);
 
-    result = AIOUSB_Validate(&DeviceIndex);
-    if(result != AIOUSB_SUCCESS) {
-          AIOUSB_UnLock();
-          goto RETURN_AIOUSB_Validate_Device;
-      }
-
-    if(deviceDesc->bADCStream == AIOUSB_FALSE) {
-          AIOUSB_UnLock();
-          result = AIOUSB_ERROR_NOT_SUPPORTED;
-          goto RETURN_AIOUSB_Validate_Device;
-      }
-
-    if((result = ADC_QueryCal(DeviceIndex)) != AIOUSB_SUCCESS) {
-          AIOUSB_UnLock();
-      }
-RETURN_AIOUSB_Validate_Device:
+RETURN_AIOUSB_Validate_ADC_Device:
+    AIOUSB_UnLock();
     return result;
 }
 
@@ -3465,7 +2887,7 @@ unsigned long AIOUSB_ADC_InternalCal(
                 int rangeValue = DAC_RANGE_10V;
 // See page 21 of the USB manual
                 AIOUSB_SetCalMode(&deviceDesc->cachedConfigBlock, AD_CAL_MODE_BIP_GROUND);         // select bip low, to select
-                AIOUSB_SetRangeSingle(&deviceDesc->cachedConfigBlock, rangeChannel, rangeValue);         // Select ±10 range for channel 0
+                AIOUSB_SetRangeSingle(&deviceDesc->cachedConfigBlock, rangeChannel, rangeValue);         // Select ??10 range for channel 0
 //WriteConfigBlock( DeviceIndex );
 
                 AIOUSB_UnLock();
@@ -4005,15 +3427,16 @@ void AIOUSB_SetScanRange(ADConfigBlock *config, unsigned startChannel, unsigned 
               startChannel <= endChannel
               ) {
                 if(config->size == AD_MUX_CONFIG_REGISTERS) {
-/*
- * this board has a MUX, so support more channels
- */
+                  /*
+                   * this board has a MUX, so support more channels
+                   */
                       config->registers[ AD_CONFIG_START_END ] = ( unsigned char )((endChannel << 4) | (startChannel & 0x0f));
                       config->registers[ AD_CONFIG_MUX_START_END ] = ( unsigned char )((endChannel & 0xf0) | ((startChannel >> 4) & 0x0f));
-                  }else {
-/*
- * this board doesn't have a MUX, so support base number of channels
- */
+                  } else {
+                  /*
+                   * this board doesn't have a MUX, so support base
+                   * number of channels
+                   */
                       config->registers[ AD_CONFIG_START_END ] = ( unsigned char )((endChannel << 4) | startChannel);
                   }
             }

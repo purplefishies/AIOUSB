@@ -37,9 +37,10 @@ clean:
 	if [ -f Makefile ] ;  then  $(MAKE) -f Makefile clean ; fi
 	-rm -f *~	
 	-rm -f AIOUSB_wrap.c
-	-rm -f AIOUSB.py
+	-rm -f AIOUSB.py*
 	-rm -f *.pm
 	-rm -f Makefile.old
+	-rm -f Makefile
 	-rm -f *.log
 	-rm -f *.o
 	-rm -f *.oct

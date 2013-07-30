@@ -20,8 +20,8 @@
 
 
 %{
-  #include "AIOUSB_Core.h"
   #include "aiousb.h"
+  #include "AIOUSB_Core.h"
   #include "libusb.h"
 
 %}
@@ -30,8 +30,9 @@
 %newobject NewBuffer;
 %delobject AIOBuf::DeleteBuffer;
 
-%include "AIOUSB_Core.h"
 %include "aiousb.h"
+%include "AIOUSB_Core.h"
+
 
 
 
