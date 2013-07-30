@@ -52,6 +52,9 @@ enum {
     AUR_CTR_COS_BULK_ABORT                  = 0x29,
     AUR_CTR_PUR_MFRQ                        = 0x2C,
     AUR_CTR_PUR_EVCT                        = 0x2D,
+
+    AUR_WDG_STATUS                          = 0x2E,
+
     AUR_CTR_PUR_MPUL                        = 0x2E,
     AUR_DIO_WDG16_DEPREC                    = 0x2F,
     AUR_READBACK_GLOBAL_STATE               = 0x30,
@@ -82,8 +85,9 @@ enum {
     AUR_ADC_IMMEDIATE                       = 0xBF,
     AUR_DIO_SPI_WRITE                       = 0xC0,
     AUR_DIO_SPI_READ                        = 0xC1,
-    AUR_ADC_GET_CONFIG                      = 0xD2
-};    // enum
+    AUR_ADC_GET_CONFIG                      = 0xD2,
+
+};
 
 
 
@@ -275,14 +279,17 @@ PRIVATE_EXTERN unsigned long AIOUSB_ArrayVoltsToCounts( unsigned long DeviceInde
                                                         int numChannels, const double volts[], unsigned short counts[] );
 
 
+PRIVATE_EXTERN unsigned long GenericVendorRead( unsigned long DeviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, unsigned long *DataSize, void *Data );
+PRIVATE_EXTERN unsigned long GenericVendorWrite( unsigned long DeviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, unsigned long DataSize, void *Data );
+
+
 #endif
+
 
 #if 0
 /*
  * these will be moved to aiousb.h when they are ready to be made public
  */
-extern unsigned long GenericVendorRead( unsigned long DeviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, unsigned long *DataSize, void *Data );
-extern unsigned long GenericVendorWrite( unsigned long DeviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, unsigned long DataSize, void *Data );
 extern unsigned long DACOutputProcess( unsigned long DeviceIndex, double *ClockHz, unsigned long NumSamples, unsigned short *pSampleData );
 #endif
 

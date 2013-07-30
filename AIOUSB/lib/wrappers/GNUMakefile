@@ -21,6 +21,9 @@ RUBY_INCLUDES	:= -I$(LIBDIR)
 PERL_INCLUDES	:= -I$(shell printenv AIOUSB_ROOT)/lib
 
 
+PERL_CFLAGS	:= $(shell perl -MConfig -e "print \$$Config{ccflags}")
+PERL_XTRA_CFLAGS:= -std=gnu99 -fno-merge-constants
+
 ifdef PERL_PREFIX
 PERL_PREFIX_INSTALL	:= PREFIX=$(PERL_PREFIX)
 else 
@@ -51,7 +54,7 @@ all:
 
 perl:
 	$(SWIG) $(PERL_INCLUDES)  -perl5 AIOUSB.i 
-	$(PERL) Makefile.PL $(PERL_PREFIX_INSTALL)
+	$(PERL) Makefile.PL CCFLAGS="$(PERL_CFLAGS) $(PERL_XTRA_CFLAGS)" $(PERL_PREFIX_INSTALL)
 	$(MAKE) -f Makefile 
 
 
