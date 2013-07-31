@@ -92,6 +92,7 @@ class TestCaseSetup {
   void doCleanupAfterBulk();
   void doDACDirect(int channel, unsigned short voltage);
   void doDACDirectSetup();
+  void writeBuffer( char *filename );
 
   void ThrowError(unsigned long, int);
 
@@ -110,7 +111,7 @@ class TestCaseSetup {
   void doGenericVendorWrite(unsigned char Request, unsigned short Value, unsigned short Index, unsigned long *DataSize, void *pData);
 
   void doBulkAcquire();
-  void doBulkAcquire(int block_size, int over_sample, double clock_speed );
+  void doBulkAcquire(unsigned int block_size, unsigned int over_sample, unsigned int clock_speed );
   void doDisplayBulkResults();
 
   void resetCPU();
@@ -131,7 +132,13 @@ class TestCaseSetup {
   double *volts;
   unsigned char *gainCodes;
   ADConfigBlock configBlock;
+
   unsigned int number_oversamples;
+  unsigned int block_size;
+  unsigned int clock_speed;
+
+
+
 
  private:
   void setupVoltageParameters(void);

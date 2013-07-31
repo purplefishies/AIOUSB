@@ -1,5 +1,6 @@
 
 #include "TestCaseSetup.h"
+#include <stdlib.h>
 
 using namespace AIOUSB;
 
@@ -31,7 +32,7 @@ TestCaseSetup::~TestCaseSetup()
 
 void TestCaseSetup::setCurrentDeviceIndex( int DI )
 {
-  this->DeviceIndex = DeviceIndex;
+  DeviceIndex = DI;
 }
 
 void TestCaseSetup::resetCPU(void) {
@@ -230,10 +231,52 @@ void TestCaseSetup::doBulkConfigBlock()
  */
 void TestCaseSetup::doBulkAcquire(void)
 {
-  int BLOCK_SIZE   = 100000;
+  unsigned int BLOCK_SIZE   = 100000;
   int OVER_SAMPLE  = 2;
   const double CLOCK_SPEED = 100000;	// Hz
   doBulkAcquire( BLOCK_SIZE, OVER_SAMPLE, CLOCK_SPEED );
+}
+
+
+
+/** 
+ * @desc writes the bytes to a file in question. Will be binary
+ *       unless the user specifies CSV as an argument
+ **/
+void TestCaseSetup::writeBuffer( char *filename ) {
+  FILE *fp =  fopen(filename,"w");
+  if ( !fp  ) {
+    perror("Unable to open file ");
+    return;
+  }
+  //number_oversamples
+  
+  for ( unsigned int i = 0; i < block_size ; i ++ ) {
+      
+      for( int channel = 0; channel < NUM_CHANNELS ; channel ++ ) { 
+          double tot = 0.0;
+          for ( unsigned int j = 0; j < number_oversamples ; j ++ ) {
+              tot += dataBuf[(i*16)*(11)+(11*channel)+j];
+          }
+          double v = tot / number_oversamples / (float)(0xffff+1);
+          // int rc = ADC_GetRangeCode( 0 );
+          int rc = 0;
+        
+          if ( (rc & 1 ) != 0 )
+              v = v*2 - 1;
+        
+          if ( (rc & 2 ) == 0 ) 
+              v = v * 2;
+          if ( (rc & 4 ) == 0 )
+              v = v * 5;
+
+          fprintf(fp,"%e", v );
+          if ( channel != NUM_CHANNELS ) 
+              fprintf(fp,",");
+      }
+      fprintf(fp,"\n");
+  }
+  fclose(fp);
 }
 
 /** 
@@ -243,14 +286,14 @@ void TestCaseSetup::doBulkAcquire(void)
  * @param over_sample 
  * @param clock_speed 
  */
-void TestCaseSetup::doBulkAcquire(int block_size, int over_sample, double clock_speed )
+void TestCaseSetup::doBulkAcquire(unsigned int blck_size, unsigned int ovr_sampl, unsigned int clk_speed )
 {
 
-  int BLOCK_SIZE      = ( block_size <= 0 ? 100000  : block_size );
-  int OVER_SAMPLE     = ( over_sample <= 0 || over_sample > 255 ? 10 : over_sample );
-  double CLOCK_SPEED  = ( clock_speed <= 0 ? 100000 : clock_speed );
-  //                                     scans       *    bytes / sample        *    1 sample + OVER_SAMPLEs */
-  const int BULK_BYTES = BLOCK_SIZE  * NUM_CHANNELS  * sizeof( unsigned short ) *    11;
+  block_size          = ( blck_size <= 0 ? 100000  : blck_size );
+  number_oversamples  = ( ovr_sampl <= 0 || ovr_sampl > 255 ? 10 : ovr_sampl );
+  double clock_speed      = ( clk_speed <= 0 ? 100000 : clk_speed );
+  //                                     scans       *    bytes / sample        *    1 sample + number_oversampless */
+  const int BULK_BYTES = block_size  * NUM_CHANNELS  * sizeof( unsigned short ) *    11;
 
 
   double clockHz = 0;
@@ -260,14 +303,14 @@ void TestCaseSetup::doBulkAcquire(int block_size, int over_sample, double clock_
   INFO("Setting up over samples and scan limits\n");
 
   AIOUSB_Reset( DeviceIndex );
-  ADC_SetOversample( DeviceIndex, OVER_SAMPLE );
+  ADC_SetOversample( DeviceIndex, number_oversamples );
   ADC_SetScanLimits( DeviceIndex, 0, NUM_CHANNELS - 1 );
-  AIOUSB_SetStreamingBlockSize( DeviceIndex, BLOCK_SIZE );
+  AIOUSB_SetStreamingBlockSize( DeviceIndex, block_size );
 
   // AIOUSB_Reset( DeviceIndex );
-  // ADC_SetOversample( DeviceIndex, OVER_SAMPLE );
+  // ADC_SetOversample( DeviceIndex, number_oversamples );
   // ADC_SetScanLimits( DeviceIndex, 0, NUM_CHANNELS - 1 );
-  // AIOUSB_SetStreamingBlockSize( DeviceIndex, BLOCK_SIZE );
+  // AIOUSB_SetStreamingBlockSize( DeviceIndex, block_size );
     
   // unsigned short *const dataBuf = ( unsigned short * ) malloc( BULK_BYTES );
   dataBuf = ( unsigned short * ) malloc( BULK_BYTES );
@@ -287,7 +330,7 @@ void TestCaseSetup::doBulkAcquire(int block_size, int over_sample, double clock_
     // and stopping the counter; but we do have to tell it what clock
     // speed to use, which is why we call AIOUSB_SetMiscClock()
     
-    AIOUSB_SetMiscClock( DeviceIndex, CLOCK_SPEED );
+    AIOUSB_SetMiscClock( DeviceIndex, clock_speed );
     result = ADC_BulkAcquire( DeviceIndex, BULK_BYTES, dataBuf );
 
     THROW_IF_ERROR( result, "attempting to start bulk acquire" );

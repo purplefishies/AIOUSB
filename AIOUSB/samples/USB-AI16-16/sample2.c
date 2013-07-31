@@ -6,7 +6,7 @@
  */
 
 
-// {{{ notes and build instructions
+
 /*
  * This source code looks best with a tab width of 4.
  *
@@ -36,14 +36,14 @@
  *
  *     gcc -ggdb -std=gnu99 -D_GNU_SOURCE -Wall -pthread -fPIC sample2.c -laiousbdbg -lusb-1.0 -lm -o sample2
  */
-// }}}
 
-// {{{ includes
+
+
 #include <aiousb.h>
 #include <math.h>
 #include <stdio.h>
 #include <unistd.h>
-// }}}
+
 
 int main( int argc, char **argv ) {
 	printf(
@@ -52,24 +52,24 @@ int main( int argc, char **argv ) {
 		"  This program demonstrates controlling a USB-AI16-16A device on\n"
 		"  the USB bus. For simplicity, it uses the first such device found\n"
 		"  on the bus.\n"
-/*API*/	, AIOUSB_GetVersion(), AIOUSB_GetVersionDate()
+	, AIOUSB_GetVersion(), AIOUSB_GetVersionDate()
 	);
 
 	/*
 	 * MUST call AIOUSB_Init() before any meaningful AIOUSB functions;
 	 * AIOUSB_GetVersion() above is an exception
 	 */
-/*API*/	unsigned long result = AIOUSB_Init();
+	unsigned long result = AIOUSB_Init();
 	if( result == AIOUSB_SUCCESS ) {
 		/*
 		 * call GetDevices() to obtain "list" of devices found on the bus
 		 */
-/*API*/	unsigned long deviceMask = GetDevices();
+	unsigned long deviceMask = GetDevices();
 		if( deviceMask != 0 ) {
 			/*
 			 * at least one ACCES device detected, but we want one of a specific type
 			 */
-/*API*/		AIOUSB_ListDevices();				// print list of all devices found on the bus
+		AIOUSB_ListDevices();				// print list of all devices found on the bus
 			const int MAX_NAME_SIZE = 20;
 			char name[ MAX_NAME_SIZE + 2 ];
 			unsigned long productID, nameSize, numDIOBytes, numCounters;
@@ -79,7 +79,7 @@ int main( int argc, char **argv ) {
 				if( ( deviceMask & 1 ) != 0 ) {
 					// found a device, but is it the correct type?
 					nameSize = MAX_NAME_SIZE;
-/*API*/				result = QueryDeviceInfo( deviceIndex, &productID, &nameSize, name, &numDIOBytes, &numCounters );
+				result = QueryDeviceInfo( deviceIndex, &productID, &nameSize, name, &numDIOBytes, &numCounters );
 					if( result == AIOUSB_SUCCESS ) {
 						if(
 							productID >= USB_AI16_16A
@@ -91,23 +91,23 @@ int main( int argc, char **argv ) {
 						}	// if( productID ...
 					} else
 						printf( "Error '%s' querying device at index %lu\n"
-/*API*/						, AIOUSB_GetResultCodeAsString( result ), deviceIndex );
+						, AIOUSB_GetResultCodeAsString( result ), deviceIndex );
 				}	// if( ( deviceMask ...
 				deviceIndex++;
 				deviceMask >>= 1;
 			}	// while( deviceMask ...
 			if( deviceFound ) {
-/*API*/			AIOUSB_Reset( deviceIndex );
-/*API*/			AIOUSB_SetCommTimeout( deviceIndex, 1000 );
-/*API*/			AIOUSB_SetDiscardFirstSample( deviceIndex, AIOUSB_TRUE );
+			AIOUSB_Reset( deviceIndex );
+			AIOUSB_SetCommTimeout( deviceIndex, 1000 );
+			AIOUSB_SetDiscardFirstSample( deviceIndex, AIOUSB_TRUE );
 
 				__uint64_t serialNumber;
-/*API*/			result = GetDeviceSerialNumber( deviceIndex, &serialNumber );
+			result = GetDeviceSerialNumber( deviceIndex, &serialNumber );
 				if( result == AIOUSB_SUCCESS )
 					printf( "Serial number of device at index %lu: %llx\n", deviceIndex, ( long long ) serialNumber );
 				else
 					printf( "Error '%s' getting serial number of device at index %lu\n"
-/*API*/					, AIOUSB_GetResultCodeAsString( result ), deviceIndex );
+					, AIOUSB_GetResultCodeAsString( result ), deviceIndex );
 
 				/*
 				 * demonstrate A/D configuration; there are two ways to configure the A/D;
@@ -118,13 +118,13 @@ int main( int argc, char **argv ) {
 				 * ADConfigBlock technique; below we demonstrate use of the discrete functions
 				 */
 				ADConfigBlock configBlock;
-/*API*/			AIOUSB_InitConfigBlock( &configBlock, deviceIndex, AIOUSB_FALSE );
-/*API*/			AIOUSB_SetAllGainCodeAndDiffMode( &configBlock, AD_GAIN_CODE_10V, AIOUSB_FALSE );
-/*API*/			AIOUSB_SetCalMode( &configBlock, AD_CAL_MODE_NORMAL );
-/*API*/			AIOUSB_SetTriggerMode( &configBlock, 0 );
-/*API*/			AIOUSB_SetScanRange( &configBlock, 2, 13 );
-/*API*/			AIOUSB_SetOversample( &configBlock, 0 );
-/*API*/			result = ADC_SetConfig( deviceIndex, configBlock.registers, &configBlock.size );
+			AIOUSB_InitConfigBlock( &configBlock, deviceIndex, AIOUSB_FALSE );
+			AIOUSB_SetAllGainCodeAndDiffMode( &configBlock, AD_GAIN_CODE_10V, AIOUSB_FALSE );
+			AIOUSB_SetCalMode( &configBlock, AD_CAL_MODE_NORMAL );
+			AIOUSB_SetTriggerMode( &configBlock, 0 );
+			AIOUSB_SetScanRange( &configBlock, 2, 13 );
+			AIOUSB_SetOversample( &configBlock, 0 );
+			result = ADC_SetConfig( deviceIndex, configBlock.registers, &configBlock.size );
 				if( result == AIOUSB_SUCCESS ) {
 					const int CAL_CHANNEL = 5;
 					const int MAX_CHANNELS = 128;
@@ -137,73 +137,73 @@ int main( int argc, char **argv ) {
 					/*
 					 * demonstrate automatic A/D calibration
 					 */
-/*API*/				result = ADC_SetCal( deviceIndex, ":AUTO:" );
+				result = ADC_SetCal( deviceIndex, ":AUTO:" );
 					if( result == AIOUSB_SUCCESS )
 						printf( "Automatic calibration completed successfully\n" );
 					else
 						printf( "Error '%s' performing automatic A/D calibration\n"
-/*API*/						, AIOUSB_GetResultCodeAsString( result ) );
+						, AIOUSB_GetResultCodeAsString( result ) );
 
 					/*
 					 * verify that A/D ground calibration is correct
 					 */
-/*API*/				ADC_SetOversample( deviceIndex, 0 );
-/*API*/				ADC_SetScanLimits( deviceIndex, CAL_CHANNEL, CAL_CHANNEL );
-/*API*/				ADC_ADMode( deviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_GROUND );
-/*API*/				result = ADC_GetScan( deviceIndex, counts );
+				ADC_SetOversample( deviceIndex, 0 );
+				ADC_SetScanLimits( deviceIndex, CAL_CHANNEL, CAL_CHANNEL );
+				ADC_ADMode( deviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_GROUND );
+				result = ADC_GetScan( deviceIndex, counts );
 					if( result == AIOUSB_SUCCESS )
 						printf( "Ground counts = %u (should be approx. 0)\n", counts[ CAL_CHANNEL ] );
 					else
 						printf( "Error '%s' attempting to read ground counts\n"
-/*API*/						, AIOUSB_GetResultCodeAsString( result ) );
+						, AIOUSB_GetResultCodeAsString( result ) );
 
 					/*
 					 * verify that A/D reference calibration is correct
 					 */
-/*API*/				ADC_ADMode( deviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_REFERENCE );
-/*API*/				result = ADC_GetScan( deviceIndex, counts );
+				ADC_ADMode( deviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_REFERENCE );
+				result = ADC_GetScan( deviceIndex, counts );
 					if( result == AIOUSB_SUCCESS )
 						printf( "Reference counts = %u (should be approx. 65130)\n", counts[ CAL_CHANNEL ] );
 					else
 						printf( "Error '%s' attempting to read reference counts\n"
-/*API*/						, AIOUSB_GetResultCodeAsString( result ) );
+						, AIOUSB_GetResultCodeAsString( result ) );
 
 					/*
 					 * demonstrate scanning channels and measuring voltages
 					 */
 					for( int channel = 0; channel < NUM_CHANNELS; channel++ )
 						gainCodes[ channel ] = AD_GAIN_CODE_0_10V;
-/*API*/				ADC_RangeAll( deviceIndex, gainCodes, AIOUSB_TRUE );
-/*API*/				ADC_SetOversample( deviceIndex, 10 );
-/*API*/				ADC_SetScanLimits( deviceIndex, 0, NUM_CHANNELS - 1 );
-/*API*/				ADC_ADMode( deviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_NORMAL );
-/*API*/				result = ADC_GetScanV( deviceIndex, volts );
+				ADC_RangeAll( deviceIndex, gainCodes, AIOUSB_TRUE );
+				ADC_SetOversample( deviceIndex, 10 );
+				ADC_SetScanLimits( deviceIndex, 0, NUM_CHANNELS - 1 );
+				ADC_ADMode( deviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_NORMAL );
+				result = ADC_GetScanV( deviceIndex, volts );
 					if( result == AIOUSB_SUCCESS ) {
 						printf( "Volts read:\n" );
 						for( int channel = 0; channel < NUM_CHANNELS; channel++ )
 							printf( "  Channel %2d = %f\n", channel, volts[ channel ] );
 					} else
 						printf( "Error '%s' performing A/D channel scan\n"
-/*API*/						, AIOUSB_GetResultCodeAsString( result ) );
+						, AIOUSB_GetResultCodeAsString( result ) );
 
 					/*
 					 * demonstrate reading a single channel in volts
 					 */
-/*API*/				result = ADC_GetChannelV( deviceIndex, CAL_CHANNEL, &volts[ CAL_CHANNEL ] );
+				result = ADC_GetChannelV( deviceIndex, CAL_CHANNEL, &volts[ CAL_CHANNEL ] );
 					if( result == AIOUSB_SUCCESS )
 						printf( "Volts read from A/D channel %d = %f\n", CAL_CHANNEL, volts[ CAL_CHANNEL ] );
 					else
 						printf( "Error '%s' reading A/D channel %d\n"
-/*API*/						, AIOUSB_GetResultCodeAsString( result )
+						, AIOUSB_GetResultCodeAsString( result )
 							, CAL_CHANNEL );
 
 					/*
 					 * demonstrate bulk acquire
 					 */
-/*API*/				AIOUSB_Reset( deviceIndex );
-/*API*/				ADC_SetOversample( deviceIndex, 10 );
-/*API*/				ADC_SetScanLimits( deviceIndex, 0, NUM_CHANNELS - 1 );
-/*API*/				AIOUSB_SetStreamingBlockSize( deviceIndex, 100000 );
+				AIOUSB_Reset( deviceIndex );
+				ADC_SetOversample( deviceIndex, 10 );
+				ADC_SetScanLimits( deviceIndex, 0, NUM_CHANNELS - 1 );
+				AIOUSB_SetStreamingBlockSize( deviceIndex, 100000 );
 					const int BULK_BYTES = 100000 /* scans */
 						* NUM_CHANNELS
 						* sizeof( unsigned short ) /* bytes / sample */
@@ -217,25 +217,25 @@ int main( int argc, char **argv ) {
 						 * make sure counter is stopped
 						 */
 						double clockHz = 0;
-/*API*/					CTR_StartOutputFreq( deviceIndex, 0, &clockHz );
+					CTR_StartOutputFreq( deviceIndex, 0, &clockHz );
 
 						/*
 						 * configure A/D for timer-triggered acquisition
 						 */
-/*API*/					ADC_ADMode( deviceIndex, AD_TRIGGER_SCAN | AD_TRIGGER_TIMER, AD_CAL_MODE_NORMAL );
+					ADC_ADMode( deviceIndex, AD_TRIGGER_SCAN | AD_TRIGGER_TIMER, AD_CAL_MODE_NORMAL );
 
 						/*
 						 * start bulk acquire; ADC_BulkAcquire() will take care of starting
 						 * and stopping the counter; but we do have to tell it what clock
 						 * speed to use, which is why we call AIOUSB_SetMiscClock()
 						 */
-/*API*/					AIOUSB_SetMiscClock( deviceIndex, CLOCK_SPEED );
-/*API*/					result = ADC_BulkAcquire( deviceIndex, BULK_BYTES, dataBuf );
+					AIOUSB_SetMiscClock( deviceIndex, CLOCK_SPEED );
+					result = ADC_BulkAcquire( deviceIndex, BULK_BYTES, dataBuf );
 						if( result == AIOUSB_SUCCESS )
 							printf( "Started bulk acquire of %d bytes\n", BULK_BYTES );
 						else
 							printf( "Error '%s' attempting to start bulk acquire of %d bytes\n"
-/*API*/							, AIOUSB_GetResultCodeAsString( result )
+							, AIOUSB_GetResultCodeAsString( result )
 								, BULK_BYTES );
 
 						/*
@@ -245,14 +245,14 @@ int main( int argc, char **argv ) {
 							unsigned long bytesRemaining = BULK_BYTES;
 							for( int seconds = 0; seconds < 100; seconds++ ) {
 								sleep( 1 );
-/*API*/							result = ADC_BulkPoll( deviceIndex, &bytesRemaining );
+							result = ADC_BulkPoll( deviceIndex, &bytesRemaining );
 								if( result == AIOUSB_SUCCESS ) {
 									printf( "  %lu bytes remaining\n", bytesRemaining );
 									if( bytesRemaining == 0 )
 										break;	// from for()
 								} else {
 									printf( "Error '%s' polling bulk acquire progress\n"
-/*API*/									, AIOUSB_GetResultCodeAsString( result ) );
+									, AIOUSB_GetResultCodeAsString( result ) );
 									break;		// from for()
 								}	// if( result ...
 							}	// for( int seconds ...
@@ -260,7 +260,7 @@ int main( int argc, char **argv ) {
 							/*
 							 * turn off timer-triggered mode
 							 */
-/*API*/						ADC_ADMode( deviceIndex, 0, AD_CAL_MODE_NORMAL );
+						ADC_ADMode( deviceIndex, 0, AD_CAL_MODE_NORMAL );
 
 							/*
 							 * if all the data was apparently received, scan it for zeros; it's
@@ -282,20 +282,20 @@ int main( int argc, char **argv ) {
 										if( zeroIndex >= 0 ) {
 											printf( "  Zero data from index %d to %d\n", zeroIndex, index - 1 );
 											zeroIndex = -1;
-										}	// if( zeroIndex ...
-									}	// if( dataBuf[ ...
-								}	// for( int index ...
+										}
+									}
+								}
 								if( anyZeroData == AIOUSB_FALSE )
 									printf( "Successfully bulk acquired %d bytes\n", BULK_BYTES );
 							} else
 								printf( "Failed to bulk acquire %d bytes\n", BULK_BYTES );
-						}	// if( result ...
+						}
 
 						free( dataBuf );
 					}	// if( dataBuf ...
 				} else
 					printf( "Error '%s' setting A/D configuration\n"
-/*API*/					, AIOUSB_GetResultCodeAsString( result ) );
+					, AIOUSB_GetResultCodeAsString( result ) );
 			} else
 				printf( "Failed to find USB-AI16-16A device\n" );
 		} else
@@ -305,7 +305,7 @@ int main( int argc, char **argv ) {
 		 * MUST call AIOUSB_Exit() before program exits,
 		 * but only if AIOUSB_Init() succeeded
 		 */
-/*API*/	AIOUSB_Exit();
+	AIOUSB_Exit();
 	}	// if( result ...
 	return ( int ) result;
 }	// main()

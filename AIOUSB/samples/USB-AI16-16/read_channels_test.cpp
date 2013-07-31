@@ -36,6 +36,7 @@ int main( int argc, char **argv ) {
       TestCaseSetup tcs;
       try { 
         tcs.findDevice();
+        tcs.setCurrentDeviceIndex(0);
         tcs.doPreSetup();
         tcs.doBulkConfigBlock();
         tcs.doSetAutoCalibration();

@@ -437,9 +437,9 @@ static void InitDeviceTable(void)
 
 static void PopulateDeviceTable(void)
 {
-/*
- * populate device table with ACCES devices found on USB bus
- */
+  /*
+   * populate device table with ACCES devices found on USB bus
+   */
     if(!AIOUSB_IsInit())
         return;
     int numAccesDevices = 0;
@@ -454,12 +454,12 @@ static void PopulateDeviceTable(void)
                 const int libusbResult = libusb_get_device_descriptor(device, &libusbDeviceDesc);
                 if(libusbResult == LIBUSB_SUCCESS) {
                       if(libusbDeviceDesc.idVendor == ACCES_VENDOR_ID) {
-// add this device to the device table
+                        /* add this device to the device table */
                             DeviceDescriptor *deviceDesc = &deviceTable[ numAccesDevices++ ];
                             deviceDesc->device = libusb_ref_device(device);
                             deviceDesc->deviceHandle = NULL;
 
-// set up device-specific properties
+                            /* set up device-specific properties */
                             unsigned productID = deviceDesc->ProductID = libusbDeviceDesc.idProduct;
                             deviceDesc->StreamingBlockSize = 31ul * 1024ul;
                             deviceDesc->bGetName = AIOUSB_TRUE;             // most boards support this feature
@@ -579,11 +579,18 @@ static void PopulateDeviceTable(void)
                                   deviceDesc->bADCStream = AIOUSB_TRUE;
                                   deviceDesc->ImmADCs = 1;
                                   deviceDesc->ADCChannels = 16;
-/*
- * there are four groups of five products each in this family; each group of five
- * products has 32 more MUX channels than the preceding group; so we calculate
- * the number of MUX channels by doing some arithmetic on the product ID
- */
+
+                                  /*
+                                   * there are four groups of five
+                                   * products each in this family;
+                                   * each group of five products has
+                                   * 32 more MUX channels than the
+                                   * preceding group; so we calculate
+                                   * the number of MUX channels by
+                                   * doing some arithmetic on the
+                                   * product ID
+                                   */
+
                                   int I = (productID - USB_AI16_32A) & ~0x0100;
                                   I /= 5;               /* products per group */
                                   deviceDesc->ADCMUXChannels = 32 * (I + 1);
@@ -602,10 +609,13 @@ static void PopulateDeviceTable(void)
                                   deviceDesc->FlashSectors = 32;
                                   deviceDesc->bDACBoardRange = AIOUSB_TRUE;
                                   deviceDesc->bDACChannelCal = AIOUSB_TRUE;
-/*
- * we use a few bits within the product ID to determine the number
- * of DACs and whether or not the product has ADCs
- */
+
+                                  /*
+                                   * we use a few bits within the
+                                   * product ID to determine the
+                                   * number of DACs and whether or not
+                                   * the product has ADCs
+                                   */
                                   switch(productID & 0x0006) {
                                     case 0x0000:
                                         deviceDesc->ImmDACs = 16;
@@ -627,9 +637,9 @@ static void PopulateDeviceTable(void)
                                       deviceDesc->ImmADCs = 2;
                               }
 
-// allocate I/O image buffers
+                            /* allocate I/O image buffers */
                             if(deviceDesc->DIOBytes > 0) {
-// calloc() zeros memory
+                              /* calloc() zeros memory */
                                   deviceDesc->LastDIOData = ( unsigned char* )calloc(deviceDesc->DIOBytes, sizeof(unsigned char));
                                   assert(deviceDesc->LastDIOData != 0);
                               }
@@ -687,40 +697,40 @@ static int CompareProductIDs(const void *p1, const void *p2)
         return 0;
 }       // CompareProductIDs()
 
-
-PRIVATE const char *ProductIDToName(unsigned int productID)
-{
-/*
- * this function returns the name of a product ID; generally,
+/**
+ * @desc this function returns the name of a product ID; generally,
  * it's best to use this only as a last resort, since most
  * devices return their name when asked in QueryDeviceInfo()
  */
+PRIVATE const char *ProductIDToName(unsigned int productID)
+{
+
 
     const char *name = "UNKNOWN";
 
     if(AIOUSB_Lock()) {
-/*
- * productIDIndex[] represents an index into
- * productIDNameTable[], sorted by product ID;
- * specifically, it contains pointers into
- * productIDNameTable[]; to get the actual product ID,
- * the pointer in productIDIndex[] must be
- * dereferenced; using a separate index table instead
- * of sorting productIDNameTable[] directly permits us
- * to create multiple indexes, in particular, a second
- * index sorted by product name
- */
+      /*
+       * productIDIndex[] represents an index into
+       * productIDNameTable[], sorted by product ID;
+       * specifically, it contains pointers into
+       * productIDNameTable[]; to get the actual product ID,
+       * the pointer in productIDIndex[] must be
+       * dereferenced; using a separate index table instead
+       * of sorting productIDNameTable[] directly permits us
+       * to create multiple indexes, in particular, a second
+       * index sorted by product name
+       */
 
 
-/* index of product IDs in productIDNameTable[] */
+      /* index of product IDs in productIDNameTable[] */
           static ProductIDName const *productIDIndex[ NUM_PROD_NAMES ];
-/* random pattern */
+          /* random pattern */
           const unsigned long INIT_PATTERN = 0xe697f8acul;
 
-/* == INIT_PATTERN if index has been created */
+          /* == INIT_PATTERN if index has been created */
           static unsigned long productIDIndexCreated = 0;
           if(productIDIndexCreated != INIT_PATTERN) {
-/* build index of product IDs */
+            /* build index of product IDs */
                 int index;
                 for(index = 0; index < NUM_PROD_NAMES; index++)
                     productIDIndex[ index ] = &productIDNameTable[ index ];
@@ -776,22 +786,23 @@ ProductNameToID(const char *name)
 
     unsigned int productID = 0;
     if(AIOUSB_Lock()) {
-/*
- * productNameIndex[] represents an index into productIDNameTable[], sorted by product name
- * (see notes for ProductIDToName())
- */
+      /*
+       * productNameIndex[] represents an index into
+       * productIDNameTable[], sorted by product name (see notes for
+       * ProductIDToName())
+       */
 
           static ProductIDName const *productNameIndex[ NUM_PROD_NAMES ];
-/** index of product names in productIDNameTable[] */
+          /** index of product names in productIDNameTable[] */
 
           const unsigned long INIT_PATTERN = 0x7e6b2017ul;
-/** random pattern */
+          /** random pattern */
 
           static unsigned long productNameIndexCreated = 0;
-/** == INIT_PATTERN if index has been created */
+          /** == INIT_PATTERN if index has been created */
 
           if(productNameIndexCreated != INIT_PATTERN) {
-/* build index of product names */
+            /* build index of product names */
                 int index;
                 for(index = 0; index < NUM_PROD_NAMES; index++)
                     productNameIndex[ index ] = &productIDNameTable[ index ];
@@ -826,15 +837,15 @@ GetDeviceName(unsigned long DeviceIndex, const char **name)
     unsigned long result = AIOUSB_SUCCESS;
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     if(deviceDesc->cachedName != 0) {
-/*
- * name is already cached, return it
- */
-          *name = deviceDesc->cachedName;
+      /*
+       * name is already cached, return it
+       */
+      *name = deviceDesc->cachedName;
           AIOUSB_UnLock();
-      }else {
-/*
- * name is not yet cached, so request it from the device
- */
+      } else {
+      /*
+       * name is not yet cached, so request it from the device
+       */
           const unsigned timeout = deviceDesc->commTimeout;
           AIOUSB_UnLock();                                                    // unlock while communicating with device
           const int MAX_NAME_SIZE = 100;                      // characters, not bytes
@@ -843,10 +854,12 @@ GetDeviceName(unsigned long DeviceIndex, const char **name)
           if(deviceName != 0) {
                 libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
                 if(deviceHandle != 0) {
-/*
- * descriptor strings returned by the device are Unicode, not ASCII, and occupy
- * two bytes per character, so we need to handle our maximum lengths accordingly
- */
+                  /*
+                   * descriptor strings returned by the device are
+                   * Unicode, not ASCII, and occupy two bytes per
+                   * character, so we need to handle our maximum
+                   * lengths accordingly
+                   */
                       const int CYPRESS_GET_DESC = 0x06;
                       const int DESC_PARAMS = 0x0302;           /**03 = descriptor type: string; 02 = index */
                       const int MAX_DESC_SIZE = 256;           // bytes, not characters
@@ -863,21 +876,21 @@ GetDeviceName(unsigned long DeviceIndex, const char **name)
                                                                                  timeout
                                                                                  );
                             if(bytesTransferred == MAX_DESC_SIZE) {
-/**
- * @verbatim
- * extract device name from descriptor and copy to cached name buffer
- *
- * descData[ 0 ] = 1 (descriptor length) + 1 (descriptor type) + 2 (Unicode) * string_length
- * descData[ 1 ] = \x03 (descriptor type: string)
- * descData[ 2 ] = low byte of first character of Unicode string
- * descData[ 3 ] = \0 (high byte)
- * descData[ 4 ] = low byte of second character of string
- * descData[ 5 ] = \0 (high byte)
- * ...
- * descData[ string_length * 2 ] = low byte of last character of string
- * descData[ string_length * 2 + 1 ] = \0 (high byte)
- * @endverbatim
- */
+                              /**
+                               * @verbatim
+                               * extract device name from descriptor and copy to cached name buffer
+                               *
+                               * descData[ 0 ] = 1 (descriptor length) + 1 (descriptor type) + 2 (Unicode) * string_length
+                               * descData[ 1 ] = \x03 (descriptor type: string)
+                               * descData[ 2 ] = low byte of first character of Unicode string
+                               * descData[ 3 ] = \0 (high byte)
+                               * descData[ 4 ] = low byte of second character of string
+                               * descData[ 5 ] = \0 (high byte)
+                               * ...
+                               * descData[ string_length * 2 ] = low byte of last character of string
+                               * descData[ string_length * 2 + 1 ] = \0 (high byte)
+                               * @endverbatim
+                               */
 
                                   const int srcLength = ( int )((descData[ 0 ] - 2) / 2);               // characters, not bytes
                                   int srcIndex, dstIndex;
@@ -921,25 +934,25 @@ PRIVATE const char *GetSafeDeviceName(unsigned long DeviceIndex)
     if(AIOUSB_Validate(&DeviceIndex) == AIOUSB_SUCCESS) {
           DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
           if(deviceDesc->bGetName) {
-/*
- * device supports getting its product name, so use it instead of the
- * name from the local product name table
- */
+            /*
+             * device supports getting its product name, so use it instead of the
+             * name from the local product name table
+             */
                 AIOUSB_UnLock();                                            // unlock while communicating with device
                 unsigned long res = GetDeviceName(DeviceIndex, &deviceName);
                 if(res != AIOUSB_SUCCESS) {
-/*
- * failed to get name from device, so fall back to local table after all
- */
+                  /*
+                   * failed to get name from device, so fall back to local table after all
+                   */
                       AIOUSB_Lock();
                       deviceName = ProductIDToName(deviceDesc->ProductID);
                       AIOUSB_UnLock();
                   }
             }else {
-/*
- * device doesn't support getting its product name, so use local
- * product name table
- */
+            /*
+             * device doesn't support getting its product name, so use local
+             * product name table
+             */
                 deviceName = ProductIDToName(deviceDesc->ProductID);
                 AIOUSB_UnLock();
             }
@@ -1133,10 +1146,10 @@ unsigned long QueryDeviceInfo(
         ) {
           const char *deviceName = GetSafeDeviceName(DeviceIndex);
           if(deviceName != 0) {
-/*
- * got a device name, so return it; pName[] is a character array, not a
- * null-terminated string, so don't append null terminator
- */
+            /*
+             * got a device name, so return it; pName[] is a character array, not a
+             * null-terminated string, so don't append null terminator
+             */
                 int length = strlen(deviceName);
                 if(length > ( int )*pNameSize)
                     length = ( int )*pNameSize;
@@ -1314,12 +1327,12 @@ unsigned long AIOUSB_ClearFIFO(
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
     if(deviceHandle != NULL) {
-/*
- * translate method into vendor request message
- */
+      /*
+       * translate method into vendor request message
+       */
           int request;
           switch(Method) {
-// case CLEAR_FIFO_METHOD_IMMEDIATE:
+            /* case CLEAR_FIFO_METHOD_IMMEDIATE: */
             default:
                 request = AUR_GEN_CLEAR_FIFO;
                 break;

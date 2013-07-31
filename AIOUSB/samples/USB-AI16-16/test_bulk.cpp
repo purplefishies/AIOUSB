@@ -50,7 +50,7 @@ int main( int argc, char **argv ) {
 
 
         tcs.doBulkAcquire( block_size, over_sample, clock_speed );
-
+        tcs.writeBuffer("foo.csv");
         // unsigned char CPUCSByte = 0x01;
         // unsigned long numBytes = 1;
         // tcs.doGenericVendorWrite(0xA0, 0xE600, 0 , &numBytes , &CPUCSByte );
