@@ -54,26 +54,6 @@ clean:
 	@$(MAKE) -f GNUMakefile octave_cleanup > /dev/null
 
 
-# -rm -rf build
-# if [ -f Makefile ] ;  then  $(MAKE) -f Makefile clean ; fi
-# -rm -f *~	
-# -rm -f AIOUSB_wrap.c
-# -rm -f AIOUSB.py*
-# -rm -f *.pm
-# -rm -f Makefile.old
-# -rm -f Makefile
-# -rm -f *.log
-# -rm -f *.o
-# -rm -f *.oct
-# -rm -f *wrap.*
-# -rm -f *.java
-# -rm -f *.php
-# -rm -fr $(JAVA_ROOT)
-# -rm -f *.class
-# -rm -f *.so
-# -rm -rf target
-# -rm -rf ruby_built.txt
-# -rm -f php_AIOUSB.h
 
 all_test:
 	for i in perl python ruby php java octave; do \
@@ -91,7 +71,7 @@ precheck:
 
 
 $(TEST_DIR):
-	mkdir -f $(TEST_DIR)
+	mkdir -p $(TEST_DIR)
 
 
 perl:
@@ -252,7 +232,7 @@ java: 	$(JAVA_DIR)
 	@touch $(JAVA_BUILT);
 
 java_test:	$(JAVA_BUILT) $(TEST_DIR)
-	@LD_LIBRARY_PATH="$${LD_LIBRARY_PATH}:$${PWD}" scala -e 'import com.accesio._;  AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices()'
+	@LD_LIBRARY_PATH="$${AIO_LIB_DIR}:$${AIO_CLASSLIB_DIR}:$$(pwd)" scala -e 'import com.accesio._;  AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices()'
 
 $(JAVA_BUILT): java
 
