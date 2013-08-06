@@ -10,6 +10,8 @@ PERL		:= perl
 PYTHON		:= python
 RUBY		:= ruby
 
+MKDIR		:= mkdir
+
 LIBDIR		:= $(shell printenv AIOUSB_ROOT)/lib
 CLASSLIBDIR	:= $(shell printenv AIOUSB_ROOT)/classlib
 
@@ -31,6 +33,8 @@ PERL_PREFIX_INSTALL	:=
 endif
 PYTHON_PREFIX	:= 
 
+JAVA_DIR	:= com/accesio
+JAVA_ROOT	:= com
 
 clean:
 	-rm -rf build
@@ -47,11 +51,18 @@ clean:
 	-rm -f *wrap.*
 	-rm -f *.java
 	-rm -f *.php
+	-rm -fr $(JAVA_ROOT)
+	-rm -f *.class
+	-rm -f *.so
+	-rm -rf target
 
 all:
 	$(MAKE)	-f GNUMakefile perl_install
 	$(MAKE) -f GNUMakefile python_install
 	$(MAKE) -f GNUMakefile ruby_install
+
+precheck:
+
 
 perl:
 	$(SWIG) $(PERL_INCLUDES)  -perl5 AIOUSB.i 
@@ -88,4 +99,14 @@ php:
 octave:
 	$(SWIG) -I../ -octave -o AIOUSB_wrap.cpp AIOUSB.i
 	mkoctfile -o AIOUSB.oct  -I.. AIOUSB_wrap.cpp -L$$AIO_LIB_DIR -laiousb
+
+$(JAVA_DIR):
+	$(MKDIR) -p $@
+
+java: 	$(JAVA_DIR)
+	$(SWIG) -I../ -java -package com.accesio -outdir $(JAVA_DIR) AIOUSB.i
+	$(CC) -fPIC -I../  -I/usr/include/libusb-1.0 -I/usr/lib/jvm/java-7-openjdk-amd64/include -L$${AIOUSB_ROOT}/lib -L$${AIOUSB_ROOT}/classlib -c AIOUSB_wrap.c
+	$(CC)  -shared -I../  -I/usr/lib/jvm/java-7-openjdk-amd64/include ./AIOUSB_wrap.o -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib   -lusb-1.0 -lpthread -laiousbdbg  -laiousbcppdbg  -o libAIOUSB.so
+	cd tests && javac -classpath "/home/jdamon/Projects/aiousb_coding/AIOUSB/AIOUSB/lib/wrappers:" test.java
+
 

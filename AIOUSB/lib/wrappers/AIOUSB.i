@@ -26,6 +26,15 @@
 
 %}
 
+/* Needed to allow inclusion into Scala */
+%pragma(java) modulecode=%{
+    static {
+        System.loadLibrary("AIOUSB"); 
+    }
+%}
+
+
+
 %newobject CreateSmartBuffer;
 %newobject NewBuffer;
 %delobject AIOBuf::DeleteBuffer;
