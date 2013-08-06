@@ -61,6 +61,7 @@ clean:
 	-rm -f *.so
 	-rm -rf target
 	-rm -rf ruby_built.txt
+	-rm -f php_AIOUSB.h
 
 all:
 	$(MAKE)	-f GNUMakefile perl_install
@@ -123,7 +124,10 @@ ruby_install: ruby_test
 php:
 	$(SWIG) -I../ -php AIOUSB.i
 	$(CC) -I. -I../  $$(php-config --includes) -fpic -c AIOUSB_wrap.c
-	$(CC) -shared AIOUSB_wrap.o -o AIOUSB.so
+	$(CC) -shared AIOUSB_wrap.o -o AIOUSB.so  -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -laiousb
+
+php_test:
+	@php -c $$PWD -r 'AIOUSB_Init(); AIOUSB_ListDevices();'
 
 #
 # OCTAVE
