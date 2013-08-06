@@ -22,6 +22,8 @@ RUBY_LDFLAGS	:= $(PYTHON_LDFLAGS)
 RUBY_INCLUDES	:= -I$(LIBDIR)
 PERL_INCLUDES	:= -I$(shell printenv AIOUSB_ROOT)/lib
 
+RUBY_BUILT	:= ruby_built.txt
+
 
 PERL_CFLAGS	:= $(shell perl -MConfig -e "print \$$Config{ccflags}")
 PERL_XTRA_CFLAGS:= -std=gnu99 -fno-merge-constants
@@ -35,6 +37,9 @@ PYTHON_PREFIX	:=
 
 JAVA_DIR	:= com/accesio
 JAVA_ROOT	:= com
+
+TEST_DIR	:=	test_dir
+
 
 clean:
 	-rm -rf build
@@ -55,6 +60,7 @@ clean:
 	-rm -f *.class
 	-rm -f *.so
 	-rm -rf target
+	-rm -rf ruby_built.txt
 
 all:
 	$(MAKE)	-f GNUMakefile perl_install
@@ -69,6 +75,9 @@ perl:
 	$(PERL) Makefile.PL CCFLAGS="$(PERL_CFLAGS) $(PERL_XTRA_CFLAGS)" $(PERL_PREFIX_INSTALL)
 	$(MAKE) -f Makefile 
 
+perl_test:	perl $(TEST_DIR)
+	@perl -I../blib/arch/ -MAIOUSB -e 'AIOUSB::AIOUSB_Init(); AIOUSB::AIOUSB_ListDevices()'
+
 
 perl_install:  perl
 	$(MAKE) -f Makefile install 
@@ -77,17 +86,38 @@ python:
 	$(SWIG) -I${LIBDIR}  -python AIOUSB.i
 	LDFLAGS="$(PYTHON_LDFLAGS)"  python setup.py build
 
+$(TEST_DIR):
+	mkdir -f $(TEST_DIR)
+
+python_test: $(TEST_DIR)
+	@cd $(TEST_DIR) && PYTHONPATH=$${PWD}/../build/lib.linux-x86_64-2.7 python -c 'import AIOUSB; AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices()'
+
+
 python_install: python
 	$(PYTHON) setup.py install --prefix=$(PYTHON_PREFIX)
 
+#
+# RUBY
+#
 ruby:
-	$(RM) -f Makefile
-	$(SWIG) -I../ -ruby AIOUSB.i
-	$(RUBY) extconf.rb --with-ldflags="$(RUBY_LDFLAGS)" --with-name-include="$(RUBY_INCLUDES)"
-	$(MAKE) -f Makefile 
+	@if [ ! -f $(RUBY_BUILT) ] ; then \
+		$(SWIG) -I../ -ruby AIOUSB.i; \
+		$(RUBY) extconf.rb --with-ldflags="$(RUBY_LDFLAGS)" --with-name-include="$(RUBY_INCLUDES)"; \
+		$(MAKE) -f Makefile;\
+		touch $(RUBY_BUILT); fi
 
-ruby_install: ruby
+$(RUBY_BUILT): ruby
+
+ruby_test:	$(RUBY_BUILT) $(TEST_DIR)
+	@cd $(TEST_DIR) && ruby -I.. -rAIOUSB  -e 'AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices()'
+
+
+ruby_install: ruby_test
 	$(MAKE) -f Makefile install
+
+#
+# PHP
+#
 
 
 php:
@@ -95,10 +125,21 @@ php:
 	$(CC) -I. -I../  $$(php-config --includes) -fpic -c AIOUSB_wrap.c
 	$(CC) -shared AIOUSB_wrap.o -o AIOUSB.so
 
+#
+# OCTAVE
+#
 
 octave:
 	$(SWIG) -I../ -octave -o AIOUSB_wrap.cpp AIOUSB.i
-	mkoctfile -o AIOUSB.oct  -I.. AIOUSB_wrap.cpp -L$$AIO_LIB_DIR -laiousb
+	mkoctfile -o AIOUSB.oct  -I.. AIOUSB_wrap.cpp -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -laiousb
+
+octave_test:
+	@octave -q  --eval "AIOUSB; AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices();"
+
+
+#
+# JAVA
+#
 
 $(JAVA_DIR):
 	$(MKDIR) -p $@
@@ -109,4 +150,7 @@ java: 	$(JAVA_DIR)
 	$(CC)  -shared -I../  -I/usr/lib/jvm/java-7-openjdk-amd64/include ./AIOUSB_wrap.o -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib   -lusb-1.0 -lpthread -laiousbdbg  -laiousbcppdbg  -o libAIOUSB.so
 	cd tests && javac -classpath "/home/jdamon/Projects/aiousb_coding/AIOUSB/AIOUSB/lib/wrappers:" test.java
 
+
+java_test:
+	@scala -e 'import com.accesio._;  AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices()'
 
