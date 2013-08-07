@@ -10,7 +10,7 @@ function LOG_TIME
 function build_cmd {
     echo "# $(LOG_TIME) $@" | tee -a ${BUILD_LOG};
     eval $@ 2>&1 | tee -a ${BUILD_LOG};
-    if [ $? != 0  ] ; then
+    if [ ${PIPESTATUS[0]} != 0  ] ; then
         echo "$(LOG_TIME) Error with '$@'"
         exit 1
     fi
