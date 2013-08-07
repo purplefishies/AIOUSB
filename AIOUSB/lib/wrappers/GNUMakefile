@@ -232,7 +232,7 @@ java: 	$(JAVA_DIR)
 	@touch $(JAVA_BUILT);
 
 java_test:	$(JAVA_BUILT) $(TEST_DIR)
-	@LD_LIBRARY_PATH="$${AIO_LIB_DIR}:$${AIO_CLASSLIB_DIR}:$$(pwd)" scala -e 'import com.accesio._;  AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices()'
+	@LD_LIBRARY_PATH="$${AIO_LIB_DIR}:$${AIO_CLASSLIB_DIR}:$$(pwd)" $CLASSPATH=$$(pwd) scala -e 'import com.accesio._;  AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices()'
 
 $(JAVA_BUILT): java
 

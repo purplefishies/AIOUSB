@@ -1,6 +1,0 @@
-#!/bin/bash
-
-function do_cmd() {
-    echo "# $(date '+<%m/%d/%Y %H:%M:%S>')  $@" >> ${BUILD_LOG};
-    eval $@ >> ${BUILD_LOG};
-}
