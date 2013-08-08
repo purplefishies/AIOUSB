@@ -28,6 +28,7 @@ PYTHON_BUILT	:= python_built.txt
 JAVA_BUILT	:= java_built.txt
 PHP_BUILT	:= php_built.txt
 OCTAVE_BUILT	:= octave_built.txt
+R_BUILT		:= R_build.txt
 
 
 PERL_CFLAGS	:= $(shell perl -MConfig -e "print \$$Config{ccflags}")
@@ -44,6 +45,9 @@ JAVA_DIR	:= com/accesio
 JAVA_ROOT	:= com
 
 TEST_DIR	:=	test_dir
+
+LITTLER		:= r
+R		:= R
 
 
 clean:
@@ -244,3 +248,33 @@ java_atest:
 	@$(MAKE) -f GNUMakefile java 2>&1 > /dev/null
 	@$(MAKE) --no-print-directory -f GNUMakefile java_test 2>&1
 	@$(MAKE) -f GNUMakefile java_cleanup > /dev/null
+
+
+
+
+#
+# PHP
+#
+
+
+R:
+	@if [ ! -f $(R_BUILT) ] ; then \
+		$(SWIG) -I.. -r AIOUSB.i 2>&1 ; \
+		R CMD SHLIB -o AIOUSB.so AIOUSB_wrap.c -L$${AIO_LIB_DIR} -laiousb -lusb-1.0 2>&1; \
+		fi
+	@touch $(R_BUILT);
+
+$(R_BUILT): R
+
+
+R_test: $(R_BUILT) $(TEST_DIR)
+	@LD_LIBRARY_PATH="$${AIO_LIB_DIR}:$${AIO_CLASSLIB_DIR}:$$(pwd)" $(LITTLER) -e 'dyn.load("AIOUSB.so"); source("AIOUSB.R"); AIOUSB_Init(); AIOUSB_ListDevices()'
+
+R_cleanup:
+	$(RM) -f AIOUSB.R AIOUSB_wrap.o AIOUSB AIOUSB.so R_AIOUSB.h $(R_BUILT) AIOUSB_wrap.c
+
+R_atest:
+	@$(MAKE) -f GNUMakefile R 2>&1 > /dev/null
+	@$(MAKE) --no-print-directory -f GNUMakefile R_test
+	@$(MAKE) -f GNUMakefile R_cleanup > /dev/null
+
