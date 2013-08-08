@@ -29,7 +29,7 @@ wrapper language support for the following languages:
 
 Users who wish to build web applications around the ACCES I/O Product line might consider one of these
 for faster development cycles. Suggestions for additional languages and features are well received and can 
-be made to suggestions <AT>  accesio  <DOT> com
+be made to suggestions _AT_  accesio _DOT_ com
 
 
 Sincerely,
