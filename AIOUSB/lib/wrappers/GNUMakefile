@@ -52,6 +52,7 @@ clean:
 	@$(MAKE) -f GNUMakefile python_cleanup > /dev/null
 	@$(MAKE) -f GNUMakefile php_cleanup > /dev/null
 	@$(MAKE) -f GNUMakefile octave_cleanup > /dev/null
+	@$(MAKE) -f GNUMakefile ruby_cleanup > /dev/null
 
 
 

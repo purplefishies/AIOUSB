@@ -120,7 +120,7 @@ test	:
 
 clean:
 	$(RM) $(ALL_CLEAN_TARGETS)
-
+	$(RM) *.csv
 #
 # This sets up the dependencies for our .a builds
 #
