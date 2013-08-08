@@ -47,6 +47,8 @@ else
         DEBUGOPTS       := -DNDEBUG
 endif
 
+DEBUG_FLAGS	:= -ggdb 
+
 
 LIBS 		:= $(CLIB) $(CDBGLIB) $(CPPLIB) $(CPPDBGLIB)  $(SHCLIB) $(SHCDBGLIB) $(SHCPPLIB) $(SHCPPDBGLIB)
 override CFLAGS	+= -I.
@@ -103,13 +105,13 @@ $(COBJS) : %.o : %.c
 	$(CC) $(OBJOPTS) $(CFLAGS) $(COPTS) $< -o $@
 
 $(CDBGOBJS) : %.dbg.o : %.c
-	$(CC) $(OBJOPTS) $(CFLAGS) $(COPTS) $< -o $@
+	$(CC) $(OBJOPTS) $(DEBUG_FLAGS) $(CFLAGS) $(COPTS) $< -o $@
 
 $(CPPOBJS) : %.cpp.o : %.c
 	$(CXX) $(CXXFLAGS) $(CFLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
 
 $(CPPDBGOBJS) : %.cpp.dbg.o : %.c
-	$(CXX) $(CXXFLAGS) $(CFLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
+	$(CXX) $(CXXFLAGS) $(DEBUG_FLAGS) $(CFLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
 
 pywrapper:
 	CC=$(CC) CFLAGS="$(EXTRA_COPTS)  -lusb-1.0" python setup.py build_ext
