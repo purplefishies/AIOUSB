@@ -26,6 +26,7 @@ wrapper language support for the following languages:
 * Ruby
 * PHP
 * Octave
+* R
 
 Users who wish to build web applications around the ACCES I/O Product line might consider one of these
 for faster development cycles. Suggestions for additional languages and features are well received and can 
