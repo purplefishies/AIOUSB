@@ -6,7 +6,7 @@ ACCES I/O Product's USB driver library
 
 This project contains USB drivers for ACCES I/O Product's USB product line. These drivers
 are comprised of a collection of C APIs that make USB requests by means of the 
-[libusb-1.0]{http://www.libusb.org/} library. Currently, this project aims at providing 
+[libusb-1.0](http://www.libusb.org/) library. Currently, this project aims at providing 
 full support to the following platforms:
 * Linux
 * Mac OS X 
