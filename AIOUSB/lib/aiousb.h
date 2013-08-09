@@ -29,7 +29,7 @@ namespace AIOUSB
 
 #define VALID_PRODUCT(product) ( VALID_ENUM(  ProductIDS, product ) )
 
-typedef int AIORET_TYPE;        /* New return type is signed, negative indicates error */
+typedef long AIORET_TYPE;        /* New return type is signed, negative indicates error */
 
  CREATE_ENUM_W_START(ProductIDS,0,
                      ACCES_VENDOR_ID    = 0x1605,
@@ -391,11 +391,8 @@ typedef struct  {
     unsigned ADCMUXChannels;         /* number of MUXed A/D channels */
     unsigned ADCChannelsPerGroup;    /* number of A/D channels in each config. group */
 } DeviceProperties;
-/* #ifndef __aiousb_cplusplus */
-/* typedef struct DeviceProperties DeviceProperties; */
-/* #endif */
 
-/*
+/**
  * other libraries often declare BOOL, TRUE and FALSE, and worse, they declare these
  * using #defines; so we sidestep that potential conflict by declaring the same types
  * prefixed with AIOUSB_; it's ugly, but if people want to use the shorter names and
@@ -415,13 +412,13 @@ const bool TRUE = true;
 enum AIOUSB_BOOL_VAL {
     AIOUSB_FALSE                        = 0,
     AIOUSB_TRUE                         = 1
-};     /* enum AIOUSB_BOOL */
+};
 typedef enum AIOUSB_BOOL_VAL AIOUSB_BOOL;
 #if defined( ENABLE_BOOL_TYPE )
 enum BOOL {
     FALSE                               = 0,
     TRUE                                = 1
-};     /* enum BOOL */
+};
 typedef enum BOOL BOOL;
 #endif
 #endif
@@ -778,7 +775,7 @@ extern unsigned long AIOUSB_ClearFIFO(
 
 extern const char *AIOUSB_GetVersion(void);                /* returns AIOUSB module version number as a string */
 extern const char *AIOUSB_GetVersionDate(void);            /* returns AIOUSB module version date as a string */
-extern const char *AIOUSB_GetResultCodeAsString( unsigned long result );       /* gets string representation of AIOUSB_xxx result code */
+extern const char *AIOUSB_GetResultCodeAsString( unsigned long value );       /* gets string representation of AIOUSB_xxx result code */
 extern void AIOUSB_ListDevices(void);                      /* prints list of USB devices to standard output (useful for debugging) */
 extern unsigned long AIOUSB_Init(void);                          /* must be called before use of other functions in AIOUSB */
 extern void AIOUSB_Exit(void);                                   /* must be called after last use of other functions in AIOUSB */

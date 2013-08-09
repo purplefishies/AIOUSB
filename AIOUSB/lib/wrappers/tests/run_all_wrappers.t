@@ -5,7 +5,7 @@ use Cwd;
 
 my $startdir= getcwd();
 #
-foreach my $language (qw(perl python ruby octave php java ) ) {
+foreach my $language (qw(perl python ruby octave php java R) ) {
 
     $cmd = "make -f GNUMakefile ${language}_atest 2>&1 "  ;
     $got = `$cmd 2>&1`;
