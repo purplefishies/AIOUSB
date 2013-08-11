@@ -26,6 +26,8 @@ const int RESULT_TEXT_SIZE = 40;
 #else
 #define RESULT_TEXT_SIZE 40
 #endif
+
+
 static const struct ResultCodeName {
     unsigned int result;
     char text[ RESULT_TEXT_SIZE + 2 ];
@@ -61,7 +63,9 @@ static const struct ResultCodeName {
     { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_NO_MEM), "LIBUSB_ERROR_NO_MEM" },
     { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_NOT_SUPPORTED), "LIBUSB_ERROR_NOT_SUPPORTED" },
     { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_OTHER), "LIBUSB_ERROR_OTHER" }
-};      // resultCodeTable[]
+};
+
+
 #ifdef __cplusplus
 const int NUM_RESULT_CODES = sizeof(resultCodeTable) / sizeof(resultCodeTable[ 0 ]);
 #else
@@ -86,7 +90,8 @@ static int CompareResultCodes(const void *p1, const void *p2)
 }       // CompareResultCodes()
 
 
-const char *AIOUSB_GetResultCodeAsString(unsigned long result)
+
+const char *AIOUSB_GetResultCodeAsString(unsigned long result_value)
 {
     const char *resultText = "UNKNOWN";
 
@@ -111,7 +116,7 @@ const char *AIOUSB_GetResultCodeAsString(unsigned long result)
             }
 
           struct ResultCodeName key;                                  // key.name not used
-          key.result = result;
+          key.result = result_value;
           const struct ResultCodeName *const pKey = &key;
           const struct ResultCodeName **resultCode
               = ( const struct ResultCodeName** )bsearch(&pKey, resultCodeIndex, NUM_RESULT_CODES, sizeof(struct ResultCodeName *), CompareResultCodes);
@@ -120,7 +125,8 @@ const char *AIOUSB_GetResultCodeAsString(unsigned long result)
           AIOUSB_UnLock();
       }
     return resultText;
-}       // AIOUSB_GetResultCodeAsString()
+}
+
 
 
 #ifdef __cplusplus

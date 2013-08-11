@@ -107,21 +107,24 @@ enum {
     USB_READ_FROM_DEVICE          = 0xC0,
     USB_BULK_WRITE_ENDPOINT       = 2,
     USB_BULK_READ_ENDPOINT        = 6
-};    // enum
+};
 
 
 
 
-// parameters passed from ADC_BulkAcquire() to its worker thread
+/* parameters passed from ADC_BulkAcquire() to its worker thread */
 struct BulkAcquireWorkerParams {
     unsigned long DeviceIndex;
     unsigned long BufSize;
     void *pBuf;
-};    // struct BulkAcquireWorkerParams
+};
 
 
 
 
+enum {
+    MAX_USB_DEVICES		  = 32
+};    // enum
 
 /*
  * DeviceDescriptor maintains property and state information for each ACCES USB device
@@ -129,25 +132,19 @@ struct BulkAcquireWorkerParams {
  * called by AIOUSB_Init()
  */
 
-enum {
-    MAX_USB_DEVICES		  = 32
-};    // enum
-
 typedef struct {
-    // libusb handles
-    libusb_device *device;                                  // NULL == no device
-    libusb_device_handle *deviceHandle;
+    libusb_device *device;              /**< NULL == no device */
+    libusb_device_handle *deviceHandle; /**< libusb handles */
     AIOUSB_BOOL bOpen;
     unsigned long PID;
 
     unsigned long DIOConfigBits;
     
 
-
     // run-time settings
-    AIOUSB_BOOL discardFirstSample;                         // AIOUSB_TRUE == discard first A/D sample in all A/D read methods
-    unsigned commTimeout;                                   // timeout for device communication (ms.)
-    double miscClockHz;                                           // miscellaneous clock frequency setting
+    AIOUSB_BOOL discardFirstSample; /**< AIOUSB_TRUE == discard first A/D sample in all A/D read methods */
+    unsigned commTimeout;           /**< timeout for device communication (ms.) */
+    double miscClockHz;             /**< miscellaneous clock frequency setting */
 
     // device-specific properties
     unsigned ProductID;
@@ -198,7 +195,7 @@ typedef struct {
     __uint64_t cachedSerialNumber;
     ADConfigBlock cachedConfigBlock;                  // .size == 0 == uninitialized
 
-    /*
+    /**
      * state of worker thread; these fields are deliberately unspecific so that
      * the library can employ worker threads in a variety of situations
      */
@@ -206,7 +203,7 @@ typedef struct {
     unsigned long workerStatus;                             // thread-defined status information (e.g. bytes remaining to receive or transmit)
     unsigned long workerResult;                             // standard AIOUSB_* result code from worker thread (if workerBusy == AIOUSB_FALSE)
 
-  /* New entries for the FastIT behavior */
+                                /** New entries for the FastIT behavior */
   
   ADConfigBlock *FastITConfig;
   ADConfigBlock *FastITBakConfig;
@@ -238,6 +235,8 @@ PRIVATE_EXTERN unsigned long AIOUSB_SetConfigBlock( unsigned long DeviceIndex , 
 PRIVATE_EXTERN AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex );
 PRIVATE_EXTERN unsigned long ADC_CopyConfig(unsigned long DeviceIndex, ADConfigBlock *config  );
 
+PRIVATE_EXTERN AIORET_TYPE AIOUSB_GetDeviceSerialNumber( unsigned long DeviceIndex );
+
 #ifndef SWIG
 PRIVATE_EXTERN DeviceDescriptor deviceTable[ MAX_USB_DEVICES ];
 
@@ -252,8 +251,6 @@ PRIVATE_EXTERN unsigned long AIOUSB_Validate_Lock(  unsigned long *DeviceIndex )
 PRIVATE_EXTERN DeviceDescriptor *AIOUSB_GetDevice_Lock( unsigned long DeviceIndex , 
                                                         unsigned long *result
                                                         );
-
-
 
 
 PRIVATE_EXTERN unsigned long AIOUSB_EnsureOpen( unsigned long DeviceIndex );
@@ -274,9 +271,13 @@ PRIVATE_EXTERN unsigned long AIOUSB_ArrayVoltsToCounts( unsigned long DeviceInde
                                                         int numChannels, const double volts[], unsigned short counts[] );
 
 
-PRIVATE_EXTERN unsigned long GenericVendorRead( unsigned long DeviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, unsigned long *DataSize, void *Data );
-PRIVATE_EXTERN unsigned long GenericVendorWrite( unsigned long DeviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, unsigned long DataSize, void *Data );
+PRIVATE_EXTERN unsigned long GenericVendorRead( unsigned long deviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, unsigned long *bytes_read, void *bufData );
+
+PRIVATE_EXTERN unsigned long GenericVendorWrite( unsigned long DeviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, unsigned long *bytes_write, void *bufData );
 PRIVATE_EXTERN unsigned long AIOUSB_Validate_Device( unsigned long DeviceIndex );
+
+
+
 
 #endif
 

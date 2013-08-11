@@ -73,8 +73,6 @@ class TestCaseSetup {
 
  public:
   
-  // TestCaseSetup() : DeviceIndex(0) , deviceFound(false) , CAL_CHANNEL(DEF_CAL_CHANNEL), 
-  //                   MAX_CHANNELS(DEF_MAX_CHANNELS) , NUM_CHANNELS(DEF_NUM_CHANNELS) {}
   ~TestCaseSetup();
   TestCaseSetup();
   void findDevice();
@@ -89,10 +87,12 @@ class TestCaseSetup {
   void doScanSingleChannel();
   void doPreReadImmediateVoltages();
   void doCSVReadVoltages();
+  void doCSVWithGetChannelV();
   void doCleanupAfterBulk();
   void doDACDirect(int channel, unsigned short voltage);
   void doDACDirectSetup();
   void writeBuffer( char *filename );
+  void setMaxCount( int val );
 
   void ThrowError(unsigned long, int);
 
@@ -126,7 +126,7 @@ class TestCaseSetup {
   bool deviceFound;
   const int CAL_CHANNEL  ;
   const int MAX_CHANNELS ;
-  const int NUM_CHANNELS ;
+  int NUM_CHANNELS ;
   // Dynamic parameters
   unsigned short *counts;
   double *volts;
@@ -136,7 +136,7 @@ class TestCaseSetup {
   unsigned int number_oversamples;
   unsigned int block_size;
   unsigned int clock_speed;
-
+  int maxcounts;
 
 
 
