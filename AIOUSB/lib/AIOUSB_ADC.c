@@ -926,24 +926,14 @@ unsigned long ADC_GetConfig(
 
     assert(deviceDesc->cachedConfigBlock.size > 0 && deviceDesc->cachedConfigBlock.size <= AD_MAX_CONFIG_REGISTERS);
     AIOUSB_Lock();
-    /* memcpy(ConfigBuf, deviceDesc->cachedConfigBlock.registers, deviceDesc->cachedConfigBlock.size); */
+    memcpy(ConfigBuf, deviceDesc->cachedConfigBlock.registers, deviceDesc->cachedConfigBlock.size);
     /* *ConfigBufSize = deviceDesc->cachedConfigBlock.size; */
     AIOUSB_UnLock();
-
 
 out_ADC_GetConfig:
     AIOUSB_UnLock();
     return result;
 }
-
-/* if(!AIOUSB_Lock()) */
-/*     return AIOUSB_ERROR_INVALID_MUTEX; */
-/* unsigned long result = AIOUSB_Validate(&DeviceIndex); */
-/* if(result != AIOUSB_SUCCESS) { */
-/*       AIOUSB_UnLock(); */
-/*       return result; */
-/*   } */
-/* DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ]; */
 
 
 int adcblock_valid_trigger_settings(ADConfigBlock *config )

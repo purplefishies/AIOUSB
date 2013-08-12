@@ -17,7 +17,7 @@ TestCaseSetup::TestCaseSetup() : DeviceIndex(0) ,
   volts                   = (double *)malloc(sizeof(double)* MAX_CHANNELS);
   gainCodes               = (unsigned char *)malloc(sizeof(unsigned char)*NUM_CHANNELS);
   dataBuf                 = NULL;
-
+  maxcounts               = -1;
   // Turn on the Debug level 
 }
 
@@ -560,21 +560,66 @@ void TestCaseSetup::doDemonstrateReadVoltages()
 void TestCaseSetup::doCSVReadVoltages()
 {
   DEBUG("Running test inside of the doDemonstrateReadVoltage\n");
+  struct timeval reftime;
+  struct timeval delta;
   int result;
+  int counter = 0;
+  int maxvalue = ( maxcounts < 0 ? 10000: maxcounts );
   for( int channel = 0; channel < NUM_CHANNELS; channel++ )
     gainCodes[ channel ] = AD_GAIN_CODE_0_10V;
-  
-  // ADC_RangeAll( DeviceIndex, gainCodes, AIOUSB_TRUE );
-  // ADC_SetOversample( DeviceIndex, 10 );
-  // ADC_SetScanLimits( DeviceIndex, 0, NUM_CHANNELS - 1 );
-  // ADC_ADMode( DeviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_NORMAL );
-  result = ADC_GetScanV( DeviceIndex, volts );
-  THROW_IF_ERROR( result, " performing A/D channel scan" );
-  for( int channel = 0; channel < NUM_CHANNELS - 1 ; channel ++ ) { 
-    LOG("%.3f,", volts[channel] );
-  }
-  LOG("%f\n", volts[NUM_CHANNELS-1] );
+  gettimeofday( &reftime, 0 );
+  while( counter < maxvalue ) {
+      result = ADC_GetScanV( DeviceIndex, volts );
+      gettimeofday( &delta, 0 );
+      LOG("%Ld,", (( (long long int)delta.tv_sec - (long long int)reftime.tv_sec)*1000000 ) + ( (long long int )delta.tv_usec - (long long int)reftime.tv_usec ));
+      THROW_IF_ERROR( result, " performing A/D channel scan" );
+      for( int channel = 0; channel < NUM_CHANNELS - 1 ; channel ++ ) { 
+          LOG("%.3f,", volts[channel] );
+      }
+      LOG("%f\n", volts[NUM_CHANNELS-1] );
 
+      if( maxcounts >= 0 ) {
+          counter ++;
+      }
+  } 
+}
+
+void TestCaseSetup::doCSVWithGetChannelV()
+{
+    DEBUG("Running test inside of the doDemonstrateReadVoltage\n");
+    struct timeval reftime;
+    struct timeval delta;
+
+    int counter = 0;
+    int maxvalue = ( maxcounts < 0 ? 10000: maxcounts );
+    double reading;
+    int channel;
+    for( channel = 0; channel < NUM_CHANNELS; channel++ )
+        gainCodes[ channel ] = AD_GAIN_CODE_0_10V;
+
+    gettimeofday( &reftime, 0 );
+
+    while( counter < maxvalue ) {
+
+        gettimeofday( &delta, 0 );
+        LOG("%Ld,", (( (long long int)delta.tv_sec - (long long int)reftime.tv_sec)*1000000 ) + ( (long long int )delta.tv_usec - (long long int)reftime.tv_usec ));
+        for ( channel = 0; channel < NUM_CHANNELS-1 ; channel ++ )  {
+            ADC_GetChannelV( DeviceIndex, channel, &reading );
+            LOG("%.3f,", reading );
+        }
+        ADC_GetChannelV( DeviceIndex, NUM_CHANNELS-1, &reading );
+        LOG("%f\n", reading );
+
+        if( maxcounts >= 0 ) {
+            counter ++;
+        }
+    }
+}
+
+
+void TestCaseSetup::setMaxCount( int val )
+{
+  maxcounts = val;
 }
 
 

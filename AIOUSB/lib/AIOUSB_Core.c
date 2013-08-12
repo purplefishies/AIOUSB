@@ -1981,17 +1981,7 @@ unsigned long GenericVendorWrite(
         goto out_GenericVendorWrite;
 
     deviceHandle = AIOUSB_GetDeviceHandle(deviceIndex);
-    /* = */
-    /* if */
-    /* if(!AIOUSB_Lock()) { */
-    /*       result = AIOUSB_ERROR_INVALID_MUTEX; */
-    /*       goto out_GenericVendorWrite; */
-    /*   } */
-    /* result = AIOUSB_Validate(&deviceIndex); */
-    /* if(result != AIOUSB_SUCCESS) { */
-    /*     AIOUSB_UnLock(); */
-    /*     goto out_GenericVendorWrite; */
-    /* } */
+
     if (!deviceHandle)  {
         result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
         goto out_GenericVendorWrite;
@@ -2085,7 +2075,7 @@ RETURN_GenericVendorRead:
 
 
 #ifdef __cplusplus
-}       // namespace AIOUSB
+}       /* namespace AIOUSB */
 #endif
 
 
