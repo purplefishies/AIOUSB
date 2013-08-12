@@ -839,7 +839,6 @@ unsigned long ADC_GetConfig(
           AIOUSB_UnLock();
       }
 
-out_ADC_GetConfig:
     AIOUSB_UnLock();
     return result;
 }
