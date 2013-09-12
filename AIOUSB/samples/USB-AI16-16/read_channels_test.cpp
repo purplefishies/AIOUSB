@@ -43,15 +43,13 @@ int main( int argc, char **argv ) {
         tcs.doVerifyGroundCalibration();
         tcs.doVerifyReferenceCalibration();
         tcs.doPreReadImmediateVoltages();
-        counter = 0;
-        while(1) { 
-          tcs.doCSVReadVoltages();
-          usleep(0.1);
-          counter ++;
-          if( opts.use_maxcount ) 
-            if( counter > opts.maxcount ) 
-              break;
-        }
+
+        if( opts.use_maxcount ) 
+          tcs.maxcounts = opts.maxcount;
+
+        tcs.doCSVReadVoltages();
+        usleep(0.1);
+
       } catch ( Error &e  ) {
         std::cout << "Errors" << e.what() << std::endl;
       }
