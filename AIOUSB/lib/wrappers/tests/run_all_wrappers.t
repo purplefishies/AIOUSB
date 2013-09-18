@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use Test::More tests => 6;
+use Test::More tests => 7;
 use Cwd;
 
 my $startdir= getcwd();

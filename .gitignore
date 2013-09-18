@@ -8,3 +8,4 @@
 *.so
 AIOUSB/samples/USB-AI16-16/*_test
 *.cmd
+BUILD_LOG.txt

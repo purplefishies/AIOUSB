@@ -2,6 +2,8 @@
 
 BUILD_LOG_TIME_FORMAT='+<%m/%d/%Y %H:%M:%S>'
 
+export CPATH=/usr/include/libusb-1.0:$CPATH
+
 function LOG_TIME
 {
     echo $(date "${BUILD_LOG_TIME_FORMAT}")
