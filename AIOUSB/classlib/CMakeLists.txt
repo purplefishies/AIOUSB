@@ -27,22 +27,39 @@ ENDIF(BUILD_CLASS_AIOUSBDBG_SHARED)
 
 file (GLOB classaiousb_files  ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}" "${C_SOURCE_DIR}/*.c" )
 
+get_directory_property( output INCLUDE_DIRECTORIES )
+# MESSAGE(status "Inside classlib , include_dirs := ${output} " )
+
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Generate 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-foreach( cpp_file ${classaiousb_files} )
-  string(REGEX REPLACE "\\.cpp$" "" outvar ${cpp_file})
-  set(classaiousbdbg_var "${outvar}.dbg.c" )
-  LIST(APPEND classaiousbdbg_files ${classaiousbdbg_var} )
-  add_custom_command( OUTPUT ${classaiousbdbg_var} COMMAND ${CMAKE_COMMAND} -E copy_if_different ${cpp_file} ${classaiousbdbg_var} )
 
-endforeach( cpp_file  )
+foreach( tmp_cpp_file ${classaiousb_files} )
+  get_filename_component( cpp_file ${tmp_cpp_file} NAME )
+  string(REGEX REPLACE "\\.cpp$" "" file_name ${cpp_file})
+  get_filename_component( dir ${tmp_cpp_file} PATH ) 
+  
+  set(ofilename_wo_stem "${CMAKE_CURRENT_BINARY_DIR}/${file_name}" )
+  set(classaiousbcpp_var "${ofilename_wo_stem}.cpp" )
+  set(classaiousbcppdbg_var "${ofilename_wo_stem}.dbg.cpp" )
 
-add_custom_target( classaiousbdbg_copies DEPENDS ${classaiousbdbg_files} )
+  LIST(APPEND classaiousbcpp_files ${classaiousbcpp_var} )
+  LIST(APPEND classaiousbcppdbg_files ${classaiousbcppdbg_var} )
+
+
+  add_custom_command( OUTPUT ${classaiousbcpp_var} COMMAND ${CMAKE_COMMAND} -E copy_if_different ${tmp_cpp_file} ${classaiousbcpp_var} )
+  add_custom_command( OUTPUT ${classaiousbcppdbg_var} COMMAND ${CMAKE_COMMAND} -E copy_if_different ${tmp_cpp_file} ${classaiousbcppdbg_var} )
+
+endforeach( tmp_cpp_file ${classaiousb_files} )
+
+include_directories( ${AIOUSB_INCLUDE_DIR} )
+
+add_custom_target( classaiousbcpp_copies DEPENDS ${classaiousbcpp_files} )
+add_custom_target( classaiousbcppdbg_copies DEPENDS ${classaiousbcppdbg_files} )
 
 # Requires that you have build the aiousb library first
-add_library( classaiousb ${CLASSAIOUSB_LIBRARY_TYPE}  ${classaiousb_files} )
-add_library( classaiousbdbg ${CLASSAIOUSBDBG_LIBRARY_TYPE} ${classaiousbdbg_files} )
+add_library( classaiousb ${CLASSAIOUSB_LIBRARY_TYPE}  ${classaiousbcpp_files} )
+add_library( classaiousbdbg ${CLASSAIOUSBDBG_LIBRARY_TYPE} ${classaiousbcppdbg_files} )
 
 target_link_libraries( classaiousb ${CORELIBS} ${EXTRA_LIBS} aiousb )
 target_link_libraries( classaiousbdbg ${CORELIBS} ${EXTRA_LIBS} aiousb )

@@ -34,10 +34,10 @@ set(SWIG_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/wrappers )
 find_package(Threads REQUIRED )
 #include(compiler_info)
 
-
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Linux / Mac Build 
-# Required for 
-#
+# 1. Put this into an included file
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 if(  UNIX OR APPLE ) 
   find_package(libusb-1.0 REQUIRED )
   include_directories( ${LIBUSB_1_INCLUDE_DIRS} )
@@ -65,5 +65,7 @@ if(  UNIX OR APPLE )
 endif( UNIX OR APPLE)
 
 add_subdirectory(lib)
+include_directories(lib)
 add_subdirectory(classlib)
-#add_subdirectory(lib/wrappers)
+include_directories(classlib)
+add_subdirectory(lib/wrappers)

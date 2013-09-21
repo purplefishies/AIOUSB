@@ -9,3 +9,6 @@
 AIOUSB/samples/USB-AI16-16/*_test
 *.cmd
 BUILD_LOG.txt
+AIOUSB/build
+AIOUSB/*TAGS*
+AIOUSB/G*
