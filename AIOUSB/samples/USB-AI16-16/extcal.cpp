@@ -23,6 +23,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <aiousb.h>
+#include <AIOUSB_Core.h>
 #include <USBDeviceManager.hpp>
 #include <USB_AI16_Family.hpp>
 // }}}

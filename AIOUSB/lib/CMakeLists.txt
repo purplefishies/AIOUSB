@@ -5,12 +5,7 @@
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 MESSAGE(STATUS "Loading rules for build libaiousb")
-# MESSAGE( STATUS "${CMAKE_SOURCE_DIR}" )
-# MESSAGE( STATUS "${CMAKE_SOURCE_DIR}" )
-# if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
-#   message(FATAL_ERROR "Prevented in-tree built. Please create a 'build' directory outside of the source code and call 'cmake' or 'ccmake' from there")
-# endif()
-# cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 2.8.8)
 
 project( aiousblibs )
 
@@ -55,12 +50,7 @@ ELSE(BUILD_AIOUSBCPPDBG_SHARED)
   SET(AIOUSBCPPDBG_LIBRARY_TYPE STATIC)
 ENDIF(BUILD_AIOUSBCPPDBG_SHARED)
 
-# MESSAGE(STATUS "C_SOURCE_DIR : ${C_SOURCE_DIR}" )
-# MESSAGE(STATUS "CMAKE_CURRENT_SOURCE_DIR : ${CMAKE_CURRENT_SOURCE_DIR}" )
-# MESSAGE(STATUS "CMAKE_CURRENT_BINARY_DIR : ${CMAKE_CURRENT_BINARY_DIR}")
 
-#file (GLOB aiousb_files  ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}" "${C_SOURCE_DIR}/*.c" )
-#file (GLOB aiousb_files  ABSOLUTE "${CMAKE_CURRENT_BINARY_DIR}" "${C_SOURCE_DIR}/*.c" )
 file( GLOB tmp_aiousb_files ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/*.c" )
 
 # MESSAGE(STATUS "aiousb_files: ${aiousb_files}" )
@@ -110,12 +100,13 @@ add_library( aiousbcpp     ${AIOUSBCPP_LIBRARY_TYPE}    ${aiousbcpp_files}  )
 add_library( aiousbcppdbg  ${AIOUSBCPPDBG_LIBRARY_TYPE} ${aiousbcppdbg_files} )
 
 include_directories( "${CMAKE_CURRENT_SOURCE_DIR}" )
-include_directories( "/foo" )
-
-MESSAGE(STATUS "Setting include path to include '${CMAKE_CURRENT_SOURCE_DIR}'")
+# MESSAGE(STATUS "Setting include path to include '${CMAKE_CURRENT_SOURCE_DIR}'")
 set( AIOUSB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}  )
 
 target_link_libraries( aiousb ${CORELIBS} ${EXTRA_LIBS} )
+target_link_libraries( aiousbcpp ${CORELIBS} ${EXTRA_LIBS} )
+target_link_libraries( aiousbcppdbg ${CORELIBS} ${EXTRA_LIBS} )
+target_link_libraries( aiousbdbg ${CORELIBS} ${EXTRA_LIBS} )
 
 add_dependencies( aiousb aiousb_copies )
 add_dependencies( aiousbcpp aiousbcpp_copies )

@@ -1,6 +1,8 @@
 
 #include "TestCaseSetup.h"
 #include <stdlib.h>
+#include <aiousb.h>
+#include <AIOUSB_Core.h>
 
 using namespace AIOUSB;
 

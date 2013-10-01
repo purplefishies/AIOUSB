@@ -2,8 +2,19 @@
 # CMAKE file for building aioclasslib. This library is deprecated
 # and will be replaced over time with the SWIG code under lib/wrappers
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+cmake_minimum_required(VERSION 2.8)
 
 MESSAGE(STATUS "Loading libraries for deprecated AIOUSBCLASSLIB ")
+
+if( NOT AIOUSB_INCLUDE_DIR)
+  set(AIOUSB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../lib )
+  MESSAGE(STATUS "Setting AIOUSB_INCLUDE_DIR to be : ${AIOUSB_INCLUDE_DIR}" )
+  LINK_DIRECTORIES( ${AIOUSB_INCLUDE_DIR} )
+  INCLUDE_DIRECTORIES( ${AIOUSB_INCLUDE_DIR} )
+  SET( CMAKE_SHARED_LINKER_FLAGS "-L${AIOUSB_INCLUDE_DIR}" )
+endif(NOT AIOUSB_INCLUDE_DIR )
+
+
 
 project( classaiousb )
 
@@ -25,14 +36,30 @@ ELSE(BUILD_CLASS_AIOUSBDBG_SHARED)
   SET(CLASSAIOUSBDBG_LIBRARY_TYPE STATIC) 
 ENDIF(BUILD_CLASS_AIOUSBDBG_SHARED)
 
-file (GLOB classaiousb_files  ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}" "${C_SOURCE_DIR}/*.c" )
+file (GLOB classaiousb_files  ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp" )
+file (GLOB hppfiles ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/*.h.*" )
+
+MESSAGE(STATUS "All files are :${hppfiles}, " )
 
 get_directory_property( output INCLUDE_DIRECTORIES )
-# MESSAGE(status "Inside classlib , include_dirs := ${output} " )
+
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Generate 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+foreach( tmp_hpp_file ${hppfiles} )
+  GET_FILENAME_COMPONENT( hpp_file ${tmp_hpp_file} NAME )
+  STRING(REGEX REPLACE "\\.h.*$" "" file_name ${hpp_file})
+  GET_FILENAME_COMPONENT( dir ${tmp_hpp_file} PATH ) 
+
+  SET(ofilename_wo_stem "${CMAKE_CURRENT_BINARY_DIR}/${file_name}" )
+  SET(hppaiousb_var "${ofilename_wo_stem}.hpp" )
+
+  LIST(APPEND hppaiousb_files ${hppaiousb_var} )
+
+  ADD_CUSTOM_COMMAND( OUTPUT ${hppaiousb_var} COMMAND ${CMAKE_COMMAND} -E copy_if_different ${tmp_hpp_file} ${hppaiousb_var} )
+endforeach( tmp_hpp_file )
 
 foreach( tmp_cpp_file ${classaiousb_files} )
   get_filename_component( cpp_file ${tmp_cpp_file} NAME )
@@ -53,13 +80,19 @@ foreach( tmp_cpp_file ${classaiousb_files} )
 endforeach( tmp_cpp_file ${classaiousb_files} )
 
 include_directories( ${AIOUSB_INCLUDE_DIR} )
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
+add_custom_target( hppaiousb_copies DEPENDS ${hppaiousb_files} )
 add_custom_target( classaiousbcpp_copies DEPENDS ${classaiousbcpp_files} )
 add_custom_target( classaiousbcppdbg_copies DEPENDS ${classaiousbcppdbg_files} )
+
 
 # Requires that you have build the aiousb library first
 add_library( classaiousb ${CLASSAIOUSB_LIBRARY_TYPE}  ${classaiousbcpp_files} )
 add_library( classaiousbdbg ${CLASSAIOUSBDBG_LIBRARY_TYPE} ${classaiousbcppdbg_files} )
+
+add_dependencies( classaiousb  hppaiousb_copies classaiousbcpp_copies classaiousbcppdbg_copies )
+add_dependencies( classaiousbdbg hppaiousb_copies classaiousbcpp_copies classaiousbcppdbg_copies )
 
 target_link_libraries( classaiousb ${CORELIBS} ${EXTRA_LIBS} aiousb )
 target_link_libraries( classaiousbdbg ${CORELIBS} ${EXTRA_LIBS} aiousb )

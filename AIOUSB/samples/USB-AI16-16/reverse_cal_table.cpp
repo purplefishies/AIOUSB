@@ -34,7 +34,7 @@ int main( int argc, char **argv ) {
 
       TestCaseSetup tcs;
       try { 
-        tcs.doSomething();
+        // tcs.doSomething();
         tcs.findDevice();
         tcs.doPreSetup();
         tcs.doBulkConfigBlock();

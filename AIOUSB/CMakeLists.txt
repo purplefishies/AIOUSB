@@ -69,3 +69,7 @@ include_directories(lib)
 add_subdirectory(classlib)
 include_directories(classlib)
 add_subdirectory(lib/wrappers)
+add_subdirectory(samples/TestLib)
+SET( AIOUSB_TESTCASELIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/samples/TestLib )
+
+add_subdirectory(samples/USB-AI16-16)
