@@ -24,7 +24,6 @@ endif( NOT AIOUSB_TESTCASELIB_DIR )
 INCLUDE_DIRECTORIES( ${AIOUSB_TESTCASELIB_DIR} )
 LINK_DIRECTORIES( ${AIOUSB_TESTCASELIB_DIR} )  
 
-#MESSAGE(STATUS "AIOUSB_INCLUDE_DIR: ${AIOUSB_INCLUDE_DIR}" )
 
 SET(CMAKE_CXX_FLAGS "-D__aiousb_cplusplus -fPIC" )
 SET(CMAKE_C_FLAGS   "-std=gnu99 " )
@@ -37,18 +36,32 @@ INCLUDE_DIRECTORIES( ${AIOUSB_TESTCASELIB_DIR} )
 file( GLOB C_FILES ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/*.c" )
 file( GLOB CXX_FILES ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp" )
 
-foreach( c_file ${C_FILES} )
+macro ( build_sample_c_file c_file ) 
+# foreach( c_file ${C_FILES} )
   GET_FILENAME_COMPONENT( tmp_c_file ${c_file} NAME )
   STRING(REGEX REPLACE "\\.c$" "" file_name ${tmp_c_file})
   ADD_EXECUTABLE( ${file_name} ${c_file} )
   TARGET_LINK_LIBRARIES( ${file_name} TestCaseSetup aiousb aiousbcpp)
-endforeach( c_file )
+# endforeach( c_file )
+endmacro ( build_sample_c_file) 
 
-foreach( cpp_file ${CXX_FILES} )
+macro ( build_sample_cpp_file cpp_file )
   GET_FILENAME_COMPONENT( tmp_cpp_file ${cpp_file} NAME )
   STRING(REGEX REPLACE "\\.cpp$" "" file_name ${tmp_cpp_file})
   ADD_EXECUTABLE( ${file_name} ${cpp_file} )
   TARGET_LINK_LIBRARIES( ${file_name} TestCaseSetup aiousbdbg aiousbcppdbg classaiousbdbg)
+endmacro ( build_sample_cpp_file )
+
+foreach( c_file ${C_FILES} )
+  build_sample_c_file( ${c_file} )
+endforeach( c_file )
+
+foreach( cpp_file ${CXX_FILES} )
+  build_sample_cpp_file( ${cpp_file} )
+  # GET_FILENAME_COMPONENT( tmp_cpp_file ${cpp_file} NAME )
+  # STRING(REGEX REPLACE "\\.cpp$" "" file_name ${tmp_cpp_file})
+  # ADD_EXECUTABLE( ${file_name} ${cpp_file} )
+  # TARGET_LINK_LIBRARIES( ${file_name} TestCaseSetup aiousbdbg aiousbcppdbg classaiousbdbg)
 endforeach( cpp_file )
 
 
