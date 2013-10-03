@@ -51,16 +51,19 @@ R		:= R
 
 
 clean:
-	for i in perl python ruby java php octave;  \
-	do \
-		cd $${i} && $(MAKE) -f GNUMakefile $${i}_cleanup && cd -; \
-	done
+	@$(MAKE) -f GNUMakefile java_cleanup > /dev/null
+	@$(MAKE) -f GNUMakefile perl_cleanup > /dev/null
+	@$(MAKE) -f GNUMakefile python_cleanup > /dev/null
+	@$(MAKE) -f GNUMakefile php_cleanup > /dev/null
+	@$(MAKE) -f GNUMakefile octave_cleanup > /dev/null
+	@$(MAKE) -f GNUMakefile ruby_cleanup > /dev/null
+
+
 
 all_test:
-	for i in perl python ruby java php octave;  \
-	do \
-		cd $${i} && $(MAKE) -f GNUMakefile $${i}_test; \
-		$(MAKE) -f GNUMakefile $${i}_cleanup ;\
+	for i in perl python ruby php java octave; do \
+		$(MAKE) -f GNUMakefile ${i}_test ; \
+		$(MAKE) -f GNUMakefile ${i}_cleanup;\
 	done
 
 
@@ -166,9 +169,9 @@ ruby_atest:
 
 php:
 	@if [ ! -f $(PHP_BUILT) ] ; then \
-		$(SWIG) -I$$AIO_LIB_DIR -php AIOUSB.i 2>&1 ; \
-		$(CC) -I. -I$$AIO_LIB_DIR  $$(php-config --includes) -fpic -c AIOUSB_wrap.c 2>&1 ; \
-		$(CC) -shared AIOUSB_wrap.o -o AIOUSB.so  -L$${AIOUSB_ROOT}/lib -L$${AIOUSB_ROOT}/classlib -laiousb 2>&1;\
+		$(SWIG) -I../ -php AIOUSB.i 2>&1 ; \
+		$(CC) -I. -I../  $$(php-config --includes) -fpic -c AIOUSB_wrap.c 2>&1 ; \
+		$(CC) -shared AIOUSB_wrap.o -o AIOUSB.so  -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -laiousb 2>&1;\
 		fi
 	@touch $(PHP_BUILT);
 
@@ -191,7 +194,7 @@ php_atest:
 #
 octave:
 	@if [ ! -f $(OCTAVE_BUILT) ] ; then \
-		$(SWIG) -I$$AIO_LIB_DIR -octave -o AIOUSB_wrap.cpp AIOUSB.i 2>&1 ; \
+		$(SWIG) -I../ -octave -o AIOUSB_wrap.cpp AIOUSB.i 2>&1 ; \
 		mkoctfile -o AIOUSB.oct  -I.. AIOUSB_wrap.cpp -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -laiousb 2>&1; \
 		touch $(OCTAVE_BUILT); fi
 
@@ -221,9 +224,9 @@ $(JAVA_DIR):
 
 java: 	$(JAVA_DIR)
 	@if [ ! -f $(JAVA_BUILT) ] ; then \
-		$(SWIG) -I$$AIO_LIB_DIR -java -package com.accesio -outdir $(JAVA_DIR) AIOUSB.i 2>&1; \
-		$(CC) -fPIC -I$$AIO_LIB_DIR  -I/usr/include/libusb-1.0 -I/usr/lib/jvm/java-7-openjdk-amd64/include -L$${AIOUSB_ROOT}/lib -L$${AIOUSB_ROOT}/classlib -c AIOUSB_wrap.c 2>&1 ; \
-		$(CC)  -shared -I$$AIO_LIB_DIR  -I/usr/lib/jvm/java-7-openjdk-amd64/include ./AIOUSB_wrap.o -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib   -lusb-1.0 -lpthread -laiousbdbg  -laiousbcppdbg  -o libAIOUSB.so 2>&1 ; \
+		$(SWIG) -I../ -java -package com.accesio -outdir $(JAVA_DIR) AIOUSB.i 2>&1; \
+		$(CC) -fPIC -I../  -I/usr/include/libusb-1.0 -I/usr/lib/jvm/java-7-openjdk-amd64/include -L$${AIOUSB_ROOT}/lib -L$${AIOUSB_ROOT}/classlib -c AIOUSB_wrap.c 2>&1 ; \
+		$(CC)  -shared -I../  -I/usr/lib/jvm/java-7-openjdk-amd64/include ./AIOUSB_wrap.o -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib   -lusb-1.0 -lpthread -laiousbdbg  -laiousbcppdbg  -o libAIOUSB.so 2>&1 ; \
 		cd tests && javac -classpath "$$(pwd):$$(pwd)/../" test.java 2>&1; \
 		if [ ! -d /tmp/scala-devel ] ; then mkdir /tmp/scala-devel; chmod 777 /tmp/scala-devel; fi \
 		fi
@@ -256,8 +259,8 @@ java_atest:
 
 R:
 	@if [ ! -f $(R_BUILT) ] ; then \
-		$(SWIG) -I$$AIO_LIB_DIR -r AIOUSB.i 2>&1 ; \
-		 export PKG_CFLAGS="-I$$AIO_LIB_DIR" ; \
+		$(SWIG) -I.. -r AIOUSB.i 2>&1 ; \
+		 export PKG_CFLAGS="-I.." ; \
 		R CMD SHLIB -o AIOUSB.so AIOUSB_wrap.c -L$${AIO_LIB_DIR} -laiousb -lusb-1.0 2>&1; \
 		fi
 	@touch $(R_BUILT);
