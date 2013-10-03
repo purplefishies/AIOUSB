@@ -4,11 +4,11 @@
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 cmake_minimum_required(VERSION 2.8)
 
-MESSAGE(STATUS "Loading libraries for deprecated AIOUSBCLASSLIB ")
+
 
 if( NOT AIOUSB_INCLUDE_DIR)
   set(AIOUSB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../lib )
-  MESSAGE(STATUS "Setting AIOUSB_INCLUDE_DIR to be : ${AIOUSB_INCLUDE_DIR}" )
+  # MESSAGE(STATUS "Setting AIOUSB_INCLUDE_DIR to be : ${AIOUSB_INCLUDE_DIR}" )
   LINK_DIRECTORIES( ${AIOUSB_INCLUDE_DIR} )
   INCLUDE_DIRECTORIES( ${AIOUSB_INCLUDE_DIR} )
   SET( CMAKE_SHARED_LINKER_FLAGS "-L${AIOUSB_INCLUDE_DIR}" )
@@ -17,6 +17,7 @@ endif(NOT AIOUSB_INCLUDE_DIR )
 
 
 project( classaiousb )
+MESSAGE(STATUS "Loading rules to build <deprecated> aiousbclasslib ")
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Options for building shared vs. Static libraries
@@ -39,7 +40,7 @@ ENDIF(BUILD_CLASS_AIOUSBDBG_SHARED)
 file (GLOB classaiousb_files  ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp" )
 file (GLOB hppfiles ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/*.h.*" )
 
-MESSAGE(STATUS "All files are :${hppfiles}, " )
+# MESSAGE(STATUS "All files are :${hppfiles}, " )
 
 get_directory_property( output INCLUDE_DIRECTORIES )
 

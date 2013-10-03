@@ -1,5 +1,5 @@
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-# CMAKE file for building Perl wrapper.
+# CMAKE file for building Ruby wrapper.
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 MESSAGE(STATUS "Rules for building wrapper scripts")
@@ -13,16 +13,13 @@ FIND_PACKAGE( SWIG REQUIRED )
 INCLUDE(${SWIG_USE_FILE})
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-# Perl
+# Ruby
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-FIND_PACKAGE( Perl )
-FIND_PACKAGE( PerlLibs )
-INCLUDE_DIRECTORIES( ${PERL_INCLUDE_PATH} ${PERL_ARCHLIB}/Core )
-MESSAGE(STATUS "Using dirs: ${PERL_INCLUDE_PATH} ${PERL_ARCHLIB}/Core " )
+FIND_PACKAGE( Ruby )
+INCLUDE_DIRECTORIES( ${RUBY_INCLUDE_DIRS} )
 set(CMAKE_C_FLAGS " -D_GNU_SOURCE ")
 SET_SOURCE_FILES_PROPERTIES(AIOUSB.i PROPERTIES CPLUSPLUS OFF)
 SET_SOURCE_FILES_PROPERTIES(AIOUSB.i PROPERTIES SWIG_FLAGS "-I${AIOUSB_INCLUDE_DIR} -includeall ")
- # -lusb-1.0 -lpthread -laiousbdbg  -laiousbcppdbg 
-SWIG_ADD_MODULE(AIOUSB perl AIOUSB.i )
+SWIG_ADD_MODULE(AIOUSB ruby AIOUSB.i )
 SWIG_LINK_LIBRARIES(AIOUSB ${PERL_LIBRARY} aiousb )
 

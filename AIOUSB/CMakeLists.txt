@@ -5,6 +5,14 @@
 
 MESSAGE( STATUS "${CMAKE_SOURCE_DIR}" )
 
+
+SET( THIS_PROJECT "OFF" )
+
+OPTION(BUILD_SAMPLES "Build the AIOUSB Samples" ON)
+OPTION(BUILD_WRAPPERS "Build the Wrapper Interfaces" ON)
+
+
+
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
   message(FATAL_ERROR "Prevented in-tree built. Please create a 'build' directory outside of the source code and call 'cmake' or 'ccmake' from there")
 endif()
@@ -12,7 +20,7 @@ endif()
 
 cmake_minimum_required(VERSION 2.8)
 
-# project( aiousblibs )
+project( AIOUSBLIBS )
 
 # use, i.e. don't skip the full RPATH for the build tree
 SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
@@ -32,7 +40,8 @@ set(SWIG_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/wrappers )
 # Threads are required in both Win and Unix 
 # Acquisition libraries
 find_package(Threads REQUIRED )
-#include(compiler_info)
+find_package(SWIG )
+
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Linux / Mac Build 
@@ -68,9 +77,30 @@ add_subdirectory(lib)
 include_directories(lib)
 add_subdirectory(classlib)
 include_directories(classlib)
-#add_subdirectory(lib/wrappers/python)
-add_subdirectory(lib/wrappers/perl)
+
+
+if ( SWIG_FOUND AND BUILD_WRAPPERS ) 
+  FOREACH( language python ruby )
+    MESSAGE(STATUS "Adding wrapper for ${language}" )
+    add_subdirectory("lib/wrappers/${language}")
+  ENDFOREACH( language )
+endif( SWIG_FOUND AND BUILD_WRAPPERS )
+
+# add_subdirectory(lib/wrappers/perl)
+# add_subdirectory(lib/wrappers/ruby)
+
 add_subdirectory(samples/TestLib)
 SET( AIOUSB_TESTCASELIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/samples/TestLib )
 
-add_subdirectory(samples/USB-AI16-16)
+#
+# Auto build the samples directory
+#
+
+if( BUILD_SAMPLES ) 
+  
+  FOREACH( SAMPLE_DIR USB-AO16-16 USB-AI16-16 USB-DA12-8A USB-DIO-16 USB-DIO-32  USB-IIRO-16)
+    MESSAGE(STATUS "Including samples for samples/${SAMPLE_DIR}")
+    STRING(REGEX REPLACE  "-" "_" THIS_PROJECT ${SAMPLE_DIR} )
+    ADD_SUBDIRECTORY("samples/${SAMPLE_DIR}")
+  ENDFOREACH( SAMPLE_DIR )
+endif( BUILD_SAMPLES )

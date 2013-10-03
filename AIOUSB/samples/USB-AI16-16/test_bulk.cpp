@@ -20,7 +20,7 @@ using namespace AIOUSB;
 extern int CURRENT_DEBUG_LEVEL;
 
 
-int main( int argc, char **argv ) {
+int main( int argc, char *argv[] ) {
   // printf("Sample test for Checking the Calibration on the board: %s, %s", AIOUSB_GetVersion(), AIOUSB_GetVersionDate());
   CURRENT_DEBUG_LEVEL = VERBOSE_LOGGING;
   unsigned long result = AIOUSB_Init();
@@ -37,6 +37,7 @@ int main( int argc, char **argv ) {
   if( result == AIOUSB_SUCCESS ) {
           
     unsigned long deviceMask = GetDevices();
+    char out_file_name[] = "test_bulk_output.csv";
     if( deviceMask != 0 ) {
       // at least one ACCES device detected, but we want one of a specific type
       TestCaseSetup tcs;
@@ -50,7 +51,7 @@ int main( int argc, char **argv ) {
 
 
         tcs.doBulkAcquire( block_size, over_sample, clock_speed );
-        tcs.writeBuffer("foo.csv");
+        tcs.writeBuffer( out_file_name );
         // unsigned char CPUCSByte = 0x01;
         // unsigned long numBytes = 1;
         // tcs.doGenericVendorWrite(0xA0, 0xE600, 0 , &numBytes , &CPUCSByte );
