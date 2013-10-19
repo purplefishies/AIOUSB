@@ -163,8 +163,8 @@ ADC_WriteADConfigBlock( unsigned long DeviceIndex , ADConfigBlock *config )
                                  AUR_ADC_SET_CONFIG,
                                  0,
                                  0, 
-                                 ADC_GetConfigSize( config ),
-                                 ADC_GetConfigRegisters( config )
+                                 ADC_GetConfigRegisters( config ),
+                                 ADC_GetConfigSize( config )
                                  );
 
     retval = ( result  == AIOUSB_SUCCESS ? AIOUSB_SUCCESS : - result );
@@ -192,8 +192,8 @@ ADC_ReadADConfigBlock( unsigned long DeviceIndex , ADConfigBlock *config )
                                 AUR_ADC_GET_CONFIG , 
                                 0 , 
                                 0, 
-                                ADC_GetConfigSize( config ), 
-                                ADC_GetConfigRegisters( config )
+                                ADC_GetConfigRegisters( config ),
+                                ADC_GetConfigSize( config )
                                 );
     if( result != AIOUSB_SUCCESS ) 
         retval = -result ;
@@ -2685,7 +2685,7 @@ double GetHiRef(unsigned long deviceIndex)
     const double HiRefRef = 65130.249;          // == 9.938239V on 0-10V range (9.938239V / 10.0V * 65535 = 65130.249)
     unsigned short RefData = 0xFFFF;
     unsigned long DataSize = sizeof(RefData);
-    unsigned long Status = GenericVendorRead(deviceIndex, 0xA2, 0x1DF2, 0, &DataSize, &RefData);
+    unsigned long Status = GenericVendorRead(deviceIndex, 0xA2, 0x1DF2, 0, &RefData, &DataSize );
 
     if(Status != AIOUSB_SUCCESS)
         return HiRefRef;

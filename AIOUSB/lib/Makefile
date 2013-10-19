@@ -20,7 +20,8 @@ AIOUSB_GetDeviceBySerialNumber.o \
 AIOUSB_GetDeviceProperties.o \
 AIOUSB_GetResultCodeAsString.o \
 AIOUSB_ListDevices.o \
-AIOUSB_WDG.o
+AIOUSB_WDG.o \
+AIOContinuousBuffer.o
 
 CCINC		:= 
 CC_SHFLAGS	:= -shared -Wl,-soname

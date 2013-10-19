@@ -271,9 +271,9 @@ PRIVATE_EXTERN unsigned long AIOUSB_ArrayVoltsToCounts( unsigned long DeviceInde
                                                         int numChannels, const double volts[], unsigned short counts[] );
 
 
-PRIVATE_EXTERN unsigned long GenericVendorRead( unsigned long deviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, unsigned long *bytes_read, void *bufData );
+PRIVATE_EXTERN unsigned long GenericVendorRead( unsigned long deviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, void *bufData , unsigned long *bytes_read  );
 
-PRIVATE_EXTERN unsigned long GenericVendorWrite( unsigned long DeviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, unsigned long *bytes_write, void *bufData );
+PRIVATE_EXTERN unsigned long GenericVendorWrite( unsigned long DeviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, void *bufData, unsigned long *bytes_write );
 PRIVATE_EXTERN unsigned long AIOUSB_Validate_Device( unsigned long DeviceIndex );
 
 

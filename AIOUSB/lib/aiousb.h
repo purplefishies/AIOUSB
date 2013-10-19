@@ -11,7 +11,9 @@
 #define aiousb_h
 
 #include <stdlib.h>
+#include <assert.h>
 
+typedef long AIORET_TYPE;        /* New return type is signed, negative indicates error */
 
 
 #ifdef __aiousb_cplusplus
@@ -26,10 +28,11 @@ namespace AIOUSB
 #define MIN_VALUE(name ) (name ## _begin+1)
 #define MAX_VALUE(name ) (name ## _end-1)
 #define VALID_ENUM(name,value ) ( value >= FIRST_ENUM(name) && value <= LAST_ENUM(name ))
+#define ERR_UNLESS_VALID_ENUM(name,value) assert(( value >= FIRST_ENUM(name) && value <= LAST_ENUM(name )))
 
 #define VALID_PRODUCT(product) ( VALID_ENUM(  ProductIDS, product ) )
 
-typedef long AIORET_TYPE;        /* New return type is signed, negative indicates error */
+
 
  CREATE_ENUM_W_START(ProductIDS,0,
                      ACCES_VENDOR_ID    = 0x1605,

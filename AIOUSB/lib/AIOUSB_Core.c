@@ -1238,7 +1238,7 @@ unsigned long GetDeviceSerialNumber(
         goto out_GetDeviceSerialNumber;
     }
 
-    result = GenericVendorRead( DeviceIndex, AUR_EEPROM_READ , EEPROM_SERIAL_NUMBER_ADDRESS, 0 , &bytes_read , &buffer_data  );
+    result = GenericVendorRead( DeviceIndex, AUR_EEPROM_READ , EEPROM_SERIAL_NUMBER_ADDRESS, 0 , &buffer_data, &bytes_read );
     if( result != AIOUSB_SUCCESS )
         goto out_GetDeviceSerialNumber;
 
@@ -1965,8 +1965,8 @@ unsigned long GenericVendorWrite(
                                  unsigned char Request,
                                  unsigned short Value,
                                  unsigned short Index,
-                                 unsigned long *bytes_written,
-                                 void *bufData
+                                 void *bufData,
+                                 unsigned long *bytes_written
                                  )
 {
     unsigned long result;
@@ -2021,8 +2021,8 @@ unsigned long GenericVendorRead(
     unsigned char Request,
     unsigned short Value,
     unsigned short Index,
-    unsigned long *bytes_read,
-    void *bufData
+    void *bufData,
+    unsigned long *bytes_read
     )
 {
     unsigned long result;
