@@ -19,6 +19,10 @@ static pthread_t cont_thread;
 static pthread_mutex_t message_lock = PTHREAD_MUTEX_INITIALIZER;
 static FILE *outfile = NULL;
 
+pthread_t worker;
+pthread_mutex_t lock;
+pthread_attr_t tattr;
+
 
 #undef AIOUSB_LOG
 #define AIOUSB_LOG(fmt, ... ) do {                                      \
@@ -157,15 +161,21 @@ void AIOContinuousBufSetClock( AIOContinuousBuf *buf, unsigned int hz )
  * @param work 
  * @return status code of start.
  */
+/* , void *(*work) (void *)  ) */
 AIORET_TYPE
-AIOContinuousBufStart( AIOContinuousBuf *buf , void *(*work) (void *)  )
+AIOContinuousBufStart( AIOContinuousBuf *buf )
 {
   /* AIORET_TYPE ret; */
   AIORET_TYPE retval;
 
 #ifdef HAS_PTHREAD
   buf->status = RUNNING;
-  retval = pthread_create( &(buf->worker), NULL , buf->callback, (void *)buf  );
+  /* retval = pthread_create( &(buf->worker), NULL , buf->callback, (void *)buf  ); */
+  /* retval = pthread_create( &(buf->worker), NULL , work, (void *)buf  ); */
+
+  /* retval = pthread_create( &(buf->worker), NULL, buf->callback, (void *)buf ); */
+  retval = pthread_create( &worker, NULL, buf->callback, (void *)buf );
+
   if( retval != 0 ) {
     buf->status = TERMINATED;
     AIOUSB_ERROR("Unable to create thread for Continuous acquisition");
@@ -251,7 +261,8 @@ AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf )
 {
   /** create thread to launch function */
   AIORET_TYPE retval;
-  retval = pthread_create( &(buf->worker), NULL , callback, (void *)buf  );
+  /* retval = pthread_create( &(buf->worker), NULL , callback, (void *)buf  ); */
+  retval = pthread_create( &worker, NULL , callback, (void *)buf  );
   if( retval != 0 ) {
     retval = -abs(retval);
   }
@@ -261,24 +272,24 @@ AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf )
 
 void *ActualWorkFunction( void *object )
 {
-  sched_yield();
-  AIOContinuousBuf *buf = (AIOContinuousBuf*)object;
-  AIOUSB_DEVEL("\tAddress is 0x%x\n", (int)(unsigned long)(AIOContinuousBuf *)buf );
-  unsigned  size  = 1000;
-  AIOBufferType *tmp = (AIOBufferType*)malloc(size*sizeof(AIOBufferType));
-  AIORET_TYPE retval;
+  /* sched_yield(); */
+  /* AIOContinuousBuf *buf = (AIOContinuousBuf*)object; */
+  /* AIOUSB_DEVEL("\tAddress is 0x%x\n", (int)(unsigned long)(AIOContinuousBuf *)buf ); */
+  /* unsigned  size  = 1000; */
+  /* AIOBufferType *tmp = (AIOBufferType*)malloc(size*sizeof(AIOBufferType)); */
+  /* AIORET_TYPE retval; */
 
-  while ( buf->status == RUNNING ) { 
+  /* while ( buf->status == RUNNING ) {  */
 
-    /* fill_buffer( tmp, size ); */
-    AIOUSB_DEVEL("\tLooping spinning wheels\n"); 
-    retval = AIOContinuousBufWrite( buf, tmp, size , AIOCONTINUOUS_BUF_NORMAL );
-    AIOUSB_DEVEL("\tWriting buf , requested size=%d, got=%d\n", size, (int)retval );
-  }
-  AIOUSB_DEVEL("Stopping\n");
-  AIOUSB_DEVEL("Completed loop\n");
-  free(tmp);
-  pthread_exit((void*)&retval);
+  /*   /\* fill_buffer( tmp, size ); *\/ */
+  /*   AIOUSB_DEVEL("\tLooping spinning wheels\n");  */
+  /*   retval = AIOContinuousBufWrite( buf, tmp, size , AIOCONTINUOUS_BUF_NORMAL ); */
+  /*   AIOUSB_DEVEL("\tWriting buf , requested size=%d, got=%d\n", size, (int)retval ); */
+  /* } */
+  /* AIOUSB_DEVEL("Stopping\n"); */
+  /* AIOUSB_DEVEL("Completed loop\n"); */
+  /* free(tmp); */
+  /* pthread_exit((void*)&retval); */
   return NULL;
 }
 
@@ -338,8 +349,9 @@ AIORET_TYPE AIOContinuousBufCallbackStartClocked( AIOContinuousBuf *buf, AIOUSB_
   } else {
     DoBCControl(buf, 0, 0x01000007);
   }
+  AIOContinuousBuf_SetCallback( buf , ActualWorkFunction );
 
-  retval = AIOContinuousBufStart( buf, buf->work ); /**< Fills up the buf buffer  */
+  retval = AIOContinuousBufStart( buf ); /**< Fills up the buf buffer  */
   if ( retval != AIOUSB_SUCCESS )
     goto out_AIOContinuousBufCallbackStartClocked;
   /**
@@ -423,7 +435,7 @@ AIORET_TYPE CaptureData( AIOContinuousBuf *buf )
                                  tmpbuf,
                                  &write_size
                                  );
-    AIOUSB_DEVEL("Value returned was %d\n", retval );
+    AIOUSB_DEVEL("Value returned was %d\n", (int)retval );
     if ( retval != AIOUSB_SUCCESS ) 
       goto out_CaptureData;
   } else {
@@ -487,7 +499,7 @@ AIORET_TYPE AIOContinuousBufRead( AIOContinuousBuf *buf, AIOBufferType *readbuf 
   
   retval = basic_copy + wrap_copy;
   /* Now reset the Start pointer */
-  set_read_pos( buf, (get_read_pos(buf) + retval) % buffer_size(buf) );
+  set_read_pos( buf, (get_read_pos(buf) + retval) % (buffer_size(buf) - 1) );
   /* Finally, unlock the buffer */
 
   AIOContinuousBufUnlock( buf );
@@ -587,7 +599,8 @@ AIORET_TYPE AIOContinuousBufLock( AIOContinuousBuf *buf )
 {
   AIORET_TYPE retval;
 #ifdef HAS_PTHREAD
-  retval = pthread_mutex_lock( &buf->lock );
+  /* retval = pthread_mutex_lock( &buf->lock ); */
+  retval = pthread_mutex_lock( &lock );
   if ( retval != 0 ) {
     retval = -retval;
   }
@@ -598,7 +611,8 @@ AIORET_TYPE AIOContinuousBufUnlock( AIOContinuousBuf *buf )
 {
   int retval;
 #ifdef HAS_PTHREAD
-  retval = pthread_mutex_unlock( &buf->lock );
+  /* retval = pthread_mutex_unlock( &buf->lock ); */
+  retval = pthread_mutex_unlock( &lock );
   if ( retval !=  0 ) {
     retval = -retval;
     AIOUSB_ERROR("Unable to unlock mutex");
@@ -625,7 +639,8 @@ AIORET_TYPE AIOContinuousBufEnd( AIOContinuousBuf *buf )
 
 
 #ifdef HAS_PTHREAD
-  ret = pthread_join( buf->worker , &ptr );
+  /* ret = pthread_join( buf->worker , &ptr ); */
+  ret = pthread_join( worker, &ptr );
 #endif
   if ( ret != 0 ) {
     AIOUSB_ERROR("Error joining threads");
@@ -680,6 +695,19 @@ void fill_buffer( AIOBufferType *buffer, unsigned size )
   }
 }
 
+void *newdoit(void *object )
+{
+  int counter = 0;
+  AIORET_TYPE retval = AIOUSB_SUCCESS;
+  while ( counter < 10 ) {
+    AIOUSB_DEBUG("Waiting in thread counter=%d\n", counter );
+    sleep(1);
+    counter++;
+  }
+  pthread_exit((void*)&retval);
+  return (void*)NULL;
+}
+
 /** 
  * @param object 
  * @return 
@@ -694,11 +722,10 @@ void *doit( void *object )
   AIORET_TYPE retval;
 
   while ( buf->status == RUNNING ) { 
-
     fill_buffer( tmp, size );
     AIOUSB_DEVEL("\tLooping spinning wheels\n"); 
     retval = AIOContinuousBufWrite( buf, tmp, size , AIOCONTINUOUS_BUF_NORMAL );
-    AIOUSB_DEVEL("\tWriting buf , requested size=%d, got=%d\n", size, (int)retval );
+    AIOUSB_DEVEL("\tWriting buf , attempted write of size size=%d, wrote=%d\n", size, (int)retval );
   }
   AIOUSB_DEVEL("Stopping\n");
   AIOUSB_DEVEL("Completed loop\n");
@@ -707,166 +734,194 @@ void *doit( void *object )
   return NULL;
 }
 
-int main(int argc, char *argv[] )
+void
+stress_test_one( int size )
+{
+  AIORET_TYPE retval;
+  int readbuf_size = size - 10;
+  AIOBufferType *readbuf = (AIOBufferType *)malloc( readbuf_size*sizeof(AIOBufferType ));
+  AIOContinuousBuf *buf = NewAIOContinuousBuf( size );
+  AIOUSB_DEVEL("Original address is 0x%x\n", (int)(unsigned long)(AIOContinuousBuf *)buf );
+  AIOContinuousBufReset( buf );
+  AIOContinuousBuf_SetCallback( buf , doit );
+  AIOUSB_DEBUG("Was able to reset device\n");
+  retval = AIOContinuousBufStart( buf );
+  AIOUSB_DEBUG("Able to start new Acquisition\n");
+  printf("%s", ( retval < 0 ? "not ok -" : "ok - " ));
+  printf("Able to start threaded collection\n");
+  for(int i = 0 ; i < 500; i ++ ) {
+    retval = AIOContinuousBufRead( buf,  readbuf, readbuf_size );
+    usleep(100);
+    AIOUSB_DEVEL("Read number of bytes=%d\n",(int)retval );
+  }
+  AIOContinuousBufEnd( buf );
+  retval = AIOContinuousBufRead( buf, readbuf, readbuf_size );
+  retval = AIOContinuousBufRead( buf, readbuf, readbuf_size );
+  printf("%s", ( (int)retval == 0 ? "ok" : "not ok" ));
+  printf(" - Completely read in the buffer \n");
+  DeleteAIOContinuousBuf( buf );
+}
+
+
+void basic_functionality()
 {
   AIOContinuousBuf *buf = NewAIOContinuousBuf( 10000 );
+  AIOBufferType *tmp = (AIOBufferType *)malloc(20000*sizeof(AIOBufferType ));
   AIORET_TYPE retval;
-
-
-  AIOContinuousBuf_SetDeviceIndex( buf, 0 );
-  AIOContinuousBuf_SetCallback( buf , doit );
-  printf("1..23\n");
-
-  {
-    AIOBufferType *tmp = (AIOBufferType *)malloc(20000*sizeof(AIOBufferType ));
-    for ( int i = 0 ; i < 1000; i ++ ) { 
-      tmp[i] = rand() % 1000;
-    }
-    retval = AIOContinuousBufWrite( buf, tmp , 20000 , AIOCONTINUOUS_BUF_ALLORNONE  );
-    printf("%s", ( (int)retval == -AIOUSB_ERROR_NOT_ENOUGH_MEMORY ? "ok" : "not ok" ));
-    printf(" - Able to perform first write, count is %d \n", (int)retval );
-    
-    free(tmp);
-
-    unsigned size = 4999;
-    tmp = (AIOBufferType *)malloc(size*sizeof(AIOBufferType ));
-    for( int i = 0; i < 3; i ++ ) {
-      for( int j = 0 ; j < size; j ++ ) {
-        tmp[j] = rand() % 1000;
-      }
-      retval = AIOContinuousBufWrite( buf, tmp , size , AIOCONTINUOUS_BUF_ALLORNONE  );
-      if( i == 2 ) { 
-        printf("%s", ( (int)retval != 0 ? "ok" : "not ok" ));
-        printf(" - Correctly stops writing\n");
-      } else {
-        printf("%s", ( (int)retval >= 0 ? "ok" : "not ok" ));
-        printf(" - Still able to write, count is %d\n", get_write_pos(buf) );
-      }
-    }
-    retval = AIOContinuousBufWrite( buf, tmp , size , AIOCONTINUOUS_BUF_NORMAL  );
-    printf("%s", ( (int)retval >= 0 ? "ok" : "not ok" ));
-    printf(" - able to write, count is %d\n", get_write_pos(buf) );
-
-    retval = AIOContinuousBufWrite( buf, tmp , size , AIOCONTINUOUS_BUF_OVERRIDE );
-    printf("%s", ( (int)retval != 0 ? "ok" : "not ok" ));
-    printf(" - Correctly writes with override \n");
+  for ( int i = 0 ; i < 1000; i ++ ) { 
+    tmp[i] = rand() % 1000;
+  }
+  retval = AIOContinuousBufWrite( buf, tmp , 20000 , AIOCONTINUOUS_BUF_ALLORNONE  );
+  printf("%s", ( (int)retval == -AIOUSB_ERROR_NOT_ENOUGH_MEMORY ? "ok" : "not ok" ));
+  printf(" - Able to perform first write, count is %d \n", (int)retval );
   
-    int readbuf_size = size - 10;
-    AIOBufferType *readbuf = (AIOBufferType *)malloc( readbuf_size*sizeof(AIOBufferType ));
-
-
-    retval = AIOContinuousBufRead( buf, readbuf, readbuf_size );
-    printf("%s", ( (int)retval != 0 ? "ok" : "not ok" ));
-    printf(" - Able to read correctly \n");
-
-
-    retval = AIOContinuousBufRead( buf, readbuf, readbuf_size );
-    printf("%s", ( (int)retval >= 0 ? "ok" : "not ok" ));
-    printf(" - Able to read correctly \n");
-
-
-    free(tmp);
-    size = 6000;
-    tmp = (AIOBufferType *)malloc(size*sizeof(AIOBufferType ));
+  free(tmp);
+  
+  unsigned size = 4999;
+  tmp = (AIOBufferType *)malloc(size*sizeof(AIOBufferType ));
+  for( int i = 0; i < 3; i ++ ) {
     for( int j = 0 ; j < size; j ++ ) {
       tmp[j] = rand() % 1000;
     }
-    retval = AIOContinuousBufWrite( buf, tmp , size , AIOCONTINUOUS_BUF_NORMAL);
-    printf("%s", ( (int)retval >= 0 ? "ok" : "not ok" ));
-    printf(" - Able to read correctly \n");
-
-    free(readbuf);
-    readbuf_size = (  buffer_max(buf) - get_read_pos (buf) + 2000 );
-    readbuf = (AIOBufferType *)malloc(readbuf_size*sizeof(AIOBufferType ));
-    retval = AIOContinuousBufRead( buf, readbuf, readbuf_size );
-    printf("%s", ( (int)retval >= 0 ? "ok" : "not ok" ));
-    printf(" - Able to read correctly \n");
-
-
-    free(readbuf);
-    free(tmp);
-
-  }
-  {
-    int size = 1000;
-    AIOBufferType *tmp = (AIOBufferType *)malloc(size*sizeof(AIOBufferType ));
-    AIOContinuousBufReset(buf);
-    for( int i = 0; i < 11; i ++ ) {
-      char *ok;
-      fill_buffer(tmp, size );
-      retval = AIOContinuousBufWrite( buf , tmp, size, AIOCONTINUOUS_BUF_NORMAL );
-      switch( i ) { 
-      case 9: 
-        ok = ( retval == (size-1) ? "ok" : "not ok" );
-        break;
-      case 10: case 11:
-        ok = ( retval == 0 ? "ok" : "not ok" );
-        break;
-      default:
-        ok = ( retval == size ? "ok" : "not ok" );
-        break;
-      }
-      printf("%s", ok );
-      printf(" - Wrote to buffer %d packets\n", (int)retval );
+    retval = AIOContinuousBufWrite( buf, tmp , size , AIOCONTINUOUS_BUF_ALLORNONE  );
+    if( i == 2 ) { 
+      printf("%s", ( (int)retval != 0 ? "ok" : "not ok" ));
+      printf(" - Correctly stops writing\n");
+    } else {
+      printf("%s", ( (int)retval >= 0 ? "ok" : "not ok" ));
+      printf(" - Still able to write, count is %d\n", get_write_pos(buf) );
     }
-    free(tmp);
   }
-
-  unsigned readbufsize = 1000000;
-  AIOBufferType *readbuf = (AIOBufferType *)malloc(sizeof(AIOBufferType)*readbufsize);
-
-  DeleteAIOContinuousBuf( buf );
-
-  buf = NewAIOContinuousBuf( 10000000 );
-  AIOUSB_DEVEL("Original address is 0x%x\n", (int)(unsigned long)(AIOContinuousBuf *)buf );
-  AIOContinuousBufReset( buf );
-  retval = AIOContinuousBufStart( buf, doit );
-  if( retval < 0 ) {
-    printf("not ok - ");
-  } else {
-    printf("ok - ");
-  }
-  printf("Able to start threaded collection\n");
-
-  for(int i = 0 ; i < 500; i ++ ) {
-    retval = AIOContinuousBufRead( buf,  readbuf, readbufsize );
-    usleep(100);
-    AIOUSB_DEVEL("Got value, %d\n",(int)retval );
-  }
-  AIOContinuousBufEnd( buf );
-  retval = AIOContinuousBufRead( buf, readbuf, readbufsize );
-  retval = AIOContinuousBufRead( buf, readbuf, readbufsize );
-  printf("%s", ( (int)retval == 0 ? "ok" : "not ok" ));
-  printf(" - Completely read in the buffer \n");
-
-  /**
-   *  Simple capture of data
-   */ 
-  AIOUSB_Init();
-  AIOUSB_ListDevices();
-  /**
-   * Setup the counter control 
-   */
-  AIOContinuousBufSetupCounters( buf );
-  /* CTR_8254Mode( AIOContinuousBuf_GetDeviceIndex( buf ), 0, 1, 2); /\* Counter 1, Mode 2 *\/ */
-  /* CTR_8254Mode( AIOContinuousBuf_GetDeviceIndex( buf ), 0, 2, 3); /\* Counter 2, Mode 3 *\/ */
-
-  AIOContinuousBufSetClock( buf, 1000 ); /* Set the clock rate */
+  retval = AIOContinuousBufWrite( buf, tmp , size , AIOCONTINUOUS_BUF_NORMAL  );
+  printf("%s", ( (int)retval >= 0 ? "ok" : "not ok" ));
+  printf(" - able to write, count is %d\n", get_write_pos(buf) );
   
-  CalculateClocks( buf );
+  retval = AIOContinuousBufWrite( buf, tmp , size , AIOCONTINUOUS_BUF_OVERRIDE );
+  printf("%s", ( (int)retval != 0 ? "ok" : "not ok" ));
+  printf(" - Correctly writes with override \n");
+  
+  int readbuf_size = size - 10;
+  AIOBufferType *readbuf = (AIOBufferType *)malloc( readbuf_size*sizeof(AIOBufferType ));
+  
+  retval = AIOContinuousBufRead( buf, readbuf, readbuf_size );
+  printf("%s", ( (int)retval != 0 ? "ok" : "not ok" ));
+  printf(" - Able to read correctly \n");
 
-  /* retval = CTR_8254ModeLoad(AIOContinuousBuf_GetDeviceIndex( buf ) , BlockIndex, 1, 2, buf->divisora ); */
-  /* retval = CTR_8254ModeLoad(AIOContinuousBuf_GetDeviceIndex( buf ) , BlockIndex, 2, 3, buf->divisorb ); */
+  retval = AIOContinuousBufRead( buf, readbuf, readbuf_size );
+  printf("%s", ( (int)retval >= 0 ? "ok" : "not ok" ));
+  printf(" - Able to read correctly \n");
 
-  CaptureData( buf );
 
-  DeleteAIOContinuousBuf( buf );
+  free(tmp);
+  size = 6000;
+  tmp = (AIOBufferType *)malloc(size*sizeof(AIOBufferType ));
+  for( int j = 0 ; j < size; j ++ ) {
+    tmp[j] = rand() % 1000;
+  }
+  retval = AIOContinuousBufWrite( buf, tmp , size , AIOCONTINUOUS_BUF_NORMAL);
+  printf("%s", ( (int)retval >= 0 ? "ok" : "not ok" ));
+  printf(" - Able to read correctly \n");
 
   free(readbuf);
+  readbuf_size = (  buffer_max(buf) - get_read_pos (buf) + 2000 );
+  readbuf = (AIOBufferType *)malloc(readbuf_size*sizeof(AIOBufferType ));
+  retval = AIOContinuousBufRead( buf, readbuf, readbuf_size );
+  printf("%s", ( (int)retval >= 0 ? "ok" : "not ok" ));
+  printf(" - Able to read correctly \n");
+
+  DeleteAIOContinuousBuf( buf );
+  free(readbuf);
+  free(tmp);
+
+}
+
+
+int main(int argc, char *argv[] )
+{
+  
+  AIORET_TYPE retval;
+
+  /* AIOContinuousBuf_SetDeviceIndex( buf, 0 ); */
+  /* AIOContinuousBuf_SetCallback( buf , doit ); */
+  printf("1..23\n");
+  basic_functionality();
+  
+  stress_test_one( 10000 );
+
+  /* { */
+  /*   int size = 1000; */
+  /*   AIOBufferType *tmp = (AIOBufferType *)malloc(size*sizeof(AIOBufferType )); */
+  /*   AIOContinuousBufReset(buf); */
+  /*   for( int i = 0; i < 11; i ++ ) { */
+  /*     char *ok; */
+  /*     fill_buffer(tmp, size ); */
+  /*     retval = AIOContinuousBufWrite( buf , tmp, size, AIOCONTINUOUS_BUF_NORMAL ); */
+  /*     switch( i ) {  */
+  /*     case 9:  */
+  /*       ok = ( retval == (size-1) ? "ok" : "not ok" ); */
+  /*       break; */
+  /*     case 10: case 11: */
+  /*       ok = ( retval == 0 ? "ok" : "not ok" ); */
+  /*       break; */
+  /*     default: */
+  /*       ok = ( retval == size ? "ok" : "not ok" ); */
+  /*       break; */
+  /*     } */
+  /*     printf("%s", ok ); */
+  /*     printf(" - Wrote to buffer %d packets\n", (int)retval ); */
+  /*   } */
+  /*   free(tmp); */
+  /* } */
+
+  /* stress_test_one( 10000 ); */
+
+  /* unsigned readbufsize = 1000000; */
+  /* AIOBufferType *readbuf = (AIOBufferType *)malloc(sizeof(AIOBufferType)*readbufsize); */
+  /* DeleteAIOContinuousBuf( buf ); */
+  /* buf = NewAIOContinuousBuf( 10000 ); */
+  /* AIOContinuousBuf_SetCallback( buf , newdoit ); */
+  /* retval = AIOContinuousBufStart( buf ); */
+  /* for(int i = 0 ; i < 500; i ++ ) { */
+  /*   retval = AIOContinuousBufRead( buf,  readbuf, readbufsize ); */
+  /*   usleep(100); */
+  /*   AIOUSB_DEVEL("Got value, %d\n",(int)retval ); */
+  /* } */
+  /* AIOContinuousBufEnd( buf ); */
+  /* free(readbuf); */
 }
 
 
 #endif
+
+  /* buf = NewAIOContinuousBuf( 10000 ); */
+  /* AIOContinuousBuf_SetCallback( buf , newdoit ); */
+  /* retval = AIOContinuousBufStart( buf ); */
+  /* sleep(60); */
+  /* AIOContinuousBufEnd( buf ); */
+
+  /* DeleteAIOContinuousBuf( buf ); */
+
+
+  /* /\** */
+  /*  *  Simple capture of data */
+  /*  *\/  */
+  /* AIOUSB_Init(); */
+  /* AIOUSB_ListDevices(); */
+  /* /\** */
+  /*  * Setup the counter control  */
+  /*  *\/ */
+  /* AIOContinuousBufSetupCounters( buf ); */
+  /* /\* CTR_8254Mode( AIOContinuousBuf_GetDeviceIndex( buf ), 0, 1, 2); /\\* Counter 1, Mode 2 *\\/ *\/ */
+  /* /\* CTR_8254Mode( AIOContinuousBuf_GetDeviceIndex( buf ), 0, 2, 3); /\\* Counter 2, Mode 3 *\\/ *\/ */
+
+  /* AIOContinuousBufSetClock( buf, 1000 ); /\* Set the clock rate *\/ */
+  
+  /* CalculateClocks( buf ); */
+
+  /* /\* retval = CTR_8254ModeLoad(AIOContinuousBuf_GetDeviceIndex( buf ) , BlockIndex, 1, 2, buf->divisora ); *\/ */
+  /* /\* retval = CTR_8254ModeLoad(AIOContinuousBuf_GetDeviceIndex( buf ) , BlockIndex, 2, 3, buf->divisorb ); *\/ */
+
+  /* CaptureData( buf ); */
 
 
 
