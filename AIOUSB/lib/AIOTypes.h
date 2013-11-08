@@ -39,13 +39,13 @@ CREATE_ENUM_W_START( AIOContinuousBufMode, 0 ,
 #define AUR_CBUF_SETUP  0x01000007
 #define AUR_CBUF_EXIT   0x00020002
 
+#define NUMBER_CHANNELS 16
 
 
 typedef short AIOBufferType;
 typedef void *(*AIOUSB_WorkFn)( void *obj );
 
 typedef struct {
-  int bufsize;
   void *(*callback)(void *object);
 #ifdef HAS_PTHREAD
   pthread_t worker;
@@ -75,6 +75,7 @@ unsigned AIOContinuousBufGetDivisorA( AIOContinuousBuf *buf );
 unsigned AIOContinuousBufGetDivisorB( AIOContinuousBuf *buf );
 AIORET_TYPE AIOContinuousBufWrite( AIOContinuousBuf *buf, AIOBufferType *writebuf, unsigned size, AIOContinuousBufMode flag );
 AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf );
+ AIORET_TYPE AIOContinuousBufRead( AIOContinuousBuf *buf, AIOBufferType *readbuf , unsigned size);
 
 
 #ifdef __aiousb_cplusplus
