@@ -49,6 +49,48 @@ static unsigned long ADC_GetImmediate(
     unsigned short *pData);
 
 
+unsigned long
+ADC_ResetDevice( unsigned long DeviceIndex  )
+{
+  unsigned long result;
+  libusb_device_handle *deviceHandle;
+  int wValue = 0xe600;
+  int wIndex = 1;
+  int timeout = 1000;
+  unsigned char data[1];
+  DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
+  if(!deviceDesc || result != AIOUSB_SUCCESS)
+    return result;
+
+  deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
+  data[0] = 1;
+  result = libusb_control_transfer(deviceHandle,
+                                   USB_WRITE_TO_DEVICE,
+                                   0xa0,
+                                   wValue,
+                                   wIndex,
+                                   data,
+                                   1,
+                                   timeout
+                                   );
+  if( result <= AIOUSB_SUCCESS )
+    goto out_ADC_ResetDevice;
+
+  data[0] = 0;
+  sleep(2);
+  result = libusb_control_transfer(deviceHandle,
+                                   USB_WRITE_TO_DEVICE,
+                                   0xa0,
+                                   wValue,
+                                   wIndex,
+                                   data,
+                                   1,
+                                   timeout
+                                   );
+out_ADC_ResetDevice:
+  return result;
+}
+
 /**
  * @desc
  * @param DeviceIndex
@@ -543,9 +585,6 @@ PRIVATE unsigned long AIOUSB_ArrayCountsToVolts(
 {
      unsigned long result;
      DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock( DeviceIndex, &result);
-     if( !deviceDesc || result != AIOUSB_SUCCESS ) {
-
-     }
      
      assert(startChannel >= 0 &&
             numChannels >= 0 &&
@@ -567,8 +606,7 @@ PRIVATE unsigned long AIOUSB_ArrayCountsToVolts(
      result = ReadConfigBlock(DeviceIndex, AIOUSB_FALSE);
      if(result == AIOUSB_SUCCESS) {
           AIOUSB_Lock();
-          int channel;
-          for(channel = 0; channel < numChannels; channel++) {
+          for(int channel = 0; channel < numChannels; channel++) {
                const int gainCode = AIOUSB_GetGainCode(&deviceDesc->cachedConfigBlock, startChannel + channel);
                assert(gainCode >= FIRST_ENUM(ADGainCode) && gainCode <= LAST_ENUM(ADGainCode));
                const struct ADRange *const range = &adRanges[ gainCode ];
@@ -2452,7 +2490,6 @@ double AIOUSB_CountsToVolts(
 
 /**
  *
- *
  * @param DeviceIndex
  * @param startChannel
  * @param endChannel
@@ -2468,8 +2505,12 @@ unsigned long AIOUSB_MultipleCountsToVolts(
     double volts[]     /* deviceDesc->ADCMUXChannels */
     )
 {
-    return AIOUSB_ArrayCountsToVolts(DeviceIndex, startChannel, endChannel - startChannel + 1,
-                                     counts + startChannel, volts + startChannel);
+    return AIOUSB_ArrayCountsToVolts(DeviceIndex, 
+                                     startChannel, 
+                                     endChannel - startChannel + 1,
+                                     counts + startChannel, 
+                                     volts + startChannel
+                                     );
 }
 
 

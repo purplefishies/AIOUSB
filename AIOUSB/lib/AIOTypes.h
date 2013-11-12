@@ -42,7 +42,8 @@ CREATE_ENUM_W_START( AIOContinuousBufMode, 0 ,
 #define NUMBER_CHANNELS 16
 
 
-typedef short AIOBufferType;
+/* typedef short AIOBufferType; */
+typedef double AIOBufferType;
 typedef void *(*AIOUSB_WorkFn)( void *obj );
 
 typedef struct {
