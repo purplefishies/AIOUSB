@@ -76,8 +76,8 @@ unsigned AIOContinuousBufGetDivisorA( AIOContinuousBuf *buf );
 unsigned AIOContinuousBufGetDivisorB( AIOContinuousBuf *buf );
 AIORET_TYPE AIOContinuousBufWrite( AIOContinuousBuf *buf, AIOBufferType *writebuf, unsigned size, AIOContinuousBufMode flag );
 AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf );
- AIORET_TYPE AIOContinuousBufRead( AIOContinuousBuf *buf, AIOBufferType *readbuf , unsigned size);
-
+AIORET_TYPE AIOContinuousBufRead( AIOContinuousBuf *buf, AIOBufferType *readbuf , unsigned size);
+AIORET_TYPE AIOContinuousBufCleanup( AIOContinuousBuf *buf );
 
 #ifdef __aiousb_cplusplus
 }
