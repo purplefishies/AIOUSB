@@ -103,8 +103,7 @@ AIOContinuousBuf *NewAIOContinuousBuf( int bufsize )
  * 
  * @param buf 
  */
-void
-DeleteAIOContinuousBuf( AIOContinuousBuf *buf )
+void DeleteAIOContinuousBuf( AIOContinuousBuf *buf )
 {
   free( buf->buffer );
   free( buf );
@@ -142,6 +141,16 @@ unsigned get_write_pos( AIOContinuousBuf *buf )
 {
   return buf->_write_pos;
 }
+
+unsigned int AIOContinuousBufGetReadPosition( AIOContinuousBuf *buf )
+{
+  return get_read_pos( buf );
+}
+unsigned int AIOContinuousBufGetWritePosition( AIOContinuousBuf *buf )
+{
+ return get_write_pos( buf );
+}
+
 
 unsigned buffer_max( AIOContinuousBuf *buf )
 {
@@ -853,7 +862,6 @@ out_AIOContinuousBufReadChannels:
 
 }
 
-
 AIORET_TYPE AIOContinuousBufEnd( AIOContinuousBuf *buf )
 { 
   /* int *retval; */
@@ -1159,25 +1167,34 @@ void continuous_stress_test( int bufsize )
   int keepgoing = 1;
   AIORET_TYPE retval;
   AIOBufferType *tmp = (AIOBufferType *)malloc(sizeof(AIOBufferType *)*tmpsize);
-
+  int ntest_count = 0;
 
   AIOUSB_Init();
   GetDevices();
   AIOContinuousBufSetClock( buf, 1000 );
   AIOContinuousBufCallbackStartClocked( buf );
 
+  
   while ( keepgoing ) {
     retval = AIOContinuousBufRead( buf, tmp, tmpsize );
     sleep(1);
-    /* if( retval < AIOUSB_TRUE ) { */
-    /*   break; */
-    /* } */
     AIOUSB_INFO("Waiting : readpos=%d, writepos=%d\n", get_read_pos(buf),get_write_pos(buf));
+    if( get_read_pos(buf) < 1000 ) {
+      ntest_count ++;
+    }
+#ifdef NTEST
+    if( ntest_count > 5000 ) {
+      AIOContinuousBufEnd( buf );
+      keepgoing = 0;
+    }
+#else
     if( get_read_pos( buf )  > 60000 ) {
       AIOContinuousBufEnd( buf );
       keepgoing = 0;
     }
+#endif
   }
+#ifdef TESTING
   set_read_pos(buf,0);
   for(int i = 0; i < get_write_pos(buf) /16 ; i ++ ) {
     for( int j =0; j < 16 ; j ++ ) { 
@@ -1185,11 +1202,8 @@ void continuous_stress_test( int bufsize )
     }
     printf("\n");
   }
-  printf("%s - Able to finish reading buffer\n", (retval == AIOUSB_SUCCESS ? "ok" : "not ok" ));
-
-
-
-
+#endif
+  printf("%s - Able to finish reading buffer\n", (retval >= AIOUSB_SUCCESS ? "ok" : "not ok" ));
 }
 
 void bulk_transfer_test( int bufsize )

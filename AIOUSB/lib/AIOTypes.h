@@ -67,10 +67,18 @@ typedef struct {
 } AIOContinuousBuf;
 
 
+AIOContinuousBuf *NewAIOContinuousBuf( int bufsize );
+ void DeleteAIOContinuousBuf( AIOContinuousBuf *buf );
 AIORET_TYPE AIOContinuousBufLock( AIOContinuousBuf *buf );
 AIORET_TYPE AIOContinuousBufUnlock( AIOContinuousBuf *buf );
 unsigned long AIOContinuousBuf_GetDeviceIndex( AIOContinuousBuf *buf );
 void AIOContinuousBuf_SetDeviceIndex( AIOContinuousBuf *buf , unsigned long DeviceIndex );
+AIORET_TYPE AIOContinuousBufCallbackStartClocked( AIOContinuousBuf *buf );
+unsigned int AIOContinuousBufGetReadPosition( AIOContinuousBuf *buf );
+unsigned int AIOContinuousBufGetWritePosition( AIOContinuousBuf *buf );
+void AIOContinuousBufSetClock( AIOContinuousBuf *buf, unsigned int hz );
+AIORET_TYPE AIOContinuousBufEnd( AIOContinuousBuf *buf );
+
 unsigned buffer_max( AIOContinuousBuf *buf );
 unsigned AIOContinuousBufGetDivisorA( AIOContinuousBuf *buf );
 unsigned AIOContinuousBufGetDivisorB( AIOContinuousBuf *buf );
