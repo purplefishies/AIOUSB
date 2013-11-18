@@ -11,12 +11,11 @@ main(int argc, char *argv[] )
   int bufsize = 100000;
   AIOContinuousBuf *buf = NewAIOContinuousBuf( bufsize );
   ADConfigBlock configBlock;
-  int tmpsize = pow(16,(double)ceil( ((double)log((double)(bufsize/1000))) / log(16)));
+  int tmpsize = pow(512,(double)ceil( ((double)log((double)(bufsize/1000))) / log(16)));
   int keepgoing = 1;
   unsigned long result;
   AIORET_TYPE retval;
   AIOBufferType *tmp = (AIOBufferType *)malloc(sizeof(AIOBufferType *)*tmpsize);
-  /* int ntest_count = 0; */
 
   AIOUSB_Init();
   GetDevices();
@@ -27,23 +26,21 @@ main(int argc, char *argv[] )
   /* Setup the Config object */
   AIOUSB_InitConfigBlock( &configBlock, AIOContinuousBuf_GetDeviceIndex(buf), AIOUSB_FALSE );
   AIOUSB_SetAllGainCodeAndDiffMode( &configBlock, AD_GAIN_CODE_0_5V, AIOUSB_FALSE );
-  /* AIOUSB_SetCalMode( &configBlock, AD_CAL_MODE_NORMAL ); */
-  /* AIOUSB_SetTriggerMode( &configBlock, 0 ); */
   AIOUSB_SetTriggerMode( &configBlock, AD_TRIGGER_SCAN | AD_TRIGGER_TIMER ); /* 0x05 */
-
   AIOUSB_SetScanRange( &configBlock, 0, 15 );
+  ADC_QueryCal( AIOContinuousBuf_GetDeviceIndex(buf) );
+
   result = ADC_SetConfig( AIOContinuousBuf_GetDeviceIndex(buf), configBlock.registers, &configBlock.size );
 
-  /* AIOUSB_SetOversample( &configBlock, 0 ); */
   if ( result != AIOUSB_SUCCESS ) {
     printf("Error reading config\n");
   }
-  ADC_QueryCal( AIOContinuousBuf_GetDeviceIndex(buf) );
+
   AIOContinuousBufSetClock( buf, 1000 );
   AIOContinuousBufCallbackStartClocked( buf );
 
   while ( keepgoing ) {
-    retval = AIOContinuousBufRead( buf, tmp, tmpsize );
+    /* retval = AIOContinuousBufRead( buf, tmp, tmpsize ); */
     sleep(1);
     printf("Waiting : readpos=%d, writepos=%d\n", 
            AIOContinuousBufGetReadPosition(buf),
@@ -54,11 +51,23 @@ main(int argc, char *argv[] )
       printf("Error found reading: ...exiting\n");
       break;
     }
-    if( AIOContinuousBufGetReadPosition(buf) > 4000 ) {
+    if( AIOContinuousBufGetWritePosition(buf) > tmpsize ) {
       keepgoing = 0;
       AIOContinuousBufEnd( buf );
     }
   }
+  while ( AIOContinuousBufGetReadPosition(buf) < AIOContinuousBufGetWritePosition(buf) ){ 
+    retval = AIOContinuousBufRead( buf, tmp, 16 );
+    if ( retval < AIOUSB_SUCCESS ) {
+      printf("ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf) );
+    } else {
+      for ( int i = 0; i < 16 ; i ++ ) { 
+        printf( "%f,", tmp[i] );
+      }
+      printf("\n");
+    }
+  }
+
   printf("Test completed...exiting\n");
   
 
