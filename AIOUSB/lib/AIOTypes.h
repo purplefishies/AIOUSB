@@ -78,6 +78,7 @@ unsigned int AIOContinuousBufGetReadPosition( AIOContinuousBuf *buf );
 unsigned int AIOContinuousBufGetWritePosition( AIOContinuousBuf *buf );
 void AIOContinuousBufSetClock( AIOContinuousBuf *buf, unsigned int hz );
 AIORET_TYPE AIOContinuousBufEnd( AIOContinuousBuf *buf );
+AIORET_TYPE AIOContinuousBufSimpleSetupConfig( AIOContinuousBuf *buf, ADGainCode gainCode );
 
 unsigned buffer_max( AIOContinuousBuf *buf );
 unsigned AIOContinuousBufGetDivisorA( AIOContinuousBuf *buf );

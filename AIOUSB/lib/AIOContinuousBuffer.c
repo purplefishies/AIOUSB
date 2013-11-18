@@ -862,6 +862,21 @@ out_AIOContinuousBufReadChannels:
 
 }
 
+AIORET_TYPE AIOContinuousBufSimpleSetupConfig( AIOContinuousBuf *buf, ADGainCode gainCode )
+{
+  AIORET_TYPE retval;
+  ADConfigBlock configBlock;
+  AIOUSB_InitConfigBlock( &configBlock, AIOContinuousBuf_GetDeviceIndex(buf), AIOUSB_FALSE );
+  AIOUSB_SetAllGainCodeAndDiffMode( &configBlock, gainCode, AIOUSB_FALSE );
+  AIOUSB_SetTriggerMode( &configBlock, AD_TRIGGER_SCAN | AD_TRIGGER_TIMER ); /* 0x05 */
+  AIOUSB_SetScanRange( &configBlock, 0, 15 ); /* All 16 channels */
+  ADC_QueryCal( AIOContinuousBuf_GetDeviceIndex(buf) );
+  retval = ADC_SetConfig( AIOContinuousBuf_GetDeviceIndex(buf), configBlock.registers, &configBlock.size );
+  if ( retval != AIOUSB_SUCCESS ) 
+    return (AIORET_TYPE)(-retval);
+}
+
+
 AIORET_TYPE AIOContinuousBufEnd( AIOContinuousBuf *buf )
 { 
   /* int *retval; */
