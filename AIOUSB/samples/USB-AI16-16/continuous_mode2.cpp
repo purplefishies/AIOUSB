@@ -84,9 +84,10 @@ main(int argc, char *argv[] )
       } else if( retval == 0 ) {
         fail_count += 1;
         printf("Fail : %d\n", fail_count );
-      } else {
-        printf("Retval: %d\n", (int)retval );
       }
+      // else {
+      // printf("Retval: %d\n", (int)retval );
+      // };
       count_read += retval;
       if( fail_count > 5 ) {
         keepgoing = 0;
