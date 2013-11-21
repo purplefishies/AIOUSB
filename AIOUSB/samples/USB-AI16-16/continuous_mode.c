@@ -42,7 +42,7 @@ main(int argc, char *argv[] )
   }
   
   /**
-   * 3. Setup the Divide by value, in this case 
+   * 3. Setup the sampling clock rate, in this case 
    *    10_000_000 / 1000
    */ 
   AIOContinuousBufSetClock( buf, 1000 );
