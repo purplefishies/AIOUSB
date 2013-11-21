@@ -142,6 +142,50 @@ unsigned get_write_pos( AIOContinuousBuf *buf )
   return buf->_write_pos;
 }
 
+
+unsigned buffer_size( AIOContinuousBuf *buf )
+{
+  return buf->size;
+}
+
+
+/** 
+ * @desc Determines the remaining space in the buffer for writing.
+ * @param buf 
+ * @return 
+ * @note Total bytes that can be written into the buffer are N-1
+ * @note
+ *  - if the abs(_write_pos - read_pos ) = Size - 1 , then our value is 
+ *  0 
+ *  - if the abs( _write_pos - _read_pos ) = 0 , then our value is Size
+ */
+
+unsigned write_size( AIOContinuousBuf *buf ) {
+  unsigned retval = 0;
+  unsigned read, write;
+  read = (unsigned )get_read_pos(buf);
+  write = (unsigned)get_write_pos(buf);
+ if( read > write ) {
+   retval =  read - write;
+ } else {
+   /* retval = write - read; */
+   return buffer_size(buf) - (get_write_pos (buf) - get_read_pos (buf));
+ }
+ return retval;
+}
+
+/** 
+ * @desc Returns the amount of data available in the buffer
+ * @param buf 
+ * 
+ * @return 
+ */
+unsigned read_size( AIOContinuousBuf *buf ) 
+{
+  return ( buffer_size(buf) - write_size(buf) );
+}
+
+
 unsigned int AIOContinuousBufGetReadPosition( AIOContinuousBuf *buf )
 {
   return get_read_pos( buf );
@@ -151,15 +195,14 @@ unsigned int AIOContinuousBufGetWritePosition( AIOContinuousBuf *buf )
  return get_write_pos( buf );
 }
 
+unsigned AIOContinuousBufAvailableReadSize( AIOContinuousBuf *buf )
+{
+  return read_size(buf);
+}
 
 unsigned buffer_max( AIOContinuousBuf *buf )
 {
   return buf->size-1;
-}
-
-unsigned buffer_size( AIOContinuousBuf *buf )
-{
-  return buf->size;
 }
 
 
@@ -648,11 +691,13 @@ AIORET_TYPE AIOContinuousBufCallbackStartClocked( AIOContinuousBuf *buf )
   CalculateClocks( buf );
   /* if( ( retval  = AIOContinuousBufLoadCounters( buf, buf->divisora, buf->divisorb )) != AIOUSB_SUCCESS) */
   /*   goto out_AIOContinuousBufCallbackStartClocked; */
-  retval = AIOContinuousBufStart( buf ); /**< Fills up the buf buffer  */
-  if( retval != AIOUSB_SUCCESS )
-    goto out_AIOContinuousBufCallbackStartClocked;
+
 
   if( ( retval  = AIOContinuousBufLoadCounters( buf, buf->divisora, buf->divisorb )) != AIOUSB_SUCCESS)
+    goto out_AIOContinuousBufCallbackStartClocked;
+
+  retval = AIOContinuousBufStart( buf ); /**< Fills up the buf buffer  */
+  if( retval != AIOUSB_SUCCESS )
     goto cleanup_AIOContinuousBufCallbackStartClocked;
    
   /**
@@ -714,42 +759,7 @@ AIORET_TYPE AIOContinuousBufRead( AIOContinuousBuf *buf, AIOBufferType *readbuf 
 }
 
 
-/** 
- * @desc Determines the remaining space in the buffer for writing.
- * @param buf 
- * @return 
- * @note Total bytes that can be written into the buffer are N-1
- * @note
- *  - if the abs(_write_pos - read_pos ) = Size - 1 , then our value is 
- *  0 
- *  - if the abs( _write_pos - _read_pos ) = 0 , then our value is Size
- */
 
-unsigned write_size( AIOContinuousBuf *buf ) {
-  unsigned retval = 0;
-  unsigned read, write;
-  read = (unsigned )get_read_pos(buf);
-  write = (unsigned)get_write_pos(buf);
- if( read > write ) {
-   retval =  read - write;
- } else {
-   /* retval = write - read; */
-   return buffer_size(buf) - (get_write_pos (buf) - get_read_pos (buf));
- }
- return retval;
-}
-
-
-/** 
- * @desc Returns the amount of data available in the buffer
- * @param buf 
- * 
- * @return 
- */
-unsigned read_size( AIOContinuousBuf *buf ) 
-{
-  return ( buffer_size(buf) - write_size(buf) );
-}
 
 
 
@@ -1087,6 +1097,10 @@ void basic_functionality()
       tmp[j] = rand() % 1000;
     }
     retval = AIOContinuousBufWrite( buf, tmp , size , AIOCONTINUOUS_BUF_ALLORNONE  );
+    if( i == 0 ) {
+      printf("%s", ( AIOContinuousBufAvailableReadSize(buf) == 4999 ? "ok" : "not ok" ));
+      printf(" - Able to find available read space\n");
+    }
     if( i == 2 ) { 
       printf("%s", ( (int)retval != 0 ? "ok" : "not ok" ));
       printf(" - Correctly stops writing\n");
@@ -1311,15 +1325,14 @@ int main(int argc, char *argv[] )
 
   /* AIOContinuousBuf_SetDeviceIndex( buf, 0 ); */
   /* AIOContinuousBuf_SetCallback( buf , doit ); */
-  printf("1..93\n");
+  printf("1..94\n");
   basic_functionality();
   int bufsize = 10000;
-#if 0
+#if 1
   for( int i = bufsize; i > 1 ; i /= 2 ) {
     /* printf("Using i:%d\n",i); */
     stress_test_one( bufsize , bufsize - bufsize / i);
   }
-
 
   bufsize = 1000006;
   for( int i = bufsize; i > 1 ; i /= 2 ) {
@@ -1333,10 +1346,8 @@ int main(int argc, char *argv[] )
 #endif
   bufsize = 10000000;
   /* bulk_transfer_test( bufsize ); */
-  continuous_stress_test( bufsize );
-
-
-  
+  /* continuous_stress_test( bufsize ); */
+ 
 
 }
 

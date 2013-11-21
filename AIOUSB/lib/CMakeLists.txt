@@ -86,9 +86,6 @@ foreach( tmp_c_file ${tmp_aiousb_files} )
   add_custom_command( OUTPUT ${aiousbcppdbg_var} COMMAND ${CMAKE_COMMAND} -E copy_if_different ${tmp_c_file} ${aiousbcppdbg_var} )
 endforeach( tmp_c_file )
 
-# MESSAGE(STATUS "aiousbcppdbg_files: ${aiousbcppdbg_files}" )
-#MESSAGE(STATUS "aiousb_files: ${aiousb_files}" )
-
 add_custom_target( aiousb_copies DEPENDS ${aiousb_files} )
 add_custom_target( aiousbcpp_copies DEPENDS ${aiousbcpp_files} )
 add_custom_target( aiousbdbg_copies DEPENDS ${aiousbdbg_files} )
@@ -126,5 +123,6 @@ install( TARGETS aiousbcppdbg DESTINATION lib )
 install( FILES "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/AIOUSB_Core.h" 
   "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/AIOUSB_USB.h" 
   "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/aiousb.h"  
+  "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/AIOTypes.h"
   DESTINATION include 
 )

@@ -1,3 +1,12 @@
+/**
+ * @file   AIOTypes.h
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @release $Format: %t$
+ * @brief  
+ *
+ */
+
 #ifndef _AIOTYPES_H
 #define _AIOTYPES_H
 #define HAS_PTHREAD 1
@@ -76,6 +85,7 @@ void AIOContinuousBuf_SetDeviceIndex( AIOContinuousBuf *buf , unsigned long Devi
 AIORET_TYPE AIOContinuousBufCallbackStartClocked( AIOContinuousBuf *buf );
 unsigned int AIOContinuousBufGetReadPosition( AIOContinuousBuf *buf );
 unsigned int AIOContinuousBufGetWritePosition( AIOContinuousBuf *buf );
+unsigned int AIOContinuousBufAvailableReadSize( AIOContinuousBuf *buf );
 void AIOContinuousBufSetClock( AIOContinuousBuf *buf, unsigned int hz );
 AIORET_TYPE AIOContinuousBufEnd( AIOContinuousBuf *buf );
 AIORET_TYPE AIOContinuousBufSimpleSetupConfig( AIOContinuousBuf *buf, ADGainCode gainCode );
