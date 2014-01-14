@@ -111,7 +111,6 @@ add_dependencies( aiousbcppdbg aiousbcppdbg_copies )
 add_dependencies( aiousbdbg aiousbdbg_copies )
 
 
-
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Installation targets
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -120,9 +119,6 @@ install( TARGETS aiousb DESTINATION lib )
 install( TARGETS aiousbdbg DESTINATION lib )
 install( TARGETS aiousbcpp DESTINATION lib )
 install( TARGETS aiousbcppdbg DESTINATION lib )
-install( FILES "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/AIOUSB_Core.h" 
-  "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/AIOUSB_USB.h" 
-  "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/aiousb.h"  
-  "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/AIOTypes.h"
-  DESTINATION include 
-)
+install( FILES AIOUSB_Core.h AIOUSB_USB.h aiousb.h AIOTypes.h DESTINATION include )
+
+
