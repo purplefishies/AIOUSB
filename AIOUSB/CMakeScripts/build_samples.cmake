@@ -5,6 +5,7 @@ macro ( build_sample_c_file project c_file )
   ADD_EXECUTABLE( "${project}_${binary_name}" ${c_file} )
   SET_TARGET_PROPERTIES( "${project}_${binary_name}" PROPERTIES OUTPUT_NAME  ${binary_name} ) 
   TARGET_LINK_LIBRARIES( "${project}_${binary_name}" TestCaseSetup aiousb aiousbcpp)
+  INSTALL(TARGETS "${project}_${binary_name}" DESTINATION "share/accesio/${project}/" ) 
 endmacro ( build_sample_c_file) 
 
 macro ( build_sample_cpp_file project cpp_file )
@@ -13,6 +14,7 @@ macro ( build_sample_cpp_file project cpp_file )
   ADD_EXECUTABLE( "${project}_${binary_name}" ${cpp_file} )
   SET_TARGET_PROPERTIES( "${project}_${binary_name}" PROPERTIES OUTPUT_NAME  ${binary_name} ) 
   TARGET_LINK_LIBRARIES( "${project}_${binary_name}" TestCaseSetup aiousbdbg aiousbcppdbg classaiousbdbg)
+  INSTALL(TARGETS "${project}_${binary_name}" DESTINATION "share/accesio/${project}/" ) 
 endmacro ( build_sample_cpp_file )
 
 

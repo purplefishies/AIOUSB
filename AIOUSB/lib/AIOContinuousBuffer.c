@@ -322,7 +322,7 @@ AIORET_TYPE CalculateClocks( AIOContinuousBuf *buf )
           break;
         } 
         if( err < min_err  ) {
-          AIOUSB_LOG( "Found new error: using lv=%d", (int)lv);
+          AIOUSB_LOG( "Found new error: using lv=%d\n", (int)lv);
           divisorb = lv;
           min_err = err;
         }
@@ -829,7 +829,7 @@ AIORET_TYPE AIOContinuousBufWrite( AIOContinuousBuf *buf, AIOBufferType *writebu
  */
 AIORET_TYPE AIOContinuousBufLock( AIOContinuousBuf *buf )
 {
-  AIORET_TYPE retval;
+  AIORET_TYPE retval = 0;
 #ifdef HAS_PTHREAD
   retval = pthread_mutex_lock( &buf->lock );
   /* retval = pthread_mutex_lock( &lock ); */
@@ -841,12 +841,13 @@ AIORET_TYPE AIOContinuousBufLock( AIOContinuousBuf *buf )
 }
 AIORET_TYPE AIOContinuousBufUnlock( AIOContinuousBuf *buf )
 {
-  int retval;
+  int retval = 0;
+  /* int retval = 0; */
 #ifdef HAS_PTHREAD
   retval = pthread_mutex_unlock( &buf->lock );
   /* retval = pthread_mutex_unlock( &lock ); */
   if ( retval !=  0 ) {
-    retval = -retval;
+    retval = -retval; 
     AIOUSB_ERROR("Unable to unlock mutex");
   }
 #endif
