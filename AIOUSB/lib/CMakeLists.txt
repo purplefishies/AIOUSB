@@ -112,6 +112,34 @@ add_dependencies( aiousbdbg aiousbdbg_copies )
 
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# Testing targets
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#gcc -O0   -g  -I. -DAIOUSB_DEBUG_LOG \
+#                  -DAIO_DEBUG \
+#                  -DTAP_TEST \
+#                  -DHAS_PTHREAD \
+#                  -DSELF_TEST \
+#                  -std=gnu99 -g -o thread_test AIOContinuousBuffer.c \
+#                  libaiousbdbg.a -lpthread -lusb-1.0 -lm
+INCLUDE( build_samples )
+
+
+set(SELF_TEST_ENTRIES AIOContinuousBuffer.c )
+foreach( selftest_file ${SELF_TEST_ENTRIES} )
+  set(MY_FLAGS "-DAIOUSB_DEBUG_LOG -DAIO_DEBUG -DTAP_TEST -DHAS_PTHREAD -DSELF_TEST" )
+  set(MY_LIBRARIES aiousbdbg pthread usb-1.0 m )
+
+  # macro ( build_selftest_c_file project c_file  cflags link_libraries )
+  build_selftest_c_file( aiousblibs ${selftest_file} ${MY_FLAGS} ${MY_LIBRARIES} )
+endforeach( selftest_file ${SELF_TEST_ENTRIES}  )
+
+#ADD_EXECUTABLE( "${project}_${binary_name}" ${cpp_file} )
+#SET_TARGET_PROPERTIES( "${project}_${binary_name}" PROPERTIES OUTPUT_NAME  ${binary_name} ) 
+#TARGET_LINK_LIBRARIES( "${project}_${binary_name}" TestCaseSetup aiousbdbg aiousbcppdbg classaiousbdbg)
+
+
+
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Installation targets
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 

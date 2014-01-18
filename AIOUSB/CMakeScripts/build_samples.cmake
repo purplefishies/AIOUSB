@@ -18,6 +18,16 @@ macro ( build_sample_cpp_file project cpp_file )
 endmacro ( build_sample_cpp_file )
 
 
+macro ( build_selftest_c_file project c_file  cflags link_libraries )
+  GET_FILENAME_COMPONENT( tmp_c_file ${c_file} NAME )
+  STRING(REGEX REPLACE "\\.c$" "_test" binary_name ${tmp_c_file})
+  ADD_EXECUTABLE( "${project}_${binary_name}" ${c_file} )
+  LINK_DIRECTORIES( ${AIOUSB_INCLUDE_DIR} )
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -gstabs -ggdb -std=gnu99 ${cflags}"  )
+  SET_TARGET_PROPERTIES( "${project}_${binary_name}" PROPERTIES OUTPUT_NAME  ${binary_name} ) 
+  TARGET_LINK_LIBRARIES( "${project}_${binary_name}" ${link_libraries} )
+endmacro ( build_selftest_c_file )
+
 macro ( build_all_samples project ) 
   file( GLOB C_FILES ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/*.c" )
   file( GLOB CXX_FILES ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp" )
