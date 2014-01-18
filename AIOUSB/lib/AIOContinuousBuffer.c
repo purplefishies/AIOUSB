@@ -738,7 +738,7 @@ AIORET_TYPE AIOContinuousBufRead( AIOContinuousBuf *buf, AIOBufferType *readbuf 
     basic_copy = MIN(size, get_write_pos(buf) - get_read_pos( buf ));
     wrap_copy  = 0;
   } else {
-    basic_copy = MIN(size, buffer_max(buf) - get_read_pos(buf));
+    basic_copy = MIN(size, buffer_size(buf) - get_read_pos(buf));
     wrap_copy  = MIN(size - basic_copy, get_write_pos(buf) );
   }
   /* Now copy the data into readbuf */
@@ -748,10 +748,10 @@ AIORET_TYPE AIOContinuousBufRead( AIOContinuousBuf *buf, AIOBufferType *readbuf 
   
   if( wrap_copy ) {
     retval = basic_copy + wrap_copy;
-    set_read_pos( buf, ( get_read_pos(buf) + retval) % buffer_max(buf) );
+    set_read_pos( buf, ( get_read_pos(buf) + retval) % buffer_size(buf) );
   } else {
     retval = basic_copy;
-    set_read_pos( buf , ( get_read_pos(buf) + retval) );
+    set_read_pos( buf , ( get_read_pos(buf) + retval) % buffer_size(buf) );
   }
 
   AIOContinuousBufUnlock( buf );
@@ -1021,6 +1021,7 @@ void *channel16_doit( void *object )
     fill_buffer( tmp, size );
     AIOUSB_DEVEL("\tLooping spinning wheels\n"); 
     retval = AIOContinuousBufWrite( buf, tmp, size , AIOCONTINUOUS_BUF_ALLORNONE );
+    usleep(rand()%100);
     if( retval >= 0 && retval != size ) {
       AIOUSB_ERROR("Error writing. Wrote bytes of size=%d but should have written=%d\n", (int)retval, size );
       AIOUSB_ERROR("read_pos=%d, write_pos=%d\n", get_read_pos(buf), get_write_pos(buf));
@@ -1054,7 +1055,7 @@ stress_test_one( int size , int readbuf_size )
   printf("Ran threaded collection with readbuf_size=%d\n",readbuf_size);
   for(int i = 0 ; i < 500; i ++ ) {
     retval = AIOContinuousBufRead( buf,  readbuf, readbuf_size );
-    usleep(100);
+    usleep(rand() % 100);
     AIOUSB_DEVEL("Read number of bytes=%d\n",(int)retval );
   }
   AIOContinuousBufEnd( buf );
@@ -1168,7 +1169,7 @@ void stress_test_read_channels( int bufsize, int keysize  )
   for ( int i = 0; i < 2000; i ++ ) {
     retval = AIOContinuousBufRead( buf, tmp, mybufsize );
     AIOUSB_DEVEL("Read %d bytes\n", (int)retval );
-    usleep(10);
+    usleep(rand()%100);
     if ( retval < AIOUSB_SUCCESS )
       goto out_stress_test_read_channels;
   }
@@ -1184,7 +1185,9 @@ void stress_test_read_channels( int bufsize, int keysize  )
 
 out_stress_test_read_channels:
   
-  printf("%s - was able to read for keysize %d\n", (retval == AIOUSB_SUCCESS ? "ok" : "not ok" ), keysize);
+  /* printf("%s - was able to read for keysize %d\n", (retval == AIOUSB_SUCCESS ? "ok" : "not ok" ), keysize); */
+  printf("%s - was able to read for keysize %d: %d\n", (retval == AIOUSB_SUCCESS ? "ok" : "not ok" ), keysize, (int)retval);
+
   free(tmp);
   DeleteAIOContinuousBuf( buf );
 }
@@ -1326,10 +1329,11 @@ int main(int argc, char *argv[] )
 
   /* AIOContinuousBuf_SetDeviceIndex( buf, 0 ); */
   /* AIOContinuousBuf_SetCallback( buf , doit ); */
+
   printf("1..94\n");
-  basic_functionality();
   int bufsize = 10000;
 #if 1
+  basic_functionality();
   for( int i = bufsize; i > 1 ; i /= 2 ) {
     /* printf("Using i:%d\n",i); */
     stress_test_one( bufsize , bufsize - bufsize / i);
@@ -1340,11 +1344,12 @@ int main(int argc, char *argv[] )
     stress_test_one( bufsize , bufsize - bufsize / i);
   }
 
-  bufsize = 2000000;
-  for ( int i = 1 , j = 2; i < 20 ; j*=2 , i += 1) {
+  bufsize = 20000;
+#endif
+  for ( int i = 1 , j = 1; i < 20 ; j*=2 , i += 1) {
     stress_test_read_channels( bufsize, j );
   }
-#endif
+
   bufsize = 10000000;
   /* bulk_transfer_test( bufsize ); */
   /* continuous_stress_test( bufsize ); */
@@ -1352,23 +1357,4 @@ int main(int argc, char *argv[] )
 
 }
 
-
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
