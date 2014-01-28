@@ -49,31 +49,45 @@ TEST_DIR	:=	test_dir
 LITTLER		:= r
 R		:= R
 
+# ruby php java octave
+all:
+	for i in perl python ruby php octave; do \
+		cd $${i} && $(MAKE) -f GNUMakefile $${i}_test && cd - ;\
+	done
 
 clean:
-	for i in perl python ruby java php octave;  \
-	do \
-		cd $${i} && $(MAKE) -f GNUMakefile $${i}_cleanup && cd -; \
+	for i in perl python ruby php java octave R; do \
+		cd $$i && $(MAKE) -f GNUMakefile $${i}_cleanup && cd -; \
 	done
 
 all_test:
-	for i in perl python ruby java php octave;  \
-	do \
-		cd $${i} && $(MAKE) -f GNUMakefile $${i}_test; \
-		$(MAKE) -f GNUMakefile $${i}_cleanup ;\
+	for i in perl python ruby php java octave; do \
+		cd $$i && $(MAKE)	-f GNUMakefile $${i}_test && cd - ;\
 	done
-
-
-all:
-	$(MAKE)	-f GNUMakefile perl_install
-	$(MAKE) -f GNUMakefile python_install
-	$(MAKE) -f GNUMakefile ruby_install
 
 precheck:
 
 
 $(TEST_DIR):
 	mkdir -p $(TEST_DIR)
+
+inplace_perl:
+	cd perl && make -f GNUMakefile perl_test
+inplace_python:
+	cd python && make -f GNUMakefile python_test
+inplace_ruby:
+	cd ruby && make -f GNUMakefile ruby_test
+inplace_java:
+	cd java && make -f GNUMakefile java_test
+inplace_R:
+	cd R && make -f GNUMakefile R_test
+inplace_php:
+	cd php && make -f GNUMakefile php_test
+inplace_octave:
+	cd octave && make -f GNUMakefile octave_test
+
+
+
 
 
 perl:
@@ -87,7 +101,7 @@ $(PERL_BUILT): perl
 
 
 perl_test:	$(PERL_BUILT) $(TEST_DIR)
-	@perl -I../blib/arch/ -MAIOUSB -e 'AIOUSB::AIOUSB_Init(); AIOUSB::AIOUSB_ListDevices()'
+	@perl -I./blib/arch/ -MAIOUSB -e 'AIOUSB::AIOUSB_Init(); AIOUSB::AIOUSB_ListDevices()'
 
 perl_cleanup:
 	@echo "Cleaning Perl"
@@ -114,12 +128,13 @@ $(PYTHON_BUILT): python
 
 
 python_test: $(PYTHON_BUILT) $(TEST_DIR)
-	@cd $(TEST_DIR) && PYTHONPATH=$${PWD}/../build/lib.linux-x86_64-2.7 python -c 'import AIOUSB; AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices()'
+	PYTHONPATH=$${PWD}/build/lib.linux-i686-2.7 python -c 'import AIOUSB; AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices()'
 
 
 python_cleanup:
 	$(RM) -f AIOUSB_wrap.c AIOUSB.py $(PYTHON_BUILT)
 	$(RM) -rf build 
+	$(RM) -rf *.pyc
 
 python_install: python
 	$(PYTHON) setup.py install --prefix=$(PYTHON_PREFIX)
@@ -134,7 +149,7 @@ python_atest:
 #
 ruby:
 	@if [ ! -f $(RUBY_BUILT) ] ; then \
-		$(SWIG) -I../ -ruby AIOUSB.i 2>&1; \
+		$(SWIG) -I../../ -ruby AIOUSB.i 2>&1; \
 		$(RUBY) extconf.rb --with-ldflags="$(RUBY_LDFLAGS)" --with-name-include="$(RUBY_INCLUDES)" 2>&1 ; \
 		$(MAKE) -f Makefile 2>&1;\
 		fi
@@ -166,9 +181,9 @@ ruby_atest:
 
 php:
 	@if [ ! -f $(PHP_BUILT) ] ; then \
-		$(SWIG) -I$$AIO_LIB_DIR -php AIOUSB.i 2>&1 ; \
-		$(CC) -I. -I$$AIO_LIB_DIR  $$(php-config --includes) -fpic -c AIOUSB_wrap.c 2>&1 ; \
-		$(CC) -shared AIOUSB_wrap.o -o AIOUSB.so  -L$${AIOUSB_ROOT}/lib -L$${AIOUSB_ROOT}/classlib -laiousb 2>&1;\
+		$(SWIG) -I../..// -php AIOUSB.i 2>&1 ; \
+		$(CC) -I. -I../../  $$(php-config --includes) -fpic -c AIOUSB_wrap.c 2>&1 ; \
+		$(CC) -shared AIOUSB_wrap.o -o AIOUSB.so  -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -laiousb 2>&1;\
 		fi
 	@touch $(PHP_BUILT);
 
@@ -176,10 +191,10 @@ $(PHP_BUILT): php
 
 
 php_test: $(PHP_BUILT) $(TEST_DIR)
-	@php -c $$PWD -r 'AIOUSB_Init(); AIOUSB_ListDevices();' 2>&1
+	@php -c $$PWD/.. -r 'AIOUSB_Init(); AIOUSB_ListDevices();' 2>&1
 
 php_cleanup:
-	$(RM) -f AIOUSB.php AIOUSB_wrap.o AIOUSB.so php_AIOUSB.h $(PHP_BUILT)
+	$(RM) -f AIOUSB.php AIOUSB_wrap.* AIOUSB.so php_AIOUSB.h $(PHP_BUILT)
 
 php_atest:
 	@$(MAKE) -f GNUMakefile php 2>&1 > /dev/null
@@ -191,13 +206,13 @@ php_atest:
 #
 octave:
 	@if [ ! -f $(OCTAVE_BUILT) ] ; then \
-		$(SWIG) -I$$AIO_LIB_DIR -octave -o AIOUSB_wrap.cpp AIOUSB.i 2>&1 ; \
-		mkoctfile -o AIOUSB.oct  -I.. AIOUSB_wrap.cpp -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -laiousb 2>&1; \
+		$(SWIG) -I../../ -octave -o AIOUSB_wrap.cpp AIOUSB.i 2>&1 ; \
+		mkoctfile -o AIOUSB.oct  -I../../ AIOUSB_wrap.cpp -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -laiousb 2>&1; \
 		touch $(OCTAVE_BUILT); fi
 
 $(OCTAVE_BUILT): octave
 
-octave_test:
+octave_test: $(OCTAVE_BUILT)
 	@octave -q  --eval "AIOUSB; AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices();"
 
 
@@ -221,10 +236,10 @@ $(JAVA_DIR):
 
 java: 	$(JAVA_DIR)
 	@if [ ! -f $(JAVA_BUILT) ] ; then \
-		$(SWIG) -I$$AIO_LIB_DIR -java -package com.accesio -outdir $(JAVA_DIR) AIOUSB.i 2>&1; \
-		$(CC) -fPIC -I$$AIO_LIB_DIR  -I/usr/include/libusb-1.0 -I/usr/lib/jvm/java-7-openjdk-amd64/include -L$${AIOUSB_ROOT}/lib -L$${AIOUSB_ROOT}/classlib -c AIOUSB_wrap.c 2>&1 ; \
-		$(CC)  -shared -I$$AIO_LIB_DIR  -I/usr/lib/jvm/java-7-openjdk-amd64/include ./AIOUSB_wrap.o -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib   -lusb-1.0 -lpthread -laiousbdbg  -laiousbcppdbg  -o libAIOUSB.so 2>&1 ; \
-		cd tests && javac -classpath "$$(pwd):$$(pwd)/../" test.java 2>&1; \
+		$(SWIG) -I../../ -java -package com.accesio -outdir $(JAVA_DIR) AIOUSB.i 2>&1; \
+		$(CC) -fPIC -I../..  -I/usr/include/libusb-1.0 -I/usr/lib/jvm/java-7-openjdk-amd64/include -L$${AIOUSB_ROOT}/lib -L$${AIOUSB_ROOT}/classlib -c AIOUSB_wrap.c 2>&1 ; \
+		$(CC)  -shared -I../..  -I/usr/lib/jvm/java-7-openjdk-amd64/include ./AIOUSB_wrap.o -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib   -lusb-1.0 -lpthread -laiousbdbg  -laiousbcppdbg  -o libAIOUSB.so 2>&1 ; \
+		cd tests && javac -classpath "$$(pwd):$$(pwd)/./:$$(pwd)/../" test.java 2>&1; \
 		if [ ! -d /tmp/scala-devel ] ; then mkdir /tmp/scala-devel; chmod 777 /tmp/scala-devel; fi \
 		fi
 	@jar cf AIOUSB.jar libAIOUSB.so com/accesio/*.class
@@ -250,14 +265,14 @@ java_atest:
 
 
 #
-# PHP
+# R
 #
 
 
 R:
 	@if [ ! -f $(R_BUILT) ] ; then \
-		$(SWIG) -I$$AIO_LIB_DIR -r AIOUSB.i 2>&1 ; \
-		 export PKG_CFLAGS="-I$$AIO_LIB_DIR" ; \
+		$(SWIG) -I../../ -r AIOUSB.i 2>&1 ; \
+		 export PKG_CFLAGS="-I../../" ; \
 		R CMD SHLIB -o AIOUSB.so AIOUSB_wrap.c -L$${AIO_LIB_DIR} -laiousb -lusb-1.0 2>&1; \
 		fi
 	@touch $(R_BUILT);
