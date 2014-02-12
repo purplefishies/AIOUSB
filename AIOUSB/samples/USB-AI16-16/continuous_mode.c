@@ -11,8 +11,7 @@ main(int argc, char *argv[] )
   int bufsize = 100000;
   int number_channels = 16;
   AIOContinuousBuf *buf = 0;
-  AIOChannelMask *channels = NewAIOChannelMask( number_channels );
-  buf = (AIOContinuousBuf *)NewAIOContinuousBuf( bufsize , channels );
+  buf = (AIOContinuousBuf *)NewAIOContinuousBuf( bufsize , number_channels );
   int tmpsize = pow(512,(double)ceil( ((double)log((double)(bufsize/1000))) / log(16)));
   int keepgoing = 1;
   AIORET_TYPE retval;

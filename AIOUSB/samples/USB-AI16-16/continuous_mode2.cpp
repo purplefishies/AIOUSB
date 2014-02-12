@@ -15,7 +15,7 @@ main(int argc, char *argv[] )
 {
   int bufsize = 10000000;
   
-  AIOContinuousBuf *buf = NewAIOContinuousBuf( bufsize , NewAIOChannelMask(16) );
+  AIOContinuousBuf *buf = NewAIOContinuousBuf( bufsize , 16 );
   unsigned tmpsize = 2048;
   int keepgoing = 1;
   AIORET_TYPE retval;
