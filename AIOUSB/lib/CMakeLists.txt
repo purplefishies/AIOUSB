@@ -122,8 +122,8 @@ add_dependencies( aiousbdbg aiousbdbg_copies )
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 INCLUDE( build_samples )
 
-# set(SELF_TEST_ENTRIES AIOContinuousBuffer.c AIOChannelMask.c )
-set(SELF_TEST_ENTRIES AIOContinuousBuffer.c )
+set(SELF_TEST_ENTRIES AIOContinuousBuffer.c AIOChannelMask.c )
+# set(SELF_TEST_ENTRIES AIOContinuousBuffer.c )
 foreach( selftest_file ${SELF_TEST_ENTRIES} )
   set(MY_FLAGS "-DAIOUSB_DEBUG_LOG -DAIO_DEBUG -DTAP_TEST -DHAS_PTHREAD -DSELF_TEST" )
   set(MY_LIBRARIES aiousbdbg usb-1.0 pthread m )
