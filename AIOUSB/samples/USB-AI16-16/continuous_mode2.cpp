@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <math.h>
-#include <AIOTypes.h>
+#include <AIODataTypes.h>
+
 
 using namespace AIOUSB;
 using namespace std;
@@ -13,8 +14,9 @@ int
 main(int argc, char *argv[] ) 
 {
   int bufsize = 10000000;
-  AIOContinuousBuf *buf = NewAIOContinuousBuf( bufsize );
-  int tmpsize = 2048;
+  
+  AIOContinuousBuf *buf = NewAIOContinuousBuf( bufsize , NewAIOChannelMask(16) );
+  unsigned tmpsize = 2048;
   int keepgoing = 1;
   AIORET_TYPE retval;
   AIOBufferType *tmpbuf = (AIOBufferType *)malloc(sizeof(AIOBufferType *)*tmpsize);
@@ -64,7 +66,7 @@ main(int argc, char *argv[] )
    *    performs the acquistion, while you go about 
    *    doing other things.
    */ 
-  AIOContinuousBufCallbackStartClocked( buf );
+  AIOContinuousBufCallbackStart( buf );
 
   printf("Using tmpsize: %d\n",tmpsize);
   while ( keepgoing ) {

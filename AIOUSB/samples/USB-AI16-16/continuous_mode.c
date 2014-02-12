@@ -3,13 +3,16 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <math.h>
-#include <AIOTypes.h>
+#include <AIODataTypes.h>
 
 int 
 main(int argc, char *argv[] ) 
 {
   int bufsize = 100000;
-  AIOContinuousBuf *buf = NewAIOContinuousBuf( bufsize );
+  int number_channels = 16;
+  AIOContinuousBuf *buf = 0;
+  AIOChannelMask *channels = NewAIOChannelMask( number_channels );
+  buf = (AIOContinuousBuf *)NewAIOContinuousBuf( bufsize , channels );
   int tmpsize = pow(512,(double)ceil( ((double)log((double)(bufsize/1000))) / log(16)));
   int keepgoing = 1;
   AIORET_TYPE retval;
@@ -53,7 +56,7 @@ main(int argc, char *argv[] )
    *    performs the acquistion, while you go about 
    *    doing other things.
    */ 
-  AIOContinuousBufCallbackStartClocked( buf );
+  AIOContinuousBufCallbackStart( buf );
 
   while ( keepgoing ) {
     /**
@@ -67,10 +70,6 @@ main(int argc, char *argv[] )
            AIOContinuousBufGetWritePosition(buf)
            );
 
-    /* if( retval < AIOUSB_SUCCESS ) { */
-    /*   printf("Error found reading: ...exiting\n"); */
-    /*   break; */
-    /* } */
     if( AIOContinuousBufGetWritePosition(buf) > tmpsize ) {
       keepgoing = 0;
       AIOContinuousBufEnd( buf );

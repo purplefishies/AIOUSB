@@ -1162,6 +1162,7 @@ unsigned long QueryDeviceInfo(
 
 
 
+
 unsigned long ClearDevices(void)
 {
     if(!AIOUSB_Lock())
