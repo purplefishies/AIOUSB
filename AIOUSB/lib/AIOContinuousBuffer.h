@@ -38,14 +38,16 @@ typedef struct {
   unsigned size;
   unsigned counter_control;
   unsigned timeout;
+  AIOChannelMask *mask;
   volatile enum THREAD_STATUS status;  /* Are we running, paused ..etc; */
 } AIOContinuousBuf;
 
-AIOContinuousBuf *NewAIOContinuousBuf( int bufsize, AIOChannelMask *mask );
+AIOContinuousBuf *NewAIOContinuousBuf( int bufsize, unsigned number_channels );
 void DeleteAIOContinuousBuf( AIOContinuousBuf *buf );
 AIORET_TYPE AIOContinuousBufLock( AIOContinuousBuf *buf );
 AIORET_TYPE AIOContinuousBufUnlock( AIOContinuousBuf *buf );
 unsigned long AIOContinuousBuf_GetDeviceIndex( AIOContinuousBuf *buf );
+AIORET_TYPE AIOContinuousBuf_SetChannelMask( AIOContinuousBuf *buf, AIOChannelMask *mask );
 void AIOContinuousBuf_SetDeviceIndex( AIOContinuousBuf *buf , unsigned long DeviceIndex );
 AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf );
 unsigned int AIOContinuousBufGetReadPosition( AIOContinuousBuf *buf );

@@ -43,10 +43,9 @@ void  DeleteAIOChannelMask( AIOChannelMask *mask )
  */
 AIORET_TYPE AIOChannelMask_SetMaskFromInt( AIOChannelMask *obj, unsigned field , unsigned index )
 {
-  int i;
+  unsigned i;
   AIORET_TYPE ret = AIOUSB_SUCCESS;  
   int curindex = (index ) * sizeof(field) / sizeof(aio_channel_obj);
-  int sizemismatch = sizeof(aio_channel_obj) / sizeof(field);
   int shift_val = index % ( sizeof(aio_channel_obj) / sizeof(field) );
   int total_shift = (shift_val * sizeof(field)*8);
   aio_channel_obj mask = (((aio_channel_obj)-1) & ~((  (aio_channel_obj)((unsigned)-1) << total_shift )));
@@ -66,9 +65,9 @@ AIORET_TYPE AIOChannelMask_SetMaskFromInt( AIOChannelMask *obj, unsigned field ,
  * @desc
  * @param channels
  **/
-unsigned AIOChannelMask_NumberChannels( AIOChannelMask *obj )
+AIORET_TYPE AIOChannelMask_NumberChannels( AIOChannelMask *obj )
 {
-  return obj->active_signals;
+  return (AIORET_TYPE)obj->active_signals;
 }
 
 
@@ -84,7 +83,7 @@ AIORET_TYPE AIOChannelMask_SetMask( AIOChannelMask *obj, const char *bitfields )
   assert( strlen(bitfields) == obj->number_signals );
 
   AIORET_TYPE ret = AIOUSB_SUCCESS;
-  int j;
+  unsigned j;
   aio_channel_obj tmpval = 0;
   int index = 0;
   for( i = strlen(bitfields) ; i > 0 ; i -- ) {
@@ -126,12 +125,12 @@ AIOChannelMask *NewAIOChannelMaskFromStr( const char *bitfields )
 AIORET_TYPE AIOChannelMask_SetMaskWithIndex( AIOChannelMask *obj, const char *bitfields , unsigned index )
 {
   assert(0);
+  return (AIORET_TYPE)-1;
 }
 
-unsigned AIOChannelMask_GetMaskWithIndex( AIOChannelMask *obj, unsigned index )
+AIORET_TYPE AIOChannelMask_GetMaskWithIndex( AIOChannelMask *obj, unsigned index )
 {
-  int i;
-  unsigned retvalue;
+  unsigned retvalue = -1;
   return retvalue;
 }
 
@@ -144,7 +143,7 @@ const char * AIOChannelMask_GetMask( AIOChannelMask *obj, unsigned index )
 {
   static char retval[BIT_LENGTH(aio_channel_obj)+1];
   memset(retval,'\0',BIT_LENGTH(aio_channel_obj)+1 );
-  int i;
+  unsigned i;
   /* for ( i = 0 ; i <  BIT_LENGTH( aio_channel_obj ) ; i ++ ) { */
   for ( i = 0 ; i <  obj->number_signals ; i ++ ) {
     /* int j = (BIT_LENGTH(aio_channel_obj) - i - 1 ); */

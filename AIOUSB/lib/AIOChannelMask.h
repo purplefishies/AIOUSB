@@ -22,8 +22,8 @@ typedef struct {
 AIOChannelMask *NewAIOChannelMask( unsigned int size );
 AIOChannelMask *NewAIOChannelMaskFromStr( const char *bitfields );
 const char * AIOChannelMask_GetMask( AIOChannelMask *obj, unsigned index );
-unsigned AIOChannelMask_NumberChannels( AIOChannelMask *obj );
-unsigned AIOChannelMask_GetMaskWithIndex( AIOChannelMask *obj, unsigned index );
+AIORET_TYPE AIOChannelMask_NumberChannels( AIOChannelMask *obj );
+AIORET_TYPE AIOChannelMask_GetMaskWithIndex( AIOChannelMask *obj, unsigned index );
 
 
 

@@ -72,11 +72,12 @@ static FILE *outfile = NULL;
 #endif
 
 
-AIOContinuousBuf *NewAIOContinuousBuf( int bufsize , AIOChannelMask *channels )
+AIOContinuousBuf *NewAIOContinuousBuf( int bufsize , unsigned num_channels )
 {
-  /* assert( number_of_channels != NULL ); */
+  assert( num_channels > 0 );
   AIOContinuousBuf *tmp  = (AIOContinuousBuf *)malloc(sizeof(AIOContinuousBuf));
-  tmp->size        = AIOChannelMask_NumberChannels( channels ) * bufsize;
+  /* tmp->size        = AIOChannelMask_NumberNum_Channels( num_channels ) * bufsize; */
+  tmp->size        = num_channels * bufsize;
   tmp->buffer      = (AIOBufferType *)malloc( tmp->size *sizeof(AIOBufferType ));
   tmp->_read_pos   = 0;
   tmp->_write_pos  = 0;
@@ -337,46 +338,16 @@ AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf )
 }
 
 
-
 /** 
- * 
+ * @desc Sets the channel mask
  * @param buf 
- * @param tmpbuf 
- * @param bufsize 
- * @return Success if >= 0, else error value
+ * @param mask 
+ * @return 
  */
-AIORET_TYPE
-AIOContinuousBufBulkTransfer( AIOContinuousBuf *buf ,  AIOBufferType *tmpbuf , unsigned bufsize  )
+AIORET_TYPE AIOContinuousBuf_SetChannelMask( AIOContinuousBuf *buf, AIOChannelMask *mask )
 {
-  AIORET_TYPE retval = 0; 
- /*  int transferred = 0; */
- /*  int usbresult; */
- /*  unsigned long result; */
- /*  unsigned wLength = 512; */
- /*  unsigned bytes = 0; */
- /*  unsigned char data[512]; */
- /*  libusb_device_handle *deviceHandle; */
-  
- /*  DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock( AIOContinuousBuf_GetDeviceIndex(buf), &result); */
- /*  if(!deviceDesc || result != AIOUSB_SUCCESS) */
- /*    return -result; */
- /*  deviceHandle = AIOUSB_GetDeviceHandle(  AIOContinuousBuf_GetDeviceIndex( buf )); */
- /*  AIOUSB_UnLock( ); */
- /*  unsigned timeout = 7000; */
-  
- /*  if( ! deviceHandle ) { */
- /*    retval = -AIOUSB_ERROR_DEVICE_NOT_CONNECTED; */
- /*    goto out_AIOContinuousBufBulkTransfer; */
- /*  } */
-                                                                
- /*  /\* libusb_bulk_transfer( deviceHandle, LIBUSB_ENDPOINT_IN | USB_BULK_READ_ENDPOINT, &data[0], wLength, &bytes, timeout ); *\/ */
-
-
- /*  AIOUSB_DEVEL("Completed Bulk acquire %d bytes\n", bytes  ); */
- /*  retval = bytes; */
-
- /* out_AIOContinuousBufBulkTransfer: */
-  return retval;
+  buf->mask = mask;
+  return 0;
 }
 
 
