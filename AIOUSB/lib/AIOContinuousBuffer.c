@@ -988,7 +988,7 @@ stress_test_one( int size , int readbuf_size )
 
 void basic_functionality()
 {
-  AIOContinuousBuf *buf = NewAIOContinuousBuf( 10000 , 16 );
+  AIOContinuousBuf *buf = NewAIOContinuousBuf( 4000 , 16 );
   int tmpsize = 80000;
   AIOBufferType *tmp = (AIOBufferType *)malloc(tmpsize*sizeof(AIOBufferType ));
   AIORET_TYPE retval;
@@ -998,8 +998,6 @@ void basic_functionality()
   retval = AIOContinuousBufWrite( buf, tmp , tmpsize , AIOCONTINUOUS_BUF_ALLORNONE  );
   printf("%s", ( (int)retval == -AIOUSB_ERROR_NOT_ENOUGH_MEMORY ? "ok" : "not ok" ));
   printf(" - Able to perform first write, count is %d \n", (int)retval );
-
-
   
   free(tmp);
   
