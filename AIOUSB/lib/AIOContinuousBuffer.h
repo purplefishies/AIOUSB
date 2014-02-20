@@ -29,7 +29,7 @@ typedef struct {
   pthread_attr_t tattr;
 #endif
   AIOUSB_WorkFn work;
-  unsigned long DeviceIndex;
+  long DeviceIndex;
   AIOBufferType *buffer;
   unsigned hz;
   unsigned divisora;
@@ -38,8 +38,9 @@ typedef struct {
   unsigned size;
   unsigned counter_control;
   unsigned timeout;
-  AIOChannelMask *mask;
-  volatile enum THREAD_STATUS status;  /* Are we running, paused ..etc; */
+  unsigned extra;                     /**< Keeps track of under writes */
+  AIOChannelMask *mask;               /**< Used for keeping track of channels */
+  volatile enum THREAD_STATUS status; /* Are we running, paused ..etc; */
 } AIOContinuousBuf;
 
 AIOContinuousBuf *NewAIOContinuousBuf( int bufsize, unsigned number_channels );

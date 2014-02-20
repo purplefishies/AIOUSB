@@ -171,22 +171,23 @@ static const char VERSION_DATE[] = "$Format: %ad$";
 
 
 /*
- * o Our mutual exclusion scheme is not intended to be bulletproof. It's primarily intended
+ * Notes on mutual exclusion / threading:
+ * - Our mutual exclusion scheme is _not_ intended to be bulletproof. It's primarily intended
  *   to ensure mutually exclusive access to deviceTable[] and other global variables. It does
  *   NOT ensure mutually exclusive access to the USB bus. In fact, we want to permit threads
  *   to communicate with multiple devices simultaneously, to the extent possible with USB.
  *
- * o Nor does this scheme prevent multiple threads from altering the configuration of the same
+ * - Nor does this scheme prevent multiple threads from altering the configuration of the same
  *   device or communicating with the same device. In other words, it's entirely possible for
  *   one thread to configure and communicate with a device, only to have another thread come
  *   along and to the same. It's up to the users of this library to ensure that such a scenario
  *   doesn't occur.
  *
- * o This library does seek to permit one thread to control one device, and another thread to
+ * - This library does seek to permit one thread to control one device, and another thread to
  *   control another device. Each thread may then safely communicate with its own device and
  *   alter the portion of deviceTable[] that pertains to its device.
  *
- * o Our mutual exclusion scheme also permits two threads to cooperate in the operation of a
+ * - Our mutual exclusion scheme also permits two threads to cooperate in the operation of a
  *   single device, such as in cases where a background thread does the actual work and the
  *   foreground thread monitors the progress. In such a case, the background thread might update
  *   a status variable which the foreground thread monitors. This form of resource sharing is
@@ -213,21 +214,7 @@ PRIVATE AIOUSB_BOOL AIOUSB_UnLock()
 #endif
 }
 
-
-
-
-/* DeviceDescriptor *AIOUSB_GetDevice_Lock( unsigned long DeviceIndex , unsigned long *result) */
-/* { */
-/*      *result = AIOUSB_Validate( &DeviceIndex ); */
-/*     if( result != AIOUSB_SUCCESS ) { */
-/*      AIOUSB_UnLock(); */
-/*      return NULL; */
-/*     } */
-/*     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ]; */
-/*      return &deviceTable[ DeviceIndex ]; */
-/* } */
-
-
+ 
  PRIVATE unsigned long AIOUSB_Validate_Lock(unsigned long *DeviceIndex)
  {
      unsigned long result;
@@ -974,9 +961,6 @@ PRIVATE struct libusb_device_handle *
 AIOUSB_GetDeviceHandle(unsigned long DeviceIndex)
 {
     libusb_device_handle *deviceHandle = NULL;
-
-    if(!AIOUSB_Lock())
-        return deviceHandle;
 
     if(AIOUSB_Validate(&DeviceIndex) != AIOUSB_SUCCESS) {
           AIOUSB_UnLock();

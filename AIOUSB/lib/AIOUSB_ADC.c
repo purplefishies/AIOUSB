@@ -107,7 +107,7 @@ ReadConfigBlock(unsigned long DeviceIndex,
     DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
     if(!deviceDesc || result != AIOUSB_SUCCESS)
         return result;
-
+    AIOUSB_UnLock();
     if(forceRead || deviceDesc->cachedConfigBlock.size == 0) {
           libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
           if(deviceHandle != NULL) {

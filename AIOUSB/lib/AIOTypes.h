@@ -44,11 +44,14 @@ CREATE_ENUM_W_START( AIOContinuousBufMode, 0 ,
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #endif
 
-
 #define AUR_CBUF_SETUP  0x01000007
 #define AUR_CBUF_EXIT   0x00020002
 
 #define NUMBER_CHANNELS 16
+
+/**< Simple macro for iterating over objects */
+#define foreach_array( i , ary, size )  i = ary[0]; \
+                                        for ( int j = 0; j < size ; j ++, i = ary[i] )
 
 typedef double AIOBufferType;
 
