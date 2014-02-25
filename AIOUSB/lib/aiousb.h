@@ -33,8 +33,39 @@ namespace AIOUSB
 #define VALID_PRODUCT(product) ( VALID_ENUM(  ProductIDS, product ) )
 
 
+/**
+ * other libraries often declare BOOL, TRUE and FALSE, and worse, they declare these
+ * using #defines; so we sidestep that potential conflict by declaring the same types
+ * prefixed with AIOUSB_; it's ugly, but if people want to use the shorter names and
+ * they are certain they won't conflict with anything else, they can define the
+ * ENABLE_BOOL_TYPE macro
+ */
+#ifdef __cplusplus
+typedef bool AIOUSB_BOOL;
+const bool AIOUSB_FALSE = false;
+const bool AIOUSB_TRUE = true;
+#if defined( ENABLE_BOOL_TYPE )
+typedef bool BOOL;
+const bool FALSE = false;
+const bool TRUE = true;
+#endif
+#else
+enum AIOUSB_BOOL_VAL {
+    AIOUSB_FALSE                        = 0,
+    AIOUSB_TRUE                         = 1
+};
+typedef enum AIOUSB_BOOL_VAL AIOUSB_BOOL;
+#if defined( ENABLE_BOOL_TYPE )
+enum BOOL {
+    FALSE                               = 0,
+    TRUE                                = 1
+};
+typedef enum BOOL BOOL;
+#endif
+#endif
 
- CREATE_ENUM_W_START(ProductIDS,0,
+
+CREATE_ENUM_W_START(ProductIDS,0,
                      ACCES_VENDOR_ID    = 0x1605,
                      /**
                       * these product IDs are constant
@@ -354,9 +385,10 @@ typedef enum  {
 } ADCalMode;
 
 typedef struct  {
-    const void *device;
-    unsigned long size;
-    unsigned char registers[ AD_MAX_CONFIG_REGISTERS ];
+  const void *device;           /**< Pointer to the device Descriptor */
+  unsigned long size;
+  AIOUSB_BOOL testing;          /**< For making Unit tests that don't talk to hardware */
+  unsigned char registers[ AD_MAX_CONFIG_REGISTERS ];
 } ADConfigBlock;
 
 
@@ -371,60 +403,21 @@ typedef struct {
   unsigned long bytes_remaining;
 } AIOBuf ;
 
-
-
-/* #ifndef __aiousb_cplusplus */
-/* typedef struct ADConfigBlock ADConfigBlock; */
-/* #endif */
-
-
-
-
-
 typedef struct  {
-    const char *Name;                /* null-terminated device name or 0 */
-    __uint64_t SerialNumber;         /* 64-bit serial number or 0 */
-    unsigned ProductID;              /* 16-bit product ID */
-    unsigned DIOPorts;               /* number of digital I/O ports (bytes) */
-    unsigned Counters;               /* number of 8254 counter blocks */
-    unsigned Tristates;              /* number of tristates */
-    long RootClock;                  /* base clock frequency */
-    unsigned DACChannels;            /* number of D/A channels */
-    unsigned ADCChannels;            /* number of A/D channels */
-    unsigned ADCMUXChannels;         /* number of MUXed A/D channels */
-    unsigned ADCChannelsPerGroup;    /* number of A/D channels in each config. group */
+    const char *Name;                /**< null-terminated device name or 0 */
+    __uint64_t SerialNumber;         /**< 64-bit serial number or 0 */
+    unsigned ProductID;              /**< 16-bit product ID */
+    unsigned DIOPorts;               /**< number of digital I/O ports (bytes) */
+    unsigned Counters;               /**< number of 8254 counter blocks */
+    unsigned Tristates;              /**< number of tristates */
+    long RootClock;                  /**< base clock frequency */
+    unsigned DACChannels;            /**< number of D/A channels */
+    unsigned ADCChannels;            /**< number of A/D channels */
+    unsigned ADCMUXChannels;         /**< number of MUXed A/D channels */
+    unsigned ADCChannelsPerGroup;    /**< number of A/D channels in each config. group */
 } DeviceProperties;
 
-/**
- * other libraries often declare BOOL, TRUE and FALSE, and worse, they declare these
- * using #defines; so we sidestep that potential conflict by declaring the same types
- * prefixed with AIOUSB_; it's ugly, but if people want to use the shorter names and
- * they are certain they won't conflict with anything else, they can define the
- * ENABLE_BOOL_TYPE macro
- */
-#ifdef __cplusplus
-typedef bool AIOUSB_BOOL;
-const bool AIOUSB_FALSE = false;
-const bool AIOUSB_TRUE = true;
-#if defined( ENABLE_BOOL_TYPE )
-typedef bool BOOL;
-const bool FALSE = false;
-const bool TRUE = true;
-#endif
-#else
-enum AIOUSB_BOOL_VAL {
-    AIOUSB_FALSE                        = 0,
-    AIOUSB_TRUE                         = 1
-};
-typedef enum AIOUSB_BOOL_VAL AIOUSB_BOOL;
-#if defined( ENABLE_BOOL_TYPE )
-enum BOOL {
-    FALSE                               = 0,
-    TRUE                                = 1
-};
-typedef enum BOOL BOOL;
-#endif
-#endif
+
 
 
 
@@ -564,6 +557,24 @@ extern unsigned long CTR_8254ReadLatched(
     unsigned long DeviceIndex,
     unsigned short *pData );
 
+extern void ADC_InitConfigBlock( ADConfigBlock *, 
+                                 void *deviceDesc, 
+                                 unsigned int 
+                                 );
+
+extern void ADC_InitConfigBlockForTesting( ADConfigBlock *, 
+                                           void *deviceDesc, 
+                                           unsigned int , 
+                                           AIOUSB_BOOL );
+
+
+extern void ADC_SetTestingMode( ADConfigBlock *config, 
+                                AIOUSB_BOOL testing );
+
+AIOUSB_BOOL ADC_GetTestingMode(ADConfigBlock *config, 
+                               AIOUSB_BOOL testing );
+
+
 extern unsigned long ADC_GetChannelV(
     unsigned long DeviceIndex,
     unsigned long ChannelIndex,
@@ -572,6 +583,11 @@ extern unsigned long ADC_GetChannelV(
 extern unsigned long ADC_GetScanV(
     unsigned long DeviceIndex,
     double *pBuf );
+
+extern unsigned ADC_SetAllGainCodeAndDiffMode( 
+    unsigned long DeviceIndex, 
+    unsigned gain, 
+    AIOUSB_BOOL differentialMode );
 
 extern unsigned long ADC_GetScan(
     unsigned long DeviceIndex,

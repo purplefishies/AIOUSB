@@ -29,22 +29,44 @@ typedef struct {
   pthread_attr_t tattr;
 #endif
   AIOUSB_WorkFn work;
-  long DeviceIndex;
+  unsigned long DeviceIndex;
   AIOBufferType *buffer;
   unsigned hz;
+  unsigned usbbuf_size;
   unsigned divisora;
   unsigned divisorb;
   unsigned _read_pos, _write_pos;
+  /* unsigned totalsize; */
+  unsigned basesize;
   unsigned size;
   unsigned counter_control;
   unsigned timeout;
+  AIOUSB_BOOL testing;
   unsigned extra;                     /**< Keeps track of under writes */
   AIOChannelMask *mask;               /**< Used for keeping track of channels */
+  AIOBufferType *tmpbuf;
+  unsigned tmpbufsize;
   volatile enum THREAD_STATUS status; /* Are we running, paused ..etc; */
 } AIOContinuousBuf;
 
-AIOContinuousBuf *NewAIOContinuousBuf( int bufsize, unsigned number_channels );
+AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex , int bufsize, unsigned number_channels );
+AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex , int bufsize , unsigned num_channels );
 void DeleteAIOContinuousBuf( AIOContinuousBuf *buf );
+AIORET_TYPE AIOContinuousBuf_InitConfiguration(  AIOContinuousBuf *buf );
+
+void AIOContinousBuf_SetTesting( AIOContinuousBuf *buf, AIOUSB_BOOL testing );
+AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex , int bufsize , unsigned num_channels );
+
+static AIORET_TYPE AIOContinousBuf_SendPreConfig( AIOContinuousBuf *buf );
+
+
+unsigned AIOContinuousBuf_GetOverSample( AIOContinuousBuf *buf );
+void AIOContinuousBuf_SetOverSample( AIOContinuousBuf *buf, unsigned os );
+void AIOContinuousBuf_SetAllGainCodeAndDiffMode( AIOContinuousBuf *buf, ADGainCode gain, AIOUSB_BOOL diff );
+void AIOContinuousBuf_SetDiscardFirstSample(  AIOContinuousBuf *buf , AIOUSB_BOOL discard );
+unsigned AIOContinuousBuf_NumberChannels( AIOContinuousBuf *buf );
+
+
 AIORET_TYPE AIOContinuousBufLock( AIOContinuousBuf *buf );
 AIORET_TYPE AIOContinuousBufUnlock( AIOContinuousBuf *buf );
 unsigned long AIOContinuousBuf_GetDeviceIndex( AIOContinuousBuf *buf );
