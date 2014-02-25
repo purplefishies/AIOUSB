@@ -265,6 +265,12 @@ PRIVATE_EXTERN int AIOUSB_BulkTransfer( struct libusb_device_handle *dev_handle,
                                         int length, int *transferred, unsigned int timeout );
 
 
+AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex, 
+                                     unsigned short *counts,
+                                     unsigned *size ,
+                                     unsigned numChannels
+                                     );
+
 
 PRIVATE_EXTERN unsigned long AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short counts[] );
 PRIVATE_EXTERN unsigned long AIOUSB_ArrayCountsToVolts( unsigned long DeviceIndex, int startChannel,
