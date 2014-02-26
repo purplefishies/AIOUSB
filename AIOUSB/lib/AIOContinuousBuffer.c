@@ -159,8 +159,9 @@ AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex , int bu
  */
 void DeleteAIOContinuousBuf( AIOContinuousBuf *buf )
 {
-  free( buf->buffer );
-  free( buf );
+    DeleteAIOChannelMask( buf->mask );
+    free( buf->buffer );
+    free( buf );
 }
 
 
@@ -1477,6 +1478,7 @@ void stress_test_drain_buffer( int bufsize )
 
   int i, count = 0, buf_unit;
   int tmpsize;
+  int datatransferred = 0;
   AIORET_TYPE retval = -2;
 
 
@@ -1497,20 +1499,55 @@ void stress_test_drain_buffer( int bufsize )
     AIOContinuousBuf_SetAllGainCodeAndDiffMode( buf, AD_GAIN_CODE_0_5V , AIOUSB_FALSE );
     AIOContinuousBuf_SetOverSample( buf, 255 );
     AIOContinuousBuf_SetDiscardFirstSample( buf, 0 );
-
+    datatransferred = 0;
     while ( count < 20 ) {
 
       read_data(data, tmpsize );          /* Load data with repeating data */
       retval = AIOContinuousBuf_CopyData( buf, data , &tmpsize );
+      datatransferred += retval;
       if ( retval < 0 )  {
         printf("not ok - Received retval: %d\n", (int)retval );
       }
       count ++; 
     }
     /* Check that the remainders are correct */
-    printf("%s - Remain=%d, expected=%d\n", ( buf->extra == expected_list[i] ? "ok" : "not ok" ), 
-           (int)buf->extra, expected_list[i] );
-    /* prove able to drain the buffer */
+    printf("%s - Remain=%d, expected=%d\n", ( buf->extra == expected_list[i] ? "ok" : "not ok" ), (int)buf->extra, expected_list[i] );
+    printf("%s - Bufwrite=%d expected=%d\n", ( datatransferred == get_write_pos(buf) ? "ok" : "not ok" ), (int)datatransferred, get_write_pos(buf));
+    printf("%s - Bufread=%f expected=%f\n", ( roundf(1000*buf->buffer[get_read_pos(buf)]) == roundf(1000*(127.0 / 65537.0)*5.0) ? "ok" : "not ok" ), 
+           buf->buffer[get_read_pos(buf)], (127.0 / 65537.0)*5.0 );
+
+
+
+    /* Drain the buffer */
+    datatransferred = 0;
+    while ( get_read_pos(buf) != get_write_pos(buf) ) {
+      datatransferred += AIOContinuousBufRead( buf, (AIOBufferType *)data, tmpsize );
+    }
+    printf("%s - Bufread=%d expected=%d\n", ( datatransferred == get_read_pos(buf) ? "ok" : "not ok" ), (int)datatransferred, get_read_pos(buf));
+    
+    count = 0;
+    while ( count < 20 ) {
+      memset(data,'\377', tmpsize * sizeof(short)); /* Set to 0xffff */
+      retval = AIOContinuousBuf_CopyData( buf, data, &tmpsize );
+      count ++;
+    }
+    printf("%s - Buffer=%f expected=%f\n", ( buf->buffer[get_read_pos(buf)] == 5.0 ? "ok" : "not ok" ), buf->buffer[get_read_pos(buf)], 5.0 );
+
+    datatransferred = 0;
+    while ( get_read_pos(buf) != get_write_pos(buf) ) {
+      datatransferred += AIOContinuousBufRead( buf, (AIOBufferType *)data, tmpsize );
+    }
+    printf("%s - Bufread=%d expected=%d\n", ( datatransferred == get_read_pos(buf) ? "ok" : "not ok" ), (int)datatransferred, get_read_pos(buf));
+
+    count = 0;
+    while ( count < 20 ) {
+      memset(data,'\0', tmpsize * sizeof(short)); /* Set to 0xffff */
+      retval = AIOContinuousBuf_CopyData( buf, data, &tmpsize );
+      count ++;
+    }
+    printf("%s - Buffer=%f expected=%f\n", ( buf->buffer[get_read_pos(buf)] == 0.0 ? "ok" : "not ok" ), buf->buffer[get_read_pos(buf)], 0.0 );
+
+
 
     /* Also show that we have the correct number of fully written packets */
     free(data);

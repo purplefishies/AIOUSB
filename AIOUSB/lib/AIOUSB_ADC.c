@@ -644,7 +644,7 @@ AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex,
     /* unsigned numChannels            = AIOUSB_GetEndChannel(&deviceDesc->cachedConfigBlock) -  */
     /*   AIOUSB_GetStartChannel(&deviceDesc->cachedConfigBlock); */
     unsigned numOverSamples         = AIOUSB_GetOversample(&deviceDesc->cachedConfigBlock);
-    unsigned short sum;
+    unsigned long sum;
     for ( cur = 0, pos = 0; cur < *size ; ) {
         for ( unsigned channel = 0; channel < numChannels; channel ++ , pos ++) {
             sum = 0;
@@ -654,7 +654,8 @@ AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex,
                     sum += counts[cur];
                 }
             }
-            counts[pos] = sum / ( discardFirstSample ? numOverSamples - 1 : numOverSamples );
+            sum = (sum / ( discardFirstSample ? numOverSamples - 1 : numOverSamples ));
+            counts[pos] = (unsigned short)sum;
             /* printf("sum=%d, ave=%d\n",sum,sum / numOverSamples); */
         }
     }
