@@ -630,7 +630,6 @@ AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex,
                                      )
 {
     unsigned long result;
-    AIORET_TYPE retval = AIOUSB_SUCCESS;
     unsigned pos, cur;
     if(counts == NULL)
         return (AIORET_TYPE)-AIOUSB_ERROR_INVALID_PARAMETER;
@@ -646,21 +645,21 @@ AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex,
     /*   AIOUSB_GetStartChannel(&deviceDesc->cachedConfigBlock); */
     unsigned numOverSamples         = AIOUSB_GetOversample(&deviceDesc->cachedConfigBlock);
     unsigned short sum;
-    for ( cur = 0, pos = 0; cur < *size ; pos ++ , cur += numChannels*numOverSamples ) {
-      for ( unsigned channel = 0; channel < numChannels ; channel ++ ) {
-        sum = 0;
-        for( unsigned os = 0; os < numOverSamples; os ++ ) {
-          if ( discardFirstSample && os == 0 ) {
-          } else {
-            sum += counts[cur + os + channel*numChannels];
-          }
+    for ( cur = 0, pos = 0; cur < *size ; ) {
+        for ( unsigned channel = 0; channel < numChannels; channel ++ , pos ++) {
+            sum = 0;
+            for( unsigned os = 0; os < numOverSamples; os ++ , cur ++ ) {
+                if ( discardFirstSample && os == 0 ) {
+                } else {
+                    sum += counts[cur];
+                }
+            }
+            counts[pos] = sum / ( discardFirstSample ? numOverSamples - 1 : numOverSamples );
+            /* printf("sum=%d, ave=%d\n",sum,sum / numOverSamples); */
         }
-        counts[pos] = sum / ( discardFirstSample ? numOverSamples - 1 : numOverSamples );
-        /* printf("sum=%d, ave=%d\n",sum,sum / numOverSamples); */
-      }
     }
     *size = pos;
-    return retval;
+    return (AIORET_TYPE)pos;
 }
 
 
@@ -3327,21 +3326,15 @@ unsigned AIOUSB_GetGainCode(const ADConfigBlock *config, unsigned channel)
 {
     assert(config != 0);
     unsigned gainCode = FIRST_ENUM(ADGainCode);             // return reasonable value on error
-    if(
-        config != 0 &&
-        config->device != 0 &&
-        config->size != 0 &&
-        AIOUSB_Lock()
-        ) {
-          const DeviceDescriptor *const deviceDesc = ( DeviceDescriptor* )config->device;
-          if(channel < AD_MAX_CHANNELS && channel < deviceDesc->ADCMUXChannels) {
-                assert(deviceDesc->ADCChannelsPerGroup != 0);
-                gainCode = (config->registers[ AD_CONFIG_GAIN_CODE + channel / deviceDesc->ADCChannelsPerGroup ]
-                            & ( unsigned char )AD_GAIN_CODE_MASK
-                            );
-            }
-          AIOUSB_UnLock();
-      }
+    if( config != 0 && config->device != 0 &&   config->size != 0 ) { 
+        const DeviceDescriptor *const deviceDesc = ( DeviceDescriptor* )config->device;
+        if(channel < AD_MAX_CHANNELS && channel < deviceDesc->ADCMUXChannels) {
+            assert(deviceDesc->ADCChannelsPerGroup != 0);
+            gainCode = (config->registers[ AD_CONFIG_GAIN_CODE + channel / deviceDesc->ADCChannelsPerGroup ]
+                        & ( unsigned char )AD_GAIN_CODE_MASK
+                        );
+        }
+    }
     return gainCode;
 }
 

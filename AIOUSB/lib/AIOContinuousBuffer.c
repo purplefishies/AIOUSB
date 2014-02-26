@@ -11,7 +11,8 @@
  *        handles the low level USB transactions for collecting samples. This thread will fill up 
  *        a data structure known as the AIOContinuousBuf that is implemented as a circular buffer.
  *        
- * 
+ * @todo Make the number of channels in the ContinuousBuffer match the number of channels in the
+ *       config object
  */
 
 #include <pthread.h>
@@ -421,87 +422,83 @@ unsigned AIOContinuousBuf_NumberChannels( AIOContinuousBuf *buf )
  */
  AIORET_TYPE copy_integer_number_bytes( AIOContinuousBuf *buf,  unsigned short *data , unsigned *size)
  {
-  unsigned i = 0, write_count = 0;
-  unsigned tmpcount, channel, pos = 0;
-  unsigned stopval=0;
-  unsigned long DeviceIndex = AIOContinuousBuf_GetDeviceIndex( buf );
-  unsigned number_channels = AIOContinuousBuf_NumberChannels(buf);
-  AIOBufferType *tmpbuf = (AIOBufferType *)malloc( (number_channels+256)*sizeof(AIOBufferType));
-  int core_size = 256;
-  unsigned tmpsize = *size;
+     unsigned i = 0, write_count = 0;
+     AIORET_TYPE retval;
+     unsigned tmpcount, channel, pos = 0;
+     unsigned stopval=0;
+     unsigned long DeviceIndex = AIOContinuousBuf_GetDeviceIndex( buf );
+     unsigned number_channels = AIOContinuousBuf_NumberChannels(buf);
+     AIOBufferType *tmpbuf = (AIOBufferType *)malloc( (number_channels+256)*sizeof(AIOBufferType));
+     int core_size = 256;
+     unsigned tmpsize = *size;
 
-  cull_and_average_counts( DeviceIndex, data, &tmpsize, AIOContinuousBuf_NumberChannels(buf) );
+     cull_and_average_counts( DeviceIndex, data, &tmpsize, AIOContinuousBuf_NumberChannels(buf) );
 
-  /**
-   *                      | Extra 
-   *   ----   ----   ---- | ----   ----   ----   ---- 
-   *  |    | |    | |    |||    | |    | |    | |    |
-   *   ----   ----   ---- | ----   ----   ----   ---- 
-   *                      |
-   *                            
-   *                      ^
-   *                      |
-   *                    buf end
-   *
-   *  Extra data is behind the buf end in the data
-   *  buffer. In this case it's two extra shorts
-   */ 
-  if( buf->extra ) {
+     /**
+      *                      | Extra 
+      *   ----   ----   ---- | ----   ----   ----   ---- 
+      *  |    | |    | |    |||    | |    | |    | |    |
+      *   ----   ----   ---- | ----   ----   ----   ---- 
+      *                      |
+      *                            
+      *                      ^
+      *                      |
+      *                    buf end
+      *
+      *  Extra data is behind the buf end in the data
+      *  buffer. In this case it's two extra shorts
+      */ 
+     if( buf->extra ) {
 
-    for ( channel = 0, i = core_size; i < core_size + buf->extra ; i += 1 ) {
-      AIOUSB_ArrayCountsToVolts( DeviceIndex,
-                                 channel,
-                                 1,
-                                 &data[i],
-                                 (double*)&tmpbuf[pos++]
-                                 );
-      channel = ( channel + 1 ) % number_channels;
-    }
-    write_count = buf->extra;
-    for ( i = 0 ; write_count < number_channels; i ++ ) {
-      AIOUSB_ArrayCountsToVolts( DeviceIndex,
-                                 channel,
-                                 1,
-                                 &data[i],
-                                 (double*)&tmpbuf[pos++]
-                                 );
+       for ( channel = (number_channels - buf->extra), i = core_size; i < core_size + buf->extra ; i += 1 ) {
+         AIOUSB_ArrayCountsToVolts( DeviceIndex,
+                                    channel,
+                                    1,
+                                    &data[i],
+                                    (double*)&tmpbuf[pos++]
+                                    );
+         channel = ( channel + 1 ) % number_channels;
+       }
+       write_count = buf->extra;
+       for ( i = 0 ; write_count < number_channels; i ++ ) {
+         AIOUSB_ArrayCountsToVolts( DeviceIndex,
+                                    channel,
+                                    1,
+                                    &data[i],
+                                    (double*)&tmpbuf[pos++]
+                                    );
                                  
-      write_count ++;
-      channel = ( channel + 1 ) % number_channels;
-    }
-  } /* Completed one channel range from the extra packets */
-  tmpcount = write_count - buf->extra;
-  i = tmpcount;
-  /* for ( channel = 0; i < (((512 - tmpcount * 2))/number_channels)*number_channels ; i += 1 ) { */
-  stopval = ((core_size - tmpcount)/number_channels)*number_channels;
-  for ( channel = 0; i < stopval ; i ++ ) {
-    /**
-     * Assign value while at the same time,
-     * determine if we need to write the packets to the AIOContinuousBuf
-     * or not */
-    /* if( pos >= core_size ) { */
-    /*   AIOUSB_DEVEL("pos val=%d",pos); */
-    /* } */
-    AIOUSB_ArrayCountsToVolts( DeviceIndex,
-                               channel,
-                               1,
-                               &data[i],
-                               (double*)&tmpbuf[pos++]
-                               );
-    write_count ++;
-    channel = ( channel + 1 ) % number_channels;
-  }
-  buf->extra = (core_size - i - tmpcount);
+         write_count ++;
+         channel = ( channel + 1 ) % number_channels;
+       }
+     } /* Completed one channel range from the extra packets */
+     tmpcount = write_count - buf->extra;
+     i = tmpcount;
+     /* for ( channel = 0; i < (((512 - tmpcount * 2))/number_channels)*number_channels ; i += 1 ) { */
+     stopval = ((core_size - tmpcount)/number_channels)*number_channels;
+     for ( channel = 0; i < stopval ; i ++ ) {
+       /**
+        * Assign value while at the same time,
+        * determine if we need to write the packets to the AIOContinuousBuf
+        * or not */
+       AIOUSB_ArrayCountsToVolts( DeviceIndex,
+                                  channel,
+                                  1,
+                                  &data[i],
+                                  (double*)&tmpbuf[pos++]
+                                  );
+       write_count ++;
+       channel = ( channel + 1 ) % number_channels;
+     }
+     buf->extra = (core_size - i - tmpcount);
 
-  AIOUSB_DEVEL( "After write: #Channels: %d, Wrote %d full channels, Extra %d\n", number_channels,write_count / number_channels , buf->extra );
-  /* After completing the write , we shoudl copy the 
-   * entire tmpbuf over to the buf */
+     AIOUSB_DEVEL( "After write: #Channels: %d, Wrote %d full channels, Extra %d\n", number_channels,write_count / number_channels , buf->extra );
 
+     retval = AIOContinuousBufWrite( buf, (AIOBufferType *)tmpbuf, write_count, AIOCONTINUOUS_BUF_ALLORNONE );
 
-
-  free(tmpbuf);
-  return (AIORET_TYPE)write_count;
-}
+     free(tmpbuf);
+     return (AIORET_TYPE)retval;
+ }
 
 /**
  * @desc Copies data from the USB buffer into the Continuous Buffer
