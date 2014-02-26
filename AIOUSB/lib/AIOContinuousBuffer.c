@@ -1446,7 +1446,7 @@ void dummy_init(void)
   deviceDesc->bADCStream = AIOUSB_TRUE;
   deviceDesc->ImmADCs = 1;
   deviceDesc->ADCChannels = deviceDesc->ADCMUXChannels = 128;
-  deviceDesc->ADCChannelsPerGroup = 1;
+  deviceDesc->ADCChannelsPerGroup = 16; /* Needed for larger than 16 signals */
   deviceDesc->ConfigBytes = AD_CONFIG_REGISTERS;
   deviceDesc->bClearFIFO = AIOUSB_TRUE;
   deviceDesc->device = (libusb_device *)42;
@@ -1513,7 +1513,7 @@ void stress_test_drain_buffer( int bufsize )
     /* Check that the remainders are correct */
     printf("%s - 1st Remain=%d, expected=%d\n", ( buf->extra == expected_list[i] ? "ok" : "not ok" ), (int)buf->extra, expected_list[i] );
     printf("%s - 1st Bufwrite=%d expected=%d\n", ( datatransferred == get_write_pos(buf) ? "ok" : "not ok" ), (int)datatransferred, get_write_pos(buf));
-    printf("%s - 1st Avgd=%f expected=%f\n", ( roundf(1000*buf->buffer[get_read_pos(buf)]) == roundf(1000*(127.0 / 65537.0)*5.0) ? "ok" : "not ok" ), 
+    printf("%s - 1st Avgd=%f expected=%f\n", ( roundf(1000*buf->buffer[get_read_pos(buf)]) == roundf(1000*(127.0 / 65538.0)*5.0) ? "ok" : "not ok" ), 
            buf->buffer[get_read_pos(buf)], (127.0 / 65537.0)*5.0 );
 
 
