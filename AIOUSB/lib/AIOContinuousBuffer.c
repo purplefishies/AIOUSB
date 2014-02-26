@@ -1464,7 +1464,7 @@ void stress_test_drain_buffer( int bufsize )
   int core_size = 256;
   int channel_list[] = { 9,19, 3, 5, 7, 9 ,11,31, 37 , 127};
   int oversamples[]  = {255};
-
+  int prev;
   int expected_list[] = { (core_size*20)%channel_list[0], 
                           (core_size*20)%channel_list[1],
                           (core_size*20)%channel_list[2],
@@ -1511,9 +1511,9 @@ void stress_test_drain_buffer( int bufsize )
       count ++; 
     }
     /* Check that the remainders are correct */
-    printf("%s - Remain=%d, expected=%d\n", ( buf->extra == expected_list[i] ? "ok" : "not ok" ), (int)buf->extra, expected_list[i] );
-    printf("%s - Bufwrite=%d expected=%d\n", ( datatransferred == get_write_pos(buf) ? "ok" : "not ok" ), (int)datatransferred, get_write_pos(buf));
-    printf("%s - Bufread=%f expected=%f\n", ( roundf(1000*buf->buffer[get_read_pos(buf)]) == roundf(1000*(127.0 / 65537.0)*5.0) ? "ok" : "not ok" ), 
+    printf("%s - 1st Remain=%d, expected=%d\n", ( buf->extra == expected_list[i] ? "ok" : "not ok" ), (int)buf->extra, expected_list[i] );
+    printf("%s - 1st Bufwrite=%d expected=%d\n", ( datatransferred == get_write_pos(buf) ? "ok" : "not ok" ), (int)datatransferred, get_write_pos(buf));
+    printf("%s - 1st Avgd=%f expected=%f\n", ( roundf(1000*buf->buffer[get_read_pos(buf)]) == roundf(1000*(127.0 / 65537.0)*5.0) ? "ok" : "not ok" ), 
            buf->buffer[get_read_pos(buf)], (127.0 / 65537.0)*5.0 );
 
 
@@ -1523,7 +1523,7 @@ void stress_test_drain_buffer( int bufsize )
     while ( get_read_pos(buf) != get_write_pos(buf) ) {
       datatransferred += AIOContinuousBufRead( buf, (AIOBufferType *)data, tmpsize );
     }
-    printf("%s - Bufread=%d expected=%d\n", ( datatransferred == get_read_pos(buf) ? "ok" : "not ok" ), (int)datatransferred, get_read_pos(buf));
+    printf("%s - 1st Bufread=%d expected=%d\n", ( datatransferred == get_read_pos(buf) ? "ok" : "not ok" ), (int)datatransferred, get_read_pos(buf));
     
     count = 0;
     while ( count < 20 ) {
@@ -1531,13 +1531,14 @@ void stress_test_drain_buffer( int bufsize )
       retval = AIOContinuousBuf_CopyData( buf, data, &tmpsize );
       count ++;
     }
-    printf("%s - Buffer=%f expected=%f\n", ( buf->buffer[get_read_pos(buf)] == 5.0 ? "ok" : "not ok" ), buf->buffer[get_read_pos(buf)], 5.0 );
+    printf("%s - 2nd avgd=%f expected=%f\n", ( buf->buffer[get_read_pos(buf)] == 5.0 ? "ok" : "not ok" ), buf->buffer[get_read_pos(buf)], 5.0 );
 
     datatransferred = 0;
+    prev = get_read_pos(buf);
     while ( get_read_pos(buf) != get_write_pos(buf) ) {
       datatransferred += AIOContinuousBufRead( buf, (AIOBufferType *)data, tmpsize );
     }
-    printf("%s - Bufread=%d expected=%d\n", ( datatransferred == get_read_pos(buf) ? "ok" : "not ok" ), (int)datatransferred, get_read_pos(buf));
+    printf("%s - 2nd Bufread=%d expected=%d\n", ( (datatransferred + prev) % buffer_size(buf) == get_read_pos(buf) ? "ok" : "not ok" ),  (datatransferred + prev) % buffer_size(buf), get_read_pos(buf));
 
     count = 0;
     while ( count < 20 ) {
@@ -1545,7 +1546,7 @@ void stress_test_drain_buffer( int bufsize )
       retval = AIOContinuousBuf_CopyData( buf, data, &tmpsize );
       count ++;
     }
-    printf("%s - Buffer=%f expected=%f\n", ( buf->buffer[get_read_pos(buf)] == 0.0 ? "ok" : "not ok" ), buf->buffer[get_read_pos(buf)], 0.0 );
+    printf("%s - 3rd avgd=%f expected=%f\n", ( buf->buffer[get_read_pos(buf)] == 0.0 ? "ok" : "not ok" ), buf->buffer[get_read_pos(buf)], 0.0 );
 
 
 
