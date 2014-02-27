@@ -32,20 +32,32 @@ typedef struct {
   unsigned long DeviceIndex;
   AIOBufferType *buffer;
   unsigned hz;
+  unsigned usbbuf_size;
   unsigned divisora;
   unsigned divisorb;
   unsigned _read_pos, _write_pos;
+  unsigned totalsize;
   unsigned size;
   unsigned counter_control;
   unsigned timeout;
   unsigned extra;                     /**< Keeps track of under writes */
   AIOChannelMask *mask;               /**< Used for keeping track of channels */
+  AIOBufferType *tmpbuf;
+  unsigned tmpbufsize;
   volatile enum THREAD_STATUS status; /* Are we running, paused ..etc; */
 } AIOContinuousBuf;
 
 AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex , int bufsize, unsigned number_channels );
 AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex , int bufsize , unsigned num_channels );
 void DeleteAIOContinuousBuf( AIOContinuousBuf *buf );
+
+unsigned AIOContinuousBuf_GetOverSample( AIOContinuousBuf *buf );
+void AIOContinuousBuf_SetOverSample( AIOContinuousBuf *buf, unsigned os );
+void AIOContinuousBuf_SetAllGainCodeAndDiffMode( AIOContinuousBuf *buf, ADGainCode gain, AIOUSB_BOOL diff );
+void AIOContinuousBuf_SetDiscardFirstSample(  AIOContinuousBuf *buf , AIOUSB_BOOL discard );
+
+
+
 AIORET_TYPE AIOContinuousBufLock( AIOContinuousBuf *buf );
 AIORET_TYPE AIOContinuousBufUnlock( AIOContinuousBuf *buf );
 unsigned long AIOContinuousBuf_GetDeviceIndex( AIOContinuousBuf *buf );

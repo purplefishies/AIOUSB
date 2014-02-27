@@ -11,14 +11,14 @@ main(int argc, char *argv[] )
   int bufsize = 100000;
   int number_channels = 16;
   AIOContinuousBuf *buf = 0;
-  buf = (AIOContinuousBuf *)NewAIOContinuousBuf( bufsize , number_channels );
   int tmpsize = pow(512,(double)ceil( ((double)log((double)(bufsize/1000))) / log(16)));
   int keepgoing = 1;
   AIORET_TYPE retval;
   AIOBufferType *tmp = (AIOBufferType *)malloc(sizeof(AIOBufferType *)*tmpsize);
-
+  
   AIOUSB_Init();
   GetDevices();
+  buf = (AIOContinuousBuf *)NewAIOContinuousBuf( 0, bufsize , number_channels );
 
   /**
    * 1. Each buf should have a device index associated with it, so 
@@ -47,8 +47,8 @@ main(int argc, char *argv[] )
    * 3. Setup the sampling clock rate, in this case 
    *    10_000_000 / 1000
    */ 
-  AIOContinuousBufSetClock( buf, 1000 );
-
+  /* AIOContinuousBufSetClock( buf, 30000 ); */
+  AIOContinuousBufSetClock( buf, 30000 );
   /**
    * 4. Start the Callback that fills up the 
    *    AIOContinuousBuf. This fires up an thread that 
@@ -63,13 +63,9 @@ main(int argc, char *argv[] )
      * retval = AIOContinuousBufRead( buf, tmp, tmpsize ); 
      */
 
-    sleep(1);
-    printf("Waiting : readpos=%d, writepos=%d\n", 
-           AIOContinuousBufGetReadPosition(buf),
-           AIOContinuousBufGetWritePosition(buf)
-           );
+    fprintf(stderr,"Waiting : readpos=%d, writepos=%d\n", AIOContinuousBufGetReadPosition(buf), AIOContinuousBufGetWritePosition(buf));
 
-    if( AIOContinuousBufGetWritePosition(buf) > tmpsize ) {
+    if( AIOContinuousBufGetWritePosition(buf) > 80000 ) {
       keepgoing = 0;
       AIOContinuousBufEnd( buf );
     }

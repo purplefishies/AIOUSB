@@ -648,15 +648,21 @@ AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex,
     for ( cur = 0, pos = 0; cur < *size ; ) {
         for ( unsigned channel = 0; channel < numChannels; channel ++ , pos ++) {
             sum = 0;
-            for( unsigned os = 0; os < numOverSamples; os ++ , cur ++ ) {
+            for( unsigned os = 0; os < numOverSamples+1; os ++ , cur ++ ) {
                 if ( discardFirstSample && os == 0 ) {
                 } else {
                     sum += counts[cur];
                 }
             }
-            sum = (sum / ( discardFirstSample ? numOverSamples - 1 : numOverSamples ));
+            if( discardFirstSample ) { 
+              if( numOverSamples ) {
+                sum = (sum / numOverSamples);                
+              } else {
+                sum = ( sum / (numOverSamples + 1));
+              }
+            }
+
             counts[pos] = (unsigned short)sum;
-            /* printf("sum=%d, ave=%d\n",sum,sum / numOverSamples); */
         }
     }
     *size = pos;
