@@ -40,6 +40,7 @@ typedef struct {
   unsigned size;
   unsigned counter_control;
   unsigned timeout;
+  AIOUSB_BOOL testing;
   unsigned extra;                     /**< Keeps track of under writes */
   AIOChannelMask *mask;               /**< Used for keeping track of channels */
   AIOBufferType *tmpbuf;
@@ -50,12 +51,17 @@ typedef struct {
 AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex , int bufsize, unsigned number_channels );
 AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex , int bufsize , unsigned num_channels );
 void DeleteAIOContinuousBuf( AIOContinuousBuf *buf );
+void AIOContinousBuf_SetTesting( AIOContinuousBuf *buf, AIOUSB_BOOL testing );
+AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex , int bufsize , unsigned num_channels );
+
+static AIORET_TYPE AIOContinousBuf_SendPreConfig( AIOContinuousBuf *buf );
+
 
 unsigned AIOContinuousBuf_GetOverSample( AIOContinuousBuf *buf );
 void AIOContinuousBuf_SetOverSample( AIOContinuousBuf *buf, unsigned os );
 void AIOContinuousBuf_SetAllGainCodeAndDiffMode( AIOContinuousBuf *buf, ADGainCode gain, AIOUSB_BOOL diff );
 void AIOContinuousBuf_SetDiscardFirstSample(  AIOContinuousBuf *buf , AIOUSB_BOOL discard );
-
+unsigned AIOContinuousBuf_NumberChannels( AIOContinuousBuf *buf );
 
 
 AIORET_TYPE AIOContinuousBufLock( AIOContinuousBuf *buf );

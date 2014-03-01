@@ -197,12 +197,23 @@ ADC_GetConfigRegisters( ADConfigBlock *config )
     return &config->registers[0];
 }
 
+/** 
+ * @desc 
+ * @param config 
+ * @param deviceDesc 
+ * @param size 
+ */
 void ADC_InitConfigBlock(ADConfigBlock *config, void *deviceDesc, unsigned size )
 {
   assert(config);
   config->device = deviceDesc;
   config->size = size;
   config->testing = AIOUSB_FALSE;
+  memset(config->registers,(unsigned char)AD_GAIN_CODE_0_5V,16 );
+  config->registers[AD_CONFIG_CAL_MODE] = AD_CAL_MODE_NORMAL;
+  config->registers[AD_CONFIG_TRIG_COUNT] = AD_TRIGGER_CTR0_EXT | AD_TRIGGER_SCAN | AD_TRIGGER_TIMER;
+  config->registers[AD_CONFIG_START_END] = 0xF0;
+  config->registers[AD_CONFIG_MUX_START_END] = 0;
 }
 
 void ADC_InitConfigBlockForTesting(ADConfigBlock *config, void *deviceDesc, unsigned size, AIOUSB_BOOL testing )
