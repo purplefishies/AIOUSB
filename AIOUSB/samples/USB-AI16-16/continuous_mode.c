@@ -56,7 +56,7 @@ main(int argc, char *argv[] )
    * 3. Setup the sampling clock rate, in this case 
    *    10_000_000 / 1000
    */ 
-  AIOContinuousBufSetClock( buf, 1000 );
+  AIOContinuousBufSetClock( buf, 31000 );
   /**
    * 4. Start the Callback that fills up the 
    *    AIOContinuousBuf. This fires up an thread that 
@@ -72,7 +72,7 @@ main(int argc, char *argv[] )
      */
     fprintf(stderr,"Waiting : readpos=%d, writepos=%d\n", AIOContinuousBufGetReadPosition(buf), AIOContinuousBufGetWritePosition(buf));
 
-    if( AIOContinuousBufGetWritePosition(buf) > 80000  || buf->status != RUNNING ) {
+    if( AIOContinuousBufGetWritePosition(buf) > (8*bufsize)/10  || buf->status != RUNNING ) {
       keepgoing = 0;
       AIOContinuousBufEnd( buf );
     }
