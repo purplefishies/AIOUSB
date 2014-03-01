@@ -305,14 +305,6 @@ out_ADC_ReadADConfigBlock:
  * @param DeviceIndex
  * @return
  */
-/* if (!AIOUSB_Lock()) */
-/*     return AIOUSB_ERROR_INVALID_MUTEX; */
-/* unsigned long result = AIOUSB_Validate(&DeviceIndex); */
-/* if (result != AIOUSB_SUCCESS) { */
-/*     AIOUSB_UnLock(); */
-/*     return result; */
-/* } */
-/* DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ]; */
 static unsigned long
 WriteConfigBlock(unsigned long DeviceIndex)
 {
@@ -392,14 +384,10 @@ AIOUSB_SetConfigBlock( unsigned long DeviceIndex , ADConfigBlock *entry )
      return result;
 }
 
-
-
 /**
- *
- *
+ * @desc Performs a scan and averages the voltage values.
  * @param DeviceIndex
  * @param counts
- *
  * @return
  */
 PRIVATE unsigned long
@@ -650,10 +638,7 @@ AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex,
 
     AIOUSB_UnLock();                                 /* unlock while communicating with device */
     result = ReadConfigBlock(DeviceIndex, AIOUSB_FALSE);
-    /* AIOUSB_Lock(); */
     AIOUSB_BOOL discardFirstSample  = deviceDesc->discardFirstSample;
-    /* unsigned numChannels            = AIOUSB_GetEndChannel(&deviceDesc->cachedConfigBlock) -  */
-    /*   AIOUSB_GetStartChannel(&deviceDesc->cachedConfigBlock); */
     unsigned numOverSamples         = AIOUSB_GetOversample(&deviceDesc->cachedConfigBlock);
     unsigned long sum;
     for ( cur = 0, pos = 0; cur < *size ; ) {
@@ -671,18 +656,15 @@ AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex,
               } else {
                 sum = ( sum / (numOverSamples + 1));
               }
+            } else {
+              sum = ( sum / (numOverSamples + 1));
             }
-
             counts[pos] = (unsigned short)sum;
         }
     }
     *size = pos;
     return (AIORET_TYPE)pos;
 }
-
-
-
-
 
 /**
  * @desc
@@ -737,7 +719,6 @@ PRIVATE unsigned long AIOUSB_ArrayCountsToVolts(
 }
 
 /**
- *
  *
  * @param DeviceIndex
  * @param startChannel
@@ -895,14 +876,11 @@ unsigned long ADC_GetChannelV(
     return result;
 }
 
-
-
 /**
- *
- *
+ * @desc Preferred way to get immediate scan readings. Will Scan all channels ( ie vectored ) 
+ *       perform averaging and culling of data. 
  * @param DeviceIndex
  * @param pBuf
- *
  * @return
  */
 unsigned long ADC_GetScanV(
@@ -1891,8 +1869,6 @@ DeleteBuffer( AIOBuf *buf )
   if( !buf ) 
     return;
 
-  /* printf("Freeing buffer of size  %d bytes\n",(int)buf->bufsize); */
-
   if( buf->buffer ) 
     free(buf->buffer );
   free(buf);
@@ -1929,10 +1905,8 @@ BulkAcquire(
             )
 {
   AIORET_TYPE result = 0;
-  /* printf("Using internal member with size %d\n", (int)aiobuf->bufsize ); */
   result = ADC_BulkAcquire( DeviceIndex, aiobuf->bufsize , aiobuf->buffer );
   aiobuf->bytes_remaining = aiobuf->bufsize;
-  /* printf("Setting remaining value ot  %d\n",(int)aiobuf->bytes_remaining  ); */
   return result;
 
 }
@@ -2129,12 +2103,6 @@ void ADC_ClearADBuf(DeviceDescriptor *deviceDesc)
       }
 }
 
-/**
- * @param DeviceIndex
- *
- * @return
- */
-
 unsigned long ADC_InitFastITScanV(
     unsigned long DeviceIndex
     )
@@ -2213,13 +2181,6 @@ RETURN_ADC_InitFastITScanV:
     return result;
 }
 
-/**
- *
- *
- * @param DeviceIndex
- *
- * @return
- */
 unsigned long ADC_ResetFastITScanV(
     unsigned long DeviceIndex
     )
@@ -2245,13 +2206,6 @@ RETURN_ADC_ResetFastITScanV:
 }
 
 
-/**
- *
- *
- * @param DeviceIndex
- *
- * @return
- */
 unsigned long ADC_SetFastITScanVChannels(
     unsigned long DeviceIndex,
     unsigned long NewChannels
@@ -2442,15 +2396,12 @@ unsigned long ADC_GetFastITScanV(unsigned long DeviceIndex, double *pData)
     CTR_8254Mode(DeviceIndex, 0, 2, 1);
     bufsize = Channels * sizeof(unsigned short) * (AIOUSB_GetRegister(deviceDesc->FastITConfig, 0x13) + 1); /* 1 sample + 3 oversamples */;
 
-    /* CLOCK_SPEED = 100000; */
-    /* AIOUSB_SetStreamingBlockSize( DeviceIndex, 100000 ); */
     clockHz = 0;
 
     ADC_SetScanLimits(DeviceIndex, 0, Channels - 1);
 
     CLOCK_SPEED = 100000;       // Hz
     AIOUSB_SetStreamingBlockSize(DeviceIndex, 100000);
-    /* dataBuf = ( unsigned short * ) malloc( bufsize ); */
     thisDataBuf = ( unsigned short* )malloc(bufsize + 100);
     memset(thisDataBuf, 0, bufsize + 100);
 
@@ -2471,14 +2422,8 @@ unsigned long ADC_GetFastITScanV(unsigned long DeviceIndex, double *pData)
     while(BytesLeft) {
           result = ADC_BulkPoll(DeviceIndex, &BytesLeft);
           if(result != AIOUSB_SUCCESS) {
-            /* #ifdef DEBUG */
-            /*         printf( "Error '%s' polling bulk acquire progress\n", AIOUSB_GetResultCodeAsString( result ) ); */
-            /* #endif */
                 break;
             }else {
-            /* #ifdef DEBUG */
-            /*         printf( "  %lu bytes remaining\n", BytesLeft ); */
-            /* #endif */
                 numsleep++;
                 usleep(10);
                 if(numsleep > 100) {

@@ -112,8 +112,10 @@ AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex, i
                                                                                                           channel */
   }
   tmp->testing      = AIOUSB_FALSE;
-  tmp->totalsize    = num_channels * bufsize;
-  tmp->size         = bufsize;
+  tmp->size =   num_channels * bufsize;
+  tmp->basesize = bufsize;
+  /* tmp->totalsize    = num_channels * bufsize; */
+  /* tmp->size         = bufsize; */
   tmp->usbbuf_size  = 128*512;
   tmp->buffer       = (AIOBufferType *)malloc( tmp->size *sizeof(AIOBufferType ));
   tmp->_read_pos    = 0;
@@ -134,13 +136,24 @@ AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex, i
 }
 
 
+AIORET_TYPE AIOContinuousBuf_InitConfiguration(  AIOContinuousBuf *buf ) 
+{
+  ADConfigBlock config;
+  AIORET_TYPE retval;
+  unsigned long tmp;
+  ADC_InitConfigBlock( &config, (void *)&deviceTable[AIOContinuousBuf_GetDeviceIndex( buf )], AD_MAX_CONFIG_REGISTERS - 1 );
+  config.testing = buf->testing;
+  AIOContinousBuf_SendPreConfig( buf );
+  tmp = AIOUSB_SetConfigBlock( AIOContinuousBuf_GetDeviceIndex( buf ), &config );
+  if ( tmp != AIOUSB_SUCCESS ) {
+      retval = -(AIORET_TYPE)tmp;
+  }
+  return retval;
+}
+
 AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex , int bufsize , unsigned num_channels )
 {
   AIOContinuousBuf *tmp = NewAIOContinuousBufWithoutConfig( DeviceIndex,  bufsize, num_channels );
-  ADConfigBlock config;
-  ADC_InitConfigBlock( &config, (void *)&deviceTable[DeviceIndex], AD_MAX_CONFIG_REGISTERS - 1 );
-  AIOContinousBuf_SendPreConfig( tmp );
-  AIOUSB_SetConfigBlock( AIOContinuousBuf_GetDeviceIndex( tmp ), &config );
   return tmp;
 }
 
@@ -148,11 +161,6 @@ AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex , int bu
 {
   AIOContinuousBuf *tmp = NewAIOContinuousBufWithoutConfig( DeviceIndex,  bufsize, num_channels );
   tmp->testing = AIOUSB_TRUE;
-  ADConfigBlock config;
-  ADC_InitConfigBlock( &config, (void *)&deviceTable[DeviceIndex], AD_MAX_CONFIG_REGISTERS - 1 );
-  config.testing = AIOUSB_TRUE;
-  AIOContinousBuf_SendPreConfig( tmp );
-  AIOUSB_SetConfigBlock( AIOContinuousBuf_GetDeviceIndex( tmp ), &config );
   return tmp;
 }
 
@@ -247,7 +255,7 @@ unsigned get_write_pos( AIOContinuousBuf *buf )
 
 unsigned buffer_size( AIOContinuousBuf *buf )
 {
-  return buf->totalsize;
+  return buf->size;
 }
 
 
@@ -261,7 +269,6 @@ unsigned buffer_size( AIOContinuousBuf *buf )
  *  0 
  *  - if the abs( _write_pos - _read_pos ) = 0 , then our value is Size
  */
-
 unsigned write_size( AIOContinuousBuf *buf ) {
   unsigned retval = 0;
   unsigned read, write;
@@ -270,7 +277,6 @@ unsigned write_size( AIOContinuousBuf *buf ) {
  if( read > write ) {
    retval =  read - write;
  } else {
-   /* retval = write - read; */
    return buffer_size(buf) - (get_write_pos (buf) - get_read_pos (buf));
  }
  return retval;
@@ -303,7 +309,7 @@ unsigned AIOContinuousBufAvailableReadSize( AIOContinuousBuf *buf )
 
 unsigned buffer_max( AIOContinuousBuf *buf )
 {
-  return buf->totalsize-1;
+  return buf->size-1;
 }
 
 void AIOContinuousBufReset( AIOContinuousBuf *buf )
@@ -313,10 +319,6 @@ void AIOContinuousBufReset( AIOContinuousBuf *buf )
   set_write_pos(buf, 0 );
   AIOContinuousBufUnlock( buf );
 }
-
-/* void *(*g)(void *obj) */
-/* AIOUSB_WorkFn */
-/*        AIOContinuousBuf_GetCallback( AIOContinuousBuf *buf ) */
 
 /** 
  * @desc Returns 
@@ -479,10 +481,6 @@ AIORET_TYPE AIOContinuousBuf_CopyData( AIOContinuousBuf *buf , unsigned short *d
      unsigned stopval=0;
      unsigned long DeviceIndex = AIOContinuousBuf_GetDeviceIndex( buf );
      unsigned number_channels = AIOContinuousBuf_NumberChannels(buf);
-     /* AIOBufferType *tmpbuf = (AIOBufferType *)malloc( (number_channels+256)*sizeof(AIOBufferType)); */
-     /* AIOBufferType *tmpbuf = (AIOBufferType *)malloc( (*size / AIOContinuousBuf_GetOverSample(buf))*sizeof(AIOBufferType)  ); */
-     /* if ( !buf->tmpbuf  || buf->tmpbufsize != number_channels ) { */
-     /* } */
      AIOBufferType *tmpbuf = AIOContinuousBuf_CreateTmpBuf( buf, (*size / (AIOContinuousBuf_GetOverSample(buf) + 1)) );
      
      int core_size = 256;
@@ -1740,9 +1738,9 @@ void stress_test_drain_buffer( int bufsize )
     buf_unit  = channel_list[i];
     actual_bufsize = ( tmpsize / oversamples[0] / channel_list[i] ) * repeat_count;
 
-    /* buf = NewAIOContinuousBufTesting( 0, bufsize , buf_unit ); */
-    buf = NewAIOContinuousBufTesting( 0, actual_bufsize , buf_unit );
 
+    buf = NewAIOContinuousBufTesting( 0, actual_bufsize , buf_unit );
+    AIOContinuousBuf_InitConfiguration(buf); /* Needed to enforce Testing mode */
     AIOContinuousBuf_SetAllGainCodeAndDiffMode( buf, AD_GAIN_CODE_0_5V , AIOUSB_FALSE );
     AIOContinuousBuf_SetOverSample( buf, 255 );
     AIOContinuousBuf_SetDiscardFirstSample( buf, 0 );
@@ -1767,10 +1765,9 @@ void stress_test_drain_buffer( int bufsize )
            (int)datatransferred, 
            get_write_pos(buf)
            );
-    printf("%s - Ch=%d 1st Avgd=%f expected=%f\n",  ( roundf(1000*buf->buffer[get_read_pos(buf)]) == roundf(1000*(127.0 / 65538.0)*5.0) ? "ok" : "not ok" ),
+    printf("%s - Ch=%d 1st Avgd=%f expected=%f\n",  ( roundf(1000*buf->buffer[get_read_pos(buf)]) == roundf(1000*(data[0] / 65538.0)*5.0) ? "ok" : "not ok" ),
            channel_list[i],
-           buf->buffer[get_read_pos(buf)], 
-           (127.0 / 65537.0)*5.0 );
+           buf->buffer[get_read_pos(buf)], (data[0] / 65538.0)*5.0);
 
     /* Drain the buffer */
     datatransferred = 0;
@@ -1917,9 +1914,6 @@ int main(int argc, char *argv[] )
 {
   
   AIORET_TYPE retval;
-
-  /* AIOContinuousBuf_SetDeviceIndex( buf, 0 ); */
-  /* AIOContinuousBuf_SetCallback( buf , doit ); */
 
   printf("1..184\n");
   int bufsize = 10000;

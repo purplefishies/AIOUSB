@@ -36,7 +36,8 @@ typedef struct {
   unsigned divisora;
   unsigned divisorb;
   unsigned _read_pos, _write_pos;
-  unsigned totalsize;
+  /* unsigned totalsize; */
+  unsigned basesize;
   unsigned size;
   unsigned counter_control;
   unsigned timeout;
@@ -51,6 +52,8 @@ typedef struct {
 AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex , int bufsize, unsigned number_channels );
 AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex , int bufsize , unsigned num_channels );
 void DeleteAIOContinuousBuf( AIOContinuousBuf *buf );
+AIORET_TYPE AIOContinuousBuf_InitConfiguration(  AIOContinuousBuf *buf );
+
 void AIOContinousBuf_SetTesting( AIOContinuousBuf *buf, AIOUSB_BOOL testing );
 AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex , int bufsize , unsigned num_channels );
 

@@ -12,7 +12,7 @@ main(int argc, char *argv[] )
   int number_channels = 16;
   AIOContinuousBuf *buf = 0;
   int keepgoing = 1;
-  AIORET_TYPE retval;
+  AIORET_TYPE retval = AIOUSB_SUCCESS;
   AIOBufferType *tmp = (AIOBufferType *)malloc(sizeof(AIOBufferType *)*bufsize);
   if( !tmp ) {
     fprintf(stderr,"Can't allocate memory for temporary buffer \n");
@@ -42,10 +42,10 @@ main(int argc, char *argv[] )
   /* ADC_QueryCal( AIOContinuousBuf_GetDeviceIndex(buf) ); */
   /* result = ADC_SetConfig( AIOContinuousBuf_GetDeviceIndex(buf), configBlock.registers, &configBlock.size ); */
   /* or ... */
+
+  AIOContinuousBuf_InitConfiguration( buf );
   AIOContinuousBuf_SetAllGainCodeAndDiffMode( buf , AD_GAIN_CODE_0_5V , AIOUSB_FALSE );
   AIOContinuousBuf_SetOverSample( buf, 0 );
-  retval = 0;
-  /* retval = AIOContinuousBufSimpleSetupConfig( buf, AD_GAIN_CODE_0_5V ); */
 
   if ( retval < AIOUSB_SUCCESS ) {
     printf("Error setting up Simple Config\n");
