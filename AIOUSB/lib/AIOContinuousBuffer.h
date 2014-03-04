@@ -41,6 +41,7 @@ typedef struct {
   unsigned size;
   unsigned counter_control;
   unsigned timeout;
+  int exitcode;
   AIOUSB_BOOL testing;
   unsigned extra;                     /**< Keeps track of under writes */
   AIOChannelMask *mask;               /**< Used for keeping track of channels */
@@ -79,6 +80,7 @@ unsigned int AIOContinuousBufAvailableReadSize( AIOContinuousBuf *buf );
 void AIOContinuousBufSetClock( AIOContinuousBuf *buf, unsigned int hz );
 AIORET_TYPE AIOContinuousBufEnd( AIOContinuousBuf *buf );
 AIORET_TYPE AIOContinuousBufSimpleSetupConfig( AIOContinuousBuf *buf, ADGainCode gainCode );
+AIORET_TYPE AIOContinuousBuf_ResetDevice( AIOContinuousBuf *buf);
 
 unsigned buffer_max( AIOContinuousBuf *buf );
 unsigned AIOContinuousBufGetDivisorA( AIOContinuousBuf *buf );

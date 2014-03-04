@@ -24,22 +24,19 @@ namespace AIOUSB {
 
 
 enum {
-    AD_MAX_CHANNELS           = 128,                // maximum number of channels supported by this driver
-    AD_GAIN_CODE_MASK               = 7
+  AD_MAX_CHANNELS    = 128,    /* maximum number of channels supported by this driver */
+  AD_GAIN_CODE_MASK  = 7
 };
 
-static const struct ADRange {
-    double minVolts;
-    double range;
-} adRanges[ AD_NUM_GAIN_CODES ] = {
-    { 0, 10 },                                                    // AD_GAIN_CODE_0_10V
-    { -10, 20 },                                                  // AD_GAIN_CODE_10V
-    { 0, 5 },                                                     // AD_GAIN_CODE_0_5V
-    { -5, 10 },                                                   // AD_GAIN_CODE_5V
-    { 0, 2 },                                                     // AD_GAIN_CODE_0_2V
-    { -2, 4 },                                                    // AD_GAIN_CODE_2V
-    { 0, 1 },                                                     // AD_GAIN_CODE_0_1V
-    { -1, 2 }                                                     // AD_GAIN_CODE_1V
+struct ADRange adRanges[ AD_NUM_GAIN_CODES ] = {
+  { 0, 10 },                                                    /* AD_GAIN_CODE_0_10V  */
+  { -10, 20 },                                                  /* AD_GAIN_CODE_10V    */
+  { 0, 5 },                                                     /* AD_GAIN_CODE_0_5V   */
+  { -5, 10 },                                                   /* AD_GAIN_CODE_5V     */
+  { 0, 2 },                                                     /* AD_GAIN_CODE_0_2V   */
+  { -2, 4 },                                                    /* AD_GAIN_CODE_2V     */
+  { 0, 1 },                                                     /* AD_GAIN_CODE_0_1V   */
+  { -1, 2 }                                                     /* AD_GAIN_CODE_1V     */  
 };
 
 // formerly public in the API
@@ -611,7 +608,27 @@ out_aiousb_getscan:
     return result;
 }
 
+unsigned ADC_GetOversample_Cached( ADConfigBlock *config )
+{
+  assert(config);
+  return config->registers[ AD_CONFIG_OVERSAMPLE ];
+}
+
+unsigned ADC_GainCode_Cached( ADConfigBlock *config, unsigned channel)
+{
+  assert(config);
+  DeviceDescriptor *deviceDesc = (DeviceDescriptor *)config->device;
+  unsigned gainCode = (config->registers[ AD_CONFIG_GAIN_CODE + channel / deviceDesc->ADCChannelsPerGroup ] & ( unsigned char )AD_GAIN_CODE_MASK );
+  return gainCode;
+}
+
+DeviceDescriptor *AIOUSB_GetDevice_NoCheck( unsigned long DeviceIndex  )
+{
+  return &deviceTable[DeviceIndex];
+}
+
 /**
+
  * @desc Combines the oversample channels as well as combines the rules for removing
  *       the first discard channel if it is enabled. Channels are average and then 
  *       the resulting array size is altered to reflect the new size of the counts
@@ -628,23 +645,26 @@ AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex,
                                      unsigned numChannels
                                      )
 {
-    unsigned long result;
     unsigned pos, cur;
     if(counts == NULL)
         return (AIORET_TYPE)-AIOUSB_ERROR_INVALID_PARAMETER;
-    DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);    
-    if(!deviceDesc || result != AIOUSB_SUCCESS)
+    /* DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);     */
+    DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_NoCheck( DeviceIndex );
+    if( !deviceDesc )
         return (AIORET_TYPE)-AIOUSB_ERROR_INVALID_DATA;
 
-    AIOUSB_UnLock();                                 /* unlock while communicating with device */
-    result = ReadConfigBlock(DeviceIndex, AIOUSB_FALSE);
+    /* AIOUSB_UnLock(); */
+    /* result = ReadConfigBlock(DeviceIndex, AIOUSB_FALSE); */
     AIOUSB_BOOL discardFirstSample  = deviceDesc->discardFirstSample;
-    unsigned numOverSamples         = AIOUSB_GetOversample(&deviceDesc->cachedConfigBlock);
+    unsigned numOverSamples         = ADC_GetOversample_Cached( &deviceDesc->cachedConfigBlock );
     unsigned long sum;
+    int repeat = 0;
     for ( cur = 0, pos = 0; cur < *size ; ) {
-        for ( unsigned channel = 0; channel < numChannels; channel ++ , pos ++) {
+        for ( unsigned channel = 0; channel < numChannels && cur < *size; channel ++ , pos ++) {
             sum = 0;
-            for( unsigned os = 0; os < numOverSamples+1; os ++ , cur ++ ) {
+            /* Needs bail out when cur > *size */
+            for( unsigned os = 0; os <= numOverSamples && cur < *size; os ++ , cur ++ ) {
+              /* printf("Pos=%d, Cur=%d, Ch=%d, Os=%d\n", pos, cur, channel,os); */
                 if ( discardFirstSample && os == 0 ) {
                 } else {
                     sum += counts[cur];
@@ -661,6 +681,7 @@ AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex,
             }
             counts[pos] = (unsigned short)sum;
         }
+        repeat ++;
     }
     *size = pos;
     return (AIORET_TYPE)pos;
@@ -3589,26 +3610,10 @@ void AIOUSB_SetScanRange(ADConfigBlock *config, unsigned startChannel, unsigned 
       }
 }
 
-
-/**
- *
- *
- * @param config
- *
- * @return
- */
 unsigned AIOUSB_GetOversample(const ADConfigBlock *config)
 {
     assert(config != 0);
-    unsigned overSample = 0;                                // return reasonable value on error
-    if(
-        config != 0 &&
-        config->device != 0 &&
-        config->size != 0
-        ) {
-          overSample = config->registers[ AD_CONFIG_OVERSAMPLE ];
-      }
-    return overSample;
+    return config->registers[ AD_CONFIG_OVERSAMPLE ];
 }
 
 
@@ -3622,14 +3627,7 @@ unsigned AIOUSB_GetOversample(const ADConfigBlock *config)
 void AIOUSB_SetOversample(ADConfigBlock *config, unsigned overSample)
 {
     assert(config != 0);
-    if(
-        config != 0 &&
-        config->device != 0 &&
-        config->size != 0 &&
-        overSample <= 255
-        ) {
-          config->registers[ AD_CONFIG_OVERSAMPLE ] = ( unsigned char )overSample;
-      }
+    config->registers[ AD_CONFIG_OVERSAMPLE ] = ( unsigned char )overSample;
 }
 
 
