@@ -223,6 +223,22 @@ typedef struct  {
 } ProductIDName;
 
 
+struct ADRange {
+  double minVolts;
+  double range;
+};
+
+PRIVATE_EXTERN struct ADRange adRanges[];
+/* struct ADRange adRanges[ AD_NUM_GAIN_CODES ] = { */
+/*   { 0, 10 },                                                    // AD_GAIN_CODE_0_10V */
+/*   { -10, 20 },                                                  // AD_GAIN_CODE_10V */
+/*   { 0, 5 },                                                     // AD_GAIN_CODE_0_5V */
+/*   { -5, 10 },                                                   // AD_GAIN_CODE_5V */
+/*   { 0, 2 },                                                     // AD_GAIN_CODE_0_2V */
+/*   { -2, 4 },                                                    // AD_GAIN_CODE_2V */
+/*   { 0, 1 },                                                     // AD_GAIN_CODE_0_1V */
+/*   { -1, 2 }                                                     // AD_GAIN_CODE_1V */
+/* }; */
 
 
 
@@ -234,10 +250,11 @@ PRIVATE_EXTERN ADConfigBlock *AIOUSB_GetConfigBlock( unsigned long DeviceIndex )
 PRIVATE_EXTERN unsigned long AIOUSB_SetConfigBlock( unsigned long DeviceIndex , ADConfigBlock *entry);
 PRIVATE_EXTERN AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex );
 PRIVATE_EXTERN unsigned long ADC_CopyConfig(unsigned long DeviceIndex, ADConfigBlock *config  );
-
 PRIVATE_EXTERN unsigned long ADC_ResetDevice( unsigned long DeviceIndex  );
-
 PRIVATE_EXTERN AIORET_TYPE AIOUSB_GetDeviceSerialNumber( unsigned long DeviceIndex );
+
+extern AIORET_TYPE ADC_WriteADConfigBlock( unsigned long DeviceIndex , ADConfigBlock *config );
+
 
 #ifndef SWIG
 PRIVATE_EXTERN DeviceDescriptor deviceTable[ MAX_USB_DEVICES ];
@@ -264,7 +281,9 @@ PRIVATE_EXTERN int AIOUSB_BulkTransfer( struct libusb_device_handle *dev_handle,
                                         unsigned char endpoint, unsigned char *data, 
                                         int length, int *transferred, unsigned int timeout );
 
-
+unsigned ADC_GetOversample_Cached( ADConfigBlock *config );
+unsigned ADC_GainCode_Cached( ADConfigBlock *config, unsigned channel);
+DeviceDescriptor *AIOUSB_GetDevice_NoCheck( unsigned long DeviceIndex  );
 AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex, 
                                      unsigned short *counts,
                                      unsigned *size ,
