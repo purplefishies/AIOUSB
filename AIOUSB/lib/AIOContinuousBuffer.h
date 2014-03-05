@@ -31,6 +31,8 @@ typedef struct {
   AIOUSB_WorkFn work;
   unsigned long DeviceIndex;
   AIOBufferType *buffer;
+  unsigned char *countsbuf;
+  unsigned countsbufsize;
   unsigned hz;
   unsigned usbbuf_size;
   unsigned divisora;
@@ -51,10 +53,13 @@ typedef struct {
 } AIOContinuousBuf;
 
 AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex , int bufsize, unsigned number_channels );
-AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex , int bufsize , unsigned num_channels );
+AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex, int scancounts , unsigned num_channels , AIOUSB_BOOL counts );
+AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, int scancounts, unsigned num_channels );
+
 void DeleteAIOContinuousBuf( AIOContinuousBuf *buf );
 AIORET_TYPE AIOContinuousBuf_InitConfiguration(  AIOContinuousBuf *buf );
 
+void AIOContinuousBuf_SetCallback(AIOContinuousBuf *buf , void *(*work)(void *object ) );
 void AIOContinousBuf_SetTesting( AIOContinuousBuf *buf, AIOUSB_BOOL testing );
 AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex , int bufsize , unsigned num_channels );
 
