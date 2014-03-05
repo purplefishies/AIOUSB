@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <aiousb.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include <math.h>
 #include <AIODataTypes.h>
@@ -33,8 +34,9 @@ main(int argc, char *argv[] )
     AIOContinuousBuf *buf = 0;
     int keepgoing = 1;
     unsigned read_count = 0;
+    unsigned char *tbuf;
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    AIOBufferType *tmp = (AIOBufferType *)malloc(sizeof(AIOBufferType *)*options.buffer_size);
+    unsigned short *tmp = (unsigned short *)malloc(sizeof(unsigned short)*options.buffer_size*options.number_channels);
     if( !tmp ) {
         fprintf(stderr,"Can't allocate memory for temporary buffer \n");
         _exit(1);
@@ -57,7 +59,16 @@ main(int argc, char *argv[] )
         fprintf(stderr,"Unable to open '%s' for writing\n", options.outfile );
         _exit(1);
     }
-  
+    /* int count; */
+    /* for( count = 0; count < buf->size ; count += 65536 ) { */
+    /*     /\* unsigned char *cur = (unsigned char *)&(buf->buffer[count]); *\/ */
+    /*     unsigned char *cur = ((unsigned char *)(&buf->buffer[0])+count); */
+    /*     unsigned char data[65536]; */
+    /*     printf("%d\n",count); */
+    /*     memcpy(cur, data, 65536 ); */
+    /* } */
+    /* printf("After\n"); */
+    /* _exit(0); */
 
     /**
      * 1. Each buf should have a device index associated with it, so 
@@ -109,16 +120,22 @@ main(int argc, char *argv[] )
          * in this example we read bytes in blocks of our core number_channels parameter. 
          * the channel order
          */
-        /* read_count += AIOContinuousBufRead( buf, tmp, AIOContinuousBuf_NumberChannels(buf) ); */
         while ( keepgoing && (AIOContinuousBufAvailableReadSize(buf) > AIOContinuousBuf_NumberChannels(buf) ) ) { 
-          /* printf("Reading\n"); */
-          retval = AIOContinuousBufRead( buf, tmp, AIOContinuousBuf_NumberChannels(buf) );
-          if ( retval < AIOUSB_SUCCESS ) {
-            fprintf(stderr,"ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf) );
-            keepgoing = 0;
-          } else {
-            read_count += retval;
-          }
+            /* printf("Reading\n"); */
+            retval = AIOContinuousBufRead( buf, (AIOBufferType *)tmp, AIOContinuousBuf_NumberChannels(buf) );
+            if ( retval < AIOUSB_SUCCESS ) {
+                fprintf(stderr,"ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf) );
+                keepgoing = 0;
+            } else {
+                read_count += retval;
+                for( int i = 0 ; i < AIOContinuousBuf_NumberChannels(buf) * (sizeof(AIOBufferType)/sizeof(short)); i ++ ) {
+                    /* fwrite("%h", sizeof(short),tmp[i] , fp); */
+                    fprintf(fp,"%d,",(int)tmp[i]);
+                    if( (i+1)%AIOContinuousBuf_NumberChannels(buf) == 0 ) {
+                        fprintf(fp,"\n");
+                    }
+                }
+            }
         }
     }
     fclose(fp);
