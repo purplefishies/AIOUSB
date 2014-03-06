@@ -34,7 +34,7 @@ main(int argc, char *argv[] )
     AIOContinuousBuf *buf = 0;
     int keepgoing = 1;
     unsigned read_count = 0;
-    unsigned char *tbuf;
+
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     unsigned short *tmp = (unsigned short *)malloc(sizeof(unsigned short)*options.buffer_size*options.number_channels);
     if( !tmp ) {
@@ -59,14 +59,20 @@ main(int argc, char *argv[] )
         fprintf(stderr,"Unable to open '%s' for writing\n", options.outfile );
         _exit(1);
     }
-    /* int count; */
-    /* for( count = 0; count < buf->size ; count += 65536 ) { */
+    /* unsigned count = 0; */
+    /* unsigned delta = AIOContinuousBuf_NumberChannels(buf)*512; */
+    /* unsigned char *data = (unsigned char *)malloc( delta ); */
+    /* memset(&data[0],(unsigned char)1,delta); */
+    /* for( count = 0; count < 2*buf->size; ) { */
     /*     /\* unsigned char *cur = (unsigned char *)&(buf->buffer[count]); *\/ */
     /*     unsigned char *cur = ((unsigned char *)(&buf->buffer[0])+count); */
-    /*     unsigned char data[65536]; */
-    /*     printf("%d\n",count); */
-    /*     memcpy(cur, data, 65536 ); */
+    /*     unsigned  tmpcount =  ( (2*buf->size - count) < delta ? (2*buf->size-count) : delta ); */
+    /*     count += tmpcount; */
+    /*     /\* unsigned char data[delta]; *\/ */
+    /*     printf("%u\n",count); */
+    /*     memcpy(cur, data, tmpcount  ); */
     /* } */
+    /* free(data); */
     /* printf("After\n"); */
     /* _exit(0); */
 
@@ -83,7 +89,9 @@ main(int argc, char *argv[] )
     AIOContinuousBuf_InitConfiguration( buf );
     AIOContinuousBuf_SetAllGainCodeAndDiffMode( buf , options.gain_code , AIOUSB_FALSE );
     AIOContinuousBuf_SetOverSample( buf, 0 );
-
+    AIOContinuousBuf_SetStartAndEndChannel( buf, 0, AIOContinuousBuf_NumberChannels(buf)-1 );
+    AIOContinuousBuf_SaveConfig( buf );
+    
     if ( retval < AIOUSB_SUCCESS ) {
         printf("Error setting up configuration\n");
         _exit(1);
@@ -129,15 +137,34 @@ main(int argc, char *argv[] )
             } else {
                 read_count += retval;
                 for( int i = 0 ; i < AIOContinuousBuf_NumberChannels(buf) * (sizeof(AIOBufferType)/sizeof(short)); i ++ ) {
-                    /* fwrite("%h", sizeof(short),tmp[i] , fp); */
-                    fprintf(fp,"%d,",(int)tmp[i]);
-                    if( (i+1)%AIOContinuousBuf_NumberChannels(buf) == 0 ) {
+                    fprintf(fp,"%d,",(int)tmp[i]);                    
+                    /* fprintf(fp,"0x%x,",(int)tmp[i]); */
+                    if( (i+1) % AIOContinuousBuf_NumberChannels(buf) == 0 ) {
                         fprintf(fp,"\n");
                     }
                 }
             }
         }
     }
+    while ( (AIOContinuousBufAvailableReadSize(buf) > AIOContinuousBuf_NumberChannels(buf) ) ) { 
+        /* printf("Reading\n"); */
+        retval = AIOContinuousBufRead( buf, (AIOBufferType *)tmp, AIOContinuousBuf_NumberChannels(buf) );
+        if ( retval < AIOUSB_SUCCESS ) {
+            fprintf(stderr,"ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf) );
+            keepgoing = 0;
+        } else {
+            read_count += retval;
+            for( int i = 0 ; i < AIOContinuousBuf_NumberChannels(buf) * (sizeof(AIOBufferType)/sizeof(short)); i ++ ) {
+                /* fwrite("%h", sizeof(short),tmp[i] , fp); */
+                fprintf(fp,"%d,",(int)tmp[i]);
+                if( (i+1)%AIOContinuousBuf_NumberChannels(buf) == 0 ) {
+                    fprintf(fp,"\n");
+                }
+            }
+        }
+    }
+
+
     fclose(fp);
     fprintf(stderr,"Test completed...exiting\n");
     /* retval = ( retval >= 0 ? 0 : - retval ); */

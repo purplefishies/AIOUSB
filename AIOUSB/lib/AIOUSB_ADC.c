@@ -3533,9 +3533,7 @@ unsigned AIOUSB_GetStartChannel(const ADConfigBlock *config)
         config->size != 0
         ) {
           if(config->size == AD_MUX_CONFIG_REGISTERS)
-              startChannel
-                  = ((config->registers[ AD_CONFIG_MUX_START_END ] & 0x0f) << 4)
-                    | (config->registers[ AD_CONFIG_START_END ] & 0xf);
+              startChannel = ((config->registers[ AD_CONFIG_MUX_START_END ] & 0x0f) << 4) | (config->registers[ AD_CONFIG_START_END ] & 0xf);
           else
               startChannel = (config->registers[ AD_CONFIG_START_END ] & 0xf);
       }
@@ -3577,37 +3575,36 @@ unsigned AIOUSB_GetEndChannel(const ADConfigBlock *config)
  * @param startChannel
  * @param endChannel
  */
-void AIOUSB_SetScanRange(ADConfigBlock *config, unsigned startChannel, unsigned endChannel)
+AIORET_TYPE AIOUSB_SetScanRange(ADConfigBlock *config, unsigned startChannel, unsigned endChannel)
 {
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
     assert(config != 0);
-    if(
-        config != 0 &&
-        config->device != 0 &&
-        config->size != 0 &&
-        AIOUSB_Lock()
-        ) {
-          const DeviceDescriptor *const deviceDesc = ( DeviceDescriptor* )config->device;
-          if(
-              endChannel < AD_MAX_CHANNELS &&
-              endChannel < deviceDesc->ADCMUXChannels &&
-              startChannel <= endChannel
-              ) {
-                if(config->size == AD_MUX_CONFIG_REGISTERS) {
-                  /*
-                   * this board has a MUX, so support more channels
-                   */
-                      config->registers[ AD_CONFIG_START_END ] = ( unsigned char )((endChannel << 4) | (startChannel & 0x0f));
-                      config->registers[ AD_CONFIG_MUX_START_END ] = ( unsigned char )((endChannel & 0xf0) | ((startChannel >> 4) & 0x0f));
-                  } else {
-                  /*
-                   * this board doesn't have a MUX, so support base
-                   * number of channels
-                   */
-                      config->registers[ AD_CONFIG_START_END ] = ( unsigned char )((endChannel << 4) | startChannel);
-                  }
+    if( config->device != 0 && config->size != 0 &&  AIOUSB_Lock() )  {
+        const DeviceDescriptor *const deviceDesc = ( DeviceDescriptor* )config->device;
+        if(
+           endChannel < AD_MAX_CHANNELS &&
+           endChannel < deviceDesc->ADCMUXChannels &&
+           startChannel <= endChannel
+           ) {
+            if(config->size == AD_MUX_CONFIG_REGISTERS) {
+                /*
+                 * this board has a MUX, so support more channels
+                 */
+                config->registers[ AD_CONFIG_START_END ] = ( unsigned char )((endChannel << 4) | (startChannel & 0x0f));
+                config->registers[ AD_CONFIG_MUX_START_END ] = ( unsigned char )((endChannel & 0xf0) | ((startChannel >> 4) & 0x0f));
+            } else {
+                /*
+                 * this board doesn't have a MUX, so support base
+                 * number of channels
+                 */
+                config->registers[ AD_CONFIG_START_END ] = ( unsigned char )((endChannel << 4) | startChannel);
             }
-          AIOUSB_UnLock();
-      }
+        }
+        AIOUSB_UnLock();
+    } else {
+        retval = -(AIOUSB_ERROR_INVALID_DATA);
+    }
+    return retval;
 }
 
 unsigned AIOUSB_GetOversample(const ADConfigBlock *config)

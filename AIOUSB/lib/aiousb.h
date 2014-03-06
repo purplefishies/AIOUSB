@@ -912,7 +912,7 @@ extern unsigned AIOUSB_GetTriggerMode( const ADConfigBlock *config );
 extern void AIOUSB_SetTriggerMode( ADConfigBlock *config, unsigned triggerMode );
 extern unsigned AIOUSB_GetStartChannel( const ADConfigBlock *config );
 extern unsigned AIOUSB_GetEndChannel( const ADConfigBlock *config );
-extern void AIOUSB_SetScanRange( ADConfigBlock *config, unsigned startChannel, unsigned endChannel );
+extern AIORET_TYPE AIOUSB_SetScanRange( ADConfigBlock *config, unsigned startChannel, unsigned endChannel );
 extern unsigned AIOUSB_GetOversample( const ADConfigBlock *config );
 extern void AIOUSB_SetOversample( ADConfigBlock *config, unsigned overSample );
 

@@ -250,10 +250,11 @@ PRIVATE_EXTERN ADConfigBlock *AIOUSB_GetConfigBlock( unsigned long DeviceIndex )
 PRIVATE_EXTERN unsigned long AIOUSB_SetConfigBlock( unsigned long DeviceIndex , ADConfigBlock *entry);
 PRIVATE_EXTERN AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex );
 PRIVATE_EXTERN unsigned long ADC_CopyConfig(unsigned long DeviceIndex, ADConfigBlock *config  );
-
 PRIVATE_EXTERN unsigned long ADC_ResetDevice( unsigned long DeviceIndex  );
-
 PRIVATE_EXTERN AIORET_TYPE AIOUSB_GetDeviceSerialNumber( unsigned long DeviceIndex );
+
+extern AIORET_TYPE ADC_WriteADConfigBlock( unsigned long DeviceIndex , ADConfigBlock *config );
+
 
 #ifndef SWIG
 PRIVATE_EXTERN DeviceDescriptor deviceTable[ MAX_USB_DEVICES ];

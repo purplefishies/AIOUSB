@@ -60,18 +60,18 @@ void DeleteAIOContinuousBuf( AIOContinuousBuf *buf );
 AIORET_TYPE AIOContinuousBuf_InitConfiguration(  AIOContinuousBuf *buf );
 
 void AIOContinuousBuf_SetCallback(AIOContinuousBuf *buf , void *(*work)(void *object ) );
-void AIOContinousBuf_SetTesting( AIOContinuousBuf *buf, AIOUSB_BOOL testing );
+void AIOContinuousBuf_SetTesting( AIOContinuousBuf *buf, AIOUSB_BOOL testing );
 AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex , int bufsize , unsigned num_channels );
 
-static AIORET_TYPE AIOContinousBuf_SendPreConfig( AIOContinuousBuf *buf );
+static AIORET_TYPE AIOContinuousBuf_SendPreConfig( AIOContinuousBuf *buf );
 
-
+AIORET_TYPE AIOContinuousBuf_SetStartAndEndChannel( AIOContinuousBuf *buf, unsigned startChannel, unsigned endChannel );
 unsigned AIOContinuousBuf_GetOverSample( AIOContinuousBuf *buf );
 void AIOContinuousBuf_SetOverSample( AIOContinuousBuf *buf, unsigned os );
 void AIOContinuousBuf_SetAllGainCodeAndDiffMode( AIOContinuousBuf *buf, ADGainCode gain, AIOUSB_BOOL diff );
 void AIOContinuousBuf_SetDiscardFirstSample(  AIOContinuousBuf *buf , AIOUSB_BOOL discard );
 unsigned AIOContinuousBuf_NumberChannels( AIOContinuousBuf *buf );
-
+AIORET_TYPE AIOContinuousBuf_SaveConfig( AIOContinuousBuf *buf );
 
 AIORET_TYPE AIOContinuousBufLock( AIOContinuousBuf *buf );
 AIORET_TYPE AIOContinuousBufUnlock( AIOContinuousBuf *buf );
