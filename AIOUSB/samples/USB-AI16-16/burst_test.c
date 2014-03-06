@@ -90,7 +90,7 @@ main(int argc, char *argv[] )
     AIOContinuousBuf_SetAllGainCodeAndDiffMode( buf , options.gain_code , AIOUSB_FALSE );
     AIOContinuousBuf_SetOverSample( buf, 0 );
     AIOContinuousBuf_SetStartAndEndChannel( buf, 0, AIOContinuousBuf_NumberChannels(buf)-1 );
-    AIOContinuousBuf_SaveConfig( buf );
+    /* AIOContinuousBuf_SaveConfig( buf ); */
     
     if ( retval < AIOUSB_SUCCESS ) {
         printf("Error setting up configuration\n");
@@ -128,17 +128,15 @@ main(int argc, char *argv[] )
          * in this example we read bytes in blocks of our core number_channels parameter. 
          * the channel order
          */
-        while ( keepgoing && (AIOContinuousBufAvailableReadSize(buf) > AIOContinuousBuf_NumberChannels(buf) ) ) { 
-            /* printf("Reading\n"); */
-            retval = AIOContinuousBufRead( buf, (AIOBufferType *)tmp, AIOContinuousBuf_NumberChannels(buf) );
-            if ( retval < AIOUSB_SUCCESS ) {
+        while ( keepgoing && AIOContinuousBufCountsAvailable(buf) ) {
+            retval = AIOContinuousBufReadAvailableCounts( buf, (unsigned short *)tmp );
+            if( retval < AIOUSB_SUCCESS ) {
                 fprintf(stderr,"ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf) );
                 keepgoing = 0;
             } else {
-                read_count += retval;
-                for( int i = 0 ; i < AIOContinuousBuf_NumberChannels(buf) * (sizeof(AIOBufferType)/sizeof(short)); i ++ ) {
-                    fprintf(fp,"%d,",(int)tmp[i]);                    
-                    /* fprintf(fp,"0x%x,",(int)tmp[i]); */
+                unsigned short *tmpbuf = (unsigned short *)&tmp[0];
+                for( int i = 0 ; i < retval ; i ++ ) {
+                    fprintf(fp,"%u,",tmpbuf[i] );
                     if( (i+1) % AIOContinuousBuf_NumberChannels(buf) == 0 ) {
                         fprintf(fp,"\n");
                     }
@@ -146,18 +144,16 @@ main(int argc, char *argv[] )
             }
         }
     }
-    while ( (AIOContinuousBufAvailableReadSize(buf) > AIOContinuousBuf_NumberChannels(buf) ) ) { 
+    while (  AIOContinuousBufCountsAvailable(buf)  ) {
         /* printf("Reading\n"); */
-        retval = AIOContinuousBufRead( buf, (AIOBufferType *)tmp, AIOContinuousBuf_NumberChannels(buf) );
+        retval = AIOContinuousBufReadAvailableCounts( buf, (unsigned short *)tmp );
         if ( retval < AIOUSB_SUCCESS ) {
             fprintf(stderr,"ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf) );
-            keepgoing = 0;
         } else {
-            read_count += retval;
-            for( int i = 0 ; i < AIOContinuousBuf_NumberChannels(buf) * (sizeof(AIOBufferType)/sizeof(short)); i ++ ) {
-                /* fwrite("%h", sizeof(short),tmp[i] , fp); */
-                fprintf(fp,"%d,",(int)tmp[i]);
-                if( (i+1)%AIOContinuousBuf_NumberChannels(buf) == 0 ) {
+            unsigned short *tmpbuf = (unsigned short *)&tmp[0];
+            for( int i = 0 ; i < retval; i ++ ) {
+                fprintf(fp,"%u,",tmpbuf[i] );
+                if( (i+1) % AIOContinuousBuf_NumberChannels(buf) == 0 ) {
                     fprintf(fp,"\n");
                 }
             }
@@ -171,6 +167,30 @@ main(int argc, char *argv[] )
     /* return(retval); */
     return 0;
 }
+
+
+
+        
+
+    /*     while ( keepgoing && (AIOContinuousBufAvailableReadSize(buf) > AIOContinuousBuf_NumberChannels(buf)*sizeof(short)/sizeof(double) ) ) { */
+    /*         /\* printf("Reading\n"); *\/ */
+    /*         retval = AIOContinuousBufRead( buf, (AIOBufferType *)tmp, AIOContinuousBuf_NumberChannels(buf) ); */
+    /*         if ( retval < AIOUSB_SUCCESS ) { */
+    /*         } else { */
+    /*             read_count += retval; */
+    /*             for( int i = 0 ; i < AIOContinuousBuf_NumberChannels(buf) * (sizeof(AIOBufferType)/sizeof(short)); i ++ ) { */
+    /*                 fprintf(fp,"%d,",(int)tmp[i]); */
+    /*                 /\* fprintf(fp,"0x%x,",(int)tmp[i]); *\/ */
+    /*                 if( (i+1) % AIOContinuousBuf_NumberChannels(buf) == 0 ) { */
+    /*                     fprintf(fp,"\n"); */
+    /*                 } */
+    /*             } */
+    /*         } */
+    /*     } */
+    /* } */
+
+
+
 
 void print_usage(int argc, char **argv,  struct option *options)
 {

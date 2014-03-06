@@ -121,7 +121,8 @@ AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex, i
   tmp->size         = num_channels * scancounts;
   if( counts ) {
       tmp->buffer = (AIOBufferType *)malloc( tmp->size * sizeof(unsigned short));
-      tmp->countsbufsize = num_channels * scancounts;
+      /* tmp->bufsize = num_channels * scancounts; */
+      /* tmp->countsbufsize = num_channels * scancounts; */
   } else {
       tmp->buffer       = (AIOBufferType *)malloc( tmp->size *sizeof(AIOBufferType ));
   }
@@ -321,6 +322,26 @@ unsigned AIOContinuousBufAvailableReadSize( AIOContinuousBuf *buf )
 {
   return read_size(buf);
 }
+
+AIORET_TYPE AIOContinuousBufCountsAvailable(AIOContinuousBuf *buf) 
+{
+  AIORET_TYPE retval = AIOUSB_SUCCESS;
+  retval = AIOContinuousBufAvailableReadSize( buf ) * sizeof(AIOBufferType ) / sizeof(unsigned short) / AIOContinuousBuf_NumberChannels(buf);
+  return retval;
+
+}
+AIORET_TYPE AIOContinuousBufReadAvailableCounts( AIOContinuousBuf *buf, unsigned short *tmp )
+{
+  AIORET_TYPE retval = AIOUSB_SUCCESS;
+  int tmpavail = AIOContinuousBufCountsAvailable( buf );
+  for ( int i = 0, pos=0 ; i < tmpavail; i ++ , pos += AIOContinuousBuf_NumberChannels(buf) ) {
+    memcpy( &tmp[pos], buf->buffer, AIOContinuousBuf_NumberChannels(buf) * sizeof(unsigned short));
+    retval += AIOContinuousBuf_NumberChannels(buf);
+    set_read_pos( buf, get_read_pos(buf)+(AIOContinuousBuf_NumberChannels(buf)*sizeof(unsigned short)/sizeof(AIOBufferType)));
+  }
+  return retval;
+}
+
 
 unsigned buffer_max( AIOContinuousBuf *buf )
 {
@@ -602,12 +623,12 @@ void *RawCountsWorkFunction( void *object )
   AIOContinuousBuf *buf = (AIOContinuousBuf*)object;
   int bytes;
   /* unsigned datasize = 128*512; */
-  unsigned datasize = AIOContinuousBuf_NumberChannels(buf)*512;
+  unsigned datasize = AIOContinuousBuf_NumberChannels(buf)*16*512;
   int usbfail = 0;
   int usbfail_count = 5;
   unsigned char *data   = (unsigned char *)malloc( datasize );
   unsigned count = 0;
-
+  unsigned printcount = 0;
     /* unsigned count = 0; */
     /* unsigned delta = AIOContinuousBuf_NumberChannels(buf)*512; */
     /* unsigned char *data = (unsigned char *)malloc( delta ); */
@@ -636,7 +657,7 @@ void *RawCountsWorkFunction( void *object )
     if( bytes ) {
         unsigned char *cur = ((unsigned char *)(&buf->buffer[0])+count);
         unsigned tmpcount  = ( (2*buf->size - count) < bytes ? (2*buf->size-count) : bytes );
-
+        printcount ++;
         /* unsigned char data[delta]; */
         /* printf("%u\n",count); */
         /* memcpy(cur, data, tmpcount  ); */
@@ -650,11 +671,15 @@ void *RawCountsWorkFunction( void *object )
         /* unsigned char *cur = (unsigned char *)&(buf->buffer[count]); */
         /* unsigned char *cur = ((unsigned char *)(&buf->buffer[0])+count); */
         count += tmpcount;
-        printf("\t\tSampData=%hu:%hu:%hu,Bytes=%d, Tmpcount=%d, Count=%d,  Bufpos=%d, Max=%d\n",
-               (unsigned short)data[0],
-               (unsigned short)data[2],
-               (unsigned short)data[4],
-               bytes ,tmpcount, count, get_write_pos(buf), 2*buf->size);
+        /* puts("\t\tSampData= */
+        /* if( (printcount+1) % 10  == 0 ) { */
+        /* printf("\t\tPrintcount=%u,SampData=%hu:%hu:%hu,Bytes=%d, Tmpcount=%d, Count=%d, Bufpos=%d, Max=%d\n", */
+        /*        printcount, */
+        /*        (unsigned short)data[0], */
+        /*        (unsigned short)data[2], */
+        /*        (unsigned short)data[4], */
+        /*        bytes ,tmpcount, count, get_write_pos(buf), 2*buf->size); */
+        /* } */
         memcpy(cur, data, tmpcount  );
         /* memcpy(cur,data,bytes ); */
         /* count += bytes; */

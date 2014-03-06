@@ -82,6 +82,11 @@ AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf );
 unsigned int AIOContinuousBufGetReadPosition( AIOContinuousBuf *buf );
 unsigned int AIOContinuousBufGetWritePosition( AIOContinuousBuf *buf );
 unsigned int AIOContinuousBufAvailableReadSize( AIOContinuousBuf *buf );
+AIORET_TYPE AIOContinuousBufReadAvailableCounts( AIOContinuousBuf *buf, unsigned short *tmp );
+AIORET_TYPE AIOContinuousBufCountsAvailable(AIOContinuousBuf *buf);
+
+
+
 void AIOContinuousBufSetClock( AIOContinuousBuf *buf, unsigned int hz );
 AIORET_TYPE AIOContinuousBufEnd( AIOContinuousBuf *buf );
 AIORET_TYPE AIOContinuousBufSimpleSetupConfig( AIOContinuousBuf *buf, ADGainCode gainCode );
