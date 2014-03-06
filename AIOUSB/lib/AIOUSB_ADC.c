@@ -211,6 +211,7 @@ void ADC_InitConfigBlock(ADConfigBlock *config, void *deviceDesc, unsigned size 
   config->registers[AD_CONFIG_TRIG_COUNT] = AD_TRIGGER_CTR0_EXT | AD_TRIGGER_SCAN | AD_TRIGGER_TIMER;
   config->registers[AD_CONFIG_START_END] = 0xF0;
   config->registers[AD_CONFIG_MUX_START_END] = 0;
+  config->registers[AD_CONFIG_START_STOP_CHANNEL_EX] = 0;
 }
 
 void ADC_InitConfigBlockForTesting(ADConfigBlock *config, void *deviceDesc, unsigned size, AIOUSB_BOOL testing )

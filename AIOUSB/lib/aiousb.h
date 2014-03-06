@@ -334,6 +334,7 @@ enum {
     AD_CONFIG_START_END                 = 18, /* start and end channels for scan (bits 7-4 contain end channel, bits 3-0 contain start channel) */
     AD_CONFIG_OVERSAMPLE                = 19, /* oversample setting (0-255 samples in addition to single sample) */
     AD_CONFIG_MUX_START_END             = 20, /* MUX start and end channels for scan (bits 7-4 contain end channel MS-nibble, bits 3-0 contain start channel MS-nibble) */
+    AD_CONFIG_START_STOP_CHANNEL_EX     = 21,
 
     /* A/D gain codes */
     AD_NUM_GAIN_CODES                   = 8,

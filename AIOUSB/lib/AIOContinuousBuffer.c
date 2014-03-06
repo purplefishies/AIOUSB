@@ -153,7 +153,10 @@ AIORET_TYPE AIOContinuousBuf_InitConfiguration(  AIOContinuousBuf *buf )
   ADConfigBlock config;
   AIORET_TYPE retval;
   unsigned long tmp;
-  ADC_InitConfigBlock( &config, (void *)&deviceTable[AIOContinuousBuf_GetDeviceIndex( buf )], AD_MAX_CONFIG_REGISTERS - 1 );
+  DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_NoCheck( AIOContinuousBuf_GetDeviceIndex(buf));
+
+  ADC_InitConfigBlock( &config, (void *)&deviceTable[AIOContinuousBuf_GetDeviceIndex( buf )], deviceDesc->ConfigBytes  );
+  /* ADC_InitConfigBlock( &config, (void *)&deviceTable[AIOContinuousBuf_GetDeviceIndex( buf )], AD_MAX_CONFIG_REGISTERS - 1 ); */
   config.testing = buf->testing;
   AIOContinuousBuf_SendPreConfig( buf );
   tmp = AIOUSB_SetConfigBlock( AIOContinuousBuf_GetDeviceIndex( buf ), &config );
