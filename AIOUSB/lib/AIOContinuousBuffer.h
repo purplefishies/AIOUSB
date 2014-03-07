@@ -32,7 +32,7 @@ typedef struct {
   unsigned long DeviceIndex;
   AIOBufferType *buffer;
   unsigned char *countsbuf;
-  unsigned countsbufsize;
+  unsigned bufunitsize;
   unsigned hz;
   unsigned usbbuf_size;
   unsigned divisora;
@@ -55,13 +55,14 @@ typedef struct {
 AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex , int bufsize, unsigned number_channels );
 AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex, int scancounts , unsigned num_channels , AIOUSB_BOOL counts );
 AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, int scancounts, unsigned num_channels );
+AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex , int bufsize , unsigned num_channels , AIOUSB_BOOL counts  );
 
 void DeleteAIOContinuousBuf( AIOContinuousBuf *buf );
 AIORET_TYPE AIOContinuousBuf_InitConfiguration(  AIOContinuousBuf *buf );
 
 void AIOContinuousBuf_SetCallback(AIOContinuousBuf *buf , void *(*work)(void *object ) );
 void AIOContinuousBuf_SetTesting( AIOContinuousBuf *buf, AIOUSB_BOOL testing );
-AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex , int bufsize , unsigned num_channels );
+
 
 static AIORET_TYPE AIOContinuousBuf_SendPreConfig( AIOContinuousBuf *buf );
 
@@ -82,8 +83,9 @@ AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf );
 unsigned int AIOContinuousBufGetReadPosition( AIOContinuousBuf *buf );
 unsigned int AIOContinuousBufGetWritePosition( AIOContinuousBuf *buf );
 unsigned int AIOContinuousBufAvailableReadSize( AIOContinuousBuf *buf );
-AIORET_TYPE AIOContinuousBufReadAvailableCounts( AIOContinuousBuf *buf, unsigned short *tmp );
-AIORET_TYPE AIOContinuousBufCountsAvailable(AIOContinuousBuf *buf);
+/* AIORET_TYPE AIOContinuousBufReadAvailableCounts( AIOContinuousBuf *buf, unsigned short *tmp , unsigned tmpsize); */
+AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf, unsigned short *tmp , unsigned size );
+AIORET_TYPE AIOContinuousBufCountScansAvailable(AIOContinuousBuf *buf);
 
 
 
@@ -96,6 +98,8 @@ unsigned buffer_max( AIOContinuousBuf *buf );
 unsigned AIOContinuousBufGetDivisorA( AIOContinuousBuf *buf );
 unsigned AIOContinuousBufGetDivisorB( AIOContinuousBuf *buf );
 AIORET_TYPE AIOContinuousBufWrite( AIOContinuousBuf *buf, AIOBufferType *writebuf, unsigned size, AIOContinuousBufMode flag );
+AIORET_TYPE AIOContinuousBufWriteCounts( AIOContinuousBuf *buf, unsigned short *data, unsigned size , AIOContinuousBufMode flag );
+
 AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf );
 AIORET_TYPE AIOContinuousBufRead( AIOContinuousBuf *buf, AIOBufferType *readbuf , unsigned size);
 AIORET_TYPE AIOContinuousBufCleanup( AIOContinuousBuf *buf );
