@@ -41,7 +41,7 @@ main(int argc, char *argv[] )
     unsigned short tobuf[32768] = {0};
 
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    unsigned short *tmp = (unsigned short *)malloc(sizeof(unsigned short)*options.buffer_size*options.number_channels);
+    unsigned short *tmp = (unsigned short *)malloc(sizeof(unsigned short)*(options.buffer_size+1)*options.number_channels);
     if( !tmp ) {
       fprintf(stderr,"Can't allocate memory for temporary buffer \n");
       _exit(1);
@@ -50,7 +50,7 @@ main(int argc, char *argv[] )
 
     AIOUSB_Init();
     GetDevices();
-    buf = (AIOContinuousBuf *)NewAIOContinuousBufForCounts( 0, options.buffer_size, options.number_channels );
+    buf = (AIOContinuousBuf *)NewAIOContinuousBufForCounts( 0, (options.buffer_size+1), options.number_channels );
     if( !buf ) {
       fprintf(stderr,"Can't allocate memory for temporary buffer \n");
       _exit(1);
@@ -139,10 +139,8 @@ main(int argc, char *argv[] )
           /* sleep(1); */
       }
     }
-    sleep(1);
     fprintf(stderr,"Waiting : total=%u, readpos=%d, writepos=%d\n", read_count, AIOContinuousBufGetReadPosition(buf), AIOContinuousBufGetWritePosition(buf));
-
-    
+   
     while (  AIOContinuousBufCountScansAvailable(buf) ) {
       retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf , 32768 );
       printf("Read=%d,Write=%d,size=%d,Avail=%d\n",
