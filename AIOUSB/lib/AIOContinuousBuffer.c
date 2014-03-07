@@ -340,28 +340,43 @@ AIORET_TYPE AIOContinuousBufCountScansAvailable(AIOContinuousBuf *buf)
 
 /* AIORET_TYPE AIOContinuousBufReadAvailableCounts( AIOContinuousBuf *buf, unsigned short *tmp ) */
 /* AIORET_TYPE AIOContinuousBufReadAvailableCounts( AIOContinuousBuf *buf, unsigned short *tmp , unsigned size ) */
+#undef MIN
+#define MIN(X,Y) ( (X) < (Y) ? (X) : (Y) )
+/** 
+ * @desc will read in an integer number of scan counts if there is room.
+ * @param buf 
+ * @param tmp 
+ * @param size The size of the tmp buffer
+ * @return 
+ */
 AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf, unsigned short *tmp , unsigned size )
 {
   AIORET_TYPE retval = AIOUSB_SUCCESS;
+  int debug = 0;
   if( size < AIOContinuousBuf_NumberChannels(buf) ) {
       return -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
   }
-  int tmpavail = AIOContinuousBufCountScansAvailable( buf );
-  for ( int i = 0, pos=0 ; i < tmpavail && (pos + AIOContinuousBuf_NumberChannels(buf)-1) < size ; i ++ , pos += AIOContinuousBuf_NumberChannels(buf) ) {
+  /* int numscans = ( AIOContinuousBufCountScansAvailable( buf ) * AIOContinuousBuf_NumberChannels(buf))/ size; */
+  int numscans = size / AIOContinuousBuf_NumberChannels(buf);
+  
+  for ( int i = 0, pos=0 ; i < numscans && (pos + AIOContinuousBuf_NumberChannels(buf)-1) < size ; i ++ , pos += AIOContinuousBuf_NumberChannels(buf) ) {
       if( i == 0 )
         retval = AIOUSB_SUCCESS;
+      if( debug ) { 
+          printf("Using i=%d\n",i );
+      }
       retval += AIOContinuousBufRead( buf, (AIOBufferType *)&tmp[pos] , AIOContinuousBuf_NumberChannels(buf)*sizeof(unsigned short)/ sizeof(AIOBufferType ));
-      /* AIOContinuousBufRead( buf, &tmp[pos], AIOContinuousBuf_NumberChannels(buf) /  */
-      /* memcpy( &tmp[pos], &buf->buffer[pos*sizeof(unsigned short) / sizeof(double)], AIOContinuousBuf_NumberChannels(buf) * sizeof(unsigned short)); */
-      /* memcpy( &tmp[pos], buf->buffer, AIOContinuousBuf_NumberChannels(buf) * sizeof(unsigned short)); */
-      /* retval += AIOContinuousBuf_NumberChannels(buf); */
-      /* set_read_pos( buf, get_read_pos(buf)+(AIOContinuousBuf_NumberChannels(buf)*sizeof(unsigned short)/sizeof(AIOBufferType))); */
+
   }
 
   return retval;
 }
-
-  /* retval = AIOContinuousBufRead( buf, (AIOBufferType *)tmp, size / 4 ); */
+/* AIOContinuousBufRead( buf, &tmp[pos], AIOContinuousBuf_NumberChannels(buf) /  */
+/* memcpy( &tmp[pos], &buf->buffer[pos*sizeof(unsigned short) / sizeof(double)], AIOContinuousBuf_NumberChannels(buf) * sizeof(unsigned short)); */
+/* memcpy( &tmp[pos], buf->buffer, AIOContinuousBuf_NumberChannels(buf) * sizeof(unsigned short)); */
+/* retval += AIOContinuousBuf_NumberChannels(buf); */
+/* set_read_pos( buf, get_read_pos(buf)+(AIOContinuousBuf_NumberChannels(buf)*sizeof(unsigned short)/sizeof(AIOBufferType))); */
+/* retval = AIOContinuousBufRead( buf, (AIOBufferType *)tmp, size / 4 ); */
 
 unsigned buffer_max( AIOContinuousBuf *buf )
 {
@@ -2219,7 +2234,8 @@ void stress_copy_counts (int bufsize)
 
 
   while (  AIOContinuousBufCountScansAvailable(buf)  ) {
-    retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf , AIOContinuousBufCountScansAvailable(buf)*AIOContinuousBuf_NumberChannels(buf) );
+    /* retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf , AIOContinuousBufCountScansAvailable(buf)*AIOContinuousBuf_NumberChannels(buf) ); */
+      retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf , 32768 );
     if ( retval < AIOUSB_SUCCESS ) {
       printf("not ok - ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf));
     } else {
