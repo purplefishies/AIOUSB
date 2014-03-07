@@ -2268,15 +2268,18 @@ void stress_copy_counts (int bufsize)
   /* --buffersize 1000000 --numchannels 16  --clockrate 10000; */
   buf = NewAIOContinuousBufTesting( 0, 1000000, 16 , AIOUSB_TRUE );
   set_write_pos(buf, 16384 );
+  memset(usdata,0,bufsize/2);
+
   while (  AIOContinuousBufCountScansAvailable(buf)  ) {
-      retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf , AIOContinuousBufCountScansAvailable(buf)*AIOContinuousBuf_NumberChannels(buf) );
+      /* retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf , AIOContinuousBufCountScansAvailable(buf)*AIOContinuousBuf_NumberChannels(buf) ); */
+      retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf , 32768 );
       if ( retval < AIOUSB_SUCCESS ) {
           printf("not ok - ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf));
       } else {
           unsigned short *tmpbuf = (unsigned short *)&tobuf[0];
           for( int i = 0, ch = 0 ; i < retval; i ++, ch = ((ch+1)% AIOContinuousBuf_NumberChannels(buf)) ) {
-              if( tmpbuf[i] != usdata[i] ) {
-                  printf("not ok - got %u,  not %u\n", tmpbuf[i],  usdata[i] );
+              if( tobuf[i] != usdata[i] ) {
+                  printf("not ok - got %u,  not %u\n", tobuf[i],  usdata[i] );
                   failed ++;
               }
           }
