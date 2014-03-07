@@ -693,29 +693,26 @@ void *RawCountsWorkFunction( void *object )
   tmpf = fopen("tmpdata.txt","w");
 
   while ( buf->status == RUNNING  ) {
-      for( int i = 0; i < datasize; i ++ ) {
-          data[i] = rand()%255;
-      }
-      bytes = datasize;
-      /* usbresult = libusb_bulk_transfer( AIOUSB_GetDeviceHandle( AIOContinuousBuf_GetDeviceIndex( buf )), */
-      /*                                   0x86, */
-      /*                                   data, */
-      /*                                   datasize, */
-      /*                                   &bytes, */
-      /*                                   3000 */
-      /*                                   ); */
+      /* for( int i = 0; i < datasize; i ++ ) { */
+      /*     data[i] = rand()%255; */
+      /* } */
+      /* bytes = datasize; */
+      usbresult = libusb_bulk_transfer( AIOUSB_GetDeviceHandle( AIOContinuousBuf_GetDeviceIndex( buf )),
+                                        0x86,
+                                        data,
+                                        datasize,
+                                        &bytes,
+                                        3000
+                                        );
       
       AIOUSB_DEVEL("libusb_bulk_transfer returned  %d as usbresult, bytes=%d\n", usbresult , (int)bytes);
       if( bytes ) {
-          
-
-          
           count  += AIOContinuousBufWriteCounts( buf, (unsigned short *)&data[0], 
                                                  bytes/2  , 
                                                  AIOCONTINUOUS_BUF_ALLORNONE
                                                  /* AIOCONTINUOUS_BUF_OVERRIDE */
                                                  );
-          printf("count=%d, Write=%d,Read=%d, max=%d\n", bytes ,get_write_pos(buf) , get_read_pos(buf),buffer_size(buf));        
+          /* printf("count=%d, Write=%d,Read=%d, max=%d\n", bytes ,get_write_pos(buf) , get_read_pos(buf),buffer_size(buf));         */
           /* if( get_write_pos(buf) >= buffer_size(buf) ) { */
           if( count > buffer_size(buf) ) {
               AIOContinuousBufLock(buf);
