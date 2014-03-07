@@ -112,14 +112,15 @@ main(int argc, char *argv[] )
         AIOContinuousBufEnd(buf);
         retval = buf->exitcode;
       }
-      /* sleep(1); */
+      sleep(1);
       while (  AIOContinuousBufCountScansAvailable(buf)  && buf->status == RUNNING ) {
-          printf("Read=%d,Write=%d,size=%d,Avail=%d\n",
-                 get_read_pos(buf),
-                 get_write_pos(buf), 
-                 buffer_size(buf),
-                 AIOContinuousBufCountScansAvailable(buf));
-          retval = AIOContinuousBufReadAvailableCounts( buf, tobuf , AIOContinuousBufCountScansAvailable(buf)*AIOContinuousBuf_NumberChannels(buf) );
+          /* printf("Read=%d,Write=%d,size=%d,Avail=%d\n", */
+          /*        get_read_pos(buf), */
+          /*        get_write_pos(buf),  */
+          /*        buffer_size(buf), */
+          /*        AIOContinuousBufCountScansAvailable(buf)); */
+          retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf , 32768 );
+          /* retval = AIOContinuousBufReadAvailableCounts( buf, tobuf , AIOContinuousBufCountScansAvailable(buf)*AIOContinuousBuf_NumberChannels(buf) ); */
           /* if ( retval < AIOUSB_SUCCESS ) { */
           /*     printf("not ok - ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf)); */
           /* } else { */
