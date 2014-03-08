@@ -117,12 +117,13 @@ main(int argc, char *argv[] )
         retval = buf->exitcode;
       }
       sleep(1);
+#if 0
       while (  AIOContinuousBufCountScansAvailable(buf)  && buf->status == RUNNING ) {
-          printf("Read=%d,Write=%d,size=%d,Avail=%d\n",
-                 get_read_pos(buf),
-                 get_write_pos(buf),
-                 buffer_size(buf),
-                 AIOContinuousBufCountScansAvailable(buf));
+          /* printf("Read=%d,Write=%d,size=%d,Avail=%d\n", */
+          /*        get_read_pos(buf), */
+          /*        get_write_pos(buf), */
+          /*        buffer_size(buf), */
+          /*        AIOContinuousBufCountScansAvailable(buf)); */
           retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf , 32768 );
           /* retval = AIOContinuousBufReadAvailableCounts( buf, tobuf , AIOContinuousBufCountScansAvailable(buf)*AIOContinuousBuf_NumberChannels(buf) ); */
           /* if ( retval < AIOUSB_SUCCESS ) { */
@@ -138,6 +139,7 @@ main(int argc, char *argv[] )
           /* } */
           /* sleep(1); */
       }
+#endif
     }
     fprintf(stderr,"Waiting : total=%u, readpos=%d, writepos=%d\n", read_count, AIOContinuousBufGetReadPosition(buf), AIOContinuousBufGetWritePosition(buf));
    
@@ -197,7 +199,7 @@ void process_with_single_buf( struct opts *opts, AIOContinuousBuf *buf , FILE *f
       AIOContinuousBufEnd(buf);
       retval = buf->exitcode;
     }
-    sleep(1);
+    sleep(5);
     while (  AIOContinuousBufCountScansAvailable(buf)  && buf->status == RUNNING ) {
       /* printf("Read=%d,Write=%d,size=%d,Avail=%d\n", */
       /*        get_read_pos(buf), */
