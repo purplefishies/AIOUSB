@@ -397,12 +397,6 @@ AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf, unsign
   }
   return retval;
 }
-/* AIOContinuousBufRead( buf, &tmp[pos], AIOContinuousBuf_NumberChannels(buf) /  */
-/* memcpy( &tmp[pos], &buf->buffer[pos*sizeof(unsigned short) / sizeof(double)], AIOContinuousBuf_NumberChannels(buf) * sizeof(unsigned short)); */
-/* memcpy( &tmp[pos], buf->buffer, AIOContinuousBuf_NumberChannels(buf) * sizeof(unsigned short)); */
-/* retval += AIOContinuousBuf_NumberChannels(buf); */
-/* set_read_pos( buf, get_read_pos(buf)+(AIOContinuousBuf_NumberChannels(buf)*sizeof(unsigned short)/sizeof(AIOBufferType))); */
-/* retval = AIOContinuousBufRead( buf, (AIOBufferType *)tmp, size / 4 ); */
 
 unsigned buffer_max( AIOContinuousBuf *buf )
 {
@@ -602,16 +596,6 @@ AIORET_TYPE AIOContinuousBuf_SmartCountsToVolts( AIOContinuousBuf *buf,
     return retval;
 }
 
-AIORET_TYPE AIOContinuousBuf_CopyCounts( AIOContinuousBuf *buf, unsigned short *data, unsigned count )
-{
-  AIORET_TYPE retval = AIOUSB_SUCCESS;
-  unsigned short *cur = (unsigned short *)&buf->buffer[ get_write_pos(buf) ];
-  memcpy( cur, data, count*sizeof(unsigned short));
-  set_write_pos( buf, get_write_pos(buf) + count  );
-  return retval;
-}
-
-
 /**
  * @desc Performs the maintenance of copying an exact channel Sample number of all channels
  *       into the ContinuousBuffer. First it must conver the raw data from the USB capture
@@ -670,7 +654,9 @@ AIORET_TYPE AIOContinuousBuf_CopyData( AIOContinuousBuf *buf , unsigned short *d
      stopval = ((core_size - tmpcount)/number_channels)*number_channels;
      write_count += AIOContinuousBuf_SmartCountsToVolts( buf,  &channel,  &data[tmpcount], stopval, &tmpbuf[0], &pos );
      buf->extra = ( core_size - write_count );
+     /* (1) can you correct this */
      memcpy(&data[*size], &data[write_count], buf->extra*sizeof(data[0]) );
+
      AIOUSB_DEVEL( "After write: #Channels: %d, Wrote %d full channels, Extra %d\n", number_channels,write_count / number_channels , buf->extra );
 
      /* retval = AIOContinuousBufWrite( buf, (AIOBufferType *)tmpbuf,  write_count, AIOCONTINUOUS_BUF_ALLORNONE ); */
@@ -679,29 +665,6 @@ AIORET_TYPE AIOContinuousBuf_CopyData( AIOContinuousBuf *buf , unsigned short *d
      return (AIORET_TYPE)retval;
  }
 
-/* unsigned char *cur = ((unsigned char *)(&buf->buffer[0])+count); */
-/* unsigned tmpcount  = ( (2*buf->size - count) < bytes ? (2*buf->size-count) : bytes ); */
-/* printcount ++; */
-/* puts("\t\tSampData= */
-/* if( (printcount+1) % 10  == 0 ) { */
-/* count += tmpcount; */
-/* printf("\t\tPrintcount=%u,WritePos=0x%x,SampData=%hu:%hu:%hu,Bytes=%d, Tmpcount=%d, Count=%d, Bufpos=%d, Max=%d\n", */
-/*        printcount, */
-/*        &cur[0], */
-/*        (unsigned short)data[0], */
-/*        (unsigned short)data[2], */
-/*        (unsigned short)data[4], */
-/*        bytes ,tmpcount, count, get_write_pos(buf), 2*buf->size); */
-/* } */
-/* memcpy(cur, data, tmpcount  ); */
-/* unsigned short *tmp = ((unsigned short *)&cur[0]); */
-/* for( int i = 0; i < bytes/2; i ++ ) { */
-/*   fprintf(tmpf,"%hu,",tmp[i] ); */
-/* } */
-/* fprintf(tmpf,"\n"); */
-/* memcpy(cur,data,bytes ); */
-/* count += bytes; */
-/* set_write_pos(buf, count / 8 ); */
 
 void *RawCountsWorkFunction( void *object )
 {
@@ -763,13 +726,15 @@ void *RawCountsWorkFunction( void *object )
           /* int tmp */
           /* int tmpcount = MIN((buffer_size(buf)-get_write_pos(buf))*4, bytes/2 ); */
           int tmpcount = MIN((buffer_size(buf)-get_write_pos(buf))*4 - AIOContinuousBuf_NumberChannels(buf), bytes/2 );
-
-          count += AIOContinuousBufWriteCounts( buf, 
+          int tmp = AIOContinuousBufWriteCounts( buf, 
                                                 (unsigned short *)&data[0],
                                                 datasize/2,
                                                 tmpcount,
                                                 AIOCONTINUOUS_BUF_ALLORNONE
                                                 );
+          if( tmp >= 0 ) {
+              count += tmp;
+          }
 
           printf("Tmpcount=%d,count=%d,Bytes=%d, Write=%d,Read=%d, max=%d\n", tmpcount,count,bytes,get_write_pos(buf) , get_read_pos(buf),buffer_size(buf));
           /* if( get_write_pos(buf) >= buffer_size(buf) ) { */
@@ -804,15 +769,6 @@ void *RawCountsWorkFunction( void *object )
   pthread_exit((void*)&retval);
   
 }
-
-/* AIOContinuousBuf_CopyCounts(  buf, (unsigned short *)&data, minval ) ; */
-/* count += bytes; */
-/* memcpy(&cur[count/2], &data[0], bytes ); */
-/* set_write_pos(buf, count/4); */
-
-/* int number_databanks = 16; */
-/* unsigned char *tmp    = (unsigned char *)malloc( datasize ); */
-/* while ( buf->status == RUNNING &&  get_write_pos(buf) < buf->size ) { */
 
 
 /**
@@ -853,8 +809,6 @@ void *ActualWorkFunction( void *object )
 
     AIOUSB_DEVEL("libusb_bulk_transfer returned  %d as usbresult, bytes=%d\n", usbresult , (int)bytes);
     if( bytes ) {
-      /* set_write_pos(buf, (bytes + get_write_pos(buf)) % buffer_size(buf)); */
-      /* memcpy(tmp,data,datasize); */
       retval = AIOContinuousBuf_CopyData( buf, (unsigned short*)data , (unsigned *)&bytes );
     } else if( usbresult < 0  && usbfail < usbfail_count ) {
       AIOUSB_ERROR("Error with usb: %d\n", (int)usbresult );
@@ -2409,3 +2363,35 @@ int main(int argc, char *argv[] )
 }
 
 #endif
+
+/* unsigned char *cur = ((unsigned char *)(&buf->buffer[0])+count); */
+/* unsigned tmpcount  = ( (2*buf->size - count) < bytes ? (2*buf->size-count) : bytes ); */
+/* printcount ++; */
+/* puts("\t\tSampData= */
+/* if( (printcount+1) % 10  == 0 ) { */
+/* count += tmpcount; */
+/* printf("\t\tPrintcount=%u,WritePos=0x%x,SampData=%hu:%hu:%hu,Bytes=%d, Tmpcount=%d, Count=%d, Bufpos=%d, Max=%d\n", */
+/*        printcount, */
+/*        &cur[0], */
+/*        (unsigned short)data[0], */
+/*        (unsigned short)data[2], */
+/*        (unsigned short)data[4], */
+/*        bytes ,tmpcount, count, get_write_pos(buf), 2*buf->size); */
+/* } */
+/* memcpy(cur, data, tmpcount  ); */
+/* unsigned short *tmp = ((unsigned short *)&cur[0]); */
+/* for( int i = 0; i < bytes/2; i ++ ) { */
+/*   fprintf(tmpf,"%hu,",tmp[i] ); */
+/* } */
+/* fprintf(tmpf,"\n"); */
+/* memcpy(cur,data,bytes ); */
+/* count += bytes; */
+/* set_write_pos(buf, count / 8 ); */
+/* AIOContinuousBuf_CopyCounts(  buf, (unsigned short *)&data, minval ) ; */
+/* count += bytes; */
+/* memcpy(&cur[count/2], &data[0], bytes ); */
+/* set_write_pos(buf, count/4); */
+/* int number_databanks = 16; */
+/* unsigned char *tmp    = (unsigned char *)malloc( datasize ); */
+/* while ( buf->status == RUNNING &&  get_write_pos(buf) < buf->size ) { */
+
