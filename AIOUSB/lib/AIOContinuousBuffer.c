@@ -273,11 +273,13 @@ unsigned get_write_pos( AIOContinuousBuf *buf )
 
 unsigned buffer_size( AIOContinuousBuf *buf )
 {
-  return buf->size * buf->bufunitsize / sizeof(AIOBufferType);
+  /* return buf->size * buf->bufunitsize / sizeof(AIOBufferType); */
+  return buf->size;
 }
 
 unsigned AIOContinuousBuf_BufSizeForCounts( AIOContinuousBuf * buf) {
-  return buffer_size(buf)* sizeof(AIOBufferType)/buf->bufunitsize;
+  /* return buffer_size(buf)* sizeof(AIOBufferType)/buf->bufunitsize; */
+  return buffer_size(buf);
 }
 
 
@@ -306,11 +308,13 @@ unsigned write_size( AIOContinuousBuf *buf ) {
 
 /* unsigned write_size_counts( AIOContinuousBuf *buf ) { */
 unsigned write_size_counts( AIOContinuousBuf *buf ) {
-  return write_size(buf) * sizeof(AIOBufferType)/sizeof(unsigned short);
+  /* return write_size(buf) * sizeof(AIOBufferType)/sizeof(unsigned short); */
+  return write_size(buf);
 }
 
 unsigned write_size_num_scan_counts( AIOContinuousBuf *buf ) {
-  float tmp = ((float)write_size(buf) * sizeof(AIOBufferType)/sizeof(unsigned short)) / AIOContinuousBuf_NumberChannels(buf);
+  /* float tmp = ((float)write_size(buf) * sizeof(AIOBufferType)/sizeof(unsigned short)) / AIOContinuousBuf_NumberChannels(buf); */
+  float tmp = write_size(buf) / AIOContinuousBuf_NumberChannels(buf);
   if( tmp > (int)tmp ) {
       tmp = (int)tmp;
   } else {
@@ -357,7 +361,9 @@ unsigned AIOContinuousBufAvailableReadSize( AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBufCountScansAvailable(AIOContinuousBuf *buf) 
 {
   AIORET_TYPE retval = AIOUSB_SUCCESS;
-  retval = AIOContinuousBufAvailableReadSize( buf ) * sizeof(AIOBufferType ) / sizeof(unsigned short) / AIOContinuousBuf_NumberChannels(buf);
+  /* retval = AIOContinuousBufAvailableReadSize( buf ) * sizeof(AIOBufferType ) / sizeof(unsigned short) / AIOContinuousBuf_NumberChannels(buf); */
+  /* retval = AIOContinuousBufAvailableReadSize( buf ) * sizeof(AIOBufferType ) / buf->bufunitsize / AIOContinuousBuf_NumberChannels(buf); */
+  retval = AIOContinuousBufAvailableReadSize( buf ) / AIOContinuousBuf_NumberChannels(buf);
   return retval;
 }
 
@@ -389,12 +395,13 @@ AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf, unsign
       if( debug ) { 
           printf("Using i=%d\n",i );
       }
-      retval += AIOContinuousBufRead( buf, (AIOBufferType *)&tmp[pos] , tmpsize, AIOContinuousBuf_NumberChannels(buf)*sizeof(unsigned short)/ sizeof(AIOBufferType ));
+      /* retval += AIOContinuousBufRead( buf, (AIOBufferType *)&tmp[pos] , tmpsize, AIOContinuousBuf_NumberChannels(buf)*sizeof(unsigned short)/ sizeof(AIOBufferType )); */
+      retval += AIOContinuousBufRead( buf, (AIOBufferType *)&tmp[pos] , tmpsize-pos, AIOContinuousBuf_NumberChannels(buf) );
 
   }
-  if( retval > 0 ) {
-      retval *= ( sizeof(AIOBufferType)/sizeof(unsigned short));
-  }
+  /* if( retval > 0 ) { */
+  /*     retval *= ( sizeof(AIOBufferType)/sizeof(unsigned short)); */
+  /* } */
   return retval;
 }
 
@@ -724,8 +731,8 @@ void *RawCountsWorkFunction( void *object )
       if( bytes ) {
         /* only write bytes that exist */
           /* int tmp */
-          /* int tmpcount = MIN((buffer_size(buf)-get_write_pos(buf))*4, bytes/2 ); */
-          int tmpcount = MIN((buffer_size(buf)-get_write_pos(buf))*4 - AIOContinuousBuf_NumberChannels(buf), bytes/2 );
+          /* int tmpcount = MIN((buffer_size(buf)-get_write_pos(buf))*4 - AIOContinuousBuf_NumberChannels(buf), bytes/2 ); */
+          int tmpcount = MIN((buffer_size(buf)-get_write_pos(buf)) - AIOContinuousBuf_NumberChannels(buf), bytes/2 );
           int tmp = AIOContinuousBufWriteCounts( buf, 
                                                 (unsigned short *)&data[0],
                                                 datasize/2,
@@ -1318,36 +1325,6 @@ AIORET_TYPE AIOContinuousBuf_ResetDevice( AIOContinuousBuf *buf)
   return retval;
 }
 
-#if 0
-AIORET_TYPE AIOContinuousBufReadCounts( AIOContinuousBuf *buf, unsigned short *readbuf, unsigned size )
-{
-  assert(size % 2 == 0 );
-  unsigned basic_copy , wrap_copy ;
-  unsigned short *buffer;
-  AIOContinuousBufLock( buf );
-  if ( get_read_pos(buf) <= get_write_pos(buf) ) {
-    basic_copy = MIN(size, get_write_pos(buf) - get_read_pos( buf ));
-    wrap_copy  = 0;
-  } else {
-    basic_copy = MIN(size, buffer_size(buf) - get_read_pos(buf));
-    wrap_copy  = MIN(size - basic_copy, get_write_pos(buf) );
-  }
-  /* Now copy the data into readbuf */
-  memcpy( &readbuf[0]          , &buf->buffer[get_read_pos(buf)]  , basic_copy*sizeof(AIOBufferType) );
-  memcpy( &readbuf[basic_copy] , &buf->buffer[0]                  , wrap_copy*sizeof(AIOBufferType)  );
-  if( wrap_copy ) {
-    retval = basic_copy + wrap_copy;
-    set_read_pos( buf, ( get_read_pos(buf) + retval) % buffer_size(buf) );
-  } else {
-    retval = basic_copy;
-    set_read_pos( buf , ( get_read_pos(buf) + retval) % buffer_size(buf) );
-  }
-out_AIOContinuousBufRead:
-  AIOContinuousBufUnlock( buf );
-  return retval;
-}
-#endif
-
 /** 
  * @desc Reads the current available amount of data from buf, into 
  *       the readbuf datastructure
@@ -1361,6 +1338,7 @@ AIORET_TYPE AIOContinuousBufRead( AIOContinuousBuf *buf, AIOBufferType *readbuf 
 
   AIORET_TYPE retval;
   unsigned basic_copy , wrap_copy ;
+  char *tbuf;
     /* First lock the Buffer */
   AIOContinuousBufLock( buf );
   /* if( buf->status == TERMINATED ) {  */
@@ -1375,9 +1353,12 @@ AIORET_TYPE AIOContinuousBufRead( AIOContinuousBuf *buf, AIOBufferType *readbuf 
     wrap_copy  = MIN(size - basic_copy, get_write_pos(buf) );
   }
   /* Now copy the data into readbuf */
+  tbuf = (char *)&buf->buffer[0] + get_read_pos(buf)*buf->bufunitsize;
+  /* memcpy( &readbuf[0]          , &buf->buffer[get_read_pos(buf)]  , basic_copy*buf->bufunitsize ); */
 
-  memcpy( &readbuf[0]          , &buf->buffer[get_read_pos(buf)]  , basic_copy*sizeof(AIOBufferType) );
-  memcpy( &readbuf[basic_copy] , &buf->buffer[0]                  , wrap_copy*sizeof(AIOBufferType)  );
+  /* memcpy( &readbuf[0]          , &buf->buffer[get_read_pos (buf) * buf->bufunitsize / sizeof(AIOBufferType ) ]  , basic_copy*buf->bufunitsize ); */
+  memcpy( &readbuf[0]          , &tbuf[0], basic_copy*buf->bufunitsize );
+  memcpy( &readbuf[basic_copy] , &buf->buffer[0]                  , wrap_copy*buf->bufunitsize );
   
   if( wrap_copy ) {
     retval = basic_copy + wrap_copy;
@@ -1407,6 +1388,7 @@ AIORET_TYPE AIOContinuousBufWrite( AIOContinuousBuf *buf, AIOBufferType *writebu
 {
   AIORET_TYPE retval;
   unsigned basic_copy, wrap_copy;
+  char *tbuf;
   ERR_UNLESS_VALID_ENUM( AIOContinuousBufMode ,  flag );
     
   /* First try to lock the buffer */
@@ -1424,7 +1406,7 @@ AIORET_TYPE AIOContinuousBufWrite( AIOContinuousBuf *buf, AIOBufferType *writebu
       basic_copy = MIN( wrbufsize, (MIN( size, ( get_read_pos( buf ) - get_write_pos( buf ) - 1 ))));
       wrap_copy  = 0;
     } else {
-      basic_copy = MIN((MIN( size, ( buffer_max(buf) - get_write_pos( buf ) ))), wrbufsize );
+      basic_copy = MIN((MIN( size, ( buffer_max(buf) - get_write_pos( buf ) + 1 ))), wrbufsize );
       wrap_copy  = MIN( size - basic_copy, get_read_pos(buf) );
     }
   } else {            /* not enough room in remaining space */
@@ -1437,8 +1419,16 @@ AIORET_TYPE AIOContinuousBufWrite( AIOContinuousBuf *buf, AIOBufferType *writebu
     }
   }
   
-  memcpy( &buf->buffer[ get_write_pos( buf ) ] , &writebuf[0]           , basic_copy*sizeof(AIOBufferType) );
-  memcpy( &buf->buffer[ 0 ]                    , &writebuf[basic_copy]  , wrap_copy*sizeof(AIOBufferType)  );
+  /* memcpy( &buf->buffer[ get_write_pos( buf ) ] , &writebuf[0]           , basic_copy*sizeof(AIOBufferType) ); */
+  /* memcpy( &buf->buffer[ 0 ]                    , &writebuf[basic_copy]  , wrap_copy*sizeof(AIOBufferType)  ); */
+  /* memcpy( &buf->buffer[ get_write_pos( buf ) ] , &writebuf[0]           , basic_copy*buf->bufunitsize ); */
+  tbuf = (char *)&buf->buffer[ 0] + get_write_pos(buf)*buf->bufunitsize;
+  /* memcpy( &buf->buffer[ get_write_pos( buf )* buf->bufunitsize / sizeof(AIOBufferType ) ] , &writebuf[0]           , basic_copy*buf->bufunitsize ); */
+  memcpy( &tbuf[0] , &writebuf[0] , basic_copy*buf->bufunitsize );
+  /* memcpy( &buf->buffer[ 0 ]                    , &writebuf[basic_copy]  , wrap_copy*buf->bufunitsize  ); */
+  memcpy( &buf->buffer[ 0 ] , &writebuf[basic_copy]  , wrap_copy*buf->bufunitsize  );
+
+
   
   /* set_write_pos( buf, (get_write_pos(buf) + basic_copy + wrap_copy ) % buf->size ); */
   set_write_pos( buf, (get_write_pos (buf) + basic_copy + wrap_copy ) % buffer_size(buf) );
@@ -1457,14 +1447,19 @@ AIORET_TYPE AIOContinuousBufWrite( AIOContinuousBuf *buf, AIOBufferType *writebu
 AIORET_TYPE AIOContinuousBufWriteCounts( AIOContinuousBuf *buf, unsigned short *data, unsigned datasize, unsigned size , AIOContinuousBufMode flag )
 {
   AIORET_TYPE retval = AIOUSB_SUCCESS;
-  retval += AIOContinuousBufWrite( buf, (AIOBufferType *)data, datasize/4, size / 4, flag  );
+  /* (1) */
+  /* retval += AIOContinuousBufWrite( buf, (AIOBufferType *)data, datasize/4, size / 4, flag  ); */
+  retval += AIOContinuousBufWrite( buf, (AIOBufferType *)data, datasize, size , flag  );
+
   /* memcpy(&buf->buffer[0],data,size*sizeof(unsigned short)); */
   /* set_write_pos(buf, size*sizeof(unsigned short) / sizeof(AIOBufferType )); */
   /* retval = size; */
-  if( retval > 0 )  
-    return retval * sizeof(AIOBufferType)/sizeof(unsigned short);
-  else
-    return retval;
+
+
+  /* if( retval > 0 )   */
+  /*   return retval * sizeof(AIOBufferType)/sizeof(unsigned short); */
+  /* else */
+  return retval;
 }
 
 
@@ -2220,16 +2215,17 @@ void stress_copy_counts (int bufsize)
       usdata[i] = (ch*20)+rand()%20;
     }
   }
-  set_write_pos( buf, 4 );
+  set_write_pos( buf, 16 );
   set_read_pos( buf, 0 );
   printf("%s - Minimum size is correct\n", ( AIOContinuousBufCountScansAvailable(buf) == 1 ? "ok" : "not ok" ));
   set_write_pos(buf, 0 );
 
   /* printf("%s - received correct number of scans left\n", AIOContinuousBufCountScansAvailable(buf) == bufsize/ 4 ? "ok" : "not ok" ); */
-  set_read_pos(buf,4);
-  printf("%s - received correct write space left\n",  ( write_size(buf) == 4 ? "ok" : "not ok" ));
+  set_read_pos(buf,AIOContinuousBuf_NumberChannels(buf));
+  printf("%s - received correct write space left\n",  ( write_size(buf) == AIOContinuousBuf_NumberChannels(buf) ? "ok" : "not ok" ));
 
-  printf("%s - Buffer Size is correct\n",  ( buffer_size(buf) == bufsize*16*sizeof(short)/sizeof(AIOBufferType) ? "ok" : "not ok" ));
+  /* printf("%s - Buffer Size is correct\n",  ( buffer_size(buf) == bufsize*16*sizeof(short)/sizeof(AIOBufferType) ? "ok" : "not ok" )); */
+  printf("%s - Buffer Size is correct\n",  ( buffer_size(buf) == bufsize*16) ? "ok" : "not ok" );
   
 
   set_read_pos(buf,0);
@@ -2240,7 +2236,8 @@ void stress_copy_counts (int bufsize)
   }
 
  
-  printf("%s - Got expected number of Counts available\n",( AIOContinuousBufCountScansAvailable(buf) ==  bufsize/2 / 16 ? "ok" : "not ok" ));
+  /* printf("%s - Got expected number of Counts available\n",( AIOContinuousBufCountScansAvailable(buf) ==  bufsize/2 / 16 ? "ok" : "not ok" )); */
+  printf("%s - Got expected number of Counts available\n",( AIOContinuousBufCountScansAvailable(buf) ==  bufsize / 2 / AIOContinuousBuf_NumberChannels(buf) ? "ok" : "not ok" ));
 
   if( AIOContinuousBufCountScansAvailable(buf)  ) { 
     retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf , 32768, AIOContinuousBuf_NumberChannels(buf)-1 );
@@ -2255,10 +2252,10 @@ void stress_copy_counts (int bufsize)
     if ( retval < AIOUSB_SUCCESS ) {
       printf("not ok - ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf));
     } else {
-      unsigned short *tmpbuf = (unsigned short *)&tobuf[0];
+      /* unsigned short *tmpbuf = (unsigned short *)&tobuf[0]; */
       for( int i = 0, ch = 0 ; i < retval; i ++, ch = ((ch+1)% AIOContinuousBuf_NumberChannels(buf)) ) {
-        if( tmpbuf[i] != usdata[i] ) {
-          printf("not ok - got %u,  not %u\n", tmpbuf[i],  usdata[i] );
+        if( tobuf[i] != usdata[i] ) {
+          printf("not ok - got %u,  not %u\n", tobuf[i],  usdata[i] );
           failed ++;
           break;
         }
@@ -2272,8 +2269,7 @@ void stress_copy_counts (int bufsize)
   int i;
   /* for ( i = 0; i < (write_size(buf) / bufsize / 2) + 1; i ++ ) { */
   /* int total_write = ( (buffer_size(buf) / 4 - get_write_pos(buf))/ ( bufsize / 8 )); */
-  /* int total_write = ((buffer_size(buf) - get_write_pos (buf)) * 4 )/ bufsize; */
-  int total_write = write_size (buf) / ( bufsize / (AIOContinuousBuf_NumberChannels(buf) / 2 ));
+  int total_write = write_size (buf) / ( bufsize / (AIOContinuousBuf_NumberChannels(buf) ));
 
   for ( i = 0; i < total_write + 2; i ++ ) {
     AIOContinuousBufWriteCounts( buf, usdata, bufsize/2, bufsize/2 , AIOCONTINUOUS_BUF_OVERRIDE );
@@ -2328,7 +2324,7 @@ int main(int argc, char *argv[] )
 
   printf("1..193\n");
   int bufsize = 10000;
-#if 1
+#if 0
   basic_functionality();
   for( int i = bufsize; i > 1 ; i /= 2 ) {
     /* printf("Using i:%d\n",i); */
@@ -2342,7 +2338,7 @@ int main(int argc, char *argv[] )
 
   bufsize = 20000;
 #endif
-#if 1
+#if 0
   for ( int i = 1 , j = 1; i < 20 ; j*=2 , i += 1) {
     stress_test_read_channels( bufsize, j );
   }
