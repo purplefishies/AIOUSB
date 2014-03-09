@@ -22,10 +22,16 @@ struct opts {
   int clock_rate;
   char *outfile;
   int reset;
+  int singlebuf;
 };
 
 
 void process_cmd_line( struct opts *, int argc, char *argv[] );
+/* void process_with_single_buf( AIOContinuousBuf *buf , FILE *fp); */
+/* void process_with_single_buf( struct options *opts, AIOContinuousBuf *buf , FILE *fp); */
+/* void process_with_single_buf( struct opts *opts, AIOContinuousBuf *buf , FILE *fp, unsigned short *tobuf); */
+void process_with_single_buf( struct opts *opts, AIOContinuousBuf *buf , FILE *fp, unsigned short *tobuf, unsigned short tobufsize);
+
 
 int 
 main(int argc, char *argv[] ) 
@@ -35,9 +41,10 @@ main(int argc, char *argv[] )
     int keepgoing = 1;
     unsigned read_count = 0;
     unsigned short tobuf[32768] = {0};
+    unsigned tobufsize = 32768;
 
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    unsigned short *tmp = (unsigned short *)malloc(sizeof(unsigned short)*options.buffer_size*options.number_channels);
+    unsigned short *tmp = (unsigned short *)malloc(sizeof(unsigned short)*(options.buffer_size+1)*options.number_channels);
     if( !tmp ) {
       fprintf(stderr,"Can't allocate memory for temporary buffer \n");
       _exit(1);
@@ -46,7 +53,7 @@ main(int argc, char *argv[] )
 
     AIOUSB_Init();
     GetDevices();
-    buf = (AIOContinuousBuf *)NewAIOContinuousBufForCounts( 0, options.buffer_size, options.number_channels );
+    buf = (AIOContinuousBuf *)NewAIOContinuousBufForCounts( 0, (options.buffer_size+1), options.number_channels );
     if( !buf ) {
       fprintf(stderr,"Can't allocate memory for temporary buffer \n");
       _exit(1);
@@ -105,6 +112,7 @@ main(int argc, char *argv[] )
        * retval = AIOContinuousBufRead( buf, tmp, tmpsize );
        */
       fprintf(stderr,"Waiting : total=%u, readpos=%d, writepos=%d\n", read_count, AIOContinuousBufGetReadPosition(buf), AIOContinuousBufGetWritePosition(buf));
+      sleep(1);
       if( read_count > options.max_count || buf->status != RUNNING ) {
         printf("Exit reason: read_count=%d, max=%d, RUNNING=%d,but_status=%d\n",read_count, options.max_count, (int)RUNNING,(int)buf->status );
         keepgoing = 0;
@@ -112,30 +120,41 @@ main(int argc, char *argv[] )
         AIOContinuousBufEnd(buf);
         retval = buf->exitcode;
       }
-      sleep(1);
-      while (  AIOContinuousBufCountScansAvailable(buf)  && buf->status == RUNNING ) {
-          /* printf("Read=%d,Write=%d,size=%d,Avail=%d\n", */
-          /*        get_read_pos(buf), */
-          /*        get_write_pos(buf),  */
-          /*        buffer_size(buf), */
-          /*        AIOContinuousBufCountScansAvailable(buf)); */
-          retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf , 32768 );
-          /* retval = AIOContinuousBufReadAvailableCounts( buf, tobuf , AIOContinuousBufCountScansAvailable(buf)*AIOContinuousBuf_NumberChannels(buf) ); */
-          /* if ( retval < AIOUSB_SUCCESS ) { */
-          /*     printf("not ok - ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf)); */
-          /* } else { */
-          /* unsigned short *tmpbuf = (unsigned short *)&tobuf[0]; */
+
+    }
+    fprintf(stderr,"Predrain Waiting : total=%u, readpos=%d, writepos=%d\n", read_count, AIOContinuousBufGetReadPosition(buf), AIOContinuousBufGetWritePosition(buf));
+    int pos = 0;
+    unsigned short *here;
+   
+    /** 
+     * Use the recommended API for reading data out of 
+     * the counts buffer
+     */
+    printf("Numscans=%d\n",AIOContinuousBufCountScansAvailable(buf)  );
+    /* _exit(0); */
+    while (  AIOContinuousBufCountScansAvailable(buf) > 0 ) {
+      printf("Read=%d,Write=%d,size=%d,Avail=%d\n",
+             get_read_pos(buf),
+             get_write_pos(buf),
+             buffer_size(buf),
+             AIOContinuousBufCountScansAvailable(buf));
+      retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf ,tobufsize, 32768 );
+      if ( retval < AIOUSB_SUCCESS ) {
+          printf("not ok - ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf));
+          keepgoing = 0;
+      } else {
+      /* unsigned short *tmpbuf = (unsigned short *)&tobuf[0]; */
+        read_count += retval;
           for( int i = 0, ch = 0 ; i < retval; i ++, ch = ((ch+1)% AIOContinuousBuf_NumberChannels(buf)) ) {
-              fprintf(fp,"%u,",tobuf[i] );
-              if( (i+1) % AIOContinuousBuf_NumberChannels(buf) == 0 ) {
-                  fprintf(fp,"\n");
-              }
+            fprintf(fp,"%u,",tobuf[i] );
+            if( (i+1) % AIOContinuousBuf_NumberChannels(buf) == 0 ) {
+              fprintf(fp,"\n");
+            }
           }
-          /* } */
-          /* sleep(1); */
       }
     }
-    
+
+
 
     fclose(fp);
     fprintf(stderr,"Test completed...exiting\n");
@@ -143,6 +162,39 @@ main(int argc, char *argv[] )
     /* return(retval); */
     return 0;
 }
+
+void process_with_single_buf( struct opts *opts, AIOContinuousBuf *buf , FILE *fp, unsigned short *tobuf, unsigned short tobufsize)
+{
+  /* int keepgoing = 1; */
+  /* int read_count = 0; */
+  /* AIORET_TYPE retval= 0; */
+  /* while ( keepgoing ) { */
+  /*   /\** */
+  /*    * You can optionally read values */
+  /*    * retval = AIOContinuousBufRead( buf, tmp, tmpsize ); */
+  /*    *\/ */
+  /*   fprintf(stderr,"Waiting : total=%u, readpos=%d, writepos=%d\n",  */
+  /*           read_count, */
+  /*           AIOContinuousBufGetReadPosition(buf),  */
+  /*           AIOContinuousBufGetWritePosition(buf) */
+  /*           ); */
+  /*   sleep(1); */
+  /*   if( read_count > opts->max_count || buf->status != RUNNING ) { */
+  /*     printf("Exit reason: read_count=%d, max=%d, RUNNING=%d,but_status=%d\n", */
+  /*            read_count,  */
+  /*            opts->max_count,  */
+  /*            (int)RUNNING, */
+  /*            (int)buf->status ); */
+  /*     keepgoing = 0; */
+  /*     printf("Exiting from main\n"); */
+  /*     AIOContinuousBufEnd(buf); */
+  /*     retval = buf->exitcode; */
+  /*   } */
+  /*   sleep(5); */
+  /* } */
+}
+
+
 /* unsigned count = 0; */
 /* unsigned delta = AIOContinuousBuf_NumberChannels(buf)*512; */
 /* unsigned char *data = (unsigned char *)malloc( delta ); */
@@ -234,6 +286,7 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] ) {
       {"help",         no_argument      , 0,  'h' },
       {"maxcount",     required_argument, 0,  'm' },
       {"reset",        no_argument,       0,  'r' },
+      {"single",        no_argument,       0,  's' },
       {0,         0,                 0,  0 }
     };
     while (1) { 
@@ -247,6 +300,9 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] ) {
           break;
         case 'n':
           options->number_channels = atoi(optarg);
+          break;
+        case 's':
+          options->singlebuf = 1;
           break;
         case 'g':
           options->gain_code = atoi(optarg);
@@ -281,3 +337,30 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] ) {
 }
 
 
+
+    /* while (  pos <= buffer_size(buf) ) { */
+    /*   /\* printf("HERE\n"); *\/ */
+    /*   here = (unsigned short *)&buf->buffer[pos]; */
+    /*   /\* retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf , 32768 ); *\/ */
+    /*   /\* printf("Read=%d,Write=%d,size=%d,Avail=%d\n", *\/ */
+    /*   /\*        get_read_pos(buf), *\/ */
+    /*   /\*        get_write_pos(buf), *\/ */
+    /*   /\*        buffer_size(buf), *\/ */
+    /*   /\*        AIOContinuousBufCountScansAvailable(buf));  *\/ */
+    /*   /\* retval = AIOContinuousBufReadAvailableCounts( buf, tobuf , AIOContinuousBufCountScansAvailable(buf)*AIOContinuousBuf_NumberChannels(buf) ); *\/ */
+    /*   /\* if ( retval < AIOUSB_SUCCESS ) { *\/ */
+    /*   /\*     printf("not ok - ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf)); *\/ */
+    /*   /\* } else { *\/ */
+    /*   /\* unsigned short *tmpbuf = (unsigned short *)&tobuf[0]; *\/ */
+      
+    /*   for( int i = 0, ch = 0 ; i < 16; i ++, ch = ((ch+1)% AIOContinuousBuf_NumberChannels(buf)) ) { */
+    /*     fprintf(fp,"%u,",here[i] ); */
+    /*     if( (i+1) % AIOContinuousBuf_NumberChannels(buf) == 0 ) { */
+    /*       fprintf(fp,"\n"); */
+    /*     } */
+    /*   } */
+    /*   pos +=4 ; */
+    /*   set_read_pos(buf,get_read_pos(buf)+pos); */
+    /*   /\* } *\/ */
+    /*   /\* sleep(1); *\/ */
+    /* } */
