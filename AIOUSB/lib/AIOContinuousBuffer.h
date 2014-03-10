@@ -67,6 +67,7 @@ void AIOContinuousBuf_SetTesting( AIOContinuousBuf *buf, AIOUSB_BOOL testing );
 static AIORET_TYPE AIOContinuousBuf_SendPreConfig( AIOContinuousBuf *buf );
 
 AIORET_TYPE AIOContinuousBuf_SetStartAndEndChannel( AIOContinuousBuf *buf, unsigned startChannel, unsigned endChannel );
+AIORET_TYPE AIOContinuousBuf_SetChannelRangeGain( AIOContinuousBuf *buf, unsigned startChannel, unsigned endChannel , unsigned gainCode );
 unsigned AIOContinuousBuf_GetOverSample( AIOContinuousBuf *buf );
 void AIOContinuousBuf_SetOverSample( AIOContinuousBuf *buf, unsigned os );
 void AIOContinuousBuf_SetAllGainCodeAndDiffMode( AIOContinuousBuf *buf, ADGainCode gain, AIOUSB_BOOL diff );
