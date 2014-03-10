@@ -22,7 +22,8 @@ struct opts {
   int clock_rate;
   char *outfile;
   int reset;
-  int singlebuf;
+  int startchannel;
+  int endchannel;
 };
 
 
@@ -36,7 +37,7 @@ void process_with_single_buf( struct opts *opts, AIOContinuousBuf *buf , FILE *f
 int 
 main(int argc, char *argv[] ) 
 {
-    struct opts options = {100000, 16, AD_GAIN_CODE_0_5V , 4000000 , 10000 , "output.txt", 0 };
+    struct opts options = {100000, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , "output.txt", 0, 0, 0, 15 };
     AIOContinuousBuf *buf = 0;
     int keepgoing = 1;
     unsigned read_count = 0;
@@ -81,8 +82,7 @@ main(int argc, char *argv[] )
     AIOContinuousBuf_InitConfiguration( buf );
     AIOContinuousBuf_SetAllGainCodeAndDiffMode( buf , options.gain_code , AIOUSB_FALSE );
     AIOContinuousBuf_SetOverSample( buf, 0 );
-    AIOContinuousBuf_SetStartAndEndChannel( buf, 0, AIOContinuousBuf_NumberChannels(buf)-1 );
-    /* AIOContinuousBuf_SaveConfig( buf ); */
+    AIOContinuousBuf_SetStartAndEndChannel( buf, options.startchannel, options.endchannel );
     
     if ( retval < AIOUSB_SUCCESS ) {
         printf("Error setting up configuration\n");
@@ -271,7 +271,8 @@ void print_usage(int argc, char **argv,  struct option *options)
 /** 
  * @desc Simple command line parser sets up testing features
  */
-void process_cmd_line( struct opts *options, int argc, char *argv [] ) {
+void process_cmd_line( struct opts *options, int argc, char *argv [] ) 
+{
     int c;
     /* int digit_optind = 0; */
     int error = 0;
@@ -286,7 +287,9 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] ) {
       {"help",         no_argument      , 0,  'h' },
       {"maxcount",     required_argument, 0,  'm' },
       {"reset",        no_argument,       0,  'r' },
-      {"single",        no_argument,       0,  's' },
+      /* {"single",        no_argument,       0,  's' }, */
+      {"startchannel", required_argument, 0,  's' },
+      {"endchannel",  required_argument, 0, 'e' },
       {0,         0,                 0,  0 }
     };
     while (1) { 
@@ -302,7 +305,10 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] ) {
           options->number_channels = atoi(optarg);
           break;
         case 's':
-          options->singlebuf = 1;
+          options->startchannel = atoi(optarg);
+          break;
+        case 'e':
+          options->endchannel = atoi(optarg);
           break;
         case 'g':
           options->gain_code = atoi(optarg);
@@ -334,33 +340,17 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] ) {
             _exit(1);
         }
     }
+    if( options->startchannel && options->endchannel && options->number_channels ) {
+      fprintf(stderr,"Error: you can only specify -startchannel & -endchannel OR  --startchannel & --numberchannels\n");
+      print_usage(argc, argv, long_options );
+      _exit(1);
+    } else if ( options->startchannel && options->number_channels ) {
+      options->endchannel = options->startchannel + options->number_channels - 1;
+    } else if ( options->number_channels ) {
+      options->startchannel = 0;
+      options->endchannel = options->number_channels - 1;
+    } else {
+      options->number_channels = options->endchannel - options->startchannel  + 1;
+    }
 }
 
-
-
-    /* while (  pos <= buffer_size(buf) ) { */
-    /*   /\* printf("HERE\n"); *\/ */
-    /*   here = (unsigned short *)&buf->buffer[pos]; */
-    /*   /\* retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf , 32768 ); *\/ */
-    /*   /\* printf("Read=%d,Write=%d,size=%d,Avail=%d\n", *\/ */
-    /*   /\*        get_read_pos(buf), *\/ */
-    /*   /\*        get_write_pos(buf), *\/ */
-    /*   /\*        buffer_size(buf), *\/ */
-    /*   /\*        AIOContinuousBufCountScansAvailable(buf));  *\/ */
-    /*   /\* retval = AIOContinuousBufReadAvailableCounts( buf, tobuf , AIOContinuousBufCountScansAvailable(buf)*AIOContinuousBuf_NumberChannels(buf) ); *\/ */
-    /*   /\* if ( retval < AIOUSB_SUCCESS ) { *\/ */
-    /*   /\*     printf("not ok - ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf)); *\/ */
-    /*   /\* } else { *\/ */
-    /*   /\* unsigned short *tmpbuf = (unsigned short *)&tobuf[0]; *\/ */
-      
-    /*   for( int i = 0, ch = 0 ; i < 16; i ++, ch = ((ch+1)% AIOContinuousBuf_NumberChannels(buf)) ) { */
-    /*     fprintf(fp,"%u,",here[i] ); */
-    /*     if( (i+1) % AIOContinuousBuf_NumberChannels(buf) == 0 ) { */
-    /*       fprintf(fp,"\n"); */
-    /*     } */
-    /*   } */
-    /*   pos +=4 ; */
-    /*   set_read_pos(buf,get_read_pos(buf)+pos); */
-    /*   /\* } *\/ */
-    /*   /\* sleep(1); *\/ */
-    /* } */
