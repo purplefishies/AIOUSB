@@ -108,16 +108,14 @@ main(int argc, char *argv[] )
          * in this example we read bytes in blocks of our core number_channels parameter. 
          * the channel order
          */
-        /* while ( keepgoing && (AIOContinuousBufAvailableReadSize(buf) > 16*AIOContinuousBuf_NumberChannels(buf) ) ) { */
         while ( keepgoing && (AIOContinuousBufAvailableReadSize(buf) > AIOContinuousBuf_NumberChannels(buf) ) ) {
-            /* retval = AIOContinuousBufRead( buf, tmp, 16*AIOContinuousBuf_NumberChannels(buf) ); */
-            retval = AIOContinuousBufRead( buf, tmp, AIOContinuousBuf_NumberChannels(buf) );
+            retval = AIOContinuousBufRead( buf, tmp, AIOContinuousBuf_NumberChannels(buf), AIOContinuousBuf_NumberChannels(buf) );
             if ( retval < AIOUSB_SUCCESS ) {
                 fprintf(stderr,"ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf) );
                 keepgoing = 0;
             } else {
                 read_count += (unsigned)retval;
-                /* for ( int i = 0; i < 16*AIOContinuousBuf_NumberChannels(buf) ; i ++ ) {  */
+
                 for ( int i = 0; i < AIOContinuousBuf_NumberChannels(buf) ; i ++ ) { 
                     fprintf(fp, "%f,", tmp[i] );
                     if(  (i+1) % 16 == 0 ) 
