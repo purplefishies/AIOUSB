@@ -75,6 +75,7 @@ class TestCaseSetup {
   
   ~TestCaseSetup();
   TestCaseSetup();
+  TestCaseSetup(int deviceIndex, int numChannels );
   void findDevice();
   void doSomething();
   void setCurrentDeviceIndex( int DeviceIndex );

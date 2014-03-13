@@ -425,9 +425,9 @@ AIORET_TYPE
 AIOContinuousBufStart( AIOContinuousBuf *buf )
 {
   AIORET_TYPE retval;
-  int fifo_max_prio;
-  struct sched_param fifo_param;
-  pthread_attr_t custom_sched_attr;
+  /* int fifo_max_prio; */
+  /* struct sched_param fifo_param; */
+  /* pthread_attr_t custom_sched_attr; */
 
 #ifdef HAS_PTHREAD
   buf->status = RUNNING;
@@ -658,8 +658,8 @@ void *RawCountsWorkFunction( void *object )
   int usbfail_count = 5;
   unsigned char *data   = (unsigned char *)malloc( datasize );
   unsigned count = 0;
-  unsigned printcount = 0;
-  int totalcount = 0;
+  /* unsigned printcount = 0; */
+  /* int totalcount = 0; */
 
   while ( buf->status == RUNNING  ) {
 
@@ -1425,10 +1425,12 @@ AIORET_TYPE AIOContinuousBuf_SetStartAndEndChannel( AIOContinuousBuf *buf, unsig
 
 AIORET_TYPE AIOContinuousBuf_SetChannelRangeGain( AIOContinuousBuf *buf, unsigned startChannel, unsigned endChannel , unsigned gainCode )
 {
+  AIORET_TYPE retval = AIOUSB_SUCCESS;
   DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_NoCheck( AIOContinuousBuf_GetDeviceIndex(buf));
-  for ( int i = startChannel; i <= endChannel ; i ++ ) {
+  for ( unsigned i = startChannel; i <= endChannel ; i ++ ) {
     AIOUSB_SetGainCode( &deviceDesc->cachedConfigBlock, i, gainCode);
   }
+  return retval;
 }
 
 

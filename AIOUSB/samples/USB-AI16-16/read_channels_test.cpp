@@ -15,16 +15,17 @@ using namespace AIOUSB;
 struct options {
   int maxcount;
   int use_maxcount;
+  int number_channels;
 };
 
 struct options get_options(int argc, char **argv );
 
 
 int main( int argc, char **argv ) {
-  // printf("Sample test for Checking the Calibration on the board: %s, %s", AIOUSB_GetVersion(), AIOUSB_GetVersionDate());
+
   unsigned long result = AIOUSB_Init();
   int counter;
-  struct options opts = { 0, 0 };
+  struct options opts = { 0, 0 , 16 };
   opts = get_options(argc, argv);
 
   if( result == AIOUSB_SUCCESS ) {
@@ -33,7 +34,7 @@ int main( int argc, char **argv ) {
     if( deviceMask != 0 ) {
       // at least one ACCES device detected, but we want one of a specific type
       // AIOUSB_ListDevices();
-      TestCaseSetup tcs;
+      TestCaseSetup tcs( 0, opts.number_channels );
       try { 
         tcs.findDevice();
         tcs.setCurrentDeviceIndex(0);
@@ -66,8 +67,11 @@ struct options get_options(int argc, char **argv )
   int tfnd;
   struct options retoptions;
   tfnd = 0;
-  while ((opt = getopt(argc, argv, "c:t")) != -1) {
+  while ((opt = getopt(argc, argv, "C:c:t")) != -1) {
     switch (opt) {
+    case 'C':
+      retoptions.number_channels = atoi(optarg);
+      break;
     case 'c':
       retoptions.maxcount     = atoi(optarg);
       retoptions.use_maxcount = 1;
