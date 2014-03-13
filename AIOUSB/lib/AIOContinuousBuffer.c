@@ -997,72 +997,6 @@ AIORET_TYPE AIOContinuousBufCleanup( AIOContinuousBuf *buf )
   return retval;
 }
 
-  /* unsigned char data[4] = {2,0,2,0}; */
-  /* unsigned wLength = 4; */
-  /* int wValue  = 0, wIndex = 0; */
-  /* /\* Write 02 00 02 00 *\/ */
-  /* /\* 40 bc 00 00 00 00 04 00 *\/ */
-  /* usbval = libusb_control_transfer( deviceHandle,  */
-  /*                                   USB_WRITE_TO_DEVICE, */
-  /*                                   AUR_START_ACQUIRING_BLOCK, */
-  /*                                   wValue, */
-  /*                                   wIndex, */
-  /*                                   data, */
-  /*                                   wLength, */
-  /*                                   buf->timeout */
-  /*                                   ); */
-  /* if( usbval < 0 ) { */
-  /*     retval = -(AIORET_TYPE)LIBUSB_RESULT_TO_AIOUSB_RESULT(usbval); */
-  /*     goto out_AIOContinuousBufCleanup; */
-  /* } */
-
-  /* /\* Clear FIFO *\/ */
-  /* usbval = libusb_control_transfer( deviceHandle, */
-  /*                                   USB_WRITE_TO_DEVICE, */
-  /*                                   AUR_GEN_CLEAR_FIFO, */
-  /*                                   0, */
-  /*                                   0, */
-  /*                                   &data[1], */
-  /*                                   0, */
-  /*                                   buf->timeout */
-  /*                                   ); */
-  /* if ( usbval < 0 ) { */
-  /*     retval = -(AIORET_TYPE)LIBUSB_RESULT_TO_AIOUSB_RESULT(usbval); */
-  /*     goto out_AIOContinuousBufCleanup; */
-  /* } */
-  /* /\* Reset Both Counters *\/ */
-  /* wValue = 0x7400; */
-  /* wIndex = 0x0; */
-  /* wLength = 0; */
-  /* data[0] = 0; */
-  
-  /* usbval = libusb_control_transfer( deviceHandle, */
-  /*                                   USB_WRITE_TO_DEVICE, */
-  /*                                   AUR_CTR_MODE, */
-  /*                                   wValue, */
-  /*                                   wIndex, */
-  /*                                   data, */
-  /*                                   wLength, */
-  /*                                   buf->timeout */
-  /*                                   ); */
-  /* if ( usbval < 0 ) { */
-  /*     retval = -(AIORET_TYPE)LIBUSB_RESULT_TO_AIOUSB_RESULT(usbval); */
-  /*     goto out_AIOContinuousBufCleanup; */
-  /* } */
-  /* wValue = 0xb600; */
-  /* usbval = libusb_control_transfer( deviceHandle, */
-  /*                                   USB_READ_FROM_DEVICE, */
-  /*                                   AUR_CTR_MODE, */
-  /*                                   wValue, */
-  /*                                   wIndex, */
-  /*                                   data, */
-  /*                                   wLength, */
-  /*                                   buf->timeout */
-  /*                                   ); */
-  /* if (usbval != 0 ) */
-  /*   retval = -(usbval); */
-
-
 AIORET_TYPE
 AIOContinuousBufPreSetup( AIOContinuousBuf * buf )
 {
@@ -1232,11 +1166,6 @@ AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf )
    * Setup counters
    * see reference in [USB AIO documentation](http://accesio.com/MANUALS/USB-AIO%20Series.PDF)
    **/
-  /* if( buf->counter_control ) {  */
-  /*   AIOContinuousBufSetupCounters( buf ); */
-  /* }  */
-  /* AIOContinuousBuf_SetCallback( buf , ActualWorkFunction ); */
-
   /* Start the clocks, and need to get going capturing data */
   if( (retval = ResetCounters(buf)) != AIOUSB_SUCCESS )
     goto out_AIOContinuousBufCallbackStart;
@@ -2229,7 +2158,7 @@ int main(int argc, char *argv[] )
 
   printf("1..193\n");
   int bufsize = 10000;
-#if 0
+#if 1
   basic_functionality();
   for( int i = bufsize; i > 1 ; i /= 2 ) {
     /* printf("Using i:%d\n",i); */
@@ -2243,7 +2172,7 @@ int main(int argc, char *argv[] )
 
   bufsize = 20000;
 #endif
-#if 0
+#if 1
   for ( int i = 1 , j = 1; i < 20 ; j*=2 , i += 1) {
     stress_test_read_channels( bufsize, j );
   }
@@ -2265,34 +2194,4 @@ int main(int argc, char *argv[] )
 
 #endif
 
-/* unsigned char *cur = ((unsigned char *)(&buf->buffer[0])+count); */
-/* unsigned tmpcount  = ( (2*buf->size - count) < bytes ? (2*buf->size-count) : bytes ); */
-/* printcount ++; */
-/* puts("\t\tSampData= */
-/* if( (printcount+1) % 10  == 0 ) { */
-/* count += tmpcount; */
-/* printf("\t\tPrintcount=%u,WritePos=0x%x,SampData=%hu:%hu:%hu,Bytes=%d, Tmpcount=%d, Count=%d, Bufpos=%d, Max=%d\n", */
-/*        printcount, */
-/*        &cur[0], */
-/*        (unsigned short)data[0], */
-/*        (unsigned short)data[2], */
-/*        (unsigned short)data[4], */
-/*        bytes ,tmpcount, count, get_write_pos(buf), 2*buf->size); */
-/* } */
-/* memcpy(cur, data, tmpcount  ); */
-/* unsigned short *tmp = ((unsigned short *)&cur[0]); */
-/* for( int i = 0; i < bytes/2; i ++ ) { */
-/*   fprintf(tmpf,"%hu,",tmp[i] ); */
-/* } */
-/* fprintf(tmpf,"\n"); */
-/* memcpy(cur,data,bytes ); */
-/* count += bytes; */
-/* set_write_pos(buf, count / 8 ); */
-/* AIOContinuousBuf_CopyCounts(  buf, (unsigned short *)&data, minval ) ; */
-/* count += bytes; */
-/* memcpy(&cur[count/2], &data[0], bytes ); */
-/* set_write_pos(buf, count/4); */
-/* int number_databanks = 16; */
-/* unsigned char *tmp    = (unsigned char *)malloc( datasize ); */
-/* while ( buf->status == RUNNING &&  get_write_pos(buf) < buf->size ) { */
 
