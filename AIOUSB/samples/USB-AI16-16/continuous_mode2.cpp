@@ -79,7 +79,7 @@ main(int argc, char *argv[] )
            );
     
     if( AIOContinuousBufAvailableReadSize(buf) >= tmpsize ) {
-      retval = AIOContinuousBufRead( buf, tmpbuf, tmpsize );
+      retval = AIOContinuousBufRead( buf, tmpbuf, tmpsize, tmpsize );
       if ( retval < AIOUSB_SUCCESS ) {
         printf("ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf) );
       } else if( retval == 0 ) {
