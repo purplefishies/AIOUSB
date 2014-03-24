@@ -229,17 +229,6 @@ struct ADRange {
 };
 
 PRIVATE_EXTERN struct ADRange adRanges[];
-/* struct ADRange adRanges[ AD_NUM_GAIN_CODES ] = { */
-/*   { 0, 10 },                                                    // AD_GAIN_CODE_0_10V */
-/*   { -10, 20 },                                                  // AD_GAIN_CODE_10V */
-/*   { 0, 5 },                                                     // AD_GAIN_CODE_0_5V */
-/*   { -5, 10 },                                                   // AD_GAIN_CODE_5V */
-/*   { 0, 2 },                                                     // AD_GAIN_CODE_0_2V */
-/*   { -2, 4 },                                                    // AD_GAIN_CODE_2V */
-/*   { 0, 1 },                                                     // AD_GAIN_CODE_0_1V */
-/*   { -1, 2 }                                                     // AD_GAIN_CODE_1V */
-/* }; */
-
 
 
 extern unsigned long AIOUSB_INIT_PATTERN;

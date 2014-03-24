@@ -85,7 +85,7 @@ void *RawCountsWorkFunction( void *object );
 #define AIOUSB_FATAL(...)  AIOUSB_LOG("<Fatal>\t" __VA_ARGS__ )
 #endif
 
-AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, int scancounts, unsigned num_channels )
+AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels )
 {
   assert( num_channels > 0 );
   AIOContinuousBuf *tmp  = NewAIOContinuousBufWithoutConfig( DeviceIndex, scancounts, num_channels, AIOUSB_TRUE );
@@ -101,7 +101,7 @@ AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, int s
  * @todo Needs a smarter constructor for specifying the Initial mask .Currently won't work
  *       for num_channels > 32
  */
-AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex, int scancounts , unsigned num_channels , AIOUSB_BOOL counts )
+AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex, unsigned scancounts , unsigned num_channels , AIOUSB_BOOL counts )
 {
   assert( num_channels > 0 );
   AIOContinuousBuf *tmp  = (AIOContinuousBuf *)malloc(sizeof(AIOContinuousBuf));
@@ -165,15 +165,15 @@ AIORET_TYPE AIOContinuousBuf_InitConfiguration(  AIOContinuousBuf *buf )
   return retval;
 }
 
-AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex , int bufsize , unsigned num_channels )
+AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex , unsigned scancounts , unsigned num_channels )
 {
-  AIOContinuousBuf *tmp = NewAIOContinuousBufWithoutConfig( DeviceIndex,  bufsize, num_channels , AIOUSB_FALSE );
+  AIOContinuousBuf *tmp = NewAIOContinuousBufWithoutConfig( DeviceIndex,  scancounts, num_channels , AIOUSB_FALSE );
   return tmp;
 }
 
-AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex , int bufsize , unsigned num_channels , AIOUSB_BOOL counts )
+AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex , unsigned scancounts , unsigned num_channels , AIOUSB_BOOL counts )
 {
-  AIOContinuousBuf *tmp = NewAIOContinuousBufWithoutConfig( DeviceIndex,  bufsize, num_channels , counts );
+  AIOContinuousBuf *tmp = NewAIOContinuousBufWithoutConfig( DeviceIndex,  scancounts, num_channels , counts );
   tmp->testing = AIOUSB_TRUE;
   return tmp;
 }

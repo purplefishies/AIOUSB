@@ -2,10 +2,6 @@
 %module AIOUSB
 %include "cpointer.i"
 
-
-/* %inline { */
-/*   extern unsigned long AIOUSB_GetStreamingBlockSize(unsigned long DeviceIndex, unsigned long *BlockSize ); */
-/* } */
 %pointer_functions( unsigned long,  ulp );
 %pointer_functions( unsigned short, usp );
 %pointer_functions( double , dp );
@@ -23,6 +19,7 @@
   #include "aiousb.h"
   #include "AIOUSB_Core.h"
   #include "libusb.h"
+  #include "AIOContinuousBuffer.h"
 
 %}
 
@@ -41,9 +38,19 @@
 
 %include "aiousb.h"
 %include "AIOUSB_Core.h"
+%include "AIOContinuousBuffer.h"
 
 
+%extend AIOContinuousBuf {
 
+  AIOContinuousBuf( unsigned long deviceIndex, unsigned numScans, unsigned numChannels ) {
+    return (AIOContinuousBuf *)NewAIOContinuousBufForCounts( deviceIndex, numScans, numChannels );
+  }
+
+  ~AIOContinuousBuf() {
+    DeleteAIOContinuousBuf($self);
+  }
+}
 
 %extend AIOBuf {
   AIOBuf(int bufsize)  {

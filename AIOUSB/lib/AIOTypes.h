@@ -24,12 +24,12 @@ typedef struct object {
   struct object *tmp;
 } Object;
 
-enum THREAD_STATUS { 
-  NOT_STARTED = 0, 
-  RUNNING, 
-  TERMINATED, 
-  JOINED 
-};
+CREATE_ENUM_W_START( THREAD_STATUS, 0 , 
+                     NOT_STARTED, 
+                     RUNNING, 
+                     TERMINATED, 
+                     JOINED 
+                     );
 
 CREATE_ENUM_W_START( AIOContinuousBufMode, 0 ,
                      AIOCONTINUOUS_BUF_ALLORNONE,

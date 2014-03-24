@@ -12,6 +12,7 @@
 
 #include "AIOTypes.h"
 #include "AIOChannelMask.h"
+#include "AIOTypes.h"
 
 #ifdef __aiousb_cplusplus
 namespace AIOUSB
@@ -49,22 +50,20 @@ typedef struct {
   AIOChannelMask *mask;               /**< Used for keeping track of channels */
   AIOBufferType *tmpbuf;
   unsigned tmpbufsize;
-  volatile enum THREAD_STATUS status; /* Are we running, paused ..etc; */
+  volatile THREAD_STATUS status; /* Are we running, paused ..etc; */
 } AIOContinuousBuf;
 
-AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex , int bufsize, unsigned number_channels );
-AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex, int scancounts , unsigned num_channels , AIOUSB_BOOL counts );
-AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, int scancounts, unsigned num_channels );
-AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex , int bufsize , unsigned num_channels , AIOUSB_BOOL counts  );
+AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex , unsigned scancounts, unsigned number_channels );
+AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex, unsigned scancounts , unsigned num_channels , AIOUSB_BOOL counts );
+AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels );
+AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex , unsigned scancounts , unsigned num_channels , AIOUSB_BOOL counts  );
 
 void DeleteAIOContinuousBuf( AIOContinuousBuf *buf );
 AIORET_TYPE AIOContinuousBuf_InitConfiguration(  AIOContinuousBuf *buf );
 
 void AIOContinuousBuf_SetCallback(AIOContinuousBuf *buf , void *(*work)(void *object ) );
 void AIOContinuousBuf_SetTesting( AIOContinuousBuf *buf, AIOUSB_BOOL testing );
-
-
-static AIORET_TYPE AIOContinuousBuf_SendPreConfig( AIOContinuousBuf *buf );
+AIORET_TYPE AIOContinuousBuf_SendPreConfig( AIOContinuousBuf *buf );
 
 AIORET_TYPE AIOContinuousBuf_SetStartAndEndChannel( AIOContinuousBuf *buf, unsigned startChannel, unsigned endChannel );
 AIORET_TYPE AIOContinuousBuf_SetChannelRangeGain( AIOContinuousBuf *buf, unsigned startChannel, unsigned endChannel , unsigned gainCode );
@@ -101,14 +100,9 @@ AIORET_TYPE AIOContinuousBufSimpleSetupConfig( AIOContinuousBuf *buf, ADGainCode
 AIORET_TYPE AIOContinuousBuf_ResetDevice( AIOContinuousBuf *buf);
 
 unsigned buffer_max( AIOContinuousBuf *buf );
-unsigned AIOContinuousBufGetDivisorA( AIOContinuousBuf *buf );
-unsigned AIOContinuousBufGetDivisorB( AIOContinuousBuf *buf );
 
-/* AIORET_TYPE AIOContinuousBufRead( AIOContinuousBuf *buf, AIOBufferType *readbuf , unsigned size); */
 AIORET_TYPE AIOContinuousBufRead( AIOContinuousBuf *buf, AIOBufferType *readbuf , unsigned readbufsize, unsigned size);
 AIORET_TYPE AIOContinuousBufWrite( AIOContinuousBuf *buf, AIOBufferType *writebuf, unsigned wrbufsize, unsigned size, AIOContinuousBufMode flag );
-/* AIORET_TYPE AIOContinuousBufWrite( AIOContinuousBuf *buf, AIOBufferType *writebuf, unsigned size, AIOContinuousBufMode flag ); */
-/* AIORET_TYPE AIOContinuousBufWriteCounts( AIOContinuousBuf *buf, unsigned short *data, unsigned size , AIOContinuousBufMode flag ); */
 AIORET_TYPE AIOContinuousBufWriteCounts( AIOContinuousBuf *buf, unsigned short *data, unsigned datasize, unsigned size , AIOContinuousBufMode flag );
 
 AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf );
