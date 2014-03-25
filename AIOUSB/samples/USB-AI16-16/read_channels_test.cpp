@@ -10,6 +10,8 @@
 #include <iostream>       
 #include <unistd.h>
 #include "TestCaseSetup.h"
+#include <string.h>
+
 using namespace AIOUSB;
 
 struct options {
@@ -18,7 +20,7 @@ struct options {
   int number_channels;
 };
 
-struct options get_options(int argc, char **argv );
+struct options get_options(struct options *opts, int argc, char **argv );
 
 
 int main( int argc, char **argv ) {
@@ -26,7 +28,7 @@ int main( int argc, char **argv ) {
   unsigned long result = AIOUSB_Init();
   int counter;
   struct options opts = { 0, 0 , 16 };
-  opts = get_options(argc, argv);
+  opts = get_options(&opts,argc, argv);
 
   if( result == AIOUSB_SUCCESS ) {
           
@@ -61,11 +63,14 @@ int main( int argc, char **argv ) {
 //
 // Gets the options 
 //
-struct options get_options(int argc, char **argv )
+struct options get_options( struct options *opts, int argc, char **argv )
 {
   int opt;
   int tfnd;
   struct options retoptions;
+  if( opts ) {
+    memcpy(&retoptions, opts, sizeof( struct options ));
+  }
   tfnd = 0;
   while ((opt = getopt(argc, argv, "C:c:t")) != -1) {
     switch (opt) {
