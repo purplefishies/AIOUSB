@@ -5,7 +5,6 @@
 %pointer_functions( unsigned long,  ulp );
 %pointer_functions( unsigned short, usp );
 %pointer_functions( double , dp );
-/* %array_functions(unsigned short *, ushort ); */
 
 %include typemaps.i
 %apply unsigned long *INOUT { unsigned long *result };
@@ -57,22 +56,7 @@
   void ushort_setitem( unsigned short *ary, int index, int value ) {
     ary[index] = (unsigned short)value;
   }
-  /* unsigned short *ushort_array( int size ) { */
-  /*   return (unsigned short *)malloc(size*sizeof(unsigned short)); */
-  /* } */
-  /* int ushort_array_get( unsigned short *ary, int index ) { */
-  /*   return (int)ary[index]; */
-  /* } */
-
 %}
-
-/* %extend Foo { */
-/*   Foo( int bufsize ) { */
-/*     struct Foo *tmp = (struct Foo *)malloc(sizeof(struct Foo)); */
-/*     tmp->ary = (unsigned short *)malloc(sizeof(unsigned short)*bufsize); */
-/*     return tmp; */
-/*   } */
-/* } */
 
 %extend AIOContinuousBuf {
 
