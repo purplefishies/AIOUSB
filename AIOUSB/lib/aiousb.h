@@ -368,7 +368,7 @@ CREATE_ENUM_W_START( ADGainCode, 0,
                      AD_GAIN_CODE_2V,       /* +/-2V */
                      AD_GAIN_CODE_0_1V,     /* 0-1V */
                      AD_GAIN_CODE_1V        /* +/-1V */
-                     )
+                     );
 
 /*
  * A/D calibration modes; if ground or reference mode is selected, only one A/D

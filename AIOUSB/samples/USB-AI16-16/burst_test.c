@@ -155,12 +155,13 @@ main(int argc, char *argv[] )
     printf("Numscans=%d\n",(int)AIOContinuousBufCountScansAvailable(buf)  );
 
     while (  AIOContinuousBufCountScansAvailable(buf) > 0 ) {
-      printf("Read=%d,Write=%d,size=%d,Avail=%d\n",
-             AIOContinuousBufGetReadPosition(buf),
-             AIOContinuousBufGetWritePosition(buf),
-             buf->size,
-             (int)AIOContinuousBufCountScansAvailable(buf));
-      retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf ,tobufsize, 32768 );
+        printf("Read=%d,Write=%d,size=%d,Avail=%d\n",
+               AIOContinuousBufGetReadPosition(buf),
+               AIOContinuousBufGetWritePosition(buf),
+               buf->size,
+               (int)AIOContinuousBufCountScansAvailable(buf));
+        retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf ,tobufsize, 32768 );
+        /* printf("Retval was %d\n",(int)retval); */
       if ( retval < AIOUSB_SUCCESS ) {
           printf("not ok - ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf));
           keepgoing = 0;
@@ -180,8 +181,7 @@ main(int argc, char *argv[] )
 
     fclose(fp);
     fprintf(stderr,"Test completed...exiting\n");
-    /* retval = ( retval >= 0 ? 0 : - retval ); */
-    /* return(retval); */
+
     return 0;
 }
 
@@ -301,8 +301,13 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] )
         options->number_channels = options->endchannel - options->startchannel  + 1;
       }
     } else {
-        int min, max;
+        int min = -1, max = -1;
         for( int i = 0; i < options->number_ranges ; i ++ ) {
+            if ( min == -1 )
+                min = options->ranges[i]->startchannel;
+            if ( max == -1 ) 
+                max = options->ranges[i]->endchannel;
+
             min = ( options->ranges[i]->startchannel < min ?  options->ranges[i]->startchannel : min );
             max = ( options->ranges[i]->endchannel > max ?  options->ranges[i]->endchannel : max );
         }

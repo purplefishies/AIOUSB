@@ -341,6 +341,19 @@ unsigned AIOContinuousBufAvailableReadSize( AIOContinuousBuf *buf )
 {
   return read_size(buf);
 }
+unsigned int AIOContinuousBufGetSize( AIOContinuousBuf *buf )
+{
+  return buffer_size(buf);
+}
+
+THREAD_STATUS AIOContinuousBufGetStatus( AIOContinuousBuf *buf )
+{
+  return buf->status;
+}
+AIORET_TYPE AIOContinuousBufGetExitCode( AIOContinuousBuf *buf )
+{
+  return buf->exitcode;
+}
 
 
 /** 
@@ -1452,7 +1465,7 @@ unsigned AIOContinuousBuf_GetOverSample( AIOContinuousBuf *buf )
 void AIOContinuousBuf_SetAllGainCodeAndDiffMode( AIOContinuousBuf *buf, ADGainCode gain, AIOUSB_BOOL diff )
 {
   AIOContinuousBufLock( buf );
-  ADC_SetAllGainCodeAndDiffMode( AIOContinuousBuf_GetDeviceIndex( buf ), gain , diff );
+  ADC_SetAllGainCodeAndDiffMode( AIOContinuousBuf_GetDeviceIndex( buf ), (unsigned)gain , diff );
   AIOUSB_UnLock();
   AIOContinuousBufUnlock( buf );
 }

@@ -1,6 +1,6 @@
 // runme.java
 
-import com.accesio.*;
+import AIOUSB.*;
 
 public class test {
  static {
