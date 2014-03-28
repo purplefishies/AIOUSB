@@ -1,11 +1,9 @@
 /**
- * @file   AIOUSB_Core.h
+ * @file   AIOUSB_ADC_ExternalCal.c
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
  * @release $Format: %t$
  * @brief
- *
- *
  */
 
 
@@ -93,35 +91,38 @@ AIOUSB_ADC_ExternalCal(
 
     AIOUSB_UnLock();
 
-/*
- * sort table into ascending order by input voltage; then verify that both the
- * input voltages and the measured counts are unique and uniformly increasing;
- * since the user's points[] array is declared to be 'const' we need to allocate
- * a working table that we can sort; in addition, we want to allocate space for
- * a slope and offset between each pair of points; so while points[] is like a
- * table with numPoints rows and two columns (input voltage, measured counts),
- * the working table effectively has the same number of rows, but four columns
- * (input voltage, measured counts, slope, offset)
- *
- *       points[] format:
- *       +-----------------+       +-----------------+
- *   [0] |  input voltage  |   [1] | measured counts |
- *       |=================|       |=================|
- *   [2] |  input voltage  |   [3] | measured counts |
- *       |=================|       |=================|
- *                            ...
- *       |=================|       |=================|
- * [n-2] |  input voltage  | [n-1] | measured counts |
- *       +-----------------+       +-----------------+
- * 'n' is not numPoints, but numPoints*2
- */
+    /**
+     * @note
+     * @verbatim
+     * sort table into ascending order by input voltage; then verify that both the
+     * input voltages and the measured counts are unique and uniformly increasing;
+     * since the user's points[] array is declared to be 'const' we need to allocate
+     * a working table that we can sort; in addition, we want to allocate space for
+     * a slope and offset between each pair of points; so while points[] is like a
+     * table with numPoints rows and two columns (input voltage, measured counts),
+     * the working table effectively has the same number of rows, but four columns
+     * (input voltage, measured counts, slope, offset)
+     *
+     *       points[] format:
+     *       +-----------------+       +-----------------+
+     *   [0] |  input voltage  |   [1] | measured counts |
+     *       |=================|       |=================|
+     *   [2] |  input voltage  |   [3] | measured counts |
+     *       |=================|       |=================|
+     *                            ...
+     *       |=================|       |=================|
+     * [n-2] |  input voltage  | [n-1] | measured counts |
+     *       +-----------------+       +-----------------+
+     * 'n' is not numPoints, but numPoints*2
+     * @endverbatim
+     */
     const int WORKING_COLUMNS = 4, COLUMN_SLOPE = 2, COLUMN_OFFSET = 3;
     double *const workingPoints = ( double* )malloc(numPoints * WORKING_COLUMNS * sizeof(double));
     assert(workingPoints != 0);
     if(workingPoints != 0) {
-/*
- * copy user's table to our working table and set slope and offset to valid values
- */
+      /*
+       * copy user's table to our working table and set slope and offset to valid values
+       */
           for(index = 0; index < numPoints; index++) {
                 workingPoints[ index * WORKING_COLUMNS + COLUMN_VOLTS ] = points[ index * INPUT_COLUMNS + COLUMN_VOLTS ];
                 workingPoints[ index * WORKING_COLUMNS + COLUMN_COUNTS ] = points[ index * INPUT_COLUMNS + COLUMN_COUNTS ];
@@ -129,14 +130,14 @@ AIOUSB_ADC_ExternalCal(
                 workingPoints[ index * WORKING_COLUMNS + COLUMN_OFFSET ] = 0.0;
             }
 
-/*
- * sort working table in ascending order of input voltage
- */
+          /*
+           * sort working table in ascending order of input voltage
+           */
           qsort(workingPoints, numPoints, WORKING_COLUMNS * sizeof(double), CompareVoltage);
 
-/*
- * verify that input voltages and measured counts are unique and ascending
- */
+          /*
+           * verify that input voltages and measured counts are unique and ascending
+           */
           for(index = 1 /* yes, 1 */; index < numPoints; index++) {
                 if(
                     workingPoints[ index * WORKING_COLUMNS + COLUMN_VOLTS ] <=
@@ -156,43 +157,45 @@ AIOUSB_ADC_ExternalCal(
                   }
             }
 
-/*
- * if table of calibration points looks good, then proceed to calculate slopes and
- * offsets of line segments between points; we verified that no two points in the
- * table are equal, so we should not get any division by zero errors
- */
+          /**
+           * @note if table of calibration points looks good, then proceed to calculate slopes and
+           * offsets of line segments between points; we verified that no two points in the
+           * table are equal, so we should not get any division by zero errors
+           */
           if(result == AIOUSB_SUCCESS) {
-/*
- * the calibration table really only applies to one range if precision is our
- * objective; therefore, we assume that all the channels are configured for the
- * same range during calibration mode, and that the user is still using the same
- * range now as when they collected the calibration data points; if all these
- * assumptions are correct, then we can use the range setting for channel 0
- *
- * the calculations are based on the following model:
- *   mcounts = icounts x slope + offset
- * where,
- *   mcounts is the measured counts (reported by an uncalibrated A/D)
- *   icounts is the input counts from an external voltage source
- *   slope is the gain error inherent in the A/D and associated circuitry
- *   offset is the offset error inherent in the A/D and associated circuitry
- * to reverse the effect of these slope and offset errors, we use this equation:
- *   ccounts = ( mcounts – offset ) / slope
- * where,
- *   ccounts is the corrected counts
- * we calculate the slope and offset using these equations:
- *   slope = ( mcounts[s] – mcounts[z] ) / ( icounts[m] – icounts[z] )
- *   offset = mcounts[z] – icounts[z] x slope
- * where,
- *   [s] is the reading at "span" (the upper reference point)
- *   [z] is the reading at "zero" (the lower reference point)
- * in the simplest case, we would use merely two points to correct the entire voltage
- * range of the A/D; in such a simple case, the "zero" point would be a point near 0V,
- * and the "span" point would be a point near the top of the voltage range, such as 9.9V;
- * however, since this function is actually calculating a whole bunch of slope/offset
- * correction factors, one between each pair of points, "zero" refers to the lower of
- * two points, and "span" refers to the higher of the two points
- */
+            /**
+             * @note
+             * @verbatim the calibration table really only applies to one range if precision is our
+             * objective; therefore, we assume that all the channels are configured for the
+             * same range during calibration mode, and that the user is still using the same
+             * range now as when they collected the calibration data points; if all these
+             * assumptions are correct, then we can use the range setting for channel 0
+             *
+             * the calculations are based on the following model:
+             *   mcounts = icounts x slope + offset
+             * where,
+             *   mcounts is the measured counts (reported by an uncalibrated A/D)
+             *   icounts is the input counts from an external voltage source
+             *   slope is the gain error inherent in the A/D and associated circuitry
+             *   offset is the offset error inherent in the A/D and associated circuitry
+             * to reverse the effect of these slope and offset errors, we use this equation:
+             *   ccounts = ( mcounts – offset ) / slope
+             * where,
+             *   ccounts is the corrected counts
+             * we calculate the slope and offset using these equations:
+             *   slope = ( mcounts[s] – mcounts[z] ) / ( icounts[m] – icounts[z] )
+             *   offset = mcounts[z] – icounts[z] x slope
+             * where,
+             *   [s] is the reading at "span" (the upper reference point)
+             *   [z] is the reading at "zero" (the lower reference point)
+             * in the simplest case, we would use merely two points to correct the entire voltage
+             * range of the A/D; in such a simple case, the "zero" point would be a point near 0V,
+             * and the "span" point would be a point near the top of the voltage range, such as 9.9V;
+             * however, since this function is actually calculating a whole bunch of slope/offset
+             * correction factors, one between each pair of points, "zero" refers to the lower of
+             * two points, and "span" refers to the higher of the two points
+             * @endverbatim
+             */
                 for(index = 1 /* yes, 1 */; index < numPoints; index++) {
                       const double counts0 = AIOUSB_VoltsToCounts(DeviceIndex, 0,           /* channel */
                                                                   workingPoints[ (index - 1) * WORKING_COLUMNS + COLUMN_VOLTS ]),

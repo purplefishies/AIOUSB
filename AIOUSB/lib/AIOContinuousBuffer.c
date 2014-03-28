@@ -135,7 +135,7 @@ AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex, u
   tmp->status       = NOT_STARTED;
   tmp->worker       = cont_thread;
   tmp->hz           = 100000; /**> Default value of 100khz  */
-  tmp->timeout      = 1000;   /**> Defautl Timeout of 1000us  */
+  tmp->timeout      = 1000;   /**> Default Timeout of 1000us  */
   tmp->extra        = 0;
   tmp->tmpbuf       = NULL;
   tmp->tmpbufsize   = 0;
@@ -240,6 +240,16 @@ void AIOContinuousBuf_SetCallback(AIOContinuousBuf *buf , void *(*work)(void *ob
   AIOContinuousBufUnlock( buf );
 }
 
+static unsigned buffer_size( AIOContinuousBuf *buf )
+{
+  return buf->size;
+}
+
+static unsigned buffer_max( AIOContinuousBuf *buf )
+{
+  return buffer_size(buf)-1;
+}
+
 void set_read_pos(AIOContinuousBuf *buf , unsigned pos )
 {
   if( pos > buffer_max( buf ) )
@@ -266,27 +276,13 @@ unsigned get_write_pos( AIOContinuousBuf *buf )
   return buf->_write_pos;
 }
 
-unsigned buffer_size( AIOContinuousBuf *buf )
-{
-  return buf->size;
-}
+
 
 unsigned AIOContinuousBuf_BufSizeForCounts( AIOContinuousBuf * buf) {
   return buffer_size(buf);
 }
 
-
-/**
- * @desc Determines the remaining space in the buffer for writing.
- * @param buf 
- * @return 
- * @note Total bytes that can be written into the buffer are N-1
- * @note
- *  - if the abs(_write_pos - read_pos ) = Size - 1 , then our value is 
- *  0 
- *  - if the abs( _write_pos - _read_pos ) = 0 , then our value is Size
- */
-unsigned write_size( AIOContinuousBuf *buf ) {
+static unsigned write_size( AIOContinuousBuf *buf ) {
   unsigned retval = 0;
   unsigned read, write;
   read = (unsigned )get_read_pos(buf);
@@ -299,11 +295,7 @@ unsigned write_size( AIOContinuousBuf *buf ) {
  return retval;
 }
 
-unsigned write_size_counts( AIOContinuousBuf *buf ) {
-  return write_size(buf);
-}
-
-unsigned write_size_num_scan_counts( AIOContinuousBuf *buf ) {
+static unsigned write_size_num_scan_counts( AIOContinuousBuf *buf ) {
   float tmp = write_size(buf) / AIOContinuousBuf_NumberChannels(buf);
   if( tmp > (int)tmp ) {
       tmp = (int)tmp;
@@ -399,10 +391,6 @@ AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf, unsign
   return retval;
 }
 
-unsigned buffer_max( AIOContinuousBuf *buf )
-{
-  return buffer_size(buf)-1;
-}
 
 void AIOContinuousBufReset( AIOContinuousBuf *buf )
 {
@@ -623,6 +611,8 @@ AIORET_TYPE AIOContinuousBuf_CopyData( AIOContinuousBuf *buf , unsigned short *d
 
      cull_and_average_counts( DeviceIndex, data, &tmpsize, AIOContinuousBuf_NumberChannels(buf) );
      /**
+      * @note
+      * @verbatim
       *                      | Extra 
       *   ----   ----   ---- | ----   ----   ----   ---- 
       *  |    | |    | |    |||    | |    | |    | |    |
@@ -635,6 +625,7 @@ AIORET_TYPE AIOContinuousBuf_CopyData( AIOContinuousBuf *buf , unsigned short *d
       *
       *  Extra data is behind the buf end in the data
       *  buffer. In this case it's two extra shorts
+      * @endverbatim
       */ 
      if( buf->extra ) {
        

@@ -102,7 +102,6 @@ AIORET_TYPE AIOContinuousBufEnd( AIOContinuousBuf *buf );
 AIORET_TYPE AIOContinuousBufSimpleSetupConfig( AIOContinuousBuf *buf, ADGainCode gainCode );
 AIORET_TYPE AIOContinuousBuf_ResetDevice( AIOContinuousBuf *buf);
 
-unsigned buffer_max( AIOContinuousBuf *buf );
 
 AIORET_TYPE AIOContinuousBufRead( AIOContinuousBuf *buf, AIOBufferType *readbuf , unsigned readbufsize, unsigned size);
 AIORET_TYPE AIOContinuousBufWrite( AIOContinuousBuf *buf, AIOBufferType *writebuf, unsigned wrbufsize, unsigned size, AIOContinuousBufMode flag );

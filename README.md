@@ -51,7 +51,7 @@ sudo zypper install libusb-1.0 cmake swig
 
 How to Build
 ------------
-Building ACCES I/O Products' Driver library amounts to compiling C source files to produce C and C++ based shared ( .so ) or static (.a) libraries.  The build process relies on either GNU make or Cmake.  The first method of building ( see [non-cmake users](#noncmake)is a little more involved but will give you the ability to build wrapper language packs.  Currently ,the simplified cmake system is easier to build and install the general libraries but we have been unable to use it to deploy the Swig based wrappers as we would have liked. If you don't require any other languages besides C/C++, I suggest you use the Cmake based approach.
+Building ACCES I/O Products' Driver library amounts to compiling C source files to produce C and C++ based shared ( .so ) or static (.a) libraries.  The build process relies on either GNU make or Cmake.  The first method of building ( see [non-cmake users](#noncmake) is a little more involved but will give you the ability to build wrapper language packs.  Currently ,the simplified cmake system is easier to build and install the general libraries but we have been unable to use it to deploy the Swig based wrappers as we would have liked. If you don't require any other languages besides C/C++, I suggest you use the Cmake based approach.
 
 
 ## <a href="#noncmake"></a>Non-CMake users
