@@ -78,13 +78,19 @@ foreach( tmp_c_file ${tmp_aiousb_files} )
   LIST(APPEND aiousbcpp_files ${aiousbcpp_var} )
   LIST(APPEND aiousbdbg_files ${aiousbdbg_var} )
   LIST(APPEND aiousbcppdbg_files ${aiousbcppdbg_var} )
-  #  message(STATUS "Trying file ${aiousbcpp_var}" )
-  # message(STATUS "Trying file ${aiousb_var}" )
+
+
+  #message(STATUS "Trying file ${aiousbcpp_var}" )
+  #message(STATUS "Trying file ${aiousb_var}" )
+
   add_custom_command( OUTPUT ${aiousb_var} COMMAND ${CMAKE_COMMAND} -E copy_if_different ${tmp_c_file} ${aiousb_var} )
   add_custom_command( OUTPUT ${aiousbdbg_var} COMMAND ${CMAKE_COMMAND} -E copy_if_different ${tmp_c_file} ${aiousbdbg_var} )
   add_custom_command( OUTPUT ${aiousbcpp_var} COMMAND ${CMAKE_COMMAND} -E copy_if_different ${tmp_c_file} ${aiousbcpp_var} )
   add_custom_command( OUTPUT ${aiousbcppdbg_var} COMMAND ${CMAKE_COMMAND} -E copy_if_different ${tmp_c_file} ${aiousbcppdbg_var} )
 endforeach( tmp_c_file )
+
+
+
 
 add_custom_target( aiousb_copies DEPENDS ${aiousb_files} )
 add_custom_target( aiousbcpp_copies DEPENDS ${aiousbcpp_files} )
@@ -112,6 +118,22 @@ add_dependencies( aiousbdbg aiousbdbg_copies )
 
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# Testing targets
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+INCLUDE( build_samples )
+
+set(SELF_TEST_ENTRIES AIOContinuousBuffer.c AIOChannelMask.c )
+# set(SELF_TEST_ENTRIES AIOContinuousBuffer.c )
+foreach( selftest_file ${SELF_TEST_ENTRIES} )
+  set(MY_FLAGS "-DAIOUSB_DEBUG_LOG -DAIO_DEBUG -DTAP_TEST -DHAS_PTHREAD -DSELF_TEST" )
+  set(MY_LIBRARIES aiousbdbg usb-1.0 pthread m )
+  build_selftest_c_file( aiousblibs ${selftest_file} ${MY_FLAGS} ${MY_LIBRARIES} )
+endforeach( selftest_file ${SELF_TEST_ENTRIES}  )
+
+# macro ( build_selftest_c_file project c_file  cflags link_libraries )
+
+
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Installation targets
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -119,6 +141,6 @@ install( TARGETS aiousb DESTINATION lib )
 install( TARGETS aiousbdbg DESTINATION lib )
 install( TARGETS aiousbcpp DESTINATION lib )
 install( TARGETS aiousbcppdbg DESTINATION lib )
-install( FILES AIOUSB_Core.h AIOUSB_USB.h aiousb.h AIOTypes.h DESTINATION include )
+install( FILES AIOUSB_Core.h AIOUSB_USB.h aiousb.h AIOTypes.h AIOChannelMask.h DESTINATION include )
 
 

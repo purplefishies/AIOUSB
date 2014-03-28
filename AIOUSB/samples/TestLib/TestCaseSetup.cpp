@@ -23,6 +23,25 @@ TestCaseSetup::TestCaseSetup() : DeviceIndex(0) ,
   // Turn on the Debug level 
 }
 
+
+TestCaseSetup::TestCaseSetup(int deviceIndex, int numChannels ) : DeviceIndex(deviceIndex) , 
+                                                                  deviceFound(false) , 
+                                                                  CAL_CHANNEL(DEF_CAL_CHANNEL), 
+                                                                  MAX_CHANNELS(DEF_MAX_CHANNELS) , 
+                                                                  NUM_CHANNELS(numChannels) ,
+                                                                  number_oversamples(0)
+{
+  counts                  = (unsigned short*)malloc( sizeof(unsigned short)*MAX_CHANNELS);
+  volts                   = (double *)malloc(sizeof(double)* MAX_CHANNELS);
+  gainCodes               = (unsigned char *)malloc(sizeof(unsigned char)*numChannels);
+  dataBuf                 = NULL;
+  maxcounts               = -1;
+  // Turn on the Debug level 
+}
+
+
+
+
 TestCaseSetup::~TestCaseSetup() 
 {
   AIOUSB_Exit();

@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <math.h>
-#include <AIOTypes.h>
+#include <AIODataTypes.h>
+
 
 using namespace AIOUSB;
 using namespace std;
@@ -13,8 +14,7 @@ int
 main(int argc, char *argv[] ) 
 {
   int bufsize = 10000000;
-  AIOContinuousBuf *buf = NewAIOContinuousBuf( bufsize );
-  int tmpsize = 2048;
+  unsigned tmpsize = 2048;
   int keepgoing = 1;
   AIORET_TYPE retval;
   AIOBufferType *tmpbuf = (AIOBufferType *)malloc(sizeof(AIOBufferType *)*tmpsize);
@@ -28,6 +28,7 @@ main(int argc, char *argv[] )
   }
   AIOUSB_Init();
   GetDevices();
+  AIOContinuousBuf *buf= NewAIOContinuousBuf( 0, bufsize , 16 );
 
   /**
    * 1. Each buf should have a device index associated with it, so 
@@ -56,7 +57,7 @@ main(int argc, char *argv[] )
    * 3. Setup the Divide by value, in this case 
    *    10_000_000 / 1000
    */ 
-  AIOContinuousBufSetClock( buf, 1000 );
+  AIOContinuousBufSetClock( buf, 30000 );
 
   /**
    * 4. Start the Callback that fills up the 
@@ -64,7 +65,7 @@ main(int argc, char *argv[] )
    *    performs the acquistion, while you go about 
    *    doing other things.
    */ 
-  AIOContinuousBufCallbackStartClocked( buf );
+  AIOContinuousBufCallbackStart( buf );
 
   printf("Using tmpsize: %d\n",tmpsize);
   while ( keepgoing ) {
@@ -78,7 +79,7 @@ main(int argc, char *argv[] )
            );
     
     if( AIOContinuousBufAvailableReadSize(buf) >= tmpsize ) {
-      retval = AIOContinuousBufRead( buf, tmpbuf, tmpsize );
+      retval = AIOContinuousBufRead( buf, tmpbuf, tmpsize, tmpsize );
       if ( retval < AIOUSB_SUCCESS ) {
         printf("ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf) );
       } else if( retval == 0 ) {

@@ -41,8 +41,8 @@ PERL_PREFIX_INSTALL	:=
 endif
 PYTHON_PREFIX	:= 
 
-JAVA_DIR	:= com/accesio
-JAVA_ROOT	:= com
+JAVA_DIR	:= AIOUSB
+JAVA_ROOT	:= AIOUSB
 
 TEST_DIR	:=	test_dir
 
@@ -236,23 +236,23 @@ $(JAVA_DIR):
 
 java: 	$(JAVA_DIR)
 	@if [ ! -f $(JAVA_BUILT) ] ; then \
-		$(SWIG) -I../../ -java -package com.accesio -outdir $(JAVA_DIR) AIOUSB.i 2>&1; \
+		$(SWIG) -I../../ -java -package AIOUSB -outdir $(JAVA_DIR) AIOUSB.i 2>&1; \
 		$(CC) -fPIC -I../..  -I/usr/include/libusb-1.0 -I/usr/lib/jvm/java-7-openjdk-amd64/include -L$${AIOUSB_ROOT}/lib -L$${AIOUSB_ROOT}/classlib -c AIOUSB_wrap.c 2>&1 ; \
 		$(CC)  -shared -I../..  -I/usr/lib/jvm/java-7-openjdk-amd64/include ./AIOUSB_wrap.o -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib   -lusb-1.0 -lpthread -laiousbdbg  -laiousbcppdbg  -o libAIOUSB.so 2>&1 ; \
 		cd tests && javac -classpath "$$(pwd):$$(pwd)/./:$$(pwd)/../" test.java 2>&1; \
 		if [ ! -d /tmp/scala-devel ] ; then mkdir /tmp/scala-devel; chmod 777 /tmp/scala-devel; fi \
 		fi
-	@jar cf AIOUSB.jar libAIOUSB.so com/accesio/*.class
+	@jar cf AIOUSB.jar libAIOUSB.so AIOUSB/*.class
 	@touch $(JAVA_BUILT);
 
 java_test:	$(JAVA_BUILT) $(TEST_DIR)
-	@LD_LIBRARY_PATH="$${AIO_LIB_DIR}:$${AIO_CLASSLIB_DIR}:$$(pwd)" CLASSPATH=$$(pwd) scala -e 'import com.accesio._;  AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices()'
+	@LD_LIBRARY_PATH="$${AIO_LIB_DIR}:$${AIO_CLASSLIB_DIR}:$$(pwd)" CLASSPATH=$$(pwd) scala -e 'import AIOUSB._;  AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices()'
 
 $(JAVA_BUILT): java
 
 java_cleanup:
 	$(RM) -rf com
-	$(RM) -rf libAIOUSB.so $(JAVA_BUILT) AIOUSB_wrap.c AIOUSB_wrap.o AIOUSB.jar
+	$(RM) -rf libAIOUSB.so $(JAVA_BUILT) AIOUSB_wrap.c AIOUSB_wrap.o AIOUSB.jar *.class $(JAVA_DIR)
 	@$(RM) -rf /tmp/scala-devel
 
 java_atest:

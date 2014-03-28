@@ -21,7 +21,8 @@ AIOUSB_GetDeviceProperties.o \
 AIOUSB_GetResultCodeAsString.o \
 AIOUSB_ListDevices.o \
 AIOUSB_WDG.o \
-AIOContinuousBuffer.o
+AIOContinuousBuffer.o \
+AIOChannelMask.o
 
 CCINC		:= 
 CC_SHFLAGS	:= -shared -Wl,-soname
