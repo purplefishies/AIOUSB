@@ -25,23 +25,35 @@ AIOContinuousBuffer.o \
 AIOChannelMask.o
 
 CCINC		:= 
-CC_SHFLAGS	:= -shared -Wl,-soname
+OSTYPE= $(shell uname -s)
+
+ifeq ("$(OSTYPE)","Darwin") 
+CC_SHFLAGS := -dynamiclib
+else 
+CC_SHFLAGS := -shared -Wl,-soname
+endif
+
 
 CDBGOBJS := $(COBJS:.o=.dbg.o)
 CPPOBJS := $(COBJS:.o=.cpp.o)
 CPPDBGOBJS := $(CPPOBJS:.o=.dbg.o)
 
 CLIB 		:= libaiousb.a
-SHCLIB		:= libaiousb.so
-
 CDBGLIB 	:= libaiousbdbg.a
-SHCDBGLIB 	:= libaiousbdbg.so
-
 CPPLIB 		:= libaiousbcpp.a
-SHCPPLIB	:= libaiousbcpp.so
-
 CPPDBGLIB 	:= libaiousbcppdbg.a
+
+ifeq ($OSTYPE,"Darwin")
+SHCDBGLIB 	:= libaiousbdbg.dylib
+SHCPPLIB	:= libaiousbcpp.dylib
+SHCPPDBGLIB 	:= libaiousbcppdbg.dylib
+SHCLIB		:= libaiousb.dylib
+else
+SHCDBGLIB 	:= libaiousbdbg.so
+SHCPPLIB	:= libaiousbcpp.so
 SHCPPDBGLIB 	:= libaiousbcppdbg.so
+SHCLIB		:= libaiousb.so
+endif
 
 ifdef DEBUG
         DEBUGOPTS       += -ggdb $(DEBUG)
@@ -57,8 +69,13 @@ override CFLAGS	+= -I.
 SHARED_LIBS	:=  -lusb-1.0 -pthread -lm
 override CXXFLAGS += -D__aiousb_cplusplus
 
-.PHONY : all
+.PHONY : all testit
+
 all : $(LIBS)
+
+testit:
+	echo $(OSTYPE)
+	echo $(CC_SHFLAGS)
 
 all_cscope: $(LIBS) cscope
 
@@ -67,27 +84,27 @@ all_cscope: $(LIBS) cscope
 $(CLIB) : $(COBJS)
 	$(AR) cr $(CLIB) $(COBJS)
 $(SHCLIB) : $(COBJS)
-	$(CC)  $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $(COBJS) $(SHARED_LIBS)
+	$(CC)  $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(COBJS) $(SHARED_LIBS)
 
 
 $(CDBGLIB) : $(CDBGOBJS)
 	$(AR) cr $(CDBGLIB) $(CDBGOBJS)
 $(SHCDBGLIB): 	$(CDBGOBJS)
-	$(CC) $(CC_SHFLAGS),$@ $(LDFLAGS) -o $@ $(CDBGOBJS) $(SHARED_LIBS) 
+	$(CC) $(CC_SHFLAGS) $(LDFLAGS) -o $@ $(CDBGOBJS) $(SHARED_LIBS) 
 
 
 $(CPPLIB) : $(CPPOBJS)
 	$(AR) cr $(CPPLIB) $(CPPOBJS)
 
 $(SHCPPLIB) : $(CPPOBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $(CPPOBJS) $(SHARED_LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS)
 
 
 $(CPPDBGLIB) : $(CPPDBGOBJS)
 	$(AR) cr $(CPPDBGLIB) $(CPPDBGOBJS)
 
 $(SHCPPDBGLIB) : $(CPPDBGOBJS)
-	$(CXX) $(CXXFLAGS)  $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $(CPPOBJS) $(SHARED_LIBS)
+	$(CXX) $(CXXFLAGS)  $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS)
 
 
 #********************************  OBJECTS  *********************************
