@@ -43,7 +43,7 @@ CDBGLIB 	:= libaiousbdbg.a
 CPPLIB 		:= libaiousbcpp.a
 CPPDBGLIB 	:= libaiousbcppdbg.a
 
-ifeq ($OSTYPE,"Darwin")
+ifeq ("$(OSTYPE)","Darwin")
 SHCDBGLIB 	:= libaiousbdbg.dylib
 SHCPPLIB	:= libaiousbcpp.dylib
 SHCPPDBGLIB 	:= libaiousbcppdbg.dylib
