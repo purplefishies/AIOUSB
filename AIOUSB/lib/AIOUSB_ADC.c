@@ -3044,7 +3044,7 @@ unsigned long AIOUSB_ADC_InternalCal(
           goto INTERNAL_CAL_ERRORS;
       }
 
-    if(autoCal) {
+    if( 1 ) {
       /*
        * create calibrated calibration table
        */
@@ -3124,6 +3124,7 @@ abort:
                 AIOUSB_UnLock();                    // unlock while communicating with device
 
                 for(k = 0; k <= 1; k++) {
+                      result = AIOUSB_ERROR_NOT_SUPPORTED;
                       WriteConfigBlock(DeviceIndex);
                       /*result = ADC_SetConfig( deviceIndex, configBlock.registers, &configBlock.size );*/
 

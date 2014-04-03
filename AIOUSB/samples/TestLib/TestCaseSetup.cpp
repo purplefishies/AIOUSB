@@ -592,7 +592,7 @@ void TestCaseSetup::doCSVReadVoltages()
   while( counter < maxvalue ) {
       result = ADC_GetScanV( DeviceIndex, volts );
       gettimeofday( &delta, 0 );
-      LOG("%Ld,", (( (long long int)delta.tv_sec - (long long int)reftime.tv_sec)*1000000 ) + ( (long long int )delta.tv_usec - (long long int)reftime.tv_usec ));
+      LOG("%lld,", (( (long long int)delta.tv_sec - (long long int)reftime.tv_sec)*1000000 ) + ( (long long int )delta.tv_usec - (long long int)reftime.tv_usec ));
       THROW_IF_ERROR( result, " performing A/D channel scan" );
       for( int channel = 0; channel < NUM_CHANNELS - 1 ; channel ++ ) { 
           LOG("%.3f,", volts[channel] );
@@ -623,7 +623,7 @@ void TestCaseSetup::doCSVWithGetChannelV()
     while( counter < maxvalue ) {
 
         gettimeofday( &delta, 0 );
-        LOG("%Ld,", (( (long long int)delta.tv_sec - (long long int)reftime.tv_sec)*1000000 ) + ( (long long int )delta.tv_usec - (long long int)reftime.tv_usec ));
+        LOG("%lld,", (( (long long int)delta.tv_sec - (long long int)reftime.tv_sec)*1000000 ) + ( (long long int )delta.tv_usec - (long long int)reftime.tv_usec ));
         for ( channel = 0; channel < NUM_CHANNELS-1 ; channel ++ )  {
             ADC_GetChannelV( DeviceIndex, channel, &reading );
             LOG("%.3f,", reading );

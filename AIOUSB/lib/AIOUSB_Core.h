@@ -228,7 +228,7 @@ struct ADRange {
   double range;
 };
 
-PRIVATE_EXTERN struct ADRange adRanges[];
+PRIVATE_EXTERN struct ADRange adRanges[ AD_NUM_GAIN_CODES ];
 
 
 extern unsigned long AIOUSB_INIT_PATTERN;

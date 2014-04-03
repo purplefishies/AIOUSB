@@ -19,11 +19,6 @@ namespace AIOUSB {
 
 
 
-typedef struct object {
-  struct object *next;
-  struct object *tmp;
-} Object;
-
 CREATE_ENUM_W_START( THREAD_STATUS, 0 , 
                      NOT_STARTED, 
                      RUNNING, 

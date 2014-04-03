@@ -657,7 +657,7 @@ void AioUsbPrintDeviceProps(DeviceProperties *devProps ) {
   fprintf(stderr, "---------- AIO USB Device Properties ----------\n");
   fprintf(stderr, "Name: %s\n", devProps->Name);
   fprintf(stderr, "ProductID: 0x%x\n", devProps->ProductID);
-  fprintf(stderr, "SerialNumber: %lu\n", devProps->SerialNumber);
+  fprintf(stderr, "SerialNumber: %llu\n", devProps->SerialNumber);
   fprintf(stderr, "ADCChannels: %u\n", devProps->ADCChannels);
   fprintf(stderr, "ADCChannelsPerGroup: %u\n", devProps->ADCChannelsPerGroup);
   fprintf(stderr, "ADCMUXChannels: %u\n", devProps->ADCMUXChannels);

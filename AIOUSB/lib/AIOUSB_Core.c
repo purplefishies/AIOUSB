@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <libusb-1.0/libusb.h>
 
 #ifdef BACKTRACE
 #include <execinfo.h>
@@ -36,7 +37,6 @@
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
-
 
 int aio_errno;
 
@@ -961,6 +961,7 @@ PRIVATE struct libusb_device_handle *
 AIOUSB_GetDeviceHandle(unsigned long DeviceIndex)
 {
     libusb_device_handle *deviceHandle = NULL;
+    /* libusb_set_debug(NULL, 4 ); */
 
     if(AIOUSB_Validate(&DeviceIndex) != AIOUSB_SUCCESS) {
           AIOUSB_UnLock();
@@ -970,12 +971,17 @@ AIOUSB_GetDeviceHandle(unsigned long DeviceIndex)
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
     deviceHandle = deviceDesc->deviceHandle;
     if(deviceHandle == NULL) {
+          int result;
           const int libusbResult = libusb_open(deviceDesc->device, &deviceHandle);
-          if(
-              libusbResult == LIBUSB_SUCCESS &&
-              deviceHandle != NULL
-              )
+          if( libusbResult == LIBUSB_SUCCESS && deviceHandle != NULL ) {
+            int kernelActive = libusb_kernel_driver_active(deviceHandle, 0);
+            result = libusb_claim_interface (deviceHandle, 0);
+            if(kernelActive == 1) {
+              result = libusb_attach_kernel_driver(deviceHandle, 0);
+            }
+
               deviceDesc->deviceHandle = deviceHandle;
+          }
       }
 
     AIOUSB_UnLock();
@@ -1386,7 +1392,7 @@ const char *AIOUSB_GetVersionDate()
  */
 unsigned long AIOUSB_Init()
 {
-    unsigned long result = AIOUSB_SUCCESS;
+  unsigned long result = AIOUSB_SUCCESS;
 
     if(!AIOUSB_IsInit()) {
           InitDeviceTable();
@@ -1395,7 +1401,8 @@ unsigned long AIOUSB_Init()
           if(pthread_mutexattr_init(&mutexAttr) == 0) {
                 if(pthread_mutexattr_settype(&mutexAttr, PTHREAD_MUTEX_RECURSIVE) == 0) {
                       if(pthread_mutex_init(&aiousbMutex, &mutexAttr) == 0) {
-                            const int libusbResult = libusb_init(NULL);
+                            const int libusbResult = libusb_init( NULL );
+
                             if(libusbResult == LIBUSB_SUCCESS) {
 /*
  * populate device table so users can use diFirst and diOnly immediately; be

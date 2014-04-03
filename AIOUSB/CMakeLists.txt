@@ -41,7 +41,8 @@ set(SWIG_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/wrappers )
 # Acquisition libraries
 find_package(Threads REQUIRED )
 find_package(SWIG )
-
+find_package(Doxygen)
+find_package(Perl)
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Linux / Mac Build 
@@ -62,8 +63,10 @@ if(  UNIX OR APPLE )
 
   if("$ENV{CFLAGS}" STREQUAL "")
     if(USE_GCC OR USE_CLANG)
-      # MESSAGE( STATUS "Setting CFLAGS" )
-      set(CMAKE_C_FLAGS   "-std=gnu99 -fPIC" )
+      MESSAGE(STATUS "GCC compiler?:${USE_GCC}")
+      if (USE_GCC)
+        set(CMAKE_C_FLAGS   "-std=gnu99 -fPIC" )
+      endif(USE_GCC)
       set(CMAKE_CXX_FLAGS "-D__aiousb_cplusplus -fPIC" )
       set(CORELIBS pthread usb-1.0 )
     endif(USE_GCC OR USE_CLANG)
@@ -71,7 +74,9 @@ if(  UNIX OR APPLE )
     set(CMAKE_C_FLAGS "$ENV{CFLAGS}")
     list(APPEND EXTRA_CFLAGS "$ENV{CFLAGS}")
   endif("$ENV{CFLAGS}" STREQUAL "")
+
 endif( UNIX OR APPLE)
+
 
 add_subdirectory(lib)
 include_directories(lib)
@@ -80,35 +85,57 @@ include_directories(classlib)
 
 
 if ( SWIG_FOUND AND BUILD_WRAPPERS ) 
-  # FOREACH( language python )
-  FOREACH( language perl java )
+  FOREACH( language perl java python )
     MESSAGE(STATUS "Adding wrapper for ${language}" )
     add_subdirectory("lib/wrappers/${language}")
   ENDFOREACH( language )
 endif( SWIG_FOUND AND BUILD_WRAPPERS )
 
-# add_subdirectory(lib/wrappers/perl)
-# add_subdirectory(lib/wrappers/ruby)
 
 add_subdirectory(samples/TestLib)
 SET( AIOUSB_TESTCASELIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/samples/TestLib )
 
-#
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Auto build the samples directory
-#
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-if( BUILD_SAMPLES ) 
-  
+IF( BUILD_SAMPLES ) 
   FOREACH( SAMPLE_DIR USB-AO16-16 USB-AI16-16 USB-DA12-8A USB-DIO-16 USB-DIO-32  USB-IIRO-16)
     MESSAGE(STATUS "Including samples for samples/${SAMPLE_DIR}")
     STRING(REGEX REPLACE  "-" "_" THIS_PROJECT ${SAMPLE_DIR} )
     ADD_SUBDIRECTORY("samples/${SAMPLE_DIR}")
-  ENDFOREACH( SAMPLE_DIR )
+  ENDFOREACH( SAMPLE_DIR  USB-AO16-16 USB-AI16-16 USB-DA12-8A USB-DIO-16 USB-DIO-32  USB-IIRO-16 )
 endif( BUILD_SAMPLES )
 
-#
+
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# Documentation and man pages
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+IF(DOXYGEN_FOUND)
+  MESSAGE(STATUS "Will generate Doxygen") 
+  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+  ADD_CUSTOM_TARGET(doc
+    ${DOXYGEN_EXECUTABLE} Doxyfile
+    COMMENT "Generating API documentation with Doxygen" VERBATIM
+  )
+
+IF( PERL_FOUND )
+SET(PAR "(" )
+SET(CPAR ")" )
+SET(REPLACE_COMMAND ${PERL_EXECUTABLE} -i -pne 's/^\\s*${PAR}References|Referenced\\s+by${CPAR}.*//g' * )
+  ADD_CUSTOM_COMMAND( TARGET doc
+    POST_BUILD
+    COMMAND ${REPLACE_COMMAND}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/man/man3
+    COMMENT "Cleaning up man pages"
+    )
+ENDIF( PERL_FOUND )
+INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/man/man3 DESTINATION man )
+ENDIF(DOXYGEN_FOUND)
+
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # CPack stuff
-#
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ACCES I/O Products AIOUSB Drivers")
 SET(CPACK_PACKAGE_VENDOR "accesio")
@@ -121,7 +148,7 @@ SET(CPACK_PACKAGE_VERSION_MINOR "98")
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "accesio ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
 IF( WIN32 AND NOT UNIX )        # WIN32
   SET(CPACK_NSIS_CONTACT "support@accesio.com")
-ELSE( WIN32 AND NOT UNIX )      # LINUX / UNIX
+ELSE( UNIX )                    # LINUX / UNIX 
   SET(CPACK_DEBIAN_PACKAGE_NAME "libaiousb" )
   SET(CPACK_DEBIAN_PACKAGE_VERSION "1.98" )
   SET(CPACK_SOURCE_STRIP_FILES "")
@@ -130,7 +157,6 @@ ELSE( WIN32 AND NOT UNIX )      # LINUX / UNIX
   SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libusb-1.0-0 ( >= 1.0.0 ), libusb-dev ( >= 0.1.0 ) ")
 
   SET(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}")
-
   # Install everything into /usr/share/accesio
   # bin
   # lib

@@ -389,7 +389,7 @@ typedef struct  {
   const void *device;           /**< Pointer to the device Descriptor */
   unsigned long size;
   AIOUSB_BOOL testing;          /**< For making Unit tests that don't talk to hardware */
-  unsigned char registers[ AD_MAX_CONFIG_REGISTERS ];
+  unsigned char registers[ AD_MAX_CONFIG_REGISTERS +1];
 } ADConfigBlock;
 
 
@@ -403,6 +403,8 @@ typedef struct {
   unsigned short *buffer;
   unsigned long bytes_remaining;
 } AIOBuf ;
+
+extern unsigned long GetDevices( void );
 
 typedef struct  {
     const char *Name;                /**< null-terminated device name or 0 */
@@ -419,12 +421,6 @@ typedef struct  {
 } DeviceProperties;
 
 
-
-
-
-
-
-extern unsigned long GetDevices( void );
 
 extern unsigned long QueryDeviceInfo(
     unsigned long DeviceIndex,

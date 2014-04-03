@@ -1839,7 +1839,7 @@ void stress_test_drain_buffer( int bufsize )
                           (core_size*20)%channel_list[9]};
 
   int i, count = 0, buf_unit = 10;
-  int tmpsize;
+  unsigned tmpsize;
   int databuf_size;
   int datatransferred = 0;
   int actual_bufsize = 10;

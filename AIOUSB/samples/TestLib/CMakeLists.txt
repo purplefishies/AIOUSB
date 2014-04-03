@@ -19,7 +19,9 @@ if( NOT LIBUSB_FOUND )
 endif( NOT LIBUSB_FOUND )
 
 SET(CMAKE_CXX_FLAGS "-D__aiousb_cplusplus -fPIC" )
-SET(CMAKE_C_FLAGS   "-std=gnu99 " )
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  SET(CMAKE_C_FLAGS   "-std=gnu99 " )
+endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" )
 
 ADD_LIBRARY( TestCaseSetup SHARED ${CMAKE_CURRENT_SOURCE_DIR}/TestCaseSetup.cpp )
 
