@@ -10,7 +10,7 @@ CPPSOURCES 	:= $(wildcard *.cpp)
 HPPSOURCES 	:= $(wildcard *.hpp)
 CPPOBJS 	:= $(subst .cpp,.o,$(CPPSOURCES))
 CPPDBGOBJS 	:= $(subst .o,.dbg.o,$(CPPOBJS))
-LIBS 		:= libclassaiousb.a libclassaiousbdbg.a libclassaiousbdbg.so libclassaiousb.so
+
 
 
 DOCDIR 		:= doc
@@ -26,9 +26,26 @@ else
         DEBUGOPTS       += -DNDEBUG
 endif
 
-CXX_SHFLAGS      := -shared -Wl,-soname
+OSTYPE= $(shell uname -s)
 
+ifeq ("$(OSTYPE)","Darwin") 
+CXX_SHFLAGS := -dynamiclib -undefined dynamic_lookup
+else 
+CXX_SHFLAGS := -shared -Wl,-soname
+endif
 
+STCPPLIB	:=libclassaiousb.a
+STCPPDBGLIB	:=libclassaiousbdbg.a
+ifeq ("$(OSTYPE)","Darwin")
+SHCPPLIB	:=libclassaiousb.dylib
+SHCPPDBGLIB	:=libclassaiousbdbg.dylib
+else
+SHCPPLIB	:=libclassaiousb.so
+SHCPPDBGLIB	:=libclassaiousbdbg.so
+endif
+LIBS 		:= $(STCPPLIB) $(STCPPDBGLIB) $(SHCPPLIB) $(SHCPPDBGLIB)
+
+#CXX_SHFLAGS      := -shared -Wl,-soname
 
 
 .PHONY : all
@@ -52,14 +69,14 @@ distclean: clean
 libclassaiousb.a : $(CPPOBJS)
 	$(AR) cr libclassaiousb.a $(CPPOBJS)
 
-libclassaiousb.so : $(CPPOBJS)
-	$(CXX) $(CXXFLAGS) $(CFLAGS) $(LDFLAGS) $(CXX_SHFLAGS),$@ -o $@ $(CPPOBJS) $(SHARED_LIBS)
+$(SHCPPLIB) : $(CPPOBJS)
+	$(CXX) $(CXXFLAGS) $(CFLAGS) $(LDFLAGS) $(CXX_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS)
 
 libclassaiousbdbg.a : $(CPPDBGOBJS)
 	$(AR) cr libclassaiousbdbg.a $(CPPDBGOBJS)
 
-libclassaiousbdbg.so : $(CPPDBGOBJS)
-	$(CXX) $(CXXFLAGS) $(CFLAGS) $(LDFLAGS) $(CXX_SHFLAGS),$@ -o $@ $(CPPDBGOBJS) $(SHARED_LIBS)
+$(SHCPPDBGLIB) : $(CPPDBGOBJS)
+	$(CXX) $(CXXFLAGS) $(CFLAGS) $(LDFLAGS) $(CXX_SHFLAGS) -o $@ $(CPPDBGOBJS) $(SHARED_LIBS)
 
 
 
