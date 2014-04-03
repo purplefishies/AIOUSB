@@ -13,6 +13,7 @@
 #include "AIOTypes.h"
 #include "AIOChannelMask.h"
 #include "AIOTypes.h"
+#include <pthread.h>
 
 #ifdef __aiousb_cplusplus
 namespace AIOUSB
