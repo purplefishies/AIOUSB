@@ -1,13 +1,11 @@
-/*
- * $RCSfile: AIOUSB_ListDevices.c,v $
- * $Revision: 1.7 $
- * $Date: 2009/11/15 20:56:05 $
- * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
+/**
+ * @file   AIOTypes.h
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @release $Format: %t$
+ * @brief  Provides a simple function for listing ACCES I/O USB devices on USB bus
  *
- * ACCES I/O USB API for Linux
  */
-
-
 
 #include "AIOUSB_Core.h"
 #include <stdio.h>
@@ -19,8 +17,7 @@ namespace AIOUSB {
 #endif
 
 
-void AIOUSB_ListDevices()
-{
+PUBLIC_EXTERN void AIOUSB_ListDevices() {
     AIOUSB_BOOL found = AIOUSB_FALSE;
 
     if(AIOUSB_Lock()) {
@@ -39,7 +36,7 @@ void AIOUSB_ListDevices()
                             if(result == AIOUSB_SUCCESS) {
                                   name[ nameSize ] = '\0';
                                   if(!found) {
-// print a heading before the first device found
+                                    // print a heading before the first device found
                                         printf("ACCES devices found:\n");
                                         found = AIOUSB_TRUE;
                                     }
@@ -69,7 +66,7 @@ void AIOUSB_ListDevices()
 
 
 #ifdef __cplusplus
-}       // namespace AIOUSB
+} /* namespace AIOUSB */
 #endif
 
 

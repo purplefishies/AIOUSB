@@ -1,18 +1,17 @@
-/*
- * $RCSfile: sample.cpp,v $
- * $Date: 2009/12/25 19:11:55 $
- * $Revision: 1.6 $
- * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
- */
-
-// {{{ build instructions
-/*
+/**
+ * @file   AIOUSB_Core.h
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @release $Format: %t$
+ * @brief 
+ *
+ * @note build instructions
+ * @verbatim
  * g++ sample.cpp -lclassaiousb -laiousbcpp -lusb-1.0 -o sample
  *   or
  * g++ -ggdb sample.cpp -lclassaiousbdbg -laiousbcppdbg -lusb-1.0 -o sample
+ * @endverbatim
  */
-// }}}
-
 
 #include <iostream>
 #include <iomanip>
@@ -51,44 +50,6 @@ int main( int argc, char *argv[] ) {
 			USB_DIO_Family &device = *( USB_DIO_Family * ) devices.at( 0 );	// get first device found
        		device.reset()
        			.setCommTimeout( 1000 );
-
-			/*
-			 * demonstrate writing EEPROM
-			 */
-			if( DEMO_EEPROM_WRITE ) {
-				cout << "Writing to EEPROM ... " << flush;
-				const int offset = 0x100;
-				string message = "USB-IDIO-8 sample program";
-       			UCharArray prevData = device.customEEPROMRead( offset, message.length() );	// preserve current EEPROM contents
-				UCharArray data( message.length() );
-				for( int index = 0; index < ( int ) message.length(); index++ )
-					data.at( index ) = message.at( index );
-       			device.setCommTimeout( 10000 )	// writing the entire EEPROM (which we're not doing here) can take a long time
-       				.customEEPROMWrite( offset, data );
-       			UCharArray readData = device.customEEPROMRead( offset, message.length() );
-				string readMessage( readData.size(), ' ' );
-				for( int index = 0; index < ( int ) readData.size(); index++ )
-					readMessage.at( index ) = readData.at( index );
-       			device.customEEPROMWrite( offset, prevData )
-       				.setCommTimeout( 1000 );
-				cout
-					<< ( ( readMessage.compare( message ) == 0 )
-						? "successful"
-						: "failed: data read back did not compare" )
-					<< endl;
-			}	// if( DEMO_EEPROM_WRITE )
-
-			/*
-			 * demonstrate reading EEPROM
-			 */
-			cout
-				<< "EEPROM contents:\n"
-				<< '['
-				<< flush << hex << setw( 2 ) << setfill( '0' );
-       		UCharArray data = device.customEEPROMRead( 0, device.CUSTOM_EEPROM_SIZE );
-			for( int index = 0; index < ( int ) data.size() - 1; index++ )
-				cout << ( unsigned ) data.at( index ) << ", ";
-			cout << ( unsigned ) data.at( data.size() - 1 ) << "]\n";
 
 			/*
 			 * demonstrate DIO configuration

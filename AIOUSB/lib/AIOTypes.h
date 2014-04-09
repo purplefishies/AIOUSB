@@ -51,6 +51,11 @@ CREATE_ENUM_W_START( AIOContinuousBufMode, 0 ,
 typedef double AIOBufferType;
 
 
+#ifndef EXPORTED_FUNCTION
+#define EXPORTED_FUNCTION
+#endif
+
+
 #ifdef __aiousb_cplusplus
 }
 #endif

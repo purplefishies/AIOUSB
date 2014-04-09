@@ -8,9 +8,11 @@
  * 
  */
 
-#if !defined( AIOUSB_Core_h )
-#define AIOUSB_Core_h
+#ifndef AIOUSB_CORE_H
+#define AIOUSB_CORE_H
 
+#define PUBLIC_EXTERN extern
+#define PRIVATE
 
 #include "aiousb.h"
 #include "libusb.h"
@@ -18,18 +20,12 @@
 #include <semaphore.h>
 
 
-
 #ifdef __aiousb_cplusplus
 namespace AIOUSB {
 #endif
 
 
-
-#define PRIVATE_EXTERN extern
-#define PRIVATE
-
-
-PRIVATE_EXTERN int aio_errno;
+PUBLIC_EXTERN int aio_errno;
 
 
 /* partially defined in "Low-Level Vendor Request Reference.pdf" */
@@ -47,8 +43,8 @@ PRIVATE_EXTERN int aio_errno;
                      AUR_CTR_READALL                         = 0x25,
                      AUR_CTR_READLATCHED                     = 0x26,
                      AUR_CTR_COS_BULK_GATE2                  = 0x27,
-                     AUR_CTR_PUR_FIRST                       = 0x28,   // 0x28 is correct; not used with device, for index offsetting
-                     AUR_CTR_PUR_OFRQ                        = 0x28,   // 0x28 is correct
+                     AUR_CTR_PUR_FIRST                       = 0x28, // 0x28 is correct; not used with device, for index offsetting
+                     AUR_CTR_PUR_OFRQ                        = 0x28, // 0x28 is correct
                      AUR_CTR_COS_BULK_ABORT                  = 0x29,
                      AUR_CTR_PUR_MFRQ                        = 0x2C,
                      AUR_CTR_PUR_EVCT                        = 0x2D,
@@ -89,8 +85,8 @@ PRIVATE_EXTERN int aio_errno;
 enum {
     BITS_PER_BYTE                 = 8,
     AI_16_MAX_COUNTS              = 65535,
-    MAX_IMM_ADCS                  = 2,                // maximum number of "immediate" A/Ds in any device
-    CAL_TABLE_WORDS               = ( 64 * 1024 ),    // 64K 2-byte words
+    MAX_IMM_ADCS                  = 2, /*< maximum number of "immediate" A/Ds in any device */
+    CAL_TABLE_WORDS               = ( 64 * 1024 ), /*< 64K 2-byte words */
     COUNTERS_PER_BLOCK            = 3,
     COUNTER_NUM_MODES             = 6,
     DAC_RESET                     = 0x80,
@@ -124,7 +120,7 @@ struct BulkAcquireWorkerParams {
 
 enum {
     MAX_USB_DEVICES		  = 32
-};    // enum
+};
 
 /*
  * DeviceDescriptor maintains property and state information for each ACCES USB device
@@ -228,69 +224,64 @@ struct ADRange {
   double range;
 };
 
-PRIVATE_EXTERN struct ADRange adRanges[ AD_NUM_GAIN_CODES ];
-
+extern struct ADRange adRanges[ AD_NUM_GAIN_CODES ];
 
 extern unsigned long AIOUSB_INIT_PATTERN;
 extern unsigned long aiousbInit ;
 
 
-PRIVATE_EXTERN ADConfigBlock *AIOUSB_GetConfigBlock( unsigned long DeviceIndex );
-PRIVATE_EXTERN unsigned long AIOUSB_SetConfigBlock( unsigned long DeviceIndex , ADConfigBlock *entry);
-PRIVATE_EXTERN AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex );
-PRIVATE_EXTERN unsigned long ADC_CopyConfig(unsigned long DeviceIndex, ADConfigBlock *config  );
-PRIVATE_EXTERN unsigned long ADC_ResetDevice( unsigned long DeviceIndex  );
-PRIVATE_EXTERN AIORET_TYPE AIOUSB_GetDeviceSerialNumber( unsigned long DeviceIndex );
-
-extern AIORET_TYPE ADC_WriteADConfigBlock( unsigned long DeviceIndex , ADConfigBlock *config );
+PUBLIC_EXTERN ADConfigBlock *AIOUSB_GetConfigBlock( unsigned long DeviceIndex );
+PUBLIC_EXTERN unsigned long AIOUSB_SetConfigBlock( unsigned long DeviceIndex , ADConfigBlock *entry);
+PUBLIC_EXTERN AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex );
+PUBLIC_EXTERN unsigned long ADC_CopyConfig(unsigned long DeviceIndex, ADConfigBlock *config  );
+PUBLIC_EXTERN unsigned long ADC_ResetDevice( unsigned long DeviceIndex  );
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetDeviceSerialNumber( unsigned long DeviceIndex );
+PUBLIC_EXTERN AIORET_TYPE ADC_WriteADConfigBlock( unsigned long DeviceIndex , ADConfigBlock *config );
 
 
 #ifndef SWIG
-PRIVATE_EXTERN DeviceDescriptor deviceTable[ MAX_USB_DEVICES ];
-
-PRIVATE_EXTERN AIOUSB_BOOL AIOUSB_Lock(void);
-PRIVATE_EXTERN AIOUSB_BOOL AIOUSB_UnLock(void);
+PUBLIC_EXTERN DeviceDescriptor deviceTable[ MAX_USB_DEVICES ];
+PUBLIC_EXTERN AIOUSB_BOOL AIOUSB_Lock(void);
+PUBLIC_EXTERN AIOUSB_BOOL AIOUSB_UnLock(void);
 
 #define AIOUSB_IsInit()  ( aiousbInit == AIOUSB_INIT_PATTERN )
 
-/* PRIVATE_EXTERN AIOUSB_BOOL AIOUSB_IsInit(void); */
-PRIVATE_EXTERN unsigned long AIOUSB_Validate( unsigned long *DeviceIndex );
-PRIVATE_EXTERN unsigned long AIOUSB_Validate_Lock(  unsigned long *DeviceIndex ) ;
-PRIVATE_EXTERN DeviceDescriptor *AIOUSB_GetDevice_Lock( unsigned long DeviceIndex , 
+PUBLIC_EXTERN unsigned long AIOUSB_Validate( unsigned long *DeviceIndex );
+PUBLIC_EXTERN unsigned long AIOUSB_Validate_Lock(  unsigned long *DeviceIndex ) ;
+PUBLIC_EXTERN DeviceDescriptor *AIOUSB_GetDevice_Lock( unsigned long DeviceIndex , 
                                                         unsigned long *result
                                                         );
 
 
-PRIVATE_EXTERN unsigned long AIOUSB_EnsureOpen( unsigned long DeviceIndex );
-PRIVATE_EXTERN const char *ProductIDToName( unsigned int productID );
-PRIVATE_EXTERN unsigned int ProductNameToID( const char *name );
-PRIVATE_EXTERN const char *GetSafeDeviceName( unsigned long DeviceIndex );
-PRIVATE_EXTERN struct libusb_device_handle *AIOUSB_GetDeviceHandle( unsigned long DeviceIndex );
-PRIVATE_EXTERN int AIOUSB_BulkTransfer( struct libusb_device_handle *dev_handle,
+PUBLIC_EXTERN unsigned long AIOUSB_EnsureOpen( unsigned long DeviceIndex );
+PUBLIC_EXTERN const char *ProductIDToName( unsigned int productID );
+PUBLIC_EXTERN unsigned int ProductNameToID( const char *name );
+PUBLIC_EXTERN const char *GetSafeDeviceName( unsigned long DeviceIndex );
+PUBLIC_EXTERN struct libusb_device_handle *AIOUSB_GetDeviceHandle( unsigned long DeviceIndex );
+PUBLIC_EXTERN int AIOUSB_BulkTransfer( struct libusb_device_handle *dev_handle,
                                         unsigned char endpoint, unsigned char *data, 
                                         int length, int *transferred, unsigned int timeout );
 
-unsigned ADC_GetOversample_Cached( ADConfigBlock *config );
-unsigned ADC_GainCode_Cached( ADConfigBlock *config, unsigned channel);
-DeviceDescriptor *AIOUSB_GetDevice_NoCheck( unsigned long DeviceIndex  );
-AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex, 
-                                     unsigned short *counts,
-                                     unsigned *size ,
-                                     unsigned numChannels
-                                     );
+PUBLIC_EXTERN unsigned ADC_GetOversample_Cached( ADConfigBlock *config );
+PUBLIC_EXTERN unsigned ADC_GainCode_Cached( ADConfigBlock *config, unsigned channel);
+PUBLIC_EXTERN DeviceDescriptor *AIOUSB_GetDevice_NoCheck( unsigned long DeviceIndex  );
+PUBLIC_EXTERN AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex, 
+                                                   unsigned short *counts,
+                                                   unsigned *size ,
+                                                   unsigned numChannels
+                                                   );
 
-
-PRIVATE_EXTERN unsigned long AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short counts[] );
-PRIVATE_EXTERN unsigned long AIOUSB_ArrayCountsToVolts( unsigned long DeviceIndex, int startChannel,
+PUBLIC_EXTERN unsigned long AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short counts[] );
+PUBLIC_EXTERN unsigned long AIOUSB_ArrayCountsToVolts( unsigned long DeviceIndex, int startChannel,
                                                         int numChannels, const unsigned short counts[], double volts[] );
-PRIVATE_EXTERN unsigned long AIOUSB_ArrayVoltsToCounts( unsigned long DeviceIndex, int startChannel,
+PUBLIC_EXTERN unsigned long AIOUSB_ArrayVoltsToCounts( unsigned long DeviceIndex, int startChannel,
                                                         int numChannels, const double volts[], unsigned short counts[] );
 
 
-PRIVATE_EXTERN unsigned long GenericVendorRead( unsigned long deviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, void *bufData , unsigned long *bytes_read  );
+PUBLIC_EXTERN unsigned long GenericVendorRead( unsigned long deviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, void *bufData , unsigned long *bytes_read  );
 
-PRIVATE_EXTERN unsigned long GenericVendorWrite( unsigned long DeviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, void *bufData, unsigned long *bytes_write );
-PRIVATE_EXTERN unsigned long AIOUSB_Validate_Device( unsigned long DeviceIndex );
+PUBLIC_EXTERN unsigned long GenericVendorWrite( unsigned long DeviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, void *bufData, unsigned long *bytes_write );
+PUBLIC_EXTERN unsigned long AIOUSB_Validate_Device( unsigned long DeviceIndex );
 
 
 

@@ -83,28 +83,32 @@ all_cscope: $(LIBS) cscope
 
 $(CLIB) : $(COBJS)
 	$(AR) cr $(CLIB) $(COBJS)
-$(SHCLIB) : $(COBJS)
-	$(CC)  $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(COBJS) $(SHARED_LIBS)
-
-
 $(CDBGLIB) : $(CDBGOBJS)
 	$(AR) cr $(CDBGLIB) $(CDBGOBJS)
-$(SHCDBGLIB): 	$(CDBGOBJS)
-	$(CC) $(CC_SHFLAGS) $(LDFLAGS) -o $@ $(CDBGOBJS) $(SHARED_LIBS) 
-
-
 $(CPPLIB) : $(CPPOBJS)
 	$(AR) cr $(CPPLIB) $(CPPOBJS)
-
-$(SHCPPLIB) : $(CPPOBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS)
-
-
 $(CPPDBGLIB) : $(CPPDBGOBJS)
 	$(AR) cr $(CPPDBGLIB) $(CPPDBGOBJS)
 
+ifeq ("$(OSTYPE)","Darwin")
+$(SHCLIB) : $(COBJS)
+	$(CC)  $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(COBJS) $(SHARED_LIBS)
+$(SHCDBGLIB): 	$(CDBGOBJS)
+	$(CC) $(CC_SHFLAGS) $(LDFLAGS) -o $@ $(CDBGOBJS) $(SHARED_LIBS) 
+$(SHCPPLIB) : $(CPPOBJS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS
 $(SHCPPDBGLIB) : $(CPPDBGOBJS)
 	$(CXX) $(CXXFLAGS)  $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS)
+else
+$(SHCLIB) : $(COBJS)
+	$(CC)  $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $(COBJS) $(SHARED_LIBS)
+$(SHCDBGLIB): 	$(CDBGOBJS)
+	$(CC) $(CC_SHFLAGS),$@ $(LDFLAGS) -o $@ $(CDBGOBJS) $(SHARED_LIBS) 
+$(SHCPPLIB) : $(CPPOBJS)
+	$(CXX) $(CXXFLAGS),$@ $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS)
+$(SHCPPDBGLIB) : $(CPPDBGOBJS)
+	$(CXX) $(CXXFLAGS),$@  $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS)
+endif
 
 
 #********************************  OBJECTS  *********************************

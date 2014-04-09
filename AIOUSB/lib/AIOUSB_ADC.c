@@ -234,8 +234,6 @@ AIOUSB_BOOL ADC_GetTestingMode(ADConfigBlock *config, AIOUSB_BOOL testing )
   return config->testing;
 }
 
-
-
 AIORET_TYPE
 ADC_WriteADConfigBlock( unsigned long DeviceIndex , ADConfigBlock *config )
 {
@@ -262,8 +260,6 @@ out_ADC_WriteADConfigBlock:
     AIOUSB_UnLock();
     return retval;
 }
-
-
 
 AIORET_TYPE
 ADC_ReadADConfigBlock( unsigned long DeviceIndex , ADConfigBlock *config )
@@ -295,8 +291,6 @@ out_ADC_ReadADConfigBlock:
     return retval;
 
 }
-
-
 
 /**
  *
@@ -629,7 +623,6 @@ DeviceDescriptor *AIOUSB_GetDevice_NoCheck( unsigned long DeviceIndex  )
 }
 
 /**
-
  * @desc Combines the oversample channels as well as combines the rules for removing
  *       the first discard channel if it is enabled. Channels are average and then 
  *       the resulting array size is altered to reflect the new size of the counts
@@ -640,11 +633,11 @@ DeviceDescriptor *AIOUSB_GetDevice_NoCheck( unsigned long DeviceIndex  )
  * @param size 
  * @return 
  */
-AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex, 
-                                     unsigned short *counts,
-                                     unsigned *size ,
-                                     unsigned numChannels
-                                     )
+PUBLIC_EXTERN AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex, 
+                                                   unsigned short *counts,
+                                                   unsigned *size ,
+                                                   unsigned numChannels
+                                                   )
 {
     unsigned pos, cur;
     if(counts == NULL)
@@ -1903,8 +1896,7 @@ DeleteBuffer( AIOBuf *buf )
  * @return AIOBuf * new Buffer object for BulkAcquire methods
  * @todo Replace 16 with correct channels returned by probing the device
  */
-AIOBuf *
-CreateSmartBuffer( unsigned long DeviceIndex )
+AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex )
 {
   unsigned long result;
   DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
