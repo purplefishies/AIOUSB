@@ -880,7 +880,7 @@ AIOUSB_GetRegister( ADConfigBlock *cb,
                     unsigned int Register );
 
 
-PUBLIC_EXTERN unsigned long AIOUSB_ADC_PUBLIC_EXTERNalCal(
+PUBLIC_EXTERN unsigned long AIOUSB_ADC_ExternalCal(
     unsigned long DeviceIndex,
     const double points[],
     int numPoints,
