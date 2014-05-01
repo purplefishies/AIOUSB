@@ -16,12 +16,7 @@ if strcmp(getenv('AIO_LIB_DIR'),'')
 end
 
 addpath(getenv('AIO_LIB_DIR')) 
-%loadlibrary('libaiousb','libaiousb.h', 'includepath','/usr/include/libusb-1.0', 'includepath',getenv('AIO_LIB_DIR'))
-% To see the other functions offered, you can run this
-% 
-% libfunctions libaiousb -full
-%
-%
+
 more off;
 
 AIOUSB;
@@ -49,10 +44,6 @@ timeout = 1000;
 AIOUSB_Reset(  deviceIndex );
 AIOUSB_SetCommTimeout( deviceIndex, timeout );
 
-
-## outData = libpointer('uint16Ptr',16) 
-## result = calllib('libaiousb','DIO_WriteAll', 0,  outData );
-## outData = new_ushortarray(2)
 outData = new_usp()
 usp_assign(outData, 15 );
 

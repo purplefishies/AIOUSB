@@ -1,17 +1,12 @@
-/*
- * $RCSfile: sample.cpp,v $
- * $Revision: 1.9 $
- * $Date: 2010/01/29 18:32:46 $
- * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
- *
- * AIOUSB library sample program
- */
-
-
-// {{{ notes and build instructions
-/*
- * This source code looks best with a tab width of 4.
- *
+/**
+ * @file   AIOContinuousBuffer.c
+ * @author  $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @release $Format: %t$
+ * @brief AIOUSB sample program 
+ * @todo Make the number of channels in the ContinuousBuffer match the number of channels in the
+ *       config object
+ * @desc
  * All the API functions that DO NOT begin "AIOUSB_" are standard API functions, largely
  * documented in http://accesio.com/MANUALS/USB%20Software%20Reference.pdf. The functions
  * that DO begin with "AIOUSB_" are "extended" API functions added to the Linux
@@ -25,11 +20,12 @@
  *
  *     export CPATH=/usr/local/include/libusb-1.0/:/usr/local/include/aiousb/
  *
- * Once libusb is installed properly, it should be possible to compile the sample program
- * using the simple command:
+ * Once libusb is installed properly, and you have sourced sourceme.sh you can compile the sample program
+ * using the following command.
  *
- *     make
+ *     make sample AIOUSBLIBDIR=${AIO_LIB_DIR} AIOUSBCLASSLIBDIR=${AIO_CLASSLIB_DIR} DEBUG=1
  *
+ * @verbatim
  * Alternatively, one can "manually" compile the sample program using the command:
  *
  *     g++ sample.cpp -laiousb -lusb-1.0 -o sample
@@ -37,16 +33,17 @@
  * or, to enable debug features
  *
  *     g++ -ggdb sample.cpp -laiousbdbg -lusb-1.0 -o sample
+ * @endverbatim
+ *
  */
-// }}}
 
-// {{{ includes
+
 #include <aiousb.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 using namespace AIOUSB;
-// }}}
+
 
 int main( int argc, char **argv ) {
 	printf(
@@ -55,24 +52,24 @@ int main( int argc, char **argv ) {
 		"  This program demonstrates high speed streaming between 2 USB-DIO-16A\n"
 		"  devices on the same USB bus. For simplicity, it uses the first 2 such\n"
 		"  devices found on the bus.\n"
-/*API*/	, AIOUSB_GetVersion(), AIOUSB_GetVersionDate()
+       	, AIOUSB_GetVersion(), AIOUSB_GetVersionDate()
 	);
 
 	/*
 	 * MUST call AIOUSB_Init() before any meaningful AIOUSB functions;
 	 * AIOUSB_GetVersion() above is an exception
 	 */
-/*API*/	unsigned long result = AIOUSB_Init();
+       	unsigned long result = AIOUSB_Init();
 	if( result == AIOUSB_SUCCESS ) {
 		/*
 		 * call GetDevices() to obtain "list" of devices found on the bus
 		 */
-/*API*/	unsigned long deviceMask = GetDevices();
+       	unsigned long deviceMask = GetDevices();
 		if( deviceMask != 0 ) {
 			/*
 			 * at least one ACCES device detected, but we want devices of a specific type
 			 */
-/*API*/		AIOUSB_ListDevices();				// print list of all devices found on the bus
+       		AIOUSB_ListDevices();				// print list of all devices found on the bus
 
 			/*
 			 * search for two USB-DIO-16A devices; the first one will be the
@@ -87,23 +84,23 @@ int main( int argc, char **argv ) {
 				if( ( deviceMask & 1 ) != 0 ) {
 					// found a device, but is it the correct type?
 					unsigned long productID;
-/*API*/				result = QueryDeviceInfo( index, &productID, NULL, NULL, NULL, NULL );
+       				result = QueryDeviceInfo( index, &productID, NULL, NULL, NULL, NULL );
 					if( result == AIOUSB_SUCCESS ) {
 						if( productID == USB_DIO_16A ) {
 							// found a USB-DIO-16A
 							if( deviceIndex1 < 0 ) {
-/*API*/							result = GetDeviceSerialNumber( index, &serialNumber1 );
+       							result = GetDeviceSerialNumber( index, &serialNumber1 );
 								if( result == AIOUSB_SUCCESS ) {
 									deviceIndex1 = index;
 									printf( "Sending device at index %d, serial number %llx\n"
 										, deviceIndex1, ( long long ) serialNumber1 );
 								} else {
 									printf( "Error '%s' getting serial number of device at index %d\n"
-/*API*/									, AIOUSB_GetResultCodeAsString( result ), index );
-									break;		// from while()
-								}	// if( result ...
+       									, AIOUSB_GetResultCodeAsString( result ), index );
+									break;
+								}
 							} else if( deviceIndex2 < 0 ) {
-/*API*/							result = GetDeviceSerialNumber( index, &serialNumber2 );
+       							result = GetDeviceSerialNumber( index, &serialNumber2 );
 								if( result == AIOUSB_SUCCESS ) {
 									if( serialNumber2 == serialNumber1 ) {
 										printf(
@@ -114,27 +111,27 @@ int main( int argc, char **argv ) {
 										deviceIndex2 = index;
 										printf( "Receiving device at index %d, serial number %llx\n"
 											, deviceIndex2, ( long long ) serialNumber2 );
-									}	// if( serialNumber2 ...
-									break;		// from while()
+									}
+									break;
 								} else {
 									printf( "Error '%s' getting serial number of device at index %d\n"
-/*API*/									, AIOUSB_GetResultCodeAsString( result ), index );
-									break;		// from while()
-								}	// if( result ...
-							}	// else if( deviceIndex2 ...
-						}	// if( productID ...
+       									, AIOUSB_GetResultCodeAsString( result ), index );
+									break;
+								}
+							}
+						}
 					} else {
 						printf( "Error '%s' querying device at index %d\n"
-/*API*/						, AIOUSB_GetResultCodeAsString( result ), index );
+       						, AIOUSB_GetResultCodeAsString( result ), index );
 						/*
 						 * even though we got an error from this device,
 						 * keep searching for other devices
 						 */
-					}	// if( result ...
-				}	// if( ( deviceMask ...
+					}
+				}
 				index++;
 				deviceMask >>= 1;
-			}	// while( deviceMask ...
+			}
 
 			if(
 				deviceIndex1 >= 0
@@ -195,49 +192,49 @@ int main( int argc, char **argv ) {
 						/*
 						 * set up communication parameters
 						 */
-/*API*/					AIOUSB_SetCommTimeout( deviceIndex1, 1000 );
-/*API*/					AIOUSB_SetStreamingBlockSize( deviceIndex1, 256 );
+       					AIOUSB_SetCommTimeout( deviceIndex1, 1000 );
+       					AIOUSB_SetStreamingBlockSize( deviceIndex1, 256 );
 
 						/*
 						 * start the clock; the sender (us) will control the clock
 						 */
 						ReadClockHz = 0;
 						WriteClockHz = CLOCK_SPEED;
-/*API*/					result = DIO_StreamSetClocks( deviceIndex1, &ReadClockHz, &WriteClockHz );
+       					result = DIO_StreamSetClocks( deviceIndex1, &ReadClockHz, &WriteClockHz );
 						if( result == AIOUSB_SUCCESS ) {
 							printf( "Stream clock for device at index %d set to %0.1f Hz\n"
 								, deviceIndex1, WriteClockHz );
 						} else {
 							printf( "Error '%s' setting stream clock for device at index %d\n"
-/*API*/							, AIOUSB_GetResultCodeAsString( result ), deviceIndex1 );
+       							, AIOUSB_GetResultCodeAsString( result ), deviceIndex1 );
 							goto abort;
-						}	// if( result ...
+						}
 
 						/*
 						 * open stream for writing
 						 */
-/*API*/					result = DIO_StreamOpen( deviceIndex1, AIOUSB_FALSE /* open for writing */ );
+       					result = DIO_StreamOpen( deviceIndex1, AIOUSB_FALSE /* open for writing */ );
 						if( result != AIOUSB_SUCCESS ) {
 							printf( "Error '%s' opening write stream for device at index %d\n"
-/*API*/							, AIOUSB_GetResultCodeAsString( result ), deviceIndex1 );
+       							, AIOUSB_GetResultCodeAsString( result ), deviceIndex1 );
 							goto abort;
-						}	// if( result ...
+						}
 
 						/*
 						 * configure I/O ports
 						 */
-/*API*/					result = DIO_ConfigureEx( deviceIndex1, &outputMask, &initialData, &tristateMask );
+       					result = DIO_ConfigureEx( deviceIndex1, &outputMask, &initialData, &tristateMask );
 						if( result != AIOUSB_SUCCESS ) {
 							printf( "Error '%s' configuring device at index %d\n"
-/*API*/							, AIOUSB_GetResultCodeAsString( result ), deviceIndex1 );
-/*API*/						DIO_StreamClose( deviceIndex1 );
+       							, AIOUSB_GetResultCodeAsString( result ), deviceIndex1 );
+       						DIO_StreamClose( deviceIndex1 );
 							goto abort;
-						}	// if( result ...
+						}
 
 						/*
 						 * send frame
 						 */
-/*API*/					result = DIO_StreamFrame( deviceIndex1, FRAME_POINTS, frameData, &transferred );
+       					result = DIO_StreamFrame( deviceIndex1, FRAME_POINTS, frameData, &transferred );
 						if( result == AIOUSB_SUCCESS ) {
 							if( transferred == FRAME_POINTS * sizeof( unsigned short ) )
 								printf( "%lu point frame successfully written to device at index %d\n"
@@ -251,9 +248,9 @@ int main( int argc, char **argv ) {
 									, transferred );
 						} else {
 							printf( "Error '%s' writing frame to device at index %d\n"
-/*API*/							, AIOUSB_GetResultCodeAsString( result ), deviceIndex1 );
+       							, AIOUSB_GetResultCodeAsString( result ), deviceIndex1 );
 							AIOUSB_ClearFIFO( deviceIndex1, CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT );
-						}	// if( result ...
+						}
 
 						/*
 						 * stop write clock and close stream, but after giving the FIFO time to empty
@@ -266,15 +263,15 @@ int main( int argc, char **argv ) {
 						 */
 						sleep( 2 );
 						ReadClockHz = WriteClockHz = 0;
-/*API*/					DIO_StreamSetClocks( deviceIndex1, &ReadClockHz, &WriteClockHz );
-/*API*/					DIO_StreamClose( deviceIndex1 );
+       					DIO_StreamSetClocks( deviceIndex1, &ReadClockHz, &WriteClockHz );
+       					DIO_StreamClose( deviceIndex1 );
 abort:;
-					}	// else if( pid ...
+					}
 
 					free( frameData );
 				} else {
 					printf( "Unable to allocate buffer for frame data\n" );
-				}	// if( frameData ...
+				}
 			} else
 				printf( "Failed to find 2 USB-DIO-16A devices\n" );
 		} else
@@ -284,8 +281,8 @@ abort:;
 		 * MUST call AIOUSB_Exit() before program exits,
 		 * but only if AIOUSB_Init() succeeded
 		 */
-/*API*/	AIOUSB_Exit();
-	}	// if( result ...
+       	AIOUSB_Exit();
+	}
 
 	/*
 	 * pause briefly so receiver can print its output
@@ -293,7 +290,7 @@ abort:;
 	 */
 	sleep( 2 );
 	return ( int ) result;
-}	// main()
+}
 
 
 /* end of file */

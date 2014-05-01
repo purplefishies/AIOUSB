@@ -1,10 +1,13 @@
 
 %module AIOUSB
 %include "cpointer.i"
+%include "carrays.i"
 
 %pointer_functions( unsigned long,  ulp );
 %pointer_functions( unsigned short, usp );
 %pointer_functions( double , dp );
+/* %pointer_functions( char, cstring ); */
+%array_functions( char , cstring );
 
 %include typemaps.i
 %apply unsigned long *INOUT { unsigned long *result };

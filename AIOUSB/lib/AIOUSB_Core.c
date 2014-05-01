@@ -45,6 +45,7 @@ static const ProductIDName productIDNameTable[] = {
     { USB_DA12_8A       , "USB-DA12-8A"    },
     { USB_DA12_8E       , "USB-DA12-8E"    },
     { USB_DIO_32        , "USB-DIO-32"     },
+    { USB_DIO_32I       , "USB-DIO-32"     },
     { USB_DIO_48        , "USB-DIO-48"     },
     { USB_DIO_96        , "USB-DIO-96"     },
     { USB_DI16A_REV_A1  , "USB-DI16A-A1"   },
@@ -1171,9 +1172,8 @@ AIOUSB_GetDevice_Lock(unsigned long DeviceIndex, unsigned long *result) {
 }
 
 
-AIORET_TYPE
-AIOUSB_GetDeviceSerialNumber( unsigned long DeviceIndex ) {
-    __uint64_t val = 0;
+AIORET_TYPE AIOUSB_GetDeviceSerialNumber( unsigned long DeviceIndex ) {
+    unsigned long val = 0;
     unsigned long retval;
     retval = GetDeviceSerialNumber( DeviceIndex, &val );
     if( retval != AIOUSB_SUCCESS ) {
@@ -1183,7 +1183,6 @@ AIOUSB_GetDeviceSerialNumber( unsigned long DeviceIndex ) {
     }
 }
 
-
 /**
  * @desc 
  * @param DeviceIndex 
@@ -1192,7 +1191,7 @@ AIOUSB_GetDeviceSerialNumber( unsigned long DeviceIndex ) {
  */
 unsigned long GetDeviceSerialNumber(
                                     unsigned long DeviceIndex,
-                                    __uint64_t *pSerialNumber
+                                    unsigned long *pSerialNumber
                                     ) {
     if( !pSerialNumber )
         return AIOUSB_ERROR_INVALID_PARAMETER;

@@ -6,18 +6,13 @@
  * @brief Core code to interface with Digital cards
  */
 
-#include "AIOUSB_Core.h"
-#include <arpa/inet.h>
-#include <assert.h>
-#include <math.h>
-#include <string.h>
-
+#include "AIOUSB_DIO.h"
 
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
 
-
+/*----------------------------------------------------------------------------*/
 static unsigned short OctaveDacFromFreq(double *Hz) {
     assert(Hz != 0);
     unsigned short octaveOffset = 0;
@@ -38,20 +33,15 @@ static unsigned short OctaveDacFromFreq(double *Hz) {
     return octaveOffset;
 }
 
-
-PUBLIC_EXTERN unsigned long DIO_Configure(
+/*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN AIORET_TYPE DIO_Configure(
                                           unsigned long DeviceIndex,
                                           unsigned char bTristate,
                                           void *pOutMask,
                                           void *pData
                                           ) {
-    if(
-        pOutMask == NULL ||
-        pData == NULL ||
-        (
-            bTristate != AIOUSB_FALSE &&
-            bTristate != AIOUSB_TRUE
-        )
+    if( !pOutMask  || !pData  ||
+        ( bTristate != AIOUSB_FALSE && bTristate != AIOUSB_TRUE )
         )
         return AIOUSB_ERROR_INVALID_PARAMETER;
 
@@ -110,18 +100,14 @@ PUBLIC_EXTERN unsigned long DIO_Configure(
 }
 
 
-
-PUBLIC_EXTERN unsigned long DIO_ConfigureEx( 
+/*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN AIORET_TYPE DIO_ConfigureEx( 
                                             unsigned long DeviceIndex, 
                                             void *pOutMask, 
                                             void *pData, 
                                             void *pTristateMask 
                                              ) { 
-    if(
-        pOutMask == NULL ||
-        pData == NULL ||
-        pTristateMask == NULL
-        )
+    if( !pOutMask  || !pData || ! pTristateMask )
         return AIOUSB_ERROR_INVALID_PARAMETER;
 
     if(!AIOUSB_Lock())
@@ -182,16 +168,13 @@ PUBLIC_EXTERN unsigned long DIO_ConfigureEx(
 
     return result;
 }
-
-PUBLIC_EXTERN unsigned long DIO_ConfigurationQuery(
-                                     unsigned long DeviceIndex,
-                                     void *pOutMask,
-                                     void *pTristateMask
-                                     ) {
-    if(
-        pOutMask == NULL ||
-        pTristateMask == NULL
-        )
+/*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN AIORET_TYPE DIO_ConfigurationQuery(
+                                                   unsigned long DeviceIndex,
+                                                   void *pOutMask,
+                                                   void *pTristateMask
+                                                   ) {
+    if( !pOutMask || pTristateMask == NULL )
         return AIOUSB_ERROR_INVALID_PARAMETER;
 
     if(!AIOUSB_Lock())
@@ -240,17 +223,16 @@ PUBLIC_EXTERN unsigned long DIO_ConfigurationQuery(
 
     return result;
 }
-
-
-
-PUBLIC_EXTERN unsigned long DIO_WriteAll(
-                            unsigned long DeviceIndex,
-                            void *pData
-                           ) {
-    if(pData == NULL)
+/*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN AIORET_TYPE DIO_WriteAll(
+                                         unsigned long DeviceIndex,
+                                         void *pData
+                                         /* DIOBuf *data */
+                                         ) {
+    if( !pData )
         return AIOUSB_ERROR_INVALID_PARAMETER;
     int tmp = AIOUSB_Lock();
-    if(!tmp) {
+    if( !tmp ) {
           AIOUSB_UnLock();
           AIOUSB_Lock();
       }
@@ -270,14 +252,23 @@ PUBLIC_EXTERN unsigned long DIO_WriteAll(
 
     if(deviceDesc->LastDIOData != 0) {
           assert(deviceDesc->DIOBytes <= 1000);       // arbitrary sanity check
+
           memcpy(deviceDesc->LastDIOData, pData, deviceDesc->DIOBytes);
+
           libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
           if(deviceHandle != NULL) {
                 const int dioBytes = deviceDesc->DIOBytes;
                 const unsigned timeout = deviceDesc->commTimeout;
                 AIOUSB_UnLock();                                            // unlock while communicating with device
-                const int bytesTransferred = libusb_control_transfer(deviceHandle, USB_WRITE_TO_DEVICE, AUR_DIO_WRITE,
-                                                                     0, 0, ( unsigned char* )pData, dioBytes, timeout);
+                const int bytesTransferred = libusb_control_transfer(deviceHandle, 
+                                                                     USB_WRITE_TO_DEVICE, 
+                                                                     AUR_DIO_WRITE,
+                                                                     0, 
+                                                                     0, 
+                                                                     ( unsigned char* )pData, 
+                                                                     dioBytes, 
+                                                                     timeout
+                                                                     );
                 if(bytesTransferred != dioBytes)
                     result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
             } else {
@@ -291,14 +282,12 @@ PUBLIC_EXTERN unsigned long DIO_WriteAll(
 
     return result;
 }
-
-
-
-PUBLIC_EXTERN unsigned long DIO_Write8(
-                         unsigned long DeviceIndex,
-                         unsigned long ByteIndex,
-                         unsigned char Data
-                         ) {
+/*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN AIORET_TYPE DIO_Write8(
+                                       unsigned long DeviceIndex,
+                                       unsigned long ByteIndex,
+                                       unsigned char Data
+                                       ) {
     if(!AIOUSB_Lock())
         return AIOUSB_ERROR_INVALID_MUTEX;
 
@@ -331,8 +320,15 @@ PUBLIC_EXTERN unsigned long DIO_Write8(
                       memcpy(dataBuffer, deviceDesc->LastDIOData, dioBytes);
                       const unsigned timeout = deviceDesc->commTimeout;
                       AIOUSB_UnLock();                                    // unlock while communicating with device
-                      const int bytesTransferred = libusb_control_transfer(deviceHandle, USB_WRITE_TO_DEVICE, AUR_DIO_WRITE,
-                                                                           0, 0, dataBuffer, dioBytes, timeout);
+                      const int bytesTransferred = libusb_control_transfer(deviceHandle, 
+                                                                           USB_WRITE_TO_DEVICE, 
+                                                                           AUR_DIO_WRITE,
+                                                                           0, 
+                                                                           0, 
+                                                                           dataBuffer, 
+                                                                           dioBytes, 
+                                                                           timeout
+                                                                           );
                       if(bytesTransferred != dioBytes)
                           result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
                       free(dataBuffer);
@@ -353,12 +349,12 @@ PUBLIC_EXTERN unsigned long DIO_Write8(
 }
 
 
-
-PUBLIC_EXTERN unsigned long DIO_Write1(
-                         unsigned long DeviceIndex,
-                         unsigned long BitIndex,
-                         unsigned char bData
-                         ) {
+/*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN AIORET_TYPE DIO_Write1(
+                                       unsigned long DeviceIndex,
+                                       unsigned long BitIndex,
+                                       unsigned char bData
+                                       ) {
     if(!AIOUSB_Lock())
         return AIOUSB_ERROR_INVALID_MUTEX;
 
@@ -375,16 +371,12 @@ PUBLIC_EXTERN unsigned long DIO_Write1(
       }
 
     const unsigned byteIndex = BitIndex / BITS_PER_BYTE;
-    if(
-        (
-            bData != AIOUSB_FALSE &&
-            bData != AIOUSB_TRUE
-        ) ||
-        byteIndex >= deviceDesc->DIOBytes
-        ) {
-          AIOUSB_UnLock();
-          return AIOUSB_ERROR_INVALID_PARAMETER;
-      }
+    if(( bData != AIOUSB_FALSE && bData != AIOUSB_TRUE ) ||
+       byteIndex >= deviceDesc->DIOBytes
+       ) {
+        AIOUSB_UnLock();
+        return AIOUSB_ERROR_INVALID_PARAMETER;
+    }
 
     if(deviceDesc->LastDIOData != 0) {
           unsigned char value = deviceDesc->LastDIOData[ byteIndex ];
@@ -393,6 +385,7 @@ PUBLIC_EXTERN unsigned long DIO_Write1(
               value &= ~bitMask;
           else
               value |= bitMask;
+
           AIOUSB_UnLock();                                                    // unlock while communicating with device
           result = DIO_Write8(DeviceIndex, byteIndex, value);
       } else {
@@ -403,100 +396,160 @@ PUBLIC_EXTERN unsigned long DIO_Write1(
     return result;
 }
 
-
-PUBLIC_EXTERN unsigned long DIO_ReadAll(
-                          unsigned long DeviceIndex,
-                          void *Buffer
-                          ) {
-    if(Buffer == NULL)
-        return AIOUSB_ERROR_INVALID_PARAMETER;
-
-    if(!AIOUSB_Lock())
+/*----------------------------------------------------------------------------*/
+unsigned long _check_init( unsigned long DeviceIndex ) {
+    unsigned long result;
+    if ( !AIOUSB_Lock() ) {
         return AIOUSB_ERROR_INVALID_MUTEX;
-
-    unsigned long result = AIOUSB_Validate(&DeviceIndex);
-    if(result != AIOUSB_SUCCESS) {
-          AIOUSB_UnLock();
-          return result;
-      }
-
-    DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
+    }
+    result = AIOUSB_Validate(&DeviceIndex);
+    AIOUSB_UnLock();
+    return result;
+}
+/*----------------------------------------------------------------------------*/
+DeviceDescriptor *_check_dio( unsigned long DeviceIndex, unsigned long *result ) {
+     DeviceDescriptor *deviceDesc = NULL;
+    *result = _check_init( DeviceIndex );
+    if ( *result != AIOUSB_SUCCESS ) {
+        return deviceDesc;
+    }
+    *deviceDesc = deviceTable[ DeviceIndex ];
     if(deviceDesc->DIOBytes == 0) {
-          AIOUSB_UnLock();
-          return AIOUSB_ERROR_NOT_SUPPORTED;
-      }
+        AIOUSB_UnLock();
+        *result = AIOUSB_ERROR_NOT_SUPPORTED;
+    }
+    return deviceDesc;
+}
+/*----------------------------------------------------------------------------*/
+libusb_device_handle *_dio_get_device_handle( unsigned long DeviceIndex, DeviceDescriptor *deviceDesc,  unsigned long *result ) {
+    libusb_device_handle *deviceHandle = NULL;
+    deviceDesc = _check_dio( DeviceIndex, result );
 
-    libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
-    if(deviceHandle != NULL) {
-          assert(deviceDesc->DIOBytes <= 1000);       // arbitrary sanity check
-          const int dioBytes = deviceDesc->DIOBytes;
-          const unsigned timeout = deviceDesc->commTimeout;
-          AIOUSB_UnLock();                                                    // unlock while communicating with device
-          const int bytesTransferred = libusb_control_transfer(deviceHandle, USB_READ_FROM_DEVICE, AUR_DIO_READ,
-                                                               0, 0, ( unsigned char* )Buffer, dioBytes, timeout);
-          if(bytesTransferred != dioBytes)
-              result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-      } else {
-          result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-          AIOUSB_UnLock();
-      }
+    if( *result != AIOUSB_SUCCESS ) {
+        return deviceHandle;
+    }
+    if ( deviceDesc->DIOBytes > 1000 ) { // Sanity check for decent values
+      *result = AIOUSB_ERROR_INVALID_DATA;
+      return deviceHandle;
+    }
+
+    deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
+
+    if( !deviceHandle ) {
+        *result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
+    }
+    return deviceHandle;
+}
+/*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN AIORET_TYPE DIO_ReadAll(
+                                        unsigned long DeviceIndex,
+                                        DIOBuf *buf
+                                        /* void *Buffer */
+                                        ) {
+    unsigned long result = AIOUSB_SUCCESS;
+    DeviceDescriptor *deviceDesc = NULL;
+    libusb_device_handle *deviceHandle = NULL;
+    deviceHandle = _dio_get_device_handle( DeviceIndex, deviceDesc,  &result );
+    if ( !deviceHandle ) {
+        return result;
+    }
+
+    char *tmpbuf = (char*)malloc( sizeof(char)*deviceDesc->DIOBytes );
+
+    AIOUSB_UnLock();                                                    // unlock while communicating with device
+    int bytesTransferred = libusb_control_transfer(deviceHandle, 
+                                                   USB_READ_FROM_DEVICE, 
+                                                   AUR_DIO_READ,
+                                                   0, 
+                                                   0, 
+                                                   (unsigned char *)tmpbuf,
+                                                   /* ( unsigned char* )Buffer,  */
+                                                   deviceDesc->DIOBytes,
+                                                   deviceDesc->commTimeout
+                                                   );
+    if( bytesTransferred < 0 || bytesTransferred != (int)deviceDesc->DIOBytes )
+        result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+
+    /* DIOBufResize( buf, dioBytes ); */
+    /* Copy to the DIOBuf */
+    DIOBufReplaceString( buf, tmpbuf, deviceDesc->DIOBytes );    
 
     return result;
 }
+/* if(Buffer == NULL) */
+/*     return AIOUSB_ERROR_INVALID_PARAMETER; */
+/* if(!AIOUSB_Lock()) */
+/*     return AIOUSB_ERROR_INVALID_MUTEX; */
+/* unsigned long result = AIOUSB_Validate(&DeviceIndex); */
+/* if(result != AIOUSB_SUCCESS) { */
+/*       AIOUSB_UnLock(); */
+/*       return result; */
+/*   } */
+/* DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ]; */
+/* if(deviceDesc->DIOBytes == 0) { */
+/*       AIOUSB_UnLock(); */
+/*       return AIOUSB_ERROR_NOT_SUPPORTED; */
+/*   } */
+/* libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex); */
+/* if(deviceHandle != NULL) { */
 
 
+/*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN AIORET_TYPE DIO_Read8(
+                                      unsigned long DeviceIndex,
+                                      unsigned long ByteIndex,
+                                      char *pBuffer
+                                      ) {
+    unsigned long result = AIOUSB_SUCCESS;
+    DeviceDescriptor *deviceDesc = NULL;
+    DIOBuf *readBuffer;
+    if ( !_dio_get_device_handle( DeviceIndex, deviceDesc,  &result ) || result != AIOUSB_SUCCESS ) {
+        goto out_DIO_Read8;
+    }
 
-PUBLIC_EXTERN unsigned long DIO_Read8(
-                        unsigned long DeviceIndex,
-                        unsigned long ByteIndex,
-                        unsigned char *pBuffer
-                        ) {
-    if(!AIOUSB_Lock())
-        return AIOUSB_ERROR_INVALID_MUTEX;
+    AIOUSB_UnLock();         // unlock while communicating with device
+    readBuffer = NewDIOBuf( deviceDesc->DIOBytes );
+    if ( !readBuffer ) {
+        result =  AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+        goto out_DIO_Read8;
+    }
+    
+    if ( (result = DIO_ReadAll(DeviceIndex, readBuffer)) == AIOUSB_SUCCESS ) {
+        const char *tmp = DIOBufToBinary( readBuffer ); 
+        pBuffer[0] = tmp[ByteIndex];
+    }
 
-    unsigned long result = AIOUSB_Validate(&DeviceIndex);
-    if(result != AIOUSB_SUCCESS) {
-          AIOUSB_UnLock();
-          return result;
-      }
+    free(readBuffer);
 
-    DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
-    if(deviceDesc->DIOBytes == 0) {
-          AIOUSB_UnLock();
-          return AIOUSB_ERROR_NOT_SUPPORTED;
-      }
-
-    if(
-        pBuffer == NULL ||
-        ByteIndex >= deviceDesc->DIOBytes
-        ) {
-          AIOUSB_UnLock();
-          return AIOUSB_ERROR_INVALID_PARAMETER;
-      }
-
-    assert(deviceDesc->DIOBytes <= 1000);               // arbitrary sanity check
-    unsigned char *const readBuffer = ( unsigned char* )malloc(deviceDesc->DIOBytes);
-    assert(readBuffer != 0);
-    if(readBuffer != 0) {
-          AIOUSB_UnLock();                                                    // unlock while communicating with device
-          if((result = DIO_ReadAll(DeviceIndex, readBuffer)) == AIOUSB_SUCCESS)
-              *pBuffer = readBuffer[ ByteIndex ];
-          free(readBuffer);
-      } else {
-          result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
-          AIOUSB_UnLock();
-      }
-
+ out_DIO_Read8:
+    AIOUSB_UnLock();
     return result;
 }
+/* if(!AIOUSB_Lock()) */
+/*     return AIOUSB_ERROR_INVALID_MUTEX; */
+/* unsigned long result = AIOUSB_Validate(&DeviceIndex); */
+/* if(result != AIOUSB_SUCCESS) { */
+/*       AIOUSB_UnLock(); */
+/*       return result; */
+/*   } */
+/* DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ]; */
+/* if(deviceDesc->DIOBytes == 0) { */
+/*       AIOUSB_UnLock(); */
+/*       return AIOUSB_ERROR_NOT_SUPPORTED; */
+/*   } */
+/* if( pBuffer == NULL || ByteIndex >= deviceDesc->DIOBytes ) { */
+/*       AIOUSB_UnLock(); */
+/*       return AIOUSB_ERROR_INVALID_PARAMETER; */
+/*   } */
 
 
 
-PUBLIC_EXTERN unsigned long DIO_Read1(
-                        unsigned long DeviceIndex,
-                        unsigned long BitIndex,
-                        unsigned char *pBuffer
-                        ) {
+/*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN AIORET_TYPE DIO_Read1(
+                                      unsigned long DeviceIndex,
+                                      unsigned long BitIndex,
+                                      char *pBuffer
+                                      ) {
     if(!AIOUSB_Lock())
         return AIOUSB_ERROR_INVALID_MUTEX;
 
@@ -521,7 +574,7 @@ PUBLIC_EXTERN unsigned long DIO_Read1(
       }
 
     AIOUSB_UnLock();                                                            // unlock while communicating with device
-    unsigned char readBuffer;
+    char readBuffer;
     if((result = DIO_Read8(DeviceIndex, BitIndex / BITS_PER_BYTE, &readBuffer)) == AIOUSB_SUCCESS) {
           const unsigned char bitMask = 1 << (( int )BitIndex % BITS_PER_BYTE);
           if((readBuffer & bitMask) != 0)
@@ -533,11 +586,11 @@ PUBLIC_EXTERN unsigned long DIO_Read1(
     return result;
 }
 
-
-PUBLIC_EXTERN unsigned long DIO_StreamOpen(
-                             unsigned long DeviceIndex,
-                             unsigned long bIsRead
-                             ) {
+/*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN AIORET_TYPE DIO_StreamOpen(
+                                           unsigned long DeviceIndex,
+                                           unsigned long bIsRead
+                                           ) {
     if(!AIOUSB_Lock())
         return AIOUSB_ERROR_INVALID_MUTEX;
 
@@ -587,10 +640,10 @@ PUBLIC_EXTERN unsigned long DIO_StreamOpen(
 }
 
 
-
-PUBLIC_EXTERN unsigned long DIO_StreamClose(
-                              unsigned long DeviceIndex
-                              ) {
+/*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN AIORET_TYPE DIO_StreamClose(
+                                            unsigned long DeviceIndex
+                                            ) {
     if(!AIOUSB_Lock())
         return AIOUSB_ERROR_INVALID_MUTEX;
 
@@ -616,12 +669,12 @@ PUBLIC_EXTERN unsigned long DIO_StreamClose(
     AIOUSB_UnLock();
     return result;
 }
-
-PUBLIC_EXTERN unsigned long DIO_StreamSetClocks(
-                                  unsigned long DeviceIndex,
-                                  double *ReadClockHz,
-                                  double *WriteClockHz
-                                  ) {
+/*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN AIORET_TYPE DIO_StreamSetClocks(
+                                                unsigned long DeviceIndex,
+                                                double *ReadClockHz,
+                                                double *WriteClockHz
+                                                ) {
     if(
         *ReadClockHz < 0 ||
         *WriteClockHz < 0
@@ -682,13 +735,13 @@ PUBLIC_EXTERN unsigned long DIO_StreamSetClocks(
     return result;
 }
 
-
-PUBLIC_EXTERN unsigned long DIO_StreamFrame(
-                              unsigned long DeviceIndex,
-                              unsigned long FramePoints,
-                              unsigned short *pFrameData,
-                              unsigned long *BytesTransferred
-                              ) {
+/*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN AIORET_TYPE DIO_StreamFrame(
+                                            unsigned long DeviceIndex,
+                                            unsigned long FramePoints,
+                                            unsigned short *pFrameData,
+                                            unsigned long *BytesTransferred
+                                            ) {
     if(
         FramePoints == 0 ||
         pFrameData == NULL ||

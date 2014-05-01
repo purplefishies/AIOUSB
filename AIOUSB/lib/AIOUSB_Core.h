@@ -4,8 +4,6 @@
  * @date   $Format: %ad$
  * @release $Format: %t$
  * @brief  
- * 
- * 
  */
 
 #ifndef AIOUSB_CORE_H
@@ -15,6 +13,7 @@
 #define PRIVATE
 
 #include "aiousb.h"
+#include "AIODataTypes.h"
 #include "libusb.h"
 #include <pthread.h>
 #include <semaphore.h>
@@ -26,6 +25,7 @@ namespace AIOUSB {
 
 
 PUBLIC_EXTERN int aio_errno;
+
 
 
 /* partially defined in "Low-Level Vendor Request Reference.pdf" */

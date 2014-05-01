@@ -1,26 +1,18 @@
-/*
- * $RCSfile: AIOUSB_GetDeviceBySerialNumber.c,v $
- * $Revision: 1.5 $
- * $Date: 2009/11/11 19:33:26 $
- * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
- *
- * ACCES I/O USB API for Linux
+/**
+ * @file   AIOUSB_GetDeviceBySerialNumber.c
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @release $Format: %t$
+ * @brief  
  */
-
-
-
 #include "AIOUSB_Core.h"
 #include <stdio.h>
-
-
 
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
 
-
-unsigned long GetDeviceBySerialNumber(const __uint64_t *pSerialNumber)
-{
+unsigned long GetDeviceBySerialNumber(unsigned long *pSerialNumber) {
     unsigned long deviceIndex = diNone;
 
     if(pSerialNumber == NULL)

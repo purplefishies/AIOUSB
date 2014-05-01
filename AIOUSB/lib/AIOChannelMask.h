@@ -1,7 +1,11 @@
 #ifndef _AIOCHANNEL_MASK_H
 #define _AIOCHANNEL_MASK_H
 
-#include <AIOTypes.h>
+#include "AIOTypes.h"
+#include <stdlib.h>
+#include <assert.h>
+#include <unistd.h>
+
 
 #ifdef __aiousb_cplusplus
 namespace AIOUSB
@@ -29,7 +33,6 @@ AIORET_TYPE AIOChannelMask_GetMaskWithIndex( AIOChannelMask *mask, unsigned inde
 int AIOChannelMask_Indices( AIOChannelMask *mask );
 int AIOChannelMask_NextIndex( AIOChannelMask *mask );
 
-/* Setters */
 AIORET_TYPE AIOChannelMask_SetMaskFromInt( AIOChannelMask *mask, unsigned field , unsigned index );
 AIORET_TYPE AIOChannelMask_SetMaskFromStr( AIOChannelMask *mask, const char *bitfields );
 AIORET_TYPE AIOChannelMask_SetMaskAuto( AIOChannelMask *mask );
