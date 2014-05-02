@@ -37,18 +37,26 @@ macro ( build_selftest_c_file project c_file  cflags link_libraries )
   INSTALL(TARGETS "${project}_${binary_name}" DESTINATION "share/accesio/selftest/${project}" ) 
 endmacro ( build_selftest_c_file )
 
-macro ( build_selftest_cpp_file project c_file  cflags link_libraries )
+#
+# Builds a file in C++ using GTest 
+#
+macro ( build_gtest_cpp_file project c_file  cflags link_libraries )
   GET_FILENAME_COMPONENT( tmp_c_file ${c_file} NAME )
   STRING(REGEX REPLACE "\\.c$" "_test" binary_name ${tmp_c_file})
-  ADD_EXECUTABLE( "${project}_${binary_name}" ${c_file} )
   LINK_DIRECTORIES( ${AIOUSB_INCLUDE_DIR} )
-  SET_SOURCE_FILES_PROPERTIES( ${c_file}  PROPERTIES LANGUAGE CXX)
+  STRING(REGEX REPLACE "\\.c$" "" file_name ${c_file})
+  SET(tmp_gtest_file "${file_name}_gtest.cpp" )
+  ADD_CUSTOM_COMMAND( OUTPUT ${tmp_gtest_file} COMMAND ${CMAKE_COMMAND} -E copy_if_different ${c_file} ${tmp_gtest_file} )
+  # MESSAGE(STATUS "Adding GTEST file ${tmp_gtest_file}" )
+  ADD_EXECUTABLE( "${project}_${binary_name}" ${tmp_gtest_file} )
+
+  SET_SOURCE_FILES_PROPERTIES( ${tmp_gtest_file}  PROPERTIES LANGUAGE CXX)
   SET_TARGET_PROPERTIES( "${project}_${binary_name}" PROPERTIES OUTPUT_NAME  ${binary_name} ) 
   SET_TARGET_PROPERTIES( "${project}_${binary_name}" PROPERTIES COMPILE_FLAGS ${cflags} ) 
   # MESSAGE(STATUS "Using libs: ${link_libraries}" )
   TARGET_LINK_LIBRARIES( "${project}_${binary_name}" ${link_libraries} )
   INSTALL(TARGETS "${project}_${binary_name}" DESTINATION "share/accesio/selftest/${project}" ) 
-endmacro ( build_selftest_cpp_file  )
+endmacro ( build_gtest_cpp_file  )
 
 
 macro ( build_all_samples project ) 

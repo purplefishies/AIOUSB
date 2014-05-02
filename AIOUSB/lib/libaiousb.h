@@ -7,10 +7,100 @@
 #include "AIOContinuousBuffer.h"
 #include "AIODataTypes.h"
 #include "AIOTypes.h"
+
+#include "DIOBuf.h"
+
+PUBLIC_EXTERN DIOBuf *NewDIOBuf ( unsigned size );
+PUBLIC_EXTERN void DeleteDIOBuf ( DIOBuf  *buf );
+PUBLIC_EXTERN DIOBuf *NewDIOBufFromChar( const char *ary , int size_array );
+PUBLIC_EXTERN DIOBuf *NewDIOBufFromBinStr( const char *ary );
+PUBLIC_EXTERN DIOBuf *DIOBufReplaceString( DIOBuf *buf, char *ary, int size_array );
+PUBLIC_EXTERN char *DIOBufToHex( DIOBuf *buf );
+PUBLIC_EXTERN char *DIOBufToBinary( DIOBuf *buf );
+PUBLIC_EXTERN DIOBuf  *DIOBufResize( DIOBuf  *buf , unsigned size );
+PUBLIC_EXTERN unsigned DIOBufSize( DIOBuf  *buf );
+PUBLIC_EXTERN char *DIOBufToString( DIOBuf  *buf );
+PUBLIC_EXTERN int DIOBufSetIndex( DIOBuf *buf, unsigned index, unsigned value );
+PUBLIC_EXTERN int DIOBufGetIndex( DIOBuf *buf, unsigned index );
+
+
+#include "AIOUSB_DIO.h"
+PUBLIC_EXTERN unsigned long DIO_Configure(
+                                          unsigned long DeviceIndex,
+                                          unsigned char bTristate,
+                                          void *pOutMask,
+                                          void *pData
+                                          );
+PUBLIC_EXTERN unsigned long DIO_ConfigureEx( 
+                                            unsigned long DeviceIndex, 
+                                            void *pOutMask, 
+                                            void *pData, 
+                                            void *pTristateMask 
+                                             );
+PUBLIC_EXTERN unsigned long DIO_ConfigurationQuery(
+                                                   unsigned long DeviceIndex,
+                                                   void *pOutMask,
+                                                   void *pTristateMask
+                                                   );
+PUBLIC_EXTERN unsigned long DIO_WriteAll(
+                                         unsigned long DeviceIndex,
+                                         void *pData
+                                         /* DIOBuf *data */
+                                         );
+PUBLIC_EXTERN unsigned long DIO_Write8(
+                                       unsigned long DeviceIndex,
+                                       unsigned long ByteIndex,
+                                       unsigned char Data
+                                       );
+PUBLIC_EXTERN unsigned long DIO_Write1(
+                                       unsigned long DeviceIndex,
+                                       unsigned long BitIndex,
+                                       unsigned char bData
+                                       );
+PUBLIC_EXTERN unsigned long DIO_ReadAll(
+                                        unsigned long DeviceIndex,
+                                        DIOBuf *buf
+                                        /* void *Buffer */
+                                        );
+PUBLIC_EXTERN unsigned long DIO_ReadAllToCharStr(
+                                                 unsigned long DeviceIndex,
+                                                 char *buf,
+                                                 unsigned size
+                                                 );
+PUBLIC_EXTERN unsigned long DIO_Read8(
+                                      unsigned long DeviceIndex,
+                                      unsigned long ByteIndex,
+                                      char *pBuffer
+                                      );
+PUBLIC_EXTERN unsigned long DIO_Read1(
+                                      unsigned long DeviceIndex,
+                                      unsigned long BitIndex,
+                                      char *pBuffer
+                                      );
+PUBLIC_EXTERN unsigned long DIO_StreamOpen(
+                                           unsigned long DeviceIndex,
+                                           unsigned long bIsRead
+                                           );
+PUBLIC_EXTERN unsigned long DIO_StreamClose(
+                                            unsigned long DeviceIndex
+                                            );
+PUBLIC_EXTERN unsigned long DIO_StreamSetClocks(
+                                                unsigned long DeviceIndex,
+                                                double *ReadClockHz,
+                                                double *WriteClockHz
+                                                );
+PUBLIC_EXTERN unsigned long DIO_StreamFrame(
+                                            unsigned long DeviceIndex,
+                                            unsigned long FramePoints,
+                                            unsigned short *pFrameData,
+                                            unsigned long *BytesTransferred
+                                            );
+
+
+
 #include "AIOUSB_USB.h"
 #include "AIOUSB_WDG.h"
 #include "aiousb.h"
-
 
 
 /* AIOUSB_Core */
@@ -45,38 +135,37 @@ PUBLIC_EXTERN void AIOUSB_ListDevices();
 
 /* AIOContinuousBuf */
 
-PUBLIC_EXTERNAL AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex , unsigned scancounts, unsigned number_channels );
-PUBLIC_EXTERNAL AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex, unsigned scancounts , unsigned num_channels , AIOUSB_BOOL counts );
-PUBLIC_EXTERNAL AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels );
-PUBLIC_EXTERNAL AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex , unsigned scancounts , unsigned num_channels , AIOUSB_BOOL counts  );
-PUBLIC_EXTERNAL void DeleteAIOContinuousBuf( AIOContinuousBuf *buf );
-PUBLIC_EXTERNAL AIORET_TYPE AIOContinuousBuf_InitConfiguration(  AIOContinuousBuf *buf );
-PUBLIC_EXTERNAL void AIOContinuousBuf_SetCallback(AIOContinuousBuf *buf , void *(*work)(void *object ) );
-PUBLIC_EXTERNAL void AIOContinuousBuf_SetTesting( AIOContinuousBuf *buf, AIOUSB_BOOL testing );
-PUBLIC_EXTERNAL AIORET_TYPE AIOContinuousBuf_SendPreConfig( AIOContinuousBuf *buf );
-PUBLIC_EXTERNAL AIORET_TYPE AIOContinuousBuf_SetStartAndEndChannel( AIOContinuousBuf *buf, unsigned startChannel, unsigned endChannel );
-PUBLIC_EXTERNAL AIORET_TYPE AIOContinuousBuf_SetChannelRangeGain( AIOContinuousBuf *buf, unsigned startChannel, unsigned endChannel , unsigned gainCode );
-PUBLIC_EXTERNAL unsigned AIOContinuousBuf_GetOverSample( AIOContinuousBuf *buf );
-PUBLIC_EXTERNAL void AIOContinuousBuf_SetOverSample( AIOContinuousBuf *buf, unsigned os );
-PUBLIC_EXTERNAL void AIOContinuousBuf_SetAllGainCodeAndDiffMode( AIOContinuousBuf *buf, ADGainCode gain, AIOUSB_BOOL diff );
-PUBLIC_EXTERNAL void AIOContinuousBuf_SetDiscardFirstSample(  AIOContinuousBuf *buf , AIOUSB_BOOL discard );
-PUBLIC_EXTERNAL unsigned AIOContinuousBuf_NumberChannels( AIOContinuousBuf *buf );
-PUBLIC_EXTERNAL AIORET_TYPE AIOContinuousBuf_SaveConfig( AIOContinuousBuf *buf );
-PUBLIC_EXTERNAL AIORET_TYPE AIOContinuousBufLock( AIOContinuousBuf *buf );
-PUBLIC_EXTERNAL AIORET_TYPE AIOContinuousBufUnlock( AIOContinuousBuf *buf );
-PUBLIC_EXTERNAL unsigned long AIOContinuousBuf_GetDeviceIndex( AIOContinuousBuf *buf );
-PUBLIC_EXTERNAL AIORET_TYPE AIOContinuousBuf_SetChannelMask( AIOContinuousBuf *buf, AIOChannelMask *mask );
-PUBLIC_EXTERNAL void AIOContinuousBuf_SetDeviceIndex( AIOContinuousBuf *buf , unsigned long DeviceIndex );
-PUBLIC_EXTERNAL AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf );
-PUBLIC_EXTERNAL unsigned int AIOContinuousBufGetReadPosition( AIOContinuousBuf *buf );
-PUBLIC_EXTERNAL unsigned int AIOContinuousBufGetWritePosition( AIOContinuousBuf *buf );
-PUBLIC_EXTERNAL unsigned int AIOContinuousBufAvailableReadSize( AIOContinuousBuf *buf );
-PUBLIC_EXTERNAL unsigned int AIOContinuousBufGetSize( AIOContinuousBuf *buf );
-PUBLIC_EXTERNAL THREAD_STATUS AIOContinuousBufGetStatus( AIOContinuousBuf *buf );
-PUBLIC_EXTERNAL AIORET_TYPE AIOContinuousBufGetExitCode( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex , unsigned scancounts, unsigned number_channels );
+PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex, unsigned scancounts , unsigned num_channels , AIOUSB_BOOL counts );
+PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels );
+PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex , unsigned scancounts , unsigned num_channels , AIOUSB_BOOL counts  );
+PUBLIC_EXTERN void DeleteAIOContinuousBuf( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_InitConfiguration(  AIOContinuousBuf *buf );
+PUBLIC_EXTERN void AIOContinuousBuf_SetCallback(AIOContinuousBuf *buf , void *(*work)(void *object ) );
+PUBLIC_EXTERN void AIOContinuousBuf_SetTesting( AIOContinuousBuf *buf, AIOUSB_BOOL testing );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_SendPreConfig( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_SetStartAndEndChannel( AIOContinuousBuf *buf, unsigned startChannel, unsigned endChannel );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_SetChannelRangeGain( AIOContinuousBuf *buf, unsigned startChannel, unsigned endChannel , unsigned gainCode );
+PUBLIC_EXTERN unsigned AIOContinuousBuf_GetOverSample( AIOContinuousBuf *buf );
+PUBLIC_EXTERN void AIOContinuousBuf_SetOverSample( AIOContinuousBuf *buf, unsigned os );
+PUBLIC_EXTERN void AIOContinuousBuf_SetAllGainCodeAndDiffMode( AIOContinuousBuf *buf, ADGainCode gain, AIOUSB_BOOL diff );
+PUBLIC_EXTERN void AIOContinuousBuf_SetDiscardFirstSample(  AIOContinuousBuf *buf , AIOUSB_BOOL discard );
+PUBLIC_EXTERN unsigned AIOContinuousBuf_NumberChannels( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_SaveConfig( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufLock( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufUnlock( AIOContinuousBuf *buf );
+PUBLIC_EXTERN unsigned long AIOContinuousBuf_GetDeviceIndex( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_SetChannelMask( AIOContinuousBuf *buf, AIOChannelMask *mask );
+PUBLIC_EXTERN void AIOContinuousBuf_SetDeviceIndex( AIOContinuousBuf *buf , unsigned long DeviceIndex );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf );
+PUBLIC_EXTERN unsigned int AIOContinuousBufGetReadPosition( AIOContinuousBuf *buf );
+PUBLIC_EXTERN unsigned int AIOContinuousBufGetWritePosition( AIOContinuousBuf *buf );
+PUBLIC_EXTERN unsigned int AIOContinuousBufAvailableReadSize( AIOContinuousBuf *buf );
+PUBLIC_EXTERN unsigned int AIOContinuousBufGetSize( AIOContinuousBuf *buf );
+PUBLIC_EXTERN THREAD_STATUS AIOContinuousBufGetStatus( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetExitCode( AIOContinuousBuf *buf );
 
 /* DIO */
-#include "AIOUSB_DIO.h"
 /* PUBLIC_EXTERN unsigned long DIO_Configure( */
 /*                                           unsigned long DeviceIndex, */
 /*                                           unsigned char bTristate, */

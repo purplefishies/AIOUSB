@@ -71,9 +71,13 @@ for i=0:stopval
     pause(1);    
 end
 
-ulp_assign(outData, 32411 );
+ulp_assign(outData, 0x5465 );
 DIO_WriteAll(deviceIndex, outData );
 disp('Reading back data');
-result = DIO_Read1( deviceIndex, 16+1,readData );
-printf("Value read back was '%d'\n", usp_value(readData));
+buf = DIOBuf(10)
+DIO_ReadAll( deviceIndex, buf );
+val = sprintf("Binary was: %s", DIOBufToString(buf) );
+disp(val);
+val = sprintf("Hex was: %s", DIOBufToHex(buf) );
+disp(val)
 ## exit();

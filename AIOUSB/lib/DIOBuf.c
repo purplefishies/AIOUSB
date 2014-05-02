@@ -225,11 +225,10 @@ TEST(DIOBuf, Binary_Output ) {
     DeleteDIOBuf( buf );
 }
 
-
 TEST(DIOBuf, Resize_Test ) {
     DIOBuf *buf = NewDIOBuf(0);
     DIOBufResize(buf, 10 ); 
-    EXPECT_STREQ( DIOBufToBinary(buf), "1111111111" );
+    EXPECT_STREQ( DIOBufToString(buf), "0000000000" );
     DeleteDIOBuf( buf );
 }
 

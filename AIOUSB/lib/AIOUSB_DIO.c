@@ -449,31 +449,47 @@ PUBLIC_EXTERN unsigned long DIO_ReadAll(
     unsigned long result = AIOUSB_SUCCESS;
     DeviceDescriptor *deviceDesc = NULL;
     libusb_device_handle *deviceHandle = NULL;
+    int bytesTransferred;
+    char *tmpbuf;
     deviceHandle = _dio_get_device_handle( DeviceIndex, &deviceDesc,  &result );
-    if ( !deviceHandle ) {
-        return result;
+    if ( !deviceHandle )
+        goto out_DIO_ReadAll;
+  
+    if ( !buf ) {
+        result = AIOUSB_ERROR_INVALID_PARAMETER;
+        goto out_DIO_ReadAll;
     }
 
-    char *tmpbuf = (char*)malloc( sizeof(char)*deviceDesc->DIOBytes );
-
-    AIOUSB_UnLock();                                                    // unlock while communicating with device
-    int bytesTransferred = libusb_control_transfer(deviceHandle, 
-                                                   USB_READ_FROM_DEVICE, 
-                                                   AUR_DIO_READ,
-                                                   0, 
-                                                   0, 
-                                                   (unsigned char *)tmpbuf,
-                                                   /* ( unsigned char* )Buffer,  */
-                                                   deviceDesc->DIOBytes,
-                                                   deviceDesc->commTimeout
-                                                   );
-    if( bytesTransferred < 0 || bytesTransferred != (int)deviceDesc->DIOBytes )
+    tmpbuf = (char*)malloc( sizeof(char)*deviceDesc->DIOBytes );
+    if ( !tmpbuf ) {
+        result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+        goto out_DIO_ReadAll;
+    }
+    AIOUSB_UnLock(); /* unlock while communicating with device */
+    bytesTransferred = libusb_control_transfer(deviceHandle, 
+                                               USB_READ_FROM_DEVICE, 
+                                               AUR_DIO_READ,
+                                               0, 
+                                               0, 
+                                               (unsigned char *)tmpbuf,
+                                               deviceDesc->DIOBytes,
+                                               deviceDesc->commTimeout
+                                               );
+    if( bytesTransferred < 0 || bytesTransferred != (int)deviceDesc->DIOBytes ) {
         result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+        goto cleanup_DIO_ReadAll;
+    }
 
-    /* DIOBufResize( buf, dioBytes ); */
-    /* Copy to the DIOBuf */
-    DIOBufReplaceString( buf, tmpbuf, deviceDesc->DIOBytes );    
-
+    if ( DIOBufResize( buf, deviceDesc->DIOBytes ) == NULL ) {
+        result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+        goto cleanup_DIO_ReadAll;
+    }
+    
+    DIOBufReplaceString( buf, tmpbuf, deviceDesc->DIOBytes ); /* Copy to the DIOBuf */
+    cleanup_DIO_ReadAll:
+    free(tmpbuf);
+    out_DIO_ReadAll:
+    AIOUSB_UnLock();
     return result;
 }
 /*----------------------------------------------------------------------------*/
