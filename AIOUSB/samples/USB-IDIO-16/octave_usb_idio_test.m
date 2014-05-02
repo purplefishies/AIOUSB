@@ -80,4 +80,4 @@ val = sprintf("Binary was: %s", DIOBufToString(buf) );
 disp(val);
 val = sprintf("Hex was: %s", DIOBufToHex(buf) );
 disp(val)
-## exit();
+

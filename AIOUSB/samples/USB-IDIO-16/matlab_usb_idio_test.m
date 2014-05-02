@@ -85,5 +85,3 @@ result = calllib('libaiousb','DIO_WriteAll', 0, libpointer('uint16', 21605  ) );
 result = calllib('libaiousb','DIO_ReadAll', deviceIndex, readData );
 calllib('libaiousb','DIOBufToString', readData ) 
 
-
-exit();

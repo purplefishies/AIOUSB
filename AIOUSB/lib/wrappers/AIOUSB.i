@@ -6,7 +6,7 @@
 %pointer_functions( unsigned long,  ulp );
 %pointer_functions( unsigned short, usp );
 %pointer_functions( double , dp );
-/* %pointer_functions( char, cstring ); */
+%pointer_functions( char , cp );
 %array_functions( char , cstring );
 
 %include typemaps.i

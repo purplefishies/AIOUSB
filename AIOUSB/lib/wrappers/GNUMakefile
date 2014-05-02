@@ -207,7 +207,7 @@ php_atest:
 octave:
 	@if [ ! -f $(OCTAVE_BUILT) ] ; then \
 		$(SWIG) -I../../ -octave -o AIOUSB_wrap.cpp AIOUSB.i 2>&1 ; \
-		mkoctfile -o AIOUSB.oct  -I../../ AIOUSB_wrap.cpp -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -laiousb 2>&1 && touch $(OCTAVE_BUILD);\
+		mkoctfile -o AIOUSB.oct  -I../../ AIOUSB_wrap.cpp -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -laiousb 2>&1 && touch $(OCTAVE_BUILT);\
 		fi
 
 $(OCTAVE_BUILT): octave

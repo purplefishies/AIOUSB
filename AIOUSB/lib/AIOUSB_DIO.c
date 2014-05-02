@@ -524,9 +524,9 @@ PUBLIC_EXTERN unsigned long DIO_ReadAllToCharStr(
 }
 /*----------------------------------------------------------------------------*/
 PUBLIC_EXTERN unsigned long DIO_Read8(
-                                    unsigned long DeviceIndex,
-                                    unsigned long ByteIndex,
-                                    char *pBuffer
+                                      unsigned long DeviceIndex,
+                                      unsigned long ByteIndex,
+                                      char *pBuffer
                                     ) {
     unsigned long result = AIOUSB_SUCCESS;
     DeviceDescriptor *deviceDesc = NULL;
@@ -544,7 +544,7 @@ PUBLIC_EXTERN unsigned long DIO_Read8(
     
     if ( (result = DIO_ReadAll(DeviceIndex, readBuffer)) == AIOUSB_SUCCESS ) {
         const char *tmp = DIOBufToBinary( readBuffer ); 
-        pBuffer[0] = tmp[ByteIndex];
+        *pBuffer = tmp[ByteIndex];
     }
 
     free(readBuffer);
