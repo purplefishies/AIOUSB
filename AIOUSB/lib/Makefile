@@ -34,7 +34,8 @@ endif
 
 CDBGOBJS := $(COBJS:.o=.dbg.o)
 CPPOBJS := $(COBJS:.o=.cpp.o)
-CPPDBGOBJS := $(CPPOBJS:.o=.dbg.o)
+CPPDBGOBJS := $(CPPOBJS:.cpp.o=.cpp.dbg.o)
+
 
 CLIB 		:= libaiousb.a
 CDBGLIB 	:= libaiousbdbg.a
@@ -72,6 +73,7 @@ override CXXFLAGS += -D__aiousb_cplusplus
 all : $(LIBS)
 
 testit:
+	echo $(CPPDBGOBJS)
 	echo $(OSTYPE)
 	echo $(CC_SHFLAGS)
 
@@ -105,7 +107,7 @@ $(SHCDBGLIB): 	$(CDBGOBJS)
 $(SHCPPLIB) : $(CPPOBJS)
 	$(CXX) $(CXXFLAGS),$@ $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS)
 $(SHCPPDBGLIB) : $(CPPDBGOBJS)
-	$(CXX) $(CXXFLAGS),$@  $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS)
+	$(CXX) $(CXXFLAGS),$@  $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPDBJOBJS) $(SHARED_LIBS)
 endif
 
 
@@ -117,7 +119,7 @@ OBJOPTS			:= -c
 COMMONOPTS		:= -Wall -pthread -fPIC
 EXTRA_COPTS		:= -std=gnu99 -D_GNU_SOURCE
 SELF_TEST_FLAGS		:= -DSELF_TEST
-SELF_TEST_LIBS		:= -lm -lpthread -laiousb -laiousbcpp
+SELF_TEST_LIBS		:= -lm -lpthread -laiousbdbg -laiousbcppdbg
 SELF_TEST_CXX_FLAGS	:= -D__aiousb_cplusplus -DSELF_TEST 
 SELF_TEST_CXX_LIBS	:= $(SELF_TEST_LIBS) -lgtest
 
@@ -134,7 +136,8 @@ $(CDBGOBJS) : %.dbg.o : %.c
 $(CPPOBJS) : %.cpp.o : %.c
 	$(CXX) $(CXXFLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
 
-$(CPPDBGOBJS) : %.cpp.dbg.o : %.c
+#$(CPPDBGOBJS) : 
+%.cpp.dbg.o : %.c
 	$(CXX) $(CXXFLAGS) $(DEBUG_FLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
 
 pywrapper:
@@ -144,10 +147,10 @@ pywrapper:
 #
 # Self testing files
 #
-%_c_test: %.c
+%_c_test: %.c $(SHCDBGLIB) $(SHCPPDBGLIB)
 	$(CC) $(CFLAGS) $(SELF_TEST_FLAGS) $< -o $@ -L. $(SELF_TEST_LIBS)
 
-%_cpp_test: %.c
+%_cpp_test: %.c $(SHCDBGLIB) $(SHCPPDBGLIB)
 	$(CXX) $(SELF_TEST_CXX_FLAGS) DIOBuf.c -o DIOBuf_cpp_test -L. $(SELF_TEST_CXX_LIBS)
 
 mostlyclean:
