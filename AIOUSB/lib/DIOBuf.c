@@ -16,7 +16,6 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
-/* #if defined(__cplusplus) && !defined(SELF_TEST) */
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif

@@ -7,8 +7,7 @@
 namespace AIOUSB {
 #endif
 
-
-
+/*----------------------------------------------------------------------------*/
 PUBLIC_EXTERN AIOChannelMask * NewAIOChannelMask( unsigned int number_channels ) {
   AIOChannelMask *tmp = (AIOChannelMask *)malloc(sizeof(AIOChannelMask ));
   unsigned i;
@@ -34,7 +33,7 @@ out_cleansignals:
   tmp = NULL;
   return tmp;
 }
-
+/*----------------------------------------------------------------------------*/
 /**
  * @desc Deletes the AIOChannelMask object
  * @param mask 
@@ -45,19 +44,19 @@ PUBLIC_EXTERN void DeleteAIOChannelMask( AIOChannelMask *mask ) {
   free(mask);
 }
 
-
+/*----------------------------------------------------------------------------*/
 int AIOChannelMask_Indices( AIOChannelMask *mask ) {
   int retval;
   mask->pos = 0;
   retval = mask->signal_indices[mask->pos++];
   return retval;
 }
-
+/*----------------------------------------------------------------------------*/
 int AIOChannelMask_NextIndex( AIOChannelMask *mask ) {
   int retval = mask->signal_indices[mask->pos++];
   return retval;
 }
-
+/*----------------------------------------------------------------------------*/
 /**
  * @desc Sets the AIOChannelMask using the regular notion of or'ing of shifted bytes, 
  * 
@@ -85,8 +84,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOChannelMask_SetMaskFromInt( AIOChannelMask *obj, un
 
   return ret;
 }
-  /* obj->signal_indices[obj->signal_index++] = i; */
-
+/*----------------------------------------------------------------------------*/
 /**
  * @desc
  * @param channels
@@ -94,15 +92,16 @@ PUBLIC_EXTERN AIORET_TYPE AIOChannelMask_SetMaskFromInt( AIOChannelMask *obj, un
 PUBLIC_EXTERN AIORET_TYPE AIOChannelMask_NumberChannels( AIOChannelMask *obj ) {
   return (AIORET_TYPE)obj->active_signals;
 }
-
-
+/*----------------------------------------------------------------------------*/
 /**
  * @desc Rely on the base type to determine the sizes
  * @param obj 
  * @param bitfields a character string that contains 0s and 1s. 
  *
  */
-PUBLIC_EXTERN AIORET_TYPE AIOChannelMask_SetMaskFromStr( AIOChannelMask *obj, const char *bitfields ) {
+PUBLIC_EXTERN AIORET_TYPE AIOChannelMask_SetMaskFromStr( AIOChannelMask *obj, 
+                                                         const char *bitfields 
+                                                         ) {
   int i;
   assert( strlen(bitfields) == obj->number_signals );
 
@@ -124,7 +123,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOChannelMask_SetMaskFromStr( AIOChannelMask *obj, co
   }
   return ret;
 }
-
+/*----------------------------------------------------------------------------*/
 /**
  * @desc Provides an intelligent system for setting your masks. It by 
  *       default assumes that each bit will be '1' or worth tracking
@@ -139,7 +138,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOChannelMask_SetMaskAuto( AIOChannelMask *mask ) {
   /* } */
   return retval;
 }
-
+/*----------------------------------------------------------------------------*/
 /**
  * @desc Creates a new AIOChannelMask object from a character string of 1's and 0's
  * @param bitfields
@@ -151,7 +150,7 @@ PUBLIC_EXTERN AIOChannelMask *NewAIOChannelMaskFromStr( const char *bitfields ) 
   AIOChannelMask_SetMaskFromStr( tmp, bitfields );
   return tmp;
 }
-
+/*----------------------------------------------------------------------------*/
 /**
  * @param obj 
  * @param bitfields a string of bitfields that we will apply
@@ -159,16 +158,19 @@ PUBLIC_EXTERN AIOChannelMask *NewAIOChannelMaskFromStr( const char *bitfields ) 
  * @return 
  * @todo Implement this function
  */
-PUBLIC_EXTERN AIORET_TYPE AIOChannelMask_SetMaskWithIndex( AIOChannelMask *obj, const char *bitfields , unsigned index ) {
+PUBLIC_EXTERN AIORET_TYPE AIOChannelMask_SetMaskWithIndex( AIOChannelMask *obj, 
+                                                           const char *bitfields , 
+                                                           unsigned index ) {
   assert(0);
   return (AIORET_TYPE)-1;
 }
-
-PUBLIC_EXTERN AIORET_TYPE AIOChannelMask_GetMaskWithIndex( AIOChannelMask *obj, unsigned index ) {
+/*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN AIORET_TYPE AIOChannelMask_GetMaskWithIndex( AIOChannelMask *obj, 
+                                                           unsigned index ) {
   unsigned retvalue = -1;
   return retvalue;
 }
-
+/*----------------------------------------------------------------------------*/
 /**
  * @desc Returns a mask for the index in question
  * @param obj 
@@ -195,8 +197,12 @@ PUBLIC_EXTERN const char *AIOChannelMask_GetMask( AIOChannelMask *obj, unsigned 
 }
 #endif
 
-
 #ifdef SELF_TEST
+
+#ifdef __cplusplus
+using namespace AIOUSB;
+#endif
+
 int main(int argc, char *argv[] )
 {
   AIORET_TYPE retval;

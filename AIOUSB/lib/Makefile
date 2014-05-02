@@ -63,7 +63,7 @@ DEBUG_FLAGS	:= -ggdb
 
 
 LIBS 		:= $(CLIB) $(CDBGLIB) $(CPPLIB) $(CPPDBGLIB)  $(SHCLIB) $(SHCDBGLIB) $(SHCPPLIB) $(SHCPPDBGLIB)
-override CFLAGS	+= -I.
+override CFLAGS	+= -I. -std=gnu99
 SHARED_LIBS	:=  -lusb-1.0 -pthread -lm
 override CXXFLAGS += -D__aiousb_cplusplus
 
@@ -113,14 +113,17 @@ endif
 
 $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) : aiousb.h AIOUSB_Core.h
 
-OBJOPTS		:= -c 
-COMMONOPTS 	:= -Wall -pthread -fPIC  $(CFLAGS)
-EXTRA_COPTS	:= -std=gnu99 -D_GNU_SOURCE
+OBJOPTS			:= -c 
+COMMONOPTS		:= -Wall -pthread -fPIC
+EXTRA_COPTS		:= -std=gnu99 -D_GNU_SOURCE
+SELF_TEST_FLAGS		:= -DSELF_TEST
+SELF_TEST_LIBS		:= -lm -lpthread -laiousb -laiousbcpp
+SELF_TEST_CXX_FLAGS	:= -D__aiousb_cplusplus -DSELF_TEST 
+SELF_TEST_CXX_LIBS	:= $(SELF_TEST_LIBS) -lgtest
 
-
-PYCFLAGS	= $(DEBUGOPTS) $(COMMONOPTS)
-COPTS		:= $(DEBUGOPTS) $(COMMONOPTS) $(EXTRA_COPTS)
-CPPOPTS		:= $(DEBUGOPTS) $(COMMONOPTS)
+PYCFLAGS		= $(DEBUGOPTS) $(COMMONOPTS)
+COPTS			:= $(DEBUGOPTS) $(COMMONOPTS) $(EXTRA_COPTS)
+CPPOPTS			:= $(DEBUGOPTS) $(COMMONOPTS)
 
 $(COBJS) : %.o : %.c
 	$(CC) $(OBJOPTS) $(CFLAGS) $(COPTS) $< -o $@
@@ -129,23 +132,31 @@ $(CDBGOBJS) : %.dbg.o : %.c
 	$(CC) $(OBJOPTS) $(DEBUG_FLAGS) $(CFLAGS) $(COPTS) $< -o $@
 
 $(CPPOBJS) : %.cpp.o : %.c
-	$(CXX) $(CXXFLAGS) $(CFLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
+	$(CXX) $(CXXFLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
 
 $(CPPDBGOBJS) : %.cpp.dbg.o : %.c
-	$(CXX) $(CXXFLAGS) $(DEBUG_FLAGS) $(CFLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
+	$(CXX) $(CXXFLAGS) $(DEBUG_FLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
 
 pywrapper:
 	CC=$(CC) CFLAGS="$(EXTRA_COPTS)  -lusb-1.0" python setup.py build_ext
 
+
+#
+# Self testing files
+#
+%_c_test: %.c
+	$(CC) $(CFLAGS) $(SELF_TEST_FLAGS) $< -o $@ -L. $(SELF_TEST_LIBS)
+
+%_cpp_test: %.c
+	$(CXX) $(SELF_TEST_CXX_FLAGS) DIOBuf.c -o DIOBuf_cpp_test -L. $(SELF_TEST_CXX_LIBS)
+
 mostlyclean:
-	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS)
+	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) 
 
 clean:
 	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) cscope.out
 
 distclean: 
-	-rm -f $(LIBS) $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) cscope.out
+	-rm -f $(LIBS) $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) cscope.out *_test
 cscope:	
 	cscope -b 
-
-# end of file

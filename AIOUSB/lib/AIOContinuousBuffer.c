@@ -1503,6 +1503,10 @@ PUBLIC_EXTERN unsigned long AIOContinuousBuf_GetDeviceIndex( AIOContinuousBuf *b
 
 #ifdef SELF_TEST
 
+#ifdef __cplusplus
+using namespace AIOUSB;
+#endif
+
 #ifndef TAP_TEST
 #define LOG(...) do {                           \
     pthread_mutex_lock( &message_lock );        \
@@ -1577,7 +1581,7 @@ void *channel16_doit( void *object )
     fill_buffer( tmp, size );
     AIOUSB_DEVEL("\tLooping spinning wheels\n"); 
     retval = AIOContinuousBufWrite( buf, tmp, size ,size,  AIOCONTINUOUS_BUF_ALLORNONE );
-    usleep(rand()%100);
+    usleep( rand()%100 );
     if( retval >= 0 && retval != size ) {
       AIOUSB_ERROR("Error writing. Wrote bytes of size=%d but should have written=%d\n", (int)retval, size );
       AIOUSB_ERROR("read_pos=%d, write_pos=%d\n", get_read_pos(buf), get_write_pos(buf));
@@ -1716,6 +1720,7 @@ void stress_test_read_channels( int bufsize, int keysize  )
 {
   AIOContinuousBuf *buf = NewAIOContinuousBuf( 0,  bufsize , 16 );
   int mybufsize = (16*keysize);
+  int stopval;
   AIOBufferType *tmp = (AIOBufferType *)malloc(mybufsize*sizeof(AIOBufferType ));
   AIORET_TYPE retval;
   AIOContinuousBuf_SetCallback( buf , channel16_doit);
@@ -1733,7 +1738,7 @@ void stress_test_read_channels( int bufsize, int keysize  )
   }
   AIOContinuousBufEnd( buf );
   /* Now read out all of the remaining sizes */
-  int stopval =read_size(buf) / mybufsize;
+  stopval =read_size(buf) / mybufsize;
   if( stopval == 0 )
     stopval = 1;
   for( int i = 1 ; i <= stopval ; i ++ ) {
@@ -2168,6 +2173,8 @@ void stress_copy_counts (int bufsize)
 
 }
 
+#include <unistd.h>
+#include <stdio.h>
 
 int main(int argc, char *argv[] )
 {
