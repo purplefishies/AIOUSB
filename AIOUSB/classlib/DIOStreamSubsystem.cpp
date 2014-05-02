@@ -56,15 +56,19 @@ ostream &DIOStreamSubsystem::print( ostream &out ) {
  */
 
 /**
- * Sets the internal read/write clock speed of a digital I/O stream <i>(see getClock())</i>.
- * Only one clock - the read or write clock - may be active at a time, so this method <i><b>automatically turns off</b></i>
- * the clock not being set by this method. Therefore, do not call this method to explicitly turn off one of the
- * clocks because it will turn off both of them. Also, when streaming between two devices, only one should have an
- * active internal clock; the other should have its clocks turned off <i>(see stopClock())</i>.
- * @param directionRead <i>true</i> sets read clock; <i>false</i> sets write clock.
- * @param clockHz the frequency at which to stream the samples (in Hertz).
- * @return The actual frequency that will be generated, limited by the device's capabilities.
- * @throws OperationFailedException
+ * Sets the internal read/write clock speed of a digital I/O stream
+ * <i>(see getClock())</i>.  Only one clock - the read or write clock
+ * - may be active at a time, so this method <i><b>automatically turns
+ * off</b></i> the clock not being set by this method. Therefore, do
+ * not call this method to explicitly turn off one of the clocks
+ * because it will turn off both of them. Also, when streaming between
+ * two devices, only one should have an active internal clock; the
+ * other should have its clocks turned off <i>(see stopClock())</i>.
+ * @param directionRead <i>true</i> sets read clock; <i>false</i> sets
+ * write clock.  @param clockHz the frequency at which to stream the
+ * samples (in Hertz).  @return The actual frequency that will be
+ * generated, limited by the device's capabilities.  @throws
+ * OperationFailedException
  */
 
 double DIOStreamSubsystem::setClock( bool directionRead, double clockHz ) {
@@ -150,7 +154,7 @@ int DIOStreamSubsystem::write( const UShortArray &values ) {
 	)
 		throw IllegalArgumentException( "Invalid values" );
 	unsigned long bytesTransferred;
-	const int result = DIO_StreamFrame( getDeviceIndex(), values.size(), ( unsigned short * ) values.data(), &bytesTransferred );
+	int result = (int)DIO_StreamFrame( getDeviceIndex(), values.size(), ( unsigned short * ) values.data(), &bytesTransferred );
 	if( result != AIOUSB_SUCCESS )
 		throw OperationFailedException( result );
 	return bytesTransferred / sizeof( unsigned short );

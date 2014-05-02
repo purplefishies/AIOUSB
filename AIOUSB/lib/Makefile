@@ -15,17 +15,11 @@ AIOUSB_CustomEEPROMRead.o \
 AIOUSB_CustomEEPROMWrite.o \
 AIOUSB_DAC.o \
 AIOUSB_DIO.o \
-AIOUSB_ListDevices.o \
 AIOUSB_WDG.o \
 AIOContinuousBuffer.o \
 AIOChannelMask.o \
 AIOUSB_Properties.o \
 DIOBuf.o
-
-#AIOUSB_GetDeviceByProductID.o \
-#AIOUSB_GetDeviceBySerialNumber.o \
-#AIOUSB_GetDeviceProperties.o \
-#AIOUSB_GetResultCodeAsString.o \
 
 
 CCINC		:= 

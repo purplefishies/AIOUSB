@@ -134,13 +134,13 @@ endforeach( selftest_file ${SELF_TEST_ENTRIES}  )
 find_package( GTest ) 
 
 
-if( GTEST_FOUND )
-  add_test(DIOBuf_test DIOBuf.c )
-  set(MY_FLAGS "-DSELF_TEST -DGTEST_TAP_PRINT_TO_STDOUT"  )
-  set(MY_LIBRARIES aiousbdbg usb-1.0 pthread m gtest  )
-  # MESSAGE(STATUS "Libraries: ${MY_LIBRARIES}")
-  build_selftest_cpp_file( aiousblibs DIOBuf.c ${MY_FLAGS} "${MY_LIBRARIES}" )
-endif( GTEST_FOUND )
+# if( GTEST_FOUND )
+#   add_test(DIOBuf_test DIOBuf.c )
+#   set(MY_FLAGS "-DSELF_TEST -D__aiousb_cplusplus -DGTEST_TAP_PRINT_TO_STDOUT"  )
+#   set(MY_LIBRARIES aiousbdbg usb-1.0 pthread m gtest  )
+#   # MESSAGE(STATUS "Libraries: ${MY_LIBRARIES}")
+#   build_selftest_cpp_file( aiousblibs DIOBuf.c ${MY_FLAGS} "${MY_LIBRARIES}" )
+# endif( GTEST_FOUND )
 
 
 # macro ( build_selftest_c_file project c_file  cflags link_libraries )

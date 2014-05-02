@@ -40,14 +40,14 @@
  */
 // }}}
 
-// {{{ includes
+
 #include <aiousb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 using namespace AIOUSB;
-// }}}
+
 
 int main( int argc, char **argv ) {
 	unsigned long result = AIOUSB_SUCCESS;
@@ -64,24 +64,24 @@ int main( int argc, char **argv ) {
 			"  process of ./sample. Please run ./sample instead.\n"
 			"\n"
 			"  Usage: receiver <hex serial number> <num. points>\n"
-/*API*/	, AIOUSB_GetVersion(), AIOUSB_GetVersionDate()
+      	, AIOUSB_GetVersion(), AIOUSB_GetVersionDate()
 		);
 	} else {
 		/*
 		 * parse command line
 		 */
-		const __uint64_t targetSerialNumber = strtoll( *( argv + 1 ), 0, 16 );
-		const unsigned long framePoints = strtol( *( argv + 2 ), 0, 0 );
+		unsigned long targetSerialNumber = strtoll( *( argv + 1 ), 0, 16 );
+		unsigned long framePoints = strtol( *( argv + 2 ), 0, 0 );
 
 		/*
 		 * initialize AIOUSB library; MUST do before any meaningful AIOUSB functions
 		 */
-/*API*/	unsigned long result = AIOUSB_Init();
+      	unsigned long result = AIOUSB_Init();
 		if( result == AIOUSB_SUCCESS ) {
 			/*
 			 * find the device with the specified serial number
 			 */
-/*API*/		unsigned long deviceIndex = GetDeviceBySerialNumber( &targetSerialNumber );
+      		unsigned long deviceIndex = GetDeviceBySerialNumber( &targetSerialNumber );
 			if( deviceIndex != diNone ) {
 				/*
 				 * found it; allocate buffer in which to receive streaming DIO data
@@ -98,38 +98,38 @@ int main( int argc, char **argv ) {
 					/*
 					 * set up communication parameters
 					 */
-/*API*/				AIOUSB_SetCommTimeout( deviceIndex, 1000 );
-/*API*/				AIOUSB_SetStreamingBlockSize( deviceIndex, 256 );
+      				AIOUSB_SetCommTimeout( deviceIndex, 1000 );
+      				AIOUSB_SetStreamingBlockSize( deviceIndex, 256 );
 
 					/*
 					 * turn off the clocks; the sender will control the clock
 					 */
 					ReadClockHz = WriteClockHz = 0;
-/*API*/				result = DIO_StreamSetClocks( deviceIndex, &ReadClockHz, &WriteClockHz );
+      				result = DIO_StreamSetClocks( deviceIndex, &ReadClockHz, &WriteClockHz );
 					if( result != AIOUSB_SUCCESS ) {
 						printf( "Error '%s' setting stream clock for device at index %lu\n"
-/*API*/						, AIOUSB_GetResultCodeAsString( result ), deviceIndex );
+      						, AIOUSB_GetResultCodeAsString( result ), deviceIndex );
 						goto abort;
 					}	// if( result ...
 
 					/*
 					 * open stream for reading
 					 */
-/*API*/				result = DIO_StreamOpen( deviceIndex, AIOUSB_TRUE /* open for reading */ );
+      				result = DIO_StreamOpen( deviceIndex, AIOUSB_TRUE /* open for reading */ );
 					if( result != AIOUSB_SUCCESS ) {
 						printf( "Error '%s' opening read stream for device at index %lu\n"
-/*API*/						, AIOUSB_GetResultCodeAsString( result ), deviceIndex );
+      						, AIOUSB_GetResultCodeAsString( result ), deviceIndex );
 						goto abort;
 					}	// if( result ...
 
 					/*
 					 * configure I/O ports
 					 */
-/*API*/				result = DIO_ConfigureEx( deviceIndex, &outputMask, &initialData, &tristateMask );
+      				result = DIO_ConfigureEx( deviceIndex, &outputMask, &initialData, &tristateMask );
 					if( result != AIOUSB_SUCCESS ) {
 						printf( "Error '%s' configuring device at index %lu\n"
-/*API*/						, AIOUSB_GetResultCodeAsString( result ), deviceIndex );
-/*API*/					DIO_StreamClose( deviceIndex );
+      						, AIOUSB_GetResultCodeAsString( result ), deviceIndex );
+      					DIO_StreamClose( deviceIndex );
 						goto abort;
 					}	// if( result ...
 
@@ -141,7 +141,7 @@ int main( int argc, char **argv ) {
 					/*
 					 * receive frame
 					 */
-/*API*/				result = DIO_StreamFrame( deviceIndex, framePoints, frameData, &transferred );
+      				result = DIO_StreamFrame( deviceIndex, framePoints, frameData, &transferred );
 					if( result == AIOUSB_SUCCESS ) {
 						if( transferred == framePoints * sizeof( unsigned short ) ) {
 							/*
@@ -175,10 +175,10 @@ int main( int argc, char **argv ) {
 						}	// if( transferred ...
 					} else {
 						printf( "Error '%s' reading frame from device at index %lu\n"
-/*API*/						, AIOUSB_GetResultCodeAsString( result ), deviceIndex );
+      						, AIOUSB_GetResultCodeAsString( result ), deviceIndex );
 						AIOUSB_ClearFIFO( deviceIndex, CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT );
 					}	// if( result ...
-/*API*/				DIO_StreamClose( deviceIndex );
+      				DIO_StreamClose( deviceIndex );
 
 abort:
 					free( frameData );
@@ -192,12 +192,9 @@ abort:
 			/*
 			 * MUST be called before program exits, but only if AIOUSB_Init() succeeded
 			 */
-/*API*/		AIOUSB_Exit();
-		}	// if( result ...
-	}	// if( argc ...
+      		AIOUSB_Exit();
+		}
+	}
 
 	return ( int ) result;
 }	// main()
-
-
-/* end of file */

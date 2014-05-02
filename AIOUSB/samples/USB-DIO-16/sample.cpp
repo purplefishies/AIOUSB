@@ -75,7 +75,7 @@ int main( int argc, char **argv ) {
 			 * search for two USB-DIO-16A devices; the first one will be the
 			 * sender of data, and the second one will be the receiver
 			 */
-			__uint64_t serialNumber1 = 0		// serial number of sender board
+			unsigned long serialNumber1 = 0		// serial number of sender board
 				, serialNumber2 = 0;			// serial number of receiver board
 			int deviceIndex1 = -1
 				, deviceIndex2 = -1

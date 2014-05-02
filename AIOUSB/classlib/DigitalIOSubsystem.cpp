@@ -9,7 +9,8 @@
 
 #include "CppCommon.h"
 #include <assert.h>
-#include <AIOUSB_Core.h>
+#include "AIOUSB_Core.h"
+#include "DIOBuf.h"
 #include "USBDeviceManager.hpp"
 #include "DigitalIOSubsystem.hpp"
 
@@ -283,14 +284,13 @@ bool DigitalIOSubsystem::read( int channel ) {
  */
 
 BoolArray DigitalIOSubsystem::read( int startChannel, int numChannels ) {
-	if(
-		numChannels < 1
-		|| startChannel < 0
-		|| startChannel + numChannels > this->numChannels
+	if( numChannels < 1 || startChannel < 0 || 
+            startChannel + numChannels > this->numChannels
 	)
 		throw IllegalArgumentException( "Invalid start channel or number of channels" );
 	UCharArray ports( numPorts );
-	const int result = DIO_ReadAll( getDeviceIndex(), ports.data() );
+        DIOBuf *buf = NewDIOBuf( numPorts );
+	const int result = DIO_ReadAll( getDeviceIndex(), buf );
 	if( result != AIOUSB_SUCCESS )
 		throw OperationFailedException( result );
 	BoolArray values( numChannels );

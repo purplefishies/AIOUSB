@@ -7,7 +7,6 @@
  *
  */
 
-#include "AIOTypes.h"
 #include "DIOBuf.h"
 #include <assert.h>
 #include <math.h>
@@ -16,6 +15,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/stat.h>
+
+/* #if defined(__cplusplus) && !defined(SELF_TEST) */
+#ifdef __cplusplus
+namespace AIOUSB {
+#endif
 
 /*----------------------------------------------------------------------------*/
 DIOBuf *NewDIOBuf( unsigned size ) {
@@ -73,7 +77,9 @@ DIOBuf *NewDIOBufFromBinStr( const char *ary ) {
 /*----------------------------------------------------------------------------*/
 DIOBuf *DIOBufReplaceString( DIOBuf *buf, char *ary, int size_array ) 
 { 
-  if ( !DIOBufResize( buf, size_array*8 )  ) 
+  if (!buf  ) { 
+    /* buf = NewDIOBuf( size_array*8 ); */
+  } else if ( !DIOBufResize( buf, size_array*8 )  ) 
     return NULL;
   _copy_to_buf( buf, ary, size_array );
   return buf;
@@ -108,7 +114,7 @@ unsigned DIOBufSize( DIOBuf *buf ) {
   return buf->_size;
 }
 /*----------------------------------------------------------------------------*/
-const char *DIOBufToString( DIOBuf *buf ) {
+char *DIOBufToString( DIOBuf *buf ) {
   unsigned i;
   memset(buf->_strbuf,0, DIOBufSize(buf)+1);
   for( i = 0; i < buf->_size ; i ++ )
@@ -117,7 +123,7 @@ const char *DIOBufToString( DIOBuf *buf ) {
   return buf->_strbuf;
 }
 /*----------------------------------------------------------------------------*/
-const char *DIOBufToHex( DIOBuf *buf ) {
+char *DIOBufToHex( DIOBuf *buf ) {
     char *tmp = strdup( DIOBufToBinary( buf ));
     memset(buf->_strbuf, 0, DIOBufSize(buf)/8 );
     strcpy(&buf->_strbuf[0], "0x" );
@@ -130,7 +136,7 @@ const char *DIOBufToHex( DIOBuf *buf ) {
     return buf->_strbuf;
 }
 /*----------------------------------------------------------------------------*/
-const char *DIOBufToBinary( DIOBuf *buf ) {
+char *DIOBufToBinary( DIOBuf *buf ) {
     int i, j;
     memset(buf->_strbuf, 0, DIOBufSize(buf)/8 );
     for( i = DIOBufSize(buf)-1, j = 0 ;  i >= 0 ; i -- , j ++  ) {
@@ -140,10 +146,14 @@ const char *DIOBufToBinary( DIOBuf *buf ) {
     return buf->_strbuf;
 }
 /*----------------------------------------------------------------------------*/
-void DIOBufSetIndex( DIOBuf *buf, unsigned index, unsigned value )
+int DIOBufSetIndex( DIOBuf *buf, unsigned index, unsigned value )
 {
-  if ( index < buf->_size )
-      buf->_buffer[index] = value;
+
+  if ( index >= buf->_size ) {
+    return -AIOUSB_ERROR_INVALID_INDEX;
+  } 
+  buf->_buffer[index] = value;
+  return 0;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -153,6 +163,12 @@ int DIOBufGetIndex( DIOBuf *buf, unsigned index ) {
   
   return buf->_buffer[ index ];
 }
+
+/* #if defined(__cplusplus) && !defined(SELF_TEST) */
+#ifdef __cplusplus 
+}
+#endif
+
 
 
 /**
@@ -166,25 +182,28 @@ int DIOBufGetIndex( DIOBuf *buf, unsigned index ) {
 #include "gtest/gtest.h"
 #include "tap.h"
 
+using namespace AIOUSB;
+
 TEST(DIOBuf , Toggle_Bits ) {
-  DIOBuf *buf = NewDIOBuf(100);
-  for ( int i = 2 ; i < 10 ; i ++ ) {
-    float c = powf( 2, (float)i );
-    int size = (int)c;
-    DIOBufResize( buf, size );
-    EXPECT_EQ( size, DIOBufSize(buf) );
-    for( int j = 0 ; j < DIOBufSize(buf); j ++ ) {
-      DIOBufSetIndex( buf, j, ( i % 2 == 0 ? 1 : 0 ));
+
+    DIOBuf *buf = NewDIOBuf(100);
+    for ( int i = 2 ; i < 10 ; i ++ ) {
+      float c = powf( 2, (float)i );
+      int size = (int)c;
+      DIOBufResize( buf, size );
+      EXPECT_EQ( size, DIOBufSize(buf) );
+      for( int j = 0 ; j < DIOBufSize(buf); j ++ ) {
+        DIOBufSetIndex( buf, j, ( i % 2 == 0 ? 1 : 0 ));
+      }
+      char *tmp = (char *)malloc( (DIOBufSize(buf)+1)*sizeof(char));
+      for( int k = 0; k < DIOBufSize( buf ); k ++ ) {
+        tmp[k] = ( i % 2 == 0 ? '1': '0' );
+      }
+      tmp[DIOBufSize(buf)] = '\0';
+      EXPECT_STREQ( DIOBufToString(buf), tmp );
+      free(tmp);
     }
-    char *tmp = (char *)malloc( (DIOBufSize(buf)+1)*sizeof(char));
-    for( int k = 0; k < DIOBufSize( buf ); k ++ ) {
-      tmp[k] = ( i % 2 == 0 ? '1': '0' );
-    }
-    tmp[DIOBufSize(buf)] = '\0';
-    EXPECT_STREQ( DIOBufToString(buf), tmp );
-    free(tmp);
-  }
-  DeleteDIOBuf(buf);
+    DeleteDIOBuf(buf);
 }
 
 TEST(DIOBuf, CharStr_Constructor ) {
@@ -204,6 +223,14 @@ TEST(DIOBuf, BinStr_Constructor ) {
 TEST(DIOBuf, Binary_Output ) {
     DIOBuf *buf = NewDIOBufFromChar("Test",4 );
     EXPECT_STREQ( DIOBufToBinary(buf), "Test" );
+    DeleteDIOBuf( buf );
+}
+
+
+TEST(DIOBuf, Resize_Test ) {
+    DIOBuf *buf = NewDIOBuf(0);
+    DIOBufResize(buf, 10 ); 
+    EXPECT_STREQ( DIOBufToBinary(buf), "1111111111" );
     DeleteDIOBuf( buf );
 }
 
@@ -234,6 +261,7 @@ TEST(DIOBuf, Toggle_interview ) {
     DeleteDIOBuf(buf);
 }
 
+
 int main( int argc , char *argv[] ) 
 {
     testing::InitGoogleTest(&argc, argv);
@@ -243,6 +271,7 @@ int main( int argc , char *argv[] )
 #endif
     listeners.Append( new tap::TapListener() );
 
+    
     DIOBuf *buf = NewDIOBuf( 100 );
     DeleteDIOBuf( buf );
   

@@ -13,13 +13,17 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "AIOTypes.h"
+#include "AIOUSB_Properties.h"
+#include "AIOUSB_DIO.h"
 
 #ifdef __aiousb_cplusplus
 namespace AIOUSB
 {
 #endif
 
-
+#ifndef PUBLIC_EXTERN
+#define PUBLIC_EXTERN extern
+#endif
 
 PUBLIC_EXTERN unsigned long QueryDeviceInfo(
                                             unsigned long DeviceIndex,
@@ -32,69 +36,6 @@ PUBLIC_EXTERN unsigned long QueryDeviceInfo(
 PUBLIC_EXTERN unsigned long ClearDevices( void );
 
 PUBLIC_EXTERN unsigned long ResolveDeviceIndex( unsigned long DeviceIndex );
-
-/* PUBLIC_EXTERN unsigned long DIO_Configure( */
-/*     unsigned long DeviceIndex, */
-/*     unsigned char bTristate, */
-/*     void *pOutMask, */
-/*     void *pData ); */
-
-/* PUBLIC_EXTERN unsigned long DIO_ConfigureEx( */
-/*     unsigned long DeviceIndex, */
-/*     void *pOutMask, */
-/*     void *pData, */
-/*     void *pTristateMask ); */
-
-/* PUBLIC_EXTERN unsigned long DIO_ConfigurationQuery( */
-/*     unsigned long DeviceIndex, */
-/*     void *pOutMask, */
-/*     void *pTristateMask ); */
-
-/* PUBLIC_EXTERN unsigned long DIO_WriteAll( */
-/*     unsigned long DeviceIndex, */
-/*     void *pData ); */
-
-/* PUBLIC_EXTERN unsigned long DIO_Write8( */
-/*     unsigned long DeviceIndex, */
-/*     unsigned long ByteIndex, */
-/*     unsigned char Data ); */
-
-/* PUBLIC_EXTERN unsigned long DIO_Write1( */
-/*     unsigned long DeviceIndex, */
-/*     unsigned long BitIndex, */
-/*     unsigned char bData ); */
-
-/* PUBLIC_EXTERN unsigned long DIO_ReadAll( */
-/*     unsigned long DeviceIndex, */
-/*     void *Buffer ); */
-
-/* PUBLIC_EXTERN unsigned long DIO_Read8( */
-/*     unsigned long DeviceIndex, */
-/*     unsigned long ByteIndex, */
-/*     char *pBuffer ); */
-
-/* PUBLIC_EXTERN unsigned long DIO_Read1( */
-/*     unsigned long DeviceIndex, */
-/*     unsigned long BitIndex, */
-/*     char *pBuffer ); */
-
-/* PUBLIC_EXTERN unsigned long DIO_StreamOpen( */
-/*     unsigned long DeviceIndex, */
-/*     unsigned long bIsRead ); */
-
-/* PUBLIC_EXTERN unsigned long DIO_StreamClose( */
-/*     unsigned long DeviceIndex ); */
-
-/* PUBLIC_EXTERN unsigned long DIO_StreamSetClocks( */
-/*     unsigned long DeviceIndex, */
-/*     double *ReadClockHz, */
-/*     double *WriteClockHz ); */
-
-/* PUBLIC_EXTERN unsigned long DIO_StreamFrame( */
-/*     unsigned long DeviceIndex, */
-/*     unsigned long FramePoints, */
-/*     unsigned short *pFrameData, */
-/*     unsigned long *BytesTransferred ); */
 
 PUBLIC_EXTERN unsigned long CTR_8254Mode(
     unsigned long DeviceIndex,

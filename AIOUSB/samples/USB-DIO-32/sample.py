@@ -1,120 +1,39 @@
-/**
- * @file   AIOUSB_Core.h
- * @author $Format: %an <%ae>$
- * @date   $Format: %ad$
- * @release $Format: %t$
- * @ingroup samples
- * @brief  
- *
- * @note All the API functions that DO NOT begin "AIOUSB_" are standard API functions, largely
- * documented in the <a href="USB Software Reference"> http://accesio.com/MANUALS/USB%20Software%20Reference.pdf</a>. 
- * The functions that DO begin with "AIOUSB_" are "extended" API functions added to the Linux
- * implementation. Source code lines in this sample program that are prefixed with the
- * comment highlight calls to the AIOUSB API.
- *
- * @see Compilation 
- * @see CmakeCompilation
- */
-
-/**
- * @ref libusb 
- * LIBUSB (http://www.libusb.org/) must be installed on the Linux box (the AIOUSB code
- * was developed using libusb version 1.0.3). After installing libusb, it may also be
- * necessary to set an environment variable so that the libusb and aiousb header files can
- * be located:
- *
- *     export CPATH=/usr/local/include/libusb-1.0/:/usr/local/include/aiousb/
- *
- * Once libusb is installed properly, it should be possible to compile the sample program
- * using the simple command:
- *
- * @ref make_C_sample
- *
- *
- * @ref 
- *
- *     make
- *
- * Alternatively, one can "manually" compile the sample program using the command:
- *
- *     g++ sample.cpp -laiousb -lusb-1.0 -o sample
- *
- * or, to enable debug features
- *
- *     g++ -ggdb sample.cpp -laiousbdbg -lusb-1.0 -o sample
- */
-
-#include "aiousb.h"
-#include "AIOUSB_DIO.h"
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-using namespace AIOUSB;
+#!/usr/bin/python
+# @file   sample.py
+# @author $Format: %an <%ae>$
+# @date   $Format: %ad$
+# @release $Format: %t$
+# @ingroup samples
+# @brief Python version of the C/C++ samples that demonstrate reading / writing from the DIO-32 card
+#
+#/
 
 
-int main( int argc, char **argv ) {
-    const int DEVICES_REQUIRED = 1;				// change this to 1 if only one device
-    const int BITS_PER_BYTE = 8;
-    const int MAX_DIO_BYTES = 4;				// a modest little assumption for convenience
-    const int MASK_BYTES = ( MAX_DIO_BYTES + BITS_PER_BYTE - 1 ) / BITS_PER_BYTE;
-    const int MAX_NAME_SIZE = 20;
-    int devicesFound = 0;
-    int index = 0;
-    typedef enum { 
-      SUCCESS = 0,
-      USB_ERROR = -1,
-      NO_DEVICE_FOUND = -2
-    } EXIT_CODE;
-    EXIT_CODE exit_code = SUCCESS;
+import sys
+from AIOUSB import *
 
-    static struct DeviceInfo {
-      unsigned char outputMask[ MASK_BYTES ];
-      unsigned char readBuffer[ MAX_DIO_BYTES ];		// image of data read from board
-      unsigned char writeBuffer[ MAX_DIO_BYTES ];		// image of data written to board
-      char name[ MAX_NAME_SIZE + 2 ];
-      unsigned long productID;
-      unsigned long nameSize;
-      unsigned long numDIOBytes;
-      unsigned long numCounters;
-      unsigned long serialNumber;
-      int index;
-    } deviceTable[ DEVICES_REQUIRED ];
+print """USB-DIO-32 sample program version 1.17, 26 November 2009
+This program demonstrates communicating with %d USB-DIO-32 devices on + 
+AIOUSB library version %s, %s
+the same USB bus. For simplicity, it uses the first %d such devices 
+found on the bus""" % ( number_devices, AIOUSB_GetVersion(), AIOUSB_GetVersionDate() , number_devices )
+         
+result = AIOUSB_Init()
+if result != AIOUSB_SUCCESS:
+    sys.exit("Unable to initialize USB devices")
 
-    printf(
-           "USB-DIO-32 sample program version 1.17, 26 November 2009\n"
-           "  AIOUSB library version %s, %s\n"
-           "  This program demonstrates communicating with %d USB-DIO-32 devices on\n"
-           "  the same USB bus. For simplicity, it uses the first %d such devices\n"
-           "  found on the bus.\n",
-           AIOUSB_GetVersion(), 
-           AIOUSB_GetVersionDate(), 
-           DEVICES_REQUIRED, 
-           DEVICES_REQUIRED
-           );
+deviceMask = GetDevices()
 
-    unsigned long result = AIOUSB_Init(); /* Call AIOUSB_Init() before any meaningful AIOUSB functions; */
-    if( result != AIOUSB_SUCCESS ) {
-        printf("Can't initialize AIOUSB USB device\n");
-        exit_code = USB_ERROR;
-    }
+AIOUSB_ListDevices();
 
-    unsigned long deviceMask = GetDevices(); /**< @ref GetDevices */
-    if( deviceMask == 0 ) {
-        printf( "No ACCES devices found on USB bus\n" );
-        exit_code = USB_ERROR;
-        goto exit_sample;
-    }
+productId = new_ulp()  
+ulp_assign(productId,0)
+QueryDeviceInfo(0, productId,new_ulp(),"",new_ulp(), new_ulp())
 
-    AIOUSB_ListDevices();
 
-    /*
-     * search for required number of USB-DIO-32 devices
-     */
-
-    struct DeviceInfo *device;
-    while( deviceMask != 0 && devicesFound < DEVICES_REQUIRED ) {
+while( deviceMask != 0 && devicesFound < DEVICES_REQUIRED ) {
         if( ( deviceMask & 1 ) != 0 ) {
-            // found a device, but is it the correct type?
+
             device = &deviceTable[ devicesFound ];
             device->nameSize = MAX_NAME_SIZE;
             result = QueryDeviceInfo( index, &device->productID,
@@ -124,8 +43,7 @@ int main( int argc, char **argv ) {
                                       &device->numCounters 
                                       );
             if( result == AIOUSB_SUCCESS ) {
-                if( device->productID == USB_DIO_32 || device->productID == USB_DIO_32I || 
-                    device->productID == USB_DIO_48 ) { // found a USB-DIO-32
+                if( device->productID == USB_DIO_32 ) { // found a USB-DIO-32
                     device->index = index;
                     devicesFound++;
                 }
@@ -171,10 +89,10 @@ int main( int argc, char **argv ) {
     
     result = DIO_Configure( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer ); /**< AIOUSB_FALSE ='s bTristate */
     
-    if( result == AIOUSB_SUCCESS )
-        printf( "Device at index %d successfully configured\n", device->index );
-    else
-        printf( "Error '%s' configuring device at index %d\n", AIOUSB_GetResultCodeAsString( result ), device->index );
+    # if( result == AIOUSB_SUCCESS )
+    #     printf( "Device at index %d successfully configured\n", device->index );
+    # else
+    #     printf( "Error '%s' configuring device at index %d\n", AIOUSB_GetResultCodeAsString( result ), device->index );
     
     if( devicesFound > 1 ) {
             device = &deviceTable[ 1 ];						// select second device
@@ -204,7 +122,7 @@ int main( int argc, char **argv ) {
      */
     for( index = 0; index < devicesFound; index++ ) {
             device = &deviceTable[ index ];
-            result = DIO_ReadAllToCharStr( device->index, (char *)device->readBuffer, MAX_DIO_BYTES );
+            result = DIO_ReadAll( device->index, device->readBuffer );
 
             if( result != AIOUSB_SUCCESS ) {
                 printf( "Error '%s' reading inputs from device at index %d\n", AIOUSB_GetResultCodeAsString( result ), device->index );
@@ -243,7 +161,7 @@ int main( int argc, char **argv ) {
                     goto abort;
                 }
 
-                result = DIO_ReadAllToCharStr( device->index, (char *)device->readBuffer , MAX_DIO_BYTES ); // verify values written
+                result = DIO_ReadAll( device->index, device->readBuffer ); // verify values written
                 if ( result != AIOUSB_SUCCESS ) {
                     printf( "Error '%s' reading inputs from device at index %d\n" , AIOUSB_GetResultCodeAsString( result ), device->index );
                     goto abort;
@@ -273,6 +191,6 @@ exit_sample:
     AIOUSB_Exit();
 
 
-    return ( int ) exit_code;
+    return ( int ) result;
 } 
 

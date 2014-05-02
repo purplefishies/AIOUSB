@@ -8,6 +8,7 @@
  */
 
 #include "AIOUSB_Core.h"
+#include "AIOTypes.h"
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -17,11 +18,9 @@
 
 #define BAD_RESULT_AND_GOTO(x, y)  result = x; goto (y);
 
-
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
-
 
 enum {
   AD_MAX_CHANNELS    = 128,    /* maximum number of channels supported by this driver */
@@ -29,14 +28,14 @@ enum {
 };
 
 struct ADRange adRanges[ AD_NUM_GAIN_CODES ] = {
-  { 0, 10 },                                                    /* AD_GAIN_CODE_0_10V  */
-  { -10, 20 },                                                  /* AD_GAIN_CODE_10V    */
-  { 0, 5 },                                                     /* AD_GAIN_CODE_0_5V   */
-  { -5, 10 },                                                   /* AD_GAIN_CODE_5V     */
-  { 0, 2 },                                                     /* AD_GAIN_CODE_0_2V   */
-  { -2, 4 },                                                    /* AD_GAIN_CODE_2V     */
-  { 0, 1 },                                                     /* AD_GAIN_CODE_0_1V   */
-  { -1, 2 }                                                     /* AD_GAIN_CODE_1V     */  
+  { 0   , 10 },                 /* AD_GAIN_CODE_0_10V  */
+  { -10 , 20 },                 /* AD_GAIN_CODE_10V    */
+  { 0   , 5  },                 /* AD_GAIN_CODE_0_5V   */
+  { -5  , 10 },                 /* AD_GAIN_CODE_5V     */
+  { 0   , 2  },                 /* AD_GAIN_CODE_0_2V   */
+  { -2  , 4  },                 /* AD_GAIN_CODE_2V     */
+  { 0   , 1  },                 /* AD_GAIN_CODE_0_1V   */
+  { -1  , 2  }                  /* AD_GAIN_CODE_1V     */  
 };
 
 // formerly public in the API
@@ -1615,9 +1614,8 @@ unsigned long ADC_SetCal(
  * @return
  */
 unsigned long ADC_QueryCal(
-    unsigned long DeviceIndex
-    )
-{
+                           unsigned long DeviceIndex
+                           ) {
     if(!AIOUSB_Lock())
         return AIOUSB_ERROR_INVALID_MUTEX;
 

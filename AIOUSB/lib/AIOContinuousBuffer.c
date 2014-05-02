@@ -361,8 +361,8 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufCountScansAvailable(AIOContinuousBuf *
   return retval;
 }
 
-#undef MIN
-#define MIN(X,Y) ( (X) < (Y) ? (X) : (Y) )
+/* #undef MIN */
+/* #define MIN(X,Y) ( (X) < (Y) ? (X) : (Y) ) */
 /** 
  * @desc will read in an integer number of scan counts if there is room.
  * @param buf 
@@ -702,7 +702,7 @@ void *RawCountsWorkFunction( void *object )
 
       if( bytes ) {
         /* only write bytes that exist */
-          int tmpcount = MIN((buffer_size(buf)-get_write_pos(buf)) - AIOContinuousBuf_NumberChannels(buf), bytes/2 );
+        int tmpcount = MIN((int)((buffer_size(buf)-get_write_pos(buf)) - AIOContinuousBuf_NumberChannels(buf)), (int)(bytes/2) );
           int tmp = AIOContinuousBufWriteCounts( buf, 
                                                 (unsigned short *)&data[0],
                                                 datasize/2,

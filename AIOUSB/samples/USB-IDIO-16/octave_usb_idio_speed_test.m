@@ -31,9 +31,9 @@ ulp_assign(productId,0)
 QueryDeviceInfo(0, productId,new_ulp(),"",new_ulp(), new_ulp())
 
 if ulp_value( productId ) == 32792
-    stopval = 15
+    stopval = 16
 elseif ulp_value( productId ) == 32796
-    stopval = 7
+    stopval = 8
 else
     tmp = sprintf('Card with board id "0x%x" is not supported by this sample', ulp_value( productId ) );
     disp(tmp);
@@ -44,36 +44,31 @@ timeout = 1000;
 AIOUSB_Reset(  deviceIndex );
 AIOUSB_SetCommTimeout( deviceIndex, timeout );
 
-outData = new_ulp()
-ulp_assign(outData, 15 );
+outData = new_usp()
+usp_assign(outData, 15 );
 
 DIO_WriteAll( deviceIndex, outData );
-readData = new_ulp();
-ulp_assign(readData ,0);
+readData = new_usp();
+usp_assign(readData ,0);
 
 
-for i=0:255
-    val=sprintf('Sending %d\n',i);
-    ulp_assign(outData, i );
-    result = DIO_WriteAll( deviceIndex, outData );
-    ## result = calllib('libaiousb','DIO_WriteAll', 0, libpointer('uint16',i) );
-    ## printf(val);
-    disp(val);
-    pause(0.04);
+
+for j=1:300
+tic;
+start = tic;
+val=sprintf('Starting at %d',start);
+disp(val);
+  for i=0:2^stopval-1
+    % val=sprintf('Sending %d',i);
+    ## val=sprintf('Sending %d',2^i);
+    usp_assign(outData, i );
+    result = DIO_WriteAll( 0, outData );
+    % disp(val)                          
+  % pause(0.04);                        
+  end
+stop = toc();
+val=sprintf('Completed in seconds %d\nCount per is %f',stop,(stop)/(2^stopval-1)  );
+disp(val);
 end
 
-for i=0:stopval
-    val=sprintf('Sending %d',2^i);
-    ulp_assign(outData, 2^i );
-    DIO_WriteAll(deviceIndex, outData );
-    ## result = calllib('libaiousb','DIO_WriteAll', 0, libpointer('uint16',2^i) );
-    disp(val);
-    pause(1);    
-end
-
-ulp_assign(outData, 32411 );
-DIO_WriteAll(deviceIndex, outData );
-disp('Reading back data');
-result = DIO_Read1( deviceIndex, 16+1,readData );
-printf("Value read back was '%d'\n", usp_value(readData));
-## exit();
+exit();

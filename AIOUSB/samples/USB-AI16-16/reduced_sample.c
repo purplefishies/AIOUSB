@@ -17,7 +17,7 @@ int main( int argc, char **argv ) {
   
   unsigned long deviceMask;
   unsigned long result;
-  __uint64_t serialNumber;
+  unsigned long serialNumber;
   double clockHz;
   const int BULK_BYTES = 100000; /* scans */
   unsigned long bytesRemaining = BULK_BYTES;
@@ -66,7 +66,10 @@ int main( int argc, char **argv ) {
     deviceIndex++;
     deviceMask >>= 1;
   }	// while( deviceMask ...
-
+  if( deviceFound == AIOUSB_FALSE ) {
+    printf("No device found\n");
+    _exit(1);
+  }
 
   AIOUSB_Reset( deviceIndex );
   AIOUSB_SetCommTimeout( deviceIndex, 1000 );

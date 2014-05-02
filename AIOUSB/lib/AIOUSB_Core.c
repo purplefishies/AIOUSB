@@ -1,5 +1,5 @@
 /**
- * @file   aiousb.h
+ * @file   AIOUSB_Core.c
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
  * @release $Format: %t$

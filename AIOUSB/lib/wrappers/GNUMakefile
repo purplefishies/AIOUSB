@@ -4,7 +4,7 @@
 #
 
 SWIG_FILE	:= AIOUSB.i	 
-SWIG		:= swig
+SWIG		:= swig 
 
 PERL		:= perl
 PYTHON		:= python
@@ -106,7 +106,7 @@ perl_test:	$(PERL_BUILT) $(TEST_DIR)
 perl_cleanup:
 	@echo "Cleaning Perl"
 	@$(RM) -f pm_to_blib $(PERL_BUILT) AIOUSB_wrap.o AIOUSB.bs \
-	MYMETA.yml MYMETA.json Makefile AIOUSB_wrap.c AIOUSB.pm 
+	MYMETA.yml MYMETA.json Makefile AIOUSB_wrap.c AIOUSB.pm *_wrap*
 	@$(RM) -rf blib
 
 perl_atest:
@@ -207,8 +207,8 @@ php_atest:
 octave:
 	@if [ ! -f $(OCTAVE_BUILT) ] ; then \
 		$(SWIG) -I../../ -octave -o AIOUSB_wrap.cpp AIOUSB.i 2>&1 ; \
-		mkoctfile -o AIOUSB.oct  -I../../ AIOUSB_wrap.cpp -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -laiousb 2>&1; \
-		touch $(OCTAVE_BUILT); fi
+		mkoctfile -o AIOUSB.oct  -I../../ AIOUSB_wrap.cpp -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -laiousb 2>&1 && touch $(OCTAVE_BUILD);\
+		fi
 
 $(OCTAVE_BUILT): octave
 
@@ -217,7 +217,7 @@ octave_test: $(OCTAVE_BUILT)
 
 
 octave_cleanup:
-	$(RM) -f $(OCTAVE_BUILT) AIOUSB.oct AIOUSB_wrap.o AIOUSB_wrap.cpp
+	$(RM) -f $(OCTAVE_BUILT) AIOUSB.oct AIOUSB_*wrap*
 
 octave_atest:
 	@$(MAKE) -f GNUMakefile octave 2>&1 > /dev/null

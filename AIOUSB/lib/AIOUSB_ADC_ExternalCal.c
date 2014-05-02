@@ -23,7 +23,8 @@ namespace AIOUSB {
 
 
 
-static int CompareVoltage(const void *p1, const void *p2) {
+static int CompareVoltage(const void *p1, const void *p2)
+{
     assert(p1 != 0 &&
            p2 != 0);
     const double voltage1 = *( double* )p1, voltage2 = *( double* )p2;
@@ -33,16 +34,18 @@ static int CompareVoltage(const void *p1, const void *p2) {
         return 1;
     else
         return 0;
-}
+}       // CompareVoltage()
 
 
-PUBLIC_EXTERN unsigned long AIOUSB_ADC_ExternalCal(
-                                                   unsigned long DeviceIndex,
-                                                   const double points[],
-                                                   int numPoints,
-                                                   unsigned short returnCalTable[],
-                                                   const char *saveFileName
-                                                   ) {
+unsigned long
+AIOUSB_ADC_ExternalCal(
+    unsigned long DeviceIndex,
+    const double points[],
+    int numPoints,
+    unsigned short returnCalTable[],
+    const char *saveFileName
+    )
+{
     if(
         points == 0 ||
         numPoints < 2 ||
@@ -242,19 +245,18 @@ PUBLIC_EXTERN unsigned long AIOUSB_ADC_ExternalCal(
                   }
 #endif
 
-                /**
-                 * @note 
-                 * generate calibration table using the equation
-                 *   ccounts = ( mcounts – offset ) / slope
-                 * described above; each slope/offset pair in workingPoints[] describes the line
-                 * segment running between the _previous_ point and the current one; in addition,
-                 * the first row in workingPoints[] doesn't contain a valid slope/offset pair
-                 * because there is no previous point before the first one (!), so we stretch the
-                 * first line segment (between points 0 and 1) backward to the beginning of the A/D
-                 * count range; similarly, since the highest calibration point is probably not right
-                 * at the top of the A/D count range, we stretch the highest line segment (between
-                 * points n-2 and n-1) up to the top of the A/D count range
-                 */
+/*
+ * generate calibration table using the equation
+ *   ccounts = ( mcounts – offset ) / slope
+ * described above; each slope/offset pair in workingPoints[] describes the line
+ * segment running between the _previous_ point and the current one; in addition,
+ * the first row in workingPoints[] doesn't contain a valid slope/offset pair
+ * because there is no previous point before the first one (!), so we stretch the
+ * first line segment (between points 0 and 1) backward to the beginning of the A/D
+ * count range; similarly, since the highest calibration point is probably not right
+ * at the top of the A/D count range, we stretch the highest line segment (between
+ * points n-2 and n-1) up to the top of the A/D count range
+ */
                 unsigned short *const calTable = ( unsigned short* )malloc(CAL_TABLE_WORDS * sizeof(unsigned short));
                 if(calTable != 0) {
                       int measCounts = 0;                 // stretch first line segment to bottom of A/D count range
@@ -275,17 +277,15 @@ PUBLIC_EXTERN unsigned long AIOUSB_ADC_ExternalCal(
                               }
                         }
 
-                      /**
-                       * @note
-                       * optionally return calibration table to caller
-                       */
-                      
+/*
+ * optionally return calibration table to caller
+ */
                       if(returnCalTable != 0)
                           memcpy(returnCalTable, calTable, CAL_TABLE_WORDS * sizeof(unsigned short));
 
-                      /**
-                       * optionally save calibration table to a file
-                       */
+/*
+ * optionally save calibration table to a file
+ */
                       if(saveFileName != 0) {
                             FILE *const calFile = fopen(saveFileName, "w");
                             if(calFile != NULL) {
@@ -299,9 +299,9 @@ PUBLIC_EXTERN unsigned long AIOUSB_ADC_ExternalCal(
                                 result = AIOUSB_ERROR_FILE_NOT_FOUND;
                         }
 
-                      /**
-                       * finally, send calibration table to device
-                       */
+/*
+ * finally, send calibration table to device
+ */
                       result = AIOUSB_ADC_SetCalTable(DeviceIndex, calTable);
 
                       free(calTable);
@@ -314,7 +314,7 @@ PUBLIC_EXTERN unsigned long AIOUSB_ADC_ExternalCal(
         result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
 
     return result;
-}
+}       // AIOUSB_ADC_ExternalCal()
 
 
 
