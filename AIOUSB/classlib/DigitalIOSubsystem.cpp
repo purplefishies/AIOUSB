@@ -261,16 +261,14 @@ DigitalIOSubsystem &DigitalIOSubsystem::getConfiguration( BoolArray *tristates, 
  */
 
 bool DigitalIOSubsystem::read( int channel ) {
-	if(
-		channel < 0
-		|| channel >= numChannels
-	)
-		throw IllegalArgumentException( "Invalid channel" );
-        int result = DIO_Read1( getDeviceIndex(), channel );
-	if( result < AIOUSB_SUCCESS )
-		throw OperationFailedException( result );
-	return (result != 0);
-}	// DigitalIOSubsystem::read()
+    if( channel < 0 || channel >= numChannels ) 
+        throw IllegalArgumentException( "Invalid channel" );
+    int byteValue = 0;
+    int result = DIO_Read1( getDeviceIndex(), channel , &byteValue );
+    if( result < AIOUSB_SUCCESS )
+        throw OperationFailedException( result );
+    return (byteValue != 0);
+}
 
 /**
  * Reads multiple digital input channels.

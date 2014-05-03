@@ -4,6 +4,7 @@
 %include "carrays.i"
 
 %pointer_functions( unsigned long,  ulp );
+%pointer_functions( int,  ip );
 %pointer_functions( unsigned short, usp );
 %pointer_functions( double , dp );
 %pointer_functions( char , cp );

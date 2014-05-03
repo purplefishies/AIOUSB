@@ -76,11 +76,11 @@ DIOBuf *NewDIOBufFromBinStr( const char *ary ) {
 /*----------------------------------------------------------------------------*/
 DIOBuf *DIOBufReplaceString( DIOBuf *buf, char *ary, int size_array ) 
 { 
-  if (!buf  ) { 
-    /* buf = NewDIOBuf( size_array*8 ); */
-  } else if ( !DIOBufResize( buf, size_array*8 )  ) 
-    return NULL;
-  _copy_to_buf( buf, ary, size_array );
+  if ( buf  ) { 
+    !DIOBufResize( buf, size_array*8 );
+    _copy_to_buf( buf, ary, size_array );
+  }
+
   return buf;
 }
 /*----------------------------------------------------------------------------*/
@@ -257,6 +257,7 @@ TEST(DIOBuf, Toggle_interview ) {
     tmp[100] = '\0';
     EXPECT_STREQ( DIOBufToString(buf), tmp );
     DeleteDIOBuf(buf);
+    free(tmp);
 }
 
 

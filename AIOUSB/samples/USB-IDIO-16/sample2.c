@@ -79,8 +79,7 @@ int main(int argc, char *argv[] )
     AIOUSB_Reset( deviceIndex );
     AIOUSB_SetCommTimeout( deviceIndex, timeout );
     unsigned outData = 15;
-    /* outData = new_usp() */
-    /* usp_assign(outData, 15 ); */
+
     DIO_WriteAll( deviceIndex, &outData );
 
     if( 1 ) { 
@@ -99,27 +98,31 @@ int main(int argc, char *argv[] )
     DIO_WriteAll(deviceIndex, &outData );
 
     DIOBuf *buf= NewDIOBuf(0);
-    char cdat;
+    int cdat;
     DIO_ReadAll( deviceIndex, buf );
     printf("Binary was: %s\n", DIOBufToString( buf ) );
     printf("Hex was: %s\n", DIOBufToHex( buf ) );
-    cdat = DIO_Read8( deviceIndex, 0 );
+    DIO_Read8( deviceIndex, 0, &cdat  );
     printf("Single data was : hex:%x, int:%d\n", (int)cdat, (int)cdat );
-    cdat = DIO_Read8( deviceIndex, 1 );
+    DIO_Read8( deviceIndex, 1, &cdat  );
     printf("Single data was : hex:%x, int:%d\n", (int)cdat, (int)cdat );
-    cdat = DIO_Read8( deviceIndex, 2 );
+    DIO_Read8( deviceIndex, 2, &cdat  );
     printf("Single data was : hex:%x, int:%d\n", (int)cdat, (int)cdat );
-    cdat = DIO_Read8( deviceIndex, 3  );
+    DIO_Read8( deviceIndex, 3, &cdat   );
     printf("Single data was : hex:%x, int:%d\n", (int)cdat, (int)cdat );
 
-    for ( int i = 7 ; i >= 0 ; i-- ) { 
-      printf("%d", DIO_Read1(deviceIndex,i));
+    int val=0;
+    for ( int i = 7 ; i >= 0 ; i-- ) {
+      DIO_Read1(deviceIndex,i, &val);
+      printf("%d", val );
     }
     printf("\n-----\n");
     for ( int i = 15 ; i >= 8 ; i -- ) {
-      printf("%d", (int)DIO_Read1(deviceIndex,i));
+      DIO_Read1(deviceIndex,i, &val);
+      printf("%d", val );
     }
     printf("\n");
-
+    AIOUSB_Exit();
+    DeleteDIOBuf( buf );
 }
 

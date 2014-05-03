@@ -523,16 +523,15 @@ PUBLIC_EXTERN unsigned long DIO_ReadAllToCharStr(
     return result;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN int DIO_Read8(
-                             unsigned long DeviceIndex,
-                             unsigned long ByteIndex
-                             ) {
+PUBLIC_EXTERN unsigned long DIO_Read8(
+                                      unsigned long DeviceIndex,
+                                      unsigned long ByteIndex,
+                                      int *pdat
+                                      ) {
     unsigned long result = AIOUSB_SUCCESS;
     DeviceDescriptor *deviceDesc = NULL;
     DIOBuf *readBuffer;
-    int pdat = -(int)AIOUSB_ERROR_LIBUSB;
     if ( !_dio_get_device_handle( DeviceIndex, &deviceDesc,  &result ) || result != AIOUSB_SUCCESS ) {
-        pdat = -(int)result;
         goto out_DIO_Read8;
     }
 
@@ -540,33 +539,34 @@ PUBLIC_EXTERN int DIO_Read8(
     readBuffer = NewDIOBuf( deviceDesc->DIOBytes );
     if ( !readBuffer ) {
         result =  AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
-        pdat = -(int)result;
         goto out_DIO_Read8;
     }
     
     if ( (result = DIO_ReadAll(DeviceIndex, readBuffer)) == AIOUSB_SUCCESS ) {
         char *tmp = DIOBufToBinary( readBuffer ); 
-        pdat = tmp[ByteIndex];
+        *pdat = (int)tmp[ByteIndex];
     }
 
-    free(readBuffer);
+    DeleteDIOBuf( readBuffer );
 
  out_DIO_Read8:
     AIOUSB_UnLock();
-    return pdat;
+    return result;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN AIOUSB_BOOL DIO_Read1(
-                                    unsigned long DeviceIndex,
-                                    unsigned long BitIndex
-                                    ) {
+PUBLIC_EXTERN unsigned long DIO_Read1(
+                                      unsigned long DeviceIndex,
+                                      unsigned long BitIndex,
+                                      int *bit
+                                      ) {
     char result = AIOUSB_SUCCESS;
-    if((result = DIO_Read8(DeviceIndex, BitIndex / BITS_PER_BYTE )) >= AIOUSB_SUCCESS) {
+    int value = 0;
+    if((result = DIO_Read8(DeviceIndex, BitIndex / BITS_PER_BYTE, &value )) >= AIOUSB_SUCCESS) {
         const unsigned char bitMask = 1 << (( int )BitIndex % BITS_PER_BYTE);
-        if((result & bitMask) != 0)
-          result = AIOUSB_TRUE;
+        if((value & bitMask) != 0)
+          *bit = AIOUSB_TRUE;
         else
-          result = AIOUSB_FALSE;
+          *bit = AIOUSB_FALSE;
     }
     return result;
 }

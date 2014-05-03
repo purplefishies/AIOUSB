@@ -66,15 +66,18 @@ PUBLIC_EXTERN unsigned long DIO_ReadAllToCharStr(
                                                  char *buf,
                                                  unsigned size
                                                  );
-PUBLIC_EXTERN int  DIO_Read8(
-                             unsigned long DeviceIndex,
-                             unsigned long ByteIndex
-                             );
 
-PUBLIC_EXTERN AIOUSB_BOOL DIO_Read1(
-                                    unsigned long DeviceIndex,
-                                    unsigned long BitIndex
-                                    );
+PUBLIC_EXTERN unsigned long DIO_Read8(
+                                      unsigned long DeviceIndex,
+                                      unsigned long ByteIndex,
+                                      int *pdat
+                                      );
+
+PUBLIC_EXTERN unsigned long DIO_Read1(
+                                      unsigned long DeviceIndex,
+                                      unsigned long BitIndex,
+                                      int *bit
+                                      );
 
 PUBLIC_EXTERN unsigned long DIO_StreamOpen(
                                            unsigned long DeviceIndex,

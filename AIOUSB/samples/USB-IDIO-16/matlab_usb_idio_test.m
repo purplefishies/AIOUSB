@@ -83,7 +83,40 @@ result = calllib('libaiousb','DIO_ReadAll', deviceIndex, readData );
 calllib('libaiousb','DIOBufToString', readData ) 
 result = calllib('libaiousb','DIO_WriteAll', 0, libpointer('uint16', 21605  ) );
 result = calllib('libaiousb','DIO_ReadAll', deviceIndex, readData );
-calllib('libaiousb','DIOBufToString', readData )
-result = calllib('libaiousb','DIO_Read8', deviceIndex, 0 )
-result = calllib('libaiousb','DIO_Read8', deviceIndex, 1 )
+calllib('libaiousb','DIOBufToString', readData );
+val = sprintf('String was: %s', calllib('libaiousb','DIOBufToString',readData));
+disp(val);
+val = sprintf('Binary was: %s', calllib('libaiousb','DIOBufToBinary',readData));
+disp(val);
+val = sprintf('Hex was: %s', calllib('libaiousb','DIOBufToHex',readData ));
+disp(val);
+
+
+tmp = 0;
+[retcode,tmp] = calllib('libaiousb', 'DIO_Read8', deviceIndex,0, tmp );
+val = sprintf('read8 = %d\n', tmp );
+disp(val);
+[retcode,tmp] = calllib('libaiousb', 'DIO_Read8', deviceIndex,1, tmp );
+val = sprintf('read8 = %d\n', tmp );
+disp(val);
+[retcode,tmp] = calllib('libaiousb', 'DIO_Read8', deviceIndex,2, tmp );
+val = sprintf('read8 = %d\n', tmp );
+disp(val);
+[retcode,tmp] = calllib('libaiousb', 'DIO_Read8', deviceIndex,3, tmp );
+val = sprintf('read8 = %d\n', tmp );
+disp(val);
+disp('-----');
+val = '';
+for i=7:-1:0
+    [ret,tmp] = calllib('libaiousb', 'DIO_Read1',deviceIndex,i,tmp );
+    val = strcat(val, sprintf('%d',tmp));
+end
+disp(val);
+val = '';
+disp('-----');
+for i=15:-1:8
+    [ret,tmp] = calllib('libaiousb', 'DIO_Read1',deviceIndex,i,tmp );
+    val = strcat(val, sprintf('%d',tmp));
+end
+disp(val);
 
