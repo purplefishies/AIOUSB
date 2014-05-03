@@ -82,6 +82,5 @@ disp(val);
 %     pause(1);    
 % end
 
-result = calllib('libaiousb','DIO_ReadAll', deviceIndex, readData );
 
 exit();
