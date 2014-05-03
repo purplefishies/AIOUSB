@@ -266,11 +266,10 @@ bool DigitalIOSubsystem::read( int channel ) {
 		|| channel >= numChannels
 	)
 		throw IllegalArgumentException( "Invalid channel" );
-	unsigned char byteValue;
-	const int result = DIO_Read1( getDeviceIndex(), channel, (char *)&byteValue );
-	if( result != AIOUSB_SUCCESS )
+        int result = DIO_Read1( getDeviceIndex(), channel );
+	if( result < AIOUSB_SUCCESS )
 		throw OperationFailedException( result );
-	return byteValue != 0;
+	return (result != 0);
 }	// DigitalIOSubsystem::read()
 
 /**
