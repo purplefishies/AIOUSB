@@ -51,14 +51,13 @@ DIO_WriteAll( deviceIndex, outData );
 readData = new_ulp();
 ulp_assign(readData ,0);
 
-
 for i=0:255
-    val=sprintf('Sending %d\n',i);
+    val=sprintf('Sending %d',i);
     ulp_assign(outData, i );
     result = DIO_WriteAll( deviceIndex, outData );
     ## result = calllib('libaiousb','DIO_WriteAll', 0, libpointer('uint16',i) );
     ## printf(val);
-    disp(val);
+    ## disp(val);
     pause(0.04);
 end
 
@@ -66,8 +65,7 @@ for i=0:stopval
     val=sprintf('Sending %d',2^i);
     ulp_assign(outData, 2^i );
     DIO_WriteAll(deviceIndex, outData );
-    ## result = calllib('libaiousb','DIO_WriteAll', 0, libpointer('uint16',2^i) );
-    disp(val);
+    ## disp(val);
     pause(1);    
 end
 
@@ -80,4 +78,19 @@ val = sprintf("Binary was: %s", DIOBufToString(buf) );
 disp(val);
 val = sprintf("Hex was: %s", DIOBufToHex(buf) );
 disp(val)
+printf("read8 = %d\n", DIO_Read8(deviceIndex,0));
+printf("read8 = %d\n", DIO_Read8(deviceIndex,1));
+printf("read8 = %d\n", DIO_Read8(deviceIndex,2));
+printf("read8 = %d\n", DIO_Read8(deviceIndex,3));
+printf("-----\n");
+for i=7:-1:0
+        val = DIO_Read1(deviceIndex,i);
+        printf("%d",val);
+end
+printf("\n-----\n");
+for i=15:-1:8
+        val = DIO_Read1(deviceIndex,i);
+        printf("%d",val);
+end
+
 

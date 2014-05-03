@@ -60,23 +60,22 @@ PUBLIC_EXTERN unsigned long DIO_Write1(
 PUBLIC_EXTERN unsigned long DIO_ReadAll(
                                         unsigned long DeviceIndex,
                                         DIOBuf *buf
-                                        /* void *Buffer */
                                         );
 PUBLIC_EXTERN unsigned long DIO_ReadAllToCharStr(
                                                  unsigned long DeviceIndex,
                                                  char *buf,
                                                  unsigned size
                                                  );
-PUBLIC_EXTERN unsigned long DIO_Read8(
-                                      unsigned long DeviceIndex,
-                                      unsigned long ByteIndex,
-                                      char *pBuffer
-                                      );
-PUBLIC_EXTERN unsigned long DIO_Read1(
-                                      unsigned long DeviceIndex,
-                                      unsigned long BitIndex,
-                                      char *pBuffer
-                                      );
+PUBLIC_EXTERN int  DIO_Read8(
+                             unsigned long DeviceIndex,
+                             unsigned long ByteIndex
+                             );
+
+PUBLIC_EXTERN AIOUSB_BOOL DIO_Read1(
+                                    unsigned long DeviceIndex,
+                                    unsigned long BitIndex
+                                    );
+
 PUBLIC_EXTERN unsigned long DIO_StreamOpen(
                                            unsigned long DeviceIndex,
                                            unsigned long bIsRead

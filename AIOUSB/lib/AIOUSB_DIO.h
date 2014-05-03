@@ -43,7 +43,6 @@ PUBLIC_EXTERN unsigned long DIO_ConfigurationQuery(
 PUBLIC_EXTERN unsigned long DIO_WriteAll(
                                          unsigned long DeviceIndex,
                                          void *pData
-                                         /* DIOBuf *data */
                                          );
 
 PUBLIC_EXTERN unsigned long DIO_Write8(
@@ -71,17 +70,15 @@ PUBLIC_EXTERN unsigned long DIO_ReadAllToCharStr(
                                                  unsigned size
                                                  );
 
-PUBLIC_EXTERN unsigned long DIO_Read8(
-                                      unsigned long DeviceIndex,
-                                      unsigned long ByteIndex,
-                                      char *pBuffer
-                                      );
+PUBLIC_EXTERN int DIO_Read8(
+                            unsigned long DeviceIndex,
+                            unsigned long ByteIndex
+                            );
 
-PUBLIC_EXTERN unsigned long DIO_Read1(
-                                      unsigned long DeviceIndex,
-                                      unsigned long BitIndex,
-                                      char *pBuffer
-                                      );
+PUBLIC_EXTERN AIOUSB_BOOL DIO_Read1(
+                                    unsigned long DeviceIndex,
+                                    unsigned long BitIndex
+                                    );
 
 PUBLIC_EXTERN unsigned long DIO_StreamOpen(
                                            unsigned long DeviceIndex,

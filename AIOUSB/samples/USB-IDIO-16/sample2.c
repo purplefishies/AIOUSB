@@ -82,10 +82,8 @@ int main(int argc, char *argv[] )
     /* outData = new_usp() */
     /* usp_assign(outData, 15 ); */
     DIO_WriteAll( deviceIndex, &outData );
-    /* unsigned readData; */
-    /* readData = new_usp(); */
-    /* usp_assign(readData ,0); */
-    if( 0 ) { 
+
+    if( 1 ) { 
       for ( outData = 0; outData < 255; outData ++ ) {
         DIO_WriteAll( deviceIndex, &outData );
         usleep(40000);
@@ -97,18 +95,31 @@ int main(int argc, char *argv[] )
         sleep(1);
       }
     }
+    outData = 0x5465;
+    DIO_WriteAll(deviceIndex, &outData );
+
     DIOBuf *buf= NewDIOBuf(0);
     char cdat;
     DIO_ReadAll( deviceIndex, buf );
-    printf("Buf: %s\n", DIOBufToString( buf ) );
-    DIO_Read8( deviceIndex, 0, &cdat );
-    printf("Single data was : %x\n", cdat );
-    DIO_Read8( deviceIndex, 1, &cdat );
-    printf("Single data was : %x\n", cdat );
-    DIO_Read8( deviceIndex, 2, &cdat );
-    printf("Single data was : %x\n", cdat );
-    DIO_Read8( deviceIndex, 3, &cdat );
-    printf("Single data was : %x\n", cdat );
+    printf("Binary was: %s\n", DIOBufToString( buf ) );
+    printf("Hex was: %s\n", DIOBufToHex( buf ) );
+    cdat = DIO_Read8( deviceIndex, 0 );
+    printf("Single data was : hex:%x, int:%d\n", (int)cdat, (int)cdat );
+    cdat = DIO_Read8( deviceIndex, 1 );
+    printf("Single data was : hex:%x, int:%d\n", (int)cdat, (int)cdat );
+    cdat = DIO_Read8( deviceIndex, 2 );
+    printf("Single data was : hex:%x, int:%d\n", (int)cdat, (int)cdat );
+    cdat = DIO_Read8( deviceIndex, 3  );
+    printf("Single data was : hex:%x, int:%d\n", (int)cdat, (int)cdat );
+
+    for ( int i = 7 ; i >= 0 ; i-- ) { 
+      printf("%d", DIO_Read1(deviceIndex,i));
+    }
+    printf("\n-----\n");
+    for ( int i = 15 ; i >= 8 ; i -- ) {
+      printf("%d", (int)DIO_Read1(deviceIndex,i));
+    }
+    printf("\n");
 
 }
 

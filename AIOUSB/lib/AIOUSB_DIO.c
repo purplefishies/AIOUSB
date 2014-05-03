@@ -523,15 +523,16 @@ PUBLIC_EXTERN unsigned long DIO_ReadAllToCharStr(
     return result;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN unsigned long DIO_Read8(
-                                      unsigned long DeviceIndex,
-                                      unsigned long ByteIndex,
-                                      char *pBuffer
-                                    ) {
+PUBLIC_EXTERN int DIO_Read8(
+                             unsigned long DeviceIndex,
+                             unsigned long ByteIndex
+                             ) {
     unsigned long result = AIOUSB_SUCCESS;
     DeviceDescriptor *deviceDesc = NULL;
     DIOBuf *readBuffer;
+    int pdat = -(int)AIOUSB_ERROR_LIBUSB;
     if ( !_dio_get_device_handle( DeviceIndex, &deviceDesc,  &result ) || result != AIOUSB_SUCCESS ) {
+        pdat = -(int)result;
         goto out_DIO_Read8;
     }
 
@@ -539,36 +540,35 @@ PUBLIC_EXTERN unsigned long DIO_Read8(
     readBuffer = NewDIOBuf( deviceDesc->DIOBytes );
     if ( !readBuffer ) {
         result =  AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+        pdat = -(int)result;
         goto out_DIO_Read8;
     }
     
     if ( (result = DIO_ReadAll(DeviceIndex, readBuffer)) == AIOUSB_SUCCESS ) {
-        const char *tmp = DIOBufToBinary( readBuffer ); 
-        *pBuffer = tmp[ByteIndex];
+        char *tmp = DIOBufToBinary( readBuffer ); 
+        pdat = tmp[ByteIndex];
     }
 
     free(readBuffer);
 
  out_DIO_Read8:
     AIOUSB_UnLock();
-    return result;
+    return pdat;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN unsigned long DIO_Read1(
+PUBLIC_EXTERN AIOUSB_BOOL DIO_Read1(
                                     unsigned long DeviceIndex,
-                                    unsigned long BitIndex,
-                                    char *pBuffer
+                                    unsigned long BitIndex
                                     ) {
-    unsigned long result = AIOUSB_SUCCESS;
-    char readBuffer;
-    if((result = DIO_Read8(DeviceIndex, BitIndex / BITS_PER_BYTE, &readBuffer)) == AIOUSB_SUCCESS) {
+    char result = AIOUSB_SUCCESS;
+    if((result = DIO_Read8(DeviceIndex, BitIndex / BITS_PER_BYTE )) >= AIOUSB_SUCCESS) {
         const unsigned char bitMask = 1 << (( int )BitIndex % BITS_PER_BYTE);
-        if((readBuffer & bitMask) != 0)
-          *pBuffer = AIOUSB_TRUE;
+        if((result & bitMask) != 0)
+          result = AIOUSB_TRUE;
         else
-          *pBuffer = AIOUSB_FALSE;
+          result = AIOUSB_FALSE;
     }
-    return -AIOUSB_ERROR_LIBUSB;
+    return result;
 }
 /*----------------------------------------------------------------------------*/
 PUBLIC_EXTERN unsigned long DIO_StreamOpen(
