@@ -14,6 +14,43 @@
 #include <sys/time.h>
 #include <time.h>
 #include "TestCaseSetup.h"
+#include <time.h>
+#include <sys/time.h>
+
+#ifdef __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
+// struct timespec ts;
+
+// #ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
+// clock_serv_t cclock;
+// mach_timespec_t mts;
+// host_get_clock_service( mach_host_self(), CALENDAR_CLOCK, &cclock );
+// clock_get_time(cclock, &mts);
+// mach_port_deallocate(mach_task_self(), cclock);
+// tv.tv_sec = mts.tv_sec;
+// tv.tv_nsec = mts.tv_nsec;
+// #else
+// clock_gettime(CLOCK_REALTIME, &tv);
+// #endif
+
+#ifdef __MACH__
+#include <sys/time.h>
+//clock_gettime is not implemented on OSX
+#define CLOCK_REALTIME 0 
+#define CLOCK_MONOTONIC 0 
+
+int clock_gettime(int /*clk_id*/, struct timespec* t) {
+    struct timeval now;
+    int rv = gettimeofday(&now, NULL);
+    if (rv) return rv;
+    t->tv_sec  = now.tv_sec;
+    t->tv_nsec = now.tv_usec * 1000;
+    return 0;
+}
+#endif
+
 
 using namespace AIOUSB;
 
@@ -184,7 +221,18 @@ char *get_time ()
 
   /* Obtain the time of day, and convert it to a tm struct. */ 
   //gettimeofday (&tv, NULL); 
-  clock_gettime( CLOCK_REALTIME, &tv );
+// #ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
+//   clock_serv_t cclock;
+//   mach_timespec_t mts;
+//   host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+//  clock_get_time(cclock, &mts);
+//  mach_port_deallocate(mach_task_self(), cclock);
+//  tv.tv_sec = mts.tv_sec;
+//  tv.tv_nsec = mts.tv_nsec;
+// #else
+ clock_gettime(CLOCK_REALTIME, &tv);
+// #endif
+  // clock_gettime( CLOCK_REALTIME, &tv );
   ptm = localtime (&tv.tv_sec); 
   /* Format the date and time, down to a single second. */ 
   strftime(buf, 40, "%Y-%m-%d %H:%M:%S", ptm); 
