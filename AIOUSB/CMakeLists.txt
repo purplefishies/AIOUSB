@@ -85,7 +85,7 @@ include_directories(classlib)
 
 
 if ( SWIG_FOUND AND BUILD_WRAPPERS ) 
-  FOREACH( language perl java python )
+  FOREACH( language perl python )
     MESSAGE(STATUS "Adding wrapper for ${language}" )
     add_subdirectory("lib/wrappers/${language}")
   ENDFOREACH( language )

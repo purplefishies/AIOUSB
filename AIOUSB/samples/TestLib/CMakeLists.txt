@@ -24,6 +24,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" )
 
 ADD_LIBRARY( TestCaseSetup SHARED ${CMAKE_CURRENT_SOURCE_DIR}/TestCaseSetup.cpp )
+TARGET_link_libraries( TestCaseSetup  aiousb aiousbcpp )
+
 
 SET( AIOUSB_TESTCASELIB_DIR ${CMAKE_CURRENT_SOURCE_DIR} )
 
