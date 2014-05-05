@@ -9,7 +9,10 @@ MESSAGE( STATUS "${CMAKE_SOURCE_DIR}" )
 SET( THIS_PROJECT "OFF" )
 
 OPTION(BUILD_SAMPLES "Build the AIOUSB Samples" ON)
-OPTION(BUILD_WRAPPERS "Build the Wrapper Interfaces" ON)
+OPTION(BUILD_PERL "Build the Perl Interfaces" OFF)
+OPTION(BUILD_PYTHON "Build the Python Interfaces" OFF)
+OPTION(BUILD_JAVA "Build the Java Interfaces" OFF)
+
 
 
 
@@ -84,12 +87,24 @@ add_subdirectory(classlib)
 include_directories(classlib)
 
 
-if ( SWIG_FOUND AND BUILD_WRAPPERS ) 
-  FOREACH( language perl python )
-    MESSAGE(STATUS "Adding wrapper for ${language}" )
-    add_subdirectory("lib/wrappers/${language}")
-  ENDFOREACH( language )
-endif( SWIG_FOUND AND BUILD_WRAPPERS )
+if ( SWIG_FOUND ) 
+if ( BUILD_PYTHON )
+    MESSAGE(STATUS "Adding wrapper for python" )
+    add_subdirectory("lib/wrappers/python")
+endif (BUILD_PYTHON)
+if ( BUILD_PERL )
+    MESSAGE(STATUS "Adding wrapper for Perl" )
+    add_subdirectory("lib/wrappers/perl")
+endif (BUILD_PERL)
+if ( BUILD_JAVA )
+    MESSAGE(STATUS "Adding wrapper for Java" )
+    add_subdirectory("lib/wrappers/java")
+endif (BUILD_JAVA)
+if ( BUILD_RUBY )
+    MESSAGE(STATUS "Adding wrapper for Ruby" )
+    add_subdirectory("lib/wrappers/ruby")
+endif (BUILD_RUBY)
+endif( SWIG_FOUND )
 
 
 add_subdirectory(samples/TestLib)
