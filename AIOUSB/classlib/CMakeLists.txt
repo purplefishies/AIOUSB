@@ -95,8 +95,8 @@ add_library( classaiousbdbg ${CLASSAIOUSBDBG_LIBRARY_TYPE} ${classaiousbcppdbg_f
 add_dependencies( classaiousb  hppaiousb_copies classaiousbcpp_copies classaiousbcppdbg_copies )
 add_dependencies( classaiousbdbg hppaiousb_copies classaiousbcpp_copies classaiousbcppdbg_copies )
 
-target_link_libraries( classaiousb ${CORELIBS} ${EXTRA_LIBS} aiousb )
-target_link_libraries( classaiousbdbg ${CORELIBS} ${EXTRA_LIBS} aiousb )
+target_link_libraries( classaiousb ${CORELIBS} ${EXTRA_LIBS} aiousb aiousbcpp )
+target_link_libraries( classaiousbdbg ${CORELIBS} ${EXTRA_LIBS} aiousbdbg aiousbcppdbg )
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Installation targets
