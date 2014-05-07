@@ -141,9 +141,6 @@ if( GTESTTAP_FOUND )
 endif( GTESTTAP_FOUND )
 
 
-# macro ( build_selftest_c_file project c_file  cflags link_libraries )
-
-
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Installation targets
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

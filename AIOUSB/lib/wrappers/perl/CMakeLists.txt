@@ -2,12 +2,9 @@
 # CMAKE file for building Perl wrapper.
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-MESSAGE(STATUS "Rules for building wrapper scripts")
-
-project( ruby_swig )
+project( perl_swig )
 
 # Required that we have BUILD_AIOUSB_SHARED ON
-
 
 FIND_PACKAGE( SWIG REQUIRED )
 INCLUDE(${SWIG_USE_FILE})
@@ -18,13 +15,31 @@ INCLUDE(${SWIG_USE_FILE})
 FIND_PACKAGE( Perl )
 FIND_PACKAGE( PerlLibs )
 INCLUDE_DIRECTORIES( ${PERL_INCLUDE_PATH} ${PERL_ARCHLIB}/Core )
-MESSAGE(STATUS "Using dirs: ${PERL_INCLUDE_PATH} ${PERL_ARCHLIB}/Core " )
-set(CMAKE_C_FLAGS " -D_GNU_SOURCE ")
+#MESSAGE(STATUS "Using dirs: ${PERL_INCLUDE_PATH} ${PERL_ARCHLIB}/Core " )
+SET(CMAKE_C_FLAGS " -D_GNU_SOURCE ")
 SET_SOURCE_FILES_PROPERTIES(AIOUSB.i PROPERTIES CPLUSPLUS OFF)
 SET_SOURCE_FILES_PROPERTIES(AIOUSB.i PROPERTIES SWIG_FLAGS "-I${AIOUSB_INCLUDE_DIR} -includeall ")
- # -lusb-1.0 -lpthread -laiousbdbg  -laiousbcppdbg 
-SWIG_ADD_MODULE(AIOUSBPerl perl AIOUSB.i )
-SET_TARGET_PROPERTIES(AIOUSBPerl PROPERTIES OUTPUT_NAME "AIOUSB" ) 
 
+SWIG_ADD_MODULE(AIOUSBPerl perl AIOUSB.i )
 SWIG_LINK_LIBRARIES(AIOUSBPerl ${PERL_LIBRARY} aiousb )
+
+ADD_CUSTOM_COMMAND( TARGET ${SWIG_MODULE_AIOUSBPerl_REAL_NAME}
+  POST_BUILD
+  COMMAND ${CMAKE_COMMAND}
+  ARGS  -E copy "${CMAKE_SHARED_LIBRARY_PREFIX}AIOUSBPerl${CMAKE_SHARED_LIBRARY_SUFFIX}" AIOUSB${CMAKE_SHARED_LIBRARY_SUFFIX}
+  COMMENT "Copying Perl files to correct naming convention"
+)
+#
+# Strip off the lib at the beginning
+#
+STRING(REGEX REPLACE "^lib" "" perl_swig_lib ${SWIG_MODULE_AIOUSBPerl_REAL_NAME})
+
+OPTION( INSTALL_PERL "Build the AIOUSB Samples" ON )
+IF(PERL_PREFIX)
+  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/AIOUSB.so DESTINATION ${PERL_ARCHLIB}/auto/AIOUSB/ )
+  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/AIOUSB.pm DESTINATION ${PERL_ARCHLIB} )
+ENDIF(PERL_PREFIX)
+#Files found in blib/arch: installing files in blib/lib into architecture dependent library tree
+#Installing /usr/local/lib/perl/5.14.2/AIOUSB.pm
+#Appending installation info to /usr/lib/perl/5.14/perllocal.pod
 
