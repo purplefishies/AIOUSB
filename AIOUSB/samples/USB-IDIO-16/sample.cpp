@@ -110,36 +110,36 @@ int main( int argc, char *argv[] )
             cout << "In the following demonstrations, you should hear the relays click\n"
                  << "and see the LED on the device blink.\n";
             cout << "  CLosing relays:" << flush << dec;
+            if( 0 ) { 
 
-
-            for( int channel = 0; channel < numOutputChannels; channel++ ) {
+              for( int channel = 0; channel < numOutputChannels; channel++ ) {
                 cout << " " << channel << flush;
                 device.dio().write( channel, false );	// close relay
                 usleep( 100000 );
-            }
+              }
 
-            cout << endl << "  Opening relays:" << flush;
+              cout << endl << "  Opening relays:" << flush;
 
-            for( int channel = 0; channel < numOutputChannels; channel++ ) {
+              for( int channel = 0; channel < numOutputChannels; channel++ ) {
                 cout << " " << channel << flush;
                 device.dio().write( channel, true );	// open relay
                 usleep( 100000 );
-            }
-            cout << endl;
+              }
+              cout << endl;
 
-            /*
-             * demonstrate writing outputs as a group
-             */
-            cout << "Closing all relays ... " << flush;
-            values.assign( values.size(), false );	// close all relays
-            device.dio().write( 0, values );
-            cout << "successful" << endl;
-            sleep( 2 );
-            cout << "Opening all relays ... " << flush;
-            values.assign( values.size(), true );	// open all relays
-            device.dio().write( 0, values );
-            cout << "successful" << endl;
-
+              /*
+               * demonstrate writing outputs as a group
+               */
+              cout << "Closing all relays ... " << flush;
+              values.assign( values.size(), false );	// close all relays
+              device.dio().write( 0, values );
+              cout << "successful" << endl;
+              sleep( 2 );
+              cout << "Opening all relays ... " << flush;
+              values.assign( values.size(), true );	// open all relays
+              device.dio().write( 0, values );
+              cout << "successful" << endl;
+            } 
             /*
              * demonstrate reading inputs individually
              */

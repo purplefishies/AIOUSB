@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <math.h>
+#include <time.h>
 
 int main(int argc, char *argv[] )
 {
@@ -81,17 +82,25 @@ int main(int argc, char *argv[] )
     unsigned outData = 15;
 
     DIO_WriteAll( deviceIndex, &outData );
-
-    if( 1 ) { 
-      for ( outData = 0; outData < 255; outData ++ ) {
-        DIO_WriteAll( deviceIndex, &outData );
-        usleep(40000);
-      }
+    /* gettimeofday(struct timeval *tv, struct timezone *tz) */
+    struct timeval start;
+    struct timeval now;
+    for( int i = 0; i < 50; i ++ ) { 
+      int tot = 0;
+      gettimeofday( &start, NULL ) ;
+      if( 1 ) { 
+        for ( outData = 0; outData < 65535; outData ++  ) {
+          DIO_WriteAll( deviceIndex, &outData );
+          tot ++;
+        }
   
-      for ( outData = 0; outData < stopval; outData ++ ) {
-        unsigned output =  (int)pow(2,(double)outData);
-        DIO_WriteAll( deviceIndex, &output );
-        sleep(1);
+        for ( outData = 0; outData < stopval; outData ++ , tot ++ ) {
+          unsigned output =  (int)pow(2,(double)outData);
+          DIO_WriteAll( deviceIndex, &output );
+          tot++;
+        }
+        gettimeofday( &now, NULL ) ;
+        printf("%d: num=%d delta=%ld\n", i, tot, (now.tv_usec - start.tv_usec ) + (now.tv_sec - start.tv_sec)*1000000 );
       }
     }
     outData = 0x5465;
