@@ -89,11 +89,11 @@ val=sprintf('Completed in seconds %d\nCount per is %f',stop,stop/ ...
 disp(val)
 val=sprintf('Mean per %d is %f', num_per_bin, mean(diffvals));
 disp(val);
-val=sprintf('Var per %d is %f', num_per_bin,  sqrt(var(diffvals)));
+val=sprintf('Stdev per %d is %f', num_per_bin,  sqrt(var(diffvals)));
 disp(val);
 val=sprintf('Mean per call is %f', mean(diffvals/num_per_bin));
 disp(val);
-val=sprintf('Var per call is %f', sqrt(var(diffvals/num_per_bin)));
+val=sprintf('Stdev per call is %f', sqrt(var(diffvals/num_per_bin)));
 disp(val);
 val=sprintf('Max per call is %f', max(diffvals/num_per_bin));
 disp(val);
