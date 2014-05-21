@@ -9,8 +9,8 @@
 
 #include "AIOUSB_Core.h"
 #include "DIOBuf.h"
+#include "AIOChannelMask.h"
 #include "AIODataTypes.h"
-
 #include <arpa/inet.h>
 #include <assert.h>
 #include <math.h>
@@ -24,9 +24,17 @@ namespace AIOUSB
 PUBLIC_EXTERN unsigned long DIO_Configure(
                                           unsigned long DeviceIndex,
                                           unsigned char bTristate,
-                                          void *pOutMask,
-                                          void *pData
+                                          AIOChannelMask *mask,
+                                          DIOBuf *buf
                                           );
+
+PUBLIC_EXTERN unsigned long DIO_ConfigureRaw(
+                                             unsigned long DeviceIndex,
+                                             unsigned char bTristate,
+                                             void *pOutMask,
+                                             void *pData
+                                             );
+
 PUBLIC_EXTERN unsigned long DIO_ConfigureEx( 
                                             unsigned long DeviceIndex, 
                                             void *pOutMask, 

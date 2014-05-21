@@ -472,8 +472,7 @@ CREATE_ENUM_W_START( ADGainCode, 0,
                      AUR_ADC_GET_CONFIG                      = 0xD2
                      )
 
-
-
+#undef BITS_PER_BYTE
 enum {
     BITS_PER_BYTE                 = 8,
     AI_16_MAX_COUNTS              = 65535,

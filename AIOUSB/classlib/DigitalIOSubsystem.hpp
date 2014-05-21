@@ -10,7 +10,7 @@
 #if ! defined( DigitalIOSubsystem_hpp )
 #define DigitalIOSubsystem_hpp
 
-
+#include "AIOTypes.h"
 #include <DeviceSubsystem.hpp>
 
 
@@ -31,9 +31,6 @@ class DigitalIOSubsystem : public DeviceSubsystem {
 
 
 public:
-	/** Number of bits in one byte. A handy number. */
-	static const int BITS_PER_BYTE = 8;
-
 
 
 protected:

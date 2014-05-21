@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <aiousb.h>
 #include <AIOUSB_Core.h>
+#include "AIOTypes.h"
 
 using namespace AIOUSB;
 
@@ -105,7 +106,6 @@ void TestCaseSetup::doPreSetup()
 void TestCaseSetup::doDACDirectSetup()
 {
   unsigned long result;
-  const int BITS_PER_BYTE = 8;
   const int MAX_DIO_BYTES = 4;
   const int MASK_BYTES = ( MAX_DIO_BYTES + BITS_PER_BYTE - 1 ) / BITS_PER_BYTE;
   const int MAX_NAME_SIZE = 20;
@@ -125,7 +125,7 @@ void TestCaseSetup::doDACDirectSetup()
     writeBuffer[ port ] = 0x11 * ( port + 1 );
   }
 
-  result = DIO_Configure( DeviceIndex, AIOUSB_FALSE , outputMask, writeBuffer );
+  result = DIO_ConfigureRaw( DeviceIndex, AIOUSB_FALSE , outputMask, writeBuffer );
 
   printf( "Writing patterns to devices:" );
   fflush( stdout );				// must do for "real-time" feedback

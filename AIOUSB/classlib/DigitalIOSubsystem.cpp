@@ -10,6 +10,7 @@
 #include "CppCommon.h"
 #include <assert.h>
 #include "AIOUSB_Core.h"
+#include "AIOTypes.h"
 #include "DIOBuf.h"
 #include "USBDeviceManager.hpp"
 #include "DigitalIOSubsystem.hpp"
@@ -149,10 +150,9 @@ DigitalIOSubsystem &DigitalIOSubsystem::configure( bool tristate, const BoolArra
 	)
 		throw IllegalArgumentException( "Invalid outputs or values" );
 	UCharArray outputMask( ( numPorts + BITS_PER_BYTE - 1 ) / BITS_PER_BYTE );
-	const int result = DIO_Configure( getDeviceIndex()
-		, ( unsigned char ) tristate
-		, bitsToBytes( outputMask, 0, outputs ).data()
-		, bitsToBytes( writeValues, 0, values ).data() );
+	const int result = DIO_ConfigureRaw( getDeviceIndex(), ( unsigned char ) tristate , 
+                                             bitsToBytes( outputMask, 0, outputs ).data() ,
+                                             bitsToBytes( writeValues, 0, values ).data() );
 	if( result != AIOUSB_SUCCESS )
 		throw OperationFailedException( result );
 	return *this;

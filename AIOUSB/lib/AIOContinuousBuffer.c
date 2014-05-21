@@ -105,48 +105,48 @@ PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long Devi
  */
 PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex, unsigned scancounts , unsigned num_channels , AIOUSB_BOOL counts )
 {
-  assert( num_channels > 0 );
-  AIOContinuousBuf *tmp  = (AIOContinuousBuf *)malloc(sizeof(AIOContinuousBuf));
-  tmp->mask              = NewAIOChannelMask( num_channels );
+    assert( num_channels > 0 );
+    AIOContinuousBuf *tmp  = (AIOContinuousBuf *)malloc(sizeof(AIOContinuousBuf));
+    tmp->mask              = NewAIOChannelMask( num_channels );
 
-  if ( num_channels > 32 ) { 
-    char *bitstr = (char *)malloc( num_channels +1 );
-    memset(bitstr, 49, num_channels ); /* Set all to 1s */
-    bitstr[num_channels] = '\0';
-    AIOChannelMask_SetMaskFromStr( tmp->mask, bitstr );
-    free(bitstr);
-  } else {
-    AIOChannelMask_SetMaskFromInt( tmp->mask, (unsigned)-1 >> (BIT_LENGTH(unsigned)-num_channels),0 ); /**< Use all bits for each channel */
-  }
-  tmp->testing      = AIOUSB_FALSE;
-  tmp->size         = num_channels * scancounts;
-  if( counts ) {
-      tmp->buffer = (AIOBufferType *)malloc( tmp->size * sizeof(unsigned short));
-      tmp->bufunitsize = sizeof(unsigned short);
-  } else {
-      tmp->buffer      = (AIOBufferType *)malloc( tmp->size *sizeof(AIOBufferType ));
-      tmp->bufunitsize = sizeof(AIOBufferType);
-  }
-  tmp->basesize     = scancounts;
-  tmp->exitcode     = 0;
-  tmp->usbbuf_size  = 128*512;
+    if ( num_channels > 32 ) { 
+        char *bitstr = (char *)malloc( num_channels +1 );
+        memset(bitstr, 49, num_channels ); /* Set all to 1s */
+        bitstr[num_channels] = '\0';
+        AIOChannelMaskSetMaskFromStr( tmp->mask, bitstr );
+        free(bitstr);
+    } else {
+        AIOChannelMaskSetMaskFromInt( tmp->mask, (unsigned)-1 >> (BIT_LENGTH(unsigned)-num_channels) ); /**< Use all bits for each channel */
+    }
+    tmp->testing      = AIOUSB_FALSE;
+    tmp->size         = num_channels * scancounts;
+    if( counts ) {
+        tmp->buffer = (AIOBufferType *)malloc( tmp->size * sizeof(unsigned short));
+        tmp->bufunitsize = sizeof(unsigned short);
+    } else {
+        tmp->buffer      = (AIOBufferType *)malloc( tmp->size *sizeof(AIOBufferType ));
+        tmp->bufunitsize = sizeof(AIOBufferType);
+    }
+    tmp->basesize     = scancounts;
+    tmp->exitcode     = 0;
+    tmp->usbbuf_size  = 128*512;
 
-  tmp->_read_pos    = 0;
-  tmp->DeviceIndex  = DeviceIndex;
-  tmp->_write_pos   = 0;
-  tmp->status       = NOT_STARTED;
-  tmp->worker       = cont_thread;
-  tmp->hz           = 100000; /**> Default value of 100khz  */
-  tmp->timeout      = 1000;   /**> Default Timeout of 1000us  */
-  tmp->extra        = 0;
-  tmp->tmpbuf       = NULL;
-  tmp->tmpbufsize   = 0;
+    tmp->_read_pos    = 0;
+    tmp->DeviceIndex  = DeviceIndex;
+    tmp->_write_pos   = 0;
+    tmp->status       = NOT_STARTED;
+    tmp->worker       = cont_thread;
+    tmp->hz           = 100000; /**> Default value of 100khz  */
+    tmp->timeout      = 1000;   /**> Default Timeout of 1000us  */
+    tmp->extra        = 0;
+    tmp->tmpbuf       = NULL;
+    tmp->tmpbufsize   = 0;
 #ifdef HAS_PTHREAD
-  tmp->lock = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;   /* Threading mutex Setup */
+    tmp->lock = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;   /* Threading mutex Setup */
 #endif
-  AIOContinuousBuf_SetCallback( tmp , ActualWorkFunction );
+    AIOContinuousBuf_SetCallback( tmp , ActualWorkFunction );
 
-  return tmp;
+    return tmp;
 }
 
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_InitConfiguration(  AIOContinuousBuf *buf ) 
@@ -546,9 +546,14 @@ AIORET_TYPE AIOContinuousBuf_SetChannelMask( AIOContinuousBuf *buf, AIOChannelMa
   return 0;
 }
 
+unsigned AIOContinuousBuf_NumberSignals( AIOContinuousBuf *buf )
+{
+    return AIOChannelMaskNumberSignals(buf->mask );
+}
+
 unsigned AIOContinuousBuf_NumberChannels( AIOContinuousBuf *buf )
 {
-  return AIOChannelMask_NumberChannels(buf->mask );
+    return AIOChannelMaskNumberSignals(buf->mask );
 }
 
 /** 
@@ -2208,9 +2213,10 @@ int main(int argc, char *argv[] )
 
   stress_test_drain_buffer( bufsize );  
 #endif  
+#if 1 
   bufsize = 65536;
   stress_copy_counts( bufsize );
-
+#endif
   /* bulk_transfer_test( bufsize ); */
   /* continuous_stress_test( bufsize ); */
  

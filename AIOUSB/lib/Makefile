@@ -65,6 +65,7 @@ DEBUG_FLAGS	:= -ggdb
 
 LIBS 		:= $(CLIB) $(CDBGLIB) $(CPPLIB) $(CPPDBGLIB)  $(SHCLIB) $(SHCDBGLIB) $(SHCPPLIB) $(SHCPPDBGLIB)
 override CFLAGS	+= -I. -std=gnu99
+TESTFLAGS	:= -g
 SHARED_LIBS	:=  -lusb-1.0 -pthread -lm
 override CXXFLAGS += -D__aiousb_cplusplus
 
@@ -148,10 +149,10 @@ pywrapper:
 # Self testing files
 #
 %_c_test: %.c $(SHCDBGLIB) $(SHCPPDBGLIB)
-	$(CC) $(CFLAGS) $(SELF_TEST_FLAGS) $< -o $@ -L. $(SELF_TEST_LIBS)
+	$(CC) $(TESTFLAGS) $(CFLAGS) $(SELF_TEST_FLAGS) $< -o $@ -L. $(SELF_TEST_LIBS)
 
 %_cpp_test: %.c $(SHCDBGLIB) $(SHCPPDBGLIB)
-	$(CXX) $(SELF_TEST_CXX_FLAGS) DIOBuf.c -o DIOBuf_cpp_test -L. $(SELF_TEST_CXX_LIBS)
+	$(CXX) $(TESTFLAGS) $(SELF_TEST_CXX_FLAGS) DIOBuf.c -o DIOBuf_cpp_test -L. $(SELF_TEST_CXX_LIBS)
 
 mostlyclean:
 	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) 
