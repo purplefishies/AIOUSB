@@ -6,7 +6,6 @@
 #include <assert.h>
 #include <unistd.h>
 
-
 #ifdef __aiousb_cplusplus
 namespace AIOUSB
 {
@@ -33,22 +32,19 @@ AIOChannelMask *NewAIOChannelMaskFromStr( const char *bitfields );
 
 PUBLIC_EXTERN const char *AIOChannelMaskToString( AIOChannelMask *mask );
 PUBLIC_EXTERN const char *AIOChannelMaskToStringAtIndex( AIOChannelMask *obj, unsigned index );
-PUBLIC_EXTERN const char *AIOChannelMaskToStringFromIndex( AIOChannelMask *mask, unsigned index );
 PUBLIC_EXTERN char *AIOChannelMaskGetMask( AIOChannelMask *mask );
 PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskGetMaskAtIndex( AIOChannelMask *mask, char *val, unsigned index );
 PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskNumberChannels( AIOChannelMask *mask );
 PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskNumberSignals( AIOChannelMask *mask );
 PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskGetSize( AIOChannelMask *mask );
 PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskIndices( AIOChannelMask *mask , int *pos);
-PUBLIC_EXTERN AIORET_TYPE AIOChannelMask_NextIndex( AIOChannelMask *mask , int *pos );
+PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskNextIndex( AIOChannelMask *mask , int *pos );
 
 PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskSetMaskFromInt( AIOChannelMask *mask, unsigned field );
 PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskSetMaskAtIndex( AIOChannelMask *mask, char field, unsigned index  );
 PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskSetMaskFromStr( AIOChannelMask *mask, const char *bitfields );
 
 #define BIT_LENGTH(x) ( sizeof(x) * 8 )
-#undef BITS_PER_BYTE
-#define BITS_PER_BYTE 8
 
 #ifdef __aiousb_cplusplus
 }

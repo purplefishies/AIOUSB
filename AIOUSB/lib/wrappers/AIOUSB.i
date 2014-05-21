@@ -21,6 +21,7 @@
 %{
   #include "AIOUSB_Core.h"
   #include "AIOContinuousBuffer.h"
+  #include "AIOChannelMask.h"
   #include "AIOTypes.h"
   #include "AIOUSB_DIO.h"
   #include "DIOBuf.h"
@@ -42,6 +43,7 @@
 %include "aiousb.h"
 %include "AIOUSB_Core.h"
 %include "AIOContinuousBuffer.h"
+%include "AIOChannelMask.h"
 %include "AIOUSB_DIO.h"
 %include "AIOTypes.h"
 %include "DIOBuf.h"
