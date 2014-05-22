@@ -8,9 +8,32 @@
 #
 #/
 
-
 import sys
+import time
 from AIOUSB import *
+
+MAX_DIO_BYTES = 32
+#
+# Simple class for keeping track of deviecs found
+#
+class Device:
+    outputMask = NewAIOChannelMaskFromStr("1111")
+    readBuffer = DIOBuf(MAX_DIO_BYTES )
+    writeBuffer = DIOBuf( MAX_DIO_BYTES )
+    name = ""
+    productID = new_ulp()
+    nameSize = new_ulp()
+    numDIOBytes = new_ulp()
+    numCounters = new_ulp()
+    serialNumber = 0
+    index = 0
+
+    def __init__(self, **kwds):
+        self.__dict__.update(kwds)
+
+
+devices = []                    # Array of our Devices
+number_devices = 1
 
 print """USB-DIO-32 sample program version 1.17, 26 November 2009
 This program demonstrates communicating with %d USB-DIO-32 devices on + 
@@ -22,175 +45,70 @@ result = AIOUSB_Init()
 if result != AIOUSB_SUCCESS:
     sys.exit("Unable to initialize USB devices")
 
+devicesFound = 0
 deviceMask = GetDevices()
-
-AIOUSB_ListDevices();
-
-productId = new_ulp()  
-ulp_assign(productId,0)
-QueryDeviceInfo(0, productId,new_ulp(),"",new_ulp(), new_ulp())
+index = 0
 
 
-while( deviceMask != 0 && devicesFound < DEVICES_REQUIRED ) {
-        if( ( deviceMask & 1 ) != 0 ) {
+AIOUSB_ListDevices()
 
-            device = &deviceTable[ devicesFound ];
-            device->nameSize = MAX_NAME_SIZE;
-            result = QueryDeviceInfo( index, &device->productID,
-                                      &device->nameSize, 
-                                      device->name, 
-                                      &device->numDIOBytes, 
-                                      &device->numCounters 
-                                      );
-            if( result == AIOUSB_SUCCESS ) {
-                if( device->productID == USB_DIO_32 ) { // found a USB-DIO-32
-                    device->index = index;
-                    devicesFound++;
-                }
-            } else
-              printf( "Error '%s' querying device at index %d\n", 
-                      AIOUSB_GetResultCodeAsString( result ), 
-                      index 
-                      );
-        }
-        index++;
-        deviceMask >>= 1;
-    }
+while deviceMask > 0 and len(devices) < number_devices :
+    if (deviceMask & 1 ) != 0:
+        productId = new_ulp()  
+        nameSize= new_ulp()
+        name = ""
+        numDIOBytes = new_ulp()
+        numCounters = new_ulp()
+        QueryDeviceInfo(index , productId, nameSize, name, numDIOBytes, numCounters)
 
-    if( devicesFound < DEVICES_REQUIRED ) {
-        printf( "Error: You need at least %d devices connected to run this sample\n", DEVICES_REQUIRED );
-        goto abort;
-    }
-    unsigned port, pattern;
-    AIOUSB_BOOL correct, allCorrect;
-
-    for( index = 0; index < devicesFound; index++ ) {
-        device = &deviceTable[ index ];
-        result = GetDeviceSerialNumber( device->index, &device->serialNumber );
-        if( result == AIOUSB_SUCCESS )
-            printf( "Serial number of device at index %d: %llx\n", device->index, ( long long ) device->serialNumber );
-        else
-            printf( "Error '%s' getting serial number of device at index %d\n", AIOUSB_GetResultCodeAsString( result ), device->index );
-    }
-
-    /*
-     * DIO configuration
-     */
-    device = &deviceTable[ 0 ];							// select first device
-    AIOUSB_SetCommTimeout( device->index, 1000 );		// set timeout for all USB operations
-    /*
-     * set all ports to output mode (we could just write "device->outputMask[ 0 ] = 0x0f"
-     * here since there are only 4 ports)
-     */
-    memset( device->outputMask, 0xff, MASK_BYTES );
-    
-    for( port = 0; port < device->numDIOBytes; port++ )
-        device->writeBuffer[ port ] = 0x11 * ( port + 1 );	// write unique pattern to each port
-    
-    result = DIO_Configure( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer ); /**< AIOUSB_FALSE ='s bTristate */
-    
-    # if( result == AIOUSB_SUCCESS )
-    #     printf( "Device at index %d successfully configured\n", device->index );
-    # else
-    #     printf( "Error '%s' configuring device at index %d\n", AIOUSB_GetResultCodeAsString( result ), device->index );
-    
-    if( devicesFound > 1 ) {
-            device = &deviceTable[ 1 ];						// select second device
-            AIOUSB_SetCommTimeout( device->index, 1000 );	// set timeout for all USB operations
-            /*
-             * set all ports to output mode (we could just write "device->outputMask[ 0 ] = 0x0f"
-             * here since there are only 4 ports)
-             */
-            memset( device->outputMask, 0xff, MASK_BYTES );
-
-            for( port = 0; port < device->numDIOBytes; port++ )
-                device->writeBuffer[ port ] = 0x66 - port;	// write unique pattern to each port
-
-            result = DIO_Configure( device->index, AIOUSB_FALSE /* bTristate */, device->outputMask, device->writeBuffer );
-
-            if( result == AIOUSB_SUCCESS )
-                printf( "Device at index %d successfully configured\n", device->index );
-            else
-                printf( "Error '%s' configuring device at index %d\n", 
-                        AIOUSB_GetResultCodeAsString( result ), 
-                        device->index 
-                        );
-    }
-
-    /*
-     * DIO read
-     */
-    for( index = 0; index < devicesFound; index++ ) {
-            device = &deviceTable[ index ];
-            result = DIO_ReadAll( device->index, device->readBuffer );
-
-            if( result != AIOUSB_SUCCESS ) {
-                printf( "Error '%s' reading inputs from device at index %d\n", AIOUSB_GetResultCodeAsString( result ), device->index );
-                break;
-            }
-            printf( "Read the following values from device at index %d:", device->index );
-            correct = AIOUSB_TRUE;
-            for( port = 0; port < device->numDIOBytes; port++ ) {
-                if( device->readBuffer[ port ] != device->writeBuffer[ port ] )
-                    correct = AIOUSB_FALSE;
-                printf( " %#x", device->readBuffer[ port ] );
-            }
-            printf( correct ? " (correct)\n" : " (INCORRECT)\n" );
-    }
-    
-    /*
-     * DIO write (board LEDs should flash vigorously during this test)
-     */
-    printf( "Writing patterns to devices:" );
-    fflush( stdout );				// must do for "real-time" feedback
-    allCorrect = AIOUSB_TRUE;
-    for( pattern = 0x00; pattern <= 0xf0; pattern += 0x10 ) {
-        
-        printf( " %#x", pattern );
-        fflush( stdout );			// must do for "real-time" feedback
-        
-        for( index = 0; index < devicesFound; index++ ) {
-                device = &deviceTable[ index ];
-                for( port = 0; port < device->numDIOBytes; port++ )
-                    device->writeBuffer[ port ] = pattern + index * 0x04 + port;
-
-                result = DIO_WriteAll( device->index, device->writeBuffer );
-                if ( result != AIOUSB_SUCCESS ) {
-                    printf( "Error '%s' writing outputs to device at index %d\n" , AIOUSB_GetResultCodeAsString( result ), device->index );
-
-                    goto abort;
-                }
-
-                result = DIO_ReadAll( device->index, device->readBuffer ); // verify values written
-                if ( result != AIOUSB_SUCCESS ) {
-                    printf( "Error '%s' reading inputs from device at index %d\n" , AIOUSB_GetResultCodeAsString( result ), device->index );
-                    goto abort;
-                }
-
-                if( result == AIOUSB_SUCCESS ) {
-                    correct = AIOUSB_TRUE;
-                    for( port = 0; port < device->numDIOBytes; port++ ) {
-                        if( device->readBuffer[ port ] != device->writeBuffer[ port ] ) {
-                            allCorrect = correct = AIOUSB_FALSE;
-                            break;
-                        }
-                    }
-                    if( ! correct ) {
-                        printf( "Error in data read back from device at index %d\n", device->index );
-                        goto abort;
-                    }
-                    
-                }
-        }
-        sleep( 1 );
-    }
-abort:
-        printf( allCorrect ? "\nAll patterns written were read back correctly\n" : "\n" );
-  
-exit_sample:
-    AIOUSB_Exit();
+        if ulp_value(productId) == USB_DIO_32:
+            devices.append( Device(index=index,productID=productId, nameSize=nameSize,  numDIOBytes=numDIOBytes, numCounters=numCounters))
+    index += 1
+    deviceMask >>= 1
 
 
-    return ( int ) result;
-} 
+device = devices[0]
+
+AIOUSB_SetCommTimeout( device.index, 1000 )
+AIOChannelMaskSetMaskFromStr( device.outputMask, "1111" )
+
+for port in range(0x20):
+    print "Using value %d" % (port)
+    DIOBufSetIndex( device.writeBuffer, port, 1 );
+    print DIOBufToString( device.writeBuffer )
+    result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer )
+    #print "Result was %d" % (result)
+    time.sleep(1/10.0)
+
+# ONLY Port D
+AIOChannelMaskSetMaskFromStr(device.outputMask, "1000" );
+result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer );
+time.sleep(1/10.0)
+# ONLY Port C
+AIOChannelMaskSetMaskFromStr(device.outputMask, "0100" );
+result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer );
+time.sleep(1/10.0);
+# ONLY Port B
+AIOChannelMaskSetMaskFromStr(device.outputMask, "0010" );
+result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer );
+time.sleep(1/10.0);
+# ONLY Port A
+AIOChannelMaskSetMaskFromStr(device.outputMask, "0001" );
+result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer );
+time.sleep(1/10.0);
+# All Channels
+AIOChannelMaskSetMaskFromStr(device.outputMask, "1111" );
+result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer );
+
+tmpbuf = list("00000000000000000000000000000000")
+
+for i in range(len(tmpbuf)):
+    if i >= 1:
+        tmpbuf[i] = "0"
+
+    tmpbuf[i] = '1'
+    DIOBufReplaceBinString(device.writeBuffer, "".join(tmpbuf) )
+    result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer )    
+    time.sleep(1/10.0)
+
 

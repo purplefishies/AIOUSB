@@ -177,8 +177,6 @@ int main( int argc, char **argv ) {
     AIOChannelMaskSetMaskFromStr(device->outputMask, "1111" ); /* one for each channel that is selectable
                                                                 * (a,b,c,d) */
 
-    /* result = DIO_ConfigureRaw( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer ); */
-    /* result = DIO_ConfigureRaw( device->index, AIOUSB_FALSE, device->outputMask,  device->writeBuffer ); */
 
     for( port = 0; port <= 0x7; port ++ ) { 
         DIOBufSetIndex( device->writeBuffer, port, 1 );
@@ -231,10 +229,6 @@ int main( int argc, char **argv ) {
     AIOChannelMaskSetMaskAtIndex( device->outputMask, 0, 0x7 );     
 
     result = DIO_Configure( device->index, AIOUSB_FALSE, device->outputMask , device->writeBuffer );    
-    
-    
-    
-
 
     /* Now change the bits based on a bitstring */
     char tmpbuf[32] = "00000000000000000000000000000000";
@@ -252,8 +246,9 @@ int main( int argc, char **argv ) {
     /* All Port B */
     DIOBufSetIndex( device->writeBuffer , 1 , 0x0 | ( 1 << 3 | 1 <<2 | 1 )  );
     /* All Port C */
-    DIOBufSetIndex( device->writeBuffer , 1 , 0x0 | ( 1 << 3 | 1 <<2 | 1 )  );
+    DIOBufSetIndex( device->writeBuffer , 2 , 0x0 | ( 1 << 3 | 1 <<2 | 1 )  );
     /* All Port D */
+    DIOBufSetIndex( device->writeBuffer , 3 , 0x0 | ( 1 << 3 | 1 <<2 | 1 )  );
     
 
     return(0);
@@ -268,30 +263,5 @@ exit_sample:
 
     return ( int ) exit_code;
 } 
-
-
-/* for( port = 0; port <= 0xff; port ++ ) {  */
-/*     /\* device->writeBuffer[2] = port; *\/ */
-/*     DIOBufSetIndex( device->writeBuffer, 2, port ); */
-/*     /\* result = DIO_ConfigureRaw( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer ); *\/ */
-/*     usleep(10000); */
-/* } */
-/* for( port = 0; port <= 0xff; port ++ ) {  */
-/*     /\* device->writeBuffer[3] = port; *\/ */
-/*     DIOBufSetIndex( device->writeBuffer, 3, port ); */
-/*     /\* result = DIO_ConfigureRaw( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer ); *\/ */
-/*     usleep(10000); */
-/* } */
-/* for ( port = 0; port < 4 ; port ++ )  { */
-/*     DIOBufSetIndex( device->writeBuffer, port, 0xff ); */
-/* } */
-/* result = DIO_ConfigureRaw( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer ); */
-/* for ( int i =0 ; i <= 0xf ; i ++ ) {  */
-/*     AIOChannelMaskSetMaskFromInt( device->outputMask, i ); */
-/*     result = DIO_ConfigureRaw( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer ); */
-/*     if ( result != AIOUSB_SUCCESS )  */
-/*         break; */
-/*     usleep(100000); */
-/* } */
 
 
