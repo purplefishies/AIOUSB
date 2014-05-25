@@ -32,7 +32,7 @@
 /* Needed to allow inclusion into Scala */
 %pragma(java) modulecode=%{
     static {
-        System.loadLibrary("AIOUSB"); 
+        System.loadLibrary("AIOUSB");
     }
 %}
 
@@ -65,6 +65,20 @@
     ary[index] = (unsigned short)value;
   }
 %}
+
+%extend AIOChannelMask { 
+    AIOChannelMask( unsigned size ) { 
+        return (AIOChannelMask *)NewAIOChannelMask( size );
+    }
+    ~AIOChannelMask() { 
+        DeleteAIOChannelMask($self);
+    }
+
+    const char *__str__() {
+        return AIOChannelMaskToString( $self );
+    }
+
+ }
 
 %extend AIOContinuousBuf {
 
@@ -177,6 +191,13 @@
   }
 
  }
+#elif defined(SWIGJAVA)
+%extend AIOChannelMask {
+  const char *toFoo() {
+      return AIOChannelMaskToString( $self );
+  }
+}
+
 #elif defined(SWIGRUBY)
 %extend DIOBuf {
 int at( unsigned index ) {

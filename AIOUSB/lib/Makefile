@@ -19,6 +19,7 @@ AIOUSB_WDG.o \
 AIOContinuousBuffer.o \
 AIOChannelMask.o \
 AIOUSB_Properties.o \
+AIODeviceInfo.o \
 DIOBuf.o
 
 
@@ -120,7 +121,7 @@ OBJOPTS			:= -c
 COMMONOPTS		:= -Wall -pthread -fPIC
 EXTRA_COPTS		:= -std=gnu99 -D_GNU_SOURCE
 SELF_TEST_FLAGS		:= -DSELF_TEST
-SELF_TEST_LIBS		:= -lm -lpthread -laiousbdbg -laiousbcppdbg
+SELF_TEST_LIBS		:= -lm -lpthread libaiousbdbg.a libaiousbcppdbg.a  -lusb-1.0
 SELF_TEST_CXX_FLAGS	:= -D__aiousb_cplusplus -DSELF_TEST 
 SELF_TEST_CXX_LIBS	:= $(SELF_TEST_LIBS) -lgtest
 
@@ -152,7 +153,7 @@ pywrapper:
 	$(CC) $(TESTFLAGS) $(CFLAGS) $(SELF_TEST_FLAGS) $< -o $@ -L. $(SELF_TEST_LIBS)
 
 %_cpp_test: %.c $(SHCDBGLIB) $(SHCPPDBGLIB)
-	$(CXX) $(TESTFLAGS) $(SELF_TEST_CXX_FLAGS) DIOBuf.c -o DIOBuf_cpp_test -L. $(SELF_TEST_CXX_LIBS)
+	$(CXX) $(TESTFLAGS) $(SELF_TEST_CXX_FLAGS) $(subst _cpp_test,.c,$<) -o $@ -L. $(SELF_TEST_CXX_LIBS)
 
 mostlyclean:
 	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) 

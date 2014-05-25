@@ -196,7 +196,7 @@ static const char VERSION_DATE[] = "$Format: %ad$";
  *   supported by our mutual exclusion scheme.
  */
 
-PRIVATE AIOUSB_BOOL AIOUSB_Lock() {
+PUBLIC_EXTERN AIOUSB_BOOL AIOUSB_Lock() {
     assert(AIOUSB_IsInit());
 #if defined(AIOUSB_ENABLE_MUTEX)
     return(pthread_mutex_lock(&aiousbMutex) == 0);
@@ -205,7 +205,7 @@ PRIVATE AIOUSB_BOOL AIOUSB_Lock() {
 #endif
 }
 
-PRIVATE AIOUSB_BOOL AIOUSB_UnLock() {
+PUBLIC_EXTERN AIOUSB_BOOL AIOUSB_UnLock() {
     assert(AIOUSB_IsInit());
 #if defined(AIOUSB_ENABLE_MUTEX)
     return(pthread_mutex_unlock(&aiousbMutex) == 0);
@@ -418,6 +418,213 @@ PRIVATE static void InitDeviceTable(void)
           deviceDesc->workerResult = AIOUSB_SUCCESS;
       }
 }
+ 
+
+
+void _setup_device_parameters( DeviceDescriptor *deviceDesc , unsigned long productID ) {
+    deviceDesc->StreamingBlockSize = 31ul * 1024ul;
+    deviceDesc->bGetName = AIOUSB_TRUE;             // most boards support this feature
+    if(productID == USB_DIO_32) {
+        deviceDesc->DIOBytes = 4;
+        deviceDesc->Counters = 3;
+        deviceDesc->RootClock = 3000000;
+    } else if(productID == USB_DIO_48) {
+        deviceDesc->DIOBytes = 6;
+    } else if(productID == USB_DIO_96) {
+        deviceDesc->DIOBytes = 12;
+    } else if( productID >= USB_DI16A_REV_A1 && productID <= USB_DI16A_REV_A2 ) {
+        deviceDesc->DIOBytes = 1;
+        deviceDesc->bDIOStream = AIOUSB_TRUE;
+        deviceDesc->bDIOSPI = AIOUSB_TRUE;
+        deviceDesc->bClearFIFO = AIOUSB_TRUE;
+    } else if(
+              productID >= USB_DIO_16H &&
+              productID <= USB_DIO_16A
+              ) {
+        deviceDesc->DIOBytes = 4;
+        deviceDesc->Tristates = 2;
+        deviceDesc->bDIOStream = AIOUSB_TRUE;
+        deviceDesc->bDIOSPI = AIOUSB_TRUE;
+        deviceDesc->bClearFIFO = AIOUSB_TRUE;
+    } else if(
+              productID == USB_IIRO_16 ||
+              productID == USB_II_16 ||
+              productID == USB_RO_16 ||
+              productID == USB_IIRO_8 ||
+              productID == USB_II_8 ||
+              productID == USB_IIRO_4
+              ) {
+        deviceDesc->DIOBytes = 4;
+        deviceDesc->WDGBytes = 2;
+    } else if(
+              productID == USB_IDIO_16 ||
+              productID == USB_II_16_OLD ||
+              productID == USB_IDO_16 ||
+              productID == USB_IDIO_8 ||
+              productID == USB_II_8_OLD ||
+              productID == USB_IDIO_4
+              ) {
+        deviceDesc->DIOBytes = 4;
+        deviceDesc->WDGBytes = 2;
+    } else if(
+              productID >= USB_DA12_8A_REV_A &&
+              productID <= USB_DA12_8A
+              ) {
+        deviceDesc->bDACStream = AIOUSB_TRUE;
+        deviceDesc->ImmDACs = 8;
+        deviceDesc->DACsUsed = 5;
+        deviceDesc->bGetName = AIOUSB_FALSE;
+        deviceDesc->RootClock = 12000000;
+    } else if(productID == USB_DA12_8E) {
+        deviceDesc->ImmDACs = 8;
+        deviceDesc->bGetName = AIOUSB_FALSE;
+    } else if(productID == USB_CTR_15) {
+        deviceDesc->Counters = 5;
+        deviceDesc->bGateSelectable = AIOUSB_TRUE;
+        deviceDesc->RootClock = 10000000;
+    } else if(
+              productID == USB_IIRO4_2SM ||
+              productID == USB_IIRO4_COM
+              ) {
+        deviceDesc->DIOBytes = 2;
+    } else if(productID == USB_DIO16RO8) {
+        deviceDesc->DIOBytes = 3;
+    } else if(productID == PICO_DIO16RO8) {
+        deviceDesc->DIOBytes = 3;
+    } else if(
+              (productID >= USB_AI16_16A && productID <= USB_AI12_16E) ||
+              (productID >= USB_AIO16_16A && productID <= USB_AIO12_16E)
+              ) {
+        deviceDesc->DIOBytes = 2;
+        deviceDesc->Counters = 1;
+        deviceDesc->RootClock = 10000000;
+        deviceDesc->bADCStream = AIOUSB_TRUE;
+        deviceDesc->ImmADCs = 1;
+        deviceDesc->ADCChannels
+            = deviceDesc->ADCMUXChannels = 16;
+        deviceDesc->ADCChannelsPerGroup = 1;
+        deviceDesc->ConfigBytes = AD_CONFIG_REGISTERS;
+        deviceDesc->bClearFIFO = AIOUSB_TRUE;
+        if(productID & 0x0100) {
+            deviceDesc->ImmDACs = 2;
+            deviceDesc->bDACBoardRange = AIOUSB_TRUE;
+        }
+    } else if(
+              (productID >= USB_AI16_64MA && productID <= USB_AI12_64ME) ||
+              (productID >= USB_AIO16_64MA && productID <= USB_AIO12_64ME)
+              ) {
+        deviceDesc->DIOBytes = 2;
+        deviceDesc->Counters = 1;
+        deviceDesc->RootClock = 10000000;
+        deviceDesc->bADCStream = AIOUSB_TRUE;
+        deviceDesc->ImmADCs = 1;
+        deviceDesc->ADCChannels = 16;
+        deviceDesc->ADCMUXChannels = 64;
+        deviceDesc->ADCChannelsPerGroup = 4;
+        deviceDesc->ConfigBytes = AD_MUX_CONFIG_REGISTERS;
+        deviceDesc->bClearFIFO = AIOUSB_TRUE;
+        if(productID & 0x0100) {
+            deviceDesc->ImmDACs = 2;
+            deviceDesc->bDACBoardRange = AIOUSB_TRUE;
+        }
+    } else if(
+              (productID >= USB_AI16_32A && productID <= USB_AI12_128E) ||
+              (productID >= USB_AIO16_32A && productID <= USB_AIO12_128E)
+              ) {
+        deviceDesc->DIOBytes = 2;
+        deviceDesc->Counters = 1;
+        deviceDesc->RootClock = 10000000;
+        deviceDesc->bADCStream = AIOUSB_TRUE;
+        deviceDesc->ImmADCs = 1;
+        deviceDesc->ADCChannels = 16;
+
+        /*
+         * there are four groups of five
+         * products each in this family;
+         * each group of five products has
+         * 32 more MUX channels than the
+         * preceding group; so we calculate
+         * the number of MUX channels by
+         * doing some arithmetic on the
+         * product ID
+         */
+
+        int I = (productID - USB_AI16_32A) & ~0x0100;
+        I /= 5;               /* products per group */
+        deviceDesc->ADCMUXChannels = 32 * (I + 1);
+        deviceDesc->ADCChannelsPerGroup = 8;
+        deviceDesc->ConfigBytes = AD_MUX_CONFIG_REGISTERS;
+        deviceDesc->bClearFIFO = AIOUSB_TRUE;
+        if(productID & 0x0100) {
+            deviceDesc->ImmDACs = 2;
+            deviceDesc->bDACBoardRange = AIOUSB_TRUE;
+        }
+    } else if(
+              productID >= USB_AO16_16A &&
+              productID <= USB_AO12_4
+              ) {
+        deviceDesc->DIOBytes = 2;
+        deviceDesc->FlashSectors = 32;
+        deviceDesc->bDACBoardRange = AIOUSB_TRUE;
+        deviceDesc->bDACChannelCal = AIOUSB_TRUE;
+
+        /*
+         * we use a few bits within the
+         * product ID to determine the
+         * number of DACs and whether or not
+         * the product has ADCs
+         */
+        switch(productID & 0x0006) {
+        case 0x0000:
+            deviceDesc->ImmDACs = 16;
+            break;
+
+        case 0x0002:
+            deviceDesc->ImmDACs = 12;
+            break;
+
+        case 0x0004:
+            deviceDesc->ImmDACs = 8;
+            break;
+
+        case 0x0006:
+            deviceDesc->ImmDACs = 4;
+            break;
+        }
+        if((productID & 0x0001) == 0)
+            deviceDesc->ImmADCs = 2;
+    }
+
+    /* allocate I/O image buffers */
+    if(deviceDesc->DIOBytes > 0) {
+        /* calloc() zeros memory */
+        deviceDesc->LastDIOData = ( unsigned char* )calloc(deviceDesc->DIOBytes, sizeof(unsigned char));
+        assert(deviceDesc->LastDIOData != 0);
+    }
+}
+
+/**
+ * @desc A mock function that can set up the DeviceTable with any type of devices
+ * @notes
+ *
+ **/
+void AddDeviceToDeviceTable( int *numAccesDevices, unsigned long productID ) {
+    DeviceDescriptor *deviceDesc = &deviceTable[ (*numAccesDevices)++ ];
+    deviceDesc->device        = NULL;
+    deviceDesc->deviceHandle  = NULL;
+    deviceDesc->ProductID     = productID;
+    _setup_device_parameters( deviceDesc , productID );
+}
+
+PUBLIC_EXTERN void PopulateDeviceTableTest(unsigned long *products, int length ) {
+    int numAccesDevices = 0;
+    AIOUSB_InitTest();    
+    for( int i = 0; i < length ; i ++ ) {
+        AddDeviceToDeviceTable( &numAccesDevices, products[i] );
+    }
+}
+
+
 
 
 
@@ -425,7 +632,7 @@ PRIVATE static void InitDeviceTable(void)
  * @todo Rely on Global Header files for the functionality of devices / cards
  * as opposed to hard coding
  */
-static void PopulateDeviceTable(void) {
+PUBLIC_EXTERN void PopulateDeviceTable(void) {
   /*
    * populate device table with ACCES devices found on USB bus
    */
@@ -450,188 +657,8 @@ static void PopulateDeviceTable(void) {
 
                             /* set up device-specific properties */
                             unsigned productID = deviceDesc->ProductID = libusbDeviceDesc.idProduct;
-                            deviceDesc->StreamingBlockSize = 31ul * 1024ul;
-                            deviceDesc->bGetName = AIOUSB_TRUE;             // most boards support this feature
-                            if(productID == USB_DIO_32) {
-                                  deviceDesc->DIOBytes = 4;
-                                  deviceDesc->Counters = 3;
-                                  deviceDesc->RootClock = 3000000;
-                              } else if(productID == USB_DIO_48) {
-                                  deviceDesc->DIOBytes = 6;
-                              } else if(productID == USB_DIO_96) {
-                                  deviceDesc->DIOBytes = 12;
-                              } else if(
-                                productID >= USB_DI16A_REV_A1 &&
-                                productID <= USB_DI16A_REV_A2
-                                ) {
-                                  deviceDesc->DIOBytes = 1;
-                                  deviceDesc->bDIOStream = AIOUSB_TRUE;
-                                  deviceDesc->bDIOSPI = AIOUSB_TRUE;
-                                  deviceDesc->bClearFIFO = AIOUSB_TRUE;
-                              } else if(
-                                productID >= USB_DIO_16H &&
-                                productID <= USB_DIO_16A
-                                ) {
-                                  deviceDesc->DIOBytes = 4;
-                                  deviceDesc->Tristates = 2;
-                                  deviceDesc->bDIOStream = AIOUSB_TRUE;
-                                  deviceDesc->bDIOSPI = AIOUSB_TRUE;
-                                  deviceDesc->bClearFIFO = AIOUSB_TRUE;
-                              } else if(
-                                productID == USB_IIRO_16 ||
-                                productID == USB_II_16 ||
-                                productID == USB_RO_16 ||
-                                productID == USB_IIRO_8 ||
-                                productID == USB_II_8 ||
-                                productID == USB_IIRO_4
-                                ) {
-                                  deviceDesc->DIOBytes = 4;
-                                  deviceDesc->WDGBytes = 2;
-                              } else if(
-                                productID == USB_IDIO_16 ||
-                                productID == USB_II_16_OLD ||
-                                productID == USB_IDO_16 ||
-                                productID == USB_IDIO_8 ||
-                                productID == USB_II_8_OLD ||
-                                productID == USB_IDIO_4
-                                ) {
-                                  deviceDesc->DIOBytes = 4;
-                                  deviceDesc->WDGBytes = 2;
-                              } else if(
-                                productID >= USB_DA12_8A_REV_A &&
-                                productID <= USB_DA12_8A
-                                ) {
-                                  deviceDesc->bDACStream = AIOUSB_TRUE;
-                                  deviceDesc->ImmDACs = 8;
-                                  deviceDesc->DACsUsed = 5;
-                                  deviceDesc->bGetName = AIOUSB_FALSE;
-                                  deviceDesc->RootClock = 12000000;
-                              } else if(productID == USB_DA12_8E) {
-                                  deviceDesc->ImmDACs = 8;
-                                  deviceDesc->bGetName = AIOUSB_FALSE;
-                              } else if(productID == USB_CTR_15) {
-                                  deviceDesc->Counters = 5;
-                                  deviceDesc->bGateSelectable = AIOUSB_TRUE;
-                                  deviceDesc->RootClock = 10000000;
-                              } else if(
-                                productID == USB_IIRO4_2SM ||
-                                productID == USB_IIRO4_COM
-                                ) {
-                                  deviceDesc->DIOBytes = 2;
-                              } else if(productID == USB_DIO16RO8) {
-                                  deviceDesc->DIOBytes = 3;
-                              } else if(productID == PICO_DIO16RO8) {
-                                  deviceDesc->DIOBytes = 3;
-                              } else if(
-                                (productID >= USB_AI16_16A && productID <= USB_AI12_16E) ||
-                                (productID >= USB_AIO16_16A && productID <= USB_AIO12_16E)
-                                ) {
-                                  deviceDesc->DIOBytes = 2;
-                                  deviceDesc->Counters = 1;
-                                  deviceDesc->RootClock = 10000000;
-                                  deviceDesc->bADCStream = AIOUSB_TRUE;
-                                  deviceDesc->ImmADCs = 1;
-                                  deviceDesc->ADCChannels
-                                      = deviceDesc->ADCMUXChannels = 16;
-                                  deviceDesc->ADCChannelsPerGroup = 1;
-                                  deviceDesc->ConfigBytes = AD_CONFIG_REGISTERS;
-                                  deviceDesc->bClearFIFO = AIOUSB_TRUE;
-                                  if(productID & 0x0100) {
-                                        deviceDesc->ImmDACs = 2;
-                                        deviceDesc->bDACBoardRange = AIOUSB_TRUE;
-                                    }
-                              } else if(
-                                (productID >= USB_AI16_64MA && productID <= USB_AI12_64ME) ||
-                                (productID >= USB_AIO16_64MA && productID <= USB_AIO12_64ME)
-                                ) {
-                                  deviceDesc->DIOBytes = 2;
-                                  deviceDesc->Counters = 1;
-                                  deviceDesc->RootClock = 10000000;
-                                  deviceDesc->bADCStream = AIOUSB_TRUE;
-                                  deviceDesc->ImmADCs = 1;
-                                  deviceDesc->ADCChannels = 16;
-                                  deviceDesc->ADCMUXChannels = 64;
-                                  deviceDesc->ADCChannelsPerGroup = 4;
-                                  deviceDesc->ConfigBytes = AD_MUX_CONFIG_REGISTERS;
-                                  deviceDesc->bClearFIFO = AIOUSB_TRUE;
-                                  if(productID & 0x0100) {
-                                        deviceDesc->ImmDACs = 2;
-                                        deviceDesc->bDACBoardRange = AIOUSB_TRUE;
-                                    }
-                              } else if(
-                                (productID >= USB_AI16_32A && productID <= USB_AI12_128E) ||
-                                (productID >= USB_AIO16_32A && productID <= USB_AIO12_128E)
-                                ) {
-                                  deviceDesc->DIOBytes = 2;
-                                  deviceDesc->Counters = 1;
-                                  deviceDesc->RootClock = 10000000;
-                                  deviceDesc->bADCStream = AIOUSB_TRUE;
-                                  deviceDesc->ImmADCs = 1;
-                                  deviceDesc->ADCChannels = 16;
 
-                                  /*
-                                   * there are four groups of five
-                                   * products each in this family;
-                                   * each group of five products has
-                                   * 32 more MUX channels than the
-                                   * preceding group; so we calculate
-                                   * the number of MUX channels by
-                                   * doing some arithmetic on the
-                                   * product ID
-                                   */
-
-                                  int I = (productID - USB_AI16_32A) & ~0x0100;
-                                  I /= 5;               /* products per group */
-                                  deviceDesc->ADCMUXChannels = 32 * (I + 1);
-                                  deviceDesc->ADCChannelsPerGroup = 8;
-                                  deviceDesc->ConfigBytes = AD_MUX_CONFIG_REGISTERS;
-                                  deviceDesc->bClearFIFO = AIOUSB_TRUE;
-                                  if(productID & 0x0100) {
-                                        deviceDesc->ImmDACs = 2;
-                                        deviceDesc->bDACBoardRange = AIOUSB_TRUE;
-                                    }
-                              } else if(
-                                productID >= USB_AO16_16A &&
-                                productID <= USB_AO12_4
-                                ) {
-                                  deviceDesc->DIOBytes = 2;
-                                  deviceDesc->FlashSectors = 32;
-                                  deviceDesc->bDACBoardRange = AIOUSB_TRUE;
-                                  deviceDesc->bDACChannelCal = AIOUSB_TRUE;
-
-                                  /*
-                                   * we use a few bits within the
-                                   * product ID to determine the
-                                   * number of DACs and whether or not
-                                   * the product has ADCs
-                                   */
-                                  switch(productID & 0x0006) {
-                                    case 0x0000:
-                                        deviceDesc->ImmDACs = 16;
-                                        break;
-
-                                    case 0x0002:
-                                        deviceDesc->ImmDACs = 12;
-                                        break;
-
-                                    case 0x0004:
-                                        deviceDesc->ImmDACs = 8;
-                                        break;
-
-                                    case 0x0006:
-                                        deviceDesc->ImmDACs = 4;
-                                        break;
-                                    }
-                                  if((productID & 0x0001) == 0)
-                                      deviceDesc->ImmADCs = 2;
-                              }
-
-                            /* allocate I/O image buffers */
-                            if(deviceDesc->DIOBytes > 0) {
-                              /* calloc() zeros memory */
-                                  deviceDesc->LastDIOData = ( unsigned char* )calloc(deviceDesc->DIOBytes, sizeof(unsigned char));
-                                  assert(deviceDesc->LastDIOData != 0);
-                              }
+                            _setup_device_parameters( deviceDesc , productID );
                         }
                   }
             }
@@ -1081,7 +1108,6 @@ PUBLIC_EXTERN unsigned long GetDevices(void) {
 }
 
 
-
 PUBLIC_EXTERN unsigned long QueryDeviceInfo(
                                             unsigned long DeviceIndex,
                                             unsigned long *pPID,
@@ -1343,10 +1369,17 @@ PUBLIC_EXTERN const char *AIOUSB_GetVersionDate() {
     return VERSION_DATE;
 }
 
+PUBLIC_EXTERN unsigned long AIOUSB_InitTest(void) {
+    InitDeviceTable();
+    aiousbInit = AIOUSB_INIT_PATTERN;
+}
+
 /**
  * @desc AIOUSB_Init() and AIOUSB_Exit() are not thread-safe and
  * should not be called while other threads might be accessing global
- * variables
+ * variables. Hence you should just run AIOUSB_Init() once at the beginning
+ * and then the AIOUSB_Exit() once at the end after every thread acquiring
+ * data has been stopped.
  */
 PUBLIC_EXTERN unsigned long AIOUSB_Init(void) {
     unsigned long result = AIOUSB_SUCCESS;
@@ -1975,13 +2008,61 @@ unsigned long GenericVendorRead(
       } else {
           result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
           AIOUSB_UnLock();
-      }   /* if( deviceHandle != NULL .. */
+      }
 RETURN_GenericVendorRead:
     return result;
 }
 
 #ifdef __cplusplus
 }       /* namespace AIOUSB */
+#endif
+
+#ifdef SELF_TEST
+
+
+#include <math.h>
+#include "gtest/gtest.h"
+#include "tap.h"
+#include "AIOUSB_Core.h"
+
+#ifdef __cplusplus
+using namespace AIOUSB;
+#endif
+
+TEST(AIOUSB_Core,FakeInit ) {
+
+    AIOUSB_InitTest();    
+    EXPECT_EQ(AIOUSB_TRUE, AIOUSB_IsInit() );
+
+}
+
+TEST(AIOUSB_Core,MockObjects) {
+    int numDevices = 0;
+    InitDeviceTable();    
+    AddDeviceToDeviceTable( &numDevices, USB_AIO16_16A );
+    EXPECT_EQ( numDevices, 1 );
+    AddDeviceToDeviceTable( &numDevices, USB_DIO_32 );
+    EXPECT_EQ( numDevices, 2 );
+
+    EXPECT_EQ( ((DeviceDescriptor *)&deviceTable[0])->ProductID, USB_AIO16_16A  );
+    EXPECT_EQ( ((DeviceDescriptor *)&deviceTable[1])->ProductID, USB_DIO_32  );
+
+}
+
+
+int main( int argc , char *argv[] ) 
+{
+    testing::InitGoogleTest(&argc, argv);
+    testing::TestEventListeners & listeners = testing::UnitTest::GetInstance()->listeners();
+#ifdef GTEST_TAP_PRINT_TO_STDOUT
+    delete listeners.Release(listeners.default_result_printer());
+#endif
+    listeners.Append( new tap::TapListener() );
+   
+    return RUN_ALL_TESTS();  
+}
+
+
 #endif
 
 

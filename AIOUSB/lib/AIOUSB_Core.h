@@ -151,6 +151,8 @@ PUBLIC_EXTERN unsigned long ADC_ResetDevice( unsigned long DeviceIndex  );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetDeviceSerialNumber( unsigned long DeviceIndex );
 PUBLIC_EXTERN AIORET_TYPE ADC_WriteADConfigBlock( unsigned long DeviceIndex , ADConfigBlock *config );
 
+PUBLIC_EXTERN void PopulateDeviceTableTest(unsigned long *products, int length );
+
 
 #ifndef SWIG
 PUBLIC_EXTERN DeviceDescriptor deviceTable[ MAX_USB_DEVICES ];
@@ -158,7 +160,7 @@ PUBLIC_EXTERN AIOUSB_BOOL AIOUSB_Lock(void);
 PUBLIC_EXTERN AIOUSB_BOOL AIOUSB_UnLock(void);
 
 #define AIOUSB_IsInit()  ( aiousbInit == AIOUSB_INIT_PATTERN )
-
+PUBLIC_EXTERN unsigned long AIOUSB_InitTest(void);
 PUBLIC_EXTERN unsigned long AIOUSB_Validate( unsigned long *DeviceIndex );
 PUBLIC_EXTERN unsigned long AIOUSB_Validate_Lock(  unsigned long *DeviceIndex ) ;
 PUBLIC_EXTERN DeviceDescriptor *AIOUSB_GetDevice_Lock( unsigned long DeviceIndex , 
