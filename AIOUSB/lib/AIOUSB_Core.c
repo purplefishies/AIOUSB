@@ -1372,6 +1372,7 @@ PUBLIC_EXTERN const char *AIOUSB_GetVersionDate() {
 PUBLIC_EXTERN unsigned long AIOUSB_InitTest(void) {
     InitDeviceTable();
     aiousbInit = AIOUSB_INIT_PATTERN;
+    return AIOUSB_SUCCESS;
 }
 
 /**
