@@ -49,12 +49,14 @@ else
 endif
 
 ifndef AIOUSBJAVALIBDIR
-	AIOUSBJAVALIBDIR := ../../java
+	AIOUSBJAVALIBDIR := ../../lib/wrappers/java
 endif
 
 CPP			:= g++
 CC			:= gcc
 JAVAC			:= javac
+
+include $(AIO_LIB_DIR)/wrappers/WrapperTargets.inc
 
 
 COMPILE_MACROS		:= $(MACROS)
@@ -71,7 +73,6 @@ OBJFILE_OPTS		:= -c
 INCPATH			:= -Ilib $(CFLAGS)
 LIBPATH			:= -Llib $(LDFLAGS)
 
-# LIBS			+= $(LIBAIOUSB) $(LIBAIOUSBCPP)  $(LIBCLASSAIOUSB) $(LIBAIOUSBCPP) $(LIBUSB) -lm
 CPPLIBS			+= $(LIBCLASSAIOUSB) $(LIBAIOUSBCPP)  $(LIBUSB) -lm $(LIBS)
 CLIBS			+= $(LIBAIOUSB) $(LIBUSB) -lm $(LIBS)
 
@@ -111,13 +112,6 @@ test	:
 	@echo "LIBRARY_DEPS=$(LIBRARY_DEPS)"
 	@echo "BUILD_DEPS=$(LIBAIOUSB_CPPDEP)"
 
-#	@echo '$(call CLASSLIB_BUILD)'
-#	@echo '$(call AIOUSBLIB_BUILD)'	
-# @echo "CPPDEPS=	$(LIBAIOUSB_CPPDEP)"
-# @echo "CDEPS=$(LIBAIOUSB_CDEP)"
-
-
-
 clean:
 	$(RM) $(ALL_CLEAN_TARGETS)
 	$(RM) *.csv
@@ -128,23 +122,34 @@ clean:
 $(eval $(call AIOUSBLIB_BUILD))
 $(eval $(call CLASSLIB_BUILD))
 
+$(AIO_LIB_DIR)/wrappers/java/$(JAVA_BUILT):
+	cd $(AIO_LIB_DIR)/wrappers && $(MAKE) -f GNUMakefile inplace_java
 
-Sample.jar: Sample.class
-	@echo "Class-Path: $(AIOUSBJAVALIBDIR)/aiousb.jar" > manifest
-	jar cmfe manifest Sample.jar Sample Sample.class
+#Sample.jar: $(AIO_LIB_DIR)/wrappers/java/$(JAVA_BUILT) Sample.class
+#	@echo "Class-Path: $(AIOUSBJAVALIBDIR)/AIOUSB.jar" > manifest
+#	jar cmfe manifest Sample.jar Sample Sample.class
+#	rm manifest
+
+%.jar: %.class $(AIO_LIB_DIR)/wrappers/java/$(JAVA_BUILT)
+	@echo "Class-Path: $(AIOUSBJAVALIBDIR)/AIOUSB.jar" > manifest
+	jar cmfe manifest $@ Sample $<
 	rm manifest
 
-Sample.class: Sample.java
-	$(JAVAC) -cp $(AIOUSBJAVALIBDIR)/aiousb.jar Sample.java
+%:%.class
+	LD_LIBRARY_PATH=$${AIO_LIB_DIR}:$${PWD}/../../lib/wrappers/java  java -classpath "../../lib/wrappers/java/AIOUSB.jar:$$PWD" $@
+
+# Sample.class: Sample.java
+%.class:%.java
+	$(JAVAC) -cp $(AIOUSBJAVALIBDIR)/AIOUSB.jar $<
 
 
 Extcal.jar: Extcal.class
-	@echo "Class-Path: $(AIOUSBJAVALIBDIR)/aiousb.jar" > manifest
+	@echo "Class-Path: $(AIOUSBJAVALIBDIR)/AIOUSB.jar" > manifest
 	jar cmfe manifest Extcal.jar Extcal Extcal.class
 	rm manifest
 
 Extcal.class: Extcal.java
-	$(JAVAC) -cp $(AIOUSBJAVALIBDIR)/aiousb.jar Extcal.java
+	$(JAVAC) -cp $(AIOUSBJAVALIBDIR)/AIOUSB.jar Extcal.java
 
 mostlyclean:
 	-rm -f sample.o extcal.o Sample.class Extcal.class
