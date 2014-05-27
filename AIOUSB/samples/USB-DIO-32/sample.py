@@ -21,13 +21,11 @@ class Device:
     readBuffer = DIOBuf(MAX_DIO_BYTES )
     writeBuffer = DIOBuf( MAX_DIO_BYTES )
     name = ""
-    productID = new_ulp()
-    nameSize = new_ulp()
-    numDIOBytes = new_ulp()
-    numCounters = new_ulp()
     serialNumber = 0
     index = 0
-
+    numDIOBytes = 0
+    numCounters = 0
+    productID = 0
     def __init__(self, **kwds):
         self.__dict__.update(kwds)
 
@@ -49,27 +47,15 @@ devicesFound = 0
 deviceMask = GetDevices()
 index = 0
 
-
 AIOUSB_ListDevices()
 
-# while deviceMask > 0 and len(devices) < number_devices :
-#     if (deviceMask & 1 ) != 0:
-#         productId = new_ulp()  
-#         nameSize= new_ulp()
-#         name = ""
-#         numDIOBytes = new_ulp()
-#         numCounters = new_ulp()
-#         QueryDeviceInfo(index , productId, nameSize, name, numDIOBytes, numCounters)
-#         if ulp_value(productId) == USB_DIO_32:
-#             devices.append( Device(index=index,productID=productId, nameSize=nameSize,  numDIOBytes=numDIOBytes, numCounters=numCounters))
-#     index += 1
-#     deviceMask >>= 1
-
-nameSize=new_ulp()
-productID=new_ulp()
-ulp_assign(productID, USB_DIO_32 )
-devices.append( Device( index=1, productID=USB_DIO_32, nameSize=nameSize))
-
+while deviceMask > 0 and len(devices) < number_devices :
+    if (deviceMask & 1 ) != 0:
+        obj = GetDeviceInfo( index )
+        if obj.PID == USB_DIO_32:
+            devices.append( Device( index=index, productID=obj.PID, numDIOBytes=obj.DIOBytes,numCounters=obj.Counters ))
+    index += 1
+    deviceMask >>= 1
 
 device = devices[0]
 
