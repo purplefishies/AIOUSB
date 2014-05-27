@@ -52,25 +52,30 @@ index = 0
 
 AIOUSB_ListDevices()
 
-while deviceMask > 0 and len(devices) < number_devices :
-    if (deviceMask & 1 ) != 0:
-        productId = new_ulp()  
-        nameSize= new_ulp()
-        name = ""
-        numDIOBytes = new_ulp()
-        numCounters = new_ulp()
-        QueryDeviceInfo(index , productId, nameSize, name, numDIOBytes, numCounters)
+# while deviceMask > 0 and len(devices) < number_devices :
+#     if (deviceMask & 1 ) != 0:
+#         productId = new_ulp()  
+#         nameSize= new_ulp()
+#         name = ""
+#         numDIOBytes = new_ulp()
+#         numCounters = new_ulp()
+#         QueryDeviceInfo(index , productId, nameSize, name, numDIOBytes, numCounters)
+#         if ulp_value(productId) == USB_DIO_32:
+#             devices.append( Device(index=index,productID=productId, nameSize=nameSize,  numDIOBytes=numDIOBytes, numCounters=numCounters))
+#     index += 1
+#     deviceMask >>= 1
 
-        if ulp_value(productId) == USB_DIO_32:
-            devices.append( Device(index=index,productID=productId, nameSize=nameSize,  numDIOBytes=numDIOBytes, numCounters=numCounters))
-    index += 1
-    deviceMask >>= 1
+nameSize=new_ulp()
+productID=new_ulp()
+ulp_assign(productID, USB_DIO_32 )
+devices.append( Device( index=1, productID=USB_DIO_32, nameSize=nameSize))
 
 
 device = devices[0]
 
 AIOUSB_SetCommTimeout( device.index, 1000 )
 AIOChannelMaskSetMaskFromStr( device.outputMask, "1111" )
+print "Mask was %s " % ( AIOChannelMaskToString( device.outputMask ))
 
 for port in range(0x20):
     print "Using value %d" % (port)

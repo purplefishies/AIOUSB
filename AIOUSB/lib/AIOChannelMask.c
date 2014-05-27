@@ -8,34 +8,34 @@ namespace AIOUSB {
 #endif
 
 /*----------------------------------------------------------------------------*/
-    PUBLIC_EXTERN AIOChannelMask * NewAIOChannelMask( unsigned int number_channels ) {
-        AIOChannelMask *tmp = (AIOChannelMask *)malloc(sizeof(AIOChannelMask ));
-        unsigned i;
-        if( !tmp ) {
-            goto out_NewAIOChannelMask;
-        }
-        tmp->size = ((number_channels+BITS_PER_BYTE-1)/BITS_PER_BYTE); /* Ceil function */
-
-        tmp->signals = (aio_channel_obj *)calloc(sizeof(aio_channel_obj), ( tmp->size + 1) );
-        if( !tmp->signals ) 
-            goto out_cleansignals;
-        tmp->strrep          = 0;
-        tmp->strrepsmall     = 0;
-        tmp->number_signals  = number_channels;
-        tmp->active_signals  = 0;
-
-        tmp->signal_indices = (int*)malloc(sizeof(int)*(number_channels+1) );
-        tmp->signal_index = 0;
-        for ( i = 0; i < number_channels + 1 ; i ++ ) {
-            tmp->signal_indices[i] = -1;
-        }
-    out_NewAIOChannelMask:
-        return tmp;
-    out_cleansignals:
-        free(tmp);
-        tmp = NULL;
-        return tmp;
+PUBLIC_EXTERN AIOChannelMask * NewAIOChannelMask( unsigned int number_channels ) {
+    AIOChannelMask *tmp = (AIOChannelMask *)malloc(sizeof(AIOChannelMask ));
+    unsigned i;
+    if( !tmp ) {
+        goto out_NewAIOChannelMask;
     }
+    tmp->size = ((number_channels+BITS_PER_BYTE-1)/BITS_PER_BYTE); /* Ceil function */
+
+    tmp->signals = (aio_channel_obj *)calloc(sizeof(aio_channel_obj), ( tmp->size + 1) );
+    if( !tmp->signals ) 
+        goto out_cleansignals;
+    tmp->strrep          = 0;
+    tmp->strrepsmall     = 0;
+    tmp->number_signals  = number_channels;
+    tmp->active_signals  = 0;
+
+    tmp->signal_indices = (int*)malloc(sizeof(int)*(number_channels+1) );
+    tmp->signal_index = 0;
+    for ( i = 0; i < number_channels + 1 ; i ++ ) {
+        tmp->signal_indices[i] = -1;
+    }
+ out_NewAIOChannelMask:
+    return tmp;
+ out_cleansignals:
+    free(tmp);
+    tmp = NULL;
+    return tmp;
+}
 /*----------------------------------------------------------------------------*/
 /**
  * @desc Deletes the AIOChannelMask object
@@ -129,16 +129,14 @@ PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskNumberSignals( AIOChannelMask *obj ) {
  * @param bitfields a character string that contains 0s and 1s. 
  *
  */
-PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskSetMaskFromStr( AIOChannelMask *obj, 
-                                                         const char *bitfields 
-                                                         ) {
-    if ( strlen(bitfields) != obj->number_signals )
-        return -AIOUSB_ERROR_INVALID_PARAMETER;
 
+PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskSetMaskFromStr( AIOChannelMask *obj, const char *bitfields ) {
     AIORET_TYPE ret = AIOUSB_SUCCESS;
     unsigned j;
     aio_channel_obj tmpval = 0;
+    int number_channels = strlen(bitfields);
     obj->signal_index = 0;
+    obj->number_signals  = number_channels;
     obj->signals = (char*)realloc( obj->signals, strlen(bitfields)*sizeof(char));
     obj->signal_indices = (int*)realloc( obj->signal_indices, sizeof(int)*(strlen(bitfields)) );
     obj->size = (strlen(bitfields) + BITS_PER_BYTE-1 ) / BITS_PER_BYTE ;
@@ -178,7 +176,7 @@ PUBLIC_EXTERN AIOChannelMask *NewAIOChannelMaskFromStr( const char *bitfields ) 
  * @param obj 
  * @param index
  */
- PUBLIC_EXTERN const char *AIOChannelMaskToString( AIOChannelMask *obj ) {
+ PUBLIC_EXTERN char *AIOChannelMaskToString( AIOChannelMask *obj ) {
      if( obj->strrep ) {
          free(obj->strrep);
      }
@@ -210,7 +208,7 @@ PUBLIC_EXTERN AIOChannelMask *NewAIOChannelMaskFromStr( const char *bitfields ) 
  * @param obj 
  * @param index
  */
-PUBLIC_EXTERN const char *AIOChannelMaskToStringAtIndex( AIOChannelMask *obj, unsigned index ) {
+PUBLIC_EXTERN char *AIOChannelMaskToStringAtIndex( AIOChannelMask *obj, unsigned index ) {
     if ( index >= (unsigned)obj->size ) {
         return NULL;
     }
@@ -263,28 +261,124 @@ PUBLIC_EXTERN char *AIOChannelMaskGetMask( AIOChannelMask *obj ) {
 #endif
 
 #ifdef SELF_TEST
+/**
+ * @brief Self test for verifying basic functionality of the AIOChannelMask interface
+ */ 
 
-#ifdef __cplusplus
+#include "gtest/gtest.h"
+#include "tap.h"
 using namespace AIOUSB;
-#endif
 
-#define TEST_MASK_STRING_AT_INDEX( expr, index, expected )                \
-    { \
-    int tval = strcmp(AIOChannelMaskToStringAtIndex( expr, index ),  expected ); \
-    printf("%s - %s%s%s%s\n", ( tval == 0  ? "ok" : "not ok" ), "decode was ", AIOChannelMaskToStringAtIndex( expr, index ), " expected was " , expected ); \
-    } 
 
-#define TEST_VALID_SIGNAL_LENGTH(mask, expected ) \
-    printf("%s - %s, exp=%d got=%d\n", (AIOChannelMaskNumberChannels( mask ) == expected ? "ok" : "not ok" ) , "Got correct number of channels", expected, (int)AIOChannelMaskNumberChannels( mask ) ); 
-
-#define TEST_MASK_STRING( mask, expected ) \
-    { \
-      int tval = strncmp(AIOChannelMaskToString( mask ),  expected ,strlen(expected)); \
-      printf("%s - %s%s%s%s\n", ( tval == 0  ? "ok" : "not ok" ), "decode was ", AIOChannelMaskToString( mask ), " expected was " , expected ); \
+TEST(AIOChannelMask, Channel_Mask_from_int ) {
+    int expected[] = {0,1,3,7,30};
+    int received[4] = {0};
+    int i,j,pos;
+    AIOChannelMask *mask = NewAIOChannelMask( 32 );
+    AIOChannelMaskSetMaskFromInt( mask , 1 | 2 | 1 << 3 | 1 << 7 | 1 << 30 );
+    EXPECT_STREQ( "01000000000000000000000010001011", AIOChannelMaskToString( mask ) );
+    EXPECT_STREQ( "10001011" , AIOChannelMaskToStringAtIndex( mask, 0 ));
+    EXPECT_EQ( 5, AIOChannelMaskNumberChannels( mask ));
+    j = 0;
+    pos = 0;
+    for ( i = AIOChannelMaskIndices(mask, &j ) ; i >= 0 ; i = AIOChannelMaskNextIndex(mask, &j ) ) { 
+        received[pos] = i;
+        EXPECT_EQ( expected[pos], received[pos] );
+        pos ++;
     }
+    DeleteAIOChannelMask( mask );
+}
 
-#define TEST_VALUE_EQUAL( expr, value ) \
-    printf("%s - %s%d%s%d\n", ( expr == value ? "ok" : "not ok" ), "value ", expr, " and expected ", value );
+TEST(AIOChannelMask, Channel_Mask_From_String ) {
+    int expected[] = {0,1,3,7,30};
+    int expected_long[] = {0,1,3,7,30,32,33,35,39,62};
+    int received[4] = {0};
+    int i,j,pos;
+    char tmpmask;
+    AIOChannelMask *mask = NewAIOChannelMaskFromStr( "0100000000000000000000001000101101000000000000000000000010001011" );
+    /* twice as long, verify that index works and that couning still works */
+    EXPECT_STREQ( "01000000", AIOChannelMaskToStringAtIndex( mask, 7 ));
+    EXPECT_EQ( 10, AIOChannelMaskNumberChannels( mask ) );
+    EXPECT_STREQ( "00000000", AIOChannelMaskToStringAtIndex( mask, 1 ));
+    EXPECT_STREQ( "01000000", AIOChannelMaskToStringAtIndex( mask, 3 ));
+    AIOChannelMaskSetMaskAtIndex( mask, 0xff, 2 );
+    EXPECT_STREQ( "11111111", AIOChannelMaskToStringAtIndex( mask, 2 ));
+    AIOChannelMaskGetMaskAtIndex( mask, &tmpmask, 2 );
+    EXPECT_EQ( 0xff, (unsigned char)tmpmask );
+    AIOChannelMaskSetMaskAtIndex( mask, 0xf0, 2 );
+    EXPECT_STREQ( "11110000" , AIOChannelMaskToStringAtIndex(mask, 2 ));
+
+    pos = 0;
+    j = 0;
+    for ( i = AIOChannelMaskIndices( mask, &j ); i >= 0 ; i = AIOChannelMaskNextIndex( mask, &j )) { 
+        received[pos] = i;
+        EXPECT_EQ( expected_long[pos], received[pos] );
+        pos ++;
+    }
+    DeleteAIOChannelMask( mask );
+
+}
+
+TEST(AIOChannelMask, Mask_Indices ) {
+    char signals[32] = {'\0'};
+    int expected[] = {0,1,3,7,30};
+    int expected_long[] = {0,1,3,7,30,32,33,35,39,62};
+    int received[4] = {0};
+    int i,j,pos;
+    char tmpmask;
+    AIOChannelMask *mask;
+    strcpy(signals,"00000000000001000011000101011111" );
+    mask = NewAIOChannelMask( strlen(signals) );
+    AIOChannelMaskSetMaskFromStr( mask, signals );
+    EXPECT_STREQ( "01011111", AIOChannelMaskToStringAtIndex( mask, 0 ));
+    EXPECT_STREQ( "00000100", AIOChannelMaskToStringAtIndex( mask, 2 ));
+    EXPECT_EQ( 10, AIOChannelMaskNumberChannels( mask ));
+    DeleteAIOChannelMask( mask );
+}
+
+TEST(AIOChannelMask, Testing_indices ) {
+    char signals[32] = {'\0'};
+    int expected[] = {0,1,3,7,30};
+    int expected_long[] = {0,1,3,7,30,32,33,35,39,62};
+    int received[4] = {0};
+    int i,j,pos;
+    char tmpmask;
+    AIOChannelMask *mask;
+    mask = NewAIOChannelMaskFromStr( "010101010101010100" );
+    EXPECT_STREQ( "01010100", AIOChannelMaskToStringAtIndex ( mask, 0 ));
+    EXPECT_STREQ( "01010101", AIOChannelMaskToStringAtIndex( mask, 1 ));
+    EXPECT_STREQ( "01", AIOChannelMaskToStringAtIndex( mask, 2 ));
+    EXPECT_STREQ( "010101010101010100", AIOChannelMaskToString( mask ));
+    EXPECT_EQ( 8, AIOChannelMaskNumberChannels( mask ));
+    DeleteAIOChannelMask( mask );
+}
+
+TEST(AIOChannelMask, One_more_thing ) {
+    char signals[32] = {'\0'};
+    int received[4] = {0};
+    int i,j,pos;
+    char tmpmask;
+    AIOChannelMask *mask;
+    mask = NewAIOChannelMaskFromStr("01010100011001010111001101110100");
+    EXPECT_STREQ( "Test", AIOChannelMaskGetMask( mask ) );
+    DeleteAIOChannelMask( mask );
+}
+
+TEST(AIOChannelMask, Setup_After_null_initialization ) {
+    AIOChannelMask *mask = NewAIOChannelMaskFromStr("1111");
+    char tmpmask;
+    int retval;
+    EXPECT_STREQ( "1111", AIOChannelMaskToString(mask ));
+    AIOChannelMaskGetMaskAtIndex( mask, &tmpmask, 0 );
+    EXPECT_EQ( 15, tmpmask );
+    DeleteAIOChannelMask( mask );
+    mask = NewAIOChannelMask(0);
+    retval = (int)AIOChannelMaskSetMaskFromStr(mask, "1010");
+    EXPECT_EQ(0, retval );
+    EXPECT_STREQ( "1010", AIOChannelMaskToString( mask ));
+    EXPECT_EQ(4, AIOChannelMaskNumberSignals( mask ));
+    EXPECT_EQ(2, AIOChannelMaskNumberChannels( mask ));
+}
 
 
 int main(int argc, char *argv[] )
@@ -297,85 +391,15 @@ int main(int argc, char *argv[] )
   int expected_long[] = {0,1,3,7,30,32,33,35,39,62};
   int received[4] = {0};
   AIOChannelMask *mask = NewAIOChannelMask( 32 );
-  AIOChannelMaskSetMaskFromInt( mask , 1 | 2 | 1 << 3 | 1 << 7 | 1 << 30 );
-  printf("1..32\n");
 
-  /* AIOChannelMaskToString( mask ); */
-  /* AIOChannelMaskToString( mask ); */
-  TEST_MASK_STRING( mask, "01000000000000000000000010001011");
-  TEST_MASK_STRING_AT_INDEX( mask, 0,  "10001011");
-  TEST_VALID_SIGNAL_LENGTH( mask, 5 );
+  testing::InitGoogleTest(&argc, argv);
+  testing::TestEventListeners & listeners = testing::UnitTest::GetInstance()->listeners();
+#ifdef GTEST_TAP_PRINT_TO_STDOUT
+  delete listeners.Release(listeners.default_result_printer());
+#endif
 
-  pos = 0;
-
-  j = 0;
-  for ( i = AIOChannelMaskIndices(mask, &j ) ; i >= 0 ; i = AIOChannelMaskNextIndex(mask, &j ) ) {
-      received[pos] = i;
-      printf("%s - received: %d matches expected: %d\n", (received[pos] == expected[pos] ? "ok" : "not ok" ), 
-             received[pos], expected[pos] );
-      pos ++;
-  }
-  DeleteAIOChannelMask( mask );
-
-  mask = NewAIOChannelMaskFromStr( "0100000000000000000000001000101101000000000000000000000010001011" );
-  /* twice as long, verify that index works and that couning still works */
-  TEST_MASK_STRING( mask, "0100000000000000000000001000101101000000000000000000000010001011" );
-  TEST_MASK_STRING_AT_INDEX( mask, 7, "01000000" );
-  TEST_VALID_SIGNAL_LENGTH( mask, 10 );
-  TEST_MASK_STRING_AT_INDEX( mask, 1, "00000000" );
-  TEST_MASK_STRING_AT_INDEX( mask, 3, "01000000" );
-  AIOChannelMaskSetMaskAtIndex( mask, 0xff, 2 );
-  TEST_MASK_STRING_AT_INDEX( mask, 2, "11111111" );
-  AIOChannelMaskGetMaskAtIndex( mask, &tmpmask, 2 );
-  TEST_VALUE_EQUAL( (unsigned char)tmpmask , 0xff);
-  AIOChannelMaskSetMaskAtIndex( mask, 0xf0, 2 );
-  TEST_MASK_STRING_AT_INDEX( mask, 2, "11110000" );
-
-  pos = 0;
-  j = 0;
-  for ( i = AIOChannelMaskIndices( mask, &j ); i >= 0 ; i = AIOChannelMaskNextIndex( mask, &j )) { 
-    received[pos] = i;
-    printf("%s - received: %d matches expected: %d\n", (received[pos] == expected_long[pos] ? "ok" : "not ok" ), 
-           received[pos], expected_long[pos] );
-    pos ++;
-  }
-  DeleteAIOChannelMask( mask );
-
-
-  strcpy(signals,"00000000000001000011000101011111" );
-  mask = NewAIOChannelMask( strlen(signals) );
-  AIOChannelMaskSetMaskFromStr( mask, signals );
-  TEST_MASK_STRING_AT_INDEX( mask, 0, "01011111" );
-  TEST_MASK_STRING_AT_INDEX( mask, 2, "00000100" );
-  TEST_VALID_SIGNAL_LENGTH( mask, 10 );
-  DeleteAIOChannelMask( mask );
-
-  mask = NewAIOChannelMaskFromStr( "010101010101010100" );
-  TEST_MASK_STRING_AT_INDEX( mask, 0,  "01010100" );
-  TEST_MASK_STRING_AT_INDEX( mask, 1,  "01010101" );
-  TEST_MASK_STRING_AT_INDEX( mask, 2,  "01" );
-  TEST_MASK_STRING( mask, "010101010101010100" );
-  TEST_VALID_SIGNAL_LENGTH( mask, 8 );
-  DeleteAIOChannelMask( mask );
-
-  mask = NewAIOChannelMaskFromStr("01010100011001010111001101110100");
-  char *tmp = AIOChannelMaskGetMask( mask );
-  printf("%s - %s, exp=%s got=%s\n", 
-         (strncmp(tmp,"Test", AIOChannelMaskGetSize(mask)) == 0 ? "ok" : "not ok" ),
-         "Got correct binary representation",
-         "Test",
-         tmp
-         );
-  DeleteAIOChannelMask( mask );
-
-  mask = NewAIOChannelMaskFromStr("1111");
-  TEST_MASK_STRING_AT_INDEX( mask , 0,  "1111" );
-
-  AIOChannelMaskGetMaskAtIndex( mask, &tmpmask, 0 );
-  TEST_VALUE_EQUAL( tmpmask , 15);
-  free(tmp);
-  DeleteAIOChannelMask( mask );
-
+  listeners.Append( new tap::TapListener() );
+  return RUN_ALL_TESTS();  
 
 }
 

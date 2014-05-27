@@ -255,6 +255,7 @@ java_cleanup:
 	$(RM) -rf com
 	$(RM) -rf libAIOUSB.so $(JAVA_BUILT) AIOUSB_wrap.c AIOUSB_wrap.o AIOUSB.jar *.class $(JAVA_DIR)
 	@$(RM) -rf /tmp/scala-devel
+	$(RM) -f tests/*.class
 
 java_atest:
 	@$(MAKE) -f GNUMakefile java 2>&1 > /dev/null

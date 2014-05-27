@@ -122,7 +122,7 @@ PUBLIC_EXTERN unsigned DIOBufByteSize( DIOBuf *buf ) {
   return buf->_size / BITS_PER_BYTE;
 }
 /*----------------------------------------------------------------------------*/
-char *DIOBufToString( DIOBuf *buf ) {
+PUBLIC_EXTERN char *DIOBufToString( DIOBuf *buf ) {
   unsigned i;
   memset(buf->_strbuf,0, DIOBufSize(buf)+1);
   for( i = 0; i < buf->_size ; i ++ )

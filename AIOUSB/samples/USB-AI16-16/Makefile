@@ -14,6 +14,8 @@ else
 	DEBUGSTEM	:=
 endif
 
+
+
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Regular C related Build
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -115,6 +117,8 @@ test	:
 clean:
 	$(RM) $(ALL_CLEAN_TARGETS)
 	$(RM) *.csv
+	$(RM) *.class
+	$(RM) *.log
 #
 # This sets up the dependencies for our .a builds
 #
@@ -125,21 +129,18 @@ $(eval $(call CLASSLIB_BUILD))
 $(AIO_LIB_DIR)/wrappers/java/$(JAVA_BUILT):
 	cd $(AIO_LIB_DIR)/wrappers && $(MAKE) -f GNUMakefile inplace_java
 
-#Sample.jar: $(AIO_LIB_DIR)/wrappers/java/$(JAVA_BUILT) Sample.class
-#	@echo "Class-Path: $(AIOUSBJAVALIBDIR)/AIOUSB.jar" > manifest
-#	jar cmfe manifest Sample.jar Sample Sample.class
-#	rm manifest
-
 %.jar: %.class $(AIO_LIB_DIR)/wrappers/java/$(JAVA_BUILT)
 	@echo "Class-Path: $(AIOUSBJAVALIBDIR)/AIOUSB.jar" > manifest
-	jar cmfe manifest $@ Sample $<
+	jar cmfe manifest $@ $(subst .jar,,$< ) $<
 	rm manifest
+
+%:	%.jar
+	LD_LIBRARY_PATH="$${AIO_LIB_DIR}:$${PWD}/../../lib/wrappers/java" java -classpath "::$${PWD}/../../lib/wrappers/java/AIOUSB.jar:$<" $@
 
 %:%.class
 	LD_LIBRARY_PATH=$${AIO_LIB_DIR}:$${PWD}/../../lib/wrappers/java  java -classpath "../../lib/wrappers/java/AIOUSB.jar:$$PWD" $@
 
-# Sample.class: Sample.java
-%.class:%.java
+%.class:	%.java
 	$(JAVAC) -cp $(AIOUSBJAVALIBDIR)/AIOUSB.jar $<
 
 

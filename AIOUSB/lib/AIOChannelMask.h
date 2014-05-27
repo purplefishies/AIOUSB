@@ -30,8 +30,8 @@ void  DeleteAIOChannelMask( AIOChannelMask *mask );
 AIOChannelMask *NewAIOChannelMaskFromStr( const char *bitfields );
 
 
-PUBLIC_EXTERN const char *AIOChannelMaskToString( AIOChannelMask *mask );
-PUBLIC_EXTERN const char *AIOChannelMaskToStringAtIndex( AIOChannelMask *obj, unsigned index );
+PUBLIC_EXTERN char *AIOChannelMaskToString( AIOChannelMask *mask );
+PUBLIC_EXTERN char *AIOChannelMaskToStringAtIndex( AIOChannelMask *obj, unsigned index );
 PUBLIC_EXTERN char *AIOChannelMaskGetMask( AIOChannelMask *mask );
 PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskGetMaskAtIndex( AIOChannelMask *mask, char *val, unsigned index );
 PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskNumberChannels( AIOChannelMask *mask );

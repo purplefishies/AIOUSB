@@ -103,7 +103,6 @@
 %extend DIOBuf {
 
   DIOBuf( int size ) {
-    printf("Creating object\n");
     return (DIOBuf *)NewDIOBuf( size );
   }
 
@@ -116,7 +115,6 @@
   }
 
   ~DIOBuf() {
-    /* printf("Deleting object\n"); */
     DeleteDIOBuf( $self );
   }
   
@@ -136,7 +134,6 @@
      return DIOBufSize( $self );
   }
   
-
   DIOBuf *resize( unsigned size ) {
     return DIOBufResize( $self, size );
   } 
@@ -193,7 +190,7 @@
  }
 #elif defined(SWIGJAVA)
 %extend AIOChannelMask {
-  const char *toFoo() {
+  char *toFoo() {
       return AIOChannelMaskToString( $self );
   }
 }

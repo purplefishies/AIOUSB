@@ -43,9 +43,9 @@ class Sample {
             nameSize = nnameSize;
             numDIOBytes = nnumDIOBytes;
             numCounters = nnumCounters;
-            outputMask = new AIOChannelMask(0);
-            readBuffer = new DIOBuf(MAX_DIO_BYTES );
-            writeBuffer = new DIOBuf( MAX_DIO_BYTES );
+            outputMask   = new AIOChannelMask(0);
+            readBuffer   = new DIOBuf(MAX_DIO_BYTES );
+            writeBuffer  = new DIOBuf( MAX_DIO_BYTES );
         }
     }
 
@@ -72,6 +72,12 @@ class Sample {
         AIOUSB.AIOUSB_ListDevices();
         int number_devices = 1;
         long deviceMask = AIOUSB.GetDevices();
+
+        // DIOBuf buf = AIOUSB.NewDIOBufFromBinStr("10101010001100111111000011111111" );
+        // char val = 0xff;
+        // AIOUSB.DIOBufSetByteAtIndex( buf,  (long)1, (char)0xff );
+        // System.out.println(AIOUSB.DIOBufToString(buf));
+
         SWIGTYPE_p_unsigned_long productID    = AIOUSB.new_ulp();
         SWIGTYPE_p_unsigned_long nameSize     = AIOUSB.new_ulp();
         SWIGTYPE_p_unsigned_long numDIOBytes  = AIOUSB.new_ulp();
@@ -79,13 +85,12 @@ class Sample {
         String name = "";
         long index = 0;
         ArrayList<Device> devices = new ArrayList<Device>();
+
         while( deviceMask > 0 && (devices.size() < number_devices  ) ) {
             if ( (deviceMask & 1 ) != 0 ) { 
                 AIOUSB.QueryDeviceInfo(index , productID, nameSize, name, numDIOBytes, numCounters);
-                // This is a hack, only because Java has some issue
-                // retrieving the value of ProductIDS.USB_DIO_32
                 if( AIOUSB.ulp_value(productID) == ProductIDS.USB_DIO_32.swigValue() ) { 
-                    System.out.println("Foud device at index:" + index );
+                    System.out.println("Found device at index:" + index );
                     devices.add( new Device( index, productID, nameSize, numDIOBytes, numCounters ) );
                 }
                 index += 1;
@@ -102,48 +107,47 @@ class Sample {
 
         Device device = devices.get(0);
         // System.out.println("Using device index:" + device.index  );
-        // System.exit(0);
+
         AIOUSB.AIOUSB_SetCommTimeout( device.index, 1000 );
+        device.outputMask = new AIOChannelMask(0);
+
+        // Use the following setting to allow writing to each of the 4 banks of 8 channels
         AIOUSB.AIOChannelMaskSetMaskFromStr( device.outputMask, "1111" );
-        System.out.println("Mask is " + device.outputMask.toFoo() );
-        
-            // for port in range(0x20):
-        System.out.println("Using device index:" + device.index  );
+
         for( int port = 0; port < 0x20; port ++ ) { 
             System.out.println( "Using value " + port );
             AIOUSB.DIOBufSetIndex( device.writeBuffer, port, 1 );
-            long result = AIOUSB.DIO_Configure( device.index, (short)1 , device.outputMask , device.writeBuffer );
+            long result = AIOUSB.DIO_Configure( device.index, (short)0 , device.outputMask , device.writeBuffer );
+            if (result != 0 ) { 
+                System.out.println("\tresult value:" + result );
+            }
             try {
                 TimeUnit.MILLISECONDS.sleep(100);// Thread.sleep(0,10000);
             } catch ( java.lang.InterruptedException e ) {
 
             }
         }
-        //     System.out.println( DIOBufToString( device.writeBuffer )
-        //         result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer )
-        //         #System.out.println( "Result was %d" % (result)
-        //         time.sleep(1/10.0)
-        //         }
-        //     # ONLY Port D
-        //     AIOChannelMaskSetMaskFromStr(device.outputMask, "1000" );
-        // result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer );
-        // time.sleep(1/10.0)
-        //     # ONLY Port C
-        //     AIOChannelMaskSetMaskFromStr(device.outputMask, "0100" );
-        // result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer );
-        // time.sleep(1/10.0);
-        // # ONLY Port B
-        //     AIOChannelMaskSetMaskFromStr(device.outputMask, "0010" );
-        // result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer );
-        // time.sleep(1/10.0);
-        // # ONLY Port A
-        //     AIOChannelMaskSetMaskFromStr(device.outputMask, "0001" );
-        // result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer );
-        // time.sleep(1/10.0);
-        // # All Channels
-        //     AIOChannelMaskSetMaskFromStr(device.outputMask, "1111" );
-        // result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer );
+        long result;
+        try { 
+            // ONLY Port D
+            AIOUSB.AIOChannelMaskSetMaskFromStr(device.outputMask, "1000" );
+            result = AIOUSB.DIO_Configure( device.index, (short)0, device.outputMask , device.writeBuffer );
+            TimeUnit.MILLISECONDS.sleep(500);
+            // ONLY Port C        
+            AIOUSB.AIOChannelMaskSetMaskFromStr(device.outputMask, "0100" );
+            result = AIOUSB.DIO_Configure( device.index, (short)0, device.outputMask , device.writeBuffer );
+            TimeUnit.MILLISECONDS.sleep(500);
+            // ONLY Port B        
+            AIOUSB.AIOChannelMaskSetMaskFromStr(device.outputMask, "0010" );
+            result = AIOUSB.DIO_Configure( device.index, (short)0, device.outputMask , device.writeBuffer );
+            TimeUnit.MILLISECONDS.sleep(500);
+            // ONLY Port A   
+            AIOUSB.AIOChannelMaskSetMaskFromStr(device.outputMask, "0001" );
+            result = AIOUSB.DIO_Configure( device.index, (short)0, device.outputMask , device.writeBuffer );
+            TimeUnit.MILLISECONDS.sleep(500);
+        } catch ( java.lang.InterruptedException e ) {
 
+        }
 
     }
 }

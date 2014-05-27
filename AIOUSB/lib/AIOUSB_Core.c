@@ -290,7 +290,7 @@ PUBLIC_EXTERN unsigned long AIOUSB_Validate(unsigned long *DeviceIndex) {
         return AIOUSB_ERROR_INVALID_MUTEX;
 
     unsigned long result = AIOUSB_ERROR_INVALID_INDEX;
-    if(!AIOUSB_IsInit()) {
+    if ( !AIOUSB_IsInit() ) {
           AIOUSB_UnLock();
           return result;
       }
@@ -621,6 +621,7 @@ PUBLIC_EXTERN void PopulateDeviceTableTest(unsigned long *products, int length )
     AIOUSB_InitTest();    
     for( int i = 0; i < length ; i ++ ) {
         AddDeviceToDeviceTable( &numAccesDevices, products[i] );
+        deviceTable[numAccesDevices-1].device = (libusb_device *)0x42;
     }
 }
 

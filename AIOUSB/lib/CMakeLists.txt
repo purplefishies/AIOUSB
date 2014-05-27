@@ -120,8 +120,7 @@ add_dependencies( aiousbdbg aiousbdbg_copies )
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 INCLUDE( build_samples )
 
-set(SELF_TEST_ENTRIES AIOContinuousBuffer.c AIOChannelMask.c )
-# set(SELF_TEST_ENTRIES AIOContinuousBuffer.c )
+set(SELF_TEST_ENTRIES AIOContinuousBuffer.c )
 foreach( selftest_file ${SELF_TEST_ENTRIES} )
   set(MY_FLAGS "-DAIOUSB_DEBUG_LOG -DAIO_DEBUG -DTAP_TEST -DHAS_PTHREAD -DSELF_TEST" )
   set(MY_LIBRARIES aiousbdbg usb-1.0 pthread m )
@@ -134,10 +133,16 @@ find_package( GTestTap )
 
 if( GTESTTAP_FOUND )
   add_test(DIOBuf_test DIOBuf.c )
+  add_test(AIOChannelMask_test AIOChannelMask.c )
+  add_test(AIOUSB_Core_test AIOUSB_Core.c )
+  add_test(AIODeviceInfo_test AIODeviceInfo.c)
   set(MY_FLAGS "-DSELF_TEST -D__aiousb_cplusplus -DGTEST_TAP_PRINT_TO_STDOUT"  )
   set(MY_LIBRARIES aiousbdbg usb-1.0 pthread m gtest aiousb aiousbcpp )
   # MESSAGE(STATUS "Libraries: ${MY_LIBRARIES}")
   build_gtest_cpp_file( aiousblibs DIOBuf.c ${MY_FLAGS} "${MY_LIBRARIES}" )
+  build_gtest_cpp_file( aiousblibs AIOChannelMask.c ${MY_FLAGS} "${MY_LIBRARIES}" )
+  build_gtest_cpp_file( aiousblibs AIOUSB_Core.c ${MY_FLAGS} "${MY_LIBRARIES}"  )
+  build_gtest_cpp_file( aiousblibs AIODeviceInfo.c  ${MY_FLAGS} "${MY_LIBRARIES}"  )
 endif( GTESTTAP_FOUND )
 
 
