@@ -131,14 +131,12 @@ $(AIO_LIB_DIR)/wrappers/java/$(JAVA_BUILT):
 
 %.jar: %.class $(AIO_LIB_DIR)/wrappers/java/$(JAVA_BUILT)
 	@echo "Class-Path: $(AIOUSBJAVALIBDIR)/AIOUSB.jar" > manifest
-	jar cmfe manifest $@ $(subst .jar,,$< ) $<
+	jar cvfm $@ manifest $<
 	rm manifest
 
 %:	%.jar
 	LD_LIBRARY_PATH="$${AIO_LIB_DIR}:$${PWD}/../../lib/wrappers/java" java -classpath "::$${PWD}/../../lib/wrappers/java/AIOUSB.jar:$<" $@
 
-%:%.class
-	LD_LIBRARY_PATH=$${AIO_LIB_DIR}:$${PWD}/../../lib/wrappers/java  java -classpath "../../lib/wrappers/java/AIOUSB.jar:$$PWD" $@
 
 %.class:	%.java
 	$(JAVAC) -cp $(AIOUSBJAVALIBDIR)/AIOUSB.jar $<
