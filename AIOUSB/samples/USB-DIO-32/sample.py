@@ -56,8 +56,12 @@ while deviceMask > 0 and len(devices) < number_devices :
             devices.append( Device( index=index, productID=obj.PID, numDIOBytes=obj.DIOBytes,numCounters=obj.Counters ))
     index += 1
     deviceMask >>= 1
-
-device = devices[0]
+try:
+    device = devices[0]
+except IndexError:
+    print """No devices were found. Please make sure you have at least one 
+ACCES I/O Products USB device plugged into your computer"""
+    sys.exit(1)
 
 AIOUSB_SetCommTimeout( device.index, 1000 )
 AIOChannelMaskSetMaskFromStr( device.outputMask, "1111" )

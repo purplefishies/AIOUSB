@@ -13,7 +13,7 @@
 #define PRIVATE
 
 #include "AIODataTypes.h"
-#include "libusb.h"
+#include "libusb-1.0/libusb.h"
 #include <pthread.h>
 #include <semaphore.h>
 
