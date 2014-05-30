@@ -47,7 +47,7 @@ char *get_time();
 int not_done( struct options *opts);
 
 struct options {
-  int stderr;
+  int tmpstderr;
   int count;
 };
 
@@ -66,13 +66,13 @@ int main(int argc, char **argv) {
     AIOUSB_BOOL deviceFound = AioUsbFindDeviceIndex(&deviceIndex);
 
     if (deviceFound == AIOUSB_TRUE ) {
-      if( opts.stderr ) 
+      if( opts.tmpstderr ) 
         printf("DEVICE INDEX: %lu\n\n", deviceIndex);
 
       DeviceProperties devProps;
       unsigned long result = AIOUSB_GetDeviceProperties(deviceIndex,
                                                         &devProps);
-      if (result == AIOUSB_SUCCESS && opts.stderr ) {
+      if (result == AIOUSB_SUCCESS && opts.tmpstderr ) {
         AioUsbPrintDeviceProps(&devProps);
       }
 
@@ -123,12 +123,12 @@ int main(int argc, char **argv) {
             usleep(50000);
             result = ADC_BulkPoll(deviceIndex, &bytesRemaining);
             if (result == AIOUSB_SUCCESS) {
-              if( opts.stderr ) 
+              if( opts.tmpstderr ) 
                 fprintf(stderr,"  %lu bytes remaining\n", bytesRemaining);
               if (bytesRemaining == 0)
                 break;
             } else {
-              if( opts.stderr ) 
+              if( opts.tmpstderr ) 
                 fprintf(stderr,"Error '%s' polling bulk acquire progress\n",
                         AIOUSB_GetResultCodeAsString(result));
               bulk_fail = 1;
@@ -173,7 +173,7 @@ struct options get_options(int argc, char **argv )
   while ((opt = getopt(argc, argv, "c:e")) != -1) {
     switch (opt) {
     case 'e':
-      retoptions.stderr = 1;
+      retoptions.tmpstderr = 1;
       break;
     case 'c':
       retoptions.count = atoi(optarg);
