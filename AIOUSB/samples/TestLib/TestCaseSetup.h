@@ -39,6 +39,7 @@ extern int CURRENT_DEBUG_LEVEL;
 #define DEBUG(X,...) if( CURRENT_DEBUG_LEVEL & DEBUG_LEVEL ) \
                          printf(X, ##__VA_ARGS__ );
 
+#undef ERROR
 #define ERROR(X,...) if( CURRENT_DEBUG_LEVEL & ERROR_LEVEL ) \
                          printf(X, ##__VA_ARGS__ );
 
