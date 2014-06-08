@@ -24,7 +24,13 @@ DIOBuf.o
 
 
 CCINC		:= 
-OSTYPE= $(shell uname -s)
+OSTYPE		= $(shell uname -s )
+#OSTYPE		= $(shell fake_uname)
+CYGWINTYPE	= $(patsubst CYGWIN%,CYGWIN,$(OSTYPE))
+ifeq ("$(CYGWINTYPE)","CYGWIN")
+OSTYPE		=CYGWIN
+endif
+
 
 ifeq ("$(OSTYPE)","Darwin") 
 CC_SHFLAGS := -dynamiclib
@@ -38,22 +44,34 @@ CPPOBJS := $(COBJS:.o=.cpp.o)
 CPPDBGOBJS := $(CPPOBJS:.cpp.o=.cpp.dbg.o)
 
 
-CLIB 		:= libaiousb.a
-CDBGLIB 	:= libaiousbdbg.a
-CPPLIB 		:= libaiousbcpp.a
-CPPDBGLIB 	:= libaiousbcppdbg.a
-
 ifeq ("$(OSTYPE)","Darwin")
-SHCDBGLIB 	:= libaiousbdbg.dylib
-SHCPPLIB	:= libaiousbcpp.dylib
-SHCPPDBGLIB 	:= libaiousbcppdbg.dylib
-SHCLIB		:= libaiousb.dylib
+LIBPREFIX=lib
+LIBSUFFIX=dylib
+STATICSUFFIX=a
+else ifeq ("$(OSTYPE)","CYGWIN")
+LIBPREFIX=cyg
+LIBSUFFIX=dll
+STATICSUFFIX=a
 else
-SHCDBGLIB 	:= libaiousbdbg.so
-SHCPPLIB	:= libaiousbcpp.so
-SHCPPDBGLIB 	:= libaiousbcppdbg.so
-SHCLIB		:= libaiousb.so
+LIBPREFIX=lib
+LIBSUFFIX=so
+STATICSUFFIX=a
 endif
+
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# Library names
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+SHCDBGLIB 	:= $(LIBPREFIX)aiousbdbg.$(LIBSUFFIX)
+SHCPPLIB	:= $(LIBPREFIX)aiousbcpp.$(LIBSUFFIX)
+SHCPPDBGLIB 	:= $(LIBPREFIX)aiousbcppdbg.$(LIBSUFFIX)
+SHCLIB		:= $(LIBPREFIX)aiousb.$(LIBSUFFIX)
+
+CLIB 		:= $(LIBPREFIX)aiousb.$(STATICSUFFIX)
+CDBGLIB 	:= $(LIBPREFIX)aiousbdbg.$(STATICSUFFIX)
+CPPLIB 		:= $(LIBPREFIX)aiousbcpp.$(STATICSUFFIX)
+CPPDBGLIB 	:= $(LIBPREFIX)aiousbcppdbg.$(STATICSUFFIX)
+
 
 ifdef DEBUG
         DEBUGOPTS       += -ggdb $(DEBUG)
@@ -75,9 +93,10 @@ override CXXFLAGS += -D__aiousb_cplusplus
 all : $(LIBS)
 
 testit:
-	echo $(CPPDBGOBJS)
-	echo $(OSTYPE)
-	echo $(CC_SHFLAGS)
+	@echo $(CPPDBGOBJS)
+	@echo $(OSTYPE)
+	@echo $(CC_SHFLAGS)
+	@echo $(CYGWINTYPE)
 
 all_cscope: $(LIBS) cscope
 
@@ -101,7 +120,26 @@ $(SHCPPLIB) : $(CPPOBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS)
 $(SHCPPDBGLIB) : $(CPPDBGOBJS)
 	$(CXX) $(CXXFLAGS)  $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS)
-else
+else ifeq ("$(OSTYPE)","CYGWIN")
+
+$(SHCLIB) : $(COBJS)
+#echo "$(CC) $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(COBJS) $(SHARED_LIBS)"
+	$(CC) $(LDFLAGS) $(CC_SHFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $(COBJS) -Wl,--no-whole-archive $(SHARED_LIBS)
+
+
+$(SHCDBGLIB): 	$(CDBGOBJS)
+#	@echo "$(CC) $(CC_SHFLAGS) $(LDFLAGS) -o $@ $(CDBGOBJS) $(SHARED_LIBS)"
+	$(CC) $(CC_SHFLAGS) $(LDFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $(CDBGOBJS) -Wl,--no-whole-archive $(SHARED_LIBS)
+
+$(SHCPPLIB) : $(CPPOBJS)
+#@echo "$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS)"
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $(CPPOBJS) -Wl,--no-whole-archive $(SHARED_LIBS)
+
+$(SHCPPDBGLIB) : $(CPPDBGOBJS)
+#@echo "$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS)"
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $(CPPOBJS) -Wl,--no-whole-archive $(SHARED_LIBS)
+
+else 
 $(SHCLIB) : $(COBJS)
 	$(CC)  $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $(COBJS) $(SHARED_LIBS)
 $(SHCDBGLIB): 	$(CDBGOBJS)
@@ -118,10 +156,15 @@ endif
 $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) : aiousb.h AIOUSB_Core.h
 
 OBJOPTS			:= -c 
-COMMONOPTS		:= -Wall -pthread -fPIC
+COMMONOPTS		:= -Wall -pthread
+ifneq ("$(OSTYPE)","CYGWIN")
+COMMONOPTS		+= -fPIC
+endif
+
+
 EXTRA_COPTS		:= -std=gnu99 -D_GNU_SOURCE
 SELF_TEST_FLAGS		:= -DSELF_TEST
-SELF_TEST_LIBS		:= -lm -lpthread libaiousbdbg.a libaiousbcppdbg.a  -lusb-1.0
+SELF_TEST_LIBS		:= -lm -lpthread libaiousbdbg.a libaiousbcppdbg.a -lusb-1.0
 SELF_TEST_CXX_FLAGS	:= -D__aiousb_cplusplus -DSELF_TEST 
 SELF_TEST_CXX_LIBS	:= $(SELF_TEST_LIBS) -lgtest
 
