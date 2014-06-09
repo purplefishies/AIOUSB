@@ -164,9 +164,9 @@ endif
 
 EXTRA_COPTS		:= -std=gnu99 -D_GNU_SOURCE
 SELF_TEST_FLAGS		:= -DSELF_TEST
-SELF_TEST_LIBS		:= -lm -lpthread libaiousbdbg.a libaiousbcppdbg.a -lusb-1.0
+SELF_TEST_LIBS		:= -lm -lpthread -laiousbdbg -lusb-1.0
 SELF_TEST_CXX_FLAGS	:= -D__aiousb_cplusplus -DSELF_TEST 
-SELF_TEST_CXX_LIBS	:= $(SELF_TEST_LIBS) -lgtest
+SELF_TEST_CXX_LIBS	:= $(SELF_TEST_LIBS) -laiousbcppdbg -lgtest
 
 PYCFLAGS		= $(DEBUGOPTS) $(COMMONOPTS)
 COPTS			:= $(DEBUGOPTS) $(COMMONOPTS) $(EXTRA_COPTS)
@@ -205,6 +205,6 @@ clean:
 	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) cscope.out
 
 distclean: 
-	-rm -f $(LIBS) $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) cscope.out *_test
+	-rm -f $(LIBS) $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) cscope.out *_test*
 cscope:	
 	cscope -b 

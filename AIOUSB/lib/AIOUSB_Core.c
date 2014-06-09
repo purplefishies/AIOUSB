@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <libusb-1.0/libusb.h>
+#include <libusb.h>
 
 #ifdef BACKTRACE
 #include <execinfo.h>
@@ -1235,7 +1235,7 @@ unsigned long GetDeviceSerialNumber(
     if( result != AIOUSB_SUCCESS )
         goto out_GetDeviceSerialNumber;
 
-    *pSerialNumber = (__uint64_t)buffer_data;
+    *pSerialNumber = (unsigned long)buffer_data;
 
 out_GetDeviceSerialNumber:
     AIOUSB_UnLock();

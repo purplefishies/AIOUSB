@@ -26,7 +26,7 @@
 #include "AIOContinuousBuffer.h"
 #include "AIOChannelMask.h"
 #include "AIOUSB_Core.h"
-#include <libusb-1.0/libusb.h>
+#include <libusb.h>
 #include <string.h>
 #include <math.h>
 

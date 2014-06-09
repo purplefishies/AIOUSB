@@ -52,7 +52,7 @@ AIOUSB_ListDevices()
 while deviceMask > 0 and len(devices) < number_devices :
     if (deviceMask & 1 ) != 0:
         obj = GetDeviceInfo( index )
-        if obj.PID == USB_DIO_32:
+        if obj.PID == USB_DIO_32 or obj.PID == USB_DIO_16A :
             devices.append( Device( index=index, productID=obj.PID, numDIOBytes=obj.DIOBytes,numCounters=obj.Counters ))
     index += 1
     deviceMask >>= 1

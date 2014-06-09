@@ -13,7 +13,7 @@
 #define PRIVATE
 
 #include "AIODataTypes.h"
-#include "libusb-1.0/libusb.h"
+#include "libusb.h"
 #include <pthread.h>
 #include <semaphore.h>
 
@@ -101,7 +101,7 @@ typedef struct {
     AIOUSB_BOOL bDeviceWasHere;
     unsigned char *LastDIOData;
     char *cachedName;
-    __uint64_t cachedSerialNumber;
+    unsigned long cachedSerialNumber;
     ADConfigBlock cachedConfigBlock;                  // .size == 0 == uninitialized
 
     /**

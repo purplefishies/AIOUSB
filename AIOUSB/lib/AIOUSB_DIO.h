@@ -11,7 +11,6 @@
 #include "DIOBuf.h"
 #include "AIOChannelMask.h"
 #include "AIODataTypes.h"
-#include <arpa/inet.h>
 #include <assert.h>
 #include <math.h>
 #include <string.h>

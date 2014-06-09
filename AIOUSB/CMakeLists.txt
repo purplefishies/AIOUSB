@@ -20,8 +20,9 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
   message(FATAL_ERROR "Prevented in-tree built. Please create a 'build' directory outside of the source code and call 'cmake' or 'ccmake' from there")
 endif()
 
-
+set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 cmake_minimum_required(VERSION 2.8)
+
 
 project( AIOUSBLIBS )
 
@@ -67,9 +68,12 @@ if(  UNIX OR APPLE )
   if("$ENV{CFLAGS}" STREQUAL "")
     if(USE_GCC OR USE_CLANG)
       MESSAGE(STATUS "GCC compiler?:${USE_GCC}")
-      if (USE_GCC)
-        set(CMAKE_C_FLAGS   "-std=gnu99 -fPIC" )
-      endif(USE_GCC)
+      if( USE_GCC ) 
+      	  set(CMAKE_C_FLAGS "-std=gnu99")
+      endif( USE_GCC )
+      if (USE_GCC AND NOT CYGWIN )
+        set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -fPIC" )
+      endif(USE_GCC AND NOT CYGWIN )
       set(CMAKE_CXX_FLAGS "-D__aiousb_cplusplus -fPIC" )
       set(CORELIBS pthread usb-1.0 )
     endif(USE_GCC OR USE_CLANG)

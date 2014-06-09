@@ -19,7 +19,8 @@ aiousb_module = Extension('_AIOUSB',
                                     ],
                           libraries=["usb-1.0","pthread","aiousb","aiousbdbg"],
                           include_dirs=["/usr/include/libusb-1.0",
-                                        os.environ.get("AIOUSB_ROOT") + "/lib"
+                                        os.environ.get("AIOUSB_ROOT") + "/lib",
+                                        "/usr/include"
                                         ]
                            )
 #aiousb_module.extra_compile_args = ['-Wl,--whole-archive  -lusb-1.0'];

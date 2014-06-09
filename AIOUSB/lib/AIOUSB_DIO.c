@@ -8,6 +8,7 @@
 
 #include "AIOUSB_DIO.h"
 #include "AIOUSB_Core.h"
+#include <arpa/inet.h>
 
 #ifdef __cplusplus
 namespace AIOUSB {
