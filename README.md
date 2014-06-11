@@ -155,7 +155,7 @@ sudo make install
 
 #### Java
 
-You must make sure that you have the Java Developer Kit installed (
+You must make sure that you have the Java Development Kit installed (
 JDK ). 
 ```bash
 export CPATH=$CPATH:$JAVA_HOME/include # example /usr/lib/jvm/java-7-openjdk-i386/include
@@ -180,6 +180,21 @@ cd AIOUSB/lib/wrappers
 make -f GNUMakefile inplace_ruby
 
 ```
+
+#### Octave
+```bash
+cd AIOUSB/lib/wrappers
+make -f GNUMakefile inplace_octave
+
+```
+
+#### R
+```bash
+cd AIOUSB/lib/wrappers
+make -f GNUMakefile inplace_R
+```
+
+
 
 
 Users who wish to build web applications around the ACCES I/O Product line might consider one of these
