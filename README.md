@@ -45,13 +45,27 @@ sudo yum install libusb-1.0 cmake swig
 sudo zypper install libusb-1.0 cmake swig
 ```
 
+#### Mac OS X
+
+##### Homebrew
+
+```bash
+brew install libusb  cmake
+```
+
+##### Darwin Ports
+
+```bash
+brew install libusb  cmake
+```
+
 
 -------------------------------------
 
 
-How to Build
-------------
-Building ACCES I/O Products' Driver library amounts to compiling C source files to produce C and C++ based shared ( .so ) or static (.a) libraries.  The build process relies on either GNU make or Cmake.  The first method of building ( see [non-cmake users](#noncmake) is a little more involved but will give you the ability to build wrapper language packs.  Currently ,the simplified cmake system is easier to build and install the general libraries but we have been unable to use it to deploy the Swig based wrappers as we would have liked. If you don't require any other languages besides C/C++, I suggest you use the Cmake based approach.
+##How to Build on UNIX systems
+-----------------------------
+Building ACCES I/O Products' Driver library amounts to compiling C source files to produce C and C++ based shared ( .so ) or static (.a) libraries.  The build process relies on either GNU make or Cmake.  The first method of building ( see [non-cmake users](#noncmake) is a little more involved but will give you the ability to build wrapper language packs.  Currently ,the simplified cmake system is easier to build and install the general libraries but we have been unable to use it to deploy the Swig based wrappers as we would have liked. If you don't require any other languages besides C/C++, it is suggested you use the Cmake based approach.
 
 
 ## <a href="#noncmake"></a>Non-CMake users
@@ -79,6 +93,39 @@ sudo make install
 ```
 
 
+## Installation
+
+### Linux Installation
+
+1. Install fxload either using the appropriate installation tool for
+your platform or by installing from
+https://github.com/accesio/fxload.  Copy fxload to a standard location
+in your $PATH.
+
+2. cp AIOUSB/Firmware/*.hex /usr/share/usb/
+
+3. cp AIOUSB/Firmware/10-acces*.rules /etc/udev/rules.d
+
+
+
+### Mac Installation (work in progress!!)
+
+1. Build and Install fxload from https://github.com/accesio/fxload and
+copy fxload to a standard location in your $PATH.
+
+
+2. Determine the raw USB Device ID for your card by looking for the
+Vendor ID 1605 in your System Profiler. Set the variable PRODUCTID to be
+this value.
+
+
+3. Manually upload your corresponding firmware to your device by
+running the following:
+
+fxload -t fx2lp -I AIOUSB/Firmware/CORRESPONDING_HEXFILE.hex -D 1605:${PRODUCTID}
+
+
+
 
 ## Extra Language Support
 In addition, to providing fully functional C Shared and Static libraries, this project also provides
@@ -91,6 +138,49 @@ wrapper language support for the following languages:
 * PHP
 * Octave
 * R
+
+### How to build Wrapper languages
+
+Perform this step *AFTER* you have already followed the instructions
+for building the aiousb libraries.  
+
+#### Perl
+```bash
+cd AIOUSB/lib/wrappers
+make -f GNUMakefile inplace_perl
+cd perl
+sudo make install
+
+```
+
+#### Java
+
+You must make sure that you have the Java Developer Kit installed (
+JDK ). 
+```bash
+export CPATH=$CPATH:$JAVA_HOME/include # example /usr/lib/jvm/java-7-openjdk-i386/include
+cd AIOUSB/lib/wrappers
+make -f GNUMakefile inplace_java
+sudo cp java/{AIOUSB.jar,libaiousb.jar} $JAR_FOLDER
+
+```
+
+#### Python
+```bash
+pyver=$(python  -c 'import platform; print platform.python_version()')
+cd AIOUSB/lib/wrappers
+make -f GNUMakefile inplace_python
+sudo cp python/build/lib.linux-$(uname -m)-${pyver}/* /usr/lib/python${pyver}/
+
+```
+
+#### Ruby
+```bash
+cd AIOUSB/lib/wrappers
+make -f GNUMakefile inplace_ruby
+
+```
+
 
 Users who wish to build web applications around the ACCES I/O Product line might consider one of these
 for faster development cycles. Suggestions for additional languages and features are well received and can 
