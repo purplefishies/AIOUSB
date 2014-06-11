@@ -22,14 +22,7 @@ AIOUSB_Properties.o \
 AIODeviceInfo.o \
 DIOBuf.o
 
-
-CCINC		:= 
-OSTYPE		= $(shell uname -s )
-#OSTYPE		= $(shell fake_uname)
-CYGWINTYPE	= $(patsubst CYGWIN%,CYGWIN,$(OSTYPE))
-ifeq ("$(CYGWINTYPE)","CYGWIN")
-OSTYPE		=CYGWIN
-endif
+include $(AIOUSB_ROOT)/Mkfiles/oses.inc
 
 
 ifeq ("$(OSTYPE)","Darwin") 
@@ -44,19 +37,7 @@ CPPOBJS := $(COBJS:.o=.cpp.o)
 CPPDBGOBJS := $(CPPOBJS:.cpp.o=.cpp.dbg.o)
 
 
-ifeq ("$(OSTYPE)","Darwin")
-LIBPREFIX=lib
-LIBSUFFIX=dylib
-STATICSUFFIX=a
-else ifeq ("$(OSTYPE)","CYGWIN")
-LIBPREFIX=cyg
-LIBSUFFIX=dll
-STATICSUFFIX=a
-else
-LIBPREFIX=lib
-LIBSUFFIX=so
-STATICSUFFIX=a
-endif
+
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Library names
@@ -123,20 +104,16 @@ $(SHCPPDBGLIB) : $(CPPDBGOBJS)
 else ifeq ("$(OSTYPE)","CYGWIN")
 
 $(SHCLIB) : $(COBJS)
-#echo "$(CC) $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(COBJS) $(SHARED_LIBS)"
 	$(CC) $(LDFLAGS) $(CC_SHFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $(COBJS) -Wl,--no-whole-archive $(SHARED_LIBS)
 
 
 $(SHCDBGLIB): 	$(CDBGOBJS)
-#	@echo "$(CC) $(CC_SHFLAGS) $(LDFLAGS) -o $@ $(CDBGOBJS) $(SHARED_LIBS)"
 	$(CC) $(CC_SHFLAGS) $(LDFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $(CDBGOBJS) -Wl,--no-whole-archive $(SHARED_LIBS)
 
 $(SHCPPLIB) : $(CPPOBJS)
-#@echo "$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS)"
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $(CPPOBJS) -Wl,--no-whole-archive $(SHARED_LIBS)
 
 $(SHCPPDBGLIB) : $(CPPDBGOBJS)
-#@echo "$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS)"
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $(CPPOBJS) -Wl,--no-whole-archive $(SHARED_LIBS)
 
 else 

@@ -14,14 +14,15 @@ else
 	DEBUGSTEM	:=
 endif
 
+include $(AIOUSB_ROOT)/Mkfiles/oses.inc
 
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Regular C related Build
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 ifdef AIOUSBLIBDIR
-	LIBAIOUSB 		:= $(AIOUSBLIBDIR)/libaiousb$(DEBUGSTEM).a
-	LIBAIOUSBCPP 		:= $(AIOUSBLIBDIR)/libaiousbcpp$(DEBUGSTEM).a
+	LIBAIOUSB 		:= $(AIOUSBLIBDIR)/$(LIBPREFIX)aiousb$(DEBUGSTEM).$(STATICSUFFIX)
+	LIBAIOUSBCPP 		:= $(AIOUSBLIBDIR)/$(LIBPREFIX)aiousbcpp$(DEBUGSTEM).$(STATICSUFFIX)
 
 	ALL_AIOUSBLIBDIR_CFILES	:= $(wildcard $(AIOUSBLIBDIR)/*.c )
 	LIBAIOUSB_CDEP		:= $(LIBAIOUSB) $(wildcard $(AIOUSBLIBDIR)/*.c )
@@ -38,7 +39,7 @@ endif
 # C++ Related Build
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 ifdef AIOUSBCLASSLIBDIR
-	LIBCLASSAIOUSB 		:= $(AIOUSBCLASSLIBDIR)/libclassaiousbdbg.a
+	LIBCLASSAIOUSB 		:= $(AIOUSBCLASSLIBDIR)/$(LIBPREFIX)classaiousbdbg.$(STATICSUFFIX)
 	ALL_AIOUSBLIBDIR_CFILES	:= $(wildcard $(AIOUSBLIBDIR)/*.c )
 	ALL_CLASSLIB_CPPFILES	:= $(wildcard $(AIOUSBCLASSLIBDIR)/*.c)
 	LIBAIOUSB_CPPDEP	:= $(LIBCLASSAIOUSB) $(ALL_AIOUSBLIBDIR_CFILES)  $(ALL_CLASSLIB_CPPFILES)
@@ -63,7 +64,10 @@ include $(AIO_LIB_DIR)/wrappers/WrapperTargets.inc
 
 COMPILE_MACROS		:= $(MACROS)
 LIBUSB 			:= -lusb-1.0
-COMMONOPTS 		:= -Wall -pthread -fPIC $(COMPILE_MACROS)
+COMMONOPTS 		:= -Wall -pthread 
+ifneq ("$(OSTYPE)","CYGWIN")
+	COMMON_OPTS	+= -fPIC $(COMPILE_MACROS)
+endif
 
 REVERSE_CAL_DEPS	:= reverse_cal_table.o lib/TestCaseSetup.o 
 COMMON_DEPS             := lib/TestCaseSetup.o
