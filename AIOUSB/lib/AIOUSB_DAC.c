@@ -1,5 +1,5 @@
 /**
- * @file   aiousb.h
+ * @file   AIOUSB_DAC.c
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
  * @release $Format: %t$
@@ -11,68 +11,62 @@
 #include <math.h>
 #include <string.h>
 
-
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
 
-
-
-unsigned long DACDirect(
-                        unsigned long DeviceIndex,
-                        unsigned short Channel,
-                        unsigned short Value
-                        ) {
-    if(!AIOUSB_Lock())
+unsigned long DACDirect(unsigned long DeviceIndex,unsigned short Channel,unsigned short Value){
+    if (!AIOUSB_Lock())
         return AIOUSB_ERROR_INVALID_MUTEX;
 
     unsigned long result = AIOUSB_Validate(&DeviceIndex);
-    if(result != AIOUSB_SUCCESS) {
-          AIOUSB_UnLock();
-          return result;
-      }
+    if (result != AIOUSB_SUCCESS) {
+        AIOUSB_UnLock();
+        return result;
+    }
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
-    if(deviceDesc->ImmDACs == 0) {
-          AIOUSB_UnLock();
-          return AIOUSB_ERROR_NOT_SUPPORTED;
-      }
+    if (deviceDesc->ImmDACs == 0) {
+        AIOUSB_UnLock();
+        return AIOUSB_ERROR_NOT_SUPPORTED;
+    }
 
-    if(
-        deviceDesc->bDACStream &&
-        (
-            deviceDesc->bDACOpen ||
-            deviceDesc->bDACClosing
-        )
-        ) {
-          AIOUSB_UnLock();
-          return AIOUSB_ERROR_OPEN_FAILED;
-      }
+    if ( deviceDesc->bDACStream && (deviceDesc->bDACOpen || deviceDesc->bDACClosing )) {
+        AIOUSB_UnLock();
+        return AIOUSB_ERROR_OPEN_FAILED;
+    }
 
-    if(Channel >= deviceDesc->ImmDACs) {
-          AIOUSB_UnLock();
-          return AIOUSB_ERROR_INVALID_PARAMETER;
-      }
+    if (Channel >= deviceDesc->ImmDACs) {
+        AIOUSB_UnLock();
+        return AIOUSB_ERROR_INVALID_PARAMETER;
+    }
 
     libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
-    if(deviceHandle != NULL) {
-          const unsigned timeout = deviceDesc->commTimeout;
-          AIOUSB_UnLock();                                            // unlock while communicating with device
-          const int bytesTransferred = libusb_control_transfer(deviceHandle, USB_WRITE_TO_DEVICE, AUR_DAC_IMMEDIATE,
-                                                               Value, Channel, 0, 0 /* wLength */, timeout);
-          if(bytesTransferred != 0)
-              result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-      }else {
-          result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-          AIOUSB_UnLock();
-      }
+    if (deviceHandle != NULL) {
+        const unsigned timeout = deviceDesc->commTimeout;
+        AIOUSB_UnLock();                                            // unlock while communicating with device
+        const int bytesTransferred = libusb_control_transfer(deviceHandle, 
+                                                             USB_WRITE_TO_DEVICE, 
+                                                             AUR_DAC_IMMEDIATE,
+                                                             Value, 
+                                                             Channel, 
+                                                             0, 
+                                                             0, /* wLength */
+                                                             timeout
+                                                             );
+        if (bytesTransferred != 0)
+            result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+    } else {
+        result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
+        AIOUSB_UnLock();
+    }
 
     return result;
 }
 
-
+/*----------------------------------------------------------------------------*/
 /**
- * pDACData is an array of DACDataCount channel/count 16-bit word pairs:
+ * @desc pDACData is an array of DACDataCount channel/count 16-bit word pairs:
  * @verbatim
  *   +----------------+
  *   |    channel     | word 0
@@ -139,37 +133,35 @@ unsigned long DACDirect(
  * when sending the DAC configuration blocks to the device we have to send all the
  * blocks from block 0 up to the block containing the highest channel number being set
  */
-
-unsigned long DACMultiDirect(
-                             unsigned long DeviceIndex,
+unsigned long DACMultiDirect( unsigned long DeviceIndex,
                              unsigned short *pDACData,
                              unsigned long DACDataCount
                              ) {
-    if(
+    if (
         pDACData == NULL ||
         DACDataCount > 10000                                            // arbitrary limit to prevent code from blowing up
         )
         return AIOUSB_ERROR_INVALID_PARAMETER;
 
-    if(DACDataCount == 0)
+    if (DACDataCount == 0)
         return AIOUSB_SUCCESS;                                        // NOP
 
-    if(!AIOUSB_Lock())
+    if (!AIOUSB_Lock())
         return AIOUSB_ERROR_INVALID_MUTEX;
 
     unsigned long result = AIOUSB_Validate(&DeviceIndex);
-    if(result != AIOUSB_SUCCESS) {
+    if (result != AIOUSB_SUCCESS) {
           AIOUSB_UnLock();
           return result;
       }
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
-    if(deviceDesc->ImmDACs == 0) {
+    if (deviceDesc->ImmDACs == 0) {
           AIOUSB_UnLock();
           return AIOUSB_ERROR_NOT_SUPPORTED;
       }
 
-    if(
+    if (
         deviceDesc->bDACStream &&
         (
             deviceDesc->bDACOpen ||
@@ -189,11 +181,11 @@ unsigned long DACMultiDirect(
         index;
     for(index = 0; index < ( int )DACDataCount; index++) {
           channel = pDACData[ index * 2 ];            // channel/count pairs
-          if(channel > highestChannel)
+          if (channel > highestChannel)
               highestChannel = channel;
       }
 
-    if(highestChannel >= ( int )deviceDesc->ImmDACs) {
+    if (highestChannel >= ( int )deviceDesc->ImmDACs) {
           AIOUSB_UnLock();
           return AIOUSB_ERROR_INVALID_PARAMETER;
       }
@@ -206,7 +198,7 @@ unsigned long DACMultiDirect(
     const int configBytes = CONFIG_BLOCK_BYTES * numConfigBlocks;
     unsigned char *const configBuffer = ( unsigned char* )malloc(configBytes);
     assert(configBuffer != 0);
-    if(configBuffer != 0) {
+    if (configBuffer != 0) {
         /*
          * sparsely populate DAC configuration blocks
          */
@@ -223,10 +215,10 @@ unsigned long DACMultiDirect(
         }
 
         libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
-        if(deviceHandle != NULL) {
+        if (deviceHandle != NULL) {
             const int bytesTransferred = libusb_control_transfer(deviceHandle, USB_WRITE_TO_DEVICE, AUR_DAC_IMMEDIATE,
                                                                  0, 0, configBuffer, configBytes, timeout);
-            if(bytesTransferred != configBytes)
+            if (bytesTransferred != configBytes)
               result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
         }else
           result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
@@ -239,44 +231,39 @@ unsigned long DACMultiDirect(
 
 
 
+/*----------------------------------------------------------------------------*/
 /*
  * @desc Sets the range code for the DAC
  * @param DeviceIndex
  * @param RangeCode
  * @return
  */
-unsigned long DACSetBoardRange(
-                               unsigned long DeviceIndex,
-                               unsigned long RangeCode
-                               ) {
-    if(
-        RangeCode < DAC_RANGE_0_5V ||
-        RangeCode > DAC_RANGE_10V
-        )
+unsigned long DACSetBoardRange(unsigned long DeviceIndex,unsigned long RangeCode ) {
+    if ( RangeCode < DAC_RANGE_0_5V || RangeCode > DAC_RANGE_10V )
         return AIOUSB_ERROR_INVALID_PARAMETER;
 
-    if(!AIOUSB_Lock())
+    if (!AIOUSB_Lock())
         return AIOUSB_ERROR_INVALID_MUTEX;
 
     unsigned long result = AIOUSB_Validate(&DeviceIndex);
-    if(result != AIOUSB_SUCCESS) {
+    if (result != AIOUSB_SUCCESS) {
           AIOUSB_UnLock();
           return result;
       }
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
-    if(deviceDesc->bDACBoardRange == AIOUSB_FALSE) {
+    if (deviceDesc->bDACBoardRange == AIOUSB_FALSE) {
           AIOUSB_UnLock();
           return AIOUSB_ERROR_NOT_SUPPORTED;
       }
 
     libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
-    if(deviceHandle != NULL) {
+    if (deviceHandle != NULL) {
           const unsigned timeout = deviceDesc->commTimeout;
           AIOUSB_UnLock();                                                    // unlock while communicating with device
           const int bytesTransferred = libusb_control_transfer(deviceHandle, USB_WRITE_TO_DEVICE, AUR_DAC_RANGE,
                                                                RangeCode, 0, 0, 0 /* wLength */, timeout);
-          if(bytesTransferred != 0)
+          if (bytesTransferred != 0)
               result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
       }else {
           result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
@@ -288,46 +275,38 @@ unsigned long DACSetBoardRange(
 
 
 
-unsigned long DACOutputOpen(
-                            unsigned long DeviceIndex,
-                            double *pClockHz
-                            ) {
+/*----------------------------------------------------------------------------*/
+unsigned long DACOutputOpen(unsigned long DeviceIndex,double *pClockHz) {
   // TODO: this function is not yet implemented
     return AIOUSB_ERROR_NOT_SUPPORTED;
 }
 
 
-unsigned long DACOutputClose(
-    unsigned long DeviceIndex,
-    unsigned long bWait
-    ) {
+/*----------------------------------------------------------------------------*/
+unsigned long DACOutputClose(unsigned long DeviceIndex,unsigned long bWait) {
   // TODO: this function is not yet implemented
     return AIOUSB_ERROR_NOT_SUPPORTED;
 }
 
 
-unsigned long DACOutputCloseNoEnd(
-                                  unsigned long DeviceIndex,
-                                  unsigned long bWait
-                                  ) {
+/*----------------------------------------------------------------------------*/
+unsigned long DACOutputCloseNoEnd( unsigned long DeviceIndex, unsigned long bWait ) {
   // TODO: this function is not yet implemented
     return AIOUSB_ERROR_NOT_SUPPORTED;
 }
 
 
 
-unsigned long DACOutputSetCount(
-                                unsigned long DeviceIndex,
-                                unsigned long NewCount
-                                ) {
+/*----------------------------------------------------------------------------*/
+unsigned long DACOutputSetCount(unsigned long DeviceIndex, unsigned long NewCount) {
   // TODO: this function is not yet implemented
     return AIOUSB_ERROR_NOT_SUPPORTED;
 } 
 
 
 
-unsigned long DACOutputFrame(
-                             unsigned long DeviceIndex,
+/*----------------------------------------------------------------------------*/
+unsigned long DACOutputFrame(unsigned long DeviceIndex,
                              unsigned long FramePoints,
                              unsigned short *FrameData
                              ) {
@@ -337,6 +316,7 @@ unsigned long DACOutputFrame(
 
 
 
+/*----------------------------------------------------------------------------*/
 unsigned long DACOutputFrameRaw(
                                 unsigned long DeviceIndex,
                                 unsigned long FramePoints,
@@ -348,6 +328,7 @@ unsigned long DACOutputFrameRaw(
 
 
 
+/*----------------------------------------------------------------------------*/
 unsigned long DACOutputStart(
                              unsigned long DeviceIndex
                              ) {
@@ -357,6 +338,7 @@ unsigned long DACOutputStart(
 
 
 
+/*----------------------------------------------------------------------------*/
 unsigned long DACOutputSetInterlock(
                                     unsigned long DeviceIndex,
                                     unsigned long bInterlock
@@ -365,9 +347,6 @@ unsigned long DACOutputSetInterlock(
     return AIOUSB_ERROR_NOT_SUPPORTED;
 } 
 
-
-
 #ifdef __cplusplus
-}       // namespace AIOUSB
+}
 #endif
-

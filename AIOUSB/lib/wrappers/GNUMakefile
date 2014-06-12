@@ -208,9 +208,11 @@ php_atest:
 # OCTAVE
 #
 octave:
+	@echo "Building Octave module WITHOUT MPI support ! Please remove -DMPICH_SKIP_MPICXX"
+	@echo "   and  -DOMPI_SKIP_MPICXX  from this build if you need this functionality"
 	@if [ ! -f $(OCTAVE_BUILT) ] ; then \
 		$(SWIG) -I../../ -octave -o AIOUSB_wrap.cpp AIOUSB.i 2>&1 ; \
-		mkoctfile -o AIOUSB.oct  -I../../ AIOUSB_wrap.cpp -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -laiousb 2>&1 && touch $(OCTAVE_BUILT);\
+		mkoctfile -o AIOUSB.oct   -DMPICH_SKIP_MPICXX  -DOMPI_SKIP_MPICXX  -I../../ AIOUSB_wrap.cpp -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -laiousb 2>&1 && touch $(OCTAVE_BUILT);\
 		fi
 
 $(OCTAVE_BUILT): octave
