@@ -3,9 +3,11 @@
  * @author $Author$
  * @date   $Date$
  * @copy
- * @brief
- *  ACCES I/O USB API for Linux
+ * @desc ACCES I/O USB Property utilities for Linux. These functions assist with identifying
+ *       cards and verifying that the API is in fact operating on the correct type of card.
  *
+ * @todo Implement a friendly FindDevices() function as well as FindDeviceByCriteria() 
+ *       function to replace all of the standard looping while ( deviceMask != 0 )...
  */
 
 #include "AIOUSB_Core.h"
@@ -26,33 +28,35 @@ static const struct ResultCodeName {
     char text[ RESULT_TEXT_SIZE + 2 ];
 } resultCodeTable[] = {
                                 /* AIOUSB result codes */
-    { AIOUSB_SUCCESS, "AIOUSB_SUCCESS" },
-    { AIOUSB_ERROR_DEVICE_NOT_CONNECTED, "AIOUSB_ERROR_DEVICE_NOT_CONNECTED" },
-    { AIOUSB_ERROR_DUP_NAME, "AIOUSB_ERROR_DUP_NAME" },
-    { AIOUSB_ERROR_FILE_NOT_FOUND, "AIOUSB_ERROR_FILE_NOT_FOUND" },
-    { AIOUSB_ERROR_INVALID_DATA, "AIOUSB_ERROR_INVALID_DATA" },
-    { AIOUSB_ERROR_INVALID_INDEX, "AIOUSB_ERROR_INVALID_INDEX" },
-    { AIOUSB_ERROR_INVALID_MUTEX, "AIOUSB_ERROR_INVALID_MUTEX" },
-    { AIOUSB_ERROR_INVALID_PARAMETER, "AIOUSB_ERROR_INVALID_PARAMETER" },
-    { AIOUSB_ERROR_INVALID_THREAD, "AIOUSB_ERROR_INVALID_THREAD" },
-    { AIOUSB_ERROR_NOT_ENOUGH_MEMORY, "AIOUSB_ERROR_NOT_ENOUGH_MEMORY" },
-    { AIOUSB_ERROR_NOT_SUPPORTED, "AIOUSB_ERROR_NOT_SUPPORTED" },
-    { AIOUSB_ERROR_OPEN_FAILED, "AIOUSB_ERROR_OPEN_FAILED" },
-    { AIOUSB_ERROR_LIBUSB, "AIOUSB_ERROR_LIBUSB" },/* this is a special case that should not occur, but ... */
-    /* libusb result codes */
-    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_IO), "LIBUSB_ERROR_IO" },
-    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_INVALID_PARAM), "LIBUSB_ERROR_INVALID_PARAM" },
-    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_ACCESS), "LIBUSB_ERROR_ACCESS" },
-    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_NO_DEVICE), "LIBUSB_ERROR_NO_DEVICE" },
-    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_NOT_FOUND), "LIBUSB_ERROR_NOT_FOUND" },
-    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_BUSY), "LIBUSB_ERROR_BUSY" },
-    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_TIMEOUT), "LIBUSB_ERROR_TIMEOUT" },
-    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_OVERFLOW), "LIBUSB_ERROR_OVERFLOW" },
-    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_PIPE), "LIBUSB_ERROR_PIPE" },
-    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_INTERRUPTED), "LIBUSB_ERROR_INTERRUPTED" },
-    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_NO_MEM), "LIBUSB_ERROR_NO_MEM" },
-    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_NOT_SUPPORTED), "LIBUSB_ERROR_NOT_SUPPORTED" },
-    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_OTHER), "LIBUSB_ERROR_OTHER" }
+    { AIOUSB_SUCCESS                                             , "AIOUSB_SUCCESS"                     },
+    { AIOUSB_ERROR_DEVICE_NOT_CONNECTED                          , "AIOUSB_ERROR_DEVICE_NOT_CONNECTED"  },
+    { AIOUSB_ERROR_DUP_NAME                                      , "AIOUSB_ERROR_DUP_NAME"              },
+    { AIOUSB_ERROR_FILE_NOT_FOUND                                , "AIOUSB_ERROR_FILE_NOT_FOUND"        },
+    { AIOUSB_ERROR_INVALID_DATA                                  , "AIOUSB_ERROR_INVALID_DATA"          },
+    { AIOUSB_ERROR_INVALID_INDEX                                 , "AIOUSB_ERROR_INVALID_INDEX"         },
+    { AIOUSB_ERROR_INVALID_MUTEX                                 , "AIOUSB_ERROR_INVALID_MUTEX"         },
+    { AIOUSB_ERROR_INVALID_PARAMETER                             , "AIOUSB_ERROR_INVALID_PARAMETER"     },
+    { AIOUSB_ERROR_INVALID_THREAD                                , "AIOUSB_ERROR_INVALID_THREAD"        },
+    { AIOUSB_ERROR_NOT_ENOUGH_MEMORY                             , "AIOUSB_ERROR_NOT_ENOUGH_MEMORY"     },
+    { AIOUSB_ERROR_NOT_SUPPORTED                                 , "AIOUSB_ERROR_NOT_SUPPORTED"         },
+    { AIOUSB_ERROR_OPEN_FAILED                                   , "AIOUSB_ERROR_OPEN_FAILED"           },
+
+                                /* SPECIAL CASE that should not occur, but supposedly can */
+    { AIOUSB_ERROR_LIBUSB                                        , "AIOUSB_ERROR_LIBUSB"                },
+                                /* LIBUSB result codes */
+    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_IO)            , "LIBUSB_ERROR_IO"                    },
+    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_INVALID_PARAM) , "LIBUSB_ERROR_INVALID_PARAM"         },
+    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_ACCESS)        , "LIBUSB_ERROR_ACCESS"                },
+    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_NO_DEVICE)     , "LIBUSB_ERROR_NO_DEVICE"             },
+    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_NOT_FOUND)     , "LIBUSB_ERROR_NOT_FOUND"             },
+    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_BUSY)          , "LIBUSB_ERROR_BUSY"                  },
+    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_TIMEOUT)       , "LIBUSB_ERROR_TIMEOUT"               },
+    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_OVERFLOW)      , "LIBUSB_ERROR_OVERFLOW"              },
+    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_PIPE)          , "LIBUSB_ERROR_PIPE"                  },
+    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_INTERRUPTED)   , "LIBUSB_ERROR_INTERRUPTED"           },
+    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_NO_MEM)        , "LIBUSB_ERROR_NO_MEM"                },
+    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_NOT_SUPPORTED) , "LIBUSB_ERROR_NOT_SUPPORTED"         },
+    { LIBUSB_RESULT_TO_AIOUSB_RESULT(LIBUSB_ERROR_OTHER)         , "LIBUSB_ERROR_OTHER"                 }
 };
 
 #ifdef __cplusplus
@@ -161,10 +165,7 @@ unsigned long GetDeviceBySerialNumber(unsigned long *pSerialNumber) {
  * @brief AIOUSB_GetDeviceProperties() returns a richer amount of information 
  * than QueryDeviceInfo()
  */
-unsigned long AIOUSB_GetDeviceProperties(
-                                         unsigned long DeviceIndex,
-                                         DeviceProperties *properties
-                                         ) {
+unsigned long AIOUSB_GetDeviceProperties(unsigned long DeviceIndex,DeviceProperties *properties ) {
     if(properties == 0)
         return AIOUSB_ERROR_INVALID_PARAMETER;
     
@@ -178,8 +179,8 @@ unsigned long AIOUSB_GetDeviceProperties(
       }
 
     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
-    properties->Name = deviceDesc->cachedName;          // if NULL, name will be requested from device
-    properties->SerialNumber = deviceDesc->cachedSerialNumber;          // if 0, serial number will be requested from device
+    properties->Name = deviceDesc->cachedName; /* if NULL, name will be requested from device */
+    properties->SerialNumber = deviceDesc->cachedSerialNumber; /* if 0, serial number will be requested from device */
     properties->ProductID = deviceDesc->ProductID;
     properties->DIOPorts = deviceDesc->DIOBytes;
     properties->Counters = deviceDesc->Counters;
@@ -301,5 +302,5 @@ PUBLIC_EXTERN void AIOUSB_ListDevices() {
 }
 
 #ifdef __cplusplus
-}       // namespace AIOUSB
+}
 #endif

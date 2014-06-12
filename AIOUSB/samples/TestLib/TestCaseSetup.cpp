@@ -230,20 +230,18 @@ TestCaseSetup::doFastITScan( int numgets )
  */
 void TestCaseSetup::doBulkConfigBlock()
 {
-   AIOUSB_InitConfigBlock( &configBlock, DeviceIndex, AIOUSB_FALSE );
-
-   AIOUSB_SetAllGainCodeAndDiffMode( &configBlock, AD_GAIN_CODE_10V, AIOUSB_FALSE );
-   AIOUSB_SetCalMode( &configBlock, AD_CAL_MODE_NORMAL );
-
-   AIOUSB_SetTriggerMode( &configBlock, 0 );
-   AIOUSB_SetScanRange( &configBlock, 2, 13 );
-   AIOUSB_SetOversample( &configBlock, 0 );
-   int result = ADC_SetConfig( DeviceIndex, configBlock.registers, &configBlock.size );
-   if( result != AIOUSB_SUCCESS  ) {
-     std::stringstream er;
-     er << "Error '" << AIOUSB_GetResultCodeAsString( result ) << "' setting A/D configuration";
-     throw Error(er.str().c_str());
-   }                  
+    AIOUSB_InitConfigBlock( &configBlock, DeviceIndex, AIOUSB_FALSE );
+    AIOUSB_SetAllGainCodeAndDiffMode( &configBlock, AD_GAIN_CODE_10V, AIOUSB_FALSE );
+    AIOUSB_SetCalMode( &configBlock, AD_CAL_MODE_NORMAL );
+    AIOUSB_SetTriggerMode( &configBlock, 0 );
+    AIOUSB_SetScanRange( &configBlock, 2, 13 );
+    AIOUSB_SetOversample( &configBlock, 0 );
+    int result = ADC_SetConfig( DeviceIndex, configBlock.registers, &configBlock.size );
+    if( result != AIOUSB_SUCCESS  ) {
+        std::stringstream er;
+        er << "Error '" << AIOUSB_GetResultCodeAsString( result ) << "' setting A/D configuration";
+        throw Error(er.str().c_str());
+    }                  
 }
 
 /** 
@@ -587,8 +585,9 @@ void TestCaseSetup::doCSVReadVoltages()
   int counter = 0;
   int maxvalue = ( maxcounts < 0 ? 10000: maxcounts );
   for( int channel = 0; channel < NUM_CHANNELS; channel++ )
-    gainCodes[ channel ] = AD_GAIN_CODE_0_10V;
+      gainCodes[ channel ] = AD_GAIN_CODE_0_10V;
   gettimeofday( &reftime, 0 );
+
   while( counter < maxvalue ) {
       result = ADC_GetScanV( DeviceIndex, volts );
       gettimeofday( &delta, 0 );
@@ -658,7 +657,7 @@ void TestCaseSetup::doPreReadImmediateVoltages()
   ADC_RangeAll( DeviceIndex, gainCodes, AIOUSB_TRUE );
   ADC_SetOversample( DeviceIndex, 10 );
   ADC_SetScanLimits( DeviceIndex, 0, NUM_CHANNELS - 1 );
-  ADC_ADMode( DeviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_NORMAL );
+  ADC_ADMode( DeviceIndex, 0 , AD_CAL_MODE_NORMAL ); /*  0 corresponds to TriggerMode */
 
   DEBUG("Completed doPreReadImmediateVoltages\n");
 
