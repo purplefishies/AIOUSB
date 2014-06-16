@@ -64,10 +64,10 @@ DEBUG_FLAGS	:= -ggdb
 
 
 LIBS 		:= $(CLIB) $(CDBGLIB) $(CPPLIB) $(CPPDBGLIB)  $(SHCLIB) $(SHCDBGLIB) $(SHCPPLIB) $(SHCPPDBGLIB)
-override CFLAGS	+= -I. -std=gnu99
+override CFLAGS	+= -I. -I/usr/include/libusb-1.0 -std=gnu99
 TESTFLAGS	:= -g
 SHARED_LIBS	:=  -lusb-1.0 -pthread -lm
-override CXXFLAGS += -D__aiousb_cplusplus
+override CXXFLAGS += -I/usr/include/libusb-1.0 -D__aiousb_cplusplus
 
 .PHONY : all testit
 
