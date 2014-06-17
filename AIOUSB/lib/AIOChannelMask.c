@@ -176,7 +176,7 @@ AIOChannelMask *NewAIOChannelMaskFromStr( const char *bitfields ) {
  * @param obj 
  * @param index
  */
- PUBLIC_EXTERN char *AIOChannelMaskToString( AIOChannelMask *obj ) {
+char *AIOChannelMaskToString( AIOChannelMask *obj ) {
      if( obj->strrep ) {
          free(obj->strrep);
      }
