@@ -3,7 +3,7 @@
  * @author $Author$
  * @date   $Date$
  * @copy
- * @desc ACCES I/O USB Property utilities for Linux. These functions assist with identifying
+ * @brief ACCES I/O USB Property utilities for Linux. These functions assist with identifying
  *       cards and verifying that the API is in fact operating on the correct type of card.
  *
  * @todo Implement a friendly FindDevices() function as well as FindDeviceByCriteria() 
@@ -255,7 +255,7 @@ const char *AIOUSB_GetResultCodeAsString(unsigned long result_value)
     return resultText;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN void AIOUSB_ListDevices() {
+void AIOUSB_ListDevices() {
     AIOUSB_BOOL found = AIOUSB_FALSE;
     if(AIOUSB_Lock()) {
           if(AIOUSB_IsInit()) {

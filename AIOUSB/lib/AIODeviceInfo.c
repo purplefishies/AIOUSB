@@ -5,33 +5,33 @@
 namespace AIOUSB {
 #endif
 
-PUBLIC_EXTERN AIODeviceInfo *NewAIODeviceInfo() {
+AIODeviceInfo *NewAIODeviceInfo() {
     AIODeviceInfo *tmp = (AIODeviceInfo *)malloc(sizeof(AIODeviceInfo));
     return tmp;
 }
 
-PUBLIC_EXTERN void DeleteAIODeviceInfo( AIODeviceInfo *di ) { 
+void DeleteAIODeviceInfo( AIODeviceInfo *di ) { 
     if ( di->Name ) 
         free(di->Name);
     free(di);
 }
 
-PUBLIC_EXTERN const char *AIODeviceInfoGetName( AIODeviceInfo *di )
+const char *AIODeviceInfoGetName( AIODeviceInfo *di )
 {
     return di->Name;
 }
 
-PUBLIC_EXTERN unsigned AIODeviceInfoGetCounters( AIODeviceInfo *di ) 
+unsigned AIODeviceInfoGetCounters( AIODeviceInfo *di ) 
 {
     return di->Counters;
 }
 
-PUBLIC_EXTERN unsigned AIODeviceInfoGetDIOBytes( AIODeviceInfo *di ) 
+unsigned AIODeviceInfoGetDIOBytes( AIODeviceInfo *di ) 
 {
     return di->DIOBytes;
 }
 
-PUBLIC_EXTERN AIODeviceInfo *GetDeviceInfo( unsigned long DeviceIndex )
+AIODeviceInfo *GetDeviceInfo( unsigned long DeviceIndex )
 {
     if ( !AIOUSB_Lock() ) { 
         aio_errno = -AIOUSB_ERROR_INVALID_MUTEX;

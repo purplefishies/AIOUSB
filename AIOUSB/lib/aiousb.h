@@ -2,7 +2,7 @@
  * @file   aiousb.h
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %t$
+ * @version $Format: %t$
  * @brief  General header files for the AIOUSB library
  *
  */

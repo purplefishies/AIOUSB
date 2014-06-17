@@ -8,7 +8,7 @@ namespace AIOUSB {
 #endif
 
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN AIOChannelMask * NewAIOChannelMask( unsigned int number_channels ) {
+AIOChannelMask * NewAIOChannelMask( unsigned int number_channels ) {
     AIOChannelMask *tmp = (AIOChannelMask *)malloc(sizeof(AIOChannelMask ));
     unsigned i;
     if( !tmp ) {
@@ -38,10 +38,10 @@ PUBLIC_EXTERN AIOChannelMask * NewAIOChannelMask( unsigned int number_channels )
 }
 /*----------------------------------------------------------------------------*/
 /**
- * @desc Deletes the AIOChannelMask object
+ * @brief Deletes the AIOChannelMask object
  * @param mask 
  */
-PUBLIC_EXTERN void DeleteAIOChannelMask( AIOChannelMask *mask ) {
+void DeleteAIOChannelMask( AIOChannelMask *mask ) {
     if ( mask->strrep ) 
         free(mask->strrep);
     if( mask->strrepsmall )
@@ -51,7 +51,7 @@ PUBLIC_EXTERN void DeleteAIOChannelMask( AIOChannelMask *mask ) {
     free(mask);
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskIndices( AIOChannelMask *mask , int *pos ) {
+AIORET_TYPE AIOChannelMaskIndices( AIOChannelMask *mask , int *pos ) {
     AIORET_TYPE retval;
     if ( !mask || !pos )
         return -AIOUSB_ERROR_INVALID_DATA;
@@ -61,7 +61,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskIndices( AIOChannelMask *mask , int *pos
     return retval;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskNextIndex( AIOChannelMask *mask , int *pos ) {
+AIORET_TYPE AIOChannelMaskNextIndex( AIOChannelMask *mask , int *pos ) {
     int retval;
     if ( *pos >= (int)mask->number_signals ) {
         retval = *pos = -1;
@@ -73,10 +73,10 @@ PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskNextIndex( AIOChannelMask *mask , int *p
 }
 /*----------------------------------------------------------------------------*/
 /**
- * @desc Sets the AIOChannelMask using the regular notion of or'ing of shifted bytes, 
+ * @brief Sets the AIOChannelMask using the regular notion of or'ing of shifted bytes, 
  * 
  */
-PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskSetMaskFromInt( AIOChannelMask *obj, unsigned field ) {
+AIORET_TYPE AIOChannelMaskSetMaskFromInt( AIOChannelMask *obj, unsigned field ) {
     int i;
     AIORET_TYPE ret = AIOUSB_SUCCESS;  
     if ( obj->size <  (int)( sizeof(field) / sizeof(aio_channel_obj )) ) {
@@ -96,7 +96,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskSetMaskFromInt( AIOChannelMask *obj, uns
     return ret;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskSetMaskAtIndex( AIOChannelMask *obj, char field, unsigned index  )
+AIORET_TYPE AIOChannelMaskSetMaskAtIndex( AIOChannelMask *obj, char field, unsigned index  )
 {
     if ( index >= (unsigned)obj->size )
         return -AIOUSB_ERROR_INVALID_INDEX;
@@ -107,30 +107,30 @@ PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskSetMaskAtIndex( AIOChannelMask *obj, cha
 }
 
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskGetSize( AIOChannelMask *obj ) {
+AIORET_TYPE AIOChannelMaskGetSize( AIOChannelMask *obj ) {
      return (AIORET_TYPE)obj->size;
 }
 /*----------------------------------------------------------------------------*/
 /**
- * @desc Returns channels that are set to High ( not low )
+ * @brief Returns channels that are set to High ( not low )
  * @param channels
  **/
-PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskNumberChannels( AIOChannelMask *obj ) {
+AIORET_TYPE AIOChannelMaskNumberChannels( AIOChannelMask *obj ) {
     return (AIORET_TYPE)obj->active_signals;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskNumberSignals( AIOChannelMask *obj ) {
+AIORET_TYPE AIOChannelMaskNumberSignals( AIOChannelMask *obj ) {
     return (AIORET_TYPE)obj->number_signals;
 }
 /*----------------------------------------------------------------------------*/
 /**
- * @desc Rely on the base type to determine the sizes
+ * @brief Rely on the base type to determine the sizes
  * @param obj 
  * @param bitfields a character string that contains 0s and 1s. 
  *
  */
 
-PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskSetMaskFromStr( AIOChannelMask *obj, const char *bitfields ) {
+AIORET_TYPE AIOChannelMaskSetMaskFromStr( AIOChannelMask *obj, const char *bitfields ) {
     AIORET_TYPE ret = AIOUSB_SUCCESS;
     unsigned j;
     aio_channel_obj tmpval = 0;
@@ -160,19 +160,19 @@ PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskSetMaskFromStr( AIOChannelMask *obj, con
 }
 /*----------------------------------------------------------------------------*/
 /**
- * @desc Creates a new AIOChannelMask object from a character string of 1's and 0's
+ * @brief Creates a new AIOChannelMask object from a character string of 1's and 0's
  * @param bitfields
  * @return a new AIOChannelMask object 
  * @todo Add smarter error checking
  */
-PUBLIC_EXTERN AIOChannelMask *NewAIOChannelMaskFromStr( const char *bitfields ) {
+AIOChannelMask *NewAIOChannelMaskFromStr( const char *bitfields ) {
     AIOChannelMask *tmp = NewAIOChannelMask( strlen(bitfields) );
     AIOChannelMaskSetMaskFromStr( tmp, bitfields );
     return tmp;
 }
 /*----------------------------------------------------------------------------*/
 /**
- * @desc Returns a mask for the index in question
+ * @brief Returns a mask for the index in question
  * @param obj 
  * @param index
  */
@@ -204,11 +204,11 @@ PUBLIC_EXTERN AIOChannelMask *NewAIOChannelMaskFromStr( const char *bitfields ) 
  }
 /*----------------------------------------------------------------------------*/
 /**
- * @desc Returns a mask for the index in question
+ * @brief Returns a mask for the index in question
  * @param obj 
  * @param index
  */
-PUBLIC_EXTERN char *AIOChannelMaskToStringAtIndex( AIOChannelMask *obj, unsigned index ) {
+char *AIOChannelMaskToStringAtIndex( AIOChannelMask *obj, unsigned index ) {
     if ( index >= (unsigned)obj->size ) {
         return NULL;
     }
@@ -236,7 +236,7 @@ PUBLIC_EXTERN char *AIOChannelMaskToStringAtIndex( AIOChannelMask *obj, unsigned
     return retval;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskGetMaskAtIndex( AIOChannelMask *obj , char *tmp , unsigned index ) {
+AIORET_TYPE AIOChannelMaskGetMaskAtIndex( AIOChannelMask *obj , char *tmp , unsigned index ) {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     if( index >= (unsigned)obj->size )
         return -AIOUSB_ERROR_INVALID_INDEX;
@@ -244,7 +244,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskGetMaskAtIndex( AIOChannelMask *obj , ch
     return retval;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN char *AIOChannelMaskGetMask( AIOChannelMask *obj ) {
+char *AIOChannelMaskGetMask( AIOChannelMask *obj ) {
     char *tmp = (char *)malloc(obj->size+1);
     if ( tmp ) {
         memset(tmp,0,obj->size+1);

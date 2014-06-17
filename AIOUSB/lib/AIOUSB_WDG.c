@@ -7,7 +7,7 @@ namespace AIOUSB {
 #endif
 
 /** 
- * @desc Creates a new Watchdog configuration object that can be 
+ * @brief Creates a new Watchdog configuration object that can be 
  *       used to trigger watchdog petting / resets
  * 
  * @return AIOWDGConfig *obj New Watchdog configuration object
@@ -27,7 +27,7 @@ void doSomething()
 }
 
 /** 
- * @desc Deletes the AIOWDGConfig object
+ * @brief Deletes the AIOWDGConfig object
  * @param obj 
  */
 void
@@ -40,7 +40,7 @@ DeleteWDGConfig( AIOWDGConfig *obj)
 }
 
 /** 
- * @desc Assigns the watchdog object to the device index in question.
+ * @brief Assigns the watchdog object to the device index in question.
  * @param DeviceIndex 
  * @param obj 
  * 
@@ -72,7 +72,7 @@ WDG_GetStatus( unsigned long DeviceIndex, AIOWDGConfig *obj )
 }
 
 /** 
- * @desc Pets the watchdog and keeps it from resetting the device
+ * @brief Pets the watchdog and keeps it from resetting the device
  * @param DeviceIndex 
  * @param obj 
  * 

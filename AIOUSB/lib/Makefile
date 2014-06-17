@@ -182,6 +182,11 @@ clean:
 	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) cscope.out
 
 distclean: 
-	-rm -f $(LIBS) $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) cscope.out *_test*
+	-rm -f $(LIBS) $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) cscope.out *_test* *.tap
 cscope:	
 	cscope -b 
+
+matlab: 
+	@if [ -z "$$MATLAB_BIN_DIR" ] ; then echo "You must set MATLAB_BIN_DIR to the path to matlab binary"; exit 1; fi
+	@export CPATH=/usr/include/libusb-1.0 && \
+	$$MATLAB_BIN_DIR/mex -v CXX=g++ CC=gcc -lm -output libaiousb $(patsubst %.o,%.c,$(COBJS)) -lusb-1.0

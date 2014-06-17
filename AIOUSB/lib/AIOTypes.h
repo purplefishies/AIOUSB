@@ -2,7 +2,7 @@
  * @file   AIOTypes.h
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %t$
+ * @version $Format: %t$
  * @brief  
  *
  */
@@ -248,7 +248,7 @@ enum {
 };
 
 /**
- * @desc range codes passed to DACSetBoardRange()
+ * @brief range codes passed to DACSetBoardRange()
  */
 CREATE_ENUM_W_START(DACRange,0,
                     DAC_RANGE_0_5V,
@@ -260,7 +260,7 @@ CREATE_ENUM_W_START(DACRange,0,
 
 
 /**
- * @desc FIFO clearing methods passed to AIOUSB_ClearFIFO()
+ * @brief FIFO clearing methods passed to AIOUSB_ClearFIFO()
  */
 CREATE_ENUM_W_START(FIFO_Method,0,
                     CLEAR_FIFO_METHOD_IMMEDIATE,
@@ -272,7 +272,7 @@ CREATE_ENUM_W_START(FIFO_Method,0,
 
 
 /**
- * @desc 
+ * @brief 
  * The AIOUSB function result codes are a bit confusing; the result codes used in the Windows
  * implementation of the API are defined in a system file, winerror.h; these result codes
  * are generic and can apply to many applications; the very first result code, ERROR_SUCCESS,
@@ -521,7 +521,7 @@ typedef struct  {
 
 
 /** 
- * @desc Allows us to keep track of streaming (bulk) acquires
+ * @brief Allows us to keep track of streaming (bulk) acquires
  * without making the user keep track of the memory management
  */
 

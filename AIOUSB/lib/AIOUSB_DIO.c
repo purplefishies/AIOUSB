@@ -2,7 +2,7 @@
  * @file   AIOUSB_DIO.c
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %t$
+ * @version $Format: %t$
  * @brief Core code to interface with Digital cards
  */
 
@@ -79,7 +79,7 @@ libusb_device_handle *_dio_get_device_handle( unsigned long DeviceIndex, DeviceD
     return deviceHandle;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN unsigned long DIO_Configure(
+unsigned long DIO_Configure(
                                           unsigned long DeviceIndex,
                                           unsigned char bTristate,
                                           AIOChannelMask *mask,
@@ -159,7 +159,7 @@ out_DIO_Configure:
     return result;
 }
 
-PUBLIC_EXTERN unsigned long DIO_ConfigureRaw(
+unsigned long DIO_ConfigureRaw(
                                              unsigned long DeviceIndex,
                                              unsigned char bTristate,
                                              void *pOutMask,
@@ -219,7 +219,7 @@ PUBLIC_EXTERN unsigned long DIO_ConfigureRaw(
 
 
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN unsigned long DIO_ConfigureEx( 
+unsigned long DIO_ConfigureEx( 
                                             unsigned long DeviceIndex, 
                                             void *pOutMask, 
                                             void *pData, 
@@ -287,7 +287,7 @@ PUBLIC_EXTERN unsigned long DIO_ConfigureEx(
     return result;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN unsigned long DIO_ConfigurationQuery(
+unsigned long DIO_ConfigurationQuery(
                                                    unsigned long DeviceIndex,
                                                    void *pOutMask,
                                                    void *pTristateMask
@@ -342,7 +342,7 @@ PUBLIC_EXTERN unsigned long DIO_ConfigurationQuery(
     return result;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN unsigned long DIO_WriteAll(
+unsigned long DIO_WriteAll(
                                          unsigned long DeviceIndex,
                                          void *pData
                                          /* DIOBuf *data */
@@ -402,7 +402,7 @@ PUBLIC_EXTERN unsigned long DIO_WriteAll(
     return result;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN unsigned long DIO_Write8(
+unsigned long DIO_Write8(
                                        unsigned long DeviceIndex,
                                        unsigned long ByteIndex,
                                        unsigned char Data
@@ -469,7 +469,7 @@ PUBLIC_EXTERN unsigned long DIO_Write8(
 
 
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN unsigned long DIO_Write1(
+unsigned long DIO_Write1(
                                        unsigned long DeviceIndex,
                                        unsigned long BitIndex,
                                        unsigned char bData
@@ -519,7 +519,7 @@ PUBLIC_EXTERN unsigned long DIO_Write1(
 /*----------------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN unsigned long DIO_ReadAll(
+unsigned long DIO_ReadAll(
                                         unsigned long DeviceIndex,
                                         DIOBuf *buf
                                         ) {
@@ -570,7 +570,7 @@ PUBLIC_EXTERN unsigned long DIO_ReadAll(
     return result;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN unsigned long DIO_ReadAllToCharStr(
+unsigned long DIO_ReadAllToCharStr(
                                                  unsigned long DeviceIndex,
                                                  char *buf,
                                                  unsigned size
@@ -600,7 +600,7 @@ PUBLIC_EXTERN unsigned long DIO_ReadAllToCharStr(
     return result;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN unsigned long DIO_Read8(
+unsigned long DIO_Read8(
                                       unsigned long DeviceIndex,
                                       unsigned long ByteIndex,
                                       int *pdat
@@ -631,7 +631,7 @@ PUBLIC_EXTERN unsigned long DIO_Read8(
     return result;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN unsigned long DIO_Read1(
+unsigned long DIO_Read1(
                                       unsigned long DeviceIndex,
                                       unsigned long BitIndex,
                                       int *bit
@@ -648,7 +648,7 @@ PUBLIC_EXTERN unsigned long DIO_Read1(
     return result;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN unsigned long DIO_StreamOpen(
+unsigned long DIO_StreamOpen(
                                            unsigned long DeviceIndex,
                                            unsigned long bIsRead
                                            ) {
@@ -702,7 +702,7 @@ PUBLIC_EXTERN unsigned long DIO_StreamOpen(
 
 
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN unsigned long DIO_StreamClose(
+unsigned long DIO_StreamClose(
                                             unsigned long DeviceIndex
                                             ) {
     if(!AIOUSB_Lock())
@@ -731,7 +731,7 @@ PUBLIC_EXTERN unsigned long DIO_StreamClose(
     return result;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN unsigned long DIO_StreamSetClocks(
+unsigned long DIO_StreamSetClocks(
                                                 unsigned long DeviceIndex,
                                                 double *ReadClockHz,
                                                 double *WriteClockHz
@@ -797,7 +797,7 @@ PUBLIC_EXTERN unsigned long DIO_StreamSetClocks(
 }
 
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN unsigned long DIO_StreamFrame(
+unsigned long DIO_StreamFrame(
                                             unsigned long DeviceIndex,
                                             unsigned long FramePoints,
                                             unsigned short *pFrameData,

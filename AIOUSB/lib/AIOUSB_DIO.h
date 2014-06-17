@@ -2,7 +2,7 @@
  * @file   AIOUSB_DIO.h
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %t$
+ * @version $Format: %t$
  */
 #ifndef _AIOUSB_DIO_H
 #define _AIOUSB_DIO_H

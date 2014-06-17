@@ -2,7 +2,7 @@
  * @file   AIOUSB_DAC.c
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %t$
+ * @version $Format: %t$
  * @brief Core code to handle DACs on AIOUSB devices.
  */
 
@@ -66,7 +66,7 @@ unsigned long DACDirect(unsigned long DeviceIndex,unsigned short Channel,unsigne
 
 /*----------------------------------------------------------------------------*/
 /**
- * @desc pDACData is an array of DACDataCount channel/count 16-bit word pairs:
+ * @brief pDACData is an array of DACDataCount channel/count 16-bit word pairs:
  * @verbatim
  *   +----------------+
  *   |    channel     | word 0
@@ -233,7 +233,7 @@ unsigned long DACMultiDirect( unsigned long DeviceIndex,
 
 /*----------------------------------------------------------------------------*/
 /*
- * @desc Sets the range code for the DAC
+ * @brief Sets the range code for the DAC
  * @param DeviceIndex
  * @param RangeCode
  * @return

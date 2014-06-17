@@ -12,8 +12,9 @@ OPTION(BUILD_SAMPLES "Build the AIOUSB Samples" ON)
 OPTION(BUILD_PERL "Build the Perl Interfaces" OFF)
 OPTION(BUILD_PYTHON "Build the Python Interfaces" OFF)
 OPTION(BUILD_JAVA "Build the Java Interfaces" OFF)
-
-
+OPTION(BUILD_R "Build the R Interfaces" OFF)
+OPTION(BUILD_OCTAVE "Build the Octave Interfaces" OFF)
+OPTION(BUILD_PHP "Build the PHP Interfaces" OFF)
 
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
@@ -92,22 +93,34 @@ include_directories(classlib)
 
 
 if ( SWIG_FOUND ) 
-if ( BUILD_PYTHON )
+  if ( BUILD_PYTHON )
     MESSAGE(STATUS "Adding wrapper for python" )
     add_subdirectory("lib/wrappers/python")
-endif (BUILD_PYTHON)
-if ( BUILD_PERL )
+  endif (BUILD_PYTHON)
+  if ( BUILD_PERL )
     MESSAGE(STATUS "Adding wrapper for Perl" )
     add_subdirectory("lib/wrappers/perl")
-endif (BUILD_PERL)
-if ( BUILD_JAVA )
+  endif (BUILD_PERL)
+  if ( BUILD_JAVA )
     MESSAGE(STATUS "Adding wrapper for Java" )
     add_subdirectory("lib/wrappers/java")
-endif (BUILD_JAVA)
-if ( BUILD_RUBY )
+  endif (BUILD_JAVA)
+  if ( BUILD_RUBY )
     MESSAGE(STATUS "Adding wrapper for Ruby" )
     add_subdirectory("lib/wrappers/ruby")
-endif (BUILD_RUBY)
+  endif (BUILD_RUBY)
+  if ( BUILD_OCTAVE )
+    MESSAGE(STATUS "Adding wrapper for Octave" )
+    add_subdirectory("lib/wrappers/octave")
+  endif (BUILD_OCTAVE )
+  if ( BUILD_R )
+    MESSAGE(STATUS "Adding wrapper for R" )
+    add_subdirectory("lib/wrappers/R")
+  endif (BUILD_R)
+  if ( BUILD_PHP )
+    MESSAGE(STATUS "Adding wrapper for PHP" )
+    add_subdirectory("lib/wrappers/PHP")
+  endif (BUILD_PHP)
 endif( SWIG_FOUND )
 
 
@@ -133,23 +146,24 @@ endif( BUILD_SAMPLES )
 IF(DOXYGEN_FOUND)
   MESSAGE(STATUS "Will generate Doxygen") 
   CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
-  ADD_CUSTOM_TARGET(doc
-    ${DOXYGEN_EXECUTABLE} Doxyfile
+  ADD_CUSTOM_TARGET(doc ALL
+    ${DOXYGEN_EXECUTABLE} Doxyfile > Doxygen_output.txt
     COMMENT "Generating API documentation with Doxygen" VERBATIM
-  )
-
-IF( PERL_FOUND )
-SET(PAR "(" )
-SET(CPAR ")" )
-SET(REPLACE_COMMAND ${PERL_EXECUTABLE} -i -pne 's/^\\s*${PAR}References|Referenced\\s+by${CPAR}.*//g' * )
-  ADD_CUSTOM_COMMAND( TARGET doc
-    POST_BUILD
-    COMMAND ${REPLACE_COMMAND}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/man/man3
-    COMMENT "Cleaning up man pages"
     )
-ENDIF( PERL_FOUND )
-INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/man/man3 DESTINATION man )
+
+  IF( PERL_FOUND )
+    SET(PAR "(" )
+    SET(CPAR ")" )
+    SET(REPLACE_COMMAND ${PERL_EXECUTABLE} -i -pne 's/^\\s*${PAR}References|Referenced\\s+by${CPAR}.*//g' * )
+    ADD_CUSTOM_COMMAND( TARGET doc
+      POST_BUILD
+      COMMAND ${REPLACE_COMMAND}
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/man/man3
+      COMMENT "Cleaning up man pages"
+      )
+  ENDIF( PERL_FOUND )
+  
+  INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/man/man3 DESTINATION man )
 ENDIF(DOXYGEN_FOUND)
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

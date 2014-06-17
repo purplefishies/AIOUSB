@@ -2,7 +2,7 @@
  * @file   DIOBuf.c
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %t$
+ * @version $Format: %t$
  * @brief  Buffers for DIO elements
  *
  */
@@ -36,7 +36,6 @@ DIOBuf *NewDIOBuf( unsigned size ) {
 void _copy_to_buf( DIOBuf *tmp, const char *ary, int size_array ) {
     int tot_bit_size = tmp->_size;
     int i; 
-    /* for ( i = tot_bit_size-1 ; i >= 0 ; i -- ) { */
     for ( i = 0 ; i < tot_bit_size ; i ++ ) { 
         int curindex = i / 8;
         tmp->_buffer[ i ] = (( ary[curindex] >> (( 8-1 ) - (i%8)) ) & 1 ? 1 : 0 );
@@ -54,7 +53,7 @@ DIOBuf *NewDIOBufFromChar( const char *ary, int size_array ) {
 }
 /*----------------------------------------------------------------------------*/
 /**
- * @desc Constructor from a string argument like "101011011";
+ * @brief Constructor from a string argument like "101011011";
  */
 DIOBuf *NewDIOBufFromBinStr( const char *ary ) {
     int tot_bit_size = strlen(ary);
@@ -114,15 +113,15 @@ DIOBuf *DIOBufResize( DIOBuf *buf , unsigned newsize ) {
   return buf;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN unsigned  DIOBufSize( DIOBuf *buf ) {
+unsigned  DIOBufSize( DIOBuf *buf ) {
   return buf->_size;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN unsigned DIOBufByteSize( DIOBuf *buf ) {
+unsigned DIOBufByteSize( DIOBuf *buf ) {
   return buf->_size / BITS_PER_BYTE;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN char *DIOBufToString( DIOBuf *buf ) {
+char *DIOBufToString( DIOBuf *buf ) {
   unsigned i;
   memset(buf->_strbuf,0, DIOBufSize(buf)+1);
   for( i = 0; i < buf->_size ; i ++ )
@@ -171,7 +170,7 @@ int DIOBufGetIndex( DIOBuf *buf, unsigned index ) {
     return buf->_buffer[buf->_size - 1 - index ];
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN AIORET_TYPE DIOBufGetByteAtIndex( DIOBuf *buf, unsigned index , char *value ) {
+AIORET_TYPE DIOBufGetByteAtIndex( DIOBuf *buf, unsigned index , char *value ) {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     if ( index >= buf->_size / BITS_PER_BYTE )   
         return -AIOUSB_ERROR_INVALID_INDEX;
@@ -184,7 +183,7 @@ PUBLIC_EXTERN AIORET_TYPE DIOBufGetByteAtIndex( DIOBuf *buf, unsigned index , ch
     return retval;
 }
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN AIORET_TYPE DIOBufSetByteAtIndex( DIOBuf *buf, unsigned index, char  value ) {
+AIORET_TYPE DIOBufSetByteAtIndex( DIOBuf *buf, unsigned index, char  value ) {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     if ( index >= buf->_size / BITS_PER_BYTE )   
         return -AIOUSB_ERROR_INVALID_INDEX;
