@@ -8,7 +8,11 @@ namespace AIOUSB {
 #endif
 
 /*----------------------------------------------------------------------------*/
-AIOChannelMask * NewAIOChannelMask( unsigned int number_channels ) {
+/**
+ * @brief Constructor AIOChannelMask bit mask object
+ * @param num_channels The number of bits in our Bit Mask
+ */
+AIOChannelMask * NewAIOChannelMask( unsigned number_channels ) {
     AIOChannelMask *tmp = (AIOChannelMask *)malloc(sizeof(AIOChannelMask ));
     unsigned i;
     if( !tmp ) {
@@ -38,8 +42,8 @@ AIOChannelMask * NewAIOChannelMask( unsigned int number_channels ) {
 }
 /*----------------------------------------------------------------------------*/
 /**
- * @brief Deletes the AIOChannelMask object
- * @param mask 
+ * @brief Destructor for the AIOChannelMask object
+ * @param mask , AIOChannelMask to delete
  */
 void DeleteAIOChannelMask( AIOChannelMask *mask ) {
     if ( mask->strrep ) 
@@ -51,6 +55,9 @@ void DeleteAIOChannelMask( AIOChannelMask *mask ) {
     free(mask);
 }
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief Returns an interator to the indices that are valid high ( 1).
+ */
 AIORET_TYPE AIOChannelMaskIndices( AIOChannelMask *mask , int *pos ) {
     AIORET_TYPE retval;
     if ( !mask || !pos )
@@ -61,6 +68,10 @@ AIORET_TYPE AIOChannelMaskIndices( AIOChannelMask *mask , int *pos ) {
     return retval;
 }
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief Part of the iterator pair of functions for finding the indices where
+ * the mask has a 1. 
+ */
 AIORET_TYPE AIOChannelMaskNextIndex( AIOChannelMask *mask , int *pos ) {
     int retval;
     if ( *pos >= (int)mask->number_signals ) {
@@ -96,6 +107,10 @@ AIORET_TYPE AIOChannelMaskSetMaskFromInt( AIOChannelMask *obj, unsigned field ) 
     return ret;
 }
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief Sets the Bit Mask at specified index to the values contained in 
+ * field
+ */
 AIORET_TYPE AIOChannelMaskSetMaskAtIndex( AIOChannelMask *obj, char field, unsigned index  )
 {
     if ( index >= (unsigned)obj->size )
@@ -105,8 +120,24 @@ AIORET_TYPE AIOChannelMaskSetMaskAtIndex( AIOChannelMask *obj, char field, unsig
     obj->signals[obj->size-index-1] = field;
     return AIOUSB_SUCCESS;
 }
-
 /*----------------------------------------------------------------------------*/
+/**
+ * @bried Retrieves the mask at offset index, and saves it to tmp
+ * @param obj The AIOChannelMask bit mask object
+ * @param *tmp The object we save the BitMask to
+ * @param index into the AIOChannelMask that we wish to retrieve the bitmask for
+ */
+AIORET_TYPE AIOChannelMaskGetMaskAtIndex( AIOChannelMask *obj , char *tmp , unsigned index ) {
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    if( index >= (unsigned)obj->size )
+        return -AIOUSB_ERROR_INVALID_INDEX;
+    *tmp = obj->signals[obj->size-1-index];
+    return retval;
+}
+/*----------------------------------------------------------------------------*/
+/**
+ *  @brief Gives the size of the given BitMask
+ */
 AIORET_TYPE AIOChannelMaskGetSize( AIOChannelMask *obj ) {
      return (AIORET_TYPE)obj->size;
 }
@@ -172,9 +203,8 @@ AIOChannelMask *NewAIOChannelMaskFromStr( const char *bitfields ) {
 }
 /*----------------------------------------------------------------------------*/
 /**
- * @brief Returns a mask for the index in question
- * @param obj 
- * @param index
+ * @brief Returns a string representation for the AIOChannel Bit mask in question
+ * @param mask AIOChannelMask to convert to string form
  */
 char *AIOChannelMaskToString( AIOChannelMask *obj ) {
      if( obj->strrep ) {
@@ -186,7 +216,7 @@ char *AIOChannelMaskToString( AIOChannelMask *obj ) {
      int i, j, pos, startpos;
      pos = 0;
      for ( i = 0;  i < obj->size; i ++ ) {
-         /** @note Check for the case where we have say 17 signals( non-integer multiple of 
+         /** @todo Check for the case where we have say 17 signals( non-integer multiple of 
           * BITS_PER_BYTE 
           */
          if ( i == 0 && (obj->number_signals % BITS_PER_BYTE != 0) ) {
@@ -205,8 +235,9 @@ char *AIOChannelMaskToString( AIOChannelMask *obj ) {
 /*----------------------------------------------------------------------------*/
 /**
  * @brief Returns a mask for the index in question
- * @param obj 
- * @param index
+ *
+ * @param obj AIOChannelMask bit mask object
+ * @param index into byte array that we wish to return a byte worth of bits from
  */
 char *AIOChannelMaskToStringAtIndex( AIOChannelMask *obj, unsigned index ) {
     if ( index >= (unsigned)obj->size ) {
@@ -217,11 +248,10 @@ char *AIOChannelMaskToStringAtIndex( AIOChannelMask *obj, unsigned index ) {
     char *retval = obj->strrepsmall;
     int i, j, pos, startpos;
     pos = 0;
-    /* for ( i = 0;  i < obj->size; i ++ ) { */
-    /* for ( i = index ; i < obj->size ; i++ ) {  */
-    /* i = index; */
+
     i = ( obj->size - index - 1 );
-        /** @note Check for the case where we have say 17 signals( non-integer multiple of 
+        /**
+         * @note Check for the case where we have say 17 signals( non-integer multiple of 
          * BITS_PER_BYTE 
          */
     if ( i == 0 && (obj->number_signals % BITS_PER_BYTE != 0) ) {
@@ -235,14 +265,7 @@ char *AIOChannelMaskToStringAtIndex( AIOChannelMask *obj, unsigned index ) {
     }
     return retval;
 }
-/*----------------------------------------------------------------------------*/
-AIORET_TYPE AIOChannelMaskGetMaskAtIndex( AIOChannelMask *obj , char *tmp , unsigned index ) {
-    AIORET_TYPE retval = AIOUSB_SUCCESS;
-    if( index >= (unsigned)obj->size )
-        return -AIOUSB_ERROR_INVALID_INDEX;
-    *tmp = obj->signals[obj->size-1-index];
-    return retval;
-}
+
 /*----------------------------------------------------------------------------*/
 char *AIOChannelMaskGetMask( AIOChannelMask *obj ) {
     char *tmp = (char *)malloc(obj->size+1);
