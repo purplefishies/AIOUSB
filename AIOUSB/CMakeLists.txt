@@ -15,6 +15,8 @@ OPTION(BUILD_JAVA "Build the Java Interfaces" OFF)
 OPTION(BUILD_R "Build the R Interfaces" OFF)
 OPTION(BUILD_OCTAVE "Build the Octave Interfaces" OFF)
 OPTION(BUILD_PHP "Build the PHP Interfaces" OFF)
+OPTION(BUILD_DOCUMENTATION "Build the Doxygen documentation" OFF )
+
 
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
@@ -27,6 +29,11 @@ cmake_minimum_required(VERSION 2.8)
 
 project( AIOUSBLIBS )
 
+
+# ROOT DIRECTORY FOR INSTALLATION
+#SET( AIOUSB_INSTALL_PREFIX /usr/share/aiousb )
+
+
 # use, i.e. don't skip the full RPATH for the build tree
 SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 # when building, don't use the install RPATH already
@@ -34,7 +41,7 @@ SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
 
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-
+# SET(CMAKE_INSTALL_PREFIX "${AIOUSB_INSTALL_PREFIX}" CACHE INTERNAL "Prefix for installation directories" FORCE)
 
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeScripts)
@@ -143,28 +150,39 @@ endif( BUILD_SAMPLES )
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Documentation and man pages
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-IF(DOXYGEN_FOUND)
-  MESSAGE(STATUS "Will generate Doxygen") 
+IF( DOXYGEN_FOUND AND BUILD_DOCUMENTATION )
+  MESSAGE(STATUS "Generating Doxygen Documentation ") 
   CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
-  ADD_CUSTOM_TARGET(doc ALL
-    ${DOXYGEN_EXECUTABLE} Doxyfile > Doxygen_output.txt
-    COMMENT "Generating API documentation with Doxygen" VERBATIM
+
+  ADD_CUSTOM_COMMAND(OUTPUT BuildDoxygen.txt 
+    COMMAND 
+    ${DOXYGEN_EXECUTABLE} Doxyfile
+    COMMAND
+    ${CMAKE_COMMAND} -E touch BuildDoxygen.txt 
+    COMMENT "Generating API documentation with Doxygen"
+    DEPENDS aiousb
     )
 
   IF( PERL_FOUND )
     SET(PAR "(" )
     SET(CPAR ")" )
     SET(REPLACE_COMMAND ${PERL_EXECUTABLE} -i -pne 's/^\\s*${PAR}References|Referenced\\s+by${CPAR}.*//g' * )
-    ADD_CUSTOM_COMMAND( TARGET doc
+
+    ADD_CUSTOM_COMMAND( TARGET BuildDoxygen.txt
       POST_BUILD
       COMMAND ${REPLACE_COMMAND}
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/man/man3
       COMMENT "Cleaning up man pages"
       )
+    
+    ADD_CUSTOM_TARGET( doc ALL DEPENDS BuildDoxygen.txt
+      COMMENT "Building Documentation"
+      )
+
   ENDIF( PERL_FOUND )
   
   INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/man/man3 DESTINATION man )
-ENDIF(DOXYGEN_FOUND)
+ENDIF( DOXYGEN_FOUND AND BUILD_DOCUMENTATION )
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # CPack stuff
@@ -185,9 +203,11 @@ ELSE( UNIX )                    # LINUX / UNIX
   SET(CPACK_DEBIAN_PACKAGE_NAME "libaiousb" )
   SET(CPACK_DEBIAN_PACKAGE_VERSION "1.98" )
   SET(CPACK_SOURCE_STRIP_FILES "")
-  SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Jimi Damon") #required
+  SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Jimi Damon <jdamon@accesio.com>") #required
   SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "" )
-  SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libusb-1.0-0 ( >= 1.0.0 ), libusb-dev ( >= 0.1.0 ) ")
+  SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libusb-1.0-0 ( >= 1.0.0 ), libusb-dev ( >= 0.1.0 )")
+  SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, cmake ( >= 2.8 ), cmake-curses ( >= 2.8 ) , cmake-data ( >= 2.8 )")
+  SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, gcc , binutils")
 
   SET(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}")
   # Install everything into /usr/share/accesio
