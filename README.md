@@ -14,7 +14,7 @@ full support to the following platforms:
 * Linux
 * Mac OS X 
 * Free / Net BSD
-* POSIX Compliant Operating Systemsthat can successfully compile and use libusb.
+* POSIX compliant operating systems that can successfully compile and use libusb.
 
 
 **NOTE**: At this moment using these drivers under Windows is **not** supported although several customers have successfully been able to build and deploy solutions based on this system. We expect to have Windows libusb support available in the near future.
@@ -56,7 +56,7 @@ brew install libusb  cmake
 ##### Darwin Ports
 
 ```bash
-brew install libusb  cmake
+sudo port install libusb cmake
 ```
 
 
