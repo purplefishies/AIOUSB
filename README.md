@@ -65,7 +65,7 @@ sudo port install libusb cmake
 
 ##How to Build on UNIX systems
 -----------------------------
-Building ACCES I/O Products' Driver library amounts to compiling C source files to produce C and C++ based shared ( .so ) or static (.a) libraries.  The build process relies on either GNU make or Cmake.  The first method of building ( see [non-cmake users](#noncmake) is a little more involved but will give you the ability to build wrapper language packs.  Currently ,the simplified cmake system is easier to build and install the general libraries but we have been unable to use it to deploy the Swig based wrappers as we would have liked. If you don't require any other languages besides C/C++, it is suggested you use the Cmake based approach.
+Building ACCES I/O Products' Driver library amounts to compiling C source files to produce C and C++ based shared ( .so ) or static (.a) libraries.  The build process relies on either GNU make or Cmake.  The first method of building ( see [non-cmake users](#noncmake) is a little more involved but will give you the ability to build wrapper language packs.  Currently ,the simplified cmake system is easier to build and install the general libraries but we have been unable to use it to deploy the Swig based wrappers as we would have liked. 
 
 
 ## <a href="#noncmake"></a>Non-CMake users
@@ -139,7 +139,34 @@ wrapper language support for the following languages:
 * Octave
 * R
 
-### How to build Wrapper languages
+## How to build Wrapper languages
+
+### CMake
+
+This is the easiest way to build the wrapper languages. Perform the following
+
+```bash
+cmake  -DCMAKE_INSTALL_PREFIX=/some/path/Dir  -DBUILD_PERL=ON -DBUILD_JAVA=ON ..
+```
+
+This will build the languages for Perl and Java. The remaining languages that can be built are
+Python ( -DBUILD_PYTHON=ON ) , Ruby (-DBUILD_RUBY=ON), PHP (-DBUILD_PHP=ON) and R (-DBUILD_R=ON) 
+while Octave is currently not ready yet. The installation of these wrapper scripts will default be written
+to the CMAKE_INSTALL_PREFIX. To better customize the installation, you should use 
+
+```bash
+ccmake -DCMAKE_INSTALL_PREFIX=/some/path/Dir ..
+```
+
+or if you have installed cmake-gui, then
+
+```bash
+cmake-gui -DCMAKE_INSTALL_PREFIX=/some/path/Dir ..
+```
+
+
+
+### Regular Make system
 
 Perform this step *AFTER* you have already followed the instructions
 for building the aiousb libraries.  
