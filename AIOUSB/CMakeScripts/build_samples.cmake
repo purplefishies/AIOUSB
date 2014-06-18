@@ -31,6 +31,9 @@ macro ( build_selftest_c_file project c_file  cflags link_libraries )
   elseif ( USE_CLANG ) 
     SET(MY_CFLAGS " -g -gstabs ${cflags}" )
   endif( USE_GCC )
+
+  ADD_TEST( NAME ${binary_name} COMMAND ${binary_name} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
+
   SET_TARGET_PROPERTIES( "${project}_${binary_name}" PROPERTIES OUTPUT_NAME  ${binary_name} ) 
   SET_TARGET_PROPERTIES( "${project}_${binary_name}" PROPERTIES COMPILE_FLAGS ${MY_CFLAGS} ) 
   TARGET_LINK_LIBRARIES( "${project}_${binary_name}" ${link_libraries} )
@@ -49,6 +52,8 @@ macro ( build_gtest_cpp_file project c_file  cflags link_libraries )
   ADD_CUSTOM_COMMAND( OUTPUT ${tmp_gtest_file} COMMAND ${CMAKE_COMMAND} -E copy_if_different ${c_file} ${tmp_gtest_file} )
   # MESSAGE(STATUS "Adding GTEST file ${tmp_gtest_file}" )
   ADD_EXECUTABLE( "${project}_${binary_name}" ${tmp_gtest_file} )
+
+  ADD_TEST( NAME ${binary_name} COMMAND ${binary_name} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
 
   SET_SOURCE_FILES_PROPERTIES( ${tmp_gtest_file}  PROPERTIES LANGUAGE CXX)
   SET_TARGET_PROPERTIES( "${project}_${binary_name}" PROPERTIES OUTPUT_NAME  ${binary_name} ) 

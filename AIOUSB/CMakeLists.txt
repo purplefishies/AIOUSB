@@ -17,6 +17,7 @@ OPTION(BUILD_OCTAVE "Build the Octave Interfaces" OFF)
 OPTION(BUILD_PHP "Build the PHP Interfaces" OFF)
 OPTION(BUILD_DOCUMENTATION "Build the Doxygen documentation" OFF )
 
+ENABLE_TESTING()
 
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})

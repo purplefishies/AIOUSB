@@ -50,10 +50,25 @@ ELSE(BUILD_AIOUSBCPPDBG_SHARED)
   SET(AIOUSBCPPDBG_LIBRARY_TYPE STATIC)
 ENDIF(BUILD_AIOUSBCPPDBG_SHARED)
 
+SET( tmp_aiousb_files 
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOChannelMask.c" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOContinuousBuffer.c" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIODeviceInfo.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_ADC.c" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_ADC_ExternalCal.c" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_CTR.c" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_Core.c" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_CustomEEPROMRead.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_CustomEEPROMWrite.c" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_DAC.c" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_DIO.c" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_Properties.c" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_USB.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_WDG.c" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/DIOBuf.c" 
+  )
 
-file( GLOB tmp_aiousb_files ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/*.c" )
 
-# MESSAGE(STATUS "aiousb_files: ${aiousb_files}" )
 set( CMAKE_INCLUDE_CURRENT_DIR  true )
 
 
@@ -129,21 +144,18 @@ foreach( selftest_file ${SELF_TEST_ENTRIES} )
 endforeach( selftest_file ${SELF_TEST_ENTRIES}  )
 endif( NOT CYGWIN )
 
+
 find_package( GTest ) 
 find_package( GTestTap )
 
 if( GTESTTAP_FOUND )
-  add_test(DIOBuf_test DIOBuf.c )
-  add_test(AIOChannelMask_test AIOChannelMask.c )
-  add_test(AIOUSB_Core_test AIOUSB_Core.c )
-  add_test(AIODeviceInfo_test AIODeviceInfo.c)
-  set(MY_FLAGS "-DSELF_TEST -D__aiousb_cplusplus -DGTEST_TAP_PRINT_TO_STDOUT"  )
-  set(MY_LIBRARIES aiousbdbg usb-1.0 pthread m gtest aiousb aiousbcpp )
-  # MESSAGE(STATUS "Libraries: ${MY_LIBRARIES}")
-  build_gtest_cpp_file( aiousblibs DIOBuf.c ${MY_FLAGS} "${MY_LIBRARIES}" )
-  build_gtest_cpp_file( aiousblibs AIOChannelMask.c ${MY_FLAGS} "${MY_LIBRARIES}" )
-  build_gtest_cpp_file( aiousblibs AIOUSB_Core.c ${MY_FLAGS} "${MY_LIBRARIES}"  )
-  build_gtest_cpp_file( aiousblibs AIODeviceInfo.c  ${MY_FLAGS} "${MY_LIBRARIES}"  )
+  set(GTEST_FILES DIOBuf.c AIOChannelMask.c AIOUSB_Core.c AIODeviceInfo.c )
+  foreach( gtest ${GTEST_FILES} ) 
+    set(MY_FLAGS "-DSELF_TEST -D__aiousb_cplusplus -DGTEST_TAP_PRINT_TO_STDOUT"  )
+    set(MY_LIBRARIES aiousbdbg usb-1.0 pthread m gtest aiousb aiousbcpp )
+    # MESSAGE(STATUS "Libraries: ${MY_LIBRARIES}")
+    build_gtest_cpp_file( aiousblibs ${gtest}  ${MY_FLAGS} "${MY_LIBRARIES}"  )
+  endforeach(gtest ${GTEST_FILES} ) 
 endif( GTESTTAP_FOUND )
 
 
@@ -155,6 +167,13 @@ install( TARGETS aiousb DESTINATION lib )
 install( TARGETS aiousbdbg DESTINATION lib )
 install( TARGETS aiousbcpp DESTINATION lib )
 install( TARGETS aiousbcppdbg DESTINATION lib )
-install( FILES AIOUSB_Core.h AIOUSB_USB.h aiousb.h AIOTypes.h AIOChannelMask.h DESTINATION include )
+install( FILES 
+         AIOUSB_Core.h 
+         AIOUSB_USB.h 
+         aiousb.h 
+         AIOTypes.h 
+         AIOChannelMask.h 
+         AIOUSB_Properties.h 
+         DESTINATION include )
 
 
