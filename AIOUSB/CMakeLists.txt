@@ -16,6 +16,9 @@ OPTION(BUILD_R "Build the R Interfaces" OFF)
 OPTION(BUILD_OCTAVE "Build the Octave Interfaces" OFF)
 OPTION(BUILD_PHP "Build the PHP Interfaces" OFF)
 OPTION(BUILD_DOCUMENTATION "Build the Doxygen documentation" OFF )
+OPTION(INSTALL_WRAPPERS_RELATIVE "Install Scripting languages in Paths relative to CMAKE_INSTALL_PREFIX" ON )
+OPTION(GUESS_WRAPPER_INSTALL_DIRECTORIES "Guess the location of Wrapper installation paths" ON )
+
 
 ENABLE_TESTING()
 
@@ -127,7 +130,7 @@ if ( SWIG_FOUND )
   endif (BUILD_R)
   if ( BUILD_PHP )
     MESSAGE(STATUS "Adding wrapper for PHP" )
-    add_subdirectory("lib/wrappers/PHP")
+    add_subdirectory("lib/wrappers/php")
   endif (BUILD_PHP)
 endif( SWIG_FOUND )
 
