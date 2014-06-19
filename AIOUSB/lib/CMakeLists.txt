@@ -167,13 +167,7 @@ install( TARGETS aiousb DESTINATION lib )
 install( TARGETS aiousbdbg DESTINATION lib )
 install( TARGETS aiousbcpp DESTINATION lib )
 install( TARGETS aiousbcppdbg DESTINATION lib )
-install( FILES 
-         AIOUSB_Core.h 
-         AIOUSB_USB.h 
-         aiousb.h 
-         AIOTypes.h 
-         AIOChannelMask.h 
-         AIOUSB_Properties.h 
-         DESTINATION include )
+FILE( GLOB aiousb_header_files *.h )
+install( FILES ${aiousb_header_files} DESTINATION include )
 
 

@@ -98,10 +98,11 @@ macro ( include_testcase_lib project )
   INCLUDE_DIRECTORIES( ${AIOUSB_TESTCASELIB_DIR} )
   LINK_DIRECTORIES( ${AIOUSB_TESTCASELIB_DIR} )  
 
-  SET(CMAKE_CXX_FLAGS "-D__aiousb_cplusplus -fPIC" )
-  if ( USE_GCC)
-    SET(CMAKE_C_FLAGS   "-std=gnu99 " )
-  endif( USE_GCC )
+
+  if ( USE_GCC AND NOT CYGWIN )
+    SET(CMAKE_C_FLAGS   "-std=gnu99" )
+    SET(CMAKE_CXX_FLAGS "-D__aiousb_cplusplus -fPIC" )
+  endif( USE_GCC AND NOT CYGWIN )
 
 endmacro( include_testcase_lib )
 
