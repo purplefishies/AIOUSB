@@ -7,6 +7,8 @@
 # make file for AIOUSB java class library and associated documentation
 #
 
+
+
 JAR := aiousb.jar
 JAVAPACKAGE := com.acces.aiousb
 JAVADIR := $(subst .,/,$(JAVAPACKAGE))
@@ -44,8 +46,12 @@ DOCTITLE := "AIOUSB Java Class Library Reference"
 
 vpath %.class $(JAVADIR)
 
-.PHONY : all
-all: $(JAR) $(JNILIB) $(DOCINDEX)
+.PHONY : deprecated
+deprecated:
+	@echo "!!! This code is deprecated and no longer supported by ACCES I/O Products !!!"	
+
+.PHONY : all 
+all: $(JAR) $(JNILIB) $(DOCINDEX) deprecated
 
 .PHONY : mostlyclean
 mostlyclean:
@@ -55,7 +61,7 @@ mostlyclean:
 clean:
 	-rm -f $(JAR) $(ALLJAVACLASSES) $(JNILIB) $(JNIOBJS) $(DOCINDEX)
 
-$(JAR) : $(JAVACLASSES)
+$(JAR) : deprecated $(JAVACLASSES)
 	-rm -f $(JAR)
 	jar cf $(JAR) $(ALLJAVACLASSES)
 	chmod a-w $(JAR)
