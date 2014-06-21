@@ -13,7 +13,16 @@
 #include "AIOTypes.h"
 #include "AIOChannelMask.h"
 #include "AIOTypes.h"
+#include "AIOUSB_Core.h"
+#include "aiousb.h"
 #include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <libusb.h>
+#include <string.h>
+#include <math.h>
 
 
 #ifdef __aiousb_cplusplus

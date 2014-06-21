@@ -15,20 +15,10 @@
  *       config object
  */
 
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include "aiousb.h"
-#include "AIOUSB_Core.h"
-#include "AIOTypes.h"
 #include "AIOContinuousBuffer.h"
 #include "AIOChannelMask.h"
 #include "AIOUSB_Core.h"
-#include <libusb.h>
-#include <string.h>
-#include <math.h>
+
 
 #ifdef __cplusplus
 namespace AIOUSB {

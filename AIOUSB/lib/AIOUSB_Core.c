@@ -968,6 +968,10 @@ PRIVATE const char *GetSafeDeviceName(unsigned long DeviceIndex) {
     return deviceName;
 }
 
+struct libusb_device_handle * AIOUSB_GetUSBHandle( DeviceDescriptor *deviceDesc ) {
+    return deviceDesc->deviceHandle;
+}
+
 /**
  * @param DeviceIndex
  * @return struct libusb_device_handle *
@@ -1180,10 +1184,33 @@ unsigned long ResolveDeviceIndex(unsigned long DeviceIndex) {
            ? DeviceIndex
            : diNone;
 }
+/*------------------------------------------------------------------------*/
+DeviceDescriptor *DeviceTableAtIndex( unsigned long DeviceIndex ) { 
+    unsigned long result = AIOUSB_Validate( &DeviceIndex  );
+    if ( !result != AIOUSB_SUCCESS ) {
+        
+    }
+    DeviceDescriptor * deviceDesc = &deviceTable[ DeviceIndex ];
 
+    return deviceDesc;
+}
+/*------------------------------------------------------------------------*/
+/**
+ * @todo Replace AIOUSB_Lock() with thread safe lock on a per device index basis
+ * @todo Insert correct error messages into global error string in case of failure
+ */
+DeviceDescriptor *DeviceTableAtIndex_Lock( unsigned long DeviceIndex ) { 
+    unsigned long result = AIOUSB_Validate( &DeviceIndex  );
+    if ( !result != AIOUSB_SUCCESS ) {
+        return NULL;
+    }
+    DeviceDescriptor * deviceDesc = &deviceTable[ DeviceIndex ];
+    if( deviceDesc ) 
+        AIOUSB_Lock();
+    return deviceDesc;
+}
 
-DeviceDescriptor *
-AIOUSB_GetDevice_Lock(unsigned long DeviceIndex, unsigned long *result) {
+DeviceDescriptor *AIOUSB_GetDevice_Lock(unsigned long DeviceIndex, unsigned long *result) {
     *result = AIOUSB_Validate(&DeviceIndex);
     if(*result != AIOUSB_SUCCESS) {
           AIOUSB_UnLock();
@@ -1914,6 +1941,269 @@ unsigned long AIOUSB_EnsureOpen(unsigned long DeviceIndex) {
 RETURN_AIOUSB_EnsureOpen:
     return result;
 }
+
+
+
+/**
+ * @param DeviceIndex
+ * @param channel
+ * @param counts
+ * @return
+ */
+double AIOUSB_CountsToVolts(
+    unsigned long DeviceIndex,
+    unsigned channel,
+    unsigned short counts
+    )
+{
+    double volts;
+
+    if(AIOUSB_ArrayCountsToVolts(DeviceIndex, channel, 1, &counts, &volts) != AIOUSB_SUCCESS)
+        volts = 0.0;
+    return volts;
+}
+
+
+
+/**
+ * @param DeviceIndex
+ * @param startChannel
+ * @param endChannel
+ * @param counts
+ * @return
+ */
+unsigned long AIOUSB_MultipleCountsToVolts(
+    unsigned long DeviceIndex,
+    unsigned startChannel,
+    unsigned endChannel,
+    const unsigned short counts[],     /* deviceDesc->ADCMUXChannels */
+    double volts[]     /* deviceDesc->ADCMUXChannels */
+    )
+{
+    return AIOUSB_ArrayCountsToVolts(DeviceIndex, 
+                                     startChannel, 
+                                     endChannel - startChannel + 1,
+                                     counts + startChannel, 
+                                     volts + startChannel
+                                     );
+}
+/*------------------------------------------------------------------------*/
+/**
+ * @param DeviceIndex
+ * @param channel
+ * @param volts
+ * @return
+ */
+unsigned short AIOUSB_VoltsToCounts(
+    unsigned long DeviceIndex,
+    unsigned channel,
+    double volts
+    )
+{
+    unsigned short counts;
+
+    if(AIOUSB_ArrayVoltsToCounts(DeviceIndex, channel, 1, &volts, &counts) != AIOUSB_SUCCESS)
+        counts = 0;
+    return counts;
+}
+/*------------------------------------------------------------------------*/
+/**
+ * @param DeviceIndex
+ * @param startChannel
+ * @param endChannel
+ * @param volts
+ * @return
+ */
+unsigned long AIOUSB_MultipleVoltsToCounts(
+    unsigned long DeviceIndex,
+    unsigned startChannel,
+    unsigned endChannel,
+    const double volts[],     /* deviceDesc->ADCMUXChannels */
+    unsigned short counts[]     /* deviceDesc->ADCMUXChannels */
+    )
+{
+    return AIOUSB_ArrayVoltsToCounts(DeviceIndex, startChannel, endChannel - startChannel + 1,
+                                     volts + startChannel, counts + startChannel);
+}
+/*------------------------------------------------------------------------*/
+/**
+ * @param config
+ * @param DeviceIndex
+ * @param defaults
+ */
+void AIOUSB_InitConfigBlock(ADConfigBlock *config, unsigned long DeviceIndex, AIOUSB_BOOL defaults)
+{
+    assert(config != 0);
+    if(config != 0) {
+/*
+ * mark as uninitialized unless this function succeeds
+ */
+          config->device = 0;
+          config->size = 0;
+          if(AIOUSB_Lock()) {
+                if(AIOUSB_Validate(&DeviceIndex) == AIOUSB_SUCCESS) {
+                      const DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
+                      config->device = deviceDesc;
+                      config->size = deviceDesc->ConfigBytes;
+                      assert(config->size == AD_CONFIG_REGISTERS ||
+                             config->size == AD_MUX_CONFIG_REGISTERS);
+                      if(defaults) {
+                            AIOUSB_SetAllGainCodeAndDiffMode(config, AD_GAIN_CODE_0_10V, AIOUSB_FALSE);
+                            AIOUSB_SetCalMode(config, AD_CAL_MODE_NORMAL);
+                            AIOUSB_SetTriggerMode(config, 0);
+                            AIOUSB_SetScanRange(config, 0, deviceDesc->ADCMUXChannels - 1);
+                            AIOUSB_SetOversample(config, 0);
+                        }
+                  }
+                AIOUSB_UnLock();
+            }
+      }
+}
+/*------------------------------------------------------------------------*/
+/**
+ * @param DeviceIndex
+ * @param fileName
+ * @return
+ */
+unsigned long AIOUSB_ADC_LoadCalTable(
+                                      unsigned long DeviceIndex,
+                                      const char *fileName
+                                      )
+{
+    if(fileName == 0)
+        return AIOUSB_ERROR_INVALID_PARAMETER;
+
+    if(!AIOUSB_Lock())
+        return AIOUSB_ERROR_INVALID_MUTEX;
+
+    unsigned long result = AIOUSB_Validate(&DeviceIndex);
+    if(result != AIOUSB_SUCCESS) {
+          AIOUSB_UnLock();
+          return result;
+      }
+
+    DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
+    if(deviceDesc->bADCStream == AIOUSB_FALSE) {
+          AIOUSB_UnLock();
+          return AIOUSB_ERROR_NOT_SUPPORTED;
+      }
+
+    if((result = ADC_QueryCal(DeviceIndex)) != AIOUSB_SUCCESS) {
+          AIOUSB_UnLock();
+          return result;
+      }
+
+    AIOUSB_UnLock();
+    unsigned short *const calTable = ( unsigned short* )malloc(CAL_TABLE_WORDS * sizeof(unsigned short));
+    assert(calTable != 0);
+    if(calTable != 0) {
+          struct stat fileInfo;
+          if(stat(fileName, &fileInfo) == 0) {
+                if(fileInfo.st_size == CAL_TABLE_WORDS * sizeof(unsigned short)) {
+                      FILE *const calFile = fopen(fileName, "r");
+                      if(calFile != NULL) {
+                            const size_t wordsRead = fread(calTable, sizeof(unsigned short), CAL_TABLE_WORDS, calFile);
+                            fclose(calFile);
+                            if(wordsRead == ( size_t )CAL_TABLE_WORDS)
+                                result = AIOUSB_ADC_SetCalTable(DeviceIndex, calTable);
+                            else
+                                result = AIOUSB_ERROR_FILE_NOT_FOUND;
+                        }else
+                          result = AIOUSB_ERROR_FILE_NOT_FOUND;
+                  }else
+                    result = AIOUSB_ERROR_INVALID_DATA;              // file size incorrect
+            }else
+              result = AIOUSB_ERROR_FILE_NOT_FOUND;
+          free(calTable);
+      }else
+        result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+
+    return result;
+}
+/*------------------------------------------------------------------------*/
+/**
+ * @param DeviceIndex
+ * @param calTable
+ * @return
+ */
+unsigned long AIOUSB_ADC_SetCalTable(
+                                     unsigned long DeviceIndex,
+                                     const unsigned short calTable[]
+                                     )
+{
+    if(calTable == 0)
+        return AIOUSB_ERROR_INVALID_PARAMETER;
+
+    if(!AIOUSB_Lock())
+        return AIOUSB_ERROR_INVALID_MUTEX;
+
+    unsigned long result = AIOUSB_Validate(&DeviceIndex);
+    if(result != AIOUSB_SUCCESS) {
+          AIOUSB_UnLock();
+          return result;
+      }
+
+    DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
+    if(deviceDesc->bADCStream == AIOUSB_FALSE) {
+          AIOUSB_UnLock();
+          return AIOUSB_ERROR_NOT_SUPPORTED;
+      }
+
+    if((result = ADC_QueryCal(DeviceIndex)) != AIOUSB_SUCCESS) {
+          AIOUSB_UnLock();
+          return result;
+      }
+
+    libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
+    if(deviceHandle != NULL) {
+/*
+ * send calibration table to SRAM one block at a time; according to the documentation,
+ * the proper procedure is to bulk transfer a block of calibration data to "endpoint 2"
+ * and then send a control message to load it into the SRAM
+ */
+          const unsigned timeout = deviceDesc->commTimeout;
+          AIOUSB_UnLock();                              // unlock while communicating with device
+          const int SRAM_BLOCK_WORDS = 1024;       // can send 1024 words at a time to SRAM
+          int sramAddress = 0;
+          int wordsRemaining = CAL_TABLE_WORDS;
+          while(wordsRemaining > 0) {
+                const int wordsWritten
+                    = (wordsRemaining < SRAM_BLOCK_WORDS)
+                      ? wordsRemaining
+                      : SRAM_BLOCK_WORDS;
+                int bytesTransferred;
+                const int libusbResult = AIOUSB_BulkTransfer(deviceHandle,
+                                                             LIBUSB_ENDPOINT_OUT | USB_BULK_WRITE_ENDPOINT,
+                                                             ( unsigned char* )(calTable + sramAddress), wordsWritten * sizeof(unsigned short),
+                                                             &bytesTransferred, timeout);
+                if(libusbResult != LIBUSB_SUCCESS) {
+                      result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult);
+                      break;                                  // from while()
+                  }else if(bytesTransferred != ( int )(wordsWritten * sizeof(unsigned short))) {
+                      result = AIOUSB_ERROR_INVALID_DATA;
+                      break;                                  // from while()
+                  }else {
+                      bytesTransferred = libusb_control_transfer(deviceHandle,
+                                                                 USB_WRITE_TO_DEVICE, AUR_LOAD_BULK_CALIBRATION_BLOCK,
+                                                                 sramAddress, wordsWritten, 0, 0, timeout);
+                      if(bytesTransferred != 0) {
+                            result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+                            break;                            // from while()
+                        }
+                  }
+                wordsRemaining -= wordsWritten;
+                sramAddress += wordsWritten;
+            }
+      }else {
+          result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
+          AIOUSB_UnLock();
+      }
+
+    return result;
+}
+
+
+
 
 /** 
  * @brief Performs a generic vendor USB write

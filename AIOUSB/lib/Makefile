@@ -78,6 +78,7 @@ testit:
 	@echo $(OSTYPE)
 	@echo $(CC_SHFLAGS)
 	@echo $(CYGWINTYPE)
+	@echo $(SHCPPLIB)
 
 all_cscope: $(LIBS) cscope
 
@@ -111,6 +112,7 @@ $(SHCDBGLIB): 	$(CDBGOBJS)
 	$(CC) $(CC_SHFLAGS) $(LDFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $(CDBGOBJS) -Wl,--no-whole-archive $(SHARED_LIBS)
 
 $(SHCPPLIB) : $(CPPOBJS)
+
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $(CPPOBJS) -Wl,--no-whole-archive $(SHARED_LIBS)
 
 $(SHCPPDBGLIB) : $(CPPDBGOBJS)
@@ -120,11 +122,11 @@ else
 $(SHCLIB) : $(COBJS)
 	$(CC)  $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $(COBJS) $(SHARED_LIBS)
 $(SHCDBGLIB): 	$(CDBGOBJS)
-	$(CC) $(CC_SHFLAGS),$@ $(LDFLAGS) -o $@ $(CDBGOBJS) $(SHARED_LIBS) 
+	$(CC)  $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $(CDBGOBJS) $(SHARED_LIBS) 
 $(SHCPPLIB) : $(CPPOBJS)
-	$(CXX) $(CXXFLAGS),$@ $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $(CPPOBJS) $(SHARED_LIBS)
 $(SHCPPDBGLIB) : $(CPPDBGOBJS)
-	$(CXX) $(CXXFLAGS),$@  $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPDBJOBJS) $(SHARED_LIBS)
+	$(CXX) $(CXXFLAGS),$@  $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $(CPPDBJOBJS) $(SHARED_LIBS)
 endif
 
 

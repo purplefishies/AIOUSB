@@ -143,8 +143,7 @@ extern unsigned long AIOUSB_INIT_PATTERN;
 extern unsigned long aiousbInit ;
 
 
-PUBLIC_EXTERN ADConfigBlock *AIOUSB_GetConfigBlock( unsigned long DeviceIndex );
-PUBLIC_EXTERN unsigned long AIOUSB_SetConfigBlock( unsigned long DeviceIndex , ADConfigBlock *entry);
+
 PUBLIC_EXTERN AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex );
 PUBLIC_EXTERN unsigned long ADC_CopyConfig(unsigned long DeviceIndex, ADConfigBlock *config  );
 PUBLIC_EXTERN unsigned long ADC_ResetDevice( unsigned long DeviceIndex  );
@@ -163,6 +162,10 @@ PUBLIC_EXTERN AIOUSB_BOOL AIOUSB_UnLock(void);
 PUBLIC_EXTERN unsigned long AIOUSB_InitTest(void);
 PUBLIC_EXTERN unsigned long AIOUSB_Validate( unsigned long *DeviceIndex );
 PUBLIC_EXTERN unsigned long AIOUSB_Validate_Lock(  unsigned long *DeviceIndex ) ;
+
+PUBLIC_EXTERN DeviceDescriptor *DeviceTableAtIndex( unsigned long DeviceIndex );
+PUBLIC_EXTERN DeviceDescriptor *DeviceTableAtIndex_Lock( unsigned long DeviceIndex );
+
 PUBLIC_EXTERN DeviceDescriptor *AIOUSB_GetDevice_Lock( unsigned long DeviceIndex , 
                                                         unsigned long *result
                                                         );
@@ -173,8 +176,14 @@ PUBLIC_EXTERN const char *ProductIDToName( unsigned int productID );
 PUBLIC_EXTERN unsigned int ProductNameToID( const char *name );
 PUBLIC_EXTERN const char *GetSafeDeviceName( unsigned long DeviceIndex );
 PUBLIC_EXTERN struct libusb_device_handle *AIOUSB_GetDeviceHandle( unsigned long DeviceIndex );
+PUBLIC_EXTERN struct libusb_device_handle *AIOUSB_GetUSBHandle(DeviceDescriptor *deviceDesc );
+
+PUBLIC_EXTERN unsigned AIOUSB_GetOversample( const ADConfigBlock *config );
+PUBLIC_EXTERN void AIOUSB_SetOversample( ADConfigBlock *config, unsigned overSample );
+
+
 PUBLIC_EXTERN int AIOUSB_BulkTransfer( struct libusb_device_handle *dev_handle,
-                                        unsigned char endpoint, unsigned char *data, 
+                                       unsigned char endpoint, unsigned char *data, 
                                         int length, int *transferred, unsigned int timeout );
 
 PUBLIC_EXTERN unsigned ADC_GetOversample_Cached( ADConfigBlock *config );

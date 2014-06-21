@@ -15,6 +15,8 @@
 #include "AIOTypes.h"
 #include "AIOUSB_Properties.h"
 #include "AIOUSB_DIO.h"
+#include "AIOUSB_ADC.h"
+#include "AIOUSB_CTR.h"
 
 #ifdef __aiousb_cplusplus
 namespace AIOUSB
@@ -37,62 +39,7 @@ PUBLIC_EXTERN unsigned long ClearDevices( void );
 
 PUBLIC_EXTERN unsigned long ResolveDeviceIndex( unsigned long DeviceIndex );
 
-PUBLIC_EXTERN unsigned long CTR_8254Mode(
-    unsigned long DeviceIndex,
-    unsigned long BlockIndex,
-    unsigned long CounterIndex,
-    unsigned long Mode );
 
-PUBLIC_EXTERN unsigned long CTR_8254Load(
-    unsigned long DeviceIndex,
-    unsigned long BlockIndex,
-    unsigned long CounterIndex,
-    unsigned short LoadValue );
-
-PUBLIC_EXTERN unsigned long CTR_8254ModeLoad(
-    unsigned long DeviceIndex,
-    unsigned long BlockIndex,
-    unsigned long CounterIndex,
-    unsigned long Mode,
-    unsigned short LoadValue );
-
-PUBLIC_EXTERN unsigned long CTR_8254ReadModeLoad(
-    unsigned long DeviceIndex,
-    unsigned long BlockIndex,
-    unsigned long CounterIndex,
-    unsigned long Mode,
-    unsigned short LoadValue,
-    unsigned short *pReadValue );
-
-PUBLIC_EXTERN unsigned long CTR_8254Read(
-    unsigned long DeviceIndex,
-    unsigned long BlockIndex,
-    unsigned long CounterIndex,
-    unsigned short *pReadValue );
-
-PUBLIC_EXTERN unsigned long CTR_8254ReadAll(
-    unsigned long DeviceIndex,
-    unsigned short *pData );
-
-PUBLIC_EXTERN unsigned long CTR_8254ReadStatus(
-    unsigned long DeviceIndex,
-    unsigned long BlockIndex,
-    unsigned long CounterIndex,
-    unsigned short *pReadValue,
-    unsigned char *pStatus );
-
-PUBLIC_EXTERN unsigned long CTR_StartOutputFreq(
-    unsigned long DeviceIndex,
-    unsigned long BlockIndex,
-    double *pHz );
-
-PUBLIC_EXTERN unsigned long CTR_8254SelectGate(
-    unsigned long DeviceIndex,
-    unsigned long GateIndex );
-
-PUBLIC_EXTERN unsigned long CTR_8254ReadLatched(
-    unsigned long DeviceIndex,
-    unsigned short *pData );
 
 PUBLIC_EXTERN void ADC_InitConfigBlock( ADConfigBlock *, 
                                  void *deviceDesc, 
@@ -156,15 +103,6 @@ PUBLIC_EXTERN unsigned long ADC_ADMode(
     unsigned char TriggerMode,
     unsigned char CalMode );
 
-PUBLIC_EXTERN unsigned long ADC_SetOversample(
-    unsigned long DeviceIndex,
-    unsigned char Oversample );
-
-PUBLIC_EXTERN unsigned ADC_GetOversample(
-    unsigned long DeviceIndex);
-
-
-
 PUBLIC_EXTERN unsigned long ADC_SetScanLimits(
     unsigned long DeviceIndex,
     unsigned long StartChannel,
@@ -200,8 +138,11 @@ PUBLIC_EXTERN void DeleteBuffer( AIOBuf *buf );
 
 PUBLIC_EXTERN AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex );
 
-/* PUBLIC_EXTERN ADConfigBlock *AIOUSB_GetConfigBlock( unsigned long DeviceIndex ); */
-/* PUBLIC_EXTERN unsigned long AIOUSB_SetConfigBlock( unsigned long DeviceIndex , ADConfigBlock *entry ); */
+PUBLIC_EXTERN ADConfigBlock *AIOUSB_GetConfigBlock( unsigned long DeviceIndex );
+PUBLIC_EXTERN unsigned long AIOUSB_SetConfigBlock( unsigned long DeviceIndex , ADConfigBlock *entry );
+
+
+
 PUBLIC_EXTERN AIORET_TYPE  BulkAcquire(
     unsigned long DeviceIndex,
     AIOBuf *buf,
@@ -460,8 +401,6 @@ PUBLIC_EXTERN void AIOUSB_SetTriggerMode( ADConfigBlock *config, unsigned trigge
 PUBLIC_EXTERN unsigned AIOUSB_GetStartChannel( const ADConfigBlock *config );
 PUBLIC_EXTERN unsigned AIOUSB_GetEndChannel( const ADConfigBlock *config );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetScanRange( ADConfigBlock *config, unsigned startChannel, unsigned endChannel );
-PUBLIC_EXTERN unsigned AIOUSB_GetOversample( const ADConfigBlock *config );
-PUBLIC_EXTERN void AIOUSB_SetOversample( ADConfigBlock *config, unsigned overSample );
 
 
 #ifdef __aiousb_cplusplus
