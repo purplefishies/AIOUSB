@@ -217,70 +217,69 @@ AIOUSB_BOOL AIOUSB_UnLock() {
  
 unsigned long AIOUSB_Validate_Lock(unsigned long *DeviceIndex)
 {
-     unsigned long result;
+    unsigned long result = (unsigned long)AIOUSB_SUCCESS;
+    assert(DeviceIndex != 0);
 
-     assert(DeviceIndex != 0);
+    if ( !AIOUSB_Lock() )
+        return AIOUSB_ERROR_INVALID_MUTEX;
 
-     if(!AIOUSB_Lock())
-       return AIOUSB_ERROR_INVALID_MUTEX;
+    if (!AIOUSB_IsInit() )
+        goto unlock_mutex;
 
-     if(!AIOUSB_IsInit())
-       goto unlock_mutex;
-
-     if(*DeviceIndex == diFirst) {
-       /*
-        * find first device on bus
-        */
-       result = AIOUSB_ERROR_FILE_NOT_FOUND;
-       int index;
-       for(index = 0; index < MAX_USB_DEVICES; index++) {
-         if(deviceTable[ index ].device != NULL) {
-           *DeviceIndex = index;
-           result = AIOUSB_SUCCESS;
-           break;                                              // from for()
-         }
-       }
-     } else if (*DeviceIndex == diOnly) {
-       /*
-        * find first device on bus, ensuring that it's the only device
-        */
-       result = AIOUSB_ERROR_FILE_NOT_FOUND;
-       int index;
-       for(index = 0; index < MAX_USB_DEVICES; index++) {
-         if(deviceTable[ index ].device != NULL) {
-           /* found a device */
-           if(result != AIOUSB_SUCCESS) {
-             /*
-              * this is the first device found; save this index, but
-              * keep checking to see that this is the only device
-              */
-             *DeviceIndex = index;
-             result = AIOUSB_SUCCESS;
-           } else {
-             /*
-              * there are multiple devices on the bus
-              */
-             result = AIOUSB_ERROR_DUP_NAME;
-             break;                             
-           }
-         }
-       }
-     } else {
-       /*
-        * simply verify that the supplied index is valid
-        */
-       if(
-          *DeviceIndex < MAX_USB_DEVICES &&
-          deviceTable[ *DeviceIndex ].device != NULL
-          )
-         result = AIOUSB_SUCCESS;
-       else
-         result = AIOUSB_ERROR_INVALID_INDEX;
-     }
+    if(*DeviceIndex == diFirst) {
+        /*
+         * find first device on bus
+         */
+        result = AIOUSB_ERROR_FILE_NOT_FOUND;
+        int index;
+        for(index = 0; index < MAX_USB_DEVICES; index++) {
+            if(deviceTable[ index ].device != NULL) {
+                *DeviceIndex = index;
+                result = AIOUSB_SUCCESS;
+                break;                                              // from for()
+            }
+        }
+    } else if (*DeviceIndex == diOnly) {
+        /*
+         * find first device on bus, ensuring that it's the only device
+         */
+        result = AIOUSB_ERROR_FILE_NOT_FOUND;
+        int index;
+        for(index = 0; index < MAX_USB_DEVICES; index++) {
+            if(deviceTable[ index ].device != NULL) {
+                /* found a device */
+                if(result != AIOUSB_SUCCESS) {
+                    /*
+                     * this is the first device found; save this index, but
+                     * keep checking to see that this is the only device
+                     */
+                    *DeviceIndex = index;
+                    result = AIOUSB_SUCCESS;
+                } else {
+                    /*
+                     * there are multiple devices on the bus
+                     */
+                    result = AIOUSB_ERROR_DUP_NAME;
+                    break;                             
+                }
+            }
+        }
+    } else {
+        /*
+         * simply verify that the supplied index is valid
+         */
+        if(
+           *DeviceIndex < MAX_USB_DEVICES &&
+           deviceTable[ *DeviceIndex ].device != NULL
+           )
+            result = AIOUSB_SUCCESS;
+        else
+            result = AIOUSB_ERROR_INVALID_INDEX;
+    }
 
  unlock_mutex:
-     AIOUSB_UnLock();
-     return result;
+    AIOUSB_UnLock();
+    return result;
 }
 
 
