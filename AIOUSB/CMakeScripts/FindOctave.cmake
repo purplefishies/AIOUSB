@@ -1,4 +1,3 @@
-
 # - Find Octave
 # GNU Octave is a high-level interpreted language, primarily intended for numerical computations.
 # available at http://www.gnu.org/software/octave/
@@ -79,7 +78,7 @@ if ( OCTAVE_CONFIG_EXECUTABLE )
   execute_process ( COMMAND ${OCTAVE_CONFIG_EXECUTABLE} -p OCTINCLUDEDIR
                     OUTPUT_VARIABLE OCTAVE_INCLUDE_PATHS
                     OUTPUT_STRIP_TRAILING_WHITESPACE )                
-                    
+
   execute_process ( COMMAND ${OCTAVE_CONFIG_EXECUTABLE} -p OCTLIBDIR
                     OUTPUT_VARIABLE OCTAVE_LIBRARIES_PATHS
                     OUTPUT_STRIP_TRAILING_WHITESPACE )                
@@ -109,6 +108,10 @@ find_program( OCTAVE_EXECUTABLE
               NAMES octave
             )
 
+find_program( OCTAVE_MKOCTFILE
+              HINTS ${OCTAVE_BIN_PATHS}
+              NAMES mkoctfile
+            )
 	
 find_library( OCTAVE_OCTINTERP_LIBRARY
               NAMES octinterp liboctinterp
@@ -130,6 +133,7 @@ list ( APPEND OCTAVE_LIBRARIES ${OCTAVE_CRUFT_LIBRARY} )
 find_path ( OCTAVE_INCLUDE_DIR 
             NAMES mex.h
             HINTS ${OCTAVE_INCLUDE_PATHS}
+            "${OCTAVE_INCLUDE_PATHS}/octave"
           )
     
 set ( OCTAVE_INCLUDE_DIRS ${OCTAVE_INCLUDE_DIR} )
