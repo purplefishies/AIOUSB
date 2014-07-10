@@ -159,6 +159,28 @@ if( GTESTTAP_FOUND )
 endif( GTESTTAP_FOUND )
 
 
+if( BUILD_MATLAB AND BUILD_AIOUSB_SHARED ) 
+  MESSAGE(STATUS "Building Matlab")
+  FIND_PACKAGE(Matlab REQUIRED )
+  SET(MEX_COMMAND ${MATLAB_ROOT}/bin/mex -I${LIBUSB_1_INCLUDE_DIRS} -lm -output libaiousb ${tmp_aiousb_files} -lusb-1.0 )
+  
+  ADD_CUSTOM_COMMAND( OUTPUT libaiousb.mexglx
+    COMMAND ${MEX_COMMAND}
+    DEPENDS aiousb
+    )
+
+  ADD_CUSTOM_TARGET( build_matlab_test ALL 
+    DEPENDS libaiousb.mexglx
+    COMMENT "Building Matlab library"
+    )
+  install( FILES ${CMAKE_CURRENT_BINARY_DIR}/libaiousb.mexglx DESTINATION lib )
+  install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/libaiousb.h DESTINATION include )
+
+ELSEIF( BUILD_MATLAB )
+  MESSAGE(FATAL_ERROR "You cannot build Matlab because you have elected to not build the shared version of the aiousb library")
+endif( BUILD_MATLAB AND BUILD_AIOUSB_SHARED)
+
+
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Installation targets
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

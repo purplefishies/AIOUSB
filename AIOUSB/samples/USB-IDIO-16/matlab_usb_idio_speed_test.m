@@ -31,7 +31,10 @@ if strcmp(getenv('AIO_LIB_DIR'),'')
 end
 
 addpath(getenv('AIO_LIB_DIR'));
-loadlibrary('libaiousb','libaiousb.h', 'includepath','/usr/include/libusb-1.0', 'includepath',getenv('AIO_LIB_DIR'));
+rootlibdir=getenv('AIO_LIB_INSTALL_DIR');
+libaiousb=strcat(rootlibdir,'/libaiousb');
+
+loadlibrary(libaiousb,'libaiousb.h', 'includepath','/usr/include/libusb-1.0', 'includepath',getenv('AIO_LIB_DIR'));
 
 % To see the other functions offered by this library , you can run
 % the following
@@ -60,7 +63,7 @@ else
 end
 
 timeout = 1000;
-result = calllib('libaiousb','AIOUSB_Reset', deviceIndex )
+result = calllib('libaiousb','AIOUSB_Reset', deviceIndex );
 result = calllib('libaiousb','AIOUSB_SetCommTimeout',deviceIndex, timeout );
 format long;
 
@@ -69,7 +72,7 @@ val=sprintf('Starting at %d',start);
 disp(val);
 countval = 1;
 num_per_bin = 10;
-%num_repetitions = 4;                   
+num_repetitions = 4;                   
 vals = zeros(1,(2^stopval)*num_repetitions/num_per_bin);
 for j = 1:1:num_repetitions
     for i=0:2^stopval-1

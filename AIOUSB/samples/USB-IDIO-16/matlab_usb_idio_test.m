@@ -16,7 +16,11 @@ if strcmp(getenv('AIO_LIB_DIR'),'')
 end
 
 addpath(getenv('AIO_LIB_DIR')) 
-loadlibrary('libaiousb','libaiousb.h', 'includepath','/usr/include/libusb-1.0', 'includepath',getenv('AIO_LIB_DIR'))
+addpath(getenv('AIO_LIB_DIR'));
+rootlibdir=getenv('AIO_LIB_INSTALL_DIR');
+libaiousb=strcat(rootlibdir,'/libaiousb');
+
+loadlibrary(libaiousb,'libaiousb.h', 'includepath','/usr/include/libusb-1.0', 'includepath',getenv('AIO_LIB_DIR'))
 
 % To see the other functions offered, you can run this
 % 
