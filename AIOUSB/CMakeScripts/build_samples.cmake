@@ -17,6 +17,19 @@ macro ( build_sample_cpp_file project cpp_file )
   INSTALL(TARGETS "${project}_${binary_name}" DESTINATION "share/accesio/${project}/" ) 
 endmacro ( build_sample_cpp_file )
 
+macro ( build_sample_matlab_file project matlab_file )
+  GET_FILENAME_COMPONENT( tmp_matlab_file ${matlab_file} NAME )
+  STRING(REGEX REPLACE "\\.m$" "" binary_name ${tmp_matlab_file})
+  ADD_CUSTOM_COMMAND( OUTPUT ${matlab_file} 
+    COMMAND cmake -E copy_if_different ${matlab_file} ${CMAKE_CURRENT_BINARY_DIR}/${matlab_file} 
+    )
+  ADD_CUSTOM_TARGET( "${project}_${binary_name}" 
+    DEPENDS ${matlab_file}
+    )
+  SET_TARGET_PROPERTIES( "${project}_${binary_name}" PROPERTIES OUTPUT_NAME  ${binary_name} ) 
+  INSTALL(FILES ${matlab_file} DESTINATION "share/accesio/${project}/" ) 
+endmacro ( build_sample_matlab_file )
+
 #
 # Special macro for building testcases that exist inside 
 # of the individual C files.
@@ -67,12 +80,16 @@ endmacro ( build_gtest_cpp_file  )
 macro ( build_all_samples project ) 
   file( GLOB C_FILES ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/*.c" )
   file( GLOB CXX_FILES ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp" )
+  file( GLOB MATLAB_FILES ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/*.m" )
   foreach( c_file ${C_FILES} )
     build_sample_c_file( ${project} ${c_file} )
   endforeach( c_file )
   foreach( cpp_file ${CXX_FILES} )
     build_sample_cpp_file( ${project} ${cpp_file} )
   endforeach( cpp_file )
+  foreach( matlab_file ${MATLAB_FILES} )
+    build_sample_matlab_file( ${project} ${matlab_file} )
+  endforeach( matlab_file )
 endmacro ( build_all_samples )
 
 macro ( include_testcase_lib project )
