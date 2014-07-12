@@ -119,7 +119,9 @@ include_directories( "${CMAKE_CURRENT_SOURCE_DIR}" )
 # MESSAGE(STATUS "Setting include path to include '${CMAKE_CURRENT_SOURCE_DIR}'")
 set( AIOUSB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}  )
 
-link_directories( ${LIBUSB_1_LIBRARIES} )
+get_filename_component(LIBUSB_DIRECTORY ${LIBUSB_1_LIBRARIES} DIRECTORY )
+link_directories( ${LIBUSB_DIRECTORY} )
+
 target_link_libraries( aiousb ${CORELIBS} ${EXTRA_LIBS} )
 target_link_libraries( aiousbcpp ${CORELIBS} ${EXTRA_LIBS} )
 target_link_libraries( aiousbcppdbg ${CORELIBS} ${EXTRA_LIBS} )
@@ -163,7 +165,7 @@ endif( GTESTTAP_FOUND )
 if( BUILD_MATLAB AND BUILD_AIOUSB_SHARED ) 
   MESSAGE(STATUS "Building Matlab")
   FIND_PACKAGE(Matlab REQUIRED )
-  SET(MEX_COMMAND ${MATLAB_ROOT}/bin/mex -I${LIBUSB_1_INCLUDE_DIRS} -lm -output libaiousb ${tmp_aiousb_files} -lusb-1.0 )
+  SET(MEX_COMMAND ${MATLAB_ROOT}/bin/mex -I${LIBUSB_1_INCLUDE_DIRS} -lm -output libaiousb ${tmp_aiousb_files} -L${LIBUSB_DIRECTORY} -lusb-1.0 )
   
   ADD_CUSTOM_COMMAND( OUTPUT libaiousb.mexglx
     COMMAND ${MEX_COMMAND}

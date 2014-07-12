@@ -1204,8 +1204,9 @@ unsigned long ADC_SetConfig(
           result = AIOUSB_ERROR_INVALID_ADCONFIG_CHANNEL_SETTING;
           goto out_ADC_SetConfig;
      }
-
-     if( !VALID_ENUM( ADCalMode , configBlock.registers[ AD_CONFIG_CAL_MODE ] ) ) {
+     /* if( !VALID_ENUM( ADCalMode , configBlock.registers[ AD_CONFIG_CAL_MODE ] ) ) { */
+     /* if( !(configBlock.registers[ AD_CONFIG_CAL_MODE ] >= 0 && configBlock.registers[ AD_CONFIG_CAL_MODE ] <= 6) ) {  */
+     if( configBlock.registers[ AD_CONFIG_CAL_MODE ] > LAST_ENUM( ADCalMode ) ) { 
           result = AIOUSB_ERROR_INVALID_ADCONFIG_CAL_SETTING;
           goto out_ADC_SetConfig;
      }
@@ -2740,7 +2741,6 @@ void AIOUSB_SetRangeSingle(ADConfigBlock *config, unsigned long channel, unsigne
         config != 0 &&
         config->device != 0 &&
         config->size != 0 &&
-        gainCode >= FIRST_ENUM(ADGainCode) &&
         gainCode <= LAST_ENUM(ADGainCode) &&
         AIOUSB_Lock()
         ) {
