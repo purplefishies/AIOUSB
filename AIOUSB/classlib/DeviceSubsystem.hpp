@@ -24,7 +24,7 @@ namespace AIOUSB {
  */
 
 class DeviceSubsystem {
-protected:
+public:
 
 
 	USBDevice *parent;							// parent device that this subsystem is part of

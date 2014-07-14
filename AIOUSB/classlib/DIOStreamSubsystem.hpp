@@ -26,12 +26,12 @@ class DIOStreamSubsystem : public DeviceSubsystem {
 	friend class USB_DIO_16_Family;
 
 
-protected:
+public:
 	double clockHz;								// last actual frequency set by setClock()
 
 
 
-protected:
+public:
 	DIOStreamSubsystem( USBDevice &parent );
 	virtual ~DIOStreamSubsystem();
 

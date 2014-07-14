@@ -41,12 +41,12 @@ private:
 
 
 
-protected:
+public:
 	CounterSubsystem counterSubsystem;
 
 
 
-protected:
+public:
 	USB_CTR_15_Family( int productID, int deviceIndex );
 	virtual ~USB_CTR_15_Family();
 

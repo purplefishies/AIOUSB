@@ -26,7 +26,7 @@ namespace AIOUSB {
 class AnalogOutputSubsystem : public DeviceSubsystem {
 
 
-protected:
+public:
 	int numChannels;							// number of D/A channels
 	int minCounts;								// minimum counts D/A can output (typically 0)
 	int maxCounts;								// maximum counts D/A can output (typically 0xfff or 0xffff)

@@ -42,12 +42,12 @@ private:
 
 
 
-protected:
+public:
 	DA12_AnalogOutputSubsystem analogOutputSubsystem;
 
 
 
-protected:
+public:
 	USB_DA12_8E_Family( int productID, int deviceIndex );
 	virtual ~USB_DA12_8E_Family();
 

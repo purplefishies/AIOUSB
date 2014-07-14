@@ -46,7 +46,7 @@ public:
 
 
 
-protected:
+public:
 	CounterSubsystem *parent;					// subsystem that this counter belongs to
 	int counterIndex;							// counter index (using 0-based counter addressing)
 

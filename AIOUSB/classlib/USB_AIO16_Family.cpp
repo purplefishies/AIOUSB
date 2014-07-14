@@ -9,7 +9,7 @@
 
 
 #include <iostream>
-#include <bits/stl_algo.h>
+#include <algorithm>
 #include <assert.h>
 #include "USBDeviceManager.hpp"
 #include "USB_AIO16_Family.hpp"

@@ -41,7 +41,7 @@ public:
 
 
 
-protected:
+public:
 	USBDeviceArray deviceList;					// contains all the ACCES devices found on the bus
 	static const unsigned long OPEN_PATTERN = 0x786938f5;	// unique, random value
 	unsigned long openStatus;					// if openStatus == OPEN_PATTERN, module is initialized
@@ -49,7 +49,7 @@ protected:
 
 
 
-protected:
+public:
 	void emptyDeviceList();
 
 

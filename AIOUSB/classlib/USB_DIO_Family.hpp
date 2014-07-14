@@ -45,12 +45,12 @@ private:
 
 
 
-protected:
+public:
 	DigitalIOSubsystem digitalIOSubsystem;
 
 
 
-protected:
+public:
 	USB_DIO_Family( int productID, int deviceIndex );
 	virtual ~USB_DIO_Family();
 

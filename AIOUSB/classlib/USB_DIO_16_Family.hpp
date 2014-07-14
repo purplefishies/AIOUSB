@@ -42,13 +42,13 @@ private:
 
 
 
-protected:
+public:
 	DigitalIOSubsystem digitalIOSubsystem;
 	DIOStreamSubsystem dioStreamSubsystem;
 
 
 
-protected:
+public:
 	USB_DIO_16_Family( int productID, int deviceIndex );
 	virtual ~USB_DIO_16_Family();
 

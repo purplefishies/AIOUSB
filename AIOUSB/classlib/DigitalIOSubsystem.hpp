@@ -33,7 +33,7 @@ class DigitalIOSubsystem : public DeviceSubsystem {
 public:
 
 
-protected:
+public:
 	int numPorts;								// number of digital I/O ports (bytes)
 	int numChannels;							// number of digital I/O channels (bits)
 	int numTristateGroups;						// number of tristate groups (bytes)

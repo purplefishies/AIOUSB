@@ -10,7 +10,7 @@
 #include "CppCommon.h"
 #include <iostream>
 #include <iterator>
-#include <bits/stl_algo.h>
+#include <algorithm>
 #include <assert.h>
 #include <AIOUSB_Core.h>
 #include "USBDeviceManager.hpp"

@@ -86,7 +86,7 @@ public:
 
 
 
-protected:
+public:
 	int deviceIndex;							// device index on bus
 	int productID;								// 16-bit product ID
 	std::string name;							// device name
@@ -94,7 +94,7 @@ protected:
 
 
 
-protected:
+public:
 	USBDevice( int productID, int deviceIndex );
 	virtual ~USBDevice();
 	USBDevice &clearFIFO( FIFO_Method method );

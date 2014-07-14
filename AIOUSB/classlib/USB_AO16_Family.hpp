@@ -43,13 +43,13 @@ private:
 
 
 
-protected:
+public:
 	AO16_AnalogOutputSubsystem analogOutputSubsystem;
 	DigitalIOSubsystem digitalIOSubsystem;
 
 
 
-protected:
+public:
 	USB_AO16_Family( int productID, int deviceIndex );
 	virtual ~USB_AO16_Family();
 

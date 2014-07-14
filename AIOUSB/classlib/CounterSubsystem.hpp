@@ -31,7 +31,7 @@ class CounterSubsystem : public DeviceSubsystem {
 	friend class USB_DIO_32_Family;
 
 
-protected:
+public:
 	static const int COUNTERS_PER_BLOCK = 3;
 
 	int numCounterBlocks;						// number of counter blocks

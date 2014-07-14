@@ -52,13 +52,13 @@ public:
 
 
 
-protected:
+public:
 	static const char RANGE_TEXT[][ 10 ];
 	AO16_OutputRange outputRange;				// device supports a single range for all D/A channels
 
 
 
-protected:
+public:
 	AO16_AnalogOutputSubsystem( USBDevice &parent );
 	virtual ~AO16_AnalogOutputSubsystem();
 

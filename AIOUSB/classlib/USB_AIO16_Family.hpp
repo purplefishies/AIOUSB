@@ -45,7 +45,7 @@ private:
 
 
 
-protected:
+public:
 	AnalogInputSubsystem analogInputSubsystem;
         AnalogOutputSubsystem analogOutputSubsytem;
 	DigitalIOSubsystem digitalIOSubsystem;

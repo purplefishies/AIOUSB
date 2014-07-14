@@ -88,12 +88,12 @@ public:
 
 
 
-protected:
+public:
 	static const char RANGE_TEXT[][ 10 ];
 
 
 
-protected:
+public:
 	/*
 	 * register indexes
 	 */

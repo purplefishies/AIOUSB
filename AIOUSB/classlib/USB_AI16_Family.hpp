@@ -46,14 +46,14 @@ private:
 
 
 
-protected:
+public:
 	AnalogInputSubsystem analogInputSubsystem;
 	DigitalIOSubsystem digitalIOSubsystem;
 	CounterSubsystem counterSubsystem;
 
 
 
-protected:
+public:
 	USB_AI16_Family( int productID, int deviceIndex );
 	virtual ~USB_AI16_Family();
 
