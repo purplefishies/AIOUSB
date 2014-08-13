@@ -13,6 +13,12 @@
 namespace AIOUSB {
 #endif
 
+
+int _determine_strbuf_size( unsigned size )
+{
+    return size + strlen("0x") + 1;
+}
+
 /*----------------------------------------------------------------------------*/
 DIOBuf *NewDIOBuf( unsigned size ) {
     DIOBuf *tmp = (DIOBuf *)malloc( sizeof(DIOBuf) );
@@ -23,7 +29,8 @@ DIOBuf *NewDIOBuf( unsigned size ) {
         free( tmp );
         return NULL;
     }
-    tmp->_strbuf = (char *)malloc(sizeof(char)*size+1);
+    tmp->_strbuf_size = _determine_strbuf_size( size );
+    tmp->_strbuf = (char *)malloc(sizeof(char) * tmp->_strbuf_size );
     if ( !tmp->_strbuf ) {
         free(tmp->_buffer);
         free(tmp);
@@ -88,29 +95,34 @@ DIOBuf *DIOBufReplaceBinString( DIOBuf *buf, char *bitstr )
   return buf;
 }
 /*----------------------------------------------------------------------------*/
-void DeleteDIOBuf( DIOBuf *buf ) {
+void DeleteDIOBuf( DIOBuf *buf ) 
+{
     buf->_size = 0;
     free( buf->_buffer );
     free( buf->_strbuf );
     free( buf );
 }
 /*----------------------------------------------------------------------------*/
-DIOBuf *DIOBufResize( DIOBuf *buf , unsigned newsize ) {
-  buf->_buffer = (unsigned char *)realloc( buf->_buffer, newsize*sizeof(unsigned char));
-  if ( !buf->_buffer ) {
-    buf->_size = 0;
-    buf->_strbuf = (char *)realloc( buf->_strbuf, (newsize+1)*sizeof(char));
-    buf->_strbuf[0] = '\0';
-    return NULL;
-  }
-  if( newsize > buf->_size )
-    memset( &buf->_buffer[buf->_size], 0, ( newsize - buf->_size ));
+DIOBuf *DIOBufResize( DIOBuf *buf , unsigned newsize ) 
+{
+    buf->_buffer = (unsigned char *)realloc( buf->_buffer, newsize*sizeof(unsigned char));
+    if ( !buf->_buffer ) {
+        buf->_size = 0;
+        buf->_strbuf_size = _determine_strbuf_size( newsize );
+        buf->_strbuf = (char *)realloc( buf->_strbuf, buf->_strbuf_size * sizeof(char) );
+        buf->_strbuf[0] = '\0';
+        return NULL;
+    }
+    if( newsize > buf->_size )
+        memset( &buf->_buffer[buf->_size], 0, ( newsize - buf->_size ));
 
-  buf->_strbuf = (char *)realloc( buf->_strbuf, (newsize+1)*sizeof(char));
-  if ( !buf->_strbuf )
-    return NULL;
-  buf->_size = newsize;
-  return buf;
+    buf->_strbuf_size = _determine_strbuf_size( newsize );
+    buf->_strbuf = (char *)realloc( buf->_strbuf, buf->_strbuf_size * sizeof(char));
+
+    if ( !buf->_strbuf )
+        return NULL;
+    buf->_size = newsize;
+    return buf;
 }
 /*----------------------------------------------------------------------------*/
 unsigned  DIOBufSize( DIOBuf *buf ) {
@@ -123,20 +135,28 @@ unsigned DIOBufByteSize( DIOBuf *buf ) {
 /*----------------------------------------------------------------------------*/
 char *DIOBufToString( DIOBuf *buf ) {
   unsigned i;
-  memset(buf->_strbuf,0, DIOBufSize(buf)+1);
+  memset(buf->_strbuf,0, buf->_strbuf_size );
   for( i = 0; i < buf->_size ; i ++ )
       buf->_strbuf[i] = ( buf->_buffer[i] == 0 ? '0' : '1' );
   buf->_strbuf[buf->_size] = '\0';
   return buf->_strbuf;
 }
+
 /*----------------------------------------------------------------------------*/
 char *DIOBufToHex( DIOBuf *buf ) {
-    char *tmp = strdup( DIOBufToBinary( buf ));
-    memset(buf->_strbuf, 0, DIOBufSize(buf)/8 );
+    /* @bug , needs to preallocate space */
+    char *tmp = (char *)malloc( DIOBufSize(buf) / BITS_PER_BYTE );
+    int size = DIOBufSize(buf) / BITS_PER_BYTE;
+
+    memset( buf->_strbuf, 0, buf->_strbuf_size );
+    memcpy( tmp, DIOBufToBinary( buf ), size );
+    /* memset(buf->_strbuf, 0, (DIOBufSize(buf) / BITS_PER_BYTE) ); */
+
     strcpy(&buf->_strbuf[0], "0x" );
     int j = strlen(buf->_strbuf);
-    for ( int i = 0 ; i < (int)strlen(tmp) ; i ++ , j = strlen(buf->_strbuf)) {
-        sprintf(&buf->_strbuf[j], "%x", tmp[i] );
+    /* for ( int i = 0 ; i < (int)strlen(tmp) ; i ++ , j = strlen(buf->_strbuf)) { */
+    for ( int i = 0 ; i <  size ; i ++ , j = strlen(buf->_strbuf)) {
+        sprintf(&buf->_strbuf[j], "%.2x", (unsigned char)tmp[i] );
     }
     buf->_strbuf[j] = 0;
     free(tmp);
@@ -264,10 +284,14 @@ TEST(DIOBuf, Resize_Test ) {
 
 TEST(DIOBuf, Hex_Output ) {
     DIOBuf *buf = NewDIOBufFromChar("Test",4 );
-    EXPECT_STREQ( DIOBufToHex(buf), "0x54657374");
+    EXPECT_STREQ( "0x54657374", DIOBufToHex(buf) );
     DIOBufReplaceString( buf, (char *)"This is a very long string to convert", 37);
-    EXPECT_STREQ( DIOBufToHex(buf), "0x5468697320697320612076657279206c6f6e6720737472696e6720746f20636f6e76657274");
+    EXPECT_STREQ(  "0x5468697320697320612076657279206c6f6e6720737472696e6720746f20636f6e76657274", DIOBufToHex(buf) );
     DeleteDIOBuf( buf );
+    
+    buf =  NewDIOBufFromBinStr("00000000000000000000000011111111" );
+    char *tmp = DIOBufToHex( buf );
+    EXPECT_STREQ( tmp, "0x000000ff" );
 }
 
 TEST(DIOBuf, Indexing_is_correct ) {

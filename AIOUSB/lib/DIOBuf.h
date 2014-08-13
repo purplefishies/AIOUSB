@@ -22,9 +22,10 @@ namespace AIOUSB {
 /* typedef AIOChannelMask DIOBuf; */
 typedef unsigned char DIOBufferType ;
 typedef struct {
-  unsigned _size;
-  unsigned char *_buffer;        /**> Actual elements  */
-  char *_strbuf;                 /**> Display string   */
+    unsigned _size;
+    unsigned char *_buffer;        /**> Actual elements  */
+    char *_strbuf;                 /**> Display string   */
+    int _strbuf_size;              /**> Size of display string */
 } DIOBuf;
 
 PUBLIC_EXTERN DIOBuf *NewDIOBuf ( unsigned size );
