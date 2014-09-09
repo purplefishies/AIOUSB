@@ -123,6 +123,10 @@ SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="16
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0033", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/PICO-DIO16RO8.hex"
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8033", RUN+="/bin/chmod 0666 $tempnode"
 
+# USBP-II8IDO4A
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0036", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USBP-II8IDO4A.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8036", RUN+="/bin/chmod 0666 $tempnode"
+
 # USB-AI16-16A
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0040", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8040", RUN+="/bin/chmod 0666 $tempnode"
