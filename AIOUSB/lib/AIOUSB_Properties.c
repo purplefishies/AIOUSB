@@ -198,6 +198,60 @@ unsigned long AIOUSB_GetDeviceProperties(unsigned long DeviceIndex,DevicePropert
 
     return result;
 }
+
+/*----------------------------------------------------------------------------*/
+AIORESULT FindDevices( int **indices, int *length , unsigned minProductID, unsigned maxProductID  )
+{
+    unsigned long deviceMask = AIOUSB_GetAllDevices();
+    int index = 0;
+    AIORESULT retval = AIOUSB_ERROR_DEVICE_NOT_FOUND;
+
+    while ( deviceMask  ) {
+        if ( deviceMask & 1 ) {
+            if ( deviceTable[index].ProductID >= minProductID && deviceTable[index].ProductID <= maxProductID ) {
+                *length += 1; 
+                *indices = (int *)realloc( *indices, (*length)*sizeof(int));
+                *indices[*length-1] = index;
+                retval = AIOUSB_SUCCESS;
+            }
+        }
+        index++;
+        deviceMask >>= 1;
+    }
+    return retval;
+}
+
+/*----------------------------------------------------------------------------*/
+AIORESULT AIOUSB_GetAllDevices() 
+{
+    AIORESULT deviceMask = 0;
+    if(AIOUSB_Lock()) {
+          if(AIOUSB_IsInit()) {
+                int index;
+                for(index = 0; index < MAX_USB_DEVICES; index++) {
+                    if(deviceTable[ index ].device != NULL) {
+                            const int MAX_NAME_SIZE = 100;
+                            char name[ MAX_NAME_SIZE + 1 ];
+                            unsigned long productID;
+                            unsigned long nameSize = MAX_NAME_SIZE;
+                            unsigned long numDIOBytes;
+                            unsigned long numCounters;
+                            AIOUSB_UnLock();                               /* unlock while communicating with device */
+                            const unsigned long result = QueryDeviceInfo(index, &productID, &nameSize, name, &numDIOBytes, &numCounters);
+                            if(result == AIOUSB_SUCCESS) {
+                                name[ nameSize ] = '\0';
+                                deviceMask = (deviceMask << 1) | 1;
+                            }
+
+                            AIOUSB_Lock();
+                        }
+                  }
+            }
+          AIOUSB_UnLock();
+      }
+    return deviceMask;
+}
+
 /*----------------------------------------------------------------------------*/
 static int CompareResultCodes(const void *p1, const void *p2)
 {

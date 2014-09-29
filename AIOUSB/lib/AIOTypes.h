@@ -14,6 +14,8 @@
 /* #include <aiousb.h> */
 
 typedef long AIORET_TYPE;        /* New return type is signed, negative indicates error */
+typedef unsigned long AIORESULT;
+
 #ifndef PUBLIC_EXTERN
 #define PUBLIC_EXTERN extern
 #endif

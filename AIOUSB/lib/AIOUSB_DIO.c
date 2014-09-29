@@ -343,10 +343,11 @@ unsigned long DIO_ConfigurationQuery(
 }
 /*----------------------------------------------------------------------------*/
 unsigned long DIO_WriteAll(
-                                         unsigned long DeviceIndex,
-                                         void *pData
-                                         /* DIOBuf *data */
-                                         ) {
+                           unsigned long DeviceIndex,
+                           void *pData
+                           /* DIOBuf *data */
+                           ) 
+{
     if( !pData )
         return AIOUSB_ERROR_INVALID_PARAMETER;
     int tmp = AIOUSB_Lock();
@@ -430,7 +431,9 @@ unsigned long DIO_Write8(
     if(deviceDesc->LastDIOData != 0) {
           assert(deviceDesc->DIOBytes <= 1000);       // arbitrary sanity check
           deviceDesc->LastDIOData[ ByteIndex ] = Data;
+
           libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
+
           if(deviceHandle != NULL) {
                 const int dioBytes = deviceDesc->DIOBytes;
                 unsigned char *const dataBuffer = ( unsigned char* )malloc(dioBytes);
@@ -467,13 +470,13 @@ unsigned long DIO_Write8(
     return result;
 }
 
-
 /*----------------------------------------------------------------------------*/
 unsigned long DIO_Write1(
-                                       unsigned long DeviceIndex,
-                                       unsigned long BitIndex,
-                                       unsigned char bData
-                                       ) {
+                         unsigned long DeviceIndex,
+                         unsigned long BitIndex,
+                         unsigned char bData
+                         ) 
+{
     if(!AIOUSB_Lock())
         return AIOUSB_ERROR_INVALID_MUTEX;
 

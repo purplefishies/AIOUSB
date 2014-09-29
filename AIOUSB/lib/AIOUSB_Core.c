@@ -45,7 +45,7 @@ static const ProductIDName productIDNameTable[] = {
     { USB_DA12_8A       , "USB-DA12-8A"    },
     { USB_DA12_8E       , "USB-DA12-8E"    },
     { USB_DIO_32        , "USB-DIO-32"     },
-    { USB_DIO_32I       , "USB-DIO-32"     },
+    { USB_DIO_32I       , "USB-DIO-32I"     },
     { USB_DIO_48        , "USB-DIO-48"     },
     { USB_DIO_96        , "USB-DIO-96"     },
     { USB_DI16A_REV_A1  , "USB-DI16A-A1"   },
@@ -418,12 +418,11 @@ PRIVATE static void InitDeviceTable(void)
       }
 }
  
-
-
+/*----------------------------------------------------------------------------*/
 void _setup_device_parameters( DeviceDescriptor *deviceDesc , unsigned long productID ) {
     deviceDesc->StreamingBlockSize = 31ul * 1024ul;
     deviceDesc->bGetName = AIOUSB_TRUE;             // most boards support this feature
-    if(productID == USB_DIO_32) {
+    if(productID == USB_DIO_32 || productID == USB_DIO_32I ) {
         deviceDesc->DIOBytes = 4;
         deviceDesc->Counters = 3;
         deviceDesc->RootClock = 3000000;
@@ -623,10 +622,6 @@ void PopulateDeviceTableTest(unsigned long *products, int length ) {
         deviceTable[numAccesDevices-1].device = (libusb_device *)0x42;
     }
 }
-
-
-
-
 
 /** 
  * @todo Rely on Global Header files for the functionality of devices / cards
@@ -930,40 +925,38 @@ static unsigned long GetDeviceName(unsigned long DeviceIndex, const char **name)
  * GetSafeDeviceName() returns a null-terminated device name; if GetSafeDeviceName() is unable
  * to obtain a legitimate device name it returns something like "UNKNOWN" or 0
  */
-PRIVATE const char *GetSafeDeviceName(unsigned long DeviceIndex) {
+PRIVATE const char *GetSafeDeviceName(unsigned long DeviceIndex) 
+{
     const char *deviceName = 0;
 
     if(!AIOUSB_Lock())
         return deviceName;
 
-    if(AIOUSB_Validate(&DeviceIndex) == AIOUSB_SUCCESS) {
-          DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
-          if(deviceDesc->bGetName) {
+    DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
+    if(deviceDesc->bGetName) {
+        /*
+         * device supports getting its product name, so use it instead of the
+         * name from the local product name table
+         */
+        AIOUSB_UnLock();                                            // unlock while communicating with device
+        unsigned long res = GetDeviceName(DeviceIndex, &deviceName);
+        if(res != AIOUSB_SUCCESS) {
             /*
-             * device supports getting its product name, so use it instead of the
-             * name from the local product name table
+             * failed to get name from device, so fall back to local table after all
              */
-                AIOUSB_UnLock();                                            // unlock while communicating with device
-                unsigned long res = GetDeviceName(DeviceIndex, &deviceName);
-                if(res != AIOUSB_SUCCESS) {
-                  /*
-                   * failed to get name from device, so fall back to local table after all
-                   */
-                      AIOUSB_Lock();
-                      deviceName = ProductIDToName(deviceDesc->ProductID);
-                      AIOUSB_UnLock();
-                  }
-            } else {
-            /*
-             * device doesn't support getting its product name, so use local
-             * product name table
-             */
-                deviceName = ProductIDToName(deviceDesc->ProductID);
-                AIOUSB_UnLock();
-            }
-      } else {
-          AIOUSB_UnLock();
-      }
+            AIOUSB_Lock();
+            deviceName = ProductIDToName(deviceDesc->ProductID);
+            AIOUSB_UnLock();
+        }
+    } else {
+        /*
+         * device doesn't support getting its product name, so use local
+         * product name table
+         */
+        AIOUSB_UnLock();
+        deviceName = ProductIDToName(deviceDesc->ProductID);
+    }
+
     return deviceName;
 }
 
@@ -1122,7 +1115,7 @@ unsigned long QueryDeviceInfo(
                                             ) {
     if(!AIOUSB_Lock())
         return AIOUSB_ERROR_INVALID_MUTEX;
-
+    AIOUSB_UnLock();
     unsigned long result = AIOUSB_Validate(&DeviceIndex);
     if(result != AIOUSB_SUCCESS) {
           AIOUSB_UnLock();
@@ -1145,6 +1138,7 @@ unsigned long QueryDeviceInfo(
         pNameSize != NULL &&
         pName != NULL
         ) {
+        AIOUSB_UnLock();
           const char *deviceName = GetSafeDeviceName(DeviceIndex);
           if(deviceName != 0) {
             /*
@@ -2310,7 +2304,6 @@ RETURN_GenericVendorRead:
 
 #ifdef SELF_TEST
 
-
 #include <math.h>
 #include "gtest/gtest.h"
 #include "tap.h"
@@ -2329,7 +2322,7 @@ TEST(AIOUSB_Core,FakeInit ) {
 
 TEST(AIOUSB_Core,MockObjects) {
     int numDevices = 0;
-    InitDeviceTable();    
+    InitDeviceTable();
     AddDeviceToDeviceTable( &numDevices, USB_AIO16_16A );
     EXPECT_EQ( numDevices, 1 );
     AddDeviceToDeviceTable( &numDevices, USB_DIO_32 );
@@ -2337,8 +2330,25 @@ TEST(AIOUSB_Core,MockObjects) {
 
     EXPECT_EQ( ((DeviceDescriptor *)&deviceTable[0])->ProductID, USB_AIO16_16A  );
     EXPECT_EQ( ((DeviceDescriptor *)&deviceTable[1])->ProductID, USB_DIO_32  );
-
 }
+
+TEST(AIOUSB_Core,NewDevices) {
+    int numDevices = 0;
+    AIOUSB_InitTest();
+    AddDeviceToDeviceTable( &numDevices, USB_DIO_32I );
+    EXPECT_EQ( ((DeviceDescriptor *)&deviceTable[0])->ProductID, USB_DIO_32I );
+    deviceTable[0].device = (libusb_device *)0x42;
+    deviceTable[0].bGetName = false;
+    int MAX_NAME_SIZE = 100;
+    char name[ MAX_NAME_SIZE + 1 ];
+    unsigned long productID;
+    unsigned long nameSize = 20;
+    unsigned long numDIOBytes;
+    unsigned long numCounters;
+    unsigned long result = QueryDeviceInfo(0, &productID, &nameSize, name, &numDIOBytes, &numCounters);
+    EXPECT_EQ( numDIOBytes, 4 );
+}
+
 
 
 int main( int argc , char *argv[] ) 
