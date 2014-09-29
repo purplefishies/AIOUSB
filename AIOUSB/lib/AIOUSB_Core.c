@@ -72,6 +72,7 @@ static const ProductIDName productIDNameTable[] = {
     { USB_IIRO4_COM     , "USB-IIRO4-COM"  },
     { USB_DIO16RO8      , "USB-DIO16RO8"   },
     { PICO_DIO16RO8     , "PICO-DIO16RO8"  },
+    { USBP_II8IDO4A     , "USBP-II8IDO4A"  },
     { USB_AI16_16A      , "USB-AI16-16A"   },
     { USB_AI16_16E      , "USB-AI16-16E"   },
     { USB_AI12_16A      , "USB-AI12-16A"   },
