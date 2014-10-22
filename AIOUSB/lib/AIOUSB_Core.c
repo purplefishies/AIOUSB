@@ -2127,71 +2127,60 @@ unsigned long AIOUSB_ADC_SetCalTable(
 {
     if(calTable == 0)
         return AIOUSB_ERROR_INVALID_PARAMETER;
+    unsigned long result = AIOUSB_SUCCESS;
+    DeviceDescriptor * deviceDesc = &deviceTable[ DeviceIndex ];
+    libusb_device_handle * deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
 
-    if(!AIOUSB_Lock())
-        return AIOUSB_ERROR_INVALID_MUTEX;
-
-    unsigned long result = AIOUSB_Validate(&DeviceIndex);
-    if(result != AIOUSB_SUCCESS) {
-          AIOUSB_UnLock();
-          return result;
-      }
-
-    DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
-    if(deviceDesc->bADCStream == AIOUSB_FALSE) {
-          AIOUSB_UnLock();
-          return AIOUSB_ERROR_NOT_SUPPORTED;
-      }
-
-    if((result = ADC_QueryCal(DeviceIndex)) != AIOUSB_SUCCESS) {
-          AIOUSB_UnLock();
-          return result;
-      }
-
-    libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
     if(deviceHandle != NULL) {
-/*
- * send calibration table to SRAM one block at a time; according to the documentation,
- * the proper procedure is to bulk transfer a block of calibration data to "endpoint 2"
- * and then send a control message to load it into the SRAM
- */
-          const unsigned timeout = deviceDesc->commTimeout;
-          AIOUSB_UnLock();                              // unlock while communicating with device
-          const int SRAM_BLOCK_WORDS = 1024;       // can send 1024 words at a time to SRAM
+
+        /*
+         * send calibration table to SRAM one block at a time; according to
+         * the documentation, the proper procedure is to bulk transfer a block
+         * of calibration data to "endpoint 2" and then send a control message
+         * to load it into the SRAM
+         */
+          AIOUSB_UnLock();
+          int SRAM_BLOCK_WORDS = 1024;
           int sramAddress = 0;
           int wordsRemaining = CAL_TABLE_WORDS;
           while(wordsRemaining > 0) {
-                const int wordsWritten
-                    = (wordsRemaining < SRAM_BLOCK_WORDS)
-                      ? wordsRemaining
-                      : SRAM_BLOCK_WORDS;
-                int bytesTransferred;
-                const int libusbResult = AIOUSB_BulkTransfer(deviceHandle,
-                                                             LIBUSB_ENDPOINT_OUT | USB_BULK_WRITE_ENDPOINT,
-                                                             ( unsigned char* )(calTable + sramAddress), wordsWritten * sizeof(unsigned short),
-                                                             &bytesTransferred, timeout);
-                if(libusbResult != LIBUSB_SUCCESS) {
-                      result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult);
-                      break;                                  // from while()
-                  }else if(bytesTransferred != ( int )(wordsWritten * sizeof(unsigned short))) {
-                      result = AIOUSB_ERROR_INVALID_DATA;
-                      break;                                  // from while()
-                  }else {
-                      bytesTransferred = libusb_control_transfer(deviceHandle,
-                                                                 USB_WRITE_TO_DEVICE, AUR_LOAD_BULK_CALIBRATION_BLOCK,
-                                                                 sramAddress, wordsWritten, 0, 0, timeout);
-                      if(bytesTransferred != 0) {
-                            result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-                            break;                            // from while()
-                        }
+              int wordsWritten = (wordsRemaining < SRAM_BLOCK_WORDS) ? wordsRemaining : SRAM_BLOCK_WORDS;
+              int bytesTransferred;
+              int libusbResult = AIOUSB_BulkTransfer(deviceHandle,
+                                                     LIBUSB_ENDPOINT_OUT | USB_BULK_WRITE_ENDPOINT,
+                                                     ( unsigned char* )(calTable + sramAddress), 
+                                                     wordsWritten * sizeof(unsigned short),
+                                                     &bytesTransferred, 
+                                                     deviceDesc->commTimeout
+                                                     );
+              if(libusbResult != LIBUSB_SUCCESS) {
+                  result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult);
+                  break;                                  // from while()
+              } else if(bytesTransferred != ( int )(wordsWritten * sizeof(unsigned short))) {
+                  result = AIOUSB_ERROR_INVALID_DATA;
+                  break;                                  // from while()
+              } else {
+                  bytesTransferred = libusb_control_transfer(deviceHandle,
+                                                             USB_WRITE_TO_DEVICE, 
+                                                             AUR_LOAD_BULK_CALIBRATION_BLOCK,
+                                                             sramAddress, 
+                                                             wordsWritten, 
+                                                             0, 
+                                                             0, 
+                                                             deviceDesc->commTimeout
+                                                             );
+                  if (bytesTransferred != 0) {
+                      result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+                      break;                            // from while()
                   }
-                wordsRemaining -= wordsWritten;
-                sramAddress += wordsWritten;
-            }
-      }else {
-          result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-          AIOUSB_UnLock();
-      }
+              }
+              wordsRemaining -= wordsWritten;
+              sramAddress += wordsWritten;
+          }
+    } else {
+        result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
+        AIOUSB_UnLock();
+    }
 
     return result;
 }

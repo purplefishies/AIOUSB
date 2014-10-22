@@ -2791,10 +2791,10 @@ unsigned long AIOUSB_ADC_InternalCal(
           return AIOUSB_ERROR_NOT_SUPPORTED;
       }
 
-    if((result = ADC_QueryCal(DeviceIndex)) != AIOUSB_SUCCESS) {
-          AIOUSB_UnLock();
-          return result;
-      }
+    /* if((result = ADC_QueryCal(DeviceIndex)) != AIOUSB_SUCCESS) { */
+    /*       AIOUSB_UnLock(); */
+    /*       return result; */
+    /*   } */
 
     AIOUSB_UnLock();
     unsigned short *const calTable = ( unsigned short* )malloc(CAL_TABLE_WORDS * sizeof(unsigned short));
@@ -2804,7 +2804,7 @@ unsigned long AIOUSB_ADC_InternalCal(
           goto INTERNAL_CAL_ERRORS;
       }
 
-    if( 1 ) {
+    if( autoCal ) {
       /*
        * create calibrated calibration table
        */
@@ -2927,7 +2927,7 @@ abort:
                       AIOUSB_UnLock();
                   }
             }
-      }else {
+      } else {                  /* 1 to 1 calibration table */
       /*
        * create default (1:1) calibration table; that is, each output
        * word equals the input word
@@ -2935,9 +2935,26 @@ abort:
           int index;
           for(index = 0; index < CAL_TABLE_WORDS; index++)
               calTable[ index ] = ( unsigned short )index;
+
+          ADConfigBlock tmpconfig;
+          memset(&tmpconfig,0,sizeof(ADConfigBlock));
+          tmpconfig.size = 20;
+          tmpconfig.registers[0x10] = 0x05;
+
+          for ( int k = 0; k <= 1 ; k ++ ) {
+
+              result = ADC_SetConfig( DeviceIndex, tmpconfig.registers, &tmpconfig.size );
+              if ( result != AIOUSB_SUCCESS ) 
+                  break;
+
+              result = AIOUSB_ADC_SetCalTable(DeviceIndex, calTable);
+              if ( result != AIOUSB_SUCCESS )
+                  break;
+              tmpconfig.registers[0x10] = 0x01;
+          }
       }
 
-    if(result == AIOUSB_SUCCESS) {
+    if (result == AIOUSB_SUCCESS && autoCal ) {
       /*
        * optionally return calibration table to caller
        */
@@ -2956,7 +2973,7 @@ abort:
                             remove(saveFileName);             // file is likely corrupt or incomplete
                             result = AIOUSB_ERROR_FILE_NOT_FOUND;
                         }
-                  }else
+                  } else
                     result = AIOUSB_ERROR_FILE_NOT_FOUND;
             }
 
