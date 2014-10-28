@@ -36,6 +36,7 @@ struct opts {
   int startchannel;
   int endchannel;
   int number_ranges;
+  int slowacquire;
   struct channel_range **ranges;
 };
 
@@ -92,6 +93,13 @@ main(int argc, char *argv[] )
      */
     /* New simpler interface */
     AIOContinuousBuf_InitConfiguration( buf );
+
+    if ( options.slowacquire ) {
+        unsigned char bufData[64];
+        unsigned bytesWritten = 0;
+        GenericVendorWrite( 0, 0xDF, 0x0000, 0x001E, bufData, &bytesWritten  );
+        /* GenericVendorWrite( DeviceIndex, 0xDF, 0x0000, 0x001E, 1, &buf );  Windows call */
+    }
 
     AIOContinuousBuf_SetOverSample( buf, 0 );
     AIOContinuousBuf_SetStartAndEndChannel( buf, options.startchannel, options.endchannel );
@@ -226,7 +234,8 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] )
       {"maxcount",     required_argument, 0,  'm' },
       {"reset",        no_argument,       0,  'r' },
       {"startchannel", required_argument, 0,  's' },
-      {"endchannel",  required_argument , 0,  'e' },
+      {"endchannel"  , required_argument, 0,  'e' },
+      {"slowacquire" , no_argument      , 0,  'S' }, 
       {"range",       required_argument , 0,  'R' },
       {0,         0,                 0,  0 }
     };
@@ -253,6 +262,9 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] )
           break;
         case 's':
           options->startchannel = atoi(optarg);
+          break;
+        case 'S':
+          options->slowacquire = 1;
           break;
         case 'e':
           options->endchannel = atoi(optarg);
