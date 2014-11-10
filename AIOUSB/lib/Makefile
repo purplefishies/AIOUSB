@@ -1,12 +1,12 @@
 #
-# $Revision$
-# $Date$
-# $Author$
-#
+# Date: $Format: %ad$
+# Author: $Format: %an <%ae>$
+# Version: $Format: %t$
 # make file for AIOUSB library
 #
 
-COBJS := \
+override CEXTRAOBJS	+= 
+override CORE_COBJS += \
 AIOUSB_ADC.o \
 AIOUSB_ADC_ExternalCal.o \
 AIOUSB_Core.o \
@@ -20,10 +20,9 @@ AIOContinuousBuffer.o \
 AIOChannelMask.o \
 AIOUSB_Properties.o \
 AIODeviceInfo.o \
-DIOBuf.o
+DIOBuf.o \
 
 include $(AIOUSB_ROOT)/Mkfiles/oses.inc
-
 
 ifeq ("$(OSTYPE)","Darwin") 
 CC_SHFLAGS := -dynamiclib
@@ -31,12 +30,15 @@ else
 CC_SHFLAGS := -shared -Wl,-soname
 endif
 
+CORE_CDBGOBJS 		+= $(CORE_COBJS:.o=.dbg.o)
+CORE_CPPOBJS 		+= $(CORE_COBJS:.o=.cpp.o)
+CORE_CPPDBGOBJS 	+= $(CORE_COBJS:.o=.cpp.dbg.o)
 
-CDBGOBJS := $(COBJS:.o=.dbg.o)
-CPPOBJS := $(COBJS:.o=.cpp.o)
-CPPDBGOBJS := $(CPPOBJS:.cpp.o=.cpp.dbg.o)
-
-
+override COBJS		+= $(CORE_COBJS) $(CEXTRAOBJS)
+override CDBGOBJS 	+= $(CORE_COBJS:.o=.dbg.o) $(CEXTRAOBJS)
+override CPPEXTRAOBJS   = $(CEXTRAOBJS:.o=.cpp.o)
+override CPPOBJS 	+= $(CORE_COBJS:.o=.cpp.o) $(CPPEXTRAOBJS)
+override CPPDBGOBJS 	+= $(CORE_COBJS:.o=.cpp.dbg.o) $(CPPEXTRAOBJS)
 
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -67,7 +69,7 @@ LIBS 		:= $(CLIB) $(CDBGLIB) $(CPPLIB) $(CPPDBGLIB)  $(SHCLIB) $(SHCDBGLIB) $(SH
 override CFLAGS	+= -I. -I/usr/include/libusb-1.0 -std=gnu99
 TESTFLAGS	:= -g
 SHARED_LIBS	:=  -lusb-1.0 -pthread -lm
-override CXXFLAGS += -I/usr/include/libusb-1.0 -D__aiousb_cplusplus
+override CXXFLAGS += -I. -I/usr/include/libusb-1.0 -D__aiousb_cplusplus
 
 .PHONY : all testit
 
@@ -79,54 +81,58 @@ testit:
 	@echo $(CC_SHFLAGS)
 	@echo $(CYGWINTYPE)
 	@echo $(SHCPPLIB)
+	@echo "COBJS=$(COBJS) $(CEXTRAOBJS)"
+	@echo "CDBGOBJS=$(CDBGOBJS)"
+	@echo "CPPOBJS=$(CPPOBJS)"
+	@echo "CPPDBGOBJS=$(CPPDBGOBJS)"
+	@echo "CPPEXTRAOBJS=$(CPPEXTRAOBJS)"
 
 all_cscope: $(LIBS) cscope
 
 #*******************************  LIBRARIES  ********************************
 
 $(CLIB) : $(COBJS)
-	$(AR) cr $(CLIB) $(COBJS)
+	$(AR) cr $(CLIB) $^
 $(CDBGLIB) : $(CDBGOBJS)
-	$(AR) cr $(CDBGLIB) $(CDBGOBJS)
+	$(AR) cr $(CDBGLIB) $^
 $(CPPLIB) : $(CPPOBJS)
-	$(AR) cr $(CPPLIB) $(CPPOBJS)
+	$(AR) cr $(CPPLIB) $^
 $(CPPDBGLIB) : $(CPPDBGOBJS)
-	$(AR) cr $(CPPDBGLIB) $(CPPDBGOBJS)
+	$(AR) cr $(CPPDBGLIB) $^
 
 ifeq ("$(OSTYPE)","Darwin")
-$(SHCLIB) : $(COBJS)
-	$(CC)  $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(COBJS) $(SHARED_LIBS)
+$(SHCLIB) : $(COBJS) $(CEXTRAOBJS)
+	$(CC)  $(LDFLAGS) $(CC_SHFLAGS) -o $@ $^ $(SHARED_LIBS)
 $(SHCDBGLIB): 	$(CDBGOBJS)
-	$(CC) $(CC_SHFLAGS) $(LDFLAGS) -o $@ $(CDBGOBJS) $(SHARED_LIBS) 
+	$(CC) $(CC_SHFLAGS) $(LDFLAGS) -o $@ $^ $(SHARED_LIBS) 
 $(SHCPPLIB) : $(CPPOBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS) -o $@ $^ $(SHARED_LIBS)
 $(SHCPPDBGLIB) : $(CPPDBGOBJS)
-	$(CXX) $(CXXFLAGS)  $(LDFLAGS) $(CC_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS)
+	$(CXX) $(CXXFLAGS)  $(LDFLAGS) $(CC_SHFLAGS) -o $@ $^ $(SHARED_LIBS)
 else ifeq ("$(OSTYPE)","CYGWIN")
 
-$(SHCLIB) : $(COBJS)
-	$(CC) $(LDFLAGS) $(CC_SHFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $(COBJS) -Wl,--no-whole-archive $(SHARED_LIBS)
+$(SHCLIB) : $(COBJS) $(CEXTRAOBJS)
+	$(CC) $(LDFLAGS) $(CC_SHFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $^ -Wl,--no-whole-archive $(SHARED_LIBS)
 
 
 $(SHCDBGLIB): 	$(CDBGOBJS)
-	$(CC) $(CC_SHFLAGS) $(LDFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $(CDBGOBJS) -Wl,--no-whole-archive $(SHARED_LIBS)
+	$(CC) $(CC_SHFLAGS) $(LDFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $^ -Wl,--no-whole-archive $(SHARED_LIBS)
 
 $(SHCPPLIB) : $(CPPOBJS)
-
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $(CPPOBJS) -Wl,--no-whole-archive $(SHARED_LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $^ -Wl,--no-whole-archive $(SHARED_LIBS)
 
 $(SHCPPDBGLIB) : $(CPPDBGOBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $(CPPOBJS) -Wl,--no-whole-archive $(SHARED_LIBS)
 
 else 
-$(SHCLIB) : $(COBJS)
-	$(CC)  $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $(COBJS) $(SHARED_LIBS)
+$(SHCLIB) : $(COBJS) $(CEXTRAOBJS)
+	$(CC)  $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $^ $(SHARED_LIBS)
 $(SHCDBGLIB): 	$(CDBGOBJS)
-	$(CC)  $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $(CDBGOBJS) $(SHARED_LIBS) 
+	$(CC)  $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $^ $(SHARED_LIBS) 
 $(SHCPPLIB) : $(CPPOBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $(CPPOBJS) $(SHARED_LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $^ $(SHARED_LIBS)
 $(SHCPPDBGLIB) : $(CPPDBGOBJS)
-	$(CXX) -g $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $(CPPDBGOBJS) $(SHARED_LIBS)
+	$(CXX) -g $(CXXFLAGS) $(LDFLAGS) $(CC_SHFLAGS),$@ -o $@ $^ $(SHARED_LIBS)
 endif
 
 
@@ -151,17 +157,23 @@ PYCFLAGS		= $(DEBUGOPTS) $(COMMONOPTS)
 COPTS			:= $(DEBUGOPTS) $(COMMONOPTS) $(EXTRA_COPTS)
 CPPOPTS			:= $(DEBUGOPTS) $(COMMONOPTS)
 
-$(COBJS) : %.o : %.c
+
+$(CORE_COBJS) : %.o : %.c
 	$(CC) $(OBJOPTS) $(CFLAGS) $(COPTS) $< -o $@
 
-$(CDBGOBJS) : %.dbg.o : %.c
+$(CEXTRAOBJS) : %.o : %.c
+	$(CC) $(OBJOPTS) $(CFLAGS) $(COPTS) $< -o $@
+
+$(CORE_CDBGOBJS) : %.dbg.o : %.c
 	$(CC) $(OBJOPTS) $(DEBUG_FLAGS) $(CFLAGS) $(COPTS) $< -o $@
 
-$(CPPOBJS) : %.cpp.o : %.c
+$(CORE_CPPOBJS) : %.cpp.o : %.c
 	$(CXX) $(CXXFLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
 
-#$(CPPDBGOBJS) : 
-%.cpp.dbg.o : %.c
+$(CPPEXTRAOBJS) : %.cpp.o : %.c
+	$(CXX) $(CXXFLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
+
+$(CORE_CPPDBGOBJS) : %.cpp.dbg.o : %.c
 	$(CXX) $(CXXFLAGS) $(DEBUG_FLAGS) $(OBJOPTS) $(CPPOPTS) $< -o $@
 
 pywrapper:

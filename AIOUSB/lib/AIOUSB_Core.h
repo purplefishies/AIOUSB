@@ -35,6 +35,27 @@ enum {
     MAX_USB_DEVICES		  = 32
 };
 
+typedef struct aiousboption {
+
+} AIOOption;
+
+typedef enum {
+    AIO_DEVICE_DESCRIPTOR,
+    AIO_ADCCONFIG_BLOCK
+} AIOArgument;
+
+typedef struct aioerror {
+    AIORET_TYPE retval;
+    char *error_message;
+} AIOError;
+
+typedef union aioeither {
+    AIOArgument right;
+    AIOError left;
+} AIOEither;
+
+
+
 /*
  * DeviceDescriptor maintains property and state information for each ACCES USB device
  * on the bus; deviceTable[] is populated by PopulateDeviceTable(), which is automatically
@@ -169,6 +190,10 @@ PUBLIC_EXTERN DeviceDescriptor *DeviceTableAtIndex_Lock( unsigned long DeviceInd
 PUBLIC_EXTERN DeviceDescriptor *AIOUSB_GetDevice_Lock( unsigned long DeviceIndex , 
                                                         unsigned long *result
                                                         );
+
+DeviceDescriptor *AIOUSB_GetDevice( unsigned long DeviceIndex );
+ADConfigBlock *AIOUSB_GetConfigBlock( DeviceDescriptor *dev);
+
 
 
 PUBLIC_EXTERN unsigned long AIOUSB_EnsureOpen( unsigned long DeviceIndex );

@@ -1391,7 +1391,8 @@ AIORET_TYPE AIOContinuousBufEnd( AIOContinuousBuf *buf )
 void AIOContinuousBuf_SetTesting( AIOContinuousBuf *buf, AIOUSB_BOOL testing )
 {
     AIOContinuousBufLock( buf );
-    ADC_SetTestingMode( AIOUSB_GetConfigBlock( AIOContinuousBuf_GetDeviceIndex(buf)), testing );
+    /* ADC_SetTestingMode( AIOUSB_GetConfigBlock( AIOContinuousBuf_GetDeviceIndex(buf)), testing );  */
+    ADC_SetTestingMode( AIOUSB_GetConfigBlock( AIOUSB_GetDevice( AIOContinuousBuf_GetDeviceIndex(buf))), testing );
     AIOContinuousBufUnlock( buf );
 }
 

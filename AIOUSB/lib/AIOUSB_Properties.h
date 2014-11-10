@@ -32,7 +32,8 @@ PUBLIC_EXTERN unsigned long AIOUSB_GetDeviceProperties(
                                                        );
 PUBLIC_EXTERN const char *AIOUSB_GetResultCodeAsString(unsigned long result_value);
 
-PUBLIC_EXTERN void AIOUSB_ListDevices();
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_ListDevices();
+
 PUBLIC_EXTERN AIORESULT FindDevices( int **indices, int *length , unsigned minProductID, unsigned maxProductID  );
 PUBLIC_EXTERN AIORESULT AIOUSB_GetAllDevices();
 

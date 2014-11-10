@@ -138,7 +138,6 @@ PUBLIC_EXTERN void DeleteBuffer( AIOBuf *buf );
 
 PUBLIC_EXTERN AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex );
 
-PUBLIC_EXTERN ADConfigBlock *AIOUSB_GetConfigBlock( unsigned long DeviceIndex );
 PUBLIC_EXTERN unsigned long AIOUSB_SetConfigBlock( unsigned long DeviceIndex , ADConfigBlock *entry );
 
 
@@ -274,7 +273,7 @@ PUBLIC_EXTERN unsigned long AIOUSB_ClearFIFO(
 PUBLIC_EXTERN const char *AIOUSB_GetVersion(void);                /* returns AIOUSB module version number as a string */
 PUBLIC_EXTERN const char *AIOUSB_GetVersionDate(void);            /* returns AIOUSB module version date as a string */
 PUBLIC_EXTERN const char *AIOUSB_GetResultCodeAsString( unsigned long value );       /* gets string representation of AIOUSB_xxx result code */
-PUBLIC_EXTERN void AIOUSB_ListDevices(void);                      /* prints list of USB devices to standard output (useful for debugging) */
+
 PUBLIC_EXTERN unsigned long AIOUSB_Init(void);                          /* must be called before use of other functions in AIOUSB */
 PUBLIC_EXTERN void AIOUSB_Exit(void);                                   /* must be called after last use of other functions in AIOUSB */
 PUBLIC_EXTERN unsigned long AIOUSB_Reset(
