@@ -326,9 +326,31 @@ CREATE_ENUM_W_START( ResultCode, 0,
                      AIOUSB_ERROR_TIMEOUT,
                      AIOUSB_ERROR_HANDLE_EOF,
                      AIOUSB_ERROR_DEVICE_NOT_FOUND,
+                     AIOUSB_ERROR_USBDEVICE_NOT_FOUND,
+                     AIOUSB_ERROR_INVALID_TIMEOUT,
+                     AIOUSB_ERROR_INVALID_USBDEVICE,
+                     AIOUSB_ERROR_INVALID_VOLTAGES,
+                     AIOUSB_ERROR_INVALID_COUNTS,
+                     AIOUSB_ERROR_INVALID_DEVICE,
+                     AIOUSB_ERROR_INVALID_DEVICE_SETTING,
+                     AIOUSB_ERROR_INVALID_DEVICE_FUNCTIONAL_PARAMETER,
+                     AIOUSB_ERROR_INVALID_DEVICE_STREAM_SETTING,
+                     AIOUSB_ERROR_INVALID_DEVICE_CHANNEL_SETTING,
+                     AIOUSB_ERROR_INVALID_DEVICE_MUX_CHANNEL_SETTING,
+                     AIOUSB_ERROR_INVALID_CONFIG,
+                     AIOUSB_ERROR_INVALID_AIOCONFIGURATION,
+                     AIOUSB_ERROR_INVALID_AIOARGUMENT,
                      AIOUSB_ERROR_INVALID_ADCONFIG_SETTING,
-                     AIOUSB_ERROR_INVALID_ADCONFIG_CAL_SETTING,
                      AIOUSB_ERROR_INVALID_ADCONFIG_CHANNEL_SETTING,
+                     AIOUSB_ERROR_INVALID_ADCONFIG_CAL_SETTING,
+                     AIOUSB_ERROR_INVALID_ADCCONFIG,
+                     AIOUSB_ERROR_INVALID_ADCCONFIG_SETTING,
+                     AIOUSB_ERROR_INVALID_ADCCONFIG_TRIGGER_SETTING,
+                     AIOUSB_ERROR_INVALID_ADCCONFIG_CAL_SETTING,
+                     AIOUSB_ERROR_INVALID_ADCCONFIG_CHANNEL_SETTING,
+                     AIOUSB_ERROR_INVALID_ADCCONFIG_OVERSAMPLE_SETTING,
+                     AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING,
+                     AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER,
                      AIOUSB_ERROR_LIBUSB /* Always make the LIBUSB the last element */
                      );
 
@@ -513,7 +535,7 @@ typedef enum  {
   AD_CAL_MODE_GROUND      = 1, /* measure ground */
   AD_CAL_MODE_REFERENCE   = 3, /* measure reference */
   AD_CAL_MODE_BIP_GROUND  = 5,
-  ADCalMode_end           = 6
+  ADCalMode_end           = 8
 } ADCalMode;
 
 typedef struct  {

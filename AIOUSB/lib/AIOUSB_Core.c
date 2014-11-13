@@ -1974,7 +1974,6 @@ unsigned long AIOUSB_EnsureOpen(unsigned long DeviceIndex) {
       }
 
     if(result == AIOUSB_SUCCESS) {
-          _Initialize_Device_Desc(DeviceIndex);
 
           result |= _Card_Specific_Settings(DeviceIndex);
           if(result != AIOUSB_SUCCESS)
@@ -2186,6 +2185,7 @@ unsigned long AIOUSB_ADC_SetCalTable(
     unsigned char bRequest;
     unsigned char data[1024];
     int bytesTransferred = 0;
+    int wordsWritten = 0;
 
     if(deviceHandle != NULL) {
 
@@ -2215,31 +2215,32 @@ unsigned long AIOUSB_ADC_SetCalTable(
           int SRAM_BLOCK_WORDS = 1024;
           int sramAddress = 0;
           int wordsRemaining = CAL_TABLE_WORDS;
+          
           while(wordsRemaining > 0) {
-              int wordsWritten = (wordsRemaining < SRAM_BLOCK_WORDS) ? wordsRemaining : 1024 ;
+              int num_to_write = (wordsRemaining < SRAM_BLOCK_WORDS) ? wordsRemaining : 1024 ;
               int libusbResult = libusb_bulk_transfer(deviceHandle,
                                                       0x2,
                                                       (unsigned char *)(calTable + sramAddress),
-                                                      wordsWritten * sizeof(unsigned short),
+                                                      num_to_write*sizeof(unsigned short),
                                                       &bytesTransferred,
                                                       deviceDesc->commTimeout
                                                       );
               if(libusbResult != LIBUSB_SUCCESS) {
                   result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult);
                   break;
-              } else if(bytesTransferred != ( int )(wordsWritten * sizeof(unsigned short))) {
+              } else if(bytesTransferred != ( int )(num_to_write * sizeof(unsigned short))) {
                   result = AIOUSB_ERROR_INVALID_DATA;
                   break;
               } else {
-                  bytesTransferred = libusb_control_transfer( deviceHandle, 0x40, 0xBB, wordsWritten, 0x400 , NULL, 0 , deviceDesc->commTimeout );
+                  bytesTransferred = libusb_control_transfer( deviceHandle, 0x40, 0xBB, sramAddress, 0x400 , NULL, 0 , deviceDesc->commTimeout );
 
                   if (bytesTransferred != 0) {
                       result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
                       break;
                   }
               }
-              wordsRemaining -= wordsWritten;
-              sramAddress += wordsWritten;
+              wordsRemaining -= num_to_write;
+              sramAddress += num_to_write;
           }
     } else {
         result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
@@ -2319,12 +2320,6 @@ unsigned long GenericVendorRead(
       }
 
     result = AIOUSB_Validate(&deviceIndex);
-    if(result != AIOUSB_SUCCESS) {
-          AIOUSB_UnLock();
-          goto RETURN_GenericVendorRead;
-      }
-
-    result = AIOUSB_EnsureOpen(deviceIndex);
     if(result != AIOUSB_SUCCESS) {
           AIOUSB_UnLock();
           goto RETURN_GenericVendorRead;
