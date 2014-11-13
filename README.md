@@ -77,7 +77,7 @@ cd AIOUSB
 source sourceme.sh
 cd lib && make && cd -
 cd classlib && make && cd -
-cd sample/USB_SAMPLE
+cd samples/USB_SAMPLE_OF_CHOICE
 make sample AIOUSBLIBDIR=${AIO_LIB_DIR} AIOUSBCLASSLIBDIR=${AIO_CLASSLIB_DIR} DEBUG=1
 ```
 
@@ -102,9 +102,9 @@ your platform or by installing from
 https://github.com/accesio/fxload.  Copy fxload to a standard location
 in your $PATH.
 
-2. cp AIOUSB/Firmware/*.hex /usr/share/usb/
+2. sudo cp AIOUSB/Firmware/*.hex /usr/share/usb/
 
-3. cp AIOUSB/Firmware/10-acces*.rules /etc/udev/rules.d
+3. sudo cp AIOUSB/Firmware/10-acces*.rules /etc/udev/rules.d
 
 
 
