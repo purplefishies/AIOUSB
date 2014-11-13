@@ -15,24 +15,31 @@ find_library("usb-1.0","libusb_open",
              "/lib/#{`uname -p`.chomp!}-linux-gnu/"
              )
 
+
+find_header("libusb.h",
+            "/usr/include/libusb-1.0",
+            "/usr/local/include/libusb-1.0"
+            )
+
+
 find_library("aiousb", "AIOUSB_Init",
              ENV["AIOUSB_ROOT"] + "/lib",
              ENV["AIOUSB_ROOT"] + "/classlib"
 )
 
 
-
 find_header("aiousb.h",
-            ENV["AIOUSB_ROOT"] + "/lib",
+            ENV["AIO_LIB_DIR"],
             "/usr/include",
             "/usr/local/include"
             )
 
-
-find_header("libusb.h",
-            "/usr/include/libusb-1.0",
-            "/usr/local/include/libusb-1.0"
+find_header("AIOUSB_Core.h",
+            ENV["AIO_LIB_DIR"],
+            "/usr/include",
+            "/usr/local/include"
             )
+
 
 create_makefile('AIOUSB')
 
