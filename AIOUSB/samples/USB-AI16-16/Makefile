@@ -16,6 +16,10 @@ endif
 
 include $(AIOUSB_ROOT)/Mkfiles/oses.inc
 
+override CFLAGS        += -I$${AIO_LIB_DIR} -I/usr/include/libusb-1.0 -std=gnu99
+override CXXFLAGS      += -I$${AIO_LIB_DIR} -I$${AIO_CLASSLIB_DIR} -Ilib -I/usr/include/libusb-1.0 -D__aiousb_cplusplus
+
+override LDFLAGS       += -L$${AIO_LIB_DIR} -L$${AIO_CLASSLIB_DIR}
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Regular C related Build
@@ -96,7 +100,6 @@ ALL_CLEAN_TARGETS	:=	$(JAVA_OBJECT_FILES) \
 			  	$(COMMON_DEPS) \
 				$(FINAL_TARGETS)
 
-CPPFLAGS        := -D__aiousb_cplusplus
 
 #*********************************  RULES  **********************************
 
@@ -159,7 +162,7 @@ mostlyclean:
 
 
 lib/TestCaseSetup.o: lib/TestCaseSetup.cpp lib/TestCaseSetup.h  $(LIBRARY_DEPS)
-	$(CPP) $(DEBUGOPTS) $(CPPFLAGS) $(LIBPATH) $(INCPATH) $(OBJFILE_OPTS) $(COMMONOPTS) $(CPPOPTS) $<  $(LIBAIOUSBCPP) $(LIBUSB) -o $@
+	$(CPP) $(DEBUGOPTS) $(CXXFLAGS) $(LIBPATH)  $(OBJFILE_OPTS) $(COMMONOPTS) $(CPPOPTS) $<  $(LIBAIOUSBCPP) $(LIBUSB) -o $@
 
 #
 # Smart Generic rules that can build any NEW C or C++ file that 
@@ -170,17 +173,17 @@ lib/TestCaseSetup.o: lib/TestCaseSetup.cpp lib/TestCaseSetup.h  $(LIBRARY_DEPS)
 # C++ Rules
 #
 %.o:%.cpp $(COMMON_DEPS) $(LIBRARY_DEPS)
-	$(CPP) $(DEBUGOPTS) $(CPPFLAGS) $(OBJFILE_OPTS) $(INCPATH) $(COMMONOPTS) $(CPPOPTS) $< $(LIBPATH) -o $@
+	$(CPP) $(DEBUGOPTS) $(CXXFLAGS) $(OBJFILE_OPTS) $(COMMONOPTS) $(CPPOPTS) $< $(LIBPATH) -o $@
 
 %:%.o	$(COMMON_DEPS) $(LIBRARY_DEPS) 
-	$(CPP)  $(LDFLAGS) $(DEBUGOPTS) $(INCPATH) $(COMMONOPTS) $(CPPOPTS) $< $(COMMON_DEPS) $(CPPLIBS)  -o $@
+	$(CPP)  $(LDFLAGS) $(CXXFLAGS) $(DEBUGOPTS)  $(COMMONOPTS) $(CPPOPTS) $< $(COMMON_DEPS) $(CPPLIBS)  -o $@
 
 
 #
 # C Rules
 #
 %.c.o:%.c	$(COMMON_DEPS)
-	$(CC) -std=gnu99  -D_GNU_SOURCE $(OBJFILE_OPTS) $(INCPATH) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $(COPTS) $<  -o $@
+	$(CC) $(CFLAGS)  -D_GNU_SOURCE $(OBJFILE_OPTS) $(INCPATH) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $(COPTS) $<  -o $@
 
 %:%.c.o
 	$(CC) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $< $(CLIBS) -o $@

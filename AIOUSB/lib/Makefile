@@ -22,6 +22,8 @@ AIOUSB_Properties.o \
 AIODeviceInfo.o \
 DIOBuf.o \
 
+HEADERS	:=	$(wildcard *.h)
+
 include $(AIOUSB_ROOT)/Mkfiles/oses.inc
 
 ifeq ("$(OSTYPE)","Darwin") 
@@ -86,6 +88,7 @@ testit:
 	@echo "CPPOBJS=$(CPPOBJS)"
 	@echo "CPPDBGOBJS=$(CPPDBGOBJS)"
 	@echo "CPPEXTRAOBJS=$(CPPEXTRAOBJS)"
+	@echo "Headers=$(HEADERS)"
 
 all_cscope: $(LIBS) cscope
 
@@ -158,7 +161,7 @@ COPTS			:= $(DEBUGOPTS) $(COMMONOPTS) $(EXTRA_COPTS)
 CPPOPTS			:= $(DEBUGOPTS) $(COMMONOPTS)
 
 
-$(CORE_COBJS) : %.o : %.c
+$(CORE_COBJS) : %.o : %.c $(HEADERS)
 	$(CC) $(OBJOPTS) $(CFLAGS) $(COPTS) $< -o $@
 
 $(CEXTRAOBJS) : %.o : %.c
