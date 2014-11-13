@@ -93,10 +93,10 @@ $(SHCPPDBGLIB): $(CPPDBGOBJS)
 	$(CXX) $(LDFLAGS) $(CXXFLAGS) $(CC_SHFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $(CPPDBGOBJS) -Wl,--no-whole-archive $(SHARED_LIBS)
 else				# Linux and UNIXes
 $(SHCPPLIB) : $(CPPOBJS)
-	$(CXX) $(CXXFLAGS) $(CFLAGS) $(LDFLAGS) $(CXX_SHFLAGS) -o $@ $(CPPOBJS) $(SHARED_LIBS)
+	$(CXX) $(CXXFLAGS) $(CFLAGS) $(LDFLAGS) $(CXX_SHFLAGS),$@ -o $@ $(CPPOBJS) $(SHARED_LIBS)
 
 $(SHCPPDBGLIB) : $(CPPDBGOBJS)
-	$(CXX) $(CXXFLAGS) $(CFLAGS) $(LDFLAGS) $(CXX_SHFLAGS) -o $@ $(CPPDBGOBJS) $(SHARED_LIBS)
+	$(CXX) $(CXXFLAGS) $(CFLAGS) $(LDFLAGS) $(CXX_SHFLAGS),$@ -o $@ $(CPPDBGOBJS) $(SHARED_LIBS)
 endif
 
 
