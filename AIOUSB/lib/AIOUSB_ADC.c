@@ -17,6 +17,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <time.h>
+
 
 #define BAD_RESULT_AND_GOTO(x, y)  result = x; goto (y);
 
@@ -1732,76 +1734,120 @@ unsigned long ADC_BulkAcquire(
                               void *pBuf
                               )
 {
-    if(pBuf == NULL)
+    if ( pBuf == NULL)
         return AIOUSB_ERROR_INVALID_PARAMETER;
 
-    if(!AIOUSB_Lock())
+    if ( !AIOUSB_Lock())
         return AIOUSB_ERROR_INVALID_MUTEX;
 
     unsigned long result = AIOUSB_Validate(&DeviceIndex);
-    if(result != AIOUSB_SUCCESS) {
-          AIOUSB_UnLock();
-          return result;
-      }
+    if ( result != AIOUSB_SUCCESS) {
+        AIOUSB_UnLock();
+        return result;
+    }
 
-    DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
-    if(deviceDesc->bADCStream == AIOUSB_FALSE) {
-          AIOUSB_UnLock();
-          return AIOUSB_ERROR_NOT_SUPPORTED;
-      }
+    DeviceDescriptor * deviceDesc = &deviceTable[ DeviceIndex ];
+    if (deviceDesc->bADCStream == AIOUSB_FALSE) {
+        AIOUSB_UnLock();
+        return AIOUSB_ERROR_NOT_SUPPORTED;
+    }
 
-    if(deviceDesc->workerBusy) {
-          AIOUSB_UnLock();
-          return AIOUSB_ERROR_OPEN_FAILED;
-      }
+    if (deviceDesc->workerBusy) {
+        AIOUSB_UnLock();
+        return AIOUSB_ERROR_OPEN_FAILED;
+    }
 
     AIOUSB_UnLock();
-    struct BulkAcquireWorkerParams *const acquireParams
-        = ( struct BulkAcquireWorkerParams* )malloc(sizeof(struct BulkAcquireWorkerParams));
-    assert(acquireParams != 0);
-    if(acquireParams != 0) {
-      /**
-       * we initialize the worker thread status here in case the thread doesn't start for some reason,
-       * such as an improperly locked mutex; this pre-initialization is necessary so that the thread
-       * status doesn't make it appear as though the worker thread has completed successfully
-       */
-          AIOUSB_Lock();
-          deviceDesc->workerStatus = BufSize;       // deviceDesc->workerStatus == bytes remaining to receive
-          deviceDesc->workerResult = AIOUSB_ERROR_INVALID_DATA;
-          deviceDesc->workerBusy = AIOUSB_TRUE;
-          AIOUSB_UnLock();
-          acquireParams->DeviceIndex = DeviceIndex;
-          acquireParams->BufSize = BufSize;
-          acquireParams->pBuf = pBuf;
-          const int maxPriority = sched_get_priority_max(SCHED_FIFO);
-          struct sched_param schedParam = { maxPriority };
-          pthread_attr_t workerThreadAttr;
-          pthread_t workerThreadID;
-          pthread_attr_init(&workerThreadAttr);
-          pthread_attr_setschedpolicy(&workerThreadAttr, SCHED_FIFO);
-          pthread_attr_setschedparam(&workerThreadAttr, &schedParam);
-          const int threadResult = pthread_create(&workerThreadID, &workerThreadAttr, BulkAcquireWorker, acquireParams);
-          if(threadResult == 0) {
-                sched_yield();
-            }else {
-              /*
-               * failed to create worker thread, clean up
-               */
-                AIOUSB_Lock();
-                deviceDesc->workerStatus = 0;
-                deviceDesc->workerResult = AIOUSB_SUCCESS;
-                deviceDesc->workerBusy = AIOUSB_FALSE;
-                AIOUSB_UnLock();
-                free(acquireParams);
-                result = AIOUSB_ERROR_INVALID_THREAD;
-            }
-          pthread_attr_destroy(&workerThreadAttr);
-          pthread_detach(workerThreadID);
-      }else
+    struct BulkAcquireWorkerParams * acquireParams = ( struct BulkAcquireWorkerParams* )malloc(sizeof(struct BulkAcquireWorkerParams));
+
+
+    if (acquireParams != 0) {
+        /**
+         * we initialize the worker thread status here in case the thread doesn't start for some reason,
+         * such as an improperly locked mutex; this pre-initialization is necessary so that the thread
+         * status doesn't make it appear as though the worker thread has completed successfully
+         */
+        AIOUSB_Lock();
+
+        deviceDesc->workerStatus  = BufSize;       // deviceDesc->workerStatus == bytes remaining to receive
+        deviceDesc->workerResult  = AIOUSB_ERROR_INVALID_DATA;
+        deviceDesc->workerBusy    = AIOUSB_TRUE;
+
+        AIOUSB_UnLock();
+
+        acquireParams->DeviceIndex  = DeviceIndex;
+        acquireParams->BufSize      = BufSize;
+        acquireParams->pBuf         = pBuf;
+
+        /* int maxPriority = sched_get_priority_max(SCHED_FIFO); */
+        struct sched_param schedParam = { sched_get_priority_max(SCHED_FIFO) };
+        pthread_attr_t workerThreadAttr;
+        pthread_t workerThreadID;
+
+        pthread_attr_init(&workerThreadAttr);
+        pthread_attr_setschedpolicy(&workerThreadAttr, SCHED_FIFO);
+        pthread_attr_setschedparam(&workerThreadAttr, &schedParam);
+
+
+        /* int threadResult = pthread_create(&workerThreadID, &workerThreadAttr, BulkAcquireWorker, acquireParams); */
+        int threadResult = pthread_create( &workerThreadID, NULL, BulkAcquireWorker, acquireParams );
+        
+
+        if (threadResult == 0) {
+            sched_yield();
+            unsigned char startdata[] = {0x05,0x00,0x00,0x00 };
+            libusb_control_transfer(AIOUSB_GetDeviceHandle(acquireParams->DeviceIndex),
+                                    USB_WRITE_TO_DEVICE,
+                                    AUR_START_ACQUIRING_BLOCK,
+                                    (acquireParams->BufSize >> 17) & 0xffff, /* high */
+                                    (acquireParams->BufSize >> 1) & 0xffff,
+                                    startdata,
+                                    sizeof(startdata),
+                                    deviceDesc->commTimeout
+                                    );
+
+
+
+        } else {
+            /*
+             * failed to create worker thread, clean up
+             */
+            AIOUSB_Lock();
+            deviceDesc->workerStatus = 0;
+            deviceDesc->workerResult = AIOUSB_SUCCESS;
+            deviceDesc->workerBusy = AIOUSB_FALSE;
+            AIOUSB_UnLock();
+            free(acquireParams);
+            result = AIOUSB_ERROR_INVALID_THREAD;
+        }
+        pthread_attr_destroy(&workerThreadAttr);
+        pthread_detach(workerThreadID);
+    } else
         result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+
+
 
     return result;
 }
+
+static void *startAcquire(void *params)
+{
+    struct BulkAcquireWorkerParams * acquireParams = ( struct BulkAcquireWorkerParams* )params;
+    DeviceDescriptor * deviceDesc = &deviceTable[ acquireParams->DeviceIndex ];
+    double clockHz = deviceDesc->miscClockHz;
+    sched_yield();
+    CTR_StartOutputFreq( acquireParams->DeviceIndex,  0, &clockHz);
+    return 0;
+}
+
+#define STREAMING_PNA_DEFINITIONS                                       \
+    struct timespec foo , bar;                                          \
+    unsigned deltas[16*8192];                                           \
+    unsigned transactions[16*8192];                                     \
+    int tindex = 0;                                                     \
+    int num_reads = 0;
+
+
 /*----------------------------------------------------------------------------*/
 /**
  * @brief we assume the parameters passed to BulkAcquireWorker() have
@@ -1813,69 +1859,110 @@ static void *BulkAcquireWorker(void *params)
 {
     assert(params != 0);
     unsigned long result = AIOUSB_SUCCESS;
-    struct BulkAcquireWorkerParams *const acquireParams = ( struct BulkAcquireWorkerParams* )params;
+    struct BulkAcquireWorkerParams * acquireParams = ( struct BulkAcquireWorkerParams* )params;
+    int libusbResult;
     AIOUSB_Lock();
-    DeviceDescriptor *const deviceDesc = &deviceTable[ acquireParams->DeviceIndex ];
-    libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle(acquireParams->DeviceIndex);
-    if(deviceHandle != NULL) {
-          unsigned long bytesRemaining = acquireParams->BufSize;
-          deviceDesc->workerStatus = bytesRemaining;       // deviceDesc->workerStatus == bytes remaining to receive
-          deviceDesc->workerResult = AIOUSB_SUCCESS;
-          deviceDesc->workerBusy = AIOUSB_TRUE;
-          double clockHz = deviceDesc->miscClockHz;
-          const unsigned long streamingBlockSize = deviceDesc->StreamingBlockSize * sizeof(unsigned short);       // bytes
-          const unsigned timeout = deviceDesc->commTimeout;
-          AIOUSB_UnLock();                              // unlock while communicating with device
-          const unsigned short numSamplesHigh = ( unsigned short )(acquireParams->BufSize >> 17);       // acquireParams->BufSize is bytes
-          const unsigned short numSamplesLow = ( unsigned short )(acquireParams->BufSize >> 1);
-          unsigned char *data = ( unsigned char* )acquireParams->pBuf;
-          assert(data != 0);
+    DeviceDescriptor * deviceDesc = &deviceTable[ acquireParams->DeviceIndex ];
+    libusb_device_handle * deviceHandle = AIOUSB_GetDeviceHandle(acquireParams->DeviceIndex);
+    pthread_t startAcquireThread;
+    unsigned long streamingBlockSize , bytesRemaining;
+    int threadResult;
 
-          int bytesTransferred = libusb_control_transfer(deviceHandle,
-                                                         USB_WRITE_TO_DEVICE, AUR_START_ACQUIRING_BLOCK,
-                                                         numSamplesHigh, numSamplesLow, 0, 0, timeout);
-          if(bytesTransferred == 0) {
-                CTR_StartOutputFreq(acquireParams->DeviceIndex, 0, &clockHz);
-                while(bytesRemaining > 0) {
-                      unsigned long bytesToTransfer
-                          = (bytesRemaining < streamingBlockSize)
-                            ? bytesRemaining
-                            : streamingBlockSize;
-                      const int libusbResult = AIOUSB_BulkTransfer(deviceHandle,
-                                                                   LIBUSB_ENDPOINT_IN | USB_BULK_READ_ENDPOINT,
-                                                                   data, ( int )bytesToTransfer, &bytesTransferred,
-                                                                   timeout);
-                      if(libusbResult != LIBUSB_SUCCESS) {
-                            result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult);
-                            break;                            // from while()
-                        }else if(bytesTransferred != ( int )bytesToTransfer) {
-                            result = AIOUSB_ERROR_INVALID_DATA;
-                            break;                            // from while()
-                        }else {
-                            data += bytesTransferred;
-                            bytesRemaining -= bytesTransferred;
-                            AIOUSB_Lock();
-                            deviceDesc->workerStatus = bytesRemaining;
-                            AIOUSB_UnLock();
-                        }
-                  }
-                clockHz = 0;
-                CTR_StartOutputFreq(acquireParams->DeviceIndex, 0, &clockHz);
-            }else
-              result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-      }else {
-          result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-          AIOUSB_UnLock();
-      }
+#ifdef PNA_TESTING
+    STREAMING_PNA_DEFINITIONS;
+#endif
 
+    int bytesTransferred;
+    unsigned char *data;
+
+    if ( !deviceHandle ) {
+        result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
+        goto out_BulkAcquireWorker;
+    }
+
+    /* Needed to allow us to start bulk acquire waiting before we signal the board to start collecting data */
+    threadResult = pthread_create( &startAcquireThread, NULL, startAcquire , params );
+    if ( threadResult != 0 ) {
+        deviceDesc->workerResult = AIOUSB_ERROR_INVALID_THREAD;
+        goto out_BulkAcquireWorker;
+    } 
+    streamingBlockSize = deviceDesc->StreamingBlockSize; 
+
+    bytesRemaining = acquireParams->BufSize;
+    deviceDesc->workerStatus = bytesRemaining;       // deviceDesc->workerStatus == bytes remaining to receive
+    deviceDesc->workerResult = AIOUSB_SUCCESS;
+    deviceDesc->workerBusy = AIOUSB_TRUE;
+
+    AIOUSB_UnLock();
+
+    data = ( unsigned char* )acquireParams->pBuf;
+
+#ifdef PNA_TESTING
+    clock_gettime( CLOCK_MONOTONIC_RAW, &bar );
+#endif
+
+    while(bytesRemaining > 0) {
+        unsigned long bytesToTransfer = (bytesRemaining < streamingBlockSize) ? bytesRemaining : streamingBlockSize;
+#ifdef PNA_TESTING
+        clock_gettime( CLOCK_MONOTONIC_RAW, &foo );
+        deltas[num_reads++] =  ( foo.tv_sec - bar.tv_sec )*1e9 + (foo.tv_nsec - bar.tv_nsec );
+#endif
+        libusbResult = libusb_bulk_transfer(deviceHandle, 
+                                            LIBUSB_ENDPOINT_IN | USB_BULK_READ_ENDPOINT, 
+                                            data, 
+                                            (int)bytesToTransfer, 
+                                            &bytesTransferred, 
+                                            4000
+                                            );
+#ifdef PNA_TESTING
+        clock_gettime( CLOCK_MONOTONIC_RAW, &bar );
+        transactions[tindex++] = bytesTransferred;
+        deltas[num_reads++] = ( bar.tv_sec - foo.tv_sec )*1e9 + (bar.tv_nsec - foo.tv_nsec);
+#endif
+        if (libusbResult != LIBUSB_SUCCESS) {
+            result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult);
+            /* printf("ERROR was %dl\n", (int)result ); */
+            break;
+        } else {
+            data += bytesTransferred;
+            bytesRemaining -= bytesToTransfer; /* Actually read in bytes */
+            AIOUSB_Lock();
+            deviceDesc->workerStatus = bytesRemaining;
+            AIOUSB_UnLock();
+        }
+    }
+#ifdef PNA_TESTING
+    FILE *fp = fopen("delays.dat","w");
+    FILE *fp2 = fopen("data.dat","w");
+    if ( !fp || !fp2 ) {
+        printf("Can't open file delays.dat for writing");
+    } else {
+        for(int i= 0; i < num_reads ; i ++ ) {
+            fprintf(fp,"%u\n", deltas[i] );
+
+        }
+        for ( int i = 0 ; i < tindex ; i ++ ) {
+            fprintf(fp2,"%u\n", transactions[i] );
+        }
+        fclose(fp2);
+        fclose(fp);
+    }
+#endif
+    
+ out_BulkAcquireWorker:
     AIOUSB_Lock();
     deviceDesc->workerStatus = 0;
     deviceDesc->workerResult = result;
     deviceDesc->workerBusy = AIOUSB_FALSE;
+
+    double clockHz = 0;
+    CTR_StartOutputFreq(acquireParams->DeviceIndex, 0, &clockHz);
     AIOUSB_UnLock();
+
     free(params);
     return 0;
 }
+
 /*----------------------------------------------------------------------------*/
 AIOBuf *
 NewBuffer( unsigned int bufsize )

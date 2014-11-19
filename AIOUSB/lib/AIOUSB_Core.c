@@ -1041,9 +1041,9 @@ PRIVATE int AIOUSB_BulkTransfer(
                       data += bytes;
                       length -= bytes;
                   } else
-                    break;              // from while() and return timeout result
+                    break;
             } else
-              break;            // from while() and return error result
+              break;
       }
     *transferred = total;
     return libusbResult;
@@ -1196,7 +1196,7 @@ DeviceDescriptor *DeviceTableAtIndex( unsigned long DeviceIndex ) {
 DeviceDescriptor *DeviceTableAtIndex_Lock( unsigned long DeviceIndex ) 
 { 
     unsigned long result = AIOUSB_Validate( &DeviceIndex  );
-    if ( !result != AIOUSB_SUCCESS ) {
+    if ( result != AIOUSB_SUCCESS ) {
         return NULL;
     }
     DeviceDescriptor * deviceDesc = &deviceTable[ DeviceIndex ];
@@ -1349,8 +1349,6 @@ unsigned long AIOUSB_SetStreamingBlockSize(
                              unsigned long DeviceIndex,
                              unsigned long BlockSize
                              ) {
-     if( BlockSize == 0 || BlockSize > 31ul * 1024ul * 1024ul )
-          return AIOUSB_ERROR_INVALID_PARAMETER;
      
      if(!AIOUSB_Lock())
           return AIOUSB_ERROR_INVALID_MUTEX;
@@ -1361,9 +1359,12 @@ unsigned long AIOUSB_SetStreamingBlockSize(
           return result;
      }
 
-     DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
-     if(deviceDesc->bADCStream) {
-          if((BlockSize & 0x1FF) != 0)
+     DeviceDescriptor * deviceDesc = &deviceTable[ DeviceIndex ];
+
+     BlockSize = ( BlockSize < 1024*64 ? 1024 * 64 : BlockSize );
+
+     if (deviceDesc->bADCStream) {
+          if ((BlockSize & 0x1FF) != 0)
                BlockSize = (BlockSize & 0xFFFFFE00ul) + 0x200;
           deviceDesc->StreamingBlockSize = BlockSize;
      } else if(deviceDesc->bDIOStream) {
@@ -1651,7 +1652,7 @@ PRIVATE void _Initialize_Device_Desc(unsigned long DeviceIndex) {
     deviceDesc->bADCStream = AIOUSB_FALSE;
     deviceDesc->RangeShift = 0;
     deviceDesc->bDIOStream = AIOUSB_FALSE;
-    deviceDesc->StreamingBlockSize = 31 * 1024;
+    deviceDesc->StreamingBlockSize = 64 * 1024;
     deviceDesc->bDIODebounce = AIOUSB_FALSE;
     deviceDesc->bDIOSPI = AIOUSB_FALSE;
     deviceDesc->bClearFIFO = AIOUSB_FALSE;
@@ -2185,7 +2186,7 @@ unsigned long AIOUSB_ADC_SetCalTable(
     unsigned char bRequest;
     unsigned char data[1024];
     int bytesTransferred = 0;
-    int wordsWritten = 0;
+    /* int wordsWritten = 0; */
 
     if(deviceHandle != NULL) {
 

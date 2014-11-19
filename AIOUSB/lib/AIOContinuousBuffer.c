@@ -15,6 +15,7 @@
  *       config object
  */
 
+#include "AIOTypes.h"
 #include "AIOContinuousBuffer.h"
 #include "AIOChannelMask.h"
 #include "AIOUSB_Core.h"
@@ -30,37 +31,37 @@ static pthread_mutex_t message_lock = PTHREAD_MUTEX_INITIALIZER;
 static FILE *outfile = NULL;
 
 
-#undef AIOUSB_LOG
-#define AIOUSB_LOG(fmt, ... ) do {                                      \
-    pthread_mutex_lock( &message_lock );                                \
-    fprintf( (!outfile ? stdout : outfile ), fmt,  ##__VA_ARGS__ );     \
-    pthread_mutex_unlock(&message_lock);                                \
-  } while ( 0 )
+/* #undef AIOUSB_LOG */
+/* #define AIOUSB_LOG(fmt, ... ) do {                                      \ */
+/*     pthread_mutex_lock( &message_lock );                                \ */
+/*     fprintf( (!outfile ? stdout : outfile ), fmt,  ##__VA_ARGS__ );     \ */
+/*     pthread_mutex_unlock(&message_lock);                                \ */
+/*   } while ( 0 ) */
 
-#undef AIOUSB_DEVEL
-#undef AIOUSB_DEBUG
-#undef AIOUSB_WARN 
-#undef AIOUSB_ERROR
-#undef AIOUSB_FATAL 
+/* #undef AIOUSB_DEVEL */
+/* #undef AIOUSB_DEBUG */
+/* #undef AIOUSB_WARN  */
+/* #undef AIOUSB_ERROR */
+/* #undef AIOUSB_FATAL  */
 
-#ifdef AIOUSB_DEBUG_LOG
-/**
- * If you _REALLY_ want to see Development messages, you will
- * need to compile with  with -DREALLY_USE_DEVEL_DEBUG
- **/
-#ifdef REALLY_USE_DEVEL_DEBUG
-#define AIOUSB_DEVEL(...)  if( 1 ) { AIOUSB_LOG( "<Devel>\t" __VA_ARGS__ ); }
-#define AIOUSB_TAP(x,...)  if( 1 ) { AIOUSB_LOG( ( x ? "ok -" : "not ok" ) __VA_ARGS__ ); }
-#else
-#define AIOUSB_DEVEL(...)  if( 0 ) { AIOUSB_LOG( "<Devel>\t" __VA_ARGS__ ); }
-#define AIOUSB_TAP(x,...)  if( 0 ) { AIOUSB_LOG( ( x ? "ok -" : "not ok" ) __VA_ARGS__ ); }
-#endif
-#define AIOUSB_DEBUG(...)  AIOUSB_LOG( "<Debug>\t" __VA_ARGS__ )
-#else
+/* #ifdef AIOUSB_DEBUG_LOG */
+/* /\** */
+/*  * If you _REALLY_ want to see Development messages, you will */
+/*  * need to compile with  with -DREALLY_USE_DEVEL_DEBUG */
+/*  **\/ */
+/* #ifdef REALLY_USE_DEVEL_DEBUG */
+/* #define AIOUSB_DEVEL(...)  if( 1 ) { AIOUSB_LOG( "<Devel>\t" __VA_ARGS__ ); } */
+/* #define AIOUSB_TAP(x,...)  if( 1 ) { AIOUSB_LOG( ( x ? "ok -" : "not ok" ) __VA_ARGS__ ); } */
+/* #else */
+/* #define AIOUSB_DEVEL(...)  if( 0 ) { AIOUSB_LOG( "<Devel>\t" __VA_ARGS__ ); } */
+/* #define AIOUSB_TAP(x,...)  if( 0 ) { AIOUSB_LOG( ( x ? "ok -" : "not ok" ) __VA_ARGS__ ); } */
+/* #endif */
+/* #define AIOUSB_DEBUG(...)  AIOUSB_LOG( "<Debug>\t" __VA_ARGS__ ) */
+/* #else */
 
-#define AIOUSB_DEVEL( ... ) if ( 0 ) { }
-#define AIOUSB_DEBUG( ... ) if ( 0 ) { }
-#endif
+/* #define AIOUSB_DEVEL( ... ) if ( 0 ) { } */
+/* #define AIOUSB_DEBUG( ... ) if ( 0 ) { } */
+/* #endif */
 
 
 void *ActualWorkFunction( void *object );
@@ -455,7 +456,7 @@ AIORET_TYPE AIOContinuousBufStart( AIOContinuousBuf *buf )
  * @param buf AIOContinuousBuf object that we will be reading data into
  * @return Success(0) or failure( < 0 ) if we can't set the clocks
  */
-AIORET_TYPE CalculateClocks( AIOContinuousBuf *buf )
+AIORET_TYPE AIOContinuousBufCalculateClocks( AIOContinuousBuf *buf )
 {
     unsigned  hz = buf->hz;
     float l;
@@ -1167,7 +1168,7 @@ AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf )
         goto out_AIOContinuousBufCallbackStart;
     if( (retval = SetConfig(buf)) != AIOUSB_SUCCESS )
         goto out_AIOContinuousBufCallbackStart;
-    if ( (retval = CalculateClocks( buf ) ) != AIOUSB_SUCCESS )
+    if ( (retval = AIOContinuousBufCalculateClocks( buf ) ) != AIOUSB_SUCCESS )
         goto out_AIOContinuousBufCallbackStart;
     /* Try a switch */
     if( (retval = StartStreaming(buf)) != AIOUSB_SUCCESS )
@@ -1196,10 +1197,13 @@ AIORET_TYPE AIOContinuousBuf_ResetDevice( AIOContinuousBuf *buf)
     AIORET_TYPE retval;
     int usbval;
     deviceHandle = AIOUSB_GetDeviceHandle(  AIOContinuousBuf_GetDeviceIndex( buf )); 
-  
+
+    /* Clear fifo first */
+    libusb_control_transfer( deviceHandle, 0x40, 0x35, 0, 0, 0, 0, buf->timeout );
+
     usbval = libusb_control_transfer( deviceHandle, 0x40, 0xA0, 0xE600, 0 , data, 1, buf->timeout );
     data[0] = 0;
-    usbval = libusb_control_transfer( deviceHandle,0x40, 0xA0, 0xE600, 0 , data, 1, buf->timeout );
+    usbval = libusb_control_transfer( deviceHandle, 0x40, 0xA0, 0xE600, 0 , data, 1, buf->timeout );
     retval = (AIORET_TYPE )usbval;
     return retval;
 }

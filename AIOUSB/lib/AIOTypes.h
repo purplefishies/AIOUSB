@@ -44,6 +44,42 @@ namespace AIOUSB {
 #endif
 
 
+    /* Logging stuff */
+
+#undef AIOUSB_LOG
+#define AIOUSB_LOG(fmt, ... ) do {                                      \
+    pthread_mutex_lock( &message_lock );                                \
+    fprintf( (!outfile ? stdout : outfile ), fmt,  ##__VA_ARGS__ );     \
+    pthread_mutex_unlock(&message_lock);                                \
+  } while ( 0 )
+
+#undef AIOUSB_DEVEL
+#undef AIOUSB_DEBUG
+#undef AIOUSB_WARN 
+#undef AIOUSB_ERROR
+#undef AIOUSB_FATAL 
+
+#ifdef AIOUSB_DEBUG_LOG
+/**
+ * If you _REALLY_ want to see Development messages, you will
+ * need to compile with  with -DREALLY_USE_DEVEL_DEBUG
+ **/
+#ifdef REALLY_USE_DEVEL_DEBUG
+#define AIOUSB_DEVEL(...)  if( 1 ) { AIOUSB_LOG( "<Devel>\t" __VA_ARGS__ ); }
+#define AIOUSB_TAP(x,...)  if( 1 ) { AIOUSB_LOG( ( x ? "ok -" : "not ok" ) __VA_ARGS__ ); }
+#else
+#define AIOUSB_DEVEL(...)  if( 0 ) { AIOUSB_LOG( "<Devel>\t" __VA_ARGS__ ); }
+#define AIOUSB_TAP(x,...)  if( 0 ) { AIOUSB_LOG( ( x ? "ok -" : "not ok" ) __VA_ARGS__ ); }
+#endif
+#define AIOUSB_DEBUG(...)  AIOUSB_LOG( "<Debug>\t" __VA_ARGS__ )
+#else
+
+#define AIOUSB_DEVEL( ... ) if ( 0 ) { }
+#define AIOUSB_DEBUG( ... ) if ( 0 ) { }
+#endif
+
+
+
 
 CREATE_ENUM_W_START( THREAD_STATUS, 0 , 
                      NOT_STARTED, 
