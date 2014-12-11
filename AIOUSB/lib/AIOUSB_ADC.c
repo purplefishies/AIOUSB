@@ -2884,6 +2884,10 @@ AIORET_TYPE ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *c
     ADC_SetConfig( DeviceIndex, config->registers, &config->size );
 
     ADData = (unsigned short *)malloc(sizeof(unsigned short)*numBytes );
+    if (!ADData ) {
+        result = -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+        goto out_ConfigureAndBulkAcquire;
+    }
     addata_num_bytes = numBytes * sizeof(unsigned short);
 
     /* Write BC data */

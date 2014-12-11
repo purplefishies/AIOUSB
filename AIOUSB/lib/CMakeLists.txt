@@ -176,8 +176,8 @@ if( BUILD_MATLAB AND BUILD_AIOUSB_SHARED )
     DEPENDS libaiousb.mexglx
     COMMENT "Building Matlab library"
     )
-  install( FILES ${CMAKE_CURRENT_BINARY_DIR}/libaiousb.mexglx DESTINATION lib )
-  install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/libaiousb.h DESTINATION include )
+  install( FILES ${CMAKE_CURRENT_BINARY_DIR}/libaiousb.mexglx DESTINATION lib/aiousb )
+  install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/libaiousb.h DESTINATION include/aiousb )
 
 ELSEIF( BUILD_MATLAB )
   MESSAGE(FATAL_ERROR "You cannot build Matlab because you have elected to not build the shared version of the aiousb library")
@@ -193,6 +193,6 @@ install( TARGETS aiousbdbg DESTINATION lib )
 install( TARGETS aiousbcpp DESTINATION lib )
 install( TARGETS aiousbcppdbg DESTINATION lib )
 FILE( GLOB aiousb_header_files *.h )
-install( FILES ${aiousb_header_files} DESTINATION include )
+install( FILES ${aiousb_header_files} DESTINATION include/aiousb )
 
 
