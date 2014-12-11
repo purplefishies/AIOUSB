@@ -2894,7 +2894,6 @@ AIORET_TYPE ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *c
     libusbresult = libusb_control_transfer( deviceHandle, USB_WRITE_TO_DEVICE, 0xBC, 0, numBytes, bcdata, sizeof(bcdata), 1000 );
 
     /* Get Immediate */
-    /* ADC_GetImmediate( DeviceIndex, 0, &ADData[0] ); */
     libusbresult = libusb_control_transfer( deviceHandle, USB_WRITE_TO_DEVICE, 0xBF, 0, 0, bcdata, 0, 1000 );
 
     /* Bulk read */
@@ -2910,7 +2909,7 @@ AIORET_TYPE ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *c
     } else if (bytesTransferred != addata_num_bytes ) {
         result = AIOUSB_ERROR_INVALID_DATA;
     } else {
-        for ( int i = 0; i < 0xff; i ++ ) 
+        for ( int i = 0; i < numBytes; i ++ ) 
             total += ADData[i];
         result = total / numBytes;
     }
