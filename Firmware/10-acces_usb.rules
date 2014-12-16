@@ -23,6 +23,10 @@
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0001", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DIO-32.hex"
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8001", RUN+="/bin/chmod 0666 $tempnode"
 
+# Model: USB-DIO-32I
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0004", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DIO-32I.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8004", RUN+="/bin/chmod 0666 $tempnode"
+
 # USB-DIO-48
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0002", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DIO-48.hex"
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8002", RUN+="/bin/chmod 0666 $tempnode"
@@ -122,10 +126,6 @@ SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="16
 # PICO-DIO16RO8
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0033", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/PICO-DIO16RO8.hex"
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8033", RUN+="/bin/chmod 0666 $tempnode"
-
-# USBP-II8IDO4A
-SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0036", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USBP-II8IDO4A.hex"
-SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8036", RUN+="/bin/chmod 0666 $tempnode"
 
 # USB-AI16-16A
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0040", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AI16-16A.hex"
@@ -432,15 +432,18 @@ SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="16
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="807f", RUN+="/bin/chmod 0666 $tempnode"
 
 # USB-DA12-8A (Rev A)
-# SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="4001", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DA128-ArevA.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
+# SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="c001", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DA128-ArevA.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
 
 # USB-DA12-8A
-SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="4002", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DA12-8A.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="c002", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DA12-8A.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
 
 # USB-DA12-8E
-SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="4003", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DA12-8E.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="c003", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DA12-8E.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
 
 # USB-IIRO4-COM (Xerox)
 # SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8031", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-IIRO4-COM.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
+
+# JTAG
+SUBSYSTEM=="usb", ACTION=="add", ATTR{idVendor}=="fffe", ATTR{idProduct}=="0480" , MODE="0666"
 
 # end of file
