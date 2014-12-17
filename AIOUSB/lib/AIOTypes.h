@@ -153,9 +153,9 @@ CREATE_ENUM_W_START(ProductIDS,0,
                       * these product IDs are constant
                       *
                       */
-                     USB_DA12_8A_REV_A  = 0x4001,
-                     USB_DA12_8A        = 0x4002,
-                     USB_DA12_8E        = 0x4003,
+                     USB_DA12_8A_REV_A  = 0xC001,
+                     USB_DA12_8A        = 0xC002,
+                     USB_DA12_8E        = 0xC003,
                      /**
                       * these are the product IDs after firmware is uploaded to the device; prior
                       * to uploading the firmware, the product ID is that shown below minus 0x8000
