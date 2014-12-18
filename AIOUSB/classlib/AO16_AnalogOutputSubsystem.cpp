@@ -38,7 +38,7 @@ const char AO16_AnalogOutputSubsystem::RANGE_TEXT[][ 10 ] = {
 
 
 
-AO16_AnalogOutputSubsystem::AO16_AnalogOutputSubsystem( USBDevice &parent )
+AO16_AnalogOutputSubsystem::AO16_AnalogOutputSubsystem( USBDeviceBase &parent )
 		: AnalogOutputSubsystem( parent )
 		, outputRange( MIN_COUNTS, MAX_COUNTS ) {
 	minCounts = MIN_COUNTS;

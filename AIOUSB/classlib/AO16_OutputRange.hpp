@@ -19,7 +19,7 @@ namespace AIOUSB {
 class AO16_OutputRange : public AnalogIORange {
 	friend class AO16_AnalogOutputSubsystem;
 
-public:
+protected:
 	AO16_OutputRange();
 	AO16_OutputRange( int minCounts, int maxCounts );
 	virtual ~AO16_OutputRange();

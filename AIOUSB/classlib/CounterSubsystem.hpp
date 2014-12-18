@@ -31,7 +31,7 @@ class CounterSubsystem : public DeviceSubsystem {
 	friend class USB_DIO_32_Family;
 
 
-public:
+protected:
 	static const int COUNTERS_PER_BLOCK = 3;
 
 	int numCounterBlocks;						// number of counter blocks
@@ -40,7 +40,7 @@ public:
 
 
 public:
-	CounterSubsystem( USBDevice &parent );
+	CounterSubsystem( USBDeviceBase &parent );
 	virtual ~CounterSubsystem();
 
 	/*

@@ -9,7 +9,7 @@
 
 
 #include <iostream>
-#include <algorithm>
+#include <bits/stl_algo.h>
 #include <assert.h>
 #include "USBDeviceManager.hpp"
 #include "USB_DA12_8A_Family.hpp"
@@ -36,7 +36,7 @@ void USB_DA12_8A_Family::initialize() {
 
 
 USB_DA12_8A_Family::USB_DA12_8A_Family( int productID, int deviceIndex )
-		: USBDevice( productID, deviceIndex )
+		: USBDeviceBase( productID, deviceIndex )
 		, analogOutputSubsystem( *this ) {
 	if( ! isSupportedProductID( productID ) )
 		throw IllegalArgumentException( "Invalid product ID" );
@@ -98,7 +98,7 @@ bool USB_DA12_8A_Family::isSupportedProductID( int productID ) {
 
 ostream &USB_DA12_8A_Family::print( ostream &out ) {
 	assert( &out != 0 );
-	USBDevice::print( out );
+	USBDeviceBase::print( out );
 	analogOutputSubsystem.print( out );
 	return out;
 }	// USB_DA12_8A_Family::print()

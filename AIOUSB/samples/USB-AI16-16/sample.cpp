@@ -19,7 +19,7 @@ int main( int argc, char **argv ) {
     unsigned long productID, nameSize, numDIOBytes, numCounters;
     unsigned long deviceIndex = 0;
     bool deviceFound = false;
-    ADConfigBlock configBlock, tmpblock;
+    ADConfigBlock configBlock = {0};
     char *calibration_type;
 
     printf("USB-AI16-16A sample program version %s, %s\n"

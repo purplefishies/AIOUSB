@@ -21,7 +21,7 @@ namespace AIOUSB {
 
 
 
-AnalogOutputSubsystem::AnalogOutputSubsystem( USBDevice &parent )
+AnalogOutputSubsystem::AnalogOutputSubsystem( USBDeviceBase &parent )
 		: DeviceSubsystem( parent ) {
 	numChannels = 0;
 	minCounts = 0;

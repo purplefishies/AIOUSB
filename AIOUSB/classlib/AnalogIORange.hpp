@@ -30,7 +30,7 @@ namespace AIOUSB {
 class AnalogIORange {
 
 
-public:
+protected:
 	int range;									// current range (meaning defined by class that owns this instance)
 	int minCounts;								// minimum A/D or D/A counts for current range (typically 0)
 	int maxCounts;								// maximum A/D or D/A counts for current range (typically 0xfff or 0xffff)

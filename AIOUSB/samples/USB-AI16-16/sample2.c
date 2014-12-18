@@ -195,7 +195,6 @@ int main( int argc, char **argv ) {
 
     AIOUSB_SetStreamingBlockSize( deviceIndex, 64*1024 );
 
-
     printf("Allocating %d Bytes\n", BULK_BYTES );
     unsigned short * dataBuf = ( unsigned short * ) malloc( BULK_BYTES );
     if ( !dataBuf ) {

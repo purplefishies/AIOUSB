@@ -33,7 +33,7 @@ class DigitalIOSubsystem : public DeviceSubsystem {
 public:
 
 
-public:
+protected:
 	int numPorts;								// number of digital I/O ports (bytes)
 	int numChannels;							// number of digital I/O channels (bits)
 	int numTristateGroups;						// number of tristate groups (bytes)
@@ -44,7 +44,7 @@ public:
 public:
 	UCharArray &bitsToBytes( UCharArray &dest, int bit, const BoolArray &src );
 	BoolArray &bytesToBits( BoolArray &dest, const UCharArray &src, int bit );
-	DigitalIOSubsystem( USBDevice &parent );
+	DigitalIOSubsystem( USBDeviceBase &parent );
 	virtual ~DigitalIOSubsystem();
 
 

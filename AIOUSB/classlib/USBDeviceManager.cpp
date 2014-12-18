@@ -10,9 +10,10 @@
 #include "CppCommon.h"
 #include <iostream>
 #include <iterator>
-#include <algorithm>
+#include <bits/stl_algo.h>
 #include <assert.h>
 #include <AIOUSB_Core.h>
+#include "AIODeviceTable.h"
 #include "USBDeviceManager.hpp"
 #include "USB_AI16_Family.hpp"
 #include "USB_AO16_Family.hpp"
@@ -23,6 +24,7 @@
 #include "USB_DIO_32_Family.hpp"
 #include "USB_DIO_Family.hpp"
 #include "USB_AIO16_Family.hpp"
+
 
 
 using namespace std;
@@ -78,7 +80,7 @@ ostream &USBDeviceManager::print( ostream &out ) {
 		throw OperationFailedException( MESSAGE_NOT_OPEN );
 	if( deviceList.size() > 0 ) {
 		out << "ACCES devices found:" << endl;
-		copy( deviceList.begin(), deviceList.end(), ostream_iterator<USBDevice *>( out ) );
+		copy( deviceList.begin(), deviceList.end(), ostream_iterator<USBDeviceBase *>( out ) );
 	} else
 		out << "No ACCES devices found" << endl;
 	return out;
@@ -262,7 +264,7 @@ USBDeviceManager &USBDeviceManager::scanForDevices() {
 			throw OperationFailedException( result );
 		const int numDevices = devices[ 0 ];
 		for( int index = 0; index < numDevices; index++ ) {
-			USBDevice *device = 0;
+			USBDeviceBase *device = 0;
 			const int deviceIndex = devices[ 1 + index * 2 ];
 			const int productID = devices[ 1 + index * 2 + 1 ];
 			if( USB_AI16_Family::isSupportedProductID( productID ) ) {

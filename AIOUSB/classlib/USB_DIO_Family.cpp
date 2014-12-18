@@ -10,7 +10,7 @@
 
 
 #include <iostream>
-#include <algorithm>
+#include <bits/stl_algo.h>
 #include <assert.h>
 #include "USBDeviceManager.hpp"
 #include "USB_DIO_Family.hpp"
@@ -53,7 +53,7 @@ void USB_DIO_Family::initialize() {
 
 
 USB_DIO_Family::USB_DIO_Family( int productID, int deviceIndex )
-		: USBDevice( productID, deviceIndex )
+		: USBDeviceBase( productID, deviceIndex )
 		, digitalIOSubsystem( *this ) {
 	if( ! isSupportedProductID( productID ) )
 		throw IllegalArgumentException( "Invalid product ID" );
@@ -115,7 +115,7 @@ bool USB_DIO_Family::isSupportedProductID( int productID ) {
 
 ostream &USB_DIO_Family::print( ostream &out ) {
 	assert( &out != 0 );
-	USBDevice::print( out );
+	USBDeviceBase::print( out );
 	digitalIOSubsystem.print( out );
 	return out;
 }	// USB_DIO_Family::print()

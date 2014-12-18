@@ -11,7 +11,7 @@
 #define USB_DA12_8E_Family_hpp
 
 
-#include <USBDevice.hpp>
+#include <USBDeviceBase.hpp>
 #include <DA12_AnalogOutputSubsystem.hpp>
 #include <DigitalIOSubsystem.hpp>
 
@@ -24,14 +24,14 @@ namespace AIOUSB {
  * Instances of class <i>USB_DA12_8E_Family</i> are automatically created by the USB device manager when they are
  * detected on the bus. You should use one of the <i>USBDeviceManager</i> search methods, such as
  * <i>USBDeviceManager::getDeviceByProductID( int productID ) const</i>,
- * to obtain a reference to a <i>USB_DA12_8E_Family</i> instance. You can then cast the <i>USBDevice</i>
+ * to obtain a reference to a <i>USB_DA12_8E_Family</i> instance. You can then cast the <i>USBDeviceBase</i>
  * reference obtained from one of those methods to a <i>USB_DA12_8E_Family</i> and make use of this class' methods, like so:
  * <pre>USBDeviceArray devices = deviceManager.getDeviceByProductID( USB_DA12_8E );
  *if( devices.size() > 0 )
  *  USB_DA12_8E_Family &device = *( USB_DA12_8E_Family * ) devices.at( 0 );</pre>
  */
 
-class USB_DA12_8E_Family : public USBDevice {
+class USB_DA12_8E_Family : public USBDeviceBase {
 	friend class USBDeviceManager;
 
 
@@ -42,12 +42,12 @@ private:
 
 
 
-public:
+protected:
 	DA12_AnalogOutputSubsystem analogOutputSubsystem;
 
 
 
-public:
+protected:
 	USB_DA12_8E_Family( int productID, int deviceIndex );
 	virtual ~USB_DA12_8E_Family();
 

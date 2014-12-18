@@ -1,10 +1,10 @@
 /*
- * $RCSfile: USBDevice.hpp,v $
+ * $RCSfile: USBDeviceBase.hpp,v $
  * $Revision: 1.14 $
  * $Date: 2010/01/18 19:40:28 $
  * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
  *
- * class BoolArray, UCharArray, UShortArray, IntArray, DoubleArray, USBDeviceArray, USBDevice declarations
+ * class BoolArray, UCharArray, UShortArray, IntArray, DoubleArray, USBDeviceArray, USBDeviceBase declarations
  */
 
 #if ! defined( USBDevice_hpp )
@@ -51,10 +51,10 @@ public:
 	StringArray( int size = 0 ) : std::vector<std::string>( size ) {}
 };	// class StringArray
 
-class USBDevice;
-class USBDeviceArray : public std::vector<USBDevice*> {
+class USBDeviceBase;
+class USBDeviceArray : public std::vector<USBDeviceBase*> {
 public:
-	USBDeviceArray( int size = 0 ) : std::vector<USBDevice*>( size ) {}
+	USBDeviceArray( int size = 0 ) : std::vector<USBDeviceBase*>( size ) {}
 };	// class USBDeviceArray
 
 
@@ -62,10 +62,10 @@ public:
 
 
 /**
- * Class USBDevice is the abstract super class of all USB device families.
+ * Class USBDeviceBase is the abstract super class of all USB device families.
  */
 
-class USBDevice {
+class USBDeviceBase {
 	friend class USBDeviceManager;
 	friend class DIOStreamSubsystem;
 	friend class AnalogInputSubsystem;
@@ -86,7 +86,7 @@ public:
 
 
 
-public:
+protected:
 	int deviceIndex;							// device index on bus
 	int productID;								// 16-bit product ID
 	std::string name;							// device name
@@ -94,18 +94,18 @@ public:
 
 
 
-public:
-	USBDevice( int productID, int deviceIndex );
-	virtual ~USBDevice();
-	USBDevice &clearFIFO( FIFO_Method method );
+protected:
+	USBDeviceBase( int productID, int deviceIndex );
+	virtual ~USBDeviceBase();
+	USBDeviceBase &clearFIFO( FIFO_Method method );
 
 	double getMiscClock() {
 		return AIOUSB_GetMiscClock( deviceIndex );
 	}	// getMiscClock()
 
-	USBDevice &setMiscClock( double clockHz );
+	USBDeviceBase &setMiscClock( double clockHz );
 	int getStreamingBlockSize();
-	USBDevice &setStreamingBlockSize( int blockSize );
+	USBDeviceBase &setStreamingBlockSize( int blockSize );
 
 
 
@@ -161,26 +161,26 @@ public:
 	 */
 
 	int getCommTimeout() const;
-	USBDevice &setCommTimeout( int timeout );
+	USBDeviceBase &setCommTimeout( int timeout );
 
 	/*
 	 * operations
 	 */
 
-	USBDevice &reset();
-	USBDevice &customEEPROMWrite( int address, const UCharArray &data );
+	USBDeviceBase &reset();
+	USBDeviceBase &customEEPROMWrite( int address, const UCharArray &data );
 	UCharArray customEEPROMRead( int address, int numBytes );
 
 
 
-};	// class USBDevice
+};	// class USBDeviceBase
 
 
 
 
 
-extern std::ostream &operator<<( std::ostream &out, USBDevice &device );
-extern std::ostream &operator<<( std::ostream &out, USBDevice *device );
+extern std::ostream &operator<<( std::ostream &out, USBDeviceBase &device );
+extern std::ostream &operator<<( std::ostream &out, USBDeviceBase *device );
 
 
 

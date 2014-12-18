@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 #include <aiousb.h>
-#include <USBDevice.hpp>
+#include <USBDeviceBase.hpp>
 
 
 namespace AIOUSB {
@@ -41,7 +41,7 @@ public:
 
 
 
-public:
+protected:
 	USBDeviceArray deviceList;					// contains all the ACCES devices found on the bus
 	static const unsigned long OPEN_PATTERN = 0x786938f5;	// unique, random value
 	unsigned long openStatus;					// if openStatus == OPEN_PATTERN, module is initialized
@@ -49,7 +49,7 @@ public:
 
 
 
-public:
+protected:
 	void emptyDeviceList();
 
 

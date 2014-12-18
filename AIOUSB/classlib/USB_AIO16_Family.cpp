@@ -9,7 +9,7 @@
 
 
 #include <iostream>
-#include <algorithm>
+#include <bits/stl_algo.h>
 #include <assert.h>
 #include "USBDeviceManager.hpp"
 #include "USB_AIO16_Family.hpp"
@@ -62,7 +62,7 @@ void USB_AIO16_Family::initialize() {
 
 
 USB_AIO16_Family::USB_AIO16_Family( int productID, int deviceIndex ) :
-    USBDevice( productID, deviceIndex ), 
+    USBDeviceBase( productID, deviceIndex ), 
     analogInputSubsystem( *this ), 
     analogOutputSubsytem( *this ),
     digitalIOSubsystem( *this ), 
@@ -126,7 +126,7 @@ bool USB_AIO16_Family::isSupportedProductID( int productID ) {
 
 ostream &USB_AIO16_Family::print( ostream &out ) {
 	assert( &out != 0 );
-	USBDevice::print( out );
+	USBDeviceBase::print( out );
 	analogInputSubsystem.print( out );
 	digitalIOSubsystem.print( out );
 	counterSubsystem.print( out );

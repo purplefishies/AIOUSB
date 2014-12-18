@@ -1,0 +1,30 @@
+USB-AI16-16A sample program version 1.110, 14 November 2014
+  AIOUSB library version $Format: %t$, $Format: %ad$
+  This program demonstrates controlling a USB-AI16-16A device on
+  the USB bus. For simplicity, it uses the first such device found
+  on the bus.
+ACCES devices found:
+  Device at index 0:
+    Product ID: 0x8140
+    Product name: USB-AIO6-16A
+    Number of digital I/O bytes: 2
+    Number of counters: 1
+Serial number of device at index 0: 2f536bff
+A/D settings successfully configured
+Automatic calibration completed successfully
+Ground counts = 0 (should be approx. 0)
+Reference counts = 65355 (should be approx. 65130)
+Volts read:
+  Channel  0 = 0.026093
+  Channel  1 = 0.035859
+Volts read from A/D channel 5 = 0.025177
+Allocating 4400000 Bytes
+Using Clock speed 21727 to acquire data
+Started bulk acquire of 4400000 bytes
+  3482496 bytes remaining
+  2499456 bytes remaining
+  1581952 bytes remaining
+  598912 bytes remaining
+num_Reads=136
+  0 bytes remaining
+Successfully bulk acquired 4400000 bytes

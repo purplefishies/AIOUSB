@@ -52,20 +52,24 @@ ENDIF(BUILD_AIOUSBCPPDBG_SHARED)
 
 SET( tmp_aiousb_files 
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOChannelMask.c" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOChannelRange.c" 
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOContinuousBuffer.c" 
   "${CMAKE_CURRENT_SOURCE_DIR}/AIODeviceInfo.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIODeviceTable.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/ADCConfigBlock.c"  
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSBDevice.c"  
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_ADC.c" 
-  "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_ADC_ExternalCal.c" 
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_CTR.c" 
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_Core.c" 
-  "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_CustomEEPROMRead.c"
-  "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_CustomEEPROMWrite.c" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_CustomEEPROM.c" 
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_DAC.c" 
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_DIO.c" 
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_Properties.c" 
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_USB.c"
-  "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_WDG.c" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSB_WDG.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/DIOBuf.c" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/USBDevice.c" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/cJSON.c" 
   )
 
 
@@ -152,13 +156,18 @@ find_package( GTest )
 find_package( GTestTap )
 
 if( GTESTTAP_FOUND )
-  set(GTEST_FILES DIOBuf.c AIOContinuousBuffer.c AIOChannelMask.c AIOUSB_Core.c AIODeviceInfo.c )
+  set(GTEST_FILES ADCConfigBlock.c AIOChannelMask.c AIOChannelRange.c AIOContinuousBuffer.c AIODeviceInfo.c AIODeviceTable.c AIOUSBDevice.c AIOUSB_Core.c DIOBuf.c USBDevice.c )
   foreach( gtest ${GTEST_FILES} ) 
     set(MY_FLAGS "-DSELF_TEST -D__aiousb_cplusplus -DGTEST_TAP_PRINT_TO_STDOUT"  )
     set(MY_LIBRARIES aiousbdbg usb-1.0 pthread m gtest aiousb aiousbcpp )
     # MESSAGE(STATUS "Libraries: ${MY_LIBRARIES}")
     build_gtest_cpp_file( aiousblibs ${gtest}  ${MY_FLAGS} "${MY_LIBRARIES}"  )
   endforeach(gtest ${GTEST_FILES} ) 
+
+
+
+
+
 endif( GTESTTAP_FOUND )
 
 

@@ -7,7 +7,7 @@
  */
 
 #include "AIOUSB_CTR.h"
-
+#include "AIODeviceTable.h"
 
 #include <math.h>
 
@@ -23,8 +23,31 @@ namespace AIOUSB {
             return r;                                                   \
         }                                                               \
     } while (0)
+
+#define JUMP_IF_INVALID_INPUT(d,r,f, g ) do { \
+        if ( !d ) { \
+            r = -AIOUSB_ERROR_DEVICE_NOT_FOUND;\
+            goto g;\
+        } else if ( (r = f) != AIOUSB_SUCCESS ) { \
+            goto g;\
+        } \
+    } while (0)
+    
+#define JUMP_IF_NO_VALID_USB( d, r, f, u, g ) do {              \
+        if ( !d ) {                                             \
+            r = -AIOUSB_ERROR_DEVICE_NOT_FOUND;                 \
+            goto g;                                             \
+        } else if ( ( r = f ) != AIOUSB_SUCCESS  ) {            \
+            goto g;                                             \
+        } else if ( !(u = AIOUSBDeviceGetUSBHandle( d )))  {    \
+            r = -AIOUSB_ERROR_INVALID_USBDEVICE;                \
+            goto g;                                             \
+        }                                                       \
+    } while (0 )
+
+
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE _check_block_index(DeviceDescriptor *deviceDesc, unsigned long BlockIndex , unsigned long CounterIndex )
+AIORET_TYPE _check_block_index(AIOUSBDevice *deviceDesc, unsigned long BlockIndex , unsigned long CounterIndex )
 {
     if (BlockIndex == 0) {
         /* contiguous counter addressing*/
@@ -43,14 +66,14 @@ AIORET_TYPE _check_block_index(DeviceDescriptor *deviceDesc, unsigned long Block
     return (AIORET_TYPE)AIOUSB_SUCCESS;
 }
 /*----------------------------------------------------------------------------*/
- AIORET_TYPE _check_valid_counters( DeviceDescriptor *deviceDesc ) {
+AIORET_TYPE _check_valid_counters( AIOUSBDevice *deviceDesc ) {
      if ( deviceDesc->Counters == 0) {
          return (AIORET_TYPE)-AIOUSB_ERROR_NOT_SUPPORTED;
      }
      return AIOUSB_SUCCESS;
  }
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE _check_valid_counter_device(DeviceDescriptor *deviceDesc, 
+AIORET_TYPE _check_valid_counter_device(AIOUSBDevice *deviceDesc, 
                                         unsigned long BlockIndex,
                                         unsigned long CounterIndex
                                         )
@@ -61,7 +84,7 @@ AIORET_TYPE _check_valid_counter_device(DeviceDescriptor *deviceDesc,
     return _check_block_index( deviceDesc, BlockIndex, CounterIndex );
 }
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE _check_valid_counter_device_with_mode(DeviceDescriptor *deviceDesc, 
+AIORET_TYPE _check_valid_counter_device_with_mode(AIOUSBDevice *deviceDesc, 
                                                   unsigned long BlockIndex,
                                                   unsigned long CounterIndex,
                                                   unsigned long Mode
@@ -72,7 +95,7 @@ AIORET_TYPE _check_valid_counter_device_with_mode(DeviceDescriptor *deviceDesc,
     return _check_valid_counter_device( deviceDesc, BlockIndex, CounterIndex );
 }
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE _check_valid_counter_device_for_read(DeviceDescriptor *deviceDesc, 
+AIORET_TYPE _check_valid_counter_device_for_read(AIOUSBDevice *deviceDesc, 
                                                  unsigned short *pData
                                                  )
 {
@@ -81,7 +104,7 @@ AIORET_TYPE _check_valid_counter_device_for_read(DeviceDescriptor *deviceDesc,
     return (AIORET_TYPE)AIOUSB_SUCCESS;
 }
 /*------------------------------------------------------------------------*/
-AIORET_TYPE _check_valid_counter_device_for_gate(DeviceDescriptor *deviceDesc, unsigned long GateIndex  ) 
+AIORET_TYPE _check_valid_counter_device_for_gate(AIOUSBDevice *deviceDesc, unsigned long GateIndex  ) 
 {
     AIORET_TYPE retval;
     if( (retval = _check_valid_counters( deviceDesc )) != AIOUSB_SUCCESS ) 
@@ -95,7 +118,7 @@ AIORET_TYPE _check_valid_counter_device_for_gate(DeviceDescriptor *deviceDesc, u
     return AIOUSB_SUCCESS;
 }
 /*------------------------------------------------------------------------*/
-AIORET_TYPE _check_valid_counter_output_frequency( DeviceDescriptor *deviceDesc, unsigned long BlockIndex, double *pHz ) {
+AIORET_TYPE _check_valid_counter_output_frequency( AIOUSBDevice *deviceDesc, unsigned long BlockIndex, double *pHz ) {
     AIORET_TYPE retval;
     if( (retval = _check_valid_counters( deviceDesc )) != AIOUSB_SUCCESS ) 
         return retval;
@@ -105,7 +128,7 @@ AIORET_TYPE _check_valid_counter_output_frequency( DeviceDescriptor *deviceDesc,
     return (AIORET_TYPE)AIOUSB_SUCCESS;
 }
 /*------------------------------------------------------------------------*/
-AIORET_TYPE _check_valid_input_for_modeload( DeviceDescriptor *deviceDesc, 
+AIORET_TYPE _check_valid_input_for_modeload( AIOUSBDevice *deviceDesc, 
                                              unsigned long BlockIndex, 
                                              unsigned long CounterIndex, 
                                              unsigned long Mode, 
@@ -131,82 +154,102 @@ AIORET_TYPE CTR_8254Mode(
                            unsigned long CounterIndex,
                            unsigned long Mode
                            ) {
-    unsigned long result;
-    DeviceDescriptor *deviceDesc = DeviceTableAtIndex_Lock( DeviceIndex );
+    AIORESULT result = AIOUSB_SUCCESS;
+    AIORET_TYPE retval;
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    USBDevice *usb = NULL;
+    unsigned short controlValue;
+    int bytesTransferred;
+    if ( result != AIOUSB_SUCCESS )
+        goto out_CTR_8254Mode;
     if( !deviceDesc ) {
-        return AIOUSB_ERROR_INVALID_INDEX;
+        result = -AIOUSB_ERROR_INVALID_INDEX;
+        goto out_CTR_8254Mode;
     }
-    if( (result = _check_valid_counter_device( deviceDesc, BlockIndex, CounterIndex )) != AIOUSB_SUCCESS ) {
-        AIOUSB_UnLock();
-        return result;
-    }
-    libusb_device_handle *usbHandle = AIOUSB_GetUSBHandle( deviceDesc );
 
-    if (usbHandle != NULL) {
-          const unsigned timeout = deviceDesc->commTimeout;
-          AIOUSB_UnLock();
-          const unsigned short controlValue = (( unsigned short )CounterIndex << (6 + 8))  |
-              (0x3u << (4 + 8))                                                            | 
-              (( unsigned short )Mode << (1 + 8))                                          | 
-              ( unsigned short )BlockIndex;
-          const int bytesTransferred = libusb_control_transfer(usbHandle,
-                                                               USB_WRITE_TO_DEVICE,
-                                                               AUR_CTR_MODE,
-                                                               controlValue,
-                                                               0,
-                                                               0,
-                                                               0,
-                                                               timeout
-                                                               );
-          if (bytesTransferred != 0)
-              result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-    } else {
-        result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-        AIOUSB_UnLock();
+    if( (retval = _check_valid_counter_device( deviceDesc, BlockIndex, CounterIndex )) != AIOUSB_SUCCESS )
+        goto out_CTR_8254Mode;
+
+    usb = AIOUSBDeviceGetUSBHandle( deviceDesc );
+
+    if (!usb ) {
+        retval = -AIOUSB_ERROR_INVALID_USBDEVICE;
+        goto out_CTR_8254Mode;
     }
+
+    AIOUSB_UnLock();
+    controlValue = (( unsigned short )CounterIndex << (6 + 8))  | (0x3u << (4 + 8))  | 
+                   (( unsigned short )Mode << (1 + 8))          | ( unsigned short )BlockIndex;
+    bytesTransferred = usb->usb_control_transfer(usb,
+                                                 USB_WRITE_TO_DEVICE,
+                                                 AUR_CTR_MODE,
+                                                 controlValue,
+                                                 0,
+                                                 0,
+                                                 0,
+                                                 deviceDesc->commTimeout
+                                                 );
+    if (bytesTransferred != 0)
+        result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+
+ out_CTR_8254Mode:
+    AIOUSB_UnLock();
     return result;
 }
+
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE CTR_8254Load(
-                           unsigned long DeviceIndex,
-                           unsigned long BlockIndex,
-                           unsigned long CounterIndex,
-                           unsigned short LoadValue
-                           ) {
-    unsigned long result;
-    DeviceDescriptor *deviceDesc = DeviceTableAtIndex_Lock( DeviceIndex );
+                         unsigned long DeviceIndex,
+                         unsigned long BlockIndex,
+                         unsigned long CounterIndex,
+                         unsigned short LoadValue
+                         ) 
+{
+    AIORESULT result = AIOUSB_SUCCESS;
+    AIORET_TYPE retval;
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    USBDevice *usb;
+    unsigned short controlValue;
+    int bytesTransferred;
+
+    if ( result != AIOUSB_SUCCESS ) {
+        retval = -result;
+        goto out_CTR_8254Load;
+    }
+        
     if( !deviceDesc ) {
-        return AIOUSB_ERROR_INVALID_INDEX;
+         retval = -AIOUSB_ERROR_INVALID_INDEX;
+         goto out_CTR_8254Load;
     }
-    if( (result = _check_valid_counter_device( deviceDesc, BlockIndex, CounterIndex )) != AIOUSB_SUCCESS ) {
-        AIOUSB_UnLock();
-        return result;
+
+    if( (retval = _check_valid_counter_device( deviceDesc, BlockIndex, CounterIndex )) != AIOUSB_SUCCESS )
+        goto out_CTR_8254Load;
+
+    usb = AIOUSBDeviceGetUSBHandle( deviceDesc );
+    
+    if (!usb ) {
+        result = -AIOUSB_ERROR_INVALID_USBDEVICE;
+        goto out_CTR_8254Load;
     }
-    libusb_device_handle *const usbHandle = AIOUSB_GetUSBHandle( deviceDesc );
-    if (usbHandle != NULL) {
-          const unsigned timeout = deviceDesc->commTimeout;
-          AIOUSB_UnLock();
-          const unsigned short controlValue
-              = (( unsigned short )CounterIndex << (6 + 8))
+
+    AIOUSB_UnLock();
+    controlValue = (( unsigned short )CounterIndex << (6 + 8)) | ( unsigned short )BlockIndex;
                 /* | ( 0x3u << ( 4 + 8 ) )*/
                 /* | ( ( unsigned short ) Mode << ( 1 + 8 ) )*/
-                | ( unsigned short )BlockIndex;
-          const int bytesTransferred = libusb_control_transfer(usbHandle, 
-                                                               USB_WRITE_TO_DEVICE, 
-                                                               AUR_CTR_LOAD,
-                                                               controlValue, 
-                                                               LoadValue, 
-                                                               0, 
-                                                               0, 
-                                                               timeout
-                                                               );
-          if (bytesTransferred != 0)
-              result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-      } else {
-          result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-          AIOUSB_UnLock();
-      }
+    bytesTransferred = usb->usb_control_transfer(usb,
+                                                 USB_WRITE_TO_DEVICE, 
+                                                 AUR_CTR_LOAD,
+                                                 controlValue, 
+                                                 LoadValue, 
+                                                 0, 
+                                                 0, 
+                                                 deviceDesc->commTimeout
+                                                 );
+    if (bytesTransferred != 0)
+        result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
 
+ out_CTR_8254Load:
+    AIOUSB_UnLock();
     return result;
 }
 /*----------------------------------------------------------------------------*/
@@ -218,34 +261,41 @@ AIORET_TYPE CTR_8254ModeLoad(
                              unsigned short LoadValue
                              )
 {
-    unsigned long result;
-    DeviceDescriptor *deviceDesc = DeviceTableAtIndex_Lock( DeviceIndex );
-    RETURN_IF_INVALID_INPUT( deviceDesc, result, _check_valid_counter_device( deviceDesc, BlockIndex, CounterIndex ));
-    libusb_device_handle *const usbHandle = AIOUSB_GetUSBHandle( deviceDesc );
-    if (usbHandle != NULL) {
-          const unsigned timeout = deviceDesc->commTimeout;
-          AIOUSB_UnLock();
-          const unsigned short controlValue
-              = (( unsigned short )CounterIndex << (6 + 8))
-                | (0x3u << (4 + 8))
-                | (( unsigned short )Mode << (1 + 8))
-                | ( unsigned short )BlockIndex;
-          const int bytesTransferred = libusb_control_transfer( usbHandle, 
-                                                                USB_WRITE_TO_DEVICE, 
-                                                                AUR_CTR_MODELOAD,
-                                                                controlValue, 
-                                                                LoadValue, 
-                                                                0, 
-                                                                0, 
-                                                                timeout
-                                                                );
-          if (bytesTransferred != 0)
-              result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-    } else {
-        result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-        AIOUSB_UnLock();
+    AIORESULT result = AIOUSB_SUCCESS;
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    USBDevice *usb;
+    unsigned short controlValue;
+    int bytesTransferred;
+
+    /* RETURN_IF_INVALID_INPUT( deviceDesc, result, _check_valid_counter_device( deviceDesc, BlockIndex, CounterIndex )); */
+    retval =  _check_valid_counter_device( deviceDesc, BlockIndex, CounterIndex );
+    if ( retval != AIOUSB_SUCCESS ) 
+        goto out_CTR_8254ModeLoad;
+
+    usb = AIOUSBDeviceGetUSBHandle( deviceDesc );
+    if ( !usb ) {
+        retval = -AIOUSB_ERROR_INVALID_USBDEVICE;
+        goto out_CTR_8254ModeLoad;
     }
 
+    AIOUSB_UnLock();
+    controlValue    = (( unsigned short )CounterIndex << (6 + 8))    | (0x3u << (4 + 8))  | 
+                      (( unsigned short )Mode << (1 + 8))  | ( unsigned short )BlockIndex;
+    bytesTransferred = usb->usb_control_transfer( usb,
+                                                  USB_WRITE_TO_DEVICE, 
+                                                  AUR_CTR_MODELOAD,
+                                                  controlValue, 
+                                                  LoadValue, 
+                                                  0, 
+                                                  0, 
+                                                  deviceDesc->commTimeout
+                                                  );
+    if (bytesTransferred != 0)
+        result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+    
+ out_CTR_8254ModeLoad:
+    AIOUSB_UnLock();
     return result;
 }
 /*----------------------------------------------------------------------------*/
@@ -258,41 +308,41 @@ AIORET_TYPE CTR_8254ReadModeLoad(
                                    unsigned short *pReadValue
                                    )
 {
-    unsigned long result;
-    DeviceDescriptor *deviceDesc = DeviceTableAtIndex_Lock( DeviceIndex );
-    RETURN_IF_INVALID_INPUT( deviceDesc, result, _check_valid_input_for_modeload( deviceDesc, BlockIndex, CounterIndex, Mode, LoadValue, pReadValue));
-    libusb_device_handle *usbHandle = AIOUSB_GetUSBHandle( deviceDesc );
-   
-    if (usbHandle != NULL) {
-        const unsigned timeout = deviceDesc->commTimeout;
-        AIOUSB_UnLock();
-        unsigned short readValue;
-        const unsigned short controlValue = (( unsigned short )CounterIndex << (6 + 8)) | 
-            (0x3u << (4 + 8)) | 
-            (( unsigned short )Mode << (1 + 8)) | 
-            ( unsigned short )BlockIndex;
+    USBDevice *usb;
+    unsigned short readValue;
+    unsigned short controlValue;
+    int bytesTransferred;
+    AIORESULT result = AIOUSB_SUCCESS;
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
 
-        const int bytesTransferred = libusb_control_transfer( usbHandle, 
-                                                              USB_WRITE_TO_DEVICE, 
-                                                              AUR_CTR_MODELOAD,
-                                                              controlValue, 
-                                                              LoadValue, 
-                                                              ( unsigned char* )&readValue, 
-                                                              sizeof(readValue), 
-                                                              timeout
-                                                              );
-          if ( bytesTransferred == sizeof(readValue) ) {
-              /* TODO: verify endian mode; original code had it reversed*/
-                *pReadValue = readValue;
-          } else
-              result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-      } else {
-          result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-          AIOUSB_UnLock();
-      }
+    JUMP_IF_NO_VALID_USB( deviceDesc , retval, _check_valid_input_for_modeload( deviceDesc, BlockIndex, CounterIndex, Mode, LoadValue, pReadValue), usb, out_CTR_8254ReadModeLoad );
 
-    return result;
+    AIOUSB_UnLock();
+
+    controlValue = (( unsigned short )CounterIndex << (6 + 8)) |  (0x3u << (4 + 8)) | 
+                   (( unsigned short )Mode << (1 + 8))         |  ( unsigned short )BlockIndex;
+    
+    bytesTransferred = usb->usb_control_transfer( usb, 
+                                                  USB_WRITE_TO_DEVICE, 
+                                                  AUR_CTR_MODELOAD,
+                                                  controlValue, 
+                                                  LoadValue, 
+                                                  ( unsigned char* )&readValue, 
+                                                  sizeof(readValue), 
+                                                  deviceDesc->commTimeout
+                                                  );
+    if ( bytesTransferred == sizeof(readValue) ) {
+        /* TODO: verify endian mode; original code had it reversed*/
+        *pReadValue = readValue;
+    } else
+        result = -LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+
+ out_CTR_8254ReadModeLoad:
+    AIOUSB_UnLock();
+    return retval;
 }
+
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE CTR_8254Read(
                            unsigned long DeviceIndex,
@@ -301,67 +351,69 @@ AIORET_TYPE CTR_8254Read(
                            unsigned short *pReadValue
                            )
 {
-    unsigned long result;
-    DeviceDescriptor *deviceDesc = DeviceTableAtIndex_Lock( DeviceIndex );
-    RETURN_IF_INVALID_INPUT( deviceDesc, result, _check_valid_counter_device( deviceDesc, BlockIndex, CounterIndex ) );
+    AIORESULT result = AIOUSB_SUCCESS;
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    USBDevice *usb;
+    unsigned short readValue;
+    unsigned short controlValue;
+    int bytesTransferred;
 
-    libusb_device_handle *const usbHandle = AIOUSB_GetUSBHandle( deviceDesc );
-    if (usbHandle != NULL) {
-          const unsigned timeout = deviceDesc->commTimeout;
-          AIOUSB_UnLock();
-          unsigned short readValue;
-          const unsigned short controlValue = (( unsigned short )CounterIndex << 8) | ( unsigned short )BlockIndex;
-          const int bytesTransferred = libusb_control_transfer(usbHandle,
-                                                               USB_READ_FROM_DEVICE,
-                                                               AUR_CTR_READ,
-                                                               controlValue,
-                                                               0,
-                                                               ( unsigned char* )&readValue,
-                                                               sizeof(readValue),
-                                                               timeout
-                                                               );
-          if (bytesTransferred == sizeof(readValue)) {
-                                /* TODO: verify endian mode; original code had it reversed*/
-                *pReadValue = readValue;
-            } else
-              result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-      } else {
-          result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-          AIOUSB_UnLock();
-      }
+    JUMP_IF_NO_VALID_USB( deviceDesc, retval, _check_valid_counter_device( deviceDesc, BlockIndex, CounterIndex ), usb, out_CTR_8254Read );
 
+    AIOUSB_UnLock();
+
+    controlValue = (( unsigned short )CounterIndex << 8) | ( unsigned short )BlockIndex;
+    bytesTransferred = usb->usb_control_transfer(usb,
+                                                 USB_READ_FROM_DEVICE,
+                                                 AUR_CTR_READ,
+                                                 controlValue,
+                                                 0,
+                                                 ( unsigned char* )&readValue,
+                                                 sizeof(readValue),
+                                                 deviceDesc->commTimeout
+                                                 );
+    if (bytesTransferred == sizeof(readValue)) {
+        /* TODO: verify endian mode; original code had it reversed*/
+        *pReadValue = readValue;
+    } else
+        result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+
+ out_CTR_8254Read:
+    AIOUSB_UnLock();
     return result;
 }
+
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE CTR_8254ReadAll(
                               unsigned long DeviceIndex,
                               unsigned short *pData
                               ) {
-    unsigned long result;
-    DeviceDescriptor *deviceDesc = DeviceTableAtIndex_Lock( DeviceIndex );
-    RETURN_IF_INVALID_INPUT( deviceDesc, result, _check_valid_counter_device_for_read( deviceDesc, pData ) );
+    AIORESULT result = AIOUSB_SUCCESS;
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    int READ_BYTES;
+    int bytesTransferred;
+    USBDevice *usb;
+    
+    JUMP_IF_NO_VALID_USB( deviceDesc, retval, _check_valid_counter_device_for_read( deviceDesc, pData ) , usb, out_CTR_8254ReadAll);
 
-    libusb_device_handle *usbHandle = AIOUSB_GetUSBHandle( deviceDesc );
-    if (usbHandle != NULL) {
-          const int READ_BYTES = deviceDesc->Counters * COUNTERS_PER_BLOCK * sizeof(unsigned short);
-          const unsigned timeout = deviceDesc->commTimeout;
-          AIOUSB_UnLock();
-          const int bytesTransferred = libusb_control_transfer(usbHandle, 
-                                                               USB_READ_FROM_DEVICE, 
-                                                               AUR_CTR_READALL,
-                                                               0, 
-                                                               0, 
-                                                               ( unsigned char* )pData, 
-                                                               READ_BYTES, 
-                                                               timeout
-                                                               );
-          if (bytesTransferred != READ_BYTES)
-              result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-      } else {
-          result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-          AIOUSB_UnLock();
-      }
-
+    READ_BYTES = deviceDesc->Counters * COUNTERS_PER_BLOCK * sizeof(unsigned short);
+    AIOUSB_UnLock();
+    bytesTransferred = usb->usb_control_transfer(usb,
+                                                 USB_READ_FROM_DEVICE, 
+                                                 AUR_CTR_READALL,
+                                                 0, 
+                                                 0, 
+                                                 ( unsigned char* )pData, 
+                                                 READ_BYTES, 
+                                                 deviceDesc->commTimeout
+                                                 );
+    if (bytesTransferred != READ_BYTES)
+        result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+    
+ out_CTR_8254ReadAll:
+    AIOUSB_UnLock();
     return result;
 }
 /*----------------------------------------------------------------------------*/
@@ -371,47 +423,51 @@ AIORET_TYPE CTR_8254ReadStatus(
                                  unsigned long CounterIndex,
                                  unsigned short *pReadValue,
                                  unsigned char *pStatus
-                                 ) {
-    unsigned long result;
-    DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
-    RETURN_IF_INVALID_INPUT( deviceDesc, result, _check_block_index( deviceDesc, BlockIndex, CounterIndex ) );
+                                 ) 
+{
+    int READ_BYTES = 3; 
+    unsigned char readData[ READ_BYTES ];
+    AIORESULT result = AIOUSB_SUCCESS;
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    unsigned short controlValue;
+    int bytesTransferred;
+    AIOUSBDevice * deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    USBDevice *usb;
 
-    libusb_device_handle *usbHandle = AIOUSB_GetUSBHandle( deviceDesc );
-    if (usbHandle != NULL) {
-           unsigned timeout = deviceDesc->commTimeout;
-          AIOUSB_UnLock();
-           int READ_BYTES = 3;
-          unsigned char readData[ READ_BYTES ];
-           unsigned short controlValue = (( unsigned short )CounterIndex << 8) | ( unsigned short )BlockIndex;
-           int bytesTransferred = libusb_control_transfer(usbHandle, 
-                                                               USB_READ_FROM_DEVICE, 
-                                                               AUR_CTR_READ,
-                                                               controlValue, 
-                                                               0, 
-                                                               readData, 
-                                                               READ_BYTES, 
-                                                               timeout
-                                                               );
-          if (bytesTransferred == READ_BYTES) {
-                *pReadValue = *( unsigned short* )readData;
-                *pStatus = readData[ 2 ];
-            } else
-              result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-      } else {
-          result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-          AIOUSB_UnLock();
-      }
+    JUMP_IF_NO_VALID_USB( deviceDesc, retval, _check_block_index( deviceDesc, BlockIndex, CounterIndex ), usb, out_CTR_8254ReadStatus );  
 
+    AIOUSB_UnLock();
+
+    controlValue = (( unsigned short )CounterIndex << 8) | ( unsigned short )BlockIndex;
+
+    bytesTransferred = usb->usb_control_transfer(usb,
+                                                 USB_READ_FROM_DEVICE, 
+                                                 AUR_CTR_READ,
+                                                 controlValue, 
+                                                 0, 
+                                                 readData, 
+                                                 READ_BYTES, 
+                                                 deviceDesc->commTimeout
+                                                 );
+    if (bytesTransferred == READ_BYTES) {
+        *pReadValue = *( unsigned short* )readData;
+        *pStatus = readData[ 2 ];
+    } else
+        result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+
+ out_CTR_8254ReadStatus:
+    AIOUSB_UnLock();
     return result;
 }
+
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE CTR_StartOutputFreq(
                                   unsigned long DeviceIndex,
                                   unsigned long BlockIndex,
                                   double *pHz
                                   ) {
-    unsigned long result;
-    DeviceDescriptor * deviceDesc = DeviceTableAtIndex_Lock( DeviceIndex );
+    AIORESULT result = AIOUSB_SUCCESS;
+    AIOUSBDevice * deviceDesc =AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
     RETURN_IF_INVALID_INPUT( deviceDesc, result, _check_valid_counter_output_frequency( deviceDesc, BlockIndex, pHz ) );
 
     if (*pHz <= 0) {
@@ -487,65 +543,69 @@ AIORET_TYPE CTR_StartOutputFreq(
 }
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE CTR_8254SelectGate(
-    unsigned long DeviceIndex,
-    unsigned long GateIndex
-    )
+                               unsigned long DeviceIndex,
+                               unsigned long GateIndex
+                               )
 {
-    unsigned long result;
-    DeviceDescriptor *deviceDesc = DeviceTableAtIndex_Lock( DeviceIndex );
-    RETURN_IF_INVALID_INPUT( deviceDesc, result, _check_valid_counter_device_for_gate(deviceDesc, GateIndex ) );
+    AIORESULT result = AIOUSB_SUCCESS;
+    AIOUSBDevice *deviceDesc =AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    int bytesTransferred;
+    USBDevice *usb = NULL;
 
-    libusb_device_handle * usbHandle = AIOUSB_GetUSBHandle( deviceDesc );
-    if (usbHandle != NULL) {
-           unsigned timeout = deviceDesc->commTimeout;
-          AIOUSB_UnLock();
-           int bytesTransferred = libusb_control_transfer(usbHandle, 
-                                                               USB_WRITE_TO_DEVICE, 
-                                                               AUR_CTR_SELGATE,
-                                                               GateIndex, 
-                                                               0, 
-                                                               0, 
-                                                               0 /* wLength */, 
-                                                               timeout);
-          if (bytesTransferred != 0)
-              result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-      } else {
-          result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-          AIOUSB_UnLock();
-      }
+    JUMP_IF_NO_VALID_USB( deviceDesc, result, _check_valid_counter_device_for_gate(deviceDesc, GateIndex ), usb, out_CTR_8254SelectGate );
 
+    
+    AIOUSB_UnLock();
+    bytesTransferred = usb->usb_control_transfer(usb,
+                                                 USB_WRITE_TO_DEVICE, 
+                                                 AUR_CTR_SELGATE,
+                                                 GateIndex, 
+                                                 0, 
+                                                 0, 
+                                                 0, 
+                                                 deviceDesc->commTimeout
+                                                 );
+    if (bytesTransferred != 0)
+        result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+
+ out_CTR_8254SelectGate:
+    AIOUSB_UnLock();
     return result;
 }
+
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE CTR_8254ReadLatched(
-                                  unsigned long DeviceIndex,
-                                  unsigned short *pData
-                                  ) {
-    unsigned long result;
-    DeviceDescriptor *deviceDesc = DeviceTableAtIndex_Lock( DeviceIndex );
+                                unsigned long DeviceIndex,
+                                unsigned short *pData
+                                ) 
+{
+    AIORESULT result = AIOUSB_SUCCESS;
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    USBDevice *usb;
+    int READ_BYTES;
+    int bytesTransferred;
 
-    libusb_device_handle * usbHandle = AIOUSB_GetUSBHandle( deviceDesc );
-    if (usbHandle != NULL) {
-        int READ_BYTES = deviceDesc->Counters * COUNTERS_PER_BLOCK * sizeof(unsigned short) + 1 ;/* for "old data" flag */
-        unsigned timeout = deviceDesc->commTimeout;
-        AIOUSB_UnLock();
-        int bytesTransferred = libusb_control_transfer(usbHandle, 
-                                                       USB_READ_FROM_DEVICE, 
-                                                       AUR_CTR_READLATCHED,
-                                                       0, 
-                                                       0, 
-                                                       ( unsigned char* )pData, 
-                                                       READ_BYTES, 
-                                                       timeout
-                                                       );
-        if (bytesTransferred != READ_BYTES)
-            result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-    } else {
-        result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-        AIOUSB_UnLock();
-    }
+    JUMP_IF_NO_VALID_USB( deviceDesc, result, _check_valid_counters(deviceDesc ), usb, out_CTR_8254ReadLatched );
     
-    return result;
+    READ_BYTES = deviceDesc->Counters * COUNTERS_PER_BLOCK * sizeof(unsigned short) + 1 ;/* for "old data" flag */
+    
+    AIOUSB_UnLock();
+    bytesTransferred = usb->usb_control_transfer(usb,
+                                                 USB_READ_FROM_DEVICE, 
+                                                 AUR_CTR_READLATCHED,
+                                                 0, 
+                                                 0, 
+                                                 ( unsigned char* )pData, 
+                                                 READ_BYTES, 
+                                                 deviceDesc->commTimeout
+                                                 );
+    if (bytesTransferred != READ_BYTES)
+        result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+    
+ out_CTR_8254ReadLatched:
+    AIOUSB_UnLock();
+    return retval;
 }
 
 

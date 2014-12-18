@@ -26,7 +26,7 @@ const int CounterSubsystem::COUNTERS_PER_BLOCK;
 
 
 
-CounterSubsystem::CounterSubsystem( USBDevice &parent )
+CounterSubsystem::CounterSubsystem( USBDeviceBase &parent )
 		: DeviceSubsystem( parent ) {
 	numCounterBlocks = numCounters = 0;
 	DeviceProperties properties;

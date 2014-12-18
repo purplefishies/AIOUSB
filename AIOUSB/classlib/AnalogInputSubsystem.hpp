@@ -88,12 +88,12 @@ public:
 
 
 
-public:
+protected:
 	static const char RANGE_TEXT[][ 10 ];
 
 
 
-public:
+protected:
 	/*
 	 * register indexes
 	 */
@@ -144,7 +144,7 @@ public:
 
 public:
 	AnalogInputSubsystem &setScanRange( int startChannel, int numChannels );
-	AnalogInputSubsystem( USBDevice &parent );
+	AnalogInputSubsystem( USBDeviceBase &parent );
 	virtual ~AnalogInputSubsystem();
 
 
@@ -347,10 +347,10 @@ public:
 	/**
 	 * Clears the streaming FIFO, using one of several different methods.
 	 * @param method the method to use when clearing the FIFO. May be one of:<br>
-	 * <i>USBDevice::CLEAR_FIFO_METHOD_IMMEDIATE<br>
-	 * USBDevice::CLEAR_FIFO_METHOD_AUTO<br>
-	 * USBDevice::CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT<br>
-	 * USBDevice::CLEAR_FIFO_METHOD_WAIT</i>
+	 * <i>USBDeviceBase::CLEAR_FIFO_METHOD_IMMEDIATE<br>
+	 * USBDeviceBase::CLEAR_FIFO_METHOD_AUTO<br>
+	 * USBDeviceBase::CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT<br>
+	 * USBDeviceBase::CLEAR_FIFO_METHOD_WAIT</i>
 	 * @return This subsystem, useful for chaining together multiple operations.
 	 */
 
