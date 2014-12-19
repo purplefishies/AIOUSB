@@ -42,7 +42,7 @@ main(int argc, char *argv[] )
         _exit(1);
     }
     if( options.reset ) {
-        AIOContinuousBuf_ResetDevice( buf );
+        AIOContinuousBufResetDevice( buf );
         _exit(0);
     }
     FILE *fp = fopen(options.outfile,"w");
@@ -55,7 +55,7 @@ main(int argc, char *argv[] )
     /**
      * 1. Each buf should have a device index associated with it, so 
      */
-    AIOContinuousBuf_SetDeviceIndex( buf, 0 );
+    AIOContinuousBufSetDeviceIndex( buf, 0 );
 
     /**
      * 2. Setup the Config object for Acquisition, either the more complicated 
@@ -70,9 +70,9 @@ main(int argc, char *argv[] )
     /* result = ADC_SetConfig( AIOContinuousBuf_GetDeviceIndex(buf), configBlock.registers, &configBlock.size ); */
     /* or ... */
     /* New simpler interface */
-    AIOContinuousBuf_InitConfiguration( buf );
-    AIOContinuousBuf_SetAllGainCodeAndDiffMode( buf , options.gain_code , AIOUSB_FALSE );
-    AIOContinuousBuf_SetOverSample( buf, 0 );
+    AIOContinuousBufInitConfiguration( buf );
+    AIOContinuousBufSetAllGainCodeAndDiffMode( buf , options.gain_code , AIOUSB_FALSE );
+    AIOContinuousBufSetOverSample( buf, 0 );
 
     if ( retval < AIOUSB_SUCCESS ) {
         printf("Error setting up configuration\n");
@@ -108,15 +108,15 @@ main(int argc, char *argv[] )
          * in this example we read bytes in blocks of our core number_channels parameter. 
          * the channel order
          */
-        while ( keepgoing && (AIOContinuousBufAvailableReadSize(buf) > AIOContinuousBuf_NumberChannels(buf) ) ) {
-            retval = AIOContinuousBufRead( buf, tmp, AIOContinuousBuf_NumberChannels(buf), AIOContinuousBuf_NumberChannels(buf) );
+        while ( keepgoing && (AIOContinuousBufAvailableReadSize(buf) > AIOContinuousBufNumberChannels(buf) ) ) {
+            retval = AIOContinuousBufRead( buf, tmp, AIOContinuousBufNumberChannels(buf), AIOContinuousBufNumberChannels(buf) );
             if ( retval < AIOUSB_SUCCESS ) {
                 fprintf(stderr,"ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf) );
                 keepgoing = 0;
             } else {
                 read_count += (unsigned)retval;
 
-                for ( int i = 0; i < AIOContinuousBuf_NumberChannels(buf) ; i ++ ) { 
+                for ( int i = 0; i < AIOContinuousBufNumberChannels(buf) ; i ++ ) { 
                     fprintf(fp, "%f,", tmp[i] );
                     if(  (i+1) % 16 == 0 ) 
                       fprintf(fp,"\n");

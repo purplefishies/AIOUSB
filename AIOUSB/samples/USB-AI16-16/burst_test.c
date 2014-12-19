@@ -50,7 +50,7 @@ struct channel_range *get_channel_range( char *optarg );
 int 
 main(int argc, char *argv[] ) 
 {
-    struct opts options = {100000, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , "output.txt", 0, 0, 15 , 0, NULL };
+    struct opts options = {100000, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , (char*)"output.txt", 0, 0, 15 , 0, 0, NULL };
     AIOContinuousBuf *buf = 0;
     int keepgoing = 1;
     unsigned read_count = 0;
@@ -73,7 +73,7 @@ main(int argc, char *argv[] )
       _exit(1);
     }
     if( options.reset ) {
-      AIOContinuousBuf_ResetDevice( buf );
+      AIOContinuousBufResetDevice( buf );
       _exit(0);
     }
     FILE *fp = fopen(options.outfile,"w");
@@ -85,36 +85,36 @@ main(int argc, char *argv[] )
     /**
      * 1. Each buf should have a device index associated with it, so 
      */
-    AIOContinuousBuf_SetDeviceIndex( buf, 0 );
+    AIOContinuousBufSetDeviceIndex( buf, 0 );
 
     /**
      * 2. Setup the Config object for Acquisition, either the more complicated 
      *    part in comments (BELOW) or using a simple interface.
      */
     /* New simpler interface */
-    AIOContinuousBuf_InitConfiguration( buf );
+    AIOContinuousBufInitConfiguration( buf );
 
     if ( options.slowacquire ) {
         unsigned char bufData[64];
-        unsigned bytesWritten = 0;
+        unsigned long bytesWritten = 0;
         GenericVendorWrite( 0, 0xDF, 0x0000, 0x001E, bufData, &bytesWritten  );
         /* GenericVendorWrite( DeviceIndex, 0xDF, 0x0000, 0x001E, 1, &buf );  Windows call */
     }
 
-    AIOContinuousBuf_SetOverSample( buf, 0 );
-    AIOContinuousBuf_SetStartAndEndChannel( buf, options.startchannel, options.endchannel );
+    AIOContinuousBufSetOverSample( buf, 0 );
+    AIOContinuousBufSetStartAndEndChannel( buf, options.startchannel, options.endchannel );
     if( !options.number_ranges ) { 
-        AIOContinuousBuf_SetAllGainCodeAndDiffMode( buf , options.gain_code , AIOUSB_FALSE );
+        AIOContinuousBufSetAllGainCodeAndDiffMode( buf , options.gain_code , AIOUSB_FALSE );
     } else {
         for ( int i = 0; i < options.number_ranges ; i ++ ) {
-            AIOContinuousBuf_SetChannelRangeGain( buf, 
-                                                  options.ranges[i]->startchannel, 
-                                                  options.ranges[i]->endchannel,
-                                                  options.ranges[i]->gaincode
-                                                  );
+            AIOContinuousBufSetChannelRange( buf, 
+                                             options.ranges[i]->startchannel, 
+                                             options.ranges[i]->endchannel,
+                                             options.ranges[i]->gaincode
+                                             );
         }
     }
-    AIOContinuousBuf_SaveConfig(buf);
+    AIOContinuousBufSaveConfig(buf);
     
     if ( retval < AIOUSB_SUCCESS ) {
         printf("Error setting up configuration\n");
@@ -176,9 +176,9 @@ main(int argc, char *argv[] )
       } else {
       /* unsigned short *tmpbuf = (unsigned short *)&tobuf[0]; */
         read_count += retval;
-          for( int i = 0, ch = 0 ; i < retval; i ++, ch = ((ch+1)% AIOContinuousBuf_NumberChannels(buf)) ) {
+          for( int i = 0, ch = 0 ; i < retval; i ++, ch = ((ch+1)% AIOContinuousBufNumberChannels(buf)) ) {
             fprintf(fp,"%u,",tobuf[i] );
-            if( (i+1) % AIOContinuousBuf_NumberChannels(buf) == 0 ) {
+            if( (i+1) % AIOContinuousBufNumberChannels(buf) == 0 ) {
               fprintf(fp,"\n");
             }
           }

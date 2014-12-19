@@ -44,7 +44,7 @@ const char DA12_AnalogOutputSubsystem::RANGE_TEXT[][ 10 ] = {
 
 
 
-DA12_AnalogOutputSubsystem::DA12_AnalogOutputSubsystem( USBDevice &parent )
+DA12_AnalogOutputSubsystem::DA12_AnalogOutputSubsystem( USBDeviceBase &parent )
 		: AnalogOutputSubsystem( parent ) {
 	minCounts = MIN_COUNTS;
 	maxCounts = MAX_COUNTS;

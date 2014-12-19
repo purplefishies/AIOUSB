@@ -22,7 +22,7 @@ namespace AIOUSB {
 
 
 
-DIOStreamSubsystem::DIOStreamSubsystem( USBDevice &parent )
+DIOStreamSubsystem::DIOStreamSubsystem( USBDeviceBase &parent )
 		: DeviceSubsystem( parent ) {
 	clockHz = 0;
 }	// DIOStreamSubsystem::DIOStreamSubsystem()

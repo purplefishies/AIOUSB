@@ -19,7 +19,7 @@ namespace AIOUSB {
 class DA12_OutputRange : public AnalogIORange {
 	friend class DA12_AnalogOutputSubsystem;
 
-public:
+protected:
 	DA12_OutputRange();
 	DA12_OutputRange( int minCounts, int maxCounts );
 	virtual ~DA12_OutputRange();

@@ -1,18 +1,19 @@
 /*
- * $RCSfile: USBDevice.cpp,v $
+ * $RCSfile: USBDeviceBase.cpp,v $
  * $Revision: 1.15 $
  * $Date: 2010/01/18 19:40:28 $
  * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
  *
- * class USBDevice implementation
+ * class USBDeviceBase implementation
  */
 
 
 #include "CppCommon.h"
+#include "AIODeviceTable.h"
 #include <iomanip>
 #include <assert.h>
 #include <AIOUSB_Core.h>
-#include "USBDevice.hpp"
+#include "USBDeviceBase.hpp"
 #include "USBDeviceManager.hpp"
 
 
@@ -21,14 +22,14 @@ using namespace std;
 namespace AIOUSB {
 
 
-const int USBDevice::CUSTOM_EEPROM_SIZE;
-const int USBDevice::CLEAR_FIFO_METHOD_IMMEDIATE;
-const int USBDevice::CLEAR_FIFO_METHOD_AUTO;
-const int USBDevice::CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT;
-const int USBDevice::CLEAR_FIFO_METHOD_WAIT;
+const int USBDeviceBase::CUSTOM_EEPROM_SIZE;
+const int USBDeviceBase::CLEAR_FIFO_METHOD_IMMEDIATE;
+const int USBDeviceBase::CLEAR_FIFO_METHOD_AUTO;
+const int USBDeviceBase::CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT;
+const int USBDeviceBase::CLEAR_FIFO_METHOD_WAIT;
 
 
-USBDevice::USBDevice( int productID, int deviceIndex ) {
+USBDeviceBase::USBDeviceBase( int productID, int deviceIndex ) {
 	if(
 		productID < USBDeviceManager::MIN_PRODUCT_ID
 		|| productID > USBDeviceManager::MAX_PRODUCT_ID
@@ -45,11 +46,11 @@ USBDevice::USBDevice( int productID, int deviceIndex ) {
 		throw OperationFailedException( result );
 	name = properties.Name;
 	serialNumber = properties.SerialNumber;
-}	// USBDevice::USBDevice()
+}	// USBDeviceBase::USBDeviceBase()
 
-USBDevice::~USBDevice() {
+USBDeviceBase::~USBDeviceBase() {
 	// nothing to do
-}	// USBDevice::~USBDevice()
+}	// USBDeviceBase::~USBDeviceBase()
 
 /*
  * properties
@@ -61,7 +62,7 @@ USBDevice::~USBDevice() {
  * @return The print stream.
  */
 
-ostream &USBDevice::print( ostream &out ) {
+ostream &USBDeviceBase::print( ostream &out ) {
 	assert( &out != 0 );
 	out
 		<< "  Device at index " << left << dec << deviceIndex << ':' << endl
@@ -69,41 +70,41 @@ ostream &USBDevice::print( ostream &out ) {
 		<< "    Product name: " << left << getName() << endl
 		<< "    Serial number: 0x" << right << setw( 16 ) << hex << getSerialNumber() << endl;
 	return out;
-}	// USBDevice::print()
+}	// USBDeviceBase::print()
 
 /*
  * configuration
  */
 
-USBDevice &USBDevice::clearFIFO( FIFO_Method  method ) {
+USBDeviceBase &USBDeviceBase::clearFIFO( FIFO_Method  method ) {
 	const int result = AIOUSB_ClearFIFO( deviceIndex, method );
 	if( result != AIOUSB_SUCCESS )
 		throw OperationFailedException( result );
 	return *this;
-}	// USBDevice::clearFIFO()
+}	// USBDeviceBase::clearFIFO()
 
-USBDevice &USBDevice::setMiscClock( double clockHz ) {
+USBDeviceBase &USBDeviceBase::setMiscClock( double clockHz ) {
 	if( clockHz < 0 )
 		throw IllegalArgumentException( "Invalid clock frequency" );
 	const int result = AIOUSB_SetMiscClock( deviceIndex, clockHz );
 	if( result != AIOUSB_SUCCESS )
 		throw OperationFailedException( result );
 	return *this;
-}	// USBDevice::setMiscClock()
+}	// USBDeviceBase::setMiscClock()
 
-int USBDevice::getStreamingBlockSize() {
+int USBDeviceBase::getStreamingBlockSize() {
 	unsigned long blockSize = AIOUSB_GetStreamingBlockSize( deviceIndex );
 	return ( int ) blockSize;
-}	// USBDevice::getStreamingBlockSize()
+}	// USBDeviceBase::getStreamingBlockSize()
 
-USBDevice &USBDevice::setStreamingBlockSize( int blockSize ) {
+USBDeviceBase &USBDeviceBase::setStreamingBlockSize( int blockSize ) {
 	if( blockSize < 0 )
 		throw IllegalArgumentException( "Invalid block size" );
 	const int result = AIOUSB_SetStreamingBlockSize( deviceIndex, blockSize );
 	if( result != AIOUSB_SUCCESS )
 		throw OperationFailedException( result );
 	return *this;
-}	// USBDevice::setStreamingBlockSize()
+}	// USBDeviceBase::setStreamingBlockSize()
 
 /**
  * Gets the current timeout setting for USB communications.
@@ -111,9 +112,9 @@ USBDevice &USBDevice::setStreamingBlockSize( int blockSize ) {
  * @see setCommTimeout( int timeout )
  */
 
-int USBDevice::getCommTimeout() const {
+int USBDeviceBase::getCommTimeout() const {
 	return AIOUSB_GetCommTimeout( deviceIndex );
-}	// USBDevice::getCommTimeout()
+}	// USBDeviceBase::getCommTimeout()
 
 /**
  * Sets the timeout for USB communications.
@@ -123,7 +124,7 @@ int USBDevice::getCommTimeout() const {
  * @throws OperationFailedException
  */
 
-USBDevice &USBDevice::setCommTimeout( int timeout ) {
+USBDeviceBase &USBDeviceBase::setCommTimeout( int timeout ) {
 	if(
 		timeout < 0
 		|| timeout > 100000						// arbitrary sanity check
@@ -133,7 +134,7 @@ USBDevice &USBDevice::setCommTimeout( int timeout ) {
 	if( result != AIOUSB_SUCCESS )
 		throw OperationFailedException( result );
 	return *this;
-}	// USBDevice::setCommTimeout()
+}	// USBDeviceBase::setCommTimeout()
 
 /*
  * operations
@@ -145,12 +146,12 @@ USBDevice &USBDevice::setCommTimeout( int timeout ) {
  * @throws OperationFailedException
  */
 
-USBDevice &USBDevice::reset() {
+USBDeviceBase &USBDeviceBase::reset() {
 	const int result = ( ResultCode ) AIOUSB_Reset( deviceIndex );
 	if( result != AIOUSB_SUCCESS )
 		throw OperationFailedException( result );
 	return *this;
-}	// USBDevice::reset()
+}	// USBDeviceBase::reset()
 
 /**
  * Writes data to the custom programming area of the device EEPROM. <i>Beware that writing to the EEPROM
@@ -168,7 +169,7 @@ USBDevice &USBDevice::reset() {
  * @throws OperationFailedException
  */
 
-USBDevice &USBDevice::customEEPROMWrite( int address, const UCharArray &data ) {
+USBDeviceBase &USBDeviceBase::customEEPROMWrite( int address, const UCharArray &data ) {
 	if(
 		&data == 0
 		|| data.size() < 1
@@ -180,7 +181,7 @@ USBDevice &USBDevice::customEEPROMWrite( int address, const UCharArray &data ) {
 	if( result != AIOUSB_SUCCESS )
 		throw OperationFailedException( result );
 	return *this;
-}	// USBDevice::customEEPROMWrite()
+}	// USBDeviceBase::customEEPROMWrite()
 
 /**
  * Reads data from the custom programming area of the device EEPROM.
@@ -193,7 +194,7 @@ USBDevice &USBDevice::customEEPROMWrite( int address, const UCharArray &data ) {
  * @throws OperationFailedException
  */
 
-UCharArray USBDevice::customEEPROMRead( int address, int numBytes ) {
+UCharArray USBDeviceBase::customEEPROMRead( int address, int numBytes ) {
 	if(
 		numBytes < 1
 		|| address < 0
@@ -206,19 +207,19 @@ UCharArray USBDevice::customEEPROMRead( int address, int numBytes ) {
 	if( result != AIOUSB_SUCCESS )
 		throw OperationFailedException( result );
 	return data;
-}	// USBDevice::customEEPROMRead()
+}	// USBDeviceBase::customEEPROMRead()
 
 
 
 
 
-ostream &operator<<( ostream &out, USBDevice &device ) {
+ostream &operator<<( ostream &out, USBDeviceBase &device ) {
 	assert( &device != 0 );
 	return device.print( out );
 }	// operator<<()
 
 
-ostream &operator<<( ostream &out, USBDevice *device ) {
+ostream &operator<<( ostream &out, USBDeviceBase *device ) {
 	assert( device != 0 );
 	if( device != 0 )
 		device->print( out );

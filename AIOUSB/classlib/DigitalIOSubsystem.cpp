@@ -71,7 +71,7 @@ BoolArray &DigitalIOSubsystem::bytesToBits( BoolArray &dest, const UCharArray &s
 	return dest;
 }	// DigitalIOSubsystem::bytesToBits()
 
-DigitalIOSubsystem::DigitalIOSubsystem( USBDevice &parent )
+DigitalIOSubsystem::DigitalIOSubsystem( USBDeviceBase &parent )
 		: DeviceSubsystem( parent ) {
 	numPorts
 		= numChannels

@@ -35,8 +35,7 @@ TARGET_link_libraries( TestCaseSetup  aiousb aiousbcpp )
 
 SET( AIOUSB_TESTCASELIB_DIR ${CMAKE_CURRENT_SOURCE_DIR} )
 
-
-install( TARGETS TestCaseSetup DESTINATION lib )
+install( TARGETS TestCaseSetup DESTINATION lib/aiousb )
 
 
 

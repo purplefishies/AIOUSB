@@ -11,10 +11,9 @@
 #define _AIOTYPES_H
 #define HAS_PTHREAD 1
 
-/* #include <aiousb.h> */
-
-typedef long AIORET_TYPE;        /* New return type is signed, negative indicates error */
+typedef int AIORET_TYPE;        /* New return type is signed, negative indicates error */
 typedef unsigned long AIORESULT;
+
 
 #ifndef PUBLIC_EXTERN
 #define PUBLIC_EXTERN extern
@@ -42,42 +41,6 @@ typedef unsigned long AIORESULT;
 #ifdef __aiousb_cplusplus
 namespace AIOUSB {
 #endif
-
-
-    /* Logging stuff */
-
-#undef AIOUSB_LOG
-#define AIOUSB_LOG(fmt, ... ) do {                                      \
-    pthread_mutex_lock( &message_lock );                                \
-    fprintf( (!outfile ? stdout : outfile ), fmt,  ##__VA_ARGS__ );     \
-    pthread_mutex_unlock(&message_lock);                                \
-  } while ( 0 )
-
-#undef AIOUSB_DEVEL
-#undef AIOUSB_DEBUG
-#undef AIOUSB_WARN 
-#undef AIOUSB_ERROR
-#undef AIOUSB_FATAL 
-
-#ifdef AIOUSB_DEBUG_LOG
-/**
- * If you _REALLY_ want to see Development messages, you will
- * need to compile with  with -DREALLY_USE_DEVEL_DEBUG
- **/
-#ifdef REALLY_USE_DEVEL_DEBUG
-#define AIOUSB_DEVEL(...)  if( 1 ) { AIOUSB_LOG( "<Devel>\t" __VA_ARGS__ ); }
-#define AIOUSB_TAP(x,...)  if( 1 ) { AIOUSB_LOG( ( x ? "ok -" : "not ok" ) __VA_ARGS__ ); }
-#else
-#define AIOUSB_DEVEL(...)  if( 0 ) { AIOUSB_LOG( "<Devel>\t" __VA_ARGS__ ); }
-#define AIOUSB_TAP(x,...)  if( 0 ) { AIOUSB_LOG( ( x ? "ok -" : "not ok" ) __VA_ARGS__ ); }
-#endif
-#define AIOUSB_DEBUG(...)  AIOUSB_LOG( "<Debug>\t" __VA_ARGS__ )
-#else
-
-#define AIOUSB_DEVEL( ... ) if ( 0 ) { }
-#define AIOUSB_DEBUG( ... ) if ( 0 ) { }
-#endif
-
 
 
 
@@ -112,7 +75,9 @@ CREATE_ENUM_W_START( AIOContinuousBufMode, 0 ,
 
 typedef double AIOBufferType;
 
-
+enum {
+    MAX_USB_DEVICES               = 32
+};
 
 
 /**
@@ -145,6 +110,21 @@ enum BOOL {
 typedef enum BOOL BOOL;
 #endif
 #endif
+
+
+#define EXIT_FN_IF_NO_VALID_USB( d, r, f, u, g ) do {           \
+        if ( !d ) {                                             \
+            r = -AIOUSB_ERROR_DEVICE_NOT_FOUND;                 \
+            goto g;                                             \
+        } else if ( ( r = f ) != AIOUSB_SUCCESS  ) {            \
+            goto g;                                             \
+        } else if ( !(u = AIOUSBDeviceGetUSBHandle( d )))  {    \
+            r = -AIOUSB_ERROR_INVALID_USBDEVICE;                \
+            goto g;                                             \
+        }                                                       \
+    } while (0 )
+
+
 
 
 CREATE_ENUM_W_START(ProductIDS,0,
@@ -390,6 +370,11 @@ CREATE_ENUM_W_START( ResultCode, 0,
                      AIOUSB_ERROR_LIBUSB /* Always make the LIBUSB the last element */
                      );
 
+enum {
+  AD_MAX_CHANNELS    = 128,    /* maximum number of channels supported by this driver */
+  AD_GAIN_CODE_MASK  = 7
+};
+
 #define AIOUSB_ERROR_OFFSET 100
 
 
@@ -430,6 +415,10 @@ CREATE_ENUM_W_START( ADRegister, 16,
  */
 enum {
     AD_MAX_CONFIG_REGISTERS             = 21, /* maximum number of "registers" (bytes) in A/D config. block */
+    AD_MIN_CONFIG_REGISTERS             = 20,
+    AD_MAX_TIMEOUT                      = 8000,
+    AD_MIN_TIMEOUT                      = 500,
+
     AD_NUM_GAIN_CODE_REGISTERS          = 16, /* number of gain code registers in A/D config. block */
 
     /* A/D configuration block indexes */
@@ -437,11 +426,12 @@ enum {
                                               /* gain codes for channels 1-15 occupy configuration block indexes 1-15 */
     AD_REGISTER_GAIN_CODE               = 0,
 
-    AD_CONFIG_CAL_MODE                  = 16, /* calibration mode (one of AD_CAL_MODE_* settings below) */
-    AD_CONFIG_TRIG_COUNT                = 17, /* trigger and counter clock (one of AD_TRIG_* settings below) */
-    AD_CONFIG_START_END                 = 18, /* start and end channels for scan (bits 7-4 contain end channel, bits 3-0 contain start channel) */
-    AD_CONFIG_OVERSAMPLE                = 19, /* oversample setting (0-255 samples in addition to single sample) */
-    AD_CONFIG_MUX_START_END             = 20, /* MUX start and end channels for scan (bits 7-4 contain end channel MS-nibble, bits 3-0 contain start channel MS-nibble) */
+    /*Codes defined in the USB Software Reference Manual */
+    AD_CONFIG_CAL_MODE                  = 0x10, /* calibration mode (one of AD_CAL_MODE_* settings below) */
+    AD_CONFIG_TRIG_COUNT                = 0x11, /* trigger and counter clock (one of AD_TRIG_* settings below) */
+    AD_CONFIG_START_END                 = 0x12, /* start and end channels for scan (bits 7-4 contain end channel, bits 3-0 contain start channel) */
+    AD_CONFIG_OVERSAMPLE                = 0x13, /* oversample setting (0-255 samples in addition to single sample) */
+    AD_CONFIG_MUX_START_END             = 0x14, /* MUX start and end channels for scan (bits 7-4 contain end channel MS-nibble, bits 3-0 contain start channel MS-nibble) */
     AD_CONFIG_START_STOP_CHANNEL_EX     = 21,
 
     /* A/D gain codes */
@@ -469,13 +459,13 @@ enum {
  */
 CREATE_ENUM_W_START( ADGainCode, 0,
                      AD_GAIN_CODE_0_10V,    /* 0-10V */
-                     AD_GAIN_CODE_10V,      /* +/-10V */
+                     AD_GAIN_CODE_10V,      /* +-10V */
                      AD_GAIN_CODE_0_5V,     /* 0-5V */
-                     AD_GAIN_CODE_5V,       /* +/-5V */
+                     AD_GAIN_CODE_5V,       /* +-5V */
                      AD_GAIN_CODE_0_2V,     /* 0-2V */
-                     AD_GAIN_CODE_2V,       /* +/-2V */
+                     AD_GAIN_CODE_2V,       /* +-2V */
                      AD_GAIN_CODE_0_1V,     /* 0-1V */
-                     AD_GAIN_CODE_1V        /* +/-1V */
+                     AD_GAIN_CODE_1V        /* +-1V */
                      );
 
 
@@ -574,13 +564,6 @@ typedef enum  {
   ADCalMode_end           = 8
 } ADCalMode;
 
-typedef struct  {
-  const void *device;           /**< Pointer to the device Descriptor */
-  unsigned long size;
-  AIOUSB_BOOL testing;          /**< For making Unit tests that don't talk to hardware */
-  unsigned char registers[ AD_MAX_CONFIG_REGISTERS +1];
-} ADConfigBlock;
-
 
 /** 
  * @brief Allows us to keep track of streaming (bulk) acquires
@@ -593,7 +576,7 @@ typedef struct {
   unsigned long bytes_remaining;
 } AIOBuf ;
 
-extern unsigned long GetDevices( void );
+/* extern unsigned long GetDevices( void ); */
 
 typedef struct  {
     const char *Name;                /**< null-terminated device name or 0 */

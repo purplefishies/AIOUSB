@@ -7,20 +7,24 @@
 
 override CEXTRAOBJS	+= 
 override CORE_COBJS += \
+cJSON.o \
 AIOUSB_ADC.o \
-AIOUSB_ADC_ExternalCal.o \
 AIOUSB_Core.o \
 AIOUSB_CTR.o \
-AIOUSB_CustomEEPROMRead.o \
-AIOUSB_CustomEEPROMWrite.o \
+AIOUSB_CustomEEPROM.o \
 AIOUSB_DAC.o \
 AIOUSB_DIO.o \
 AIOUSB_WDG.o \
+AIOUSB_Properties.o \
 AIOContinuousBuffer.o \
 AIOChannelMask.o \
-AIOUSB_Properties.o \
 AIODeviceInfo.o \
+AIODeviceTable.o \
+AIOUSBDevice.o \
 DIOBuf.o \
+ADCConfigBlock.o \
+AIOChannelRange.o \
+USBDevice.o
 
 HEADERS	:=	$(wildcard *.h)
 

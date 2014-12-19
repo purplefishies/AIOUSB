@@ -30,7 +30,7 @@ class AI16_DataPoint;
 class AI16_DataSet {
 	friend class AnalogInputSubsystem;
 
-public:
+protected:
 	AnalogInputSubsystem *subsystem;			// subsystem from which this data was obtained
 	AI16_DataPointArray points;					// data points taken from device
 	long timeStamp;								// approximate time stamp when data was captured

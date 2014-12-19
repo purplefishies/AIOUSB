@@ -12,7 +12,7 @@
 #define USB_DIO_Family_hpp
 
 #include "CppCommon.h"
-#include <USBDevice.hpp>
+#include <USBDeviceBase.hpp>
 #include <DigitalIOSubsystem.hpp>
 
 
@@ -27,14 +27,14 @@ namespace AIOUSB {
  * Instances of class <i>USB_DIO_Family</i> are automatically created by the USB device manager when they are
  * detected on the bus. You should use one of the <i>USBDeviceManager</i> search methods, such as
  * <i>USBDeviceManager::getDeviceByProductID( int productID ) const</i>,
- * to obtain a reference to a <i>USB_DIO_Family</i> instance. You can then cast the <i>USBDevice</i>
+ * to obtain a reference to a <i>USB_DIO_Family</i> instance. You can then cast the <i>USBDeviceBase</i>
  * reference obtained from one of those methods to a <i>USB_DIO_Family</i> and make use of this class' methods, like so:
  * <pre>USBDeviceArray devices = deviceManager.getDeviceByProductID( USB_DIO_48, USB_DIO_96 );
  *if( devices.size() > 0 )
  *  USB_DIO_Family &device = *( USB_DIO_Family * ) devices.at( 0 );</pre>
  */
 
-class USB_DIO_Family : public USBDevice {
+class USB_DIO_Family : public USBDeviceBase {
 	friend class USBDeviceManager;
 
 
@@ -45,12 +45,12 @@ private:
 
 
 
-public:
+protected:
 	DigitalIOSubsystem digitalIOSubsystem;
 
 
 
-public:
+protected:
 	USB_DIO_Family( int productID, int deviceIndex );
 	virtual ~USB_DIO_Family();
 

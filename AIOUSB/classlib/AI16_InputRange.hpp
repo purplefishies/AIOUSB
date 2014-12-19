@@ -20,7 +20,7 @@ class AI16_InputRange : public AnalogIORange {
 	friend class AnalogInputSubsystem;
 	friend class AI16_DataPoint;
 
-public:
+protected:
 	AI16_InputRange();
 	AI16_InputRange( int minCounts, int maxCounts );
 	virtual ~AI16_InputRange();

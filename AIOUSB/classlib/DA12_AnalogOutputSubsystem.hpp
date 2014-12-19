@@ -60,14 +60,14 @@ public:
 
 
 
-public:
+protected:
 	static const char RANGE_TEXT[][ 10 ];
 	DA12_OutputRange *outputRange;				// device supports a separate range for each D/A channel
 
 
 
-public:
-	DA12_AnalogOutputSubsystem( USBDevice &parent );
+protected:
+	DA12_AnalogOutputSubsystem( USBDeviceBase &parent );
 	virtual ~DA12_AnalogOutputSubsystem();
 
 

@@ -10,7 +10,7 @@
 
 
 #include <iostream>
-#include <algorithm>
+#include <bits/stl_algo.h>
 #include <assert.h>
 #include "USBDeviceManager.hpp"
 #include "USB_CTR_15_Family.hpp"
@@ -36,7 +36,7 @@ void USB_CTR_15_Family::initialize() {
 
 
 USB_CTR_15_Family::USB_CTR_15_Family( int productID, int deviceIndex )
-		: USBDevice( productID, deviceIndex )
+		: USBDeviceBase( productID, deviceIndex )
 		, counterSubsystem( *this ) {
 	if( ! isSupportedProductID( productID ) )
 		throw IllegalArgumentException( "Invalid product ID" );
@@ -98,7 +98,7 @@ bool USB_CTR_15_Family::isSupportedProductID( int productID ) {
 
 ostream &USB_CTR_15_Family::print( ostream &out ) {
 	assert( &out != 0 );
-	USBDevice::print( out );
+	USBDeviceBase::print( out );
 	counterSubsystem.print( out );
 	return out;
 }	// USB_CTR_15_Family::print()
