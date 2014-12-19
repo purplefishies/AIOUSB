@@ -153,6 +153,8 @@ AIORET_TYPE AIOUSBDeviceGetTesting( AIOUSBDevice *dev )
 /*----------------------------------------------------------------------------*/
 USBDevice *AIOUSBDeviceGetUSBHandle( AIOUSBDevice *dev ) 
 {
+    if ( !dev ) 
+        return NULL;
     return dev->usb_device;
 }
 

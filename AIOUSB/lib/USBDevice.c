@@ -171,12 +171,22 @@ int USBDeviceSetDebug( USBDevice *usb, AIOUSB_BOOL debug )
 }
 
 /*----------------------------------------------------------------------------*/
-libusb_device_handle *get_usb_device( struct aiousb_device *dev )
+libusb_device_handle *USBDeviceGetUSBDeviceHandle( USBDevice *usb )
 {
-    if( !dev )
+    if( !usb )
+        return NULL;
+    return usb->deviceHandle;
+}
+
+/*----------------------------------------------------------------------------*/
+libusb_device_handle *get_usb_device( USBDevice *dev )
+{
+    if ( !dev ) 
         return NULL;
     return dev->deviceHandle;
 }
+
+
 
 /*----------------------------------------------------------------------------*/
 int USBDeviceFetchADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock )

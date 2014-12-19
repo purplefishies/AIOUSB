@@ -208,21 +208,19 @@ unsigned long ReadConfigBlock(unsigned long DeviceIndex,
                               AIOUSB_BOOL forceRead
                               )
 {
-    unsigned long result = AIOUSB_SUCCESS;
-    DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
-    ADCConfigBlock configBlock;
-
-    if(!deviceDesc || result != AIOUSB_SUCCESS)
+    AIORESULT result = AIOUSB_SUCCESS;
+    DeviceDescriptor *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
+    if ( result  != AIOUSB_SUCCESS )
         return result;
-    /* AIOUSB_UnLock(); */
+    ADCConfigBlock configBlock = *(ADCConfigBlock*)AIOUSBDeviceGetADCConfigBlock( deviceDesc );
     if(forceRead || deviceDesc->cachedConfigBlock.size == 0) {
         libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
         if( !deviceHandle ) {
             result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
             goto out_ReadConfigBlock;
         }
-        /* request A/D configuration block from device */
 
+        /* request A/D configuration block from device */
         ADCConfigBlockInitialize( &configBlock, configBlock.device );
 
         /* AIOUSB_UnLock(); */

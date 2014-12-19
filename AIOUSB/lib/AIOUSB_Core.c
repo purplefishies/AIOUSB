@@ -344,8 +344,8 @@ unsigned long AIOUSB_Validate(unsigned long *DeviceIndex)
 }
 
 struct libusb_device_handle * AIOUSB_GetUSBHandle( DeviceDescriptor *deviceDesc ) {
-    /* return deviceDesc->deviceHandle; */
-    return NULL;
+
+    return USBDeviceGetUSBDeviceHandle( AIOUSBDeviceGetUSBHandle( deviceDesc ) );
 }
 
 PRIVATE struct libusb_device_handle *AIOUSB_GetDeviceHandle(unsigned long DeviceIndex) {

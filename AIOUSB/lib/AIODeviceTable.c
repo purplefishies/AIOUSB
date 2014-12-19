@@ -307,8 +307,6 @@ unsigned long QueryDeviceInfo( unsigned long DeviceIndex,
         AIOUSB_UnLock();
         return result;
     }
-    if(!AIOUSB_Lock())
-        return AIOUSB_ERROR_INVALID_MUTEX;
 
     if(pPID != NULL)
         *pPID = deviceDesc->ProductID;
@@ -318,8 +316,6 @@ unsigned long QueryDeviceInfo( unsigned long DeviceIndex,
 
     if(pCounters != NULL)
         *pCounters = deviceDesc->Counters;
-
-    AIOUSB_UnLock();                                                            // unlock while communicating with device
 
     if(
         pNameSize != NULL &&
@@ -355,49 +351,48 @@ PRIVATE char *ProductIDToName(unsigned int productID)
     char *tmpstr = strdup("UNKNOWN");
     char *name = tmpstr;
 
-    if (AIOUSB_Lock()) {
-      /*
-       * productIDIndex[] represents an index into
-       * productIDNameTable[], sorted by product ID;
-       * specifically, it contains pointers into
-       * productIDNameTable[]; to get the actual product ID,
-       * the pointer in productIDIndex[] must be
-       * dereferenced; using a separate index table instead
-       * of sorting productIDNameTable[] directly permits us
-       * to create multiple indexes, in particular, a second
-       * index sorted by product name
-       */
+
+    /*
+     * productIDIndex[] represents an index into
+     * productIDNameTable[], sorted by product ID;
+     * specifically, it contains pointers into
+     * productIDNameTable[]; to get the actual product ID,
+     * the pointer in productIDIndex[] must be
+     * dereferenced; using a separate index table instead
+     * of sorting productIDNameTable[] directly permits us
+     * to create multiple indexes, in particular, a second
+     * index sorted by product name
+     */
         
-      /* index of product IDs in productIDNameTable[] */
-          static ProductIDName  *productIDIndex[ NUM_PROD_NAMES ];
-          /* random pattern */
-           unsigned long INIT_PATTERN = 0xe697f8acul;
+    /* index of product IDs in productIDNameTable[] */
+    static ProductIDName  *productIDIndex[ NUM_PROD_NAMES ];
+    /* random pattern */
+    unsigned long INIT_PATTERN = 0xe697f8acul;
 
-          /* == INIT_PATTERN if index has been created */
-          static unsigned long productIDIndexCreated = 0;
-          if(productIDIndexCreated != INIT_PATTERN) {
-            /* build index of product IDs */
-                int index;
-                for(index = 0; index < NUM_PROD_NAMES; index++)
-                    productIDIndex[ index ] = &productIDNameTable[ index ];
+    /* == INIT_PATTERN if index has been created */
+    static unsigned long productIDIndexCreated = 0;
+    if(productIDIndexCreated != INIT_PATTERN) {
+        /* build index of product IDs */
+        int index;
+        for(index = 0; index < NUM_PROD_NAMES; index++)
+            productIDIndex[ index ] = &productIDNameTable[ index ];
 
-                qsort(productIDIndex, NUM_PROD_NAMES, sizeof(ProductIDName *), CompareProductIDs);
-                productIDIndexCreated = INIT_PATTERN;
-            }
-
-          ProductIDName key;
-          key.id = productID;
-          ProductIDName * pKey = &key;
-          ProductIDName **product = (  ProductIDName** )bsearch(&pKey, 
-                                                                productIDIndex, 
-                                                                NUM_PROD_NAMES, 
-                                                                sizeof(ProductIDName *), 
-                                                                CompareProductIDs
-                                                                );
-          if(product != 0)
-              name = (*product)->name;
-          AIOUSB_UnLock();
+        qsort(productIDIndex, NUM_PROD_NAMES, sizeof(ProductIDName *), CompareProductIDs);
+        productIDIndexCreated = INIT_PATTERN;
     }
+
+    ProductIDName key;
+    key.id = productID;
+    ProductIDName * pKey = &key;
+    ProductIDName **product = (  ProductIDName** )bsearch(&pKey, 
+                                                          productIDIndex, 
+                                                          NUM_PROD_NAMES, 
+                                                          sizeof(ProductIDName *), 
+                                                          CompareProductIDs
+                                                          );
+    if(product != 0)
+        name = (*product)->name;
+
     return name;
 }
 
@@ -426,41 +421,40 @@ PRIVATE unsigned int ProductNameToID(const char *name)
     assert(name != 0);
 
     unsigned int productID = 0;
-    if(AIOUSB_Lock()) {
-      /*
-       * productNameIndex[] represents an index into
-       * productIDNameTable[], sorted by product name (see notes for
-       * ProductIDToName())
-       */
 
-          static ProductIDName const *productNameIndex[ NUM_PROD_NAMES ];
-          /** index of product names in productIDNameTable[] */
+    /*
+     * productNameIndex[] represents an index into
+     * productIDNameTable[], sorted by product name (see notes for
+     * ProductIDToName())
+     */
 
-          const unsigned long INIT_PATTERN = 0x7e6b2017ul;
-          /** random pattern */
+    static ProductIDName const *productNameIndex[ NUM_PROD_NAMES ];
+    /** index of product names in productIDNameTable[] */
 
-          static unsigned long productNameIndexCreated = 0;
-          /** == INIT_PATTERN if index has been created */
+    const unsigned long INIT_PATTERN = 0x7e6b2017ul;
+    /** random pattern */
 
-          if(productNameIndexCreated != INIT_PATTERN) {
-            /* build index of product names */
-                int index;
-                for(index = 0; index < NUM_PROD_NAMES; index++)
-                    productNameIndex[ index ] = &productIDNameTable[ index ];
-                qsort(productNameIndex, NUM_PROD_NAMES, sizeof(ProductIDName *), CompareProductNames);
-                productNameIndexCreated = INIT_PATTERN;
-            }
+    static unsigned long productNameIndexCreated = 0;
+    /** == INIT_PATTERN if index has been created */
 
-          ProductIDName key;                                   // key.id not used
-          strncpy(key.name, name, PROD_NAME_SIZE);
-          key.name[ PROD_NAME_SIZE ] = 0;                     // in case strncpy() doesn't copy null
-          const ProductIDName *const pKey = &key;
-          const ProductIDName **product
-              = ( const ProductIDName** )bsearch(&pKey, productNameIndex, NUM_PROD_NAMES, sizeof(ProductIDName *), CompareProductNames);
-          if(product != 0)
-              productID = (*product)->id;
-          AIOUSB_UnLock();
-      }
+    if(productNameIndexCreated != INIT_PATTERN) {
+        /* build index of product names */
+        int index;
+        for(index = 0; index < NUM_PROD_NAMES; index++)
+            productNameIndex[ index ] = &productIDNameTable[ index ];
+        qsort(productNameIndex, NUM_PROD_NAMES, sizeof(ProductIDName *), CompareProductNames);
+        productNameIndexCreated = INIT_PATTERN;
+    }
+
+    ProductIDName key;                                   // key.id not used
+    strncpy(key.name, name, PROD_NAME_SIZE);
+    key.name[ PROD_NAME_SIZE ] = 0;                     // in case strncpy() doesn't copy null
+    const ProductIDName *const pKey = &key;
+    const ProductIDName **product
+        = ( const ProductIDName** )bsearch(&pKey, productNameIndex, NUM_PROD_NAMES, sizeof(ProductIDName *), CompareProductNames);
+    if(product != 0)
+        productID = (*product)->id;
+
     return productID;
 }
 
@@ -468,9 +462,6 @@ PRIVATE unsigned int ProductNameToID(const char *name)
 AIORET_TYPE GetDevices(void) 
 {
     unsigned long deviceMask = 0;
-
-    if ( !AIOUSB_Lock() )
-        return -AIOUSB_ERROR_INVALID_MUTEX;
 
     if ( AIOUSB_IsInit() ) {
       /**
@@ -490,7 +481,7 @@ AIORET_TYPE GetDevices(void)
         return -AIOUSB_ERROR_NOT_INIT;
     }
 
-    AIOUSB_UnLock();
+
     return (AIORET_TYPE)deviceMask;
 }
 
@@ -518,9 +509,6 @@ USBDevice *AIODeviceTableGetUSBDeviceAtIndex( unsigned long DeviceIndex, AIORESU
 /*----------------------------------------------------------------------------*/
 static unsigned long GetDeviceName(unsigned long DeviceIndex, char **name) 
 {
-    assert(name != 0);
-    if(!AIOUSB_Lock())
-        return AIOUSB_ERROR_INVALID_MUTEX;
 
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = _get_device( DeviceIndex, &result );
@@ -541,7 +529,7 @@ static unsigned long GetDeviceName(unsigned long DeviceIndex, char **name)
     }
 
     /* name is not yet cached, so request it from the device  */
-    AIOUSB_UnLock();
+
     deviceName = ( char* )malloc(MAX_NAME_SIZE + 2);
 
     if ( !deviceName ) {
@@ -600,9 +588,9 @@ static unsigned long GetDeviceName(unsigned long DeviceIndex, char **name)
             deviceName[ dstIndex ] = descData[ srcIndex ];
         }
         deviceName[ dstIndex ] = 0; /* null-terminate */
-        AIOUSB_Lock();
+
         *name = deviceDesc->cachedName = strdup(deviceName);
-        AIOUSB_UnLock();
+
     } else {
         result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
     }
@@ -610,7 +598,7 @@ static unsigned long GetDeviceName(unsigned long DeviceIndex, char **name)
  free_deviceName_GetDeviceName:
     free(deviceName);
  out_GetDeviceName:
-    AIOUSB_UnLock();
+
     return result;
 }
 
@@ -623,39 +611,37 @@ static unsigned long GetDeviceName(unsigned long DeviceIndex, char **name)
 char *GetSafeDeviceName(unsigned long DeviceIndex) 
 {
     char *deviceName = 0;
-    if(!AIOUSB_Lock())
-        return deviceName;
+
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
-    if ( result != AIOUSB_SUCCESS ){
-        AIOUSB_UnLock();
+    if ( result != AIOUSB_SUCCESS )
         return deviceName;
-    }
+
 
     if(deviceDesc->bGetName) {
         /*
          * device supports getting its product name, so use it instead of the
          * name from the local product name table
          */
-        AIOUSB_UnLock();                                            // unlock while communicating with device
+
         unsigned long res = GetDeviceName(DeviceIndex, &deviceName);
         if(res != AIOUSB_SUCCESS) {
             /*
              * failed to get name from device, so fall back to local table after all
              */
-            AIOUSB_Lock();
+
             deviceName = ProductIDToName(deviceDesc->ProductID);
-            AIOUSB_UnLock();
+
         } else {
             /*
              * device doesn't support getting its product name, so use local
              * product name table
              */
             deviceName = ProductIDToName(deviceDesc->ProductID);
-            AIOUSB_UnLock();
+
         }
     }
-    AIOUSB_UnLock();
+
     return deviceName;
 }
 /*----------------------------------------------------------------------------*/ 
@@ -1304,32 +1290,31 @@ AIORESULT AIODeviceTableSetDeviceID( int index, AIOUSBDevice *dev )
 AIORESULT AIOUSB_GetAllDevices() 
 {
     AIORESULT deviceMask = 0;
-    if(AIOUSB_Lock()) {
-          if(AIOUSB_IsInit()) {
-                int index;
-                for (index = 0; index < MAX_USB_DEVICES; index++) {
-                    AIORESULT res = AIOUSB_SUCCESS;
-                    AIODeviceTableGetDeviceAtIndex( index , &res );
-                    if ( res == AIOUSB_SUCCESS ) { 
-                            const int MAX_NAME_SIZE = 100;
-                            char name[ MAX_NAME_SIZE + 1 ];
-                            unsigned long productID;
-                            unsigned long nameSize = MAX_NAME_SIZE;
-                            unsigned long numDIOBytes;
-                            unsigned long numCounters;
-                            AIOUSB_UnLock();                               /* unlock while communicating with device */
-                            const unsigned long result = QueryDeviceInfo(index, &productID, &nameSize, name, &numDIOBytes, &numCounters);
-                            if(result == AIOUSB_SUCCESS) {
-                                name[ nameSize ] = '\0';
-                                deviceMask = (deviceMask << 1) | 1;
-                            }
+    
+    if(AIOUSB_IsInit()) {
+        int index;
+        for (index = 0; index < MAX_USB_DEVICES; index++) {
+            AIORESULT res = AIOUSB_SUCCESS;
+            AIODeviceTableGetDeviceAtIndex( index , &res );
+            if ( res == AIOUSB_SUCCESS ) { 
+                const int MAX_NAME_SIZE = 100;
+                char name[ MAX_NAME_SIZE + 1 ];
+                unsigned long productID;
+                unsigned long nameSize = MAX_NAME_SIZE;
+                unsigned long numDIOBytes;
+                unsigned long numCounters;
+                AIOUSB_UnLock();                               /* unlock while communicating with device */
+                const unsigned long result = QueryDeviceInfo(index, &productID, &nameSize, name, &numDIOBytes, &numCounters);
+                if(result == AIOUSB_SUCCESS) {
+                    name[ nameSize ] = '\0';
+                    deviceMask = (deviceMask << 1) | 1;
+                }
 
-                            AIOUSB_Lock();
-                        }
-                  }
+                AIOUSB_Lock();
             }
-          AIOUSB_UnLock();
-      }
+        }
+    }
+
     return deviceMask;
 }
 
@@ -1554,25 +1539,22 @@ unsigned long AIOUSB_Reset( unsigned long DeviceIndex )
 {
     AIORESULT result = AIOUSB_SUCCESS;
 
-    if(!AIOUSB_Lock())
-        return AIOUSB_ERROR_INVALID_MUTEX;
 
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
-    if ( result != AIOUSB_SUCCESS ){
-        AIOUSB_UnLock();
+    if ( result != AIOUSB_SUCCESS )
         return result;
-    }
+
     USBDevice *usb = AIOUSBDeviceGetUSBHandle( deviceDesc );
 
     if(usb != NULL) {
-        AIOUSB_UnLock();
+
         int libusbResult = usb->usb_reset_device(usb);
         if (libusbResult != LIBUSB_SUCCESS )
             result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult);
         usleep(250000);
     } else {
         result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-        AIOUSB_UnLock();
+
     }
 
     return result;

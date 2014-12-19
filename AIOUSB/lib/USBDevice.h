@@ -58,7 +58,8 @@ int usb_request(struct aiousb_device *dev_handle,
 int usb_reset_device( struct aiousb_device *usb );
 
  
-libusb_device_handle *get_usb_device( struct aiousb_device *dev );
+libusb_device_handle *get_usb_device( USBDevice *dev );
+libusb_device_handle *USBDeviceGetUSBDeviceHandle( USBDevice *usb );
 
 
 #ifdef __aiousb_cplusplus

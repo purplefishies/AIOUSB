@@ -106,6 +106,7 @@ PUBLIC_EXTERN unsigned int ProductNameToID( const char *name );
 PUBLIC_EXTERN struct libusb_device_handle *AIOUSB_GetDeviceHandle( unsigned long DeviceIndex );
 PUBLIC_EXTERN struct libusb_device_handle *AIOUSB_GetUSBHandle(DeviceDescriptor *deviceDesc );
 
+
 PUBLIC_EXTERN unsigned AIOUSB_GetOversample( const ADConfigBlock *config );
 PUBLIC_EXTERN void AIOUSB_SetOversample( ADConfigBlock *config, unsigned overSample );
 
