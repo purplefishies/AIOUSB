@@ -15,6 +15,7 @@
 #include <AIODataTypes.h>
 #include <getopt.h>
 #include <ctype.h>
+#include <time.h>
 
 #define  _FILE_OFFSET_BITS 64  
 
@@ -26,18 +27,19 @@ struct channel_range {
 
 
 struct opts {
-  int buffer_size;
-  int number_channels;
-  int gain_code;
-  unsigned max_count;
-  int clock_rate;
-  char *outfile;
-  int reset;
-  int startchannel;
-  int endchannel;
-  int number_ranges;
-  int slowacquire;
-  struct channel_range **ranges;
+    int buffer_size;
+    int number_channels;
+    int gain_code;
+    unsigned max_count;
+    int clock_rate;
+    char *outfile;
+    int reset;
+    int startchannel;
+    int endchannel;
+    int number_ranges;
+    int slowacquire;
+    int with_timing;
+    struct channel_range **ranges;
 };
 
 
@@ -50,12 +52,13 @@ struct channel_range *get_channel_range( char *optarg );
 int 
 main(int argc, char *argv[] ) 
 {
-    struct opts options = {100000, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , (char*)"output.txt", 0, 0, 15 , 0, 0, NULL };
+    struct opts options = {100000, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , (char*)"output.txt", 0, 0, 15 , 0, 0, 0, NULL };
     AIOContinuousBuf *buf = 0;
     int keepgoing = 1;
     unsigned read_count = 0;
     unsigned short tobuf[32768] = {0};
     unsigned tobufsize = 32768;
+    struct timespec foo , bar;
 
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     unsigned short *tmp = (unsigned short *)malloc(sizeof(unsigned short)*(options.buffer_size+1)*options.number_channels);
@@ -138,6 +141,39 @@ main(int argc, char *argv[] )
      * in this example we read bytes in blocks of our core number_channels parameter. 
      * the channel order
      */
+    if ( options.with_timing ) 
+        clock_gettime( CLOCK_MONOTONIC_RAW, &bar );
+
+
+
+#if 1
+    while ( buf->status == RUNNING || AIOContinuousBufCountScansAvailable(buf) > 0 ) {
+
+        if ( AIOContinuousBufCountScansAvailable(buf) > 0 ) { 
+            if( options.with_timing ) 
+                clock_gettime( CLOCK_MONOTONIC_RAW, &foo );
+            retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf ,tobufsize, AIOContinuousBufNumberChannels(buf)*AIOContinuousBufCountScansAvailable(buf) );
+            if ( options.with_timing )
+                clock_gettime( CLOCK_MONOTONIC_RAW, &bar );
+            /* printf("Retval was %d\n",(int)retval); */
+            if ( retval < AIOUSB_SUCCESS ) {
+                printf("not ok - ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf));
+                keepgoing = 0;
+            } else {
+                read_count += retval;
+                for( int i = 0, ch = 0 ; i < retval; i ++, ch = ((ch+1)% AIOContinuousBufNumberChannels(buf)) ) {
+                    if( options.with_timing ) 
+                        fprintf(fp ,"%d,%d,", (int)bar.tv_sec, (int)(bar.tv_sec - foo.tv_sec) );
+                    fprintf(fp,"%u,",tobuf[i] );
+                    if( (i+1) % AIOContinuousBufNumberChannels(buf) == 0 ) {
+                        fprintf(fp,"\n");
+                    }
+                }
+            }
+        }
+    }
+#else
+
     while ( keepgoing ) {
       /**
        * You can optionally read values
@@ -184,7 +220,7 @@ main(int argc, char *argv[] )
       }
     }
 
-
+#endif
 
     fclose(fp);
     fprintf(stderr,"Test completed...exiting\n");
@@ -235,12 +271,13 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] )
       {"startchannel", required_argument, 0,  's' },
       {"endchannel"  , required_argument, 0,  'e' },
       {"slowacquire" , no_argument      , 0,  'S' }, 
-      {"range",       required_argument , 0,  'R' },
+      {"range",        required_argument, 0,  'R' },
+      {"timing",       no_argument      , 0,  'T' },
       {0,         0,                 0,  0 }
     };
     while (1) { 
       struct channel_range *tmp;
-        c = getopt_long(argc, argv, "b:n:g:c:m:h", long_options, &option_index);
+        c = getopt_long(argc, argv, "b:n:g:c:m:hT", long_options, &option_index);
         if( c == -1 )
           break;
         switch (c) {
@@ -260,8 +297,11 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] )
           options->number_channels = atoi(optarg);
           break;
         case 's':
-          options->startchannel = atoi(optarg);
-          break;
+            options->startchannel = atoi(optarg);
+            break;
+        case 'T':
+            options->with_timing = 1;
+            break;
         case 'S':
           options->slowacquire = 1;
           break;
