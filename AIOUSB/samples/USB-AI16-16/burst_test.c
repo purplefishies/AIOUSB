@@ -39,6 +39,7 @@ struct opts {
     int number_ranges;
     int slowacquire;
     int with_timing;
+    int verbose;
     struct channel_range **ranges;
 };
 
@@ -52,9 +53,8 @@ struct channel_range *get_channel_range( char *optarg );
 int 
 main(int argc, char *argv[] ) 
 {
-    struct opts options = {100000, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , (char*)"output.txt", 0, 0, 15 , 0, 0, 0, NULL };
+    struct opts options = {100000, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , (char*)"output.txt", 0, 0, 15 , 0, 0, 0, 0, NULL };
     AIOContinuousBuf *buf = 0;
-    int keepgoing = 1;
     unsigned read_count = 0;
     unsigned short tobuf[32768] = {0};
     unsigned tobufsize = 32768;
@@ -144,26 +144,28 @@ main(int argc, char *argv[] )
     if ( options.with_timing ) 
         clock_gettime( CLOCK_MONOTONIC_RAW, &bar );
 
-
-
-#if 1
     while ( buf->status == RUNNING || AIOContinuousBufCountScansAvailable(buf) > 0 ) {
 
         if ( AIOContinuousBufCountScansAvailable(buf) > 0 ) { 
             if( options.with_timing ) 
                 clock_gettime( CLOCK_MONOTONIC_RAW, &foo );
+
             retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf ,tobufsize, AIOContinuousBufNumberChannels(buf)*AIOContinuousBufCountScansAvailable(buf) );
+
             if ( options.with_timing )
                 clock_gettime( CLOCK_MONOTONIC_RAW, &bar );
             /* printf("Retval was %d\n",(int)retval); */
             if ( retval < AIOUSB_SUCCESS ) {
                 printf("not ok - ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf));
-                keepgoing = 0;
             } else {
+                if ( options.verbose )
+                    fprintf(stderr,"Waiting : total=%u, readpos=%d, writepos=%d\n", read_count, 
+                            AIOContinuousBufGetReadPosition(buf), AIOContinuousBufGetWritePosition(buf));
+
                 read_count += retval;
                 for( int i = 0, ch = 0 ; i < retval; i ++, ch = ((ch+1)% AIOContinuousBufNumberChannels(buf)) ) {
                     if( options.with_timing ) 
-                        fprintf(fp ,"%d,%d,", (int)bar.tv_sec, (int)(bar.tv_sec - foo.tv_sec) );
+                        fprintf(fp ,"%d,%d,", (int)bar.tv_sec, (int)(( bar.tv_sec - foo.tv_sec )*1e9 + (bar.tv_nsec - foo.tv_nsec )));
                     fprintf(fp,"%u,",tobuf[i] );
                     if( (i+1) % AIOContinuousBufNumberChannels(buf) == 0 ) {
                         fprintf(fp,"\n");
@@ -172,55 +174,6 @@ main(int argc, char *argv[] )
             }
         }
     }
-#else
-
-    while ( keepgoing ) {
-      /**
-       * You can optionally read values
-       * retval = AIOContinuousBufRead( buf, tmp, tmpsize );
-       */
-      fprintf(stderr,"Waiting : total=%u, readpos=%d, writepos=%d\n", read_count, AIOContinuousBufGetReadPosition(buf), AIOContinuousBufGetWritePosition(buf));
-      sleep(1);
-      if( read_count > options.max_count || buf->status != RUNNING ) {
-        printf("Exit reason: read_count=%d, max=%d, RUNNING=%d,but_status=%d\n",read_count, options.max_count, (int)RUNNING,(int)buf->status );
-        keepgoing = 0;
-        printf("Exiting from main\n");
-        AIOContinuousBufEnd(buf);
-        retval = buf->exitcode;
-      }
-
-    }
-    fprintf(stderr,"Predrain Waiting : total=%u, readpos=%d, writepos=%d\n", read_count, AIOContinuousBufGetReadPosition(buf), AIOContinuousBufGetWritePosition(buf));
-   
-    /** 
-     * Use the recommended API for reading data out of 
-     * the counts buffer
-     */
-    printf("Numscans=%d\n",(int)AIOContinuousBufCountScansAvailable(buf)  );
-
-    while (  AIOContinuousBufCountScansAvailable(buf) > 0 ) {
-        printf("Read=%d,Write=%d,size=%d,Avail=%d\n",
-               AIOContinuousBufGetReadPosition(buf),
-               AIOContinuousBufGetWritePosition(buf),
-               buf->size,
-               (int)AIOContinuousBufCountScansAvailable(buf));
-        retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf ,tobufsize, 32768 );
-        /* printf("Retval was %d\n",(int)retval); */
-      if ( retval < AIOUSB_SUCCESS ) {
-          printf("not ok - ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf));
-          keepgoing = 0;
-      } else {
-          read_count += retval;
-          for( int i = 0, ch = 0 ; i < retval; i ++, ch = ((ch+1)% AIOContinuousBufNumberChannels(buf)) ) {
-              fprintf(fp,"%u,",tobuf[i] );
-              if( (i+1) % AIOContinuousBufNumberChannels(buf) == 0 ) {
-                  fprintf(fp,"\n");
-              }
-          }
-      }
-    }
-
-#endif
 
     fclose(fp);
     fprintf(stderr,"Test completed...exiting\n");
@@ -273,11 +226,12 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] )
       {"slowacquire" , no_argument      , 0,  'S' }, 
       {"range",        required_argument, 0,  'R' },
       {"timing",       no_argument      , 0,  'T' },
+      {"verbose",      no_argument      , 0,  'V' },
       {0,         0,                 0,  0 }
     };
     while (1) { 
       struct channel_range *tmp;
-        c = getopt_long(argc, argv, "b:n:g:c:m:hT", long_options, &option_index);
+        c = getopt_long(argc, argv, "b:n:g:c:m:hTV", long_options, &option_index);
         if( c == -1 )
           break;
         switch (c) {
@@ -298,6 +252,9 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] )
           break;
         case 's':
             options->startchannel = atoi(optarg);
+            break;
+        case 'V':
+            options->verbose = 1;
             break;
         case 'T':
             options->with_timing = 1;
