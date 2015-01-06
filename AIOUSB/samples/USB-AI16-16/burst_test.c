@@ -174,13 +174,12 @@ main(int argc, char *argv[] )
           printf("not ok - ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf));
           keepgoing = 0;
       } else {
-      /* unsigned short *tmpbuf = (unsigned short *)&tobuf[0]; */
-        read_count += retval;
+          read_count += retval;
           for( int i = 0, ch = 0 ; i < retval; i ++, ch = ((ch+1)% AIOContinuousBufNumberChannels(buf)) ) {
-            fprintf(fp,"%u,",tobuf[i] );
-            if( (i+1) % AIOContinuousBufNumberChannels(buf) == 0 ) {
-              fprintf(fp,"\n");
-            }
+              fprintf(fp,"%u,",tobuf[i] );
+              if( (i+1) % AIOContinuousBufNumberChannels(buf) == 0 ) {
+                  fprintf(fp,"\n");
+              }
           }
       }
     }

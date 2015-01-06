@@ -304,7 +304,7 @@ unsigned long QueryDeviceInfo( unsigned long DeviceIndex,
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
     if ( result != AIOUSB_SUCCESS ){
-        AIOUSB_UnLock();
+
         return result;
     }
 
@@ -1303,14 +1303,14 @@ AIORESULT AIOUSB_GetAllDevices()
                 unsigned long nameSize = MAX_NAME_SIZE;
                 unsigned long numDIOBytes;
                 unsigned long numCounters;
-                AIOUSB_UnLock();                               /* unlock while communicating with device */
+
                 const unsigned long result = QueryDeviceInfo(index, &productID, &nameSize, name, &numDIOBytes, &numCounters);
                 if(result == AIOUSB_SUCCESS) {
                     name[ nameSize ] = '\0';
                     deviceMask = (deviceMask << 1) | 1;
                 }
 
-                AIOUSB_Lock();
+
             }
         }
     }

@@ -288,15 +288,7 @@ static int CompareResultCodes(const void *p1, const void *p2)
 /*----------------------------------------------------------------------------*/
 const char *AIOUSB_GetResultCodeAsString(unsigned long result_value)
 {
-    char *resultText = "UNKNOWN";
-
-    /* if(AIOUSB_Lock()) { */
-    /*
-     * resultCodeIndex[] represents an index into resultCodeTable[], sorted by result code;
-     * specifically, it contains pointers into resultCodeTable[]; to get the actual result
-     * code, the pointer in resultCodeIndex[] must be dereferenced
-     */
-    /* AIOUSB_UnLock(); */
+    const char *resultText = "UNKNOWN";
     static struct ResultCodeName *resultCodeIndex[ NUM_RESULT_CODES ];  /* index of result codes in resultCodeTable[] */
     unsigned long INIT_PATTERN = 0x100c48b9ul; /* random pattern */
     static unsigned long resultCodeIndexCreated = 0; /* == INIT_PATTERN if index has been created */

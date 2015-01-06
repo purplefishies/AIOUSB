@@ -37,15 +37,15 @@ PUBLIC_EXTERN AIORESULT ADC_GetScan(
                                         unsigned short *pBuf );
  
 PUBLIC_EXTERN AIORESULT ADC_GetConfig(
-                                          unsigned long DeviceIndex,
-                                          unsigned char *pConfigBuf,
-                                          unsigned long *ConfigBufSize );
+                                      unsigned long DeviceIndex,
+                                      unsigned char *pConfigBuf,
+                                      unsigned long *ConfigBufSize );
 
- PUBLIC_EXTERN AIORESULT ADC_SetConfig(
-                                           unsigned long DeviceIndex,
-                                           unsigned char *pConfigBuf,
-                                           unsigned long *ConfigBufSize );
-
+PUBLIC_EXTERN AIORESULT ADC_SetConfig(
+                                      unsigned long DeviceIndex,
+                                      unsigned char *pConfigBuf,
+                                      unsigned long *ConfigBufSize );
+ 
 PUBLIC_EXTERN AIORESULT ADC_RangeAll(
     unsigned long DeviceIndex,
     unsigned char *pGainCodes,

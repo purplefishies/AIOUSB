@@ -170,11 +170,12 @@ AIORET_TYPE AIOContinuousBufInitConfiguration(  AIOContinuousBuf *buf )
 
     /* tmp = AIOUSB_SetConfigBlock( AIOContinuousBufGetDeviceIndex( buf ), &config ); */
 
-    /* tmp = CopyADCConfigBlock( AIOUSBDeviceGetADCConfigBlock( buf ), &config ); */
+    tmp = ADC_SetConfig( AIOContinuousBufGetDeviceIndex( buf ), config.registers, &config.size );
+    if ( tmp != AIOUSB_SUCCESS ) {
+        retval = -(AIORET_TYPE)tmp;
+    }
+        
     tmp = ADCConfigBlockCopy( AIOUSBDeviceGetADCConfigBlock( deviceDesc ), &config );
-
-    /* AIOContinuousBufGetDeviceIndex( buf ); */
-
     if ( tmp != AIOUSB_SUCCESS ) {
         retval = -(AIORET_TYPE)tmp;
     }

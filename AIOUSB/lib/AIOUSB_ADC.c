@@ -48,13 +48,13 @@ static unsigned long ADC_GetImmediate(
 /*----------------------------------------------------------------------------*/
 unsigned long ADC_ResetDevice( unsigned long DeviceIndex  )
 {
-    unsigned long result;
+    AIORESULT result;
     libusb_device_handle *deviceHandle;
     int wValue = 0xe600;
     int wIndex = 1;
     int timeout = 1000;
     unsigned char data[1];
-    DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
+    AIOUSBDevice *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
     if(!deviceDesc || result != AIOUSB_SUCCESS)
         return result;
 
@@ -88,32 +88,6 @@ unsigned long ADC_ResetDevice( unsigned long DeviceIndex  )
 }
 
 /*----------------------------------------------------------------------------*/
-/* void ADC_VerifyAndCorrectConfigBlock( ADConfigBlock *configBlock , DeviceDescriptor *deviceDesc  ) */
-/* { */
-/*     unsigned channel; */
-/*     AIOUSB_Lock(); */
-/*     for(channel = 0; channel < AD_NUM_GAIN_CODE_REGISTERS; channel++) { */
-/*         if(( configBlock->registers[ AD_CONFIG_GAIN_CODE + channel ] &  */
-/*              ~( unsigned char )(AD_DIFFERENTIAL_MODE | AD_GAIN_CODE_MASK ) */
-/*              ) != 0 ) {  */
-/*             configBlock->registers[ AD_CONFIG_GAIN_CODE + channel ] = FIRST_ENUM(ADGainCode); */
-/*         } */
-/*     } */
-/*     const unsigned char calMode = configBlock->registers[ AD_CONFIG_CAL_MODE ]; */
-/*     if( calMode != AD_CAL_MODE_NORMAL && calMode != AD_CAL_MODE_GROUND && calMode != AD_CAL_MODE_REFERENCE ) */
-/*         configBlock->registers[ AD_CONFIG_CAL_MODE ] = AD_CAL_MODE_NORMAL; */
-/*     if((configBlock->registers[ AD_CONFIG_TRIG_COUNT ] & ~AD_TRIGGER_VALID_MASK) != 0) */
-/*         configBlock->registers[ AD_CONFIG_TRIG_COUNT ] = 0; */
-/*     const unsigned endChannel = AIOUSB_GetEndChannel( configBlock ); */
-/*     if( endChannel >= ( unsigned )deviceDesc->ADCMUXChannels  || */
-/*         AIOUSB_GetStartChannel( configBlock ) > endChannel ) */
-/*         AIOUSB_SetScanRange( configBlock, 0, deviceDesc->ADCMUXChannels - 1); */
-/*     /\* deviceDesc->cachedConfigBlock = configBlock; *\/ */
-/*     AIOUSB_UnLock(); */
-/* } */
-
-
-/*----------------------------------------------------------------------------*/
 unsigned long *ADC_GetConfigSize( ADConfigBlock *config ) 
 {
     return &config->size;
@@ -142,15 +116,13 @@ AIOUSB_BOOL ADC_GetTestingMode(ADConfigBlock *config, AIOUSB_BOOL testing )
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE ADC_WriteADConfigBlock( unsigned long DeviceIndex , ADConfigBlock *config )
 {
-    unsigned long result;
+    AIORESULT result = AIOUSB_SUCCESS;
     AIORET_TYPE retval;
-    DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock( DeviceIndex, &result );
 
-    if ( !deviceDesc || result != AIOUSB_SUCCESS )  {
-        retval = -result;
+    AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
+    if ( result  != AIOUSB_SUCCESS )
         goto out_ADC_WriteADConfigBlock;
-    }
-    
+
     result = GenericVendorWrite( DeviceIndex , 
                                  AUR_ADC_SET_CONFIG,
                                  0,
@@ -170,14 +142,12 @@ out_ADC_WriteADConfigBlock:
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE ADC_ReadADConfigBlock( unsigned long DeviceIndex , ADConfigBlock *config )
 {
-    unsigned long result;
+    AIORESULT result;
     AIORET_TYPE retval;
-    DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock( DeviceIndex, &result );
-    if ( !deviceDesc || result != AIOUSB_SUCCESS )  {
-        retval = -result;
+    AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
+    if ( result  != AIOUSB_SUCCESS )
         goto out_ADC_ReadADConfigBlock;
-    }
-    
+
     /* Check size ...not necessary */
     result = GenericVendorRead( DeviceIndex, 
                                 AUR_ADC_GET_CONFIG , 
@@ -193,7 +163,6 @@ AIORET_TYPE ADC_ReadADConfigBlock( unsigned long DeviceIndex , ADConfigBlock *co
     
     
 out_ADC_ReadADConfigBlock:
-    /* AIOUSB_UnLock(); */
     return retval;
 
 }
@@ -209,12 +178,12 @@ unsigned long ReadConfigBlock(unsigned long DeviceIndex,
                               )
 {
     AIORESULT result = AIOUSB_SUCCESS;
-    DeviceDescriptor *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
+    AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
     if ( result  != AIOUSB_SUCCESS )
         return result;
     ADCConfigBlock configBlock = *(ADCConfigBlock*)AIOUSBDeviceGetADCConfigBlock( deviceDesc );
     if(forceRead || deviceDesc->cachedConfigBlock.size == 0) {
-        libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
+        libusb_device_handle *deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
         if( !deviceHandle ) {
             result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
             goto out_ReadConfigBlock;
@@ -223,9 +192,8 @@ unsigned long ReadConfigBlock(unsigned long DeviceIndex,
         /* request A/D configuration block from device */
         ADCConfigBlockInitialize( &configBlock, configBlock.device );
 
-        /* AIOUSB_UnLock(); */
         if( configBlock.testing != AIOUSB_TRUE ) {
-            const int bytesTransferred = libusb_control_transfer(deviceHandle,
+            int bytesTransferred = libusb_control_transfer(deviceHandle,
                                                                  USB_READ_FROM_DEVICE,
                                                                  AUR_ADC_GET_CONFIG,
                                                                  0,
@@ -261,14 +229,12 @@ unsigned long WriteConfigBlock(unsigned long DeviceIndex)
 {
     libusb_device_handle *deviceHandle;
     ADConfigBlock *configBlock;
-    unsigned long result = AIOUSB_SUCCESS;
-    /* DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result); */
-    DeviceDescriptor *deviceDesc = AIOUSB_GetDevice( DeviceIndex );
+    AIORESULT result = AIOUSB_SUCCESS;
+    AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
     int bytesTransferred;
-    if ( !deviceDesc ) {
-        result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
+    if ( result  != AIOUSB_SUCCESS )
         goto out_WriteConfigBlock;
-    }
+
     /* if ( result != AIOUSB_SUCCESS ) { */
     /*     AIOUSB_UnLock(); */
     /*     return result; */
@@ -318,20 +284,20 @@ out_WriteConfigBlock:
  * @param grounCounts
  * @param referenceCounts
  */
-void
-ADC_Acquire_Reference_Counts(
-                                unsigned long DeviceIndex,
-                                double *groundCounts,
-                                double *referenceCounts
-                                )
+AIORESULT ADC_Acquire_Reference_Counts(
+                                       unsigned long DeviceIndex,
+                                       double *groundCounts,
+                                       double *referenceCounts
+                                       )
 {
     int reading;
-    unsigned long result;
+    AIORESULT result = AIOUSB_SUCCESS;
     double averageCounts;
-    DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS ) 
+        return result;
 
     for(reading = 0; reading <= 1; reading++) {
-          /* AIOUSB_Lock(); */
           AIOUSB_SetCalMode(&deviceDesc->cachedConfigBlock, (reading == 0) ? AD_CAL_MODE_GROUND : AD_CAL_MODE_REFERENCE);
 
           result = WriteConfigBlock(DeviceIndex);
@@ -341,8 +307,8 @@ ADC_Acquire_Reference_Counts(
              * average a bunch of readings to get a nice, stable
              * reading
              */
-                const int AVERAGE_SAMPLES = 256;
-                const unsigned MAX_GROUND = 0x00ff, MIN_REFERENCE = 0xf000;
+                int AVERAGE_SAMPLES = 256;
+                unsigned MAX_GROUND = 0x00ff, MIN_REFERENCE = 0xf000;
                 long countsSum = 0;
                 int sample;
                 unsigned short counts[ MAX_IMM_ADCS ];
@@ -377,7 +343,7 @@ ADC_Acquire_Reference_Counts(
             }
       }
 RETURN_AIOUSB_GetBulkAcquire:
-    return;
+    return result;
 }
 
 
@@ -408,16 +374,19 @@ PRIVATE unsigned long AIOUSB_GetScan(
     int numChannels, samplesPerChannel, libusbresult;
     unsigned numSamples, overSample, triggerMode,  bytesTransferred;     
     unsigned short *sampleBuffer;
-    unsigned long result = AIOUSB_SUCCESS;
+    AIORESULT result = AIOUSB_SUCCESS;
     unsigned char bcdata[] = {0x05,0x00,0x00,0x00 };
 
     /* AIOUSB_UnLock(); */
     if(counts == NULL)
         return AIOUSB_ERROR_INVALID_PARAMETER;
-    DeviceDescriptor * deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
+
+    AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
+    if ( result  != AIOUSB_SUCCESS )
+        return result;
+
     libusb_device_handle *deviceHandle;
-    if(result != AIOUSB_SUCCESS)
-        goto out_AIOUSB_GetScan;
+
 
     if(deviceDesc->bADCStream == AIOUSB_FALSE) {
         result = AIOUSB_ERROR_NOT_SUPPORTED;
@@ -645,13 +614,13 @@ unsigned ADC_GetOversample_Cached( ADConfigBlock *config )
 unsigned ADC_GainCode_Cached( ADConfigBlock *config, unsigned channel)
 {
   assert(config);
-  DeviceDescriptor *deviceDesc = (DeviceDescriptor *)config->device;
+  AIOUSBDevice *deviceDesc = (AIOUSBDevice *)config->device;
   unsigned gainCode = (config->registers[ AD_CONFIG_GAIN_CODE + channel / deviceDesc->ADCChannelsPerGroup ] & ( unsigned char )AD_GAIN_CODE_MASK );
   return gainCode;
 }
 
 /*--------------------------------------------------------------------------*/
-/* DeviceDescriptor *AIOUSB_GetDevice_NoCheck( unsigned long DeviceIndex  ) */
+/* AIOUSBDevice *AIOUSB_GetDevice_NoCheck( unsigned long DeviceIndex  ) */
 /* { */
 /*   return &deviceTable[DeviceIndex]; */
 /* } */
@@ -676,13 +645,11 @@ AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex,
     unsigned pos, cur;
     if(counts == NULL)
         return (AIORET_TYPE)-AIOUSB_ERROR_INVALID_PARAMETER;
-    /* DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);     */
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
-    if ( result != AIOUSB_SUCCESS ){
-        /* AIOUSB_UnLock(); */
+    if ( result != AIOUSB_SUCCESS ) 
         return result;
-    }
+
 
     if( !deviceDesc )
         return (AIORET_TYPE)-AIOUSB_ERROR_INVALID_DATA;
@@ -738,29 +705,27 @@ PRIVATE unsigned long AIOUSB_ArrayCountsToVolts(
     double volts[]
      )
 {
-     unsigned long result;
-     DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock( DeviceIndex, &result);
-     
+    AIORESULT result;
+    AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
+    if ( result  != AIOUSB_SUCCESS )
+        return result;
+    
      if( startChannel < 0 ||
          numChannels < 0 ||
          startChannel + numChannels > ( int )deviceDesc->ADCMUXChannels ||
          counts == NULL ||
          volts == NULL
          ) {
-         /* AIOUSB_UnLock(); */
          return AIOUSB_ERROR_INVALID_PARAMETER;
      }
 
      result = ReadConfigBlock(DeviceIndex, AIOUSB_FALSE);
      if(result == AIOUSB_SUCCESS) {
-          /* AIOUSB_Lock(); */
           for(int channel = 0; channel < numChannels; channel++) {
                int gainCode = AIOUSB_GetGainCode(&deviceDesc->cachedConfigBlock, startChannel + channel);
-               /* assert(gainCode >= FIRST_ENUM(ADGainCode) && gainCode <= LAST_ENUM(ADGainCode)); */
                const struct ADRange *const range = &adRanges[ gainCode ];
                volts[ channel ] = ( (( double )counts[ channel ] / ( double )AI_16_MAX_COUNTS) * range->range ) + range->minVolts;
           }
-          /* AIOUSB_UnLock(); */
      }
 
      return result;
@@ -784,43 +749,35 @@ PRIVATE unsigned long AIOUSB_ArrayVoltsToCounts(
                                                 )
 {
     AIORESULT result = AIOUSB_SUCCESS;
-    /* if(!AIOUSB_Lock()) */
-    /*     return AIOUSB_ERROR_INVALID_MUTEX; */
-    /* unsigned long result = AIOUSB_Validate(&DeviceIndex); */
-    /* if(result != AIOUSB_SUCCESS) { */
-    /*       AIOUSB_UnLock(); */
-    /*       return result; */
-    /*   } */
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
-    /* DeviceDescriptor *deviceDesc = &deviceTable[ DeviceIndex ]; */
 
     if( startChannel < 0 || numChannels < 0 || startChannel + numChannels > ( int )deviceDesc->ADCMUXChannels ||
         volts == NULL || counts == NULL ) 
         return AIOUSB_ERROR_INVALID_PARAMETER;
 
     result = ReadConfigBlock(DeviceIndex, AIOUSB_FALSE);
-    if(result == AIOUSB_SUCCESS) {
-          /* AIOUSB_Lock(); */
-          int channel;
-          for(channel = 0; channel < numChannels; channel++) {
-                int gainCode = AIOUSB_GetGainCode(&deviceDesc->cachedConfigBlock, startChannel + channel);
-                assert(gainCode >= FIRST_ENUM(ADGainCode) &&
-                       gainCode <= LAST_ENUM(ADGainCode));
 
+    if(result != AIOUSB_SUCCESS)
+        return result;
 
-                const struct ADRange *const range = &adRanges[ gainCode ];
-                int rawCounts = round(
-                    ( double )AI_16_MAX_COUNTS
-                    * (volts[ channel ] - range->minVolts)
-                    / range->range
-                    );
-                if(rawCounts < 0)
-                    rawCounts = 0;
-                else if(rawCounts > AI_16_MAX_COUNTS)
-                    rawCounts = AI_16_MAX_COUNTS;
-                counts[ channel ] = ( unsigned short )rawCounts;
-            }
-      }
+    int channel;
+    for(channel = 0; channel < numChannels; channel++) {
+        int gainCode = AIOUSB_GetGainCode(&deviceDesc->cachedConfigBlock, startChannel + channel);
+        assert(gainCode >= FIRST_ENUM(ADGainCode) &&
+               gainCode <= LAST_ENUM(ADGainCode));
+        
+        const struct ADRange *const range = &adRanges[ gainCode ];
+        int rawCounts = round(
+                              ( double )AI_16_MAX_COUNTS
+                              * (volts[ channel ] - range->minVolts)
+                              / range->range
+                              );
+        if(rawCounts < 0)
+            rawCounts = 0;
+        else if(rawCounts > AI_16_MAX_COUNTS)
+            rawCounts = AI_16_MAX_COUNTS;
+        counts[ channel ] = ( unsigned short )rawCounts;
+    }
 
     return result;
 }
@@ -839,14 +796,8 @@ unsigned long ADC_GetChannelV(
                               )
 {
     AIORESULT result = AIOUSB_SUCCESS;
-    /* if(!AIOUSB_Lock()) */
-    /*     return AIOUSB_ERROR_INVALID_MUTEX; */
-    /* unsigned long result = AIOUSB_Validate(&DeviceIndex); */
-    /* if(result != AIOUSB_SUCCESS) { */
-    /*       return result; */
-    /*   } */
 
-    DeviceDescriptor *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
     if(deviceDesc->bADCStream == AIOUSB_FALSE)
         return AIOUSB_ERROR_NOT_SUPPORTED;
 
@@ -874,27 +825,27 @@ unsigned long ADC_GetChannelV(
      */
 
     result = ReadConfigBlock(DeviceIndex, AIOUSB_FALSE);
-    if (result == AIOUSB_SUCCESS) {
-          /* AIOUSB_Lock(); */
-          ADConfigBlock origConfigBlock = deviceDesc->cachedConfigBlock;       // restore when done
-          AIOUSB_SetScanRange(&deviceDesc->cachedConfigBlock, ChannelIndex, ChannelIndex);
+    if ( result != AIOUSB_SUCCESS ) {
+        return result;
+    }
 
-          result = WriteConfigBlock(DeviceIndex);
-          unsigned short counts;
-          result = AIOUSB_GetScan(DeviceIndex, &counts);
-          if(result == AIOUSB_SUCCESS) {
-                double volts;
-                result = AIOUSB_ArrayCountsToVolts(DeviceIndex, ChannelIndex, 1, &counts, &volts);
-                if(result == AIOUSB_SUCCESS)
-                    *pBuf = volts;
-                else
-                    *pBuf = 0.0;
-            }
-          /* AIOUSB_Lock(); */
-          deviceDesc->cachedConfigBlock = origConfigBlock;
+    ADConfigBlock origConfigBlock = deviceDesc->cachedConfigBlock;       // restore when done
+    AIOUSB_SetScanRange(&deviceDesc->cachedConfigBlock, ChannelIndex, ChannelIndex);
 
-          WriteConfigBlock(DeviceIndex);
-      }
+    result = WriteConfigBlock(DeviceIndex);
+    unsigned short counts;
+    result = AIOUSB_GetScan(DeviceIndex, &counts);
+    if(result == AIOUSB_SUCCESS) {
+        double volts;
+        result = AIOUSB_ArrayCountsToVolts(DeviceIndex, ChannelIndex, 1, &counts, &volts);
+        if(result == AIOUSB_SUCCESS)
+            *pBuf = volts;
+        else
+            *pBuf = 0.0;
+    }
+
+    deviceDesc->cachedConfigBlock = origConfigBlock;
+    WriteConfigBlock(DeviceIndex);
 
     return result;
 }
@@ -915,14 +866,16 @@ unsigned long ADC_GetScanV(
     if ( !pBuf )
         return AIOUSB_ERROR_INVALID_PARAMETER;
 
-    /* if(!AIOUSB_Lock()) */
-    /*     return AIOUSB_ERROR_INVALID_MUTEX; */
 
-    unsigned long result = AIOUSB_Validate(&DeviceIndex);
+    AIORESULT result = AIOUSB_Validate(&DeviceIndex);
     if ( result != AIOUSB_SUCCESS )
         return result;
 
-    DeviceDescriptor *deviceDesc = &deviceTable[ DeviceIndex ];
+    /* AIOUSBDevice *deviceDesc = &deviceTable[ DeviceIndex ]; */
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS ) 
+        return result;
+
     if ( !deviceDesc->bADCStream ) 
         return AIOUSB_ERROR_NOT_SUPPORTED;
 
@@ -980,8 +933,8 @@ unsigned long ADC_GetScan(
                           )
 {
     unsigned startChannel;
-    unsigned long result;
-    DeviceDescriptor * deviceDesc;
+    AIORESULT result;
+    AIOUSBDevice * deviceDesc;
     if(pBuf == NULL) {
         result =  AIOUSB_ERROR_INVALID_PARAMETER;
         goto err_ADC_GetScan;
@@ -1017,12 +970,15 @@ unsigned long ADC_GetScan(
     return result;
 }
 
-static DeviceDescriptor *ADC_CheckSupported_Lock( unsigned long DeviceIndex, unsigned long *result )
+static AIOUSBDevice *ADC_CheckSupported_Lock( unsigned long DeviceIndex, unsigned long *result )
 {
-    DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock( DeviceIndex, result );
+    AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , result );
+    if ( *result  != AIOUSB_SUCCESS )
+        return (AIOUSBDevice*)NULL;
+
     if (deviceDesc->ConfigBytes == 0) {
         *result = AIOUSB_ERROR_NOT_SUPPORTED;
-        return (DeviceDescriptor*)NULL;
+        return (AIOUSBDevice*)NULL;
     }
     if( deviceDesc == 0 && *result == AIOUSB_SUCCESS ) 
         *result = AIOUSB_ERROR_OPEN_FAILED;
@@ -1043,11 +999,11 @@ unsigned long ADC_GetConfig(
     unsigned long *ConfigBufSize
     )
 {
-    unsigned long result;
+    AIORESULT result;
     if( ConfigBuf == NULL || ConfigBufSize == NULL ) 
          return AIOUSB_ERROR_INVALID_PARAMETER;
 
-    DeviceDescriptor *deviceDesc = ADC_CheckSupported_Lock( DeviceIndex, &result );
+    AIOUSBDevice *deviceDesc = ADC_CheckSupported_Lock( DeviceIndex, &result );
 
     if(*ConfigBufSize < deviceDesc->ConfigBytes) {
         *ConfigBufSize = deviceDesc->ConfigBytes;
@@ -1096,7 +1052,7 @@ int adcblock_valid_channel_settings(ADConfigBlock *config , int ADCMUXChannels )
 unsigned long 
 valid_config_block( ADConfigBlock *config )
 {
-     unsigned long result = 0;
+     AIORESULT result = 0;
      return result;
 }
 
@@ -1106,9 +1062,8 @@ adcblock_valid_size( ADConfigBlock *config )
      return config->size > 0 && config->size <= AD_MAX_CONFIG_REGISTERS;
 }
 
+/*----------------------------------------------------------------------------*/
 /**
- *
- *
  * @param DeviceIndex
  * @param pConfigBuf
  * @param ConfigBufSize
@@ -1116,20 +1071,20 @@ adcblock_valid_size( ADConfigBlock *config )
  * @return
  */
 unsigned long ADC_SetConfig(
-    unsigned long DeviceIndex,
-    unsigned char *pConfigBuf,
-    unsigned long *ConfigBufSize
-    )
+                            unsigned long DeviceIndex,
+                            unsigned char *pConfigBuf,
+                            unsigned long *ConfigBufSize
+                            )
 {
 
      unsigned endChannel;
-     unsigned long result;
+     AIORESULT result;
      if( pConfigBuf == NULL || ConfigBufSize == NULL )
           return AIOUSB_ERROR_INVALID_PARAMETER;
 
-     DeviceDescriptor *const deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
-     if(result != AIOUSB_SUCCESS || !deviceDesc)
-          goto out_ADC_SetConfig;
+     AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
+     if ( result  != AIOUSB_SUCCESS )
+         return result;
 
      if(deviceDesc->ConfigBytes == 0)
          return AIOUSB_ERROR_NOT_SUPPORTED;
@@ -1189,7 +1144,7 @@ out_ADC_SetConfig:
      return result;
 }
 
-
+/*----------------------------------------------------------------------------*/
 /** 
  * @brief Copies the given ADConfig object into the cachedConfigBlock
  * that is used to communicate with the USB device 
@@ -1204,13 +1159,13 @@ unsigned long ADC_CopyConfig(
     )
 {
 
-     unsigned long result;
+     AIORESULT result;
      if( config== NULL )
           return AIOUSB_ERROR_INVALID_PARAMETER;
 
-     DeviceDescriptor *const deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
-     if( !deviceDesc || result != AIOUSB_SUCCESS )
-          goto out_ADC_CopyConfig;
+     AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
+     if ( result  != AIOUSB_SUCCESS )
+         return result;
 
      if(deviceDesc->ConfigBytes == 0) {
           result =  AIOUSB_ERROR_NOT_SUPPORTED;
@@ -1259,10 +1214,7 @@ out_ADC_CopyConfig:
      return result;
 }
 
-
-
-
-
+/*----------------------------------------------------------------------------*/
 /**
  * @param DeviceIndex
  * @param pGainCodes
@@ -1288,8 +1240,8 @@ unsigned long ADC_RangeAll(
     /*       AIOUSB_UnLock(); */
     /*       return result; */
     /*   } */
-    /* DeviceDescriptor *deviceDesc = &deviceTable[ DeviceIndex ]; */
-    DeviceDescriptor *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    /* AIOUSBDevice *deviceDesc = &deviceTable[ DeviceIndex ]; */
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
     if ( result != AIOUSB_SUCCESS )
         return result;
     if( deviceDesc->ADCChannels == 0 || deviceDesc->bADCStream == AIOUSB_FALSE )
@@ -1320,6 +1272,7 @@ unsigned long ADC_RangeAll(
     return result;
 }
 
+/*----------------------------------------------------------------------------*/
 /**
  * @param DeviceIndex
  * @param ADChannel
@@ -1333,12 +1286,10 @@ unsigned long ADC_Range1(unsigned long DeviceIndex,
                          unsigned long bSingleEnded
                          )
 {
-    unsigned long result;
-    DeviceDescriptor *const deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
-
-    if(result != AIOUSB_SUCCESS || !deviceDesc)
-        goto out_adc_range1;
-
+    AIORESULT result;
+    AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
+    if ( result  != AIOUSB_SUCCESS )
+        return result;
 
     result = AIOUSB_ERROR_NOT_SUPPORTED;
     if(deviceDesc->ADCMUXChannels == 0 || deviceDesc->bADCStream == AIOUSB_FALSE)
@@ -1371,8 +1322,7 @@ out_adc_range1:
     return result;
 }
 
-
-
+/*----------------------------------------------------------------------------*/
 /**
  * @param DeviceIndex
  * @param TriggerMode
@@ -1402,7 +1352,7 @@ unsigned long ADC_ADMode(
     /*       AIOUSB_UnLock(); */
     /*       return result; */
     /*   } */
-    DeviceDescriptor *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
     if ( result != AIOUSB_SUCCESS )
         return result;
     
@@ -1421,18 +1371,21 @@ unsigned long ADC_ADMode(
     return result;
 }
 
+/*----------------------------------------------------------------------------*/
 /**
  * @param DeviceIndex
  * @param Oversample
  * @return
  */
-unsigned long ADC_SetOversample(
-                                unsigned long DeviceIndex,
-                                unsigned char Oversample
-                                )
+AIORESULT ADC_SetOversample(
+                            unsigned long DeviceIndex,
+                            unsigned char Oversample
+                            )
 {
-    unsigned long result;
-    DeviceDescriptor *const deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
+    AIORESULT result;
+    AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
+    if ( result  != AIOUSB_SUCCESS )
+        return result;
 
     if(result != AIOUSB_SUCCESS || !deviceDesc )
         goto out_ADC_SetOversample;
@@ -1454,30 +1407,30 @@ out_ADC_SetOversample:
     return result;
 }
 
+/*----------------------------------------------------------------------------*/
 /**
  * @param DeviceIndex 
  * @return 
  */
 unsigned ADC_GetOversample( unsigned long DeviceIndex )
 {
-    unsigned long result;
-    DeviceDescriptor *const deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
-
-    if(!deviceDesc || result != AIOUSB_SUCCESS )
-         goto out_adc_setoversample;
+    AIORESULT result;
+    AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
+    if ( result  != AIOUSB_SUCCESS )
+        return result;
     
     ReadConfigBlock(DeviceIndex, AIOUSB_FALSE);
 
     result = (unsigned long)AIOUSB_GetOversample(&deviceDesc->cachedConfigBlock );
 
-out_adc_setoversample:
    return result;
 }
 
+/*----------------------------------------------------------------------------*/
 AIORESULT ADC_SetAllGainCodeAndDiffMode( unsigned long DeviceIndex, unsigned gain, AIOUSB_BOOL differentialMode ) 
 {
-    unsigned long result;
-    DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
+    AIORESULT result;
+    AIOUSBDevice *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
     if(result != AIOUSB_SUCCESS || !deviceDesc )
         goto out_ADC_SetAllGainCodeAndDiffMode;
     else if( deviceDesc->bADCStream == AIOUSB_FALSE) {
@@ -1504,8 +1457,8 @@ unsigned long ADC_SetScanLimits(
     unsigned long EndChannel
     )
 {
-    unsigned long result;
-    DeviceDescriptor *const deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
+    AIORESULT result;
+    AIOUSBDevice *const deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
     if(!deviceDesc || deviceDesc->bADCStream == AIOUSB_FALSE) {
         result =  AIOUSB_ERROR_NOT_SUPPORTED;
         goto out_ADC_SetScanLimits;
@@ -1542,7 +1495,7 @@ unsigned long ADC_SetCal(
         return AIOUSB_ERROR_INVALID_PARAMETER;
 
     assert(strlen(CalFileName) > 0);
-    unsigned long result;
+    AIORESULT result;
     if(strcmp(CalFileName, ":AUTO:") == 0)
         result = AIOUSB_ADC_InternalCal(DeviceIndex, AIOUSB_TRUE, 0, 0);
     else if(
@@ -1619,7 +1572,7 @@ unsigned long ADC_Initialize(
     const char *CalFileName
     )
 {
-    unsigned long result = AIOUSB_SUCCESS;
+    AIORESULT result = AIOUSB_SUCCESS;
 
     if(
         pConfigBuf != NULL &&
@@ -1663,7 +1616,12 @@ unsigned long ADC_BulkAcquire(
     /*     return result; */
     /* } */
 
-    DeviceDescriptor * deviceDesc = &deviceTable[ DeviceIndex ];
+    /* AIOUSBDevice * deviceDesc = &deviceTable[ DeviceIndex ]; */
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS ) 
+        return result;
+
+
     if (deviceDesc->bADCStream == AIOUSB_FALSE)
         return AIOUSB_ERROR_NOT_SUPPORTED;
 
@@ -1743,12 +1701,16 @@ unsigned long ADC_BulkAcquire(
 
 static void *startAcquire(void *params)
 {
+    static AIORESULT result = AIOUSB_SUCCESS;
     struct BulkAcquireWorkerParams * acquireParams = ( struct BulkAcquireWorkerParams* )params;
-    DeviceDescriptor * deviceDesc = &deviceTable[ acquireParams->DeviceIndex ];
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( acquireParams->DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS ) 
+        return &result;
+
     double clockHz = deviceDesc->miscClockHz;
     sched_yield();
-    CTR_StartOutputFreq( acquireParams->DeviceIndex,  0, &clockHz);
-    return 0;
+    result = CTR_StartOutputFreq( acquireParams->DeviceIndex,  0, &clockHz);
+    return &result;
 }
 
 #define STREAMING_PNA_DEFINITIONS                                       \
@@ -1768,12 +1730,19 @@ static void *startAcquire(void *params)
  */
 static void *BulkAcquireWorker(void *params)
 {
-    assert(params != 0);
-    unsigned long result = AIOUSB_SUCCESS;
+    static unsigned long result = AIOUSB_SUCCESS;
+    if ( !params ) {
+        result = AIOUSB_ERROR_INVALID_PARAMETER;
+        return &result;
+    }
+        
     struct BulkAcquireWorkerParams * acquireParams = ( struct BulkAcquireWorkerParams* )params;
     int libusbResult;
-    /* AIOUSB_Lock(); */
-    DeviceDescriptor * deviceDesc = &deviceTable[ acquireParams->DeviceIndex ];
+    /* AIOUSBDevice * deviceDesc = &deviceTable[ acquireParams->DeviceIndex ]; */
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( acquireParams->DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS ) 
+        return &result;
+
     libusb_device_handle * deviceHandle = AIOUSB_GetDeviceHandle(acquireParams->DeviceIndex);
     pthread_t startAcquireThread;
     unsigned long streamingBlockSize , bytesRemaining;
@@ -1803,8 +1772,6 @@ static void *BulkAcquireWorker(void *params)
     deviceDesc->workerStatus = bytesRemaining;       // deviceDesc->workerStatus == bytes remaining to receive
     deviceDesc->workerResult = AIOUSB_SUCCESS;
     deviceDesc->workerBusy = AIOUSB_TRUE;
-
-    /* AIOUSB_UnLock(); */
 
     data = ( unsigned char* )acquireParams->pBuf;
 
@@ -1918,8 +1885,8 @@ DeleteBuffer( AIOBuf *buf )
  */
 AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex )
 {
-  unsigned long result;
-  DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
+  AIORESULT result;
+  AIOUSBDevice *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
   if(!deviceDesc || result != AIOUSB_SUCCESS) {
        aio_errno = -result;
        return (AIOBuf*)NULL;
@@ -2034,7 +2001,7 @@ static unsigned long ADC_GetImmediate(
     /*       AIOUSB_UnLock(); */
     /*       return result; */
     /*   }  */
-    /* DeviceDescriptor *deviceDesc = &deviceTable[ DeviceIndex ]; */
+    /* AIOUSBDevice *deviceDesc = &deviceTable[ DeviceIndex ]; */
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
     if ( result != AIOUSB_SUCCESS )
         return result;
@@ -2078,7 +2045,12 @@ unsigned long ADC_CreateFastITConfig(unsigned long DeviceIndex,
                                      int size
                                      )
 {
-    DeviceDescriptor *deviceDesc = &deviceTable[ DeviceIndex ];
+    /* AIOUSBDevice *deviceDesc = &deviceTable[ DeviceIndex ]; */
+    AIORESULT result = AIOUSB_SUCCESS;
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS ) 
+        return result;
+
 
     if(!deviceDesc->FastITConfig || deviceDesc->FastITConfig->size <= 0) {
           deviceDesc->FastITConfig = (ADConfigBlock*)malloc(sizeof(ADConfigBlock));
@@ -2104,9 +2076,13 @@ unsigned char *ADC_GetADConfigBlock_Registers(ADConfigBlock *config)
  * @param DeviceIndex
  */
 /*----------------------------------------------------------------------------*/
-void ADC_ClearFastITConfig(unsigned long DeviceIndex)
+AIORESULT ADC_ClearFastITConfig(unsigned long DeviceIndex)
 {
-    DeviceDescriptor *deviceDesc = &deviceTable[ DeviceIndex ];
+    /* AIOUSBDevice *deviceDesc = &deviceTable[ DeviceIndex ]; */
+    AIORESULT result = AIOUSB_SUCCESS;
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS ) 
+        return result;
 
     if(deviceDesc->FastITConfig->size) {
           free(deviceDesc->FastITConfig);
@@ -2114,12 +2090,13 @@ void ADC_ClearFastITConfig(unsigned long DeviceIndex)
           deviceDesc->FastITConfig = NULL;
           deviceDesc->FastITBakConfig = NULL;
       }
+    return result;
 }
 
 
 
 /*----------------------------------------------------------------------------*/
-unsigned long ADC_CreateADBuf(DeviceDescriptor *const deviceDesc,
+unsigned long ADC_CreateADBuf(AIOUSBDevice *const deviceDesc,
                               int size
                               )
 {
@@ -2131,7 +2108,7 @@ unsigned long ADC_CreateADBuf(DeviceDescriptor *const deviceDesc,
     return AIOUSB_SUCCESS;
 }
 /*----------------------------------------------------------------------------*/
-void ADC_ClearADBuf(DeviceDescriptor *deviceDesc)
+void ADC_ClearADBuf(AIOUSBDevice *deviceDesc)
 {
     if(deviceDesc->ADBuf_size) {
           free(deviceDesc->ADBuf);
@@ -2144,13 +2121,13 @@ unsigned long ADC_InitFastITScanV(
     )
 {
     int Dat;
-    unsigned long result;
+    AIORESULT result;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
 
     if ( result != AIOUSB_SUCCESS )
         return result;
 
-    /* DeviceDescriptor *deviceDesc = &deviceTable[ DeviceIndex ]; */
+    /* AIOUSBDevice *deviceDesc = &deviceTable[ DeviceIndex ]; */
     /* if(!AIOUSB_Lock()) */
     /*     return AIOUSB_ERROR_INVALID_MUTEX; */
     /* result = AIOUSB_Validate(&DeviceIndex); */
@@ -2212,8 +2189,12 @@ unsigned long ADC_ResetFastITScanV(
     unsigned long DeviceIndex
     )
 {
-    unsigned long result = 0;
-    DeviceDescriptor *deviceDesc = &deviceTable[ DeviceIndex ];
+    AIORESULT result = 0;
+    /* AIOUSBDevice *deviceDesc = &deviceTable[ DeviceIndex ]; */
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS ) 
+        return result;
+
 
     if(!deviceDesc->bADCStream || deviceDesc->ConfigBytes < 20) {
         result = AIOUSB_ERROR_BAD_TOKEN_TYPE;
@@ -2236,9 +2217,13 @@ unsigned long ADC_SetFastITScanVChannels(
                                          unsigned long NewChannels
                                          )
 {
-    unsigned long result = 0;
+    AIORESULT result = 0;
     ADConfigBlock configBlock;
-    DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
+    /* AIOUSBDevice *const deviceDesc = &deviceTable[ DeviceIndex ]; */
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS ) 
+        return result;
+
 
     configBlock.device = deviceDesc;
     configBlock.size = deviceDesc->ConfigBytes;
@@ -2497,7 +2482,7 @@ char * ADConfigBlockToYAML(ADConfigBlock *config)
  */
 unsigned long ADC_GetFastITScanV(unsigned long DeviceIndex, double *pData)
 {
-    unsigned long result = 0;
+    AIORESULT result = 0;
 
     int StartChannel;
     int EndChannel;
@@ -2512,7 +2497,7 @@ unsigned long ADC_GetFastITScanV(unsigned long DeviceIndex, double *pData)
     double CLOCK_SPEED = 100000;
     int i, ch;
 
-    DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
+    AIOUSBDevice *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
 
     if( !deviceDesc || result != AIOUSB_SUCCESS )
         goto out_ADC_GetFastITScanV;
@@ -2646,9 +2631,13 @@ AIOUSB_BOOL AIOUSB_IsDiscardFirstSample(
                                         )
 {
     AIOUSB_BOOL discard = AIOUSB_FALSE;
+    AIORESULT result = AIOUSB_SUCCESS;
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS ) 
+        return result;
 
-    if(AIOUSB_Validate(&DeviceIndex) == AIOUSB_SUCCESS)
-        discard = deviceTable[ DeviceIndex ].discardFirstSample;
+    /* if(AIOUSB_Validate(&DeviceIndex) == AIOUSB_SUCCESS) */
+        discard = deviceDesc->discardFirstSample;
 
     return discard;
 }
@@ -2663,14 +2652,14 @@ unsigned long AIOUSB_SetDiscardFirstSample(
                                            AIOUSB_BOOL discard
                                            )
 {
-    unsigned long result;
-    DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
-    if (result != AIOUSB_SUCCESS || !deviceDesc )
-        goto out_AIOUSB_SetDiscardFirstSample;
+    AIORESULT result;
+    /* AIOUSBDevice *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result); */
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS ) 
+        return result;
 
-    deviceTable[ DeviceIndex ].discardFirstSample = discard;
-out_AIOUSB_SetDiscardFirstSample:
-    /* AIOUSB_UnLock(); */
+    deviceDesc->discardFirstSample = discard;
+
     return result;
 }
 /*----------------------------------------------------------------------------*/
@@ -2683,7 +2672,7 @@ void AIOUSB_Copy_Config_Block(ADConfigBlock *to, ADConfigBlock *from)
 /*----------------------------------------------------------------------------*/
 unsigned long AIOUSB_Validate_ADC_Device(unsigned long DeviceIndex)
 {
-    unsigned long result;
+    AIORESULT result;
 
     if( (result = AIOUSB_Validate_Device( DeviceIndex ) ) != AIOUSB_SUCCESS )
         goto RETURN_AIOUSB_Validate_ADC_Device;
@@ -2753,33 +2742,33 @@ void DoLoadCalTable(
  * @param channel
  * @param gainCode
  */
-void AIOUSB_SetRangeSingle(ADConfigBlock *config, unsigned long channel, unsigned char gainCode)
+AIORESULT AIOUSB_SetRangeSingle(ADConfigBlock *config, unsigned long channel, unsigned char gainCode)
 {
-    assert(config != 0);
-    if(
-        config != 0 &&
-        config->device != 0 &&
-        config->size != 0 &&
-        gainCode <= LAST_ENUM(ADGainCode)
-        ) {
-        DeviceDescriptor * deviceDesc = ( DeviceDescriptor* )config->device;
-        if(
-           channel < AD_MAX_CHANNELS &&
-           channel < deviceDesc->ADCMUXChannels
-           ) {
-            assert(deviceDesc->ADCChannelsPerGroup != 0);
-            int reg = AD_CONFIG_GAIN_CODE + channel / deviceDesc->ADCChannelsPerGroup;
-            assert(reg < AD_NUM_GAIN_CODE_REGISTERS);
-            
-            config->registers[ reg ] = gainCode;
-        }
-        /* AIOUSB_UnLock(); */
+    AIORESULT result = AIOUSB_SUCCESS;
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    if( !config || !config->size || gainCode > LAST_ENUM( ADGainCode ) )
+        return AIOUSB_ERROR_INVALID_PARAMETER;
+
+    AIOUSBDevice *deviceDesc = ADCConfigBlockGetAIOUSBDevice( config, &retval );
+    if ( retval != AIOUSB_SUCCESS ) 
+        return (AIORESULT)retval;
+
+    if( channel < AD_MAX_CHANNELS && channel < deviceDesc->ADCMUXChannels ) {
+
+        if ( !deviceDesc->ADCChannelsPerGroup )
+            return AIOUSB_ERROR_INVALID_CHANNELS_PER_GROUP_SETTING;
+
+        int reg = AD_CONFIG_GAIN_CODE + channel / deviceDesc->ADCChannelsPerGroup;
+
+        if ( reg > AD_NUM_GAIN_CODE_REGISTERS ) 
+            return AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING;
+        config->registers[ reg ] = gainCode;
     }
+
+    return result;
 }
 
 int dRef = 3;
-
-
 
 AIORET_TYPE ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *config )
 {
@@ -2862,36 +2851,23 @@ unsigned long AIOUSB_ADC_InternalCal(
     if ( retval != AIOUSB_SUCCESS ) 
         return retval;
 
-    /* if(!AIOUSB_Lock()) */
-    /*     return AIOUSB_ERROR_INVALID_MUTEX; */
-    /* unsigned long result = AIOUSB_Validate(&DeviceIndex); */
-    /* if(result != AIOUSB_SUCCESS) { */
-    /*       AIOUSB_UnLock(); */
-    /*       return result; */
-    /*   } */
-    /* DeviceDescriptor * deviceDesc = &deviceTable[ DeviceIndex ]; */
-
-    if (deviceDesc->bADCStream == AIOUSB_FALSE) {
-        /* AIOUSB_UnLock(); */
+    if (deviceDesc->bADCStream == AIOUSB_FALSE)
         return AIOUSB_ERROR_NOT_SUPPORTED;
-    }
-    oConfig = deviceDesc->cachedConfigBlock;
-    if((retval = ADC_QueryCal(DeviceIndex)) != AIOUSB_SUCCESS) {
-        /* AIOUSB_UnLock(); */
-        return retval;
-    }
 
-    /* AIOUSB_UnLock(); */
+    oConfig = deviceDesc->cachedConfigBlock;
+
+    if((retval = ADC_QueryCal(DeviceIndex)) != AIOUSB_SUCCESS)
+        return retval;
+
     unsigned short * calTable = ( unsigned short* )malloc(CAL_TABLE_WORDS * sizeof(unsigned short));
 
     if (!calTable) {
         retval = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
-          goto INTERNAL_CAL_ERRORS;
+        goto out_AIOUSB_ADC_InternalCal;
     }
 
 
-    ADC_GetConfig( DeviceIndex, oConfig.registers, &oConfig.size );
-
+    retval = ADC_GetConfig( DeviceIndex, oConfig.registers, &oConfig.size );
 
     if( autoCal ) {
         /* lowRef = lowRefRef; */
@@ -2923,7 +2899,7 @@ unsigned long AIOUSB_ADC_InternalCal(
             tmpval = ConfigureAndBulkAcquire( DeviceIndex, &nConfig );
             if ( tmpval < 0xf000 ) {
                 retval = AIOUSB_ERROR_INVALID_DATA;
-                goto abort;
+                goto free_AIOUSB_ADC_InternalCal;
             }
             hiRead = tmpval;
             
@@ -2934,12 +2910,12 @@ unsigned long AIOUSB_ADC_InternalCal(
             if ( k ==0 ) {
                 if ( tmpval < 0x7e00 || tmpval > 0x80ff ) {
                     retval = AIOUSB_ERROR_INVALID_DATA;
-                    goto abort;
+                    goto free_AIOUSB_ADC_InternalCal;
                 }
             } else {
                 if ( tmpval > 0x00ff ) {
                     retval = AIOUSB_ERROR_INVALID_DATA;
-                    goto abort;
+                    goto free_AIOUSB_ADC_InternalCal;
                 }
             }
             lowRead = tmpval;
@@ -3012,15 +2988,13 @@ unsigned long AIOUSB_ADC_InternalCal(
                     retval = AIOUSB_ERROR_FILE_NOT_FOUND;
             }
       }
- abort:
+ free_AIOUSB_ADC_InternalCal:
     free(calTable);
 
-    /* AIOUSB_Lock(); */
     deviceDesc->cachedConfigBlock = oConfig;
-    /* AIOUSB_UnLock(); */
     retval = ADC_SetConfig( DeviceIndex, oConfig.registers, &oConfig.size );
 
-INTERNAL_CAL_ERRORS:
+out_AIOUSB_ADC_InternalCal:
 
     return retval;
 }
@@ -3073,7 +3047,7 @@ unsigned AIOUSB_GetGainCode(const ADConfigBlock *config, unsigned channel)
     assert(config != 0);
     unsigned gainCode = FIRST_ENUM(ADGainCode);             // return reasonable value on error
     if( config != 0 && config->device != 0 &&   config->size != 0 ) { 
-        const DeviceDescriptor *const deviceDesc = ( DeviceDescriptor* )config->device;
+        const AIOUSBDevice *const deviceDesc = ( DeviceDescriptor* )config->device;
         if(channel < AD_MAX_CHANNELS && channel < deviceDesc->ADCMUXChannels) {
             assert(deviceDesc->ADCChannelsPerGroup != 0);
             gainCode = (config->registers[ AD_CONFIG_GAIN_CODE + channel / deviceDesc->ADCChannelsPerGroup ]
@@ -3100,7 +3074,7 @@ void AIOUSB_SetGainCode(ADConfigBlock *config, unsigned channel, unsigned gainCo
         config->size != 0 &&
         VALID_ENUM(ADGainCode, gainCode)
        ) {
-        DeviceDescriptor * deviceDesc = ( DeviceDescriptor* )config->device;
+        AIOUSBDevice * deviceDesc = ( DeviceDescriptor* )config->device;
         if(channel < AD_MAX_CHANNELS && channel < deviceDesc->ADCMUXChannels) {
                 assert(deviceDesc->ADCChannelsPerGroup != 0);
                 int reg = AD_CONFIG_GAIN_CODE + channel / deviceDesc->ADCChannelsPerGroup;
@@ -3125,7 +3099,7 @@ AIOUSB_BOOL AIOUSB_IsDifferentialMode(const ADConfigBlock *config, unsigned chan
     if( config->device != 0 &&
         config->size != 0
         ) {
-           DeviceDescriptor *deviceDesc = ( DeviceDescriptor* )config->device;
+           AIOUSBDevice *deviceDesc = ( DeviceDescriptor* )config->device;
           if(
              channel < AD_MAX_CHANNELS &&
              channel < deviceDesc->ADCMUXChannels
@@ -3159,7 +3133,7 @@ void AIOUSB_SetDifferentialMode(ADConfigBlock *config, unsigned channel, AIOUSB_
         config->device != 0 &&
         config->size != 0
         ) {
-          const DeviceDescriptor *const deviceDesc = ( DeviceDescriptor* )config->device;
+          const AIOUSBDevice *const deviceDesc = ( DeviceDescriptor* )config->device;
           if(
               channel < AD_MAX_CHANNELS &&
               channel < deviceDesc->ADCMUXChannels
@@ -3293,7 +3267,7 @@ AIORET_TYPE AIOUSB_SetScanRange(ADConfigBlock *config, unsigned startChannel, un
     if( !config->device || !config->size )  {
         return  -(AIOUSB_ERROR_INVALID_DATA);
     }
-    /* const DeviceDescriptor *const deviceDesc = ( DeviceDescriptor* )config->device; */
+    /* const AIOUSBDevice *const deviceDesc = ( DeviceDescriptor* )config->device; */
     AIOUSBDevice *deviceDesc = ADCConfigBlockGetAIOUSBDevice( config, &retval );
     if ( retval != AIOUSB_SUCCESS ) 
         return retval;
@@ -3380,8 +3354,11 @@ unsigned long AIOUSB_ADC_ExternalCal(
     /*       AIOUSB_UnLock(); */
     /*       return result; */
     /*   } */
+    /* AIOUSBDevice *deviceDesc = &deviceTable[ DeviceIndex ]; */
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS ) 
+        return result;
 
-    DeviceDescriptor *deviceDesc = &deviceTable[ DeviceIndex ];
     if(deviceDesc->bADCStream == AIOUSB_FALSE) {
           AIOUSB_UnLock();
           return AIOUSB_ERROR_NOT_SUPPORTED;
