@@ -425,7 +425,7 @@ AIORET_TYPE AIOContinuousBufCountScansAvailable(AIOContinuousBuf *buf)
 AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf, 
                                                    unsigned short *tmp , 
                                                    unsigned tmpsize, 
-                                                   unsigned size 
+                                                   unsigned size
                                                    )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
@@ -943,7 +943,7 @@ AIORET_TYPE SetConfig( AIOContinuousBuf *buf )
     if( AIOContinuousBufNumberChannels(buf) > 16 ) {
       deviceDesc->cachedConfigBlock.size = AD_MUX_CONFIG_REGISTERS;
     }
-
+    retval = ADC_WriteADConfigBlock( AIOContinuousBufGetDeviceIndex( buf ), &deviceDesc->cachedConfigBlock );
 
  out_SetConfig:
     return retval;
@@ -1744,11 +1744,11 @@ AIORET_TYPE AIOContinuousBufSetOverSample( AIOContinuousBuf *buf, unsigned os )
     assert(buf);
     AIOContinuousBufLock( buf );
     AIORESULT result = AIOUSB_SUCCESS;
-    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), &result );
+    AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), &result );
     if ( result != AIOUSB_SUCCESS ) 
         return -AIOUSB_ERROR_INVALID_DEVICE_SETTING;
 
-    result = ADCConfigBlockSetOversample( AIOUSBDeviceGetADCConfigBlock( dev ), os );
+    result = ADC_SetOversample( AIOContinuousBufGetDeviceIndex(buf), os );     
     
     AIOContinuousBufUnlock( buf );
     return result;
