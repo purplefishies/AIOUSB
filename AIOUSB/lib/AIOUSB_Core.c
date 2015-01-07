@@ -626,60 +626,51 @@ unsigned long AIOUSB_ClearFIFO(
 
     if(!VALID_ENUM(FIFO_Method, Method))
         return AIOUSB_ERROR_INVALID_PARAMETER;
-    /* if(!AIOUSB_Lock()) */
-    /*     return AIOUSB_ERROR_INVALID_MUTEX; */
-    /* unsigned long result = AIOUSB_Validate(&DeviceIndex); */
-    /* if(result != AIOUSB_SUCCESS) { */
-    /*       AIOUSB_UnLock(); */
-    /*       return result; */
-    /*   } */
 
     DeviceDescriptor *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
-    libusb_device_handle * deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
-    if(deviceHandle != NULL) {
-      /*
-       * translate method into vendor request message
-       */
-          int request;
-          switch(Method) {
-            /* case CLEAR_FIFO_METHOD_IMMEDIATE: */
-            default:
-                request = AUR_GEN_CLEAR_FIFO;
-                break;
+    if ( result != AIOUSB_SUCCESS ) 
+        return result;
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS ) 
+        return result;
 
-            case CLEAR_FIFO_METHOD_AUTO:
-                request = AUR_GEN_CLEAR_FIFO_NEXT;
-                break;
+    /*
+     * translate method into vendor request message
+     */
+    int request;
+    switch(Method) {
+        /* case CLEAR_FIFO_METHOD_IMMEDIATE: */
+    default:
+        request = AUR_GEN_CLEAR_FIFO;
+        break;
 
-            case CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT:
-                request = AUR_GEN_ABORT_AND_CLEAR;
-                break;
+    case CLEAR_FIFO_METHOD_AUTO:
+        request = AUR_GEN_CLEAR_FIFO_NEXT;
+        break;
 
-            case CLEAR_FIFO_METHOD_WAIT:
-                request = AUR_GEN_CLEAR_FIFO_WAIT;
-                break;
-            }
+    case CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT:
+        request = AUR_GEN_ABORT_AND_CLEAR;
+        break;
+
+    case CLEAR_FIFO_METHOD_WAIT:
+        request = AUR_GEN_CLEAR_FIFO_WAIT;
+        break;
+    }
           
-          int bytesTransferred = libusb_control_transfer(deviceHandle,
-                                                         USB_WRITE_TO_DEVICE, 
-                                                         request, 
-                                                         0, 
-                                                         0, 
-                                                         0, 
-                                                         0 /* wLength */, 
-                                                         deviceDesc->commTimeout
-                                                         );
-          if(bytesTransferred != 0)
-              result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-      } else {
-          result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-          AIOUSB_UnLock();
-      }
+    int bytesTransferred = usb->usb_control_transfer(usb,
+                                                     USB_WRITE_TO_DEVICE, 
+                                                     request, 
+                                                     0, 
+                                                     0, 
+                                                     0, 
+                                                     0, 
+                                                     deviceDesc->commTimeout
+                                                     );
+    if(bytesTransferred != 0)
+        result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
 
     return result;
 }
-
-
 
 
 const char *AIOUSB_GetVersion() {
@@ -689,17 +680,6 @@ const char *AIOUSB_GetVersion() {
 const char *AIOUSB_GetVersionDate() {
     return VERSION_DATE;
 }
-
-/* void AIOUSB_Exit() { */
-/*     if(AIOUSB_IsInit()) { */
-/*           CloseAllDevices(); */
-/*           libusb_exit(NULL); */
-/* #if defined(AIOUSB_ENABLE_MUTEX) */
-/*           pthread_mutex_destroy(&aiousbMutex); */
-/* #endif */
-/*           aiousbInit = 0; */
-/*       } */
-/* } */
 
 double AIOUSB_GetMiscClock(
                            unsigned long DeviceIndex
@@ -1031,72 +1011,72 @@ unsigned long AIOUSB_ADC_SetCalTable(
     if(calTable == 0)
         return AIOUSB_ERROR_INVALID_PARAMETER;
     unsigned long result = AIOUSB_SUCCESS;
-    DeviceDescriptor * deviceDesc = &deviceTable[ DeviceIndex ];
-    libusb_device_handle * deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS )
+        return result;
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS )
+        return result;    
+
     unsigned short wValue, wIndex, wLength;
     unsigned char bRequest;
     unsigned char data[1024];
     int bytesTransferred = 0;
     /* int wordsWritten = 0; */
 
-    if(deviceHandle != NULL) {
 
-        /*
-         * send calibration table to SRAM one block at a time; according to
-         * the documentation, the proper procedure is to bulk transfer a block
-         * of calibration data to "endpoint 2" and then send a control message
-         * to load it into the SRAM
-         */
-          AIOUSB_UnLock();
-          /* bmRequestType = 0x40 */
-          bRequest = AUR_LOAD_BULK_CALIBRATION_BLOCK;
-          wValue = 0x00;
-          wIndex = 0x00;
-          wLength = 0x1;
-          /* First read */
-          bytesTransferred = libusb_control_transfer(deviceHandle,
-                                                     USB_READ_FROM_DEVICE,
-                                                     bRequest,
-                                                     wValue, 
-                                                     wIndex,
-                                                     data,
-                                                     wLength,
-                                                     deviceDesc->commTimeout
-                                                     );
+    /*
+     * send calibration table to SRAM one block at a time; according to
+     * the documentation, the proper procedure is to bulk transfer a block
+     * of calibration data to "endpoint 2" and then send a control message
+     * to load it into the SRAM
+     */
+    AIOUSB_UnLock();
+    /* bmRequestType = 0x40 */
+    bRequest = AUR_LOAD_BULK_CALIBRATION_BLOCK;
+    wValue = 0x00;
+    wIndex = 0x00;
+    wLength = 0x1;
+    /* First read */
+    bytesTransferred = usb->usb_control_transfer(usb,
+                                                 USB_READ_FROM_DEVICE,
+                                                 bRequest,
+                                                 wValue, 
+                                                 wIndex,
+                                                 data,
+                                                 wLength,
+                                                 deviceDesc->commTimeout
+                                                 );
           
-          int SRAM_BLOCK_WORDS = 1024;
-          int sramAddress = 0;
-          int wordsRemaining = CAL_TABLE_WORDS;
+    int SRAM_BLOCK_WORDS = 1024;
+    int sramAddress = 0;
+    int wordsRemaining = CAL_TABLE_WORDS;
           
-          while(wordsRemaining > 0) {
-              int num_to_write = (wordsRemaining < SRAM_BLOCK_WORDS) ? wordsRemaining : 1024 ;
-              int libusbResult = libusb_bulk_transfer(deviceHandle,
-                                                      0x2,
-                                                      (unsigned char *)(calTable + sramAddress),
-                                                      num_to_write*sizeof(unsigned short),
-                                                      &bytesTransferred,
-                                                      deviceDesc->commTimeout
-                                                      );
-              if(libusbResult != LIBUSB_SUCCESS) {
-                  result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult);
-                  break;
-              } else if(bytesTransferred != ( int )(num_to_write * sizeof(unsigned short))) {
-                  result = AIOUSB_ERROR_INVALID_DATA;
-                  break;
-              } else {
-                  bytesTransferred = libusb_control_transfer( deviceHandle, 0x40, 0xBB, sramAddress, 0x400 , NULL, 0 , deviceDesc->commTimeout );
+    while(wordsRemaining > 0) {
+        int num_to_write = (wordsRemaining < SRAM_BLOCK_WORDS) ? wordsRemaining : 1024 ;
+        int libusbResult = usb->usb_bulk_transfer(usb,
+                                                  0x2,
+                                                  (unsigned char *)(calTable + sramAddress),
+                                                  num_to_write*sizeof(unsigned short),
+                                                  &bytesTransferred,
+                                                  deviceDesc->commTimeout
+                                                  );
+        if(libusbResult != LIBUSB_SUCCESS) {
+            result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult);
+            break;
+        } else if(bytesTransferred != ( int )(num_to_write * sizeof(unsigned short))) {
+            result = AIOUSB_ERROR_INVALID_DATA;
+            break;
+        } else {
+            bytesTransferred = usb->usb_control_transfer( usb, 0x40, 0xBB, sramAddress, 0x400 , NULL, 0 , deviceDesc->commTimeout );
 
-                  if (bytesTransferred != 0) {
-                      result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-                      break;
-                  }
-              }
-              wordsRemaining -= num_to_write;
-              sramAddress += num_to_write;
-          }
-    } else {
-        result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-        AIOUSB_UnLock();
+            if (bytesTransferred != 0) {
+                result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+                break;
+            }
+        }
+        wordsRemaining -= num_to_write;
+        sramAddress += num_to_write;
     }
 
     return result;
@@ -1117,36 +1097,28 @@ unsigned long GenericVendorWrite(
                                  unsigned long *bytes_written
                                  ) {
     unsigned long result;
-    DeviceDescriptor *deviceDesc = AIOUSB_GetDevice_Lock( deviceIndex, &result );
-    libusb_device_handle *deviceHandle;
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( deviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS )
+        return result;
     int bytesTransferred;
 
-    if ( !deviceDesc || result != AIOUSB_SUCCESS )
-        goto out_GenericVendorWrite;
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( deviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS )
+        return result;    
 
-    deviceHandle = AIOUSB_GetDeviceHandle(deviceIndex);
-
-    if (!deviceHandle)  {
-        result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-        goto out_GenericVendorWrite;
-    }
-
-    AIOUSB_UnLock();  /*  unlock while communicating with device */
-    bytesTransferred = libusb_control_transfer(deviceHandle,
-                                               USB_WRITE_TO_DEVICE,
-                                               Request,
-                                               Value,
-                                               Index,
-                                               (unsigned char*)bufData,
-                                               *bytes_written,
-                                               deviceDesc->commTimeout
-                                               );
+    bytesTransferred = usb->usb_control_transfer(usb,
+                                                 USB_WRITE_TO_DEVICE,
+                                                 Request,
+                                                 Value,
+                                                 Index,
+                                                 (unsigned char*)bufData,
+                                                 *bytes_written,
+                                                 deviceDesc->commTimeout
+                                                 );
     if (bytesTransferred != (int)*bytes_written) {
         result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
     }
 
-out_GenericVendorWrite:
-    AIOUSB_UnLock();
     return result;
 }
 
