@@ -1133,46 +1133,39 @@ unsigned long GenericVendorRead(
                                 unsigned short Index,
                                 void *bufData,
                                 unsigned long *bytes_read
-                                ) {
+                                ) 
+{
     unsigned long result;
-    DeviceDescriptor *const deviceDesc = &deviceTable[ deviceIndex ];
-    libusb_device_handle *const deviceHandle = AIOUSB_GetDeviceHandle(deviceIndex);
-
-    if(!AIOUSB_Lock()) {
-          result = AIOUSB_ERROR_INVALID_MUTEX;
-          goto RETURN_GenericVendorRead;
-      }
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( deviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS )
+        return result;
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( deviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS )
+        return result;    
 
     result = AIOUSB_Validate(&deviceIndex);
-    if(result != AIOUSB_SUCCESS) {
-          AIOUSB_UnLock();
-          goto RETURN_GenericVendorRead;
-      }
+    if (result != AIOUSB_SUCCESS)
+        return result;
 
-    if(deviceHandle != NULL) {
-          const unsigned timeout = deviceDesc->commTimeout;
-          AIOUSB_UnLock();       // unlock while communicating with device
-          const int bytesTransferred = libusb_control_transfer(deviceHandle,
-                                                               USB_READ_FROM_DEVICE,
-                                                               Request,
-                                                               Value,
-                                                               Index,
-                                                               (unsigned char*)bufData,
-                                                               *bytes_read,
-                                                               timeout
-                                                               );
-          if(bytesTransferred != (int)*bytes_read)
-              result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-      } else {
-          result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-          AIOUSB_UnLock();
-      }
-RETURN_GenericVendorRead:
+    unsigned timeout = deviceDesc->commTimeout;
+    
+    int bytesTransferred = usb->usb_control_transfer(usb,
+                                                     USB_READ_FROM_DEVICE,
+                                                     Request,
+                                                     Value,
+                                                     Index,
+                                                     (unsigned char*)bufData,
+                                                     *bytes_read,
+                                                     timeout
+                                                     );
+    if(bytesTransferred != (int)*bytes_read)
+        result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+
     return result;
 }
 
 #ifdef __cplusplus
-}       /* namespace AIOUSB */
+}
 #endif
 
 #ifdef SELF_TEST
