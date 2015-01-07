@@ -49,40 +49,38 @@ static unsigned long ADC_GetImmediate(
 unsigned long ADC_ResetDevice( unsigned long DeviceIndex  )
 {
     AIORESULT result;
-    libusb_device_handle *deviceHandle;
     int wValue = 0xe600;
     int wIndex = 1;
     int timeout = 1000;
     unsigned char data[1];
-    AIOUSBDevice *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
-    if(!deviceDesc || result != AIOUSB_SUCCESS)
-        return result;
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS ) 
+        return result ;
 
-    deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
     data[0] = 1;
-    result = libusb_control_transfer(deviceHandle,
-                                     USB_WRITE_TO_DEVICE,
-                                     0xa0,
-                                     wValue,
-                                     wIndex,
-                                     data,
-                                     1,
-                                     timeout
-                                     );
+    result = usb->usb_control_transfer(usb,
+                                       USB_WRITE_TO_DEVICE,
+                                       0xa0,
+                                       wValue,
+                                       wIndex,
+                                       data,
+                                       1,
+                                       timeout
+                                       );
     if( result <= AIOUSB_SUCCESS )
         goto out_ADC_ResetDevice;
 
     data[0] = 0;
     sleep(2);
-    result = libusb_control_transfer(deviceHandle,
-                                     USB_WRITE_TO_DEVICE,
-                                     0xa0,
-                                     wValue,
-                                     wIndex,
-                                     data,
-                                     1,
-                                     timeout
-                                     );
+    result = usb->usb_control_transfer(usb,
+                                       USB_WRITE_TO_DEVICE,
+                                       0xa0,
+                                       wValue,
+                                       wIndex,
+                                       data,
+                                       1,
+                                       timeout
+                                       );
  out_ADC_ResetDevice:
     return result;
 }
@@ -181,27 +179,28 @@ unsigned long ReadConfigBlock(unsigned long DeviceIndex,
     AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
     if ( result  != AIOUSB_SUCCESS )
         return result;
-    ADCConfigBlock configBlock = *(ADCConfigBlock*)AIOUSBDeviceGetADCConfigBlock( deviceDesc );
-    if(forceRead || deviceDesc->cachedConfigBlock.size == 0) {
-        libusb_device_handle *deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
-        if( !deviceHandle ) {
-            result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-            goto out_ReadConfigBlock;
-        }
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
+    ADCConfigBlock configBlock;
+    if ( result  != AIOUSB_SUCCESS ) {
+        result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
+        goto out_ReadConfigBlock;
+    }
 
-        /* request A/D configuration block from device */
+    configBlock = *(ADCConfigBlock*)AIOUSBDeviceGetADCConfigBlock( deviceDesc );
+    if(forceRead || deviceDesc->cachedConfigBlock.size == 0) {
+
         ADCConfigBlockInitialize( &configBlock, configBlock.device );
 
         if( configBlock.testing != AIOUSB_TRUE ) {
-            int bytesTransferred = libusb_control_transfer(deviceHandle,
-                                                                 USB_READ_FROM_DEVICE,
-                                                                 AUR_ADC_GET_CONFIG,
-                                                                 0,
-                                                                 0,
-                                                                 configBlock.registers,
-                                                                 configBlock.size,
-                                                                 deviceDesc->commTimeout
-                                                                 );
+            int bytesTransferred = usb->usb_control_transfer(usb,
+                                                             USB_READ_FROM_DEVICE,
+                                                             AUR_ADC_GET_CONFIG,
+                                                             0,
+                                                             0,
+                                                             configBlock.registers,
+                                                             configBlock.size,
+                                                             deviceDesc->commTimeout
+                                                             );
 
             if ( bytesTransferred != ( int ) configBlock.size) {
                 result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
@@ -227,11 +226,15 @@ unsigned long ReadConfigBlock(unsigned long DeviceIndex,
  */
 unsigned long WriteConfigBlock(unsigned long DeviceIndex)
 {
-    libusb_device_handle *deviceHandle;
+    /* libusb_device_handle *deviceHandle; */
     ADConfigBlock *configBlock;
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
+    USBDevice *usb;
     int bytesTransferred;
+    if ( result  != AIOUSB_SUCCESS )
+        goto out_WriteConfigBlock;
+    usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
     if ( result  != AIOUSB_SUCCESS )
         goto out_WriteConfigBlock;
 
@@ -248,31 +251,32 @@ unsigned long WriteConfigBlock(unsigned long DeviceIndex)
         result = AIOUSB_ERROR_INVALID_ADCONFIG_SETTING;
         goto out_WriteConfigBlock;
     }
-    deviceHandle = AIOUSB_GetUSBHandle( deviceDesc );
-    if ( !deviceHandle ) {
-        result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-        goto out_WriteConfigBlock;
-    }
+
+    /* deviceHandle = AIOUSB_GetUSBHandle( deviceDesc ); */
+    /* if ( !deviceHandle ) { */
+    /*     result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED; */
+    /*     goto out_WriteConfigBlock; */
+    /* } */
     /* configBlock = deviceDesc->cachedConfigBlock; */
     /* AIOUSB_UnLock(); */
     /* assert(configBlock.size > 0 && configBlock.size <= AD_MAX_CONFIG_REGISTERS); */
 
     if ( configBlock->testing != AIOUSB_TRUE ) {
-        bytesTransferred = libusb_control_transfer(deviceHandle,
-                                                   USB_WRITE_TO_DEVICE, 
-                                                   AUR_ADC_SET_CONFIG,
-                                                   0, 
-                                                   0, 
-                                                   configBlock->registers, 
-                                                   configBlock->size, 
-                                                   deviceDesc->commTimeout
-                                                   );
+        bytesTransferred = usb->usb_control_transfer(usb,
+                                                     USB_WRITE_TO_DEVICE, 
+                                                     AUR_ADC_SET_CONFIG,
+                                                     0, 
+                                                     0, 
+                                                     configBlock->registers, 
+                                                     configBlock->size, 
+                                                     deviceDesc->commTimeout
+                                                     );
         if ( bytesTransferred != ( int )configBlock->size )
             result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
     }
 
 out_WriteConfigBlock:
-    /* AIOUSB_UnLock(); */
+
     return result;
 }
 
@@ -384,20 +388,15 @@ PRIVATE unsigned long AIOUSB_GetScan(
     AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
     if ( result  != AIOUSB_SUCCESS )
         return result;
-
-    libusb_device_handle *deviceHandle;
-
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex , &result );
+    if ( result != AIOUSB_SUCCESS )
+        return result;
 
     if(deviceDesc->bADCStream == AIOUSB_FALSE) {
         result = AIOUSB_ERROR_NOT_SUPPORTED;
         goto out_AIOUSB_GetScan;
     }
 
-    deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
-    if (!deviceHandle ) {
-        result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-        goto out_AIOUSB_GetScan;
-    }
     /* Save config */
     /* result = ReadConfigBlock(DeviceIndex, AIOUSB_FALSE); */
     
@@ -520,39 +519,38 @@ PRIVATE unsigned long AIOUSB_GetScan(
     }
 
     /* BC */
-
-    bytesTransferred = libusb_control_transfer(deviceHandle,
-                                               USB_WRITE_TO_DEVICE, 
-                                               AUR_START_ACQUIRING_BLOCK,
-                                               (numSamples >> 16),           /* High Samples */
-                                               ( unsigned short )numSamples, /* Low samples */
-                                               bcdata,
-                                               sizeof(bcdata),
-                                               deviceDesc->commTimeout
-                                               );
+    bytesTransferred = usb->usb_control_transfer(usb,
+                                                 USB_WRITE_TO_DEVICE, 
+                                                 AUR_START_ACQUIRING_BLOCK,
+                                                 (numSamples >> 16),           /* High Samples */
+                                                 ( unsigned short )numSamples, /* Low samples */
+                                                 bcdata,
+                                                 sizeof(bcdata),
+                                                 deviceDesc->commTimeout
+                                                 );
     if ( bytesTransferred != sizeof(bcdata) ) { 
         result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);       
         goto out_freebuf_AIOUSB_GetScan;
     }
 
     /* BF */
-    bytesTransferred = libusb_control_transfer(deviceHandle,
-                                               USB_WRITE_TO_DEVICE,
-                                               AUR_ADC_IMMEDIATE,
-                                               0, 
-                                               0, 
-                                               ( unsigned char* )sampleBuffer, 
-                                               0,
-                                               deviceDesc->commTimeout
-                                               );
+    bytesTransferred = usb->usb_control_transfer(usb,
+                                                 USB_WRITE_TO_DEVICE,
+                                                 AUR_ADC_IMMEDIATE,
+                                                 0, 
+                                                 0, 
+                                                 ( unsigned char* )sampleBuffer, 
+                                                 0,
+                                                 deviceDesc->commTimeout
+                                                 );
     if (bytesTransferred == 0) {
-        libusbresult = AIOUSB_BulkTransfer(deviceHandle,
-                                           LIBUSB_ENDPOINT_IN | USB_BULK_READ_ENDPOINT,
-                                           ( unsigned char* )sampleBuffer, 
-                                           numSamples * sizeof(unsigned short), 
-                                           (int*)&bytesTransferred,
-                                           deviceDesc->commTimeout
-                                           );
+        libusbresult = usb->usb_bulk_transfer(usb,
+                                              LIBUSB_ENDPOINT_IN | USB_BULK_READ_ENDPOINT,
+                                              ( unsigned char* )sampleBuffer, 
+                                              numSamples * sizeof(unsigned short), 
+                                              (int*)&bytesTransferred,
+                                              deviceDesc->commTimeout
+                                              );
 
         if (libusbresult != LIBUSB_SUCCESS) {
             result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbresult);
@@ -1518,32 +1516,24 @@ unsigned long ADC_QueryCal(
                            unsigned long DeviceIndex
                            ) 
 {
-    /* if(!AIOUSB_Lock()) */
-    /*     return AIOUSB_ERROR_INVALID_MUTEX; */
-    /* unsigned long result = AIOUSB_Validate(&DeviceIndex); */
-    /* if(result != AIOUSB_SUCCESS) { */
-    /*       AIOUSB_UnLock(); */
-    /*       return result; */
-    /*   } */
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
     if ( result != AIOUSB_SUCCESS ) 
         return result;
- 
-    libusb_device_handle *deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
-    if ( !deviceHandle ) { 
-        return AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-    }
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS ) 
+        return result;
+
     unsigned char calSupported = 0xff;       // so we can detect if it changes
-    int bytesTransferred = libusb_control_transfer(deviceHandle, 
-                                                   USB_READ_FROM_DEVICE, 
-                                                   AUR_PROBE_CALFEATURE,
-                                                   0, 
-                                                   0, 
-                                                   &calSupported, 
-                                                   sizeof(calSupported), 
-                                                   deviceDesc->commTimeout
-                                                   );
+    int bytesTransferred = usb->usb_control_transfer(usb,
+                                                     USB_READ_FROM_DEVICE, 
+                                                     AUR_PROBE_CALFEATURE,
+                                                     0, 
+                                                     0, 
+                                                     &calSupported, 
+                                                     sizeof(calSupported), 
+                                                     deviceDesc->commTimeout
+                                                     );
     if (bytesTransferred == sizeof(calSupported)) {
         if (calSupported != 0xBB) {             // 0xBB == AUR_LOAD_BULK_CALIBRATION_BLOCK
             result = AIOUSB_ERROR_NOT_SUPPORTED;
@@ -1608,19 +1598,13 @@ unsigned long ADC_BulkAcquire(
         return AIOUSB_ERROR_INVALID_PARAMETER;
     AIORESULT result = AIOUSB_SUCCESS;
     
-    /* if ( !AIOUSB_Lock()) */
-    /*     return AIOUSB_ERROR_INVALID_MUTEX; */
-    /* unsigned long result = AIOUSB_Validate(&DeviceIndex); */
-    /* if ( result != AIOUSB_SUCCESS) { */
-    /*     AIOUSB_UnLock(); */
-    /*     return result; */
-    /* } */
-
     /* AIOUSBDevice * deviceDesc = &deviceTable[ DeviceIndex ]; */
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
     if ( result != AIOUSB_SUCCESS ) 
         return result;
-
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS )
+        return result;
 
     if (deviceDesc->bADCStream == AIOUSB_FALSE)
         return AIOUSB_ERROR_NOT_SUPPORTED;
@@ -1639,13 +1623,10 @@ unsigned long ADC_BulkAcquire(
          * such as an improperly locked mutex; this pre-initialization is necessary so that the thread
          * status doesn't make it appear as though the worker thread has completed successfully
          */
-        /* AIOUSB_Lock(); */
 
         deviceDesc->workerStatus  = BufSize;       // deviceDesc->workerStatus == bytes remaining to receive
         deviceDesc->workerResult  = AIOUSB_ERROR_INVALID_DATA;
         deviceDesc->workerBusy    = AIOUSB_TRUE;
-
-        /* AIOUSB_UnLock(); */
 
         acquireParams->DeviceIndex  = DeviceIndex;
         acquireParams->BufSize      = BufSize;
@@ -1667,15 +1648,15 @@ unsigned long ADC_BulkAcquire(
         if (threadResult == 0) {
             sched_yield();
             unsigned char startdata[] = {0x05,0x00,0x00,0x00 };
-            libusb_control_transfer(AIOUSB_GetDeviceHandle(acquireParams->DeviceIndex),
-                                    USB_WRITE_TO_DEVICE,
-                                    AUR_START_ACQUIRING_BLOCK,
-                                    (acquireParams->BufSize >> 17) & 0xffff, /* high */
-                                    (acquireParams->BufSize >> 1) & 0xffff,
-                                    startdata,
-                                    sizeof(startdata),
-                                    deviceDesc->commTimeout
-                                    );
+            usb->usb_control_transfer(usb,
+                                      USB_WRITE_TO_DEVICE,
+                                      AUR_START_ACQUIRING_BLOCK,
+                                      (acquireParams->BufSize >> 17) & 0xffff, /* high */
+                                      (acquireParams->BufSize >> 1) & 0xffff,
+                                      startdata,
+                                      sizeof(startdata),
+                                      deviceDesc->commTimeout
+                                      );
 
 
 
@@ -1993,16 +1974,10 @@ static unsigned long ADC_GetImmediate(
     if(pData == NULL)
         return AIOUSB_ERROR_INVALID_PARAMETER;
     AIORESULT result = AIOUSB_SUCCESS;
-
-    /* if(!AIOUSB_Lock()) */
-    /*     return AIOUSB_ERROR_INVALID_MUTEX; */
-    /* unsigned long result = AIOUSB_Validate(&DeviceIndex); */
-    /* if(result != AIOUSB_SUCCESS) { */
-    /*       AIOUSB_UnLock(); */
-    /*       return result; */
-    /*   }  */
-    /* AIOUSBDevice *deviceDesc = &deviceTable[ DeviceIndex ]; */
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS )
+        return result;
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
     if ( result != AIOUSB_SUCCESS )
         return result;
 
@@ -2011,24 +1986,19 @@ static unsigned long ADC_GetImmediate(
         return AIOUSB_ERROR_NOT_SUPPORTED;
     }
 
-    libusb_device_handle *deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
-    if (deviceHandle != NULL) {
-        int numBytes = sizeof(unsigned short) * deviceDesc->ImmADCs;
-        int bytesTransferred = libusb_control_transfer(deviceHandle, 
-                                                       USB_READ_FROM_DEVICE, 
-                                                       AUR_ADC_IMMEDIATE,
-                                                       0, 
-                                                       Channel, 
-                                                       ( unsigned char* )pData, 
-                                                       numBytes, 
-                                                       deviceDesc->commTimeout
-                                                       );
-          if(bytesTransferred != numBytes)
-              result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-      } else {
-          result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-          /* AIOUSB_UnLock(); */
-      }
+
+    int numBytes = sizeof(unsigned short) * deviceDesc->ImmADCs;
+    int bytesTransferred = usb->usb_control_transfer(usb,
+                                                     USB_READ_FROM_DEVICE, 
+                                                     AUR_ADC_IMMEDIATE,
+                                                     0, 
+                                                     Channel, 
+                                                     ( unsigned char* )pData, 
+                                                     numBytes, 
+                                                     deviceDesc->commTimeout
+                                                     );
+    if(bytesTransferred != numBytes)
+        result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
 
     return result;
 }
@@ -2778,13 +2748,11 @@ AIORET_TYPE ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *c
     int numBytes = 256;
     unsigned char bcdata[] = {0x05,0x00,0x00,0x00};
     int libusbresult;
-    AIORET_TYPE result;
-    libusb_device_handle *deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex);
+    AIORESULT result;
 
-    if ( !deviceHandle ) {
-        result = -AIOUSB_ERROR_INVALID_USBDEVICE;
-        goto out_ConfigureAndBulkAcquire;
-    }
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS )
+        return (AIORET_TYPE)result;
 
     /* Set Config */
     ADC_SetConfig( DeviceIndex, config->registers, &config->size );
@@ -2797,18 +2765,18 @@ AIORET_TYPE ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *c
     addata_num_bytes = numBytes * sizeof(unsigned short);
 
     /* Write BC data */
-    libusbresult = libusb_control_transfer( deviceHandle, USB_WRITE_TO_DEVICE, 0xBC, 0, numBytes, bcdata, sizeof(bcdata), 1000 );
+    libusbresult = usb->usb_control_transfer( usb, USB_WRITE_TO_DEVICE, 0xBC, 0, numBytes, bcdata, sizeof(bcdata), 1000 );
 
     /* Get Immediate */
-    libusbresult = libusb_control_transfer( deviceHandle, USB_WRITE_TO_DEVICE, 0xBF, 0, 0, bcdata, 0, 1000 );
+    libusbresult = usb->usb_control_transfer( usb, USB_WRITE_TO_DEVICE, 0xBF, 0, 0, bcdata, 0, 1000 );
 
     /* Bulk read */
-    libusbresult = AIOUSB_BulkTransfer( deviceHandle, 
-                                        LIBUSB_ENDPOINT_IN | USB_BULK_READ_ENDPOINT,
-                                        (unsigned char *)ADData,
-                                        addata_num_bytes,
-                                        (int *)&bytesTransferred,
-                                        1000 );
+    libusbresult = usb->usb_bulk_transfer( usb, 
+                                           LIBUSB_ENDPOINT_IN | USB_BULK_READ_ENDPOINT,
+                                           (unsigned char *)ADData,
+                                           addata_num_bytes,
+                                           (int *)&bytesTransferred,
+                                           1000 );
     
     if (libusbresult != LIBUSB_SUCCESS) {
         result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbresult);
@@ -2820,7 +2788,7 @@ AIORET_TYPE ConfigureAndBulkAcquire( unsigned long DeviceIndex, ADConfigBlock *c
         result = total / numBytes;
     }
  out_ConfigureAndBulkAcquire:
-    return result;
+    return (AIORET_TYPE)result;
 }
 
 
