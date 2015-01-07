@@ -177,17 +177,15 @@ unsigned long ReadConfigBlock(unsigned long DeviceIndex,
 {
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
+    ADCConfigBlock configBlock;
     if ( result  != AIOUSB_SUCCESS )
         return result;
-    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
-    ADCConfigBlock configBlock;
-    if ( result  != AIOUSB_SUCCESS ) {
-        result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-        goto out_ReadConfigBlock;
-    }
 
     configBlock = *(ADCConfigBlock*)AIOUSBDeviceGetADCConfigBlock( deviceDesc );
     if(forceRead || deviceDesc->cachedConfigBlock.size == 0) {
+        USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
+        if ( result != AIOUSB_SUCCESS )
+            return result;
 
         ADCConfigBlockInitialize( &configBlock, configBlock.device );
 
@@ -233,35 +231,20 @@ unsigned long WriteConfigBlock(unsigned long DeviceIndex)
     USBDevice *usb;
     int bytesTransferred;
     if ( result  != AIOUSB_SUCCESS )
-        goto out_WriteConfigBlock;
-    usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
-    if ( result  != AIOUSB_SUCCESS )
-        goto out_WriteConfigBlock;
+        return result;
 
-    /* if ( result != AIOUSB_SUCCESS ) { */
-    /*     AIOUSB_UnLock(); */
-    /*     return result; */
-    /* } */
-    /* if( ( deviceHandle = AIOUSB_GetDeviceHandle(DeviceIndex) ) == NULL ) { */
-    /*     result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED; */
-    /*     goto out_WriteConfigBlock; */
-    /* } */
+
     configBlock = AIOUSB_GetConfigBlock( AIOUSB_GetDevice( DeviceIndex ));
     if (!configBlock ) {
         result = AIOUSB_ERROR_INVALID_ADCONFIG_SETTING;
         goto out_WriteConfigBlock;
     }
 
-    /* deviceHandle = AIOUSB_GetUSBHandle( deviceDesc ); */
-    /* if ( !deviceHandle ) { */
-    /*     result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED; */
-    /*     goto out_WriteConfigBlock; */
-    /* } */
-    /* configBlock = deviceDesc->cachedConfigBlock; */
-    /* AIOUSB_UnLock(); */
-    /* assert(configBlock.size > 0 && configBlock.size <= AD_MAX_CONFIG_REGISTERS); */
-
     if ( configBlock->testing != AIOUSB_TRUE ) {
+        usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
+        if ( result  != AIOUSB_SUCCESS )
+            goto out_WriteConfigBlock;
+
         bytesTransferred = usb->usb_control_transfer(usb,
                                                      USB_WRITE_TO_DEVICE, 
                                                      AUR_ADC_SET_CONFIG,

@@ -1562,6 +1562,10 @@ AIORET_TYPE AIOContinuousBufSetTesting( AIOContinuousBuf *buf, AIOUSB_BOOL testi
     if ( result != AIOUSB_SUCCESS )
         return -result;
 
+    result = AIOUSBDeviceSetTesting( device, testing );
+    if ( result != AIOUSB_SUCCESS )
+        return -result;
+
     result = ADCConfigBlockSetTesting( AIOUSBDeviceGetADCConfigBlock( device ), testing );
     if ( result != AIOUSB_SUCCESS )
         return -result;
@@ -2150,7 +2154,7 @@ void dummy_init(void)
     AIORESULT result = AIOUSB_SUCCESS;
     AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numAccesDevices, USB_AIO12_128E, NULL );
     AIOUSBDevice *device = AIODeviceTableGetDeviceAtIndex( numAccesDevices ,  &result );
-    /* printf("here\n"); */
+
 }
 
 
@@ -2159,7 +2163,7 @@ void stress_test_drain_buffer( int bufsize )
     AIOContinuousBuf *buf;
     unsigned extra = 0;
     int core_size = 256;
-    int channel_list[] = { 9,19, 3, 5, 7, 9 ,11,31, 37 , 127};
+    int channel_list[] = { 9, 19, 3, 5, 7, 9 ,11,31, 37 , 127};
     int oversamples[]  = {255};
     int prev;
     int repeat_count = 20;
@@ -2200,7 +2204,7 @@ void stress_test_drain_buffer( int bufsize )
 
         actual_bufsize = 1000 * ( tmpsize / (oversample+1));
         buf = NewAIOContinuousBufTesting( 0, actual_bufsize , buf_unit , AIOUSB_FALSE );
-
+        
         AIORESULT result;
         /**
          */
@@ -2683,8 +2687,16 @@ TEST_F( AIOContinuousBufSetup, SetsTesting )
 {
     int i, count = 0, buf_unit = 10;
     int actual_bufsize = 10;
+
     AIORESULT result = AIOUSB_SUCCESS;
+    int numDevices = 0;
+    AIODeviceTableInit();    
+    AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_AIO16_16A );
+    EXPECT_EQ( numDevices, 1 );
+
     AIOContinuousBuf * buf = NewAIOContinuousBufTesting( 0, actual_bufsize , buf_unit , AIOUSB_FALSE );
+    AIOContinuousBufSetTesting( buf, AIOUSB_TRUE );
+
     AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ) , &result );
     EXPECT_EQ( result, AIOUSB_SUCCESS );    
 
@@ -2704,8 +2716,15 @@ TEST(AIOContinuousBuf,Stress_Test_Read_Channels) {
  * @todo Creating a new Continuous Buffer and setting it up should 
  */
 TEST(AIOContinuousBuf, CanAssignDeviceToConfig) {
+    AIORESULT result = AIOUSB_SUCCESS;
+    int numDevices = 0;
+    AIODeviceTableInit();    
+    AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_AIO16_16A );
+    EXPECT_EQ( numDevices, 1 );
+
     AIOContinuousBuf *buf = NewAIOContinuousBufTesting( 0, 10, 16 , AIOUSB_TRUE );
-    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ) , NULL );
+    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ) , &result );
+    ASSERT_EQ( result , AIOUSB_SUCCESS );
     ADCConfigBlock *ad = AIOUSBDeviceGetADCConfigBlock ( dev );
     
     EXPECT_TRUE( ad );
