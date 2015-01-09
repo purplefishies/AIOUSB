@@ -70,12 +70,10 @@ extern struct ADRange adRanges[ AD_NUM_GAIN_CODES ];
 extern unsigned long AIOUSB_INIT_PATTERN;
 extern unsigned long aiousbInit ;
 
-/* PUBLIC_EXTERN unsigned long ADC_CopyConfig(unsigned long DeviceIndex, ADConfigBlock *config  ); */
+
 PUBLIC_EXTERN unsigned long ADC_ResetDevice( unsigned long DeviceIndex  );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetDeviceSerialNumber( unsigned long DeviceIndex );
 PUBLIC_EXTERN AIORET_TYPE ADC_WriteADConfigBlock( unsigned long DeviceIndex , ADConfigBlock *config );
-
-PUBLIC_EXTERN void PopulateDeviceTableTest(unsigned long *products, int length );
 
 
 #ifndef SWIG
