@@ -14,8 +14,6 @@ namespace AIOUSB
 {
 #endif
 
-/* libusb_device *device;              /\**< NULL == no device *\/ */
-/* libusb_device_handle *deviceHandle; /\**< libusb handles *\/ */
 typedef struct aio_usb_driver {
     USBDevice *usb_device;
     AIOUSB_BOOL bOpen;
@@ -47,7 +45,7 @@ typedef struct aio_usb_driver {
     
     unsigned char RangeShift;
 
-    unsigned ADCChannelsPerGroup;                     // number of A/D channels in each config. group (1, 4 or 8 depending on model)
+    unsigned ADCChannelsPerGroup;      /**< number of A/D channels in each config. group (1, 4 or 8 depending on model) */
     AIOUSB_BOOL bDIOStream;
     unsigned long StreamingBlockSize;
     AIOUSB_BOOL bDIODebounce;
@@ -76,15 +74,15 @@ typedef struct aio_usb_driver {
     unsigned char *LastDIOData;
     char *cachedName;
     unsigned long cachedSerialNumber;
-    ADCConfigBlock cachedConfigBlock;                  // .size == 0 == uninitialized
+    ADCConfigBlock cachedConfigBlock; /**< .size == 0 == uninitialized */
 
     /**
      * state of worker thread; these fields are deliberately unspecific so that
      * the library can employ worker threads in a variety of situations
      */
-    AIOUSB_BOOL workerBusy;                                 // AIOUSB_TRUE == worker thread is busy
-    unsigned long workerStatus;                             // thread-defined status information (e.g. bytes remaining to receive or transmit)
-    unsigned long workerResult;                             // standard AIOUSB_* result code from worker thread (if workerBusy == AIOUSB_FALSE)
+    AIOUSB_BOOL workerBusy;     /**< AIOUSB_TRUE == worker thread is busy */
+    unsigned long workerStatus; /**< thread-defined status information (e.g. bytes remaining to receive or transmit) */
+    unsigned long workerResult; /**< standard AIOUSB_* result code from worker thread (if workerBusy == AIOUSB_FALSE) */
 
     /** New entries for the FastIT behavior */
     ADCConfigBlock *FastITConfig;

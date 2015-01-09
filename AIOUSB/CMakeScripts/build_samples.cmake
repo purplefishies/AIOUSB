@@ -17,19 +17,6 @@ macro ( build_sample_cpp_file project cpp_file )
   INSTALL(TARGETS "${project}_${binary_name}" DESTINATION "share/accesio/${project}/" ) 
 endmacro ( build_sample_cpp_file )
 
-macro ( build_sample_matlab_file project matlab_file )
-  GET_FILENAME_COMPONENT( tmp_matlab_file ${matlab_file} NAME )
-  STRING(REGEX REPLACE "\\.m$" "" binary_name ${tmp_matlab_file})
-  ADD_CUSTOM_COMMAND( OUTPUT ${matlab_file} 
-    COMMAND cmake -E copy_if_different ${matlab_file} ${CMAKE_CURRENT_BINARY_DIR}/${matlab_file} 
-    )
-  ADD_CUSTOM_TARGET( "${project}_${binary_name}" 
-    DEPENDS ${matlab_file}
-    )
-  SET_TARGET_PROPERTIES( "${project}_${binary_name}" PROPERTIES OUTPUT_NAME  ${binary_name} ) 
-  INSTALL(FILES ${matlab_file} DESTINATION "share/accesio/${project}/" ) 
-endmacro ( build_sample_matlab_file )
-
 #
 # Special macro for building testcases that exist inside 
 # of the individual C files.
@@ -40,9 +27,9 @@ macro ( build_selftest_c_file project c_file  cflags link_libraries )
   ADD_EXECUTABLE( "${project}_${binary_name}" ${c_file} )
   LINK_DIRECTORIES( ${AIOUSB_INCLUDE_DIR} )
   if ( USE_GCC)
-    SET(MY_CFLAGS " -g -std=gnu99 ${cflags}" )
+    SET(MY_CFLAGS " -g -gstabs -std=gnu99 ${cflags}" )
   elseif ( USE_CLANG ) 
-    SET(MY_CFLAGS " -g ${cflags}" )
+    SET(MY_CFLAGS " -g -gstabs ${cflags}" )
   endif( USE_GCC )
 
   ADD_TEST( NAME ${binary_name} COMMAND ${binary_name} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
@@ -53,9 +40,9 @@ macro ( build_selftest_c_file project c_file  cflags link_libraries )
   INSTALL(TARGETS "${project}_${binary_name}" DESTINATION "share/accesio/selftest/${project}" ) 
 endmacro ( build_selftest_c_file )
 
-#
-# Builds a file in C++ using GTest 
-#
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# Builds an in-file testcase in C++ using GTest 
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 macro ( build_gtest_cpp_file project c_file  cflags link_libraries )
   GET_FILENAME_COMPONENT( tmp_c_file ${c_file} NAME )
   STRING(REGEX REPLACE "\\.c$" "_test" binary_name ${tmp_c_file})
@@ -77,19 +64,47 @@ macro ( build_gtest_cpp_file project c_file  cflags link_libraries )
 endmacro ( build_gtest_cpp_file  )
 
 
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# Builds a Unit test case in the tests directory
+# @todo improve by making dependency off of the original file
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+macro ( build_gtest_test_file project cpp_file  cflags link_libraries )
+  GET_FILENAME_COMPONENT( just_name_cpp_file ${cpp_file} NAME )
+  # MESSAGE("Found file:${cpp_file}")
+  LINK_DIRECTORIES( ${AIOUSB_INCLUDE_DIR} )
+  #STRING(REGEX REPLACE "\\.c$" "" file_name ${cpp_file})
+  #SET(tmp_gtest_file "${tmp_cpp_file}" )
+  STRING(REGEX REPLACE "\\.cpp$" "" tmp_gtest_file ${just_name_cpp_file} )
+  SET( out_test_file "${CMAKE_CURRENT_BINARY_DIR}/tests/${just_name_cpp_file}" )
+  # MESSAGE("Out file: ${out_test_file}")
+  #SET( test_target_copied "tests_${tmp_gtest_file}_copied" )
+  SET( test_target "tests_${tmp_gtest_file}" )
+
+  # MESSAGE("Copied file: ${out_test_file}")
+  # MESSAGE("Custom Target: ${test_target_copied}")
+  # MESSAGE("Build Target: ${test_target}")
+
+  ADD_EXECUTABLE( ${test_target} ${cpp_file}  )
+  ADD_TEST( NAME ${test_target} COMMAND ${test_target} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
+
+  SET_SOURCE_FILES_PROPERTIES( ${out_test_file}  PROPERTIES LANGUAGE CXX)
+  SET_TARGET_PROPERTIES( ${test_target} PROPERTIES OUTPUT_NAME ${test_target} ) 
+  SET_TARGET_PROPERTIES( ${test_target} PROPERTIES COMPILE_FLAGS ${cflags} ) 
+  # MESSAGE(STATUS "Using libs: ${link_libraries}" )
+  TARGET_LINK_LIBRARIES( ${test_target} ${link_libraries} )
+
+endmacro ( build_gtest_test_file  )
+
+
 macro ( build_all_samples project ) 
   file( GLOB C_FILES ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/*.c" )
   file( GLOB CXX_FILES ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp" )
-  file( GLOB MATLAB_FILES ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/*.m" )
   foreach( c_file ${C_FILES} )
     build_sample_c_file( ${project} ${c_file} )
   endforeach( c_file )
   foreach( cpp_file ${CXX_FILES} )
     build_sample_cpp_file( ${project} ${cpp_file} )
   endforeach( cpp_file )
-  foreach( matlab_file ${MATLAB_FILES} )
-    build_sample_matlab_file( ${project} ${matlab_file} )
-  endforeach( matlab_file )
 endmacro ( build_all_samples )
 
 macro ( include_testcase_lib project )
@@ -117,8 +132,8 @@ macro ( include_testcase_lib project )
 
 
   if ( USE_GCC AND NOT CYGWIN )
-    SET(CMAKE_C_FLAGS   "-std=gnu99 " )
-    SET(CMAKE_CXX_FLAGS "-D__aiousb_cplusplus -fPIC " )
+    SET(CMAKE_C_FLAGS   "-std=gnu99" )
+    SET(CMAKE_CXX_FLAGS "-D__aiousb_cplusplus -fPIC" )
   endif( USE_GCC AND NOT CYGWIN )
 
 endmacro( include_testcase_lib )
