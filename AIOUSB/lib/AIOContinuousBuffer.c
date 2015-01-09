@@ -115,6 +115,7 @@ AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex,
     }
     tmp->testing      = AIOUSB_FALSE;
     tmp->size         = num_channels * scancounts;
+    tmp->scans_to_read = scancounts;
     if( counts ) {
         tmp->buffer = (AIOBufferType *)malloc( tmp->size * sizeof(unsigned short));
         tmp->bufunitsize = sizeof(unsigned short);
@@ -311,6 +312,25 @@ void set_write_pos(AIOContinuousBuf *buf , unsigned pos )
 unsigned get_write_pos( AIOContinuousBuf *buf )
 {
     return buf->_write_pos;
+}
+
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOContinuousBufSetNumberScansToRead( AIOContinuousBuf *buf , unsigned num_scans )
+{
+    assert(buf);
+    if (buf ) 
+        buf->scans_to_read = num_scans;
+    else
+        return -AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER;
+
+    return  AIOUSB_SUCCESS;
+}
+
+
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOContinuousBufGetNumberScansToRead( AIOContinuousBuf *buf )
+{
+    return buf->scans_to_read;
 }
 
 /*----------------------------------------------------------------------------*/

@@ -13,3 +13,5 @@ AIOUSB/build
 AIOUSB/*TAGS*
 AIOUSB/G*
 build
+*.tap
+*_cpp_test

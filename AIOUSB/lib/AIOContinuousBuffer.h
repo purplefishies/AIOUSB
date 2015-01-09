@@ -34,35 +34,36 @@ typedef void *(*AIOUSB_WorkFn)( void *obj );
 
 
 typedef struct {
-  void *(*callback)(void *object);
+    void *(*callback)(void *object);
 #ifdef HAS_PTHREAD
-  pthread_t worker;
-  pthread_mutex_t lock;
-  pthread_attr_t tattr;
+    pthread_t worker;
+    pthread_mutex_t lock;
+    pthread_attr_t tattr;
 #endif
-  AIOUSB_WorkFn work;
-  unsigned long DeviceIndex;
-  AIOBufferType *buffer;
-  unsigned char *countsbuf;
-  unsigned bufunitsize;
-  unsigned hz;
-  unsigned usbbuf_size;
-  unsigned divisora;
-  unsigned divisorb;
-  unsigned _read_pos, _write_pos;
-  /* unsigned totalsize; */
-  unsigned basesize;
-  unsigned size;
-  unsigned counter_control;
-  unsigned timeout;
-  AIORET_TYPE exitcode;
-  AIOUSB_BOOL testing;
-  AIOUSB_BOOL debug;
-  unsigned extra;                     /**< Keeps track of under writes */
-  AIOChannelMask *mask;               /**< Used for keeping track of channels */
-  AIOBufferType *tmpbuf;
-  unsigned tmpbufsize;
-  volatile THREAD_STATUS status; /* Are we running, paused ..etc; */
+    AIOUSB_WorkFn work;
+    unsigned long DeviceIndex;
+    AIOBufferType *buffer;
+    unsigned char *countsbuf;
+    unsigned bufunitsize;
+    unsigned hz;
+    unsigned usbbuf_size;
+    unsigned divisora;
+    unsigned divisorb;
+    unsigned _read_pos, _write_pos;
+    /* unsigned totalsize; */
+    unsigned basesize;
+    unsigned size;
+    unsigned scans_to_read;
+    unsigned counter_control;
+    unsigned timeout;
+    AIORET_TYPE exitcode;
+    AIOUSB_BOOL testing;
+    AIOUSB_BOOL debug;
+    unsigned extra;                     /**< Keeps track of under writes */
+    AIOChannelMask *mask;               /**< Used for keeping track of channels */
+    AIOBufferType *tmpbuf;
+    unsigned tmpbufsize;
+    volatile THREAD_STATUS status; /* Are we running, paused ..etc; */
 } AIOContinuousBuf;
 
 /*-----------------------------  Constructors  ------------------------------*/
@@ -105,6 +106,10 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetTimeout( AIOContinuousBuf *buf );
 
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetDebug( AIOContinuousBuf *buf, AIOUSB_BOOL debug );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetDebug( AIOContinuousBuf *buf );
+
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetNumberScansToRead( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetNumberScansToRead( AIOContinuousBuf *buf , unsigned num_scans );
+
 
 /*-----------------------------  Deprecated / Refactored   -------------------------------*/
 #ifndef SWIG
