@@ -4,7 +4,7 @@
 #include "AIOTypes.h"
 #include "ADCConfigBlock.h"
 #include "USBDevice.h"
-
+#include "cJSON.h"
 #include <string.h>
 #include <semaphore.h>
 #include <libusb.h>
@@ -101,6 +101,7 @@ typedef AIOUSBDevice DeviceDescriptor;
 
 
 char *AIOUSBDeviceToJSON( AIOUSBDevice *device );
+AIOUSBDevice *NewAIOUSBDeviceFromJSON( char *str );
 AIOUSBDevice *NewAIOUSBDeviceFromJSON( char *str );
 
 AIORET_TYPE AIOUSBDeviceInitializeWithProductID( AIOUSBDevice *device , ProductIDS productID );

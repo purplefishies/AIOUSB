@@ -36,21 +36,10 @@ typedef struct aiousboption {
 
 } AIOOption;
 
-typedef enum {
-    AIO_DEVICE_DESCRIPTOR,
-    AIO_ADCCONFIG_BLOCK
-} AIOArgument;
-
 typedef struct aioerror {
     AIORET_TYPE retval;
     char *error_message;
 } AIOError;
-
-typedef union aioeither {
-    AIOArgument right;
-    AIOError left;
-} AIOEither;
-
 
 #define PROD_NAME_SIZE 40
 

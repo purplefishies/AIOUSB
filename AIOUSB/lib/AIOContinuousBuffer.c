@@ -1495,9 +1495,6 @@ AIORET_TYPE AIOContinuousBufRead( AIOContinuousBuf *buf, AIOBufferType *readbuf 
     return retval;
 }
 
-
-
-
 /*----------------------------------------------------------------------------*/
 /** 
  * @brief 
@@ -2745,9 +2742,6 @@ TEST(AIOContinuousBuf,BasicFunctionality ) {
     retval = AIOContinuousBufRead( buf, readbuf, readbuf_size, readbuf_size );
     EXPECT_GE( retval, AIOUSB_SUCCESS ) << "Unable to read buffer ";
 
-    /* printf("%s", ( (int)retval != 0 ? "ok" : "not ok" )); */
-    /* printf(" - Able to read correctly \n"); */
-
     retval = AIOContinuousBufRead( buf, readbuf, readbuf_size, readbuf_size );
     ASSERT_GE( retval, 0 );
 
@@ -2760,8 +2754,6 @@ TEST(AIOContinuousBuf,BasicFunctionality ) {
     }
     retval = AIOContinuousBufWrite( buf, tmp , size, size , AIOCONTINUOUS_BUF_NORMAL);
     EXPECT_GE( retval, 0 );
-    /* printf("%s", ( (int)retval >= 0 ? "ok" : "not ok" )); */
-    /* printf(" - Able to read correctly \n"); */
 
     free(readbuf);
     readbuf_size = (  buffer_max(buf) - get_read_pos (buf) + 2000 );
@@ -2819,12 +2811,9 @@ TEST(AIOContinuousBuf, CopyCounts ) {
     }
 
     while (  AIOContinuousBufCountScansAvailable(buf)  && !failed) {
-        /* retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf , AIOContinuousBufCountScansAvailable(buf)*AIOContinuousBufNumberChannels(buf) ); */
+
         retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf , 32768, 32768 );
         EXPECT_GE( retval, 0 );
-
-
-
         for( int i = 0, ch = 0 ; i < retval; i ++, ch = ((ch+1)% AIOContinuousBufNumberChannels(buf)) )
             EXPECT_EQ( usdata[i], tobuf[i] );
 
@@ -2887,9 +2876,6 @@ int main(int argc, char *argv[] )
 
   listeners.Append( new tap::TapListener() );
   return RUN_ALL_TESTS();  
-
-  /* bulk_transfer_test( bufsize ); */
-  /* continuous_stress_test( bufsize ); */
 
 }
 

@@ -16,6 +16,43 @@ AIOUSBDevice *NewAIOUSBDevice( unsigned long DeviceIndex )
     return dev;
 }
 
+/*----------------------------------------------------------------------------*/
+AIOUSBDevice *NewAIOUSBDeviceFromJSON( char *str )
+{
+    AIOUSBDevice *dev = (AIOUSBDevice *)calloc(sizeof(AIOUSBDevice),1);
+    cJSON *json;
+    json = cJSON_Parse(str);
+
+    if (!json ) 
+        return NULL;
+    cJSON *aiousbdevice = cJSON_GetObjectItem(json,"aiousbdevice");
+
+    if (!aiousbdevice )
+        goto err_NewAIOUSBDeviceFromJSON;
+
+    cJSON *tmp;
+
+    if ( (tmp = cJSON_GetObjectItem(aiousbdevice,"device_index") ) ) {
+        dev->deviceIndex = cJSON_AsInteger( tmp );
+    }
+    if ( (tmp = cJSON_GetObjectItem(aiousbdevice,"adc_channels_per_group") ) ) {
+        dev->ADCChannels = cJSON_AsInteger( tmp );
+    }
+    if ( (tmp = cJSON_GetObjectItem(aiousbdevice,"adc_mux_channels") ) ) {
+        dev->ADCMUXChannels = cJSON_AsInteger( tmp );
+    }
+    if ( (tmp = cJSON_GetObjectItem(aiousbdevice,"adcconfig") ) ) {
+        ADCConfigBlock *tmpconfig = NewADCConfigBlockFromJSON( tmp->valuestring );
+        ADCConfigBlockCopy( AIOUSBDeviceGetADCConfigBlock( dev ), tmpconfig );
+        DeleteADCConfigBlock(tmpconfig);
+    }
+
+    return dev;
+
+ err_NewAIOUSBDeviceFromJSON:
+    free(dev);
+    return NULL;
+}
 
 /*----------------------------------------------------------------------------*/
 void DeleteAIOUSBDevice( AIOUSBDevice *dev) 

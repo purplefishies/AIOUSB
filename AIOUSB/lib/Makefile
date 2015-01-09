@@ -23,6 +23,8 @@ AIODeviceTable.o \
 AIOUSBDevice.o \
 DIOBuf.o \
 ADCConfigBlock.o \
+AIOCommandLine.o \
+AIOConfiguration.o \
 AIOChannelRange.o \
 USBDevice.o
 
@@ -195,6 +197,9 @@ pywrapper:
 
 %_cpp_test: %.c $(SHCDBGLIB) $(SHCPPDBGLIB)
 	$(CXX) $(TESTFLAGS) $(SELF_TEST_CXX_FLAGS) $(subst _cpp_test,.c,$<) -o $@ -L. $(SELF_TEST_CXX_LIBS)
+
+tests/%_cpp_test: tests/%.cpp $(SHCDBGLIB) $(SHCPPDBGLIB)
+	$(CXX) $(TESTFLAGS) $(CXXFLAGS) $< -o $@ -L. $(SELF_TEST_CXX_LIBS)
 
 mostlyclean:
 	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) 
