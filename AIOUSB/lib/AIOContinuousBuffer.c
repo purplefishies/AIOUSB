@@ -689,6 +689,72 @@ AIORET_TYPE AIOContinuousBuf_SmartCountsToVolts( AIOContinuousBuf *buf,
 
 /*----------------------------------------------------------------------------*/
 /**
+ * @brief Allows one to write into the AIOContinuousBuf buffer a given amount (size) of data.
+ * @param buf 
+ * @param writebuf 
+ * @param size 
+ * @param flag
+ * @return Status of whether the write was successful , if so returning the number of bytes written
+ *         or if there was insufficient space, it returns negative error code. If the number 
+ *         is >= 0, then this corresponds to the number of bytes that were written into the buffer.
+ */
+AIORET_TYPE AIOContinuousBufWrite( AIOContinuousBuf *buf, 
+                                   AIOBufferType *writebuf, 
+                                   unsigned wrbufsize, 
+                                   unsigned size, 
+                                   AIOContinuousBufMode flag )
+{
+    AIORET_TYPE retval;
+    unsigned basic_copy, wrap_copy;
+    char *tbuf;
+    ERR_UNLESS_VALID_ENUM( AIOContinuousBufMode ,  flag );
+    
+    /* First try to lock the buffer */
+    /* printf("trying to lock buffer for write\n"); */
+    AIOContinuousBufLock( buf );
+
+    /* Then see if the remaining size is large enough */
+    if( size > buffer_size( buf ) ) {
+        retval = -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+        goto out_AIOContinuousBufWrite;
+    }
+
+    if( write_size(buf) > size || flag == AIOCONTINUOUS_BUF_NORMAL ) {
+        if( get_read_pos(buf) > get_write_pos(buf) ) { 
+            basic_copy = MIN( wrbufsize, (MIN( size, ( get_read_pos( buf ) - get_write_pos( buf ) - 1 ))));
+            wrap_copy  = 0;
+        } else {
+            basic_copy = MIN((MIN( size, ( buffer_max(buf) - get_write_pos( buf ) + 1 ))), wrbufsize );
+            wrap_copy  = MIN( size - basic_copy, get_read_pos(buf) );
+        }
+    } else {            /* not enough room in remaining space */
+        if( flag & AIOCONTINUOUS_BUF_OVERRIDE )  {
+            basic_copy = MIN( size, ( buffer_max(buf) - get_write_pos(buf)  ));
+            wrap_copy  = size - basic_copy;
+        } else {                    /* Assuming All or none */
+            retval = -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+            goto out_AIOContinuousBufWrite;
+        }
+    }
+  
+    tbuf = (char *)&buf->buffer[ 0] + get_write_pos(buf)*buf->bufunitsize;
+    memcpy( &tbuf[0] , &writebuf[0] , basic_copy*buf->bufunitsize );
+    memcpy( &buf->buffer[ 0 ] , &writebuf[basic_copy]  , wrap_copy*buf->bufunitsize  );
+  
+    set_write_pos( buf, (get_write_pos (buf) + basic_copy + wrap_copy ) % buffer_size(buf) );
+    retval = basic_copy+wrap_copy;
+
+    /* If the flag is set such that we can
+     * overwrite , then we are ok, otherwise, 
+     * let's do something different */
+
+ out_AIOContinuousBufWrite:
+    AIOContinuousBufUnlock( buf );
+    return retval;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
  * @brief Performs the maintenance of copying an exact channel Sample
  *       number of all channels into the ContinuousBuffer. First it
  *       must conver the raw data from the USB capture to
@@ -764,6 +830,16 @@ AIORET_TYPE AIOContinuousBufCopyData( AIOContinuousBuf *buf , unsigned short *da
  }
 
 /*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOContinuousBufWriteCounts( AIOContinuousBuf *buf, unsigned short *data, unsigned datasize, unsigned size , AIOContinuousBufMode flag )
+{
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    retval += AIOContinuousBufWrite( buf, (AIOBufferType *)data, datasize, size , flag  );
+
+    return retval;
+}
+
+
+/*----------------------------------------------------------------------------*/
 void *RawCountsWorkFunction( void *object )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
@@ -779,6 +855,7 @@ void *RawCountsWorkFunction( void *object )
     unsigned char *data   = (unsigned char *)malloc( datasize );
     unsigned count = 0;
     USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), &result );
+
     if ( result != AIOUSB_SUCCESS ) {
         buf->exitcode = -(AIORET_TYPE)result;
         retval = -result;
@@ -1418,80 +1495,8 @@ AIORET_TYPE AIOContinuousBufRead( AIOContinuousBuf *buf, AIOBufferType *readbuf 
     return retval;
 }
 
-/*----------------------------------------------------------------------------*/
-/**
- * @brief Allows one to write in to the AIOContinuousBuf buffer a given amount of data.
- * @param buf 
- * @param writebuf 
- * @param size 
- * @param flag
- * @return Status of whether the write was successful , if so returning the number of bytes written
- *         or if there was insufficient space, it returns negative error code. If the number 
- *         is >= 0, then this corresponds to the number of bytes that were written into the buffer.
- */
-AIORET_TYPE AIOContinuousBufWrite( AIOContinuousBuf *buf, 
-                                                 AIOBufferType *writebuf, 
-                                                 unsigned wrbufsize, 
-                                                 unsigned size, 
-                                                 AIOContinuousBufMode flag )
-{
-    AIORET_TYPE retval;
-    unsigned basic_copy, wrap_copy;
-    char *tbuf;
-    ERR_UNLESS_VALID_ENUM( AIOContinuousBufMode ,  flag );
-    
-    /* First try to lock the buffer */
-    /* printf("trying to lock buffer for write\n"); */
-    AIOContinuousBufLock( buf );
 
-    /* Then see if the remaining size is large enough */
-    if( size > buffer_size( buf ) ) {
-        retval = -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
-        goto out_AIOContinuousBufWrite;
-    }
 
-    if( write_size(buf) > size || flag == AIOCONTINUOUS_BUF_NORMAL ) {
-        if( get_read_pos(buf) > get_write_pos(buf) ) { 
-            basic_copy = MIN( wrbufsize, (MIN( size, ( get_read_pos( buf ) - get_write_pos( buf ) - 1 ))));
-            wrap_copy  = 0;
-        } else {
-            basic_copy = MIN((MIN( size, ( buffer_max(buf) - get_write_pos( buf ) + 1 ))), wrbufsize );
-            wrap_copy  = MIN( size - basic_copy, get_read_pos(buf) );
-        }
-    } else {            /* not enough room in remaining space */
-        if( flag & AIOCONTINUOUS_BUF_OVERRIDE )  {
-            basic_copy = MIN( size, ( buffer_max(buf) - get_write_pos(buf)  ));
-            wrap_copy  = size - basic_copy;
-        } else {                    /* Assuming All or none */
-            retval = -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
-            goto out_AIOContinuousBufWrite;
-        }
-    }
-  
-    tbuf = (char *)&buf->buffer[ 0] + get_write_pos(buf)*buf->bufunitsize;
-    memcpy( &tbuf[0] , &writebuf[0] , basic_copy*buf->bufunitsize );
-    memcpy( &buf->buffer[ 0 ] , &writebuf[basic_copy]  , wrap_copy*buf->bufunitsize  );
-  
-    set_write_pos( buf, (get_write_pos (buf) + basic_copy + wrap_copy ) % buffer_size(buf) );
-    retval = basic_copy+wrap_copy;
-
-    /* If the flag is set such that we can
-     * overwrite , then we are ok, otherwise, 
-     * let's do something different */
-
- out_AIOContinuousBufWrite:
-    AIOContinuousBufUnlock( buf );
-    return retval;
-}
-
-/*----------------------------------------------------------------------------*/
-AIORET_TYPE AIOContinuousBufWriteCounts( AIOContinuousBuf *buf, unsigned short *data, unsigned datasize, unsigned size , AIOContinuousBufMode flag )
-{
-    AIORET_TYPE retval = AIOUSB_SUCCESS;
-    retval += AIOContinuousBufWrite( buf, (AIOBufferType *)data, datasize, size , flag  );
-
-    return retval;
-}
 
 /*----------------------------------------------------------------------------*/
 /** 
@@ -1994,86 +1999,6 @@ stress_test_one( int size , int readbuf_size )
     free(readbuf);
 }
 
-
-void basic_functionality()
-{
-    AIOContinuousBuf *buf = NewAIOContinuousBuf(0,  4000 , 16 );
-    int tmpsize = 80000;
-    AIOBufferType *tmp = (AIOBufferType *)malloc(tmpsize*sizeof(AIOBufferType ));
-    AIORET_TYPE retval;
-    for ( int i = 0 ; i < tmpsize; i ++ ) { 
-        tmp[i] = rand() % 1000;
-    }
-    retval = AIOContinuousBufWrite( buf, tmp , tmpsize, tmpsize , AIOCONTINUOUS_BUF_ALLORNONE  );
-    printf("%s", ( (int)retval == -AIOUSB_ERROR_NOT_ENOUGH_MEMORY ? "ok" : "not ok" ));
-    printf(" - Able to perform first write, count is %d \n", (int)retval );
-  
-    free(tmp);
-  
-    unsigned size = 4999;
-    tmp = (AIOBufferType *)malloc(size*sizeof(AIOBufferType ));
-    for( int i = 0; i < 3; i ++ ) {
-        for( int j = 0 ; j < size; j ++ ) {
-            tmp[j] = rand() % 1000;
-        }
-        retval = AIOContinuousBufWrite( buf, tmp , tmpsize, size , AIOCONTINUOUS_BUF_ALLORNONE  );
-        if( i == 0 ) {
-            printf("%s", ( AIOContinuousBufAvailableReadSize(buf) == 4999 ? "ok" : "not ok" ));
-            printf(" - Able to find available read space\n");
-        }
-        if( i == 2 ) { 
-            printf("%s", ( (int)retval != 0 ? "ok" : "not ok" ));
-            printf(" - Correctly stops writing\n");
-        } else {
-            printf("%s", ( (int)retval >= 0 ? "ok" : "not ok" ));
-            printf(" - Still able to write, count is %d\n", get_write_pos(buf) );
-        }
-    }
-    retval = AIOContinuousBufWrite( buf, tmp , tmpsize, size , AIOCONTINUOUS_BUF_NORMAL  );
-    printf("%s", ( (int)retval >= 0 ? "ok" : "not ok" ));
-    printf(" - able to write, count is %d\n", get_write_pos(buf) );
-  
-    retval = AIOContinuousBufWrite( buf, tmp , tmpsize, size , AIOCONTINUOUS_BUF_OVERRIDE );
-    printf("%s", ( (int)retval != 0 ? "ok" : "not ok" ));
-    printf(" - Correctly writes with override \n");
-  
-    int readbuf_size = size - 10;
-    AIOBufferType *readbuf = (AIOBufferType *)malloc( readbuf_size*sizeof(AIOBufferType ));
-  
-    /* 
-     * Problem here.
-     */  
-    retval = AIOContinuousBufRead( buf, readbuf, readbuf_size, readbuf_size );
-    printf("%s", ( (int)retval != 0 ? "ok" : "not ok" ));
-    printf(" - Able to read correctly \n");
-
-    retval = AIOContinuousBufRead( buf, readbuf, readbuf_size, readbuf_size );
-    printf("%s", ( (int)retval >= 0 ? "ok" : "not ok" ));
-    printf(" - Able to read correctly \n");
-
-
-    free(tmp);
-    size = 6000;
-    tmp = (AIOBufferType *)malloc(size*sizeof(AIOBufferType ));
-    for( int j = 0 ; j < size; j ++ ) {
-        tmp[j] = rand() % 1000;
-    }
-    retval = AIOContinuousBufWrite( buf, tmp , size, size , AIOCONTINUOUS_BUF_NORMAL);
-    printf("%s", ( (int)retval >= 0 ? "ok" : "not ok" ));
-    printf(" - Able to read correctly \n");
-
-    free(readbuf);
-    readbuf_size = (  buffer_max(buf) - get_read_pos (buf) + 2000 );
-    readbuf = (AIOBufferType *)malloc(readbuf_size*sizeof(AIOBufferType ));
-    retval = AIOContinuousBufRead( buf, readbuf, readbuf_size, readbuf_size );
-    printf("%s", ( (int)retval >= 0 ? "ok" : "not ok" ));
-    printf(" - Able to read correctly \n");
-
-    DeleteAIOContinuousBuf( buf );
-    free(readbuf);
-    free(tmp);
-
-}
 
 void stress_test_read_channels( int bufsize, int keysize  ) 
 {
