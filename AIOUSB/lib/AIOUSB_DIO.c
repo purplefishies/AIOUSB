@@ -54,10 +54,6 @@ AIOUSBDevice *_check_dio( unsigned long DeviceIndex, AIORESULT *result )
         *result = AIOUSB_ERROR_NOT_SUPPORTED;
         return NULL;
     }
-    if( device->DIOBytes == 0 ) {
-        *result = AIOUSB_ERROR_NOT_SUPPORTED;
-        return NULL;
-    }
 
     return device;
 }
@@ -279,8 +275,9 @@ AIORESULT DIO_ConfigurationQuery(
     if ( bytesTransferred == bufferSize ) {
         memcpy(pOutMask, configBuffer, MASK_BYTES_SIZE( device ) );
         memcpy(pTristateMask, configBuffer + MASK_BYTES_SIZE( device ), TRISTATE_BYTES_SIZE( device ) );
-    } else
+    } else {
         result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+    }
     free(configBuffer);
     
     return result;

@@ -25,11 +25,18 @@ PUBLIC_EXTERN AIORESULT  ADC_GetChannelV(
                                          unsigned long ChannelIndex,
                                          double *pBuf );
  
- 
+
+#ifdef SWIG
 PUBLIC_EXTERN AIORESULT ADC_SetAllGainCodeAndDiffMode( 
                                                       unsigned long DeviceIndex, 
                                                       unsigned gain, 
-                                                      AIOUSB_BOOL differentialMode ) __attribute__ ((deprecated("Please use ADCConfigBlockSetAllGainCodeAndDiffMode instead")));
+                                                      AIOUSB_BOOL differentialMode );
+#else 
+PUBLIC_EXTERN AIORESULT ADC_SetAllGainCodeAndDiffMode( 
+                                                      unsigned long DeviceIndex, 
+                                                      unsigned gain, 
+                                                      AIOUSB_BOOL differentialMode ) ACCES_DEPRECATED("Please use ADCConfigBlockSetAllGainCodeAndDiffMode instead");
+#endif
 
 
 PUBLIC_EXTERN AIORESULT ADC_GetScan(
@@ -148,21 +155,19 @@ PUBLIC_EXTERN unsigned AIOUSB_GetStartChannel( const ADConfigBlock *config );
 PUBLIC_EXTERN unsigned AIOUSB_GetEndChannel( const ADConfigBlock *config );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetScanRange( ADConfigBlock *config, unsigned startChannel, unsigned endChannel );
 
-PUBLIC_EXTERN AIORESULT ADC_InitConfigBlock( ADCConfigBlock *, void *deviceDesc, unsigned int );
 
-PUBLIC_EXTERN void ADC_InitConfigBlockForTesting( ADCConfigBlock *, 
-                                                  void *deviceDesc, 
-                                                  unsigned int something, 
-                                                  AIOUSB_BOOL foo);
 
-PUBLIC_EXTERN AIORESULT AIOUSB_InitConfigBlock( ADCConfigBlock *config, unsigned long DeviceIndex, AIOUSB_BOOL defaults );
 
 
 PUBLIC_EXTERN AIOBuf *NewBuffer( unsigned int bufsize );
 PUBLIC_EXTERN void DeleteBuffer( AIOBuf *buf );
 PUBLIC_EXTERN AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex );
-PUBLIC_EXTERN AIORESULT AIOUSB_SetConfigBlock( unsigned long DeviceIndex , ADConfigBlock *entry );
-
+/* PUBLIC_EXTERN AIORESULT AIOUSB_SetConfigBlock( unsigned long DeviceIndex , ADConfigBlock *entry ); */
+/* PUBLIC_EXTERN AIORESULT AIOUSB_InitConfigBlock( ADCConfigBlock *config, unsigned long DeviceIndex, AIOUSB_BOOL defaults ); */
+/* PUBLIC_EXTERN void ADC_InitConfigBlockForTesting( ADCConfigBlock *,  */
+/*                                                   void *deviceDesc,  */
+/*                                                   unsigned int something,  */
+/*                                                   AIOUSB_BOOL foo); */
 
 
 #ifdef __aiousb_cplusplus

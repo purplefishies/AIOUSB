@@ -36,11 +36,16 @@ typedef unsigned long AIORESULT;
 
 #define VALID_PRODUCT(product) ( VALID_ENUM(  ProductIDS, product ) )
 
-
+#ifdef SWIG
+#define ACCES_DEPRECATED(FOO) ()
+#else
+#define ACCES_DEPRECATED(FOO)   __attribute__ ((deprecated(FOO)))
+#endif
 
 #ifdef __aiousb_cplusplus
 namespace AIOUSB {
 #endif
+
 
 
 

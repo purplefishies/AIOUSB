@@ -20,15 +20,20 @@
 
 %{
   #include "AIOUSB_Core.h"
+  #include "ADCConfigBlock.h"
   #include "AIOContinuousBuffer.h"
   #include "AIOChannelMask.h"
+  #include "AIODeviceTable.h"    
+  #include "AIOUSBDevice.h"
   #include "AIODeviceInfo.h"
   #include "AIOUSB_Properties.h"
+  #include "AIOUSB_ADC.h"
+  #include "AIOUSB_DAC.h"
   #include "AIOTypes.h"
+  #include "cJSON.h"
   #include "AIOUSB_DIO.h"
   #include "DIOBuf.h"
   #include "libusb.h"
-  #include "aiousb.h"
 %}
 
 /* Needed to allow inclusion into Scala */
@@ -42,13 +47,18 @@
 %newobject NewBuffer;
 %delobject AIOBuf::DeleteBuffer;
 
-%include "aiousb.h"
 %include "AIOUSB_Core.h"
+%include "ADCConfigBlock.h"
 %include "AIOContinuousBuffer.h"
 %include "AIOUSB_Properties.h"
 %include "AIOChannelMask.h"
+%include "AIODeviceTable.h"    
+%include "AIOUSB_ADC.h"
+%include "AIOUSB_DAC.h"
+%include "AIOUSBDevice.h"
 %include "AIODeviceInfo.h"
 %include "AIOUSB_DIO.h"
+%include "cJSON.h"
 %include "AIOTypes.h"
 %include "DIOBuf.h"
 

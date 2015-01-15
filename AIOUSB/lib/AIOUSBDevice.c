@@ -55,6 +55,20 @@ AIOUSBDevice *NewAIOUSBDeviceFromJSON( char *str )
 }
 
 /*----------------------------------------------------------------------------*/
+char *AIOUSBDeviceToJSON( AIOUSBDevice *device )
+{
+    char tmpbuf[2048] = {0};
+    /* \"device_index\":\"0\",\"adc_channels_per_group\":\"1\",\"adc_mux_channels\":\"16\",\ */
+    sprintf( &tmpbuf[strlen(tmpbuf)], "{\"%s\":%d,", "device_index", device->deviceIndex );
+    sprintf( &tmpbuf[strlen(tmpbuf)],  "\"%s\":%d,", "adc_channels_per_group", device->ADCChannels );
+    sprintf( &tmpbuf[strlen(tmpbuf)],  "\"%s\":%d,", "adc_mux_channels", device->ADCMUXChannels );
+    sprintf( &tmpbuf[strlen(tmpbuf)],  "\"%s\":%s", "adcconfig", ADCConfigBlockToJSON( AIOUSBDeviceGetADCConfigBlock( device )));
+    strcat( tmpbuf, "}" );
+
+    return strdup(tmpbuf);    
+}
+
+/*----------------------------------------------------------------------------*/
 void DeleteAIOUSBDevice( AIOUSBDevice *dev) 
 {
     free(dev);
@@ -96,6 +110,20 @@ AIORET_TYPE AIOUSBDeviceGetTimeout( AIOUSBDevice *device )
     return device->commTimeout;
 }
 
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOUSBDeviceCopyADCConfigBlock( AIOUSBDevice *dev, ADCConfigBlock *newone )
+{
+    assert( dev && newone );
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    if ( !dev  ) 
+        return AIOUSB_ERROR_INVALID_DEVICE;
+
+    if ( !newone ) 
+        return AIOUSB_ERROR_INVALID_ADCCONFIG;
+
+    retval = ADCConfigBlockCopy( AIOUSBDeviceGetADCConfigBlock( dev ), newone );
+    return retval;
+}
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE _verify_device( AIOUSBDevice *dev ) 
