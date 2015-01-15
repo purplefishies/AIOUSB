@@ -157,17 +157,43 @@ PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetScanRange( ADConfigBlock *config, unsigned s
 
 
 
+PUBLIC_EXTERN unsigned long AIOUSB_SetStreamingBlockSize(
+                                                         unsigned long DeviceIndex,
+                                                         unsigned long BlockSize );
+
+
+
+PUBLIC_EXTERN AIOUSB_BOOL AIOUSB_IsDiscardFirstSample( unsigned long DeviceIndex );    
+PUBLIC_EXTERN unsigned long AIOUSB_SetDiscardFirstSample(unsigned long DeviceIndex,AIOUSB_BOOL discard );
 
 
 PUBLIC_EXTERN AIOBuf *NewBuffer( unsigned int bufsize );
 PUBLIC_EXTERN void DeleteBuffer( AIOBuf *buf );
 PUBLIC_EXTERN AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex );
-/* PUBLIC_EXTERN AIORESULT AIOUSB_SetConfigBlock( unsigned long DeviceIndex , ADConfigBlock *entry ); */
-/* PUBLIC_EXTERN AIORESULT AIOUSB_InitConfigBlock( ADCConfigBlock *config, unsigned long DeviceIndex, AIOUSB_BOOL defaults ); */
-/* PUBLIC_EXTERN void ADC_InitConfigBlockForTesting( ADCConfigBlock *,  */
-/*                                                   void *deviceDesc,  */
-/*                                                   unsigned int something,  */
-/*                                                   AIOUSB_BOOL foo); */
+
+PUBLIC_EXTERN unsigned long AIOUSB_ADC_InternalCal(
+                                                   unsigned long DeviceIndex,
+                                                   AIOUSB_BOOL autoCal,
+                                                   unsigned short returnCalTable[],
+                                                   const char *saveFileName );
+
+PUBLIC_EXTERN AIORET_TYPE  BulkPoll(
+                                    unsigned long DeviceIndex,
+                                    AIOBuf *
+                                    );
+
+PUBLIC_EXTERN unsigned char *ADC_GetADConfigBlock_Registers(
+                                                            ADConfigBlock *config
+                                                            );
+
+PUBLIC_EXTERN void AIOUSB_SetRegister(
+                                      ADConfigBlock *cb,
+                                      unsigned int Register,
+                                      unsigned char value );
+
+PUBLIC_EXTERN unsigned char AIOUSB_GetRegister( ADConfigBlock *cb, unsigned int Register );
+
+
 
 
 #ifdef __aiousb_cplusplus

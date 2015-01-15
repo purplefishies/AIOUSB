@@ -85,11 +85,59 @@ DeviceDescriptor *AIOUSB_GetDevice( unsigned long DeviceIndex );
 ADConfigBlock *AIOUSB_GetConfigBlock( DeviceDescriptor *dev);
 
 
+PUBLIC_EXTERN AIORESULT AIOUSB_SetMiscClock(unsigned long DeviceIndex,double clockHz );
+PUBLIC_EXTERN AIORESULT AIOUSB_GetMiscClock(unsigned long DeviceIndex );
+
+PUBLIC_EXTERN unsigned long AIOUSB_SetCommTimeout(unsigned long DeviceIndex, unsigned timeout );
+PUBLIC_EXTERN unsigned AIOUSB_GetCommTimeout( unsigned long DeviceIndex );
+
+PUBLIC_EXTERN const char *AIOUSB_GetVersion(void);                /* returns AIOUSB module version number as a string */
+PUBLIC_EXTERN const char *AIOUSB_GetVersionDate(void);            /* returns AIOUSB module version date as a string */
+PUBLIC_EXTERN const char *AIOUSB_GetResultCodeAsString( unsigned long value );       /* gets string representation of AIOUSB_xxx result code */
+
+
+PUBLIC_EXTERN double AIOUSB_CountsToVolts(unsigned long DeviceIndex,unsigned channel, unsigned short counts );
+PUBLIC_EXTERN unsigned long AIOUSB_MultipleCountsToVolts(
+                                                         unsigned long DeviceIndex,
+                                                         unsigned startChannel,
+                                                         unsigned endChannel,
+                                                         const unsigned short counts[],
+                                                         double volts[] );
+PUBLIC_EXTERN unsigned short AIOUSB_VoltsToCounts(
+                                                  unsigned long DeviceIndex,
+                                                  unsigned channel,
+                                                  double volts );
+
+PUBLIC_EXTERN unsigned long AIOUSB_MultipleVoltsToCounts(
+                                                         unsigned long DeviceIndex,
+                                                         unsigned startChannel,
+                                                         unsigned endChannel,
+                                                         const double volts[],
+                                                         unsigned short counts[] );
+
+PUBLIC_EXTERN unsigned long AIOUSB_ADC_LoadCalTable(
+                                                    unsigned long DeviceIndex,
+                                                    const char *fileName );
+
+PUBLIC_EXTERN unsigned long AIOUSB_ADC_SetCalTable(
+                                                   unsigned long DeviceIndex,
+                                                   const unsigned short calTable[] );
+PUBLIC_EXTERN unsigned long AIOUSB_ClearFIFO(
+                                             unsigned long DeviceIndex,
+                                             FIFO_Method Method
+                                             );
+
+PUBLIC_EXTERN long AIOUSB_GetStreamingBlockSize(
+                                                unsigned long DeviceIndex
+                                                );
+
+
+
+
 
 PUBLIC_EXTERN AIORESULT AIOUSB_EnsureOpen( unsigned long DeviceIndex );
-/* PUBLIC_EXTERN const char *ProductIDToName( unsigned int productID ); */
 PUBLIC_EXTERN unsigned int ProductNameToID( const char *name );
-/* PUBLIC_EXTERN const char *GetSafeDeviceName( unsigned long DeviceIndex ); */
+
 PUBLIC_EXTERN struct libusb_device_handle *AIOUSB_GetDeviceHandle( unsigned long DeviceIndex );
 PUBLIC_EXTERN struct libusb_device_handle *AIOUSB_GetUSBHandle(DeviceDescriptor *deviceDesc );
 

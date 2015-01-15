@@ -2863,45 +2863,6 @@ INSTANTIATE_TEST_CASE_P(AllCombinations, ParamTest,  ::testing::Combine(::testin
                                                                         ::testing::ValuesIn(lambda_w),::testing::ValuesIn(lambda_r))
                         );
 
-/* set_write_pos(buf, num_channels_per_scan * (num_scans - 1 ) ); */
-/* set_read_pos(buf,  num_channels_per_scan * (num_scans - 2 ) ); */
-/* retval = AIOContinuousBufWriteCounts( buf, tobuf, tobuf_size, tobuf_size / 2, AIOCONTINUOUS_BUF_ALLORNONE ); */
-/* EXPECT_EQ( tobuf_size / 2, retval ); */
-/* retval = AIOContinuousBufWriteCounts( buf, tobuf, tobuf_size, tobuf_size / 2, AIOCONTINUOUS_BUF_ALLORNONE ); */
-/* EXPECT_EQ( tobuf_size / 2, retval ); */
-/* retval = AIOContinuousBufWriteCounts( buf, tobuf, tobuf_size, tobuf_size / 2, AIOCONTINUOUS_BUF_ALLORNONE ); */
-/* EXPECT_EQ( tobuf_size / 2, retval ); */
-/* while (  AIOContinuousBufCountScansAvailable(buf) ) { */
-/*     retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf , tobuf_size, tobuf_size ); */
-/*     ASSERT_GE( retval, AIOUSB_SUCCESS ) << "Couldn't read from buffer at position " << (int)AIOContinuousBufGetReadPosition(buf) << std::endl; */
-/*     unsigned short *tmpbuf = (unsigned short *)&tobuf[0]; */
-/*     for( int i = 0, ch = 0 ; i < retval; i ++, ch = ((ch+1)% AIOContinuousBufNumberChannels(buf)) ) { */
-/*         ASSERT_EQ( tobuf[i], use_data[i] ); */
-/*     } */
-/* } */
-/* DeleteAIOContinuousBuf(buf); */
-/* buf = NewAIOContinuousBufTesting( 0, 10, 16 , AIOUSB_TRUE ); */
-/* retval = AIOContinuousBufWriteCounts( buf, use_data, num_scans/2,num_scans/2 , AIOCONTINUOUS_BUF_ALLORNONE );  */
-/* EXPECT_LE( retval, 0 ) << "Unable to prevent writes when not enough space"; */
-/* unsigned tmpsize = MIN( AIOContinuousBufNumberWriteScansInCounts(buf) , num_scans/2 ); */
-/* retval = AIOContinuousBufWriteCounts( buf, use_data, num_scans/2,tmpsize , AIOCONTINUOUS_BUF_ALLORNONE );  */
-/* EXPECT_EQ( tmpsize, retval ) << "Not able to write just until the end of the buffer\n"; */
-/* while (  AIOContinuousBufCountScansAvailable(buf)  ) { */
-/*     retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf , tobuf_size, tobuf_size ); */
-/*     ASSERT_GE( retval, AIOUSB_SUCCESS ) << "Unable to read from buffer at position " << (int)AIOContinuousBufGetReadPosition(buf) << std::endl; */
-/*     for( int i = 0, ch = 0 ; i < retval; i ++, ch = ((ch+1)% AIOContinuousBufNumberChannels(buf)) ) { */
-/*         ASSERT_EQ( tobuf[i], use_data[i] ) << "Did not get matching data for i=" << i << std::endl; */
-/*     } */
-/* } */
-/* /\* Read=0,Write=16384,size=4000000,Avail=4096; *\/ */
-/* DeleteAIOContinuousBuf(buf); */
-/* /\* --buffersize 1000000 --numchannels 16  --clockrate 10000; *\/ */
-/* buf = NewAIOContinuousBufTesting( 0, 1000000, 16 , AIOUSB_TRUE ); */
-/* /\* set_write_pos(buf, 16384 ); *\/ */
-/* memset(use_data,0,num_scans/2); */
-/* AIOContinuousBufWriteCounts( buf, use_data, num_scans/2,num_scans/2 , AIOCONTINUOUS_BUF_OVERRIDE ); */
-
-
 TEST(AIOContinuousBuf,StressTestOne ) {
     bufsize = 10000;
     for( int i = bufsize; i > 1 ; i /= 2 ) {

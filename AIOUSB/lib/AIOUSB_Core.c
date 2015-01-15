@@ -681,9 +681,9 @@ const char *AIOUSB_GetVersionDate() {
     return VERSION_DATE;
 }
 
-double AIOUSB_GetMiscClock(
-                           unsigned long DeviceIndex
-                           ) 
+AIORESULT AIOUSB_GetMiscClock(
+                              unsigned long DeviceIndex
+                              ) 
 {
     double clockHz = 0;                                                         // return reasonable value on error
 
@@ -695,10 +695,11 @@ double AIOUSB_GetMiscClock(
     return clockHz;
 }
 
-unsigned long AIOUSB_SetMiscClock(
-                                                unsigned long DeviceIndex,
-                                                double clockHz
-                                  ) {
+AIORESULT AIOUSB_SetMiscClock(
+                              unsigned long DeviceIndex,
+                              double clockHz
+                              ) 
+{
     if(clockHz <= 0)
         return AIOUSB_ERROR_INVALID_PARAMETER;
 
