@@ -13,7 +13,6 @@
 %include typemaps.i
 %apply unsigned long *INOUT { unsigned long *result };
 %{
-/*   extern unsigned long AIOUSB_GetStreamingBlockSize(unsigned long DeviceIndex, unsigned long *BlockSize ); */
   extern unsigned long ADC_BulkPoll( unsigned long DeviceIndex, unsigned long *INOUT );
 %}
 
@@ -48,6 +47,66 @@
 %newobject NewBuffer;
 %delobject AIOBuf::DeleteBuffer;
 
+%typemap(in) unsigned char *gainCodes {
+    int i;
+    static unsigned char temp[16];
+
+    if (!PySequence_Check($input)) {
+        PyErr_SetString(PyExc_ValueError,"Expected a sequence");
+        return NULL;
+    }
+    if (PySequence_Length($input) != 16 ) {
+        PyErr_SetString(PyExc_ValueError,"Size mismatch. Expected 16 elements");
+        return NULL;
+    }
+    for (i = 0; i < 16; i++) {
+        PyObject *o = PySequence_GetItem($input,i);
+        if (PyNumber_Check(o)) {
+            temp[i] = (unsigned char) PyFloat_AsDouble(o);
+        } else {
+            PyErr_SetString(PyExc_ValueError,"Sequence elements must be numbers");
+            return NULL;
+        }
+    }
+    $1 = temp;
+}
+
+// %typemap(in)  unsigned short *scanCounts {
+//     unsigned short temp[256];
+//     $1 = temp;
+// }
+// %typemap(argout) unsigned short *scanCounts {
+//     int i;
+//     printf("Doing something...but don't know what\n");
+//     $result = PyList_New(16);
+//     for (i = 0; i < 16; i++) {
+//         PyObject *o = PyFloat_FromDouble((double) $1[i]);
+//         PyList_SetItem($result,i,o);
+//     }
+// }
+
+%typemap(in)  double *voltages {
+    unsigned short temp[256];
+    $1 = temp;
+}
+%typemap(argout) double *voltages {
+    int i;
+    // printf("Doing something...but don't know what\n");
+    $result = PyList_New(16);
+    for (i = 0; i < 16; i++) {
+        PyObject *o = PyFloat_FromDouble((double) $1[i]);
+        PyList_SetItem($result,i,o);
+    }
+}
+
+
+unsigned long ADC_RangeAll( unsigned long DeviceIndex, unsigned char *gainCodes ,unsigned long bSingleEnded );
+unsigned long ADC_GetScanV(unsigned long DeviceIndex, double *voltages );
+
+
+// unsigned long ADC_GetScan( unsigned long DeviceIndex , unsigned short *scanCounts );
+
+
 %include "AIOUSB_Core.h"
 %include "ADCConfigBlock.h"
 %include "AIOContinuousBuffer.h"
@@ -64,23 +123,50 @@
 %include "AIOTypes.h"
 %include "DIOBuf.h"
 
+%array_functions(unsigned short, counts )
+%array_functions(double, volts )
+
 %inline %{
-  unsigned short *new_ushortarray(int size) {
-      return (unsigned short *)malloc(size*sizeof(unsigned short));
-  }
+    /* For handling counts */
+    unsigned short *new_ushortarray(int size) {
+        return (unsigned short *)malloc(size*sizeof(unsigned short));
+    }
 
-  void delete_ushortarray( unsigned short *ary ) {
-    free(ary);
-  }
+    void delete_ushortarray( unsigned short *ary ) {
+        free(ary);
+    }
 
-  int ushort_getitem(unsigned short *ary, int index) {
-    return (int)ary[index];
-  }
+    int ushort_getitem(unsigned short *ary, int index) {
+       return (int)ary[index];
+    }
 
-  void ushort_setitem( unsigned short *ary, int index, int value ) {
-    ary[index] = (unsigned short)value;
-  }
+    void ushort_setitem( unsigned short *ary, int index, int value ) {
+       ary[index] = (unsigned short)value;
+    }
+
+    void print_array(double x[10]) {
+       int i;
+       for (i = 0; i < 10; i++) {
+          printf("[%d] = %g\n", i, x[i]);
+       }
+    }
+
+    // Ushort_Array new_Ushort_Array(int nelements) {
+    //     Ushort_Array tmp;
+    //     tmp._ary = (unsigned short *)calloc(nelements,sizeof(unsigned short));
+    //     tmp.size = nelements;
+    //     return tmp;
+    // }
+
 %}
+
+
+    
+%extend Ushort_Array {
+    char *__str__() {
+        return "FOO";
+    }
+}
 
 %extend AIOChannelMask { 
     AIOChannelMask( unsigned size ) { 

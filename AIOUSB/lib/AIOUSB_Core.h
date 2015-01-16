@@ -66,7 +66,6 @@ PUBLIC_EXTERN AIORET_TYPE ADC_WriteADConfigBlock( unsigned long DeviceIndex , AD
 
 
 #ifndef SWIG
-
 PUBLIC_EXTERN AIOUSB_BOOL AIOUSB_Lock(void);
 PUBLIC_EXTERN AIOUSB_BOOL AIOUSB_UnLock(void);
 
@@ -80,6 +79,7 @@ PUBLIC_EXTERN DeviceDescriptor *DeviceTableAtIndex_Lock( unsigned long DeviceInd
 PUBLIC_EXTERN DeviceDescriptor *AIOUSB_GetDevice_Lock( unsigned long DeviceIndex , 
                                                         unsigned long *result
                                                         );
+#endif
 
 DeviceDescriptor *AIOUSB_GetDevice( unsigned long DeviceIndex );
 ADConfigBlock *AIOUSB_GetConfigBlock( DeviceDescriptor *dev);
@@ -152,7 +152,7 @@ PUBLIC_EXTERN int AIOUSB_BulkTransfer( struct libusb_device_handle *dev_handle,
 
 PUBLIC_EXTERN unsigned ADC_GetOversample_Cached( ADConfigBlock *config );
 PUBLIC_EXTERN unsigned ADC_GainCode_Cached( ADConfigBlock *config, unsigned channel);
-PUBLIC_EXTERN DeviceDescriptor *AIOUSB_GetDevice_NoCheck( unsigned long DeviceIndex  );
+
 PUBLIC_EXTERN AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex, 
                                                    unsigned short *counts,
                                                    unsigned *size ,
@@ -175,7 +175,7 @@ PUBLIC_EXTERN AIORESULT GenericVendorWrite( unsigned long DeviceIndex, unsigned 
 PUBLIC_EXTERN AIORESULT AIOUSB_Validate_Device( unsigned long DeviceIndex );
 
 
-#endif
+
 
 
 

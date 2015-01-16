@@ -50,23 +50,13 @@ AIORET_TYPE AIODeviceInfoGetDIOBytes( AIODeviceInfo *di )
 AIODeviceInfo *AIODeviceInfoGet( unsigned long DeviceIndex )
 {
     AIORESULT result = AIOUSB_SUCCESS;
-    if ( !AIOUSB_Lock() ) { 
-        aio_errno = -AIOUSB_ERROR_INVALID_MUTEX;
-        return NULL;
-    }
+
     AIODeviceInfo *tmp = NewAIODeviceInfo();
     if ( !tmp ) {
         aio_errno = -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
         return NULL;
     }
     memset(tmp,0,sizeof(AIODeviceInfo));
-    AIOUSB_UnLock();
-    /* unsigned long result = AIOUSB_Validate(&DeviceIndex); */
-    if ( result != AIOUSB_SUCCESS ) {
-        AIOUSB_UnLock();
-        aio_errno = -result;
-        return NULL;
-    }
 
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
     if ( result != AIOUSB_SUCCESS ) {
@@ -78,8 +68,6 @@ AIODeviceInfo *AIODeviceInfoGet( unsigned long DeviceIndex )
     tmp->DIOBytes  = deviceDesc->DIOBytes;
     tmp->Counters  = deviceDesc->Counters;
 
-    AIOUSB_UnLock();  /* unlock while communicating with device */
-    
     const char *deviceName = ProductIDToName( tmp->PID );
     if ( deviceName ) {
         tmp->Name = strdup( deviceName );

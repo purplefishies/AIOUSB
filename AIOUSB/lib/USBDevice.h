@@ -44,7 +44,7 @@ USBDevice *AIODeviceTableGetUSBDevice( unsigned long DeviceIndex , AIORESULT *re
 int USBDeviceReadADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock );
 int USBDeviceGetIdProduct( USBDevice *device );
 int USBDeviceFetchADCConfigBlock( USBDevice *device, ADCConfigBlock *config );
-
+int USBDevicePutADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock );
 
 int usb_control_transfer(struct aiousb_device *dev_handle,
                                  uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex,

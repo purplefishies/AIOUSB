@@ -1203,10 +1203,10 @@ out_ADC_CopyConfig:
  * @return
  */
 unsigned long ADC_RangeAll(
-    unsigned long DeviceIndex,
-    unsigned char *pGainCodes,
-    unsigned long bSingleEnded
-    )
+                           unsigned long DeviceIndex,
+                           unsigned char *pGainCodes,
+                           unsigned long bSingleEnded
+                           )
 {
     unsigned channel;
     AIORESULT result = AIOUSB_SUCCESS;
@@ -1375,11 +1375,10 @@ AIORESULT ADC_SetOversample(
         goto out_ADC_SetOversample;
     }
 
-
     result = ReadConfigBlock(DeviceIndex, AIOUSB_FALSE);
     if( result != AIOUSB_SUCCESS) 
         goto out_ADC_SetOversample;
-    /* AIOUSB_Lock(); */
+
     AIOUSB_SetOversample(&deviceDesc->cachedConfigBlock, Oversample);
     result = WriteConfigBlock(DeviceIndex);
 

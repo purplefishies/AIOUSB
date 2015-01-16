@@ -14,6 +14,13 @@
 typedef int AIORET_TYPE;        /* New return type is signed, negative indicates error */
 typedef unsigned long AIORESULT;
 
+typedef unsigned short * COUNTS;
+typedef struct ushort_array {
+    unsigned short *_ary;
+    unsigned size;
+} Ushort_Array;
+
+
 
 #ifndef PUBLIC_EXTERN
 #define PUBLIC_EXTERN extern
