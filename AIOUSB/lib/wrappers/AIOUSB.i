@@ -89,6 +89,7 @@
     unsigned short temp[256];
     $1 = temp;
 }
+
 %typemap(argout) double *voltages {
     int i;
     // printf("Doing something...but don't know what\n");
@@ -99,12 +100,15 @@
     }
 }
 
+%typemap(in)  double *ctrClockHz {
+    double tmp = PyFloat_AsDouble($input);
+    $1 = &tmp;
+}
 
 unsigned long ADC_RangeAll( unsigned long DeviceIndex, unsigned char *gainCodes ,unsigned long bSingleEnded );
 unsigned long ADC_GetScanV(unsigned long DeviceIndex, double *voltages );
-
-
-// unsigned long ADC_GetScan( unsigned long DeviceIndex , unsigned short *scanCounts );
+unsigned long ADC_GetChannelV(unsigned long DeviceIndex, unsigned long ChannelIndex, double *voltages );
+unsigned long CTR_StartOutputFreq( unsigned long DeviceIndex,  unsigned long BlockIndex, double *ctrClockHz );
 
 
 %include "AIOUSB_Core.h"

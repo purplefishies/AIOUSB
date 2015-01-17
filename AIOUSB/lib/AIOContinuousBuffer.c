@@ -501,7 +501,7 @@ AIORET_TYPE AIOContinuousBufReadIntegerNumberOfScans( AIOContinuousBuf *buf,
         return -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
     }
 
-    for ( int i = 0, pos = 0;  i < num_scans && ( pos + AIOContinuousBufNumberChannels(buf)-1 ) < tmpbuffer_size ; i++ , pos += AIOContinuousBufNumberChannels(buf) ) {
+    for ( int i = 0, pos = 0;  i < (int)num_scans && ( pos + AIOContinuousBufNumberChannels(buf)-1 ) < tmpbuffer_size ; i++ , pos += AIOContinuousBufNumberChannels(buf) ) {
         if( i == 0 )
             retval = AIOUSB_SUCCESS;
         if( debug ) { 
@@ -908,14 +908,12 @@ void *RawCountsWorkFunction( void *object )
     int bytes;
     srand(3);
 
-    /* unsigned datasize = AIOContinuousBufNumberChannels(buf)*16*512 */
-    unsigned datasize = 64*1024;
+    unsigned datasize = AIOContinuousBufNumberChannels(buf)*16*512;
     int usbfail = 0;
     int usbfail_count = 5;
     unsigned char *data   = (unsigned char *)malloc( datasize );
     unsigned count = 0;
     USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), &result );
-    printf("RAW!!\n");
 
     if ( result != AIOUSB_SUCCESS ) {
         buf->exitcode = -(AIORET_TYPE)result;
@@ -957,15 +955,11 @@ void *RawCountsWorkFunction( void *object )
         if( bytes ) {
             /* only write bytes that exist */
             int tmpcount = MIN((int)((buffer_size(buf)-get_write_pos(buf)) - AIOContinuousBufNumberChannels(buf)), (int)(bytes/2) );
-            printf("First: %d\t",(int)((buffer_size(buf)-get_write_pos(buf)) - AIOContinuousBufNumberChannels(buf)) );
-            printf("Second: %d\n", bytes / 2 );
-
             int tmp = AIOContinuousBufWriteCounts( buf, 
                                                    (unsigned short *)&data[0],
                                                    datasize/2,
                                                    tmpcount,
                                                    AIOCONTINUOUS_BUF_ALLORNONE
-                                                   /* AIOCONTINUOUS_BUF_NORMAL */
                                                    );
             if( tmp >= 0 ) {
                 count += tmp;
@@ -979,9 +973,8 @@ void *RawCountsWorkFunction( void *object )
              * 1. count >= number we are supposed to read
              * 2. we don't have enough space
              */
-            /* if( count >= AIOContinuousBuf_BufSizeForCounts(buf) - AIOContinuousBufNumberChannels(buf) ) { */
+            if( count >= AIOContinuousBuf_BufSizeForCounts(buf) - AIOContinuousBufNumberChannels(buf) ) {
             /* if ( count >= AIOContinuousBufGetNumberScansToRead(buf) - AIOContinuousBufNumberChannels(buf) ) {  */
-            if ( count >= AIOContinuousBufGetNumberScansToRead(buf)*AIOContinuousBufNumberChannels(buf) ) {
                 AIOContinuousBufLock(buf);
                 buf->status = TERMINATED;
                 AIOContinuousBufUnlock(buf);
@@ -2669,6 +2662,13 @@ TEST(AIOContinuousBuf, BufferScanCounting )
     EXPECT_EQ( retval, tobuf_size - num_channels_per_scan ) << "Reading all of the scans remaining in the AIOContinuousBuf";
 
     /*----------------------------------------------------------------------------*/
+
+    /* int i; */
+    /* int total_write = write_size (buf) / ( num_scans / (AIOContinuousBufNumberChannels(buf) )); */
+    /* for ( i = 0; i < total_write + 2; i ++ ) { */
+    /*     retval = AIOContinuousBufWriteCounts( buf, use_data, num_scans/2, num_scans/2 , AIOCONTINUOUS_BUF_OVERRIDE ); */
+    /*     EXPECT_GE(retval,0); */
+    /* } */
 
     set_write_pos(buf, num_channels_per_scan * (num_scans - 1 ));
     set_read_pos(buf, num_channels_per_scan * (num_scans - 2 ));
