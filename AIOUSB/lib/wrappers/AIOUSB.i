@@ -47,6 +47,7 @@
 %newobject NewBuffer;
 %delobject AIOBuf::DeleteBuffer;
 
+#if defined(SWIGPYTHON)
 %typemap(in) unsigned char *gainCodes {
     int i;
     static unsigned char temp[16];
@@ -110,6 +111,7 @@ unsigned long ADC_GetScanV(unsigned long DeviceIndex, double *voltages );
 unsigned long ADC_GetChannelV(unsigned long DeviceIndex, unsigned long ChannelIndex, double *voltages );
 unsigned long CTR_StartOutputFreq( unsigned long DeviceIndex,  unsigned long BlockIndex, double *ctrClockHz );
 
+#endif
 
 %include "AIOUSB_Core.h"
 %include "ADCConfigBlock.h"
