@@ -7,8 +7,6 @@ import AIOUSB
 from AIOUSB import *
 
 class Device:
-    # readBuffer = DIOBuf(MAX_DIO_BYTES )
-    # writeBuffer = DIOBuf( MAX_DIO_BYTES )
     name = ""
     serialNumber = 0
     index = 0
@@ -85,21 +83,12 @@ serialNumber = AIOUSB.new_ulp()
 result = GetDeviceSerialNumber( deviceIndex, serialNumber );
 print "Serial number of device at index %d: %x" % ( deviceIndex, ulp_value( serialNumber ))
 
-#
-# demonstrate A/D configuration; there are two ways to configure the A/D;
-# one way is to create an ADConfigBlock instance and configure it, and then
-# send the whole thing to the device using ADC_SetConfig(); the other way
-# is to use the discrete API functions such as ADC_SetScanLimits(), which
-# send the new settings to the device immediately; here we demonstrate the
-# ADConfigBlock technique; below we demonstrate use of the discrete functions
-
 result = 0
 ndevice,result = AIODeviceTableGetDeviceAtIndex( deviceIndex , result )
-# print "Result was %d" % ( result )
 
 cb = AIOUSBDeviceGetADCConfigBlock( ndevice )
 
-# AIOUSB_InitConfigBlock( &configBlock, deviceIndex, AIOUSB_FALSE );
+
 AIOUSB_SetAllGainCodeAndDiffMode( cb, AD_GAIN_CODE_10V, AIOUSB_FALSE );
 AIOUSB_SetCalMode( cb, AD_CAL_MODE_NORMAL );
 AIOUSB_SetTriggerMode( cb, 0 );
@@ -108,31 +97,15 @@ AIOUSB_SetOversample( cb, 0 );
 
 ADC_WriteADConfigBlock( deviceIndex, cb )
 
-#AIOUSBDeviceWriteConfig( device, cb )
-#AIOUSB_WriteConfig( deviceIndex, cb )
-#result = ADC_SetConfig( deviceIndex, cb.registers, cb.size );
-
 
 print "A/D settings successfully configured"
 
-#     /*
-#      * demonstrate automatic A/D calibration
-#      */
-#    result = ADC_SetCal( deviceIndex, ":AUTO:" );
-#    if( result == AIOUSB_SUCCESS )
-#        printf( "Automatic calibration completed successfully\n" );
-#    else
-#        printf( "Error '%s' performing automatic A/D calibration\n", AIOUSB_GetResultCodeAsString( result ) );
+
 retval = ADC_SetCal(deviceIndex, ":AUTO:")
 if result != AIOUSB_SUCCESS:
     print "Error '%s' performing automatic A/D calibration" % ( AIOUSB_GetResultCodeAsString( result ) )
     sys.exit(0)
 
-
-
-#     /*
-#      * verify that A/D ground calibration is correct
-#      */
 ADC_SetOversample( deviceIndex, 0 );
 ADC_SetScanLimits( deviceIndex, CAL_CHANNEL, CAL_CHANNEL );
 ADC_ADMode( deviceIndex, 0 , AD_CAL_MODE_GROUND );
@@ -144,15 +117,6 @@ if result != AIOUSB_SUCCESS:
     print "Error '%s' attempting to read ground counts\n" % ( AIOUSB_GetResultCodeAsString( result ) )
 else:
     print "Ground counts = %u (should be approx. 0)" % ( ushort_getitem( counts, CAL_CHANNEL) )
-
-# print "Counts=%s" % ( str(counts) )
-# foocounts = [0 for x in range(1,16)]
-
-# result = ADC_GetScan( deviceIndex, counts );
-# if result != AIOUSB_SUCCESS:
-#     print "Error '%s' attempting to read ground counts\n" % ( AIOUSB_GetResultCodeAsString( result ) )
-# else:
-#     print "Ground counts = %u (should be approx. 0)" % ( ushort_getitem( counts, CAL_CHANNEL) )
 
 
 ADC_ADMode( deviceIndex, 0 , AD_CAL_MODE_REFERENCE ) # TriggerMode
@@ -169,7 +133,6 @@ gainCodes = [0 for x in range(0,16)]
 # 
 for channel in range(0,len(gainCodes)):
     gainCodes[channel] = AD_GAIN_CODE_0_10V
-    # gainCodes[channel] = AD_GAIN_CODE_10V
 
 ADC_RangeAll( deviceIndex , gainCodes, AIOUSB_TRUE )
 ADC_SetOversample( deviceIndex, NUM_OVERSAMPLES )
@@ -186,20 +149,11 @@ for i in range(0,1):
 
 
 # demonstrate reading a single channel in volts
-
 result = ADC_GetChannelV( deviceIndex, CAL_CHANNEL, volts[ CAL_CHANNEL ] );
 
 print "Result from A/D channel %d was %f " % (CAL_CHANNEL, result[0] )
 result = ADC_GetChannelV( deviceIndex, 0 , volts[ CAL_CHANNEL ] );
 print "Result from A/D channel %d was %f " % (  0 , result[0] )
-
-
-# if result != AIOUSB_SUCCESS:
-#     print "Error '%s' reading A/D channel %d" % (AIOUSB_GetResultCodeAsString( result ), CAL_CHANNEL )
-#     sys.exit(0)
-# else:
-#     print("Volts read from A/D channel %d = %f" % ( CAL_CHANNEL, volts[ CAL_CHANNEL ] ))
-
 
 
 # 
@@ -230,11 +184,11 @@ CTR_StartOutputFreq( deviceIndex, 0, clockHz );
 ADC_ADMode( deviceIndex, AD_TRIGGER_SCAN | AD_TRIGGER_TIMER, AD_CAL_MODE_NORMAL );
 
 
-#  /*
-#   * start bulk acquire; ADC_BulkAcquire() will take care of starting
-#   * and stopping the counter; but we do have to tell it what clock
-#   * speed to use, which is why we call AIOUSB_SetMiscClock()
-#   */
+# 
+# start bulk acquire; ADC_BulkAcquire() will take care of starting
+# and stopping the counter; but we do have to tell it what clock
+# speed to use, which is why we call AIOUSB_SetMiscClock()
+# 
 print("Using Clock speed %d to acquire data" % ( CLOCK_SPEED ))
 AIOUSB_SetMiscClock( deviceIndex, CLOCK_SPEED );
 
@@ -245,26 +199,6 @@ if result != AIOUSB_SUCCESS:
     sys.exit(1)
 else:
     print( "Started bulk acquire of %d bytes" % ( BULK_BYTES ))
-
-#     /*
-#      * use bulk poll to monitor progress
-#      */
-#     if( result == AIOUSB_SUCCESS ) {
-#         unsigned long bytesRemaining = BULK_BYTES;
-#         for( int seconds = 0; seconds < 100; seconds++ ) {
-#             sleep( 1 );
-#             result = ADC_BulkPoll( deviceIndex, &bytesRemaining );
-#             if( result == AIOUSB_SUCCESS ) {
-#                 printf( "  %lu bytes remaining\n", bytesRemaining );
-#                 if( bytesRemaining == 0 )
-#                     break;
-#             } else {
-#                 printf( "Error '%s' polling bulk acquire progress\n", 
-#                         AIOUSB_GetResultCodeAsString( result ) );
-#                 sleep(1);
-#                 break;
-#             }
-#         }
 
 bytesRemaining = new_ulp()
 ulp_assign( bytesRemaining, BULK_BYTES )
