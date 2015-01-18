@@ -72,20 +72,6 @@
     $1 = temp;
 }
 
-// %typemap(in)  unsigned short *scanCounts {
-//     unsigned short temp[256];
-//     $1 = temp;
-// }
-// %typemap(argout) unsigned short *scanCounts {
-//     int i;
-//     printf("Doing something...but don't know what\n");
-//     $result = PyList_New(16);
-//     for (i = 0; i < 16; i++) {
-//         PyObject *o = PyFloat_FromDouble((double) $1[i]);
-//         PyList_SetItem($result,i,o);
-//     }
-// }
-
 %typemap(in)  double *voltages {
     unsigned short temp[256];
     $1 = temp;
@@ -110,6 +96,24 @@ unsigned long ADC_RangeAll( unsigned long DeviceIndex, unsigned char *gainCodes 
 unsigned long ADC_GetScanV(unsigned long DeviceIndex, double *voltages );
 unsigned long ADC_GetChannelV(unsigned long DeviceIndex, unsigned long ChannelIndex, double *voltages );
 unsigned long CTR_StartOutputFreq( unsigned long DeviceIndex,  unsigned long BlockIndex, double *ctrClockHz );
+
+#elif defined(SWIGRUBY)
+%typemap(in) unsigned char *gainCodes {
+    int i;
+    static unsigned char temp[16];
+    /* printf("HERE!!\n"); */
+    if ( RARRAY_LEN($input) != 16 ) {
+        rb_raise(rb_eIndexError, "Length is not valid ");
+    }
+    for (i = 0; i < 16; i++) {
+        temp[i] = (unsigned char)NUM2INT(rb_ary_entry($input, i)); 
+        /* printf("Setting temp[%d] to %d\n", i, (int)temp[i] ); */
+    }
+    $1 = temp;
+}
+
+unsigned long ADC_RangeAll( unsigned long DeviceIndex, unsigned char *gainCodes ,unsigned long bSingleEnded );
+
 
 #endif
 
@@ -166,13 +170,6 @@ unsigned long CTR_StartOutputFreq( unsigned long DeviceIndex,  unsigned long Blo
 
 %}
 
-
-    
-%extend Ushort_Array {
-    char *__str__() {
-        return "FOO";
-    }
-}
 
 %extend AIOChannelMask { 
     AIOChannelMask( unsigned size ) { 
