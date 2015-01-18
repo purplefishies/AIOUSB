@@ -98,6 +98,13 @@ unsigned long ADC_GetChannelV(unsigned long DeviceIndex, unsigned long ChannelIn
 unsigned long CTR_StartOutputFreq( unsigned long DeviceIndex,  unsigned long BlockIndex, double *ctrClockHz );
 
 #elif defined(SWIGRUBY)
+
+%typemap(in)  double *ctrClockHz {
+    double tmp = NUM2DBL($input);
+    // printf("Type was %d\n", (int)tmp );
+    $1 = &tmp;
+}
+
 %typemap(in) unsigned char *gainCodes {
     int i;
     static unsigned char temp[16];
@@ -112,8 +119,26 @@ unsigned long CTR_StartOutputFreq( unsigned long DeviceIndex,  unsigned long Blo
     $1 = temp;
 }
 
-unsigned long ADC_RangeAll( unsigned long DeviceIndex, unsigned char *gainCodes ,unsigned long bSingleEnded );
+%typemap(in)  double *voltages {
+    double temp[256];
+    $1 = temp;
+}
 
+%typemap(argout) double *voltages {
+    int i;
+    // printf("Debugging ruby voltages\n");
+    $result = rb_ary_new2(16);
+    // printf("Allocated buffer\n");
+    for (i = 0; i < 16; i++) {
+        rb_ary_store( $result, i, rb_float_new((double)$1[i]));
+    }
+}
+
+
+unsigned long ADC_RangeAll( unsigned long DeviceIndex, unsigned char *gainCodes ,unsigned long bSingleEnded );
+unsigned long ADC_GetScanV(unsigned long DeviceIndex, double *voltages );
+unsigned long ADC_GetChannelV(unsigned long DeviceIndex, unsigned long ChannelIndex, double *voltages );
+unsigned long CTR_StartOutputFreq( unsigned long DeviceIndex,  unsigned long BlockIndex, double *ctrClockHz );
 
 #endif
 
