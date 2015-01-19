@@ -92,10 +92,33 @@
     $1 = &tmp;
 }
 
-unsigned long ADC_RangeAll( unsigned long DeviceIndex, unsigned char *gainCodes ,unsigned long bSingleEnded );
-unsigned long ADC_GetScanV(unsigned long DeviceIndex, double *voltages );
-unsigned long ADC_GetChannelV(unsigned long DeviceIndex, unsigned long ChannelIndex, double *voltages );
-unsigned long CTR_StartOutputFreq( unsigned long DeviceIndex,  unsigned long BlockIndex, double *ctrClockHz );
+#elif defined(SWIGPERL)
+
+%typemap(in) unsigned char *gainCodes {
+    AV *tempav;
+    I32 len;
+    int i;
+    SV **tv;
+
+    static unsigned char temp[16];
+    if (!SvROK($input))
+        croak("Argument $argnum is not a reference.");
+    if (SvTYPE(SvRV($input)) != SVt_PVAV)
+        croak("Argument $argnum is not an array.");
+
+    tempav = (AV*)SvRV($input);
+    len = av_len(tempav);
+    if ( (int)len != 16-1 )  {
+        croak("Bad stuff: length was %d\n", (int)len);
+    }
+    for (i = 0; i <= len; i++) {
+        tv = av_fetch(tempav, i, 0);
+        temp[i] = (unsigned char) SvNV(*tv );
+        // printf("Setting value %d\n", (int)SvNV(*tv ));
+    }
+    
+    $1 = temp;
+}
 
 #elif defined(SWIGRUBY)
 
@@ -108,7 +131,7 @@ unsigned long CTR_StartOutputFreq( unsigned long DeviceIndex,  unsigned long Blo
 %typemap(in) unsigned char *gainCodes {
     int i;
     static unsigned char temp[16];
-    /* printf("HERE!!\n"); */
+
     if ( RARRAY_LEN($input) != 16 ) {
         rb_raise(rb_eIndexError, "Length is not valid ");
     }
@@ -134,13 +157,13 @@ unsigned long CTR_StartOutputFreq( unsigned long DeviceIndex,  unsigned long Blo
     }
 }
 
+#endif
 
 unsigned long ADC_RangeAll( unsigned long DeviceIndex, unsigned char *gainCodes ,unsigned long bSingleEnded );
 unsigned long ADC_GetScanV(unsigned long DeviceIndex, double *voltages );
 unsigned long ADC_GetChannelV(unsigned long DeviceIndex, unsigned long ChannelIndex, double *voltages );
 unsigned long CTR_StartOutputFreq( unsigned long DeviceIndex,  unsigned long BlockIndex, double *ctrClockHz );
 
-#endif
 
 %include "AIOUSB_Core.h"
 %include "ADCConfigBlock.h"
