@@ -94,6 +94,38 @@
 
 #elif defined(SWIGPERL)
 
+%typemap(in)  double *voltages {
+    unsigned short temp[256];
+    $1 = temp;
+}
+
+%typemap(argout) double *voltages {
+    AV *myav;
+    SV **svs;
+    int i = 0,len = 16;
+    /* Figure out how many elements we have */
+    svs = (SV **) malloc(len*sizeof(SV *));
+    for (i = 0; i < len ; i++) {
+        svs[i] = sv_newmortal();
+        // sv_setpv((SV*)svs[i],$1[i]);
+        // sv_setpv( (SV*)svs[i], $1[i] );
+        sv_setnv( (SV*)svs[i],(double)$1[i] );
+    };
+    myav = av_make(len,svs);
+    free(svs);
+    $result = newRV_noinc((SV*)myav);
+    sv_2mortal($result);
+    argvi++;
+    // int i;
+    // // printf("Doing something...but don't know what\n");
+    // $result = PyList_New(16);
+    // for (i = 0; i < 16; i++) {
+    //     PyObject *o = PyFloat_FromDouble((double) $1[i]);
+    //     PyList_SetItem($result,i,o);
+    // }
+}
+
+
 %typemap(in) unsigned char *gainCodes {
     AV *tempav;
     I32 len;
