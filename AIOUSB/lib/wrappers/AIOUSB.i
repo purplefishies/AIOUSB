@@ -107,8 +107,7 @@
     svs = (SV **) malloc(len*sizeof(SV *));
     for (i = 0; i < len ; i++) {
         svs[i] = sv_newmortal();
-        // sv_setpv((SV*)svs[i],$1[i]);
-        // sv_setpv( (SV*)svs[i], $1[i] );
+
         sv_setnv( (SV*)svs[i],(double)$1[i] );
     };
     myav = av_make(len,svs);
@@ -150,6 +149,11 @@
     }
     
     $1 = temp;
+}
+
+%typemap(in)  double *ctrClockHz {
+    double tmp = SvIV($input);
+    $1 = &tmp;
 }
 
 #elif defined(SWIGRUBY)
