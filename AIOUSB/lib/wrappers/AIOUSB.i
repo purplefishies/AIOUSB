@@ -72,19 +72,43 @@
     $1 = temp;
 }
 
-%typemap(in)  double *voltages {
-    unsigned short temp[256];
+//
+// 
+%typemap(in)  double *voltages
+{
+    double temp[256];
     $1 = temp;
 }
 
-%typemap(argout) double *voltages {
+%typemap(argout) (unsigned long DeviceIndex, double *voltages)  {
     int i;
-    // printf("Doing something...but don't know what\n");
-    $result = PyList_New(16);
-    for (i = 0; i < 16; i++) {
-        PyObject *o = PyFloat_FromDouble((double) $1[i]);
+    AIORESULT result = AIOUSB_SUCCESS;
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( $1, &result );
+    if ( result != AIOUSB_SUCCESS ) {
+        PyErr_SetString(PyExc_ValueError,"Invalid DeviceIndex");
+        return NULL;
+    }
+    int tmpsize = deviceDesc->ADCMUXChannels;
+    $result = PyList_New(tmpsize);
+    for (i = 0; i < tmpsize; i++) {
+        PyObject *o = PyFloat_FromDouble((double) $2[i]);
         PyList_SetItem($result,i,o);
     }
+}
+
+%typemap(argout) (unsigned long DeviceIndex, unsigned long ChannelIndex, double *voltages )
+{
+    // printf("debugging");
+    int i;
+    if ( result != AIOUSB_SUCCESS ) {
+        PyErr_SetString(PyExc_ValueError,"Invalid DeviceIndex");
+        return NULL;
+    }
+
+    $result = PyList_New(1);
+
+    PyObject *o = PyFloat_FromDouble((double) $3[$2]);
+    PyList_SetItem($result,0,o);
 }
 
 %typemap(in)  double *ctrClockHz {
@@ -115,15 +139,7 @@
     $result = newRV_noinc((SV*)myav);
     sv_2mortal($result);
     argvi++;
-    // int i;
-    // // printf("Doing something...but don't know what\n");
-    // $result = PyList_New(16);
-    // for (i = 0; i < 16; i++) {
-    //     PyObject *o = PyFloat_FromDouble((double) $1[i]);
-    //     PyList_SetItem($result,i,o);
-    // }
 }
-
 
 %typemap(in) unsigned char *gainCodes {
     AV *tempav;
@@ -196,7 +212,7 @@
 #endif
 
 unsigned long ADC_RangeAll( unsigned long DeviceIndex, unsigned char *gainCodes ,unsigned long bSingleEnded );
-unsigned long ADC_GetScanV(unsigned long DeviceIndex, double *voltages );
+unsigned long ADC_GetScanV( unsigned long DeviceIndex, double *voltages );
 unsigned long ADC_GetChannelV(unsigned long DeviceIndex, unsigned long ChannelIndex, double *voltages );
 unsigned long CTR_StartOutputFreq( unsigned long DeviceIndex,  unsigned long BlockIndex, double *ctrClockHz );
 
