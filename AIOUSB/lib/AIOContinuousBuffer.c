@@ -1098,8 +1098,8 @@ AIORET_TYPE SetConfig( AIOContinuousBuf *buf )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     unsigned long result;
-    AIOUSBDevice *deviceDesc = AIOUSB_GetDevice_Lock( AIOContinuousBufGetDeviceIndex( buf ), &result );
-    if (!deviceDesc || result != AIOUSB_SUCCESS ) {
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), &result );
+    if (result != AIOUSB_SUCCESS ) {
         retval = (AIORET_TYPE)result;
         goto out_SetConfig;
     }

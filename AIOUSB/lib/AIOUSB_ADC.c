@@ -1393,8 +1393,8 @@ unsigned ADC_GetOversample( unsigned long DeviceIndex )
 AIORESULT ADC_SetAllGainCodeAndDiffMode( unsigned long DeviceIndex, unsigned gain, AIOUSB_BOOL differentialMode ) 
 {
     AIORESULT result;
-    AIOUSBDevice *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
-    if(result != AIOUSB_SUCCESS || !deviceDesc )
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    if (result != AIOUSB_SUCCESS )
         goto out_ADC_SetAllGainCodeAndDiffMode;
     else if( deviceDesc->bADCStream == AIOUSB_FALSE) {
         result = AIOUSB_ERROR_NOT_SUPPORTED;
@@ -1406,7 +1406,6 @@ out_ADC_SetAllGainCodeAndDiffMode:
     return result;
 }
 
-
 /**
  * @brief
  * @param DeviceIndex
@@ -1415,13 +1414,13 @@ out_ADC_SetAllGainCodeAndDiffMode:
  * @return
  */
 unsigned long ADC_SetScanLimits(
-    unsigned long DeviceIndex,
-    unsigned long StartChannel,
-    unsigned long EndChannel
-    )
+                                unsigned long DeviceIndex,
+                                unsigned long StartChannel,
+                                unsigned long EndChannel
+                                )
 {
     AIORESULT result;
-    AIOUSBDevice *const deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
     if(!deviceDesc || deviceDesc->bADCStream == AIOUSB_FALSE) {
         result =  AIOUSB_ERROR_NOT_SUPPORTED;
         goto out_ADC_SetScanLimits;
@@ -1825,8 +1824,8 @@ DeleteBuffer( AIOBuf *buf )
 AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex )
 {
   AIORESULT result;
-  AIOUSBDevice *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
-  if(!deviceDesc || result != AIOUSB_SUCCESS) {
+  AIODeviceTableGetDeviceAtIndex(DeviceIndex, &result);
+  if ( result != AIOUSB_SUCCESS ) {
        aio_errno = -result;
        return (AIOBuf*)NULL;
   }
@@ -2403,17 +2402,16 @@ unsigned long ADC_GetFastITScanV(unsigned long DeviceIndex, double *pData)
     double CLOCK_SPEED = 100000;
     int i, ch;
 
-    AIOUSBDevice *deviceDesc = AIOUSB_GetDevice_Lock(DeviceIndex, &result);
-
-    if( !deviceDesc || result != AIOUSB_SUCCESS )
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS )
         goto out_ADC_GetFastITScanV;
 
-    if(!deviceDesc->bADCStream) {
+    if (!deviceDesc->bADCStream) {
           result = AIOUSB_ERROR_BAD_TOKEN_TYPE;
           goto out_ADC_GetFastITScanV;
       }
 
-    if(deviceDesc->ConfigBytes < 20) {
+    if (deviceDesc->ConfigBytes < 20) {
           result = AIOUSB_ERROR_BAD_TOKEN_TYPE;
           goto out_ADC_GetFastITScanV;
       }
@@ -2428,8 +2426,6 @@ unsigned long ADC_GetFastITScanV(unsigned long DeviceIndex, double *pData)
 
 
     Channels      = EndChannel - StartChannel + 1;
-
-    /*  Result := ADC_BulkAcquire(DeviceIndex, Length(ADBuf) * SizeOf(ADBuf[0]), @ADBuf[0]); */
 
     CTR_8254Mode(DeviceIndex, 0, 2, 0);
     CTR_8254Mode(DeviceIndex, 0, 2, 1);

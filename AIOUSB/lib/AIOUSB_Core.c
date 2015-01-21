@@ -476,21 +476,6 @@ ADConfigBlock *AIOUSB_GetConfigBlock( DeviceDescriptor *dev)
 }
 
 /*----------------------------------------------------------------------------*/
-DeviceDescriptor *AIOUSB_GetDevice_Lock(unsigned long DeviceIndex, unsigned long *result) 
-{
-    *result = AIOUSB_Validate(&DeviceIndex);
-    if(*result != AIOUSB_SUCCESS) {
-        return NULL;
-    }
-
-    DeviceDescriptor *const deviceDesc = &deviceTable[ DeviceIndex ];
-    if(!deviceDesc) {
-        *result = AIOUSB_ERROR_DEVICE_NOT_FOUND;
-    }
-    return deviceDesc;
-}
-
-/*----------------------------------------------------------------------------*/
 /**
  * @brief This function is deprecated.
  * @param DeviceIndex

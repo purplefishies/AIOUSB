@@ -76,9 +76,6 @@ PUBLIC_EXTERN AIORESULT AIOUSB_Validate_Lock(  unsigned long *DeviceIndex ) ;
 PUBLIC_EXTERN DeviceDescriptor *DeviceTableAtIndex( unsigned long DeviceIndex );
 PUBLIC_EXTERN DeviceDescriptor *DeviceTableAtIndex_Lock( unsigned long DeviceIndex );
 
-PUBLIC_EXTERN DeviceDescriptor *AIOUSB_GetDevice_Lock( unsigned long DeviceIndex , 
-                                                        unsigned long *result
-                                                        );
 #endif
 
 DeviceDescriptor *AIOUSB_GetDevice( unsigned long DeviceIndex );
