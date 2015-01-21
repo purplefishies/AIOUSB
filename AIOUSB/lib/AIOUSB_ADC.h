@@ -11,31 +11,28 @@ namespace AIOUSB
 #endif
 
 
-PUBLIC_EXTERN AIORESULT ADC_GetScanV(
-                                     unsigned long DeviceIndex,
-                                     double *pBuf 
-                                     );
-    
-PUBLIC_EXTERN AIORESULT ADC_SetAllGainCodeAndDiffMode( 
-                                                     unsigned long DeviceIndex, 
-                                                     unsigned gain, 
-                                                     AIOUSB_BOOL differentialMode );
-PUBLIC_EXTERN AIORESULT  ADC_GetChannelV(
-                                         unsigned long DeviceIndex,
+#ifndef SWIG
+PUBLIC_EXTERN AIORESULT ADC_GetScanV( unsigned long DeviceIndex,
+                                      double *pBuf 
+                                      );
+PUBLIC_EXTERN AIORESULT ADC_RangeAll( unsigned long DeviceIndex,
+                                      unsigned char *pGainCodes,
+                                      unsigned long bSingleEnded );
+
+PUBLIC_EXTERN AIORESULT ADC_GetChannelV( unsigned long DeviceIndex,
                                          unsigned long ChannelIndex,
                                          double *pBuf );
- 
 
-#ifdef SWIG
-PUBLIC_EXTERN AIORESULT ADC_SetAllGainCodeAndDiffMode( 
-                                                      unsigned long DeviceIndex, 
-                                                      unsigned gain, 
-                                                      AIOUSB_BOOL differentialMode );
-#else 
+
+#endif
+    
+
+#ifndef SWIG
 PUBLIC_EXTERN AIORESULT ADC_SetAllGainCodeAndDiffMode( 
                                                       unsigned long DeviceIndex, 
                                                       unsigned gain, 
                                                       AIOUSB_BOOL differentialMode ) ACCES_DEPRECATED("Please use ADCConfigBlockSetAllGainCodeAndDiffMode instead");
+
 #endif
 
 
@@ -53,10 +50,6 @@ PUBLIC_EXTERN AIORESULT ADC_SetConfig(
                                       unsigned char *pConfigBuf,
                                       unsigned long *ConfigBufSize );
  
-PUBLIC_EXTERN AIORESULT ADC_RangeAll(
-    unsigned long DeviceIndex,
-    unsigned char *pGainCodes,
-    unsigned long bSingleEnded );
 
 PUBLIC_EXTERN AIORESULT ADC_Range1(
     unsigned long DeviceIndex,

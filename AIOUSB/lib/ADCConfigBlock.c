@@ -718,49 +718,49 @@ char *ADCConfigBlockToYAML(ADCConfigBlock *config)
 
 /*---------------------  Default settings for JSON read  ---------------------*/
 EnumStringLookup Gains[] = {
-    { AD_GAIN_CODE_0_10V , "0-10V" , STRINGIFY(AD_GAIN_CODE_0_10V)  }, /* Default value */
-    { AD_GAIN_CODE_10V   , "+-10V" , STRINGIFY(AD_GAIN_CODE_10V  )  },
-    { AD_GAIN_CODE_0_5V  , "0-5V"  , STRINGIFY(AD_GAIN_CODE_0_5V )  },
-    { AD_GAIN_CODE_5V    , "+-5V"  , STRINGIFY(AD_GAIN_CODE_5V   )  },
-    { AD_GAIN_CODE_0_2V  , "0-2V"  , STRINGIFY(AD_GAIN_CODE_0_2V )  },
-    { AD_GAIN_CODE_2V    , "+-2V"  , STRINGIFY(AD_GAIN_CODE_2V   )  },
-    { AD_GAIN_CODE_0_1V  , "0-1V"  , STRINGIFY(AD_GAIN_CODE_0_1V )  },
-    { AD_GAIN_CODE_1V    , "+-1V"  , STRINGIFY(AD_GAIN_CODE_1V   )  },
+    { AD_GAIN_CODE_0_10V , (char *)"0-10V" , (char *)STRINGIFY(AD_GAIN_CODE_0_10V)  }, /* Default value */
+    { AD_GAIN_CODE_10V   , (char *)"+-10V" , (char *)STRINGIFY(AD_GAIN_CODE_10V  )  },
+    { AD_GAIN_CODE_0_5V  , (char *)"0-5V"  , (char *)STRINGIFY(AD_GAIN_CODE_0_5V )  },
+    { AD_GAIN_CODE_5V    , (char *)"+-5V"  , (char *)STRINGIFY(AD_GAIN_CODE_5V   )  },
+    { AD_GAIN_CODE_0_2V  , (char *)"0-2V"  , (char *)STRINGIFY(AD_GAIN_CODE_0_2V )  },
+    { AD_GAIN_CODE_2V    , (char *)"+-2V"  , (char *)STRINGIFY(AD_GAIN_CODE_2V   )  },
+    { AD_GAIN_CODE_0_1V  , (char *)"0-1V"  , (char *)STRINGIFY(AD_GAIN_CODE_0_1V )  },
+    { AD_GAIN_CODE_1V    , (char *)"+-1V"  , (char *)STRINGIFY(AD_GAIN_CODE_1V   )  },
 };
 
 EnumStringLookup Calibrations[] = {
-    {AD_CAL_MODE_NORMAL     , "Normal"        ,  STRINGIFY(AD_CAL_MODE_NORMAL    )  }, /* Default */
-    {AD_CAL_MODE_GROUND     , "Ground"        ,  STRINGIFY(AD_CAL_MODE_GROUND    )  },
-    {AD_CAL_MODE_REFERENCE  , "Reference"     ,  STRINGIFY(AD_CAL_MODE_REFERENCE )  },
-    {AD_CAL_MODE_BIP_GROUND , "BIP Reference" ,  STRINGIFY(AD_CAL_MODE_BIP_GROUND)  }
+    {AD_CAL_MODE_NORMAL     , (char *)"Normal"        ,  (char *)STRINGIFY(AD_CAL_MODE_NORMAL    )  }, /* Default */
+    {AD_CAL_MODE_GROUND     , (char *)"Ground"        ,  (char *)STRINGIFY(AD_CAL_MODE_GROUND    )  },
+    {AD_CAL_MODE_REFERENCE  , (char *)"Reference"     ,  (char *)STRINGIFY(AD_CAL_MODE_REFERENCE )  },
+    {AD_CAL_MODE_BIP_GROUND , (char *)"BIP Reference" ,  (char *)STRINGIFY(AD_CAL_MODE_BIP_GROUND)  }
 };
 
 EnumStringLookup ReferenceModes[] = {
-    {AD_TRIGGER_TIMER   , "counter"  , STRINGIFY(AD_TRIGGER_TIMER    ) }, /* Default */
-    {AD_TRIGGER_CTR0_EXT, "external" , STRINGIFY(AD_TRIGGER_CTR0_EXT ) },
-    {0                  , "sw"       , STRINGIFY(0                   ) },
+    {AD_TRIGGER_TIMER   , (char *)"counter"  , (char *)STRINGIFY(AD_TRIGGER_TIMER    ) }, /* Default */
+    {AD_TRIGGER_CTR0_EXT, (char *)"external" , (char *)STRINGIFY(AD_TRIGGER_CTR0_EXT ) },
+    {0                  , (char *)"sw"       , (char *)STRINGIFY(0                   ) },
 };
 
 EnumStringLookup Edges[] = {
-    { 1, "falling-edge", "1" }, /* Default */
-    { 0, "rising-edge" , "0" }
+    { 1, (char *)"falling-edge", (char *)"1" }, /* Default */
+    { 0, (char *)"rising-edge" , (char *)"0" }
 };
 
 EnumStringLookup RefChannels[] = {
-    { 1, "all-channels"   , "1" }, /* Default */
-    { 0, "single-channel" , "0" }
+    { 1, (char *)"all-channels"   , (char *)"1" }, /* Default */
+    { 0, (char *)"single-channel" , (char *)"0" }
 };
 
 EnumStringLookup StartChannel[] = {
-    { 0, "0",  "0" }
+    { 0, (char *)"0",  (char *)"0" }
 };
 
 EnumStringLookup EndChannel[] = {
-    { 15, "15",  "15" }
+    { 15, (char *)"15",  (char *)"15" }
 };
 
 EnumStringLookup Oversample[] = {
-    { 0, "0", "0" }
+    { 0, (char *)"0", (char *)"0" }
 };
 /*-----------------------  End settings for JSON read  -----------------------*/
 

@@ -55,9 +55,11 @@ PUBLIC_EXTERN AIORET_TYPE CTR_8254ReadStatus( unsigned long DeviceIndex,
                                               unsigned short *pReadValue,
                                               unsigned char *pStatus );
 
+#ifndef SWIG
 PUBLIC_EXTERN AIORET_TYPE CTR_StartOutputFreq( unsigned long DeviceIndex,
                                                unsigned long BlockIndex,
                                                double *pHz );
+#endif
 
 PUBLIC_EXTERN AIORET_TYPE CTR_8254SelectGate( unsigned long DeviceIndex,
                                               unsigned long GateIndex );

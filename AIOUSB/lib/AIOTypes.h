@@ -593,7 +593,7 @@ typedef struct {
 /* extern unsigned long GetDevices( void ); */
 
 typedef struct  {
-    const char *Name;                /**< null-terminated device name or 0 */
+    char *Name;                      /**< null-terminated device name or 0 */
     unsigned long SerialNumber;      /**< 64-bit serial number or 0 */
     unsigned ProductID;              /**< 16-bit product ID */
     unsigned DIOPorts;               /**< number of digital I/O ports (bytes) */

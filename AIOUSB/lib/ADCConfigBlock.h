@@ -35,8 +35,8 @@ typedef ADCConfigBlock ADConfigBlock;
 
 typedef struct lookup { 
     int value;
-    char const *str;
-    char const *strvalue;
+    char *str;
+    char *strvalue;
 } EnumStringLookup;
 
 #define STRINGIFY(x) #x

@@ -26,7 +26,7 @@
   #include "AIOUSBDevice.h"
   #include "AIODeviceInfo.h"
   #include "AIOUSB_Properties.h"
-  #include "AIOUSB_ADC.h"
+  // #include "AIOUSB_ADC.h"
   #include "AIOUSB_DAC.h"
   #include "AIOUSB_CTR.h"
   #include "AIOTypes.h"
@@ -99,7 +99,6 @@
 %typemap(argout) (unsigned long DeviceIndex, unsigned long ChannelIndex, double *voltages )
 {
     // printf("debugging");
-    int i;
     if ( result != AIOUSB_SUCCESS ) {
         PyErr_SetString(PyExc_ValueError,"Invalid DeviceIndex");
         return NULL;
@@ -373,7 +372,7 @@ unsigned long CTR_StartOutputFreq( unsigned long DeviceIndex,  unsigned long Blo
     return DIOBufGetIndex( $self, index );
   }
   int __setitem__(unsigned index, int value ) {
-    DIOBufSetIndex( $self, index, value );
+    return DIOBufSetIndex( $self, index, value );
   }
  }
 #elif defined(SWIGOCTAVE)
