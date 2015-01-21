@@ -70,6 +70,7 @@ static ProductIDName productIDNameTable[] = {
     { USB_AI12_128A     , "USB-AI12-128A"  },
     { USB_AI12_128      , "USB-AI12-128"   },
     { USB_AI12_128E     , "USB-AI12-128E"  },
+    { USB_AO_ARB1       , "USB_AO_ARB1"    },
     { USB_AO16_16A      , "USB-AO16-16A"   },
     { USB_AO16_16       , "USB-AO16-16"    },
     { USB_AO16_12A      , "USB-AO16-12A"   },
@@ -1202,6 +1203,13 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
             device->ImmDACs = 2;
             device->bDACBoardRange = AIOUSB_TRUE;
         }
+    } else if ( productID == USB_AO_ARB1 ) { 
+      device->DIOBytes      = 4;
+      device->Tristates     = 1;
+      device->bGetName      = AIOUSB_TRUE;
+      device->bDIOStream    = AIOUSB_TRUE;
+      device->bClearFIFO    = AIOUSB_TRUE;
+      device->bDACDIOClock  = AIOUSB_TRUE;
     } else if(
               productID >= USB_AO16_16A &&
               productID <= USB_AO12_4

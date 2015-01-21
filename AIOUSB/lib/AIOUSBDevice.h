@@ -38,6 +38,7 @@ typedef struct aio_usb_driver {
     unsigned long ConfigBytes;
     unsigned ImmDACs;
     AIOUSB_BOOL bDACStream;
+    AIOUSB_BOOL bDACDIOClock;
     unsigned DACsUsed;
     AIOUSB_BOOL bADCStream;
     unsigned ADCChannels;

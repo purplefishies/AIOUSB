@@ -1,9 +1,7 @@
-#
-# $RCSfile: 10-acces_usb.rules,v $
-# $Revision: 1.9 $
-# $Date: 2010/01/31 19:25:07 $
-# :tabSize=4:indentSize=4:collapseFolds=1:
-#
+# 10-acces_usb.rules
+# $Format: %an <%ae>$
+# $Format: %ad$
+# $Format: %t$
 # loads the correct firmware into an ACCES I/O USB device when it is plugged in
 #
 # this implementation may seem a bit peculiar, what with two initialization steps per board; the reason
@@ -442,6 +440,11 @@ SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="16
 
 # USB-IIRO4-COM (Xerox)
 # SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8031", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-IIRO4-COM.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
+
+# USB-AO-ARB1
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0068", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-AO-ARB1.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8068", RUN+="/bin/chmod 0666 $tempnode"
+
 
 # JTAG
 SUBSYSTEM=="usb", ACTION=="add", ATTR{idVendor}=="fffe", ATTR{idProduct}=="0480" , MODE="0666"
