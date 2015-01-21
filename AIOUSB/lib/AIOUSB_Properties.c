@@ -98,13 +98,6 @@ unsigned long AIOUSB_GetDeviceByProductID(int minProductID,
     if(non_usb_supported_device(minProductID, maxProductID, maxDevices, deviceList))
         return AIOUSB_ERROR_INVALID_PARAMETER;
 
-    /* if(!AIOUSB_Lock()) */
-    /*     return AIOUSB_ERROR_INVALID_MUTEX; */
-    /* if(!AIOUSB_IsInit()) { */
-    /*     AIOUSB_UnLock(); */
-    /*     return AIOUSB_ERROR_DEVICE_NOT_CONNECTED; */
-    /* } */
-
     int index, numDevices = 0;
 
     for(index = 0; index < MAX_USB_DEVICES && numDevices < maxDevices; index++) {
@@ -112,9 +105,7 @@ unsigned long AIOUSB_GetDeviceByProductID(int minProductID,
             deviceTable[ index ].ProductID >= ( unsigned )minProductID &&
             deviceTable[ index ].ProductID <= ( unsigned )maxProductID
             ) {
-            /*
-             * deviceList[] contains device index-product ID pairs, one pair per device found
-             */
+            /**< deviceList[] contains device index-product ID pairs, one pair per device found */
             deviceList[ 1 + numDevices * 2 ] = index;
             deviceList[ 1 + numDevices * 2 + 1 ] = ( int )deviceTable[ index ].ProductID;
             numDevices++;
@@ -122,7 +113,6 @@ unsigned long AIOUSB_GetDeviceByProductID(int minProductID,
     }
     deviceList[ 0 ] = numDevices;
 
-    /* AIOUSB_UnLock(); */
     return AIOUSB_SUCCESS;
 }
 
@@ -154,10 +144,6 @@ AIORESULT GetDeviceSerialNumber(unsigned long DeviceIndex, unsigned long *pSeria
     unsigned long buffer_data;
     AIORESULT result = AIOUSB_SUCCESS;
     AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
-    /* if ( result != AIOUSB_SUCCESS ){ */
-    /*     AIOUSB_UnLock(); */
-    /*     return result; */
-    /* } */
 
     result = GenericVendorRead( DeviceIndex, AUR_EEPROM_READ , EEPROM_SERIAL_NUMBER_ADDRESS, 0 , &buffer_data, &bytes_read );
     if( result != AIOUSB_SUCCESS )
@@ -166,7 +152,6 @@ AIORESULT GetDeviceSerialNumber(unsigned long DeviceIndex, unsigned long *pSeria
     *pSerialNumber = (unsigned long)buffer_data;
 
 out_GetDeviceSerialNumber:
-    /* AIOUSB_UnLock(); */
 
     return result;
 }
@@ -179,32 +164,24 @@ unsigned long GetDeviceBySerialNumber(unsigned long *pSerialNumber)
     if(pSerialNumber == NULL)
         return deviceIndex;
 
-    /* if(!AIOUSB_Lock()) */
-    /*     return deviceIndex; */
-    /* if(!AIOUSB_IsInit()) { */
-    /*       AIOUSB_UnLock(); */
-    /*       return deviceIndex; */
-    /*   } */
-
     int index;
     for(index = 0; index < MAX_USB_DEVICES; index++) {
           if(deviceTable[ index ].usb_device != NULL) {
 
                 unsigned long deviceSerialNumber;
                 unsigned long result = GetDeviceSerialNumber(index, &deviceSerialNumber);
-                /* AIOUSB_Lock(); */
+
                 if( result == AIOUSB_SUCCESS && deviceSerialNumber == *pSerialNumber ) {
                       deviceIndex = index;
                       break;
                   }
-                /*
+                /**
                  * else, even if we get an error requesting the serial number from
                  * this device, keep searching
                  */
           }
       }
 
-    /* AIOUSB_UnLock(); */
     return deviceIndex;
 }
 
@@ -239,16 +216,10 @@ unsigned long AIOUSB_GetDeviceProperties(unsigned long DeviceIndex,DevicePropert
 {
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
-    /* if ( result != AIOUSB_SUCCESS ){ */
-    /*     AIOUSB_UnLock(); */
-    /*     return result; */
-    /* } */
+
     if(properties == 0)
         return AIOUSB_ERROR_INVALID_PARAMETER;
     
-    /* if(!AIOUSB_Lock()) */
-    /*     return AIOUSB_ERROR_INVALID_MUTEX; */
-
     properties->Name = deviceDesc->cachedName; /* if NULL, name will be requested from device */
     properties->SerialNumber = deviceDesc->cachedSerialNumber; /* if 0, serial number will be requested from device */
     properties->ProductID = deviceDesc->ProductID;
@@ -293,7 +264,7 @@ const char *AIOUSB_GetResultCodeAsString(unsigned long result_value)
     unsigned long INIT_PATTERN = 0x100c48b9ul; /* random pattern */
     static unsigned long resultCodeIndexCreated = 0; /* == INIT_PATTERN if index has been created */
     if(resultCodeIndexCreated != INIT_PATTERN) {
-        /*
+        /**
          * build index of result codes
          */
         int index;
@@ -314,7 +285,7 @@ const char *AIOUSB_GetResultCodeAsString(unsigned long result_value)
                                                                             );
     if(resultCode != 0)
         resultText = (*resultCode)->text;
-    /* AIOUSB_UnLock(); */
+
     return resultText;
 }
 
@@ -322,8 +293,6 @@ const char *AIOUSB_GetResultCodeAsString(unsigned long result_value)
 AIORET_TYPE AIOUSB_ShowDevices( AIODisplayType display_type )
 {
     int found = 0;
-    /* if ( !AIOUSB_IsInit() ) */
-    /*     return -AIOUSB_ERROR_NOT_INIT; */
 
     switch ( display_type ) {
     case BASIC:
@@ -400,7 +369,6 @@ AIORET_TYPE AIOUSB_ShowDevices( AIODisplayType display_type )
                     break;
                 }
             
-                AIOUSB_Lock();
             }
         }
     }
