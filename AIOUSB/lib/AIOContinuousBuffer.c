@@ -27,57 +27,13 @@ namespace AIOUSB {
 #endif
 
 
-static pthread_t cont_thread;
-static pthread_mutex_t message_lock = PTHREAD_MUTEX_INITIALIZER;
-static FILE *outfile = NULL;
-
-
-#undef AIOUSB_LOG
-#define AIOUSB_LOG(fmt, ... ) do {                                      \
-    pthread_mutex_lock( &message_lock );                                \
-    fprintf( (!outfile ? stdout : outfile ), fmt,  ##__VA_ARGS__ );     \
-    pthread_mutex_unlock(&message_lock);                                \
-  } while ( 0 )
-
-#undef AIOUSB_DEVEL
-#undef AIOUSB_DEBUG
-#undef AIOUSB_WARN 
-#undef AIOUSB_ERROR
-#undef AIOUSB_FATAL 
-
-#ifdef AIOUSB_DEBUG_LOG
-/**
- * If you _REALLY_ want to see Development messages, you will
- * need to compile with  with -DREALLY_USE_DEVEL_DEBUG
- **/
-#ifdef REALLY_USE_DEVEL_DEBUG
-#define AIOUSB_DEVEL(...)  if( 1 ) { AIOUSB_LOG( "<Devel>\t" __VA_ARGS__ ); }
-#define AIOUSB_TAP(x,...)  if( 1 ) { AIOUSB_LOG( ( x ? "ok -" : "not ok" ) __VA_ARGS__ ); }
-#else
-#define AIOUSB_DEVEL(...)  if( 0 ) { AIOUSB_LOG( "<Devel>\t" __VA_ARGS__ ); }
-#define AIOUSB_TAP(x,...)  if( 0 ) { AIOUSB_LOG( ( x ? "ok -" : "not ok" ) __VA_ARGS__ ); }
-#endif
-#define AIOUSB_DEBUG(...)  AIOUSB_LOG( "<Debug>\t" __VA_ARGS__ )
-#else
-
-#define AIOUSB_DEVEL( ... ) if ( 0 ) { }
-#define AIOUSB_DEBUG( ... ) if ( 0 ) { }
-#endif
-
+pthread_t cont_thread;
+pthread_mutex_t message_lock = PTHREAD_MUTEX_INITIALIZER;
+FILE *outfile = NULL;
 
 void *ActualWorkFunction( void *object );
 void *RawCountsWorkFunction( void *object );
 
-/**
- * Compile with -DAIOUSB_DISABLE_LOG_MESSAGES 
- * if you don't wish to see these warning messages
- **/
-#ifndef AIOUSB_DISABLE_LOG_MESSAGES
-#define AIOUSB_WARN(...)   AIOUSB_LOG("<Warn>\t"  __VA_ARGS__ )
-#define AIOUSB_INFO(...)   AIOUSB_LOG("<Info>\t"  __VA_ARGS__ )
-#define AIOUSB_ERROR(...)  AIOUSB_LOG("<Error>\t" __VA_ARGS__ )
-#define AIOUSB_FATAL(...)  AIOUSB_LOG("<Fatal>\t" __VA_ARGS__ )
-#endif
 
 AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels )
 {
@@ -1778,30 +1734,6 @@ AIORET_TYPE AIOContinuousBufSetChannelRange( AIOContinuousBuf *buf,
 }
 
 /*----------------------------------------------------------------------------*/
-/* AIORET_TYPE AIOContinuousBufSetTimeout( AIOContinuousBuf *buf, unsigned timeout )  */
-/* { */
-/*     AIORET_TYPE retval = AIOUSB_SUCCESS; */
-/*     AIORESULT result = AIOUSB_SUCCESS; */
-/*     if ( !buf )  */
-/*         return -AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER; */
-/*     AIOUSBDevice *device = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf) , &result ); */
-/*     if ( result != AIOUSB_SUCCESS ){ */
-/*         AIOUSB_UnLock(); */
-/*         return -abs(result); */
-/*     } */
-/*     device->commTimeout = timeout; */
-/*     retval = ADCConfigBlockSetTimeout( AIOUSBDeviceGetADCConfigBlock( device ), timeout ); */
-/*     buf->timeout = timeout; */
-/*     return retval; */
-/* } */
-/* AIORET_TYPE AIOContinuousBufGetTimeout( AIOContinuousBuf *buf )  */
-/* { */
-/*     if ( !buf )  */
-/*         return -AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER; */
-/*     return buf->timeout; */
-/* } */
-
-/*----------------------------------------------------------------------------*/
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetTimeout( AIOContinuousBuf *buf, unsigned timeout )
 {
     assert(buf);
@@ -2663,13 +2595,6 @@ TEST(AIOContinuousBuf, BufferScanCounting )
 
     /*----------------------------------------------------------------------------*/
 
-    /* int i; */
-    /* int total_write = write_size (buf) / ( num_scans / (AIOContinuousBufNumberChannels(buf) )); */
-    /* for ( i = 0; i < total_write + 2; i ++ ) { */
-    /*     retval = AIOContinuousBufWriteCounts( buf, use_data, num_scans/2, num_scans/2 , AIOCONTINUOUS_BUF_OVERRIDE ); */
-    /*     EXPECT_GE(retval,0); */
-    /* } */
-
     set_write_pos(buf, num_channels_per_scan * (num_scans - 1 ));
     set_read_pos(buf, num_channels_per_scan * (num_scans - 2 ));
     
@@ -2695,36 +2620,12 @@ TEST(AIOContinuousBuf, BufferScanCounting )
     set_write_pos(buf, 0 );
     set_read_pos(buf, 0 );
     
-
-
-
     /*----------------------------------------------------------------------------*/
     /**< Cleanup */
     DeleteAIOContinuousBuf(buf); 
     free(use_data);
     free(tobuf);
 }
-
-/* class AIOContinuousBufSetup : public ::testing::Test  */
-/* { */
-/*  protected: */
-/*     virtual void SetUp() { */
-/*         numAccesDevices = 0; */
-/*         AIOUSB_Init(); */
-/*         result = AIOUSB_SUCCESS; */
-/*         AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numAccesDevices, USB_AI16_16E, NULL ); */
-/*         device = AIODeviceTableGetDeviceAtIndex( numAccesDevices ,  &result ); */
-/*     } */
-  
-/*     virtual void TearDown() {  */
-
-/*     } */
-/*     int numAccesDevices; */
-/*     AIORESULT result; */
-/*     AIOUSBDevice *device; */
-/*     unsigned short *data; */
-/* }; */
-
 
 class Row {
  public:
@@ -2741,10 +2642,18 @@ std::ostream& operator<<(std::ostream& os, const Row& dt)
     return os;
 }
 
-/* class ParamTest : public ::testing::TestWithParam<Row> { */
-/* }; */
-
+class BufParams : public std::tuple<int,int,int,int> {};
+/* class ParamTest : public ::testing::TestWithParam<BufParams> {}; */
 class ParamTest : public ::testing::TestWithParam<std::tuple<int,int,int,int>> {};
+
+std::ostream& operator<<(std::ostream &os, const BufParams& dt)
+{
+    /* os << "( " << dt.num_scans << " , " << dt.num_channels_per_scan << " , " << dt.lambda_write << " , " << dt.lambda_read << " )" << std::endl; */
+    os << "Foo\n";
+    return os;
+}
+
+
 
 /**
  * @brief 
