@@ -418,7 +418,7 @@ AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf,
     if( size < (unsigned)AIOContinuousBufNumberChannels(buf) ) {
         return -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
     }
-    int numscans = size / AIOContinuousBufNumberChannels(buf);
+    int numscans = MIN(size / AIOContinuousBufNumberChannels(buf), tmpbuffer_size / AIOContinuousBufNumberChannels(buf) );
   
     for ( int i = 0, pos=0 ; i < numscans && (pos + AIOContinuousBufNumberChannels(buf)-1) < (int)size ; i ++ , pos += AIOContinuousBufNumberChannels(buf) ) {
         if( i == 0 )
@@ -426,6 +426,7 @@ AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf,
         if( debug ) { 
             printf("Using i=%d\n",i );
         }
+        /* Incorrect number */
         retval += AIOContinuousBufRead( buf, (AIOBufferType *)&read_buf[pos] , tmpbuffer_size - pos, AIOContinuousBufNumberChannels(buf) );
 
     }
@@ -1495,8 +1496,8 @@ AIORET_TYPE AIOContinuousBufRead( AIOContinuousBuf *buf, AIOBufferType *readbuf 
     }
     /* Now copy the data into readbuf */
     tbuf = (char *)&buf->buffer[0] + get_read_pos(buf)*buf->bufunitsize;
-    memcpy( &readbuf[0]          , &tbuf[0], basic_copy*buf->bufunitsize );
-    memcpy( &readbuf[basic_copy] , &buf->buffer[0]                  , wrap_copy*buf->bufunitsize );
+    memcpy( &readbuf[0]          , &tbuf[0]           , basic_copy*buf->bufunitsize );
+    memcpy( &readbuf[basic_copy] , &buf->buffer[0]    , wrap_copy*buf->bufunitsize );
   
     if( wrap_copy ) {
         retval = basic_copy + wrap_copy;
