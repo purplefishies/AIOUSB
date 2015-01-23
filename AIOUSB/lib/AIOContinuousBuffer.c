@@ -15,6 +15,7 @@
  *       config object
  */
 
+#include "AIOUSB_Log.h"
 #include "AIOContinuousBuffer.h"
 #include "ADCConfigBlock.h"
 #include "AIOChannelMask.h"
@@ -25,11 +26,6 @@
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
-
-
-pthread_t cont_thread;
-pthread_mutex_t message_lock = PTHREAD_MUTEX_INITIALIZER;
-FILE *outfile = NULL;
 
 void *ActualWorkFunction( void *object );
 void *RawCountsWorkFunction( void *object );

@@ -13,6 +13,7 @@ AIOUSB_Core.o \
 AIOUSB_CTR.o \
 AIOUSB_CustomEEPROM.o \
 AIOUSB_DAC.o \
+AIOUSB_Log.o \
 AIOUSB_DIO.o \
 AIOUSB_WDG.o \
 AIOUSB_Properties.o \
@@ -27,6 +28,7 @@ AIOCommandLine.o \
 AIOConfiguration.o \
 AIOChannelRange.o \
 USBDevice.o
+
 
 HEADERS	:=	$(wildcard *.h)
 
