@@ -14,8 +14,6 @@
 
 static int libusb_file_number = 0;
 
-/* typedef DeviceDescriptor AIOUSBDevice; */
-
 /*----------------------------------------------------------------------------*/
 void save_results( char *prefix,
                    uint8_t request_type, 
@@ -84,6 +82,11 @@ int mock_usb_control_transfer(struct aiousb_device *dev_handle,
                          uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
                          unsigned char *data, uint16_t wLength, unsigned int timeout)
 {
+    if ( request_type == USB_READ_FROM_DEVICE ) { 
+        printf("Reading\n");
+    } else {
+        printf("Writing\n");
+    }
     printf("MockUSB Control\n");
     return wLength;
 }
@@ -94,6 +97,11 @@ int mock_usb_bulk_transfer(struct aiousb_device *dev_handle,
                       int *actual_length, unsigned int timeout
                       )
 {
+    if ( request_type == USB_READ_FROM_DEVICE ) { 
+        printf("Reading\n");
+    } else {
+        printf("Writing\n");
+    }
     printf("MockUSB Bulk");
     return length;
 }

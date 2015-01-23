@@ -75,7 +75,6 @@ PUBLIC_EXTERN AIORESULT AIOUSB_Validate_Lock(  unsigned long *DeviceIndex ) ;
 
 PUBLIC_EXTERN DeviceDescriptor *DeviceTableAtIndex( unsigned long DeviceIndex );
 PUBLIC_EXTERN DeviceDescriptor *DeviceTableAtIndex_Lock( unsigned long DeviceIndex );
-
 #endif
 
 DeviceDescriptor *AIOUSB_GetDevice( unsigned long DeviceIndex );
@@ -100,37 +99,28 @@ PUBLIC_EXTERN unsigned long AIOUSB_MultipleCountsToVolts(
                                                          unsigned endChannel,
                                                          const unsigned short counts[],
                                                          double volts[] );
-PUBLIC_EXTERN unsigned short AIOUSB_VoltsToCounts(
-                                                  unsigned long DeviceIndex,
+PUBLIC_EXTERN unsigned short AIOUSB_VoltsToCounts(unsigned long DeviceIndex,
                                                   unsigned channel,
                                                   double volts );
 
-PUBLIC_EXTERN unsigned long AIOUSB_MultipleVoltsToCounts(
-                                                         unsigned long DeviceIndex,
+PUBLIC_EXTERN unsigned long AIOUSB_MultipleVoltsToCounts(unsigned long DeviceIndex,
                                                          unsigned startChannel,
                                                          unsigned endChannel,
                                                          const double volts[],
                                                          unsigned short counts[] );
 
-PUBLIC_EXTERN unsigned long AIOUSB_ADC_LoadCalTable(
-                                                    unsigned long DeviceIndex,
+PUBLIC_EXTERN unsigned long AIOUSB_ADC_LoadCalTable(unsigned long DeviceIndex,
                                                     const char *fileName );
 
-PUBLIC_EXTERN unsigned long AIOUSB_ADC_SetCalTable(
-                                                   unsigned long DeviceIndex,
+PUBLIC_EXTERN unsigned long AIOUSB_ADC_SetCalTable(unsigned long DeviceIndex,
                                                    const unsigned short calTable[] );
-PUBLIC_EXTERN unsigned long AIOUSB_ClearFIFO(
-                                             unsigned long DeviceIndex,
+PUBLIC_EXTERN unsigned long AIOUSB_ClearFIFO(unsigned long DeviceIndex,
                                              FIFO_Method Method
                                              );
 
 PUBLIC_EXTERN long AIOUSB_GetStreamingBlockSize(
                                                 unsigned long DeviceIndex
                                                 );
-
-
-
-
 
 PUBLIC_EXTERN AIORESULT AIOUSB_EnsureOpen( unsigned long DeviceIndex );
 PUBLIC_EXTERN unsigned int ProductNameToID( const char *name );
@@ -170,11 +160,6 @@ PUBLIC_EXTERN AIORESULT GenericVendorRead( unsigned long deviceIndex, unsigned c
 
 PUBLIC_EXTERN AIORESULT GenericVendorWrite( unsigned long DeviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, void *bufData, unsigned long *bytes_write );
 PUBLIC_EXTERN AIORESULT AIOUSB_Validate_Device( unsigned long DeviceIndex );
-
-
-
-
-
 
 
 #if 0
