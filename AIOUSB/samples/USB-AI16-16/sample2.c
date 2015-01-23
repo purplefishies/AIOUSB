@@ -1,7 +1,8 @@
 /*
- * $Date $Format: %ad$$
- * $Author $Format: %an <%ae>$$
- * $Release $Format: %t$$
+ * @file   AIOUSB_Core.c
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @version $Format: %t$
  * AIOUSB library sample program
  */
 
@@ -9,6 +10,19 @@
 #include <math.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <getopt.h>
+
+struct opts {
+    int num_oversamples;
+    int num_channels;
+    int num_scans;
+    int clock_speed;
+    int cal_channel;
+    int max_channels;
+    int clock_scale;
+};
+
+void process_cmd_line( struct opts *, int argc, char *argv[] );
 
 int main( int argc, char **argv ) {
     unsigned long deviceMask;
@@ -19,11 +33,14 @@ int main( int argc, char **argv ) {
     AIOUSB_BOOL deviceFound = AIOUSB_FALSE;
     ADConfigBlock configBlock;
 
-    int CAL_CHANNEL = 5;
-    int MAX_CHANNELS = 128;
-    int NUM_CHANNELS = 16;
-    int NUM_OVERSAMPLES = 10;
-    int NUM_SCANS = 100000;
+    struct opts options = {0, 16, 100000, 0 , 5 , 128 , 1 };
+
+    process_cmd_line( &options, argc, argv );
+    int CAL_CHANNEL      = options.cal_channel;
+    int MAX_CHANNELS     = options.max_channels;
+    int NUM_CHANNELS     = options.num_channels;
+    int NUM_OVERSAMPLES  = options.num_oversamples;
+    int NUM_SCANS        = options.num_scans;
    
 
     unsigned short counts[ MAX_CHANNELS ];
@@ -32,14 +49,16 @@ int main( int argc, char **argv ) {
 
     int BULK_BYTES = NUM_SCANS * NUM_CHANNELS * sizeof( unsigned short ) * (NUM_OVERSAMPLES+1);
 
-    double CLOCK_SPEED = 500000 / ( NUM_CHANNELS * (NUM_OVERSAMPLES+1) );
+    double CLOCK_SPEED = (500000 * options.clock_scale ) / ( NUM_CHANNELS * (NUM_OVERSAMPLES+1) );
 
-    printf( "USB-AI16-16A sample program version 1.110, 17 November 2014\n"
-            "  AIOUSB library version %s, %s\n"
-            "  This program demonstrates controlling a USB-AI16-16A device on\n"
-            "  the USB bus. For simplicity, it uses the first such device found\n"
-            "  on the bus.\n", AIOUSB_GetVersion(), AIOUSB_GetVersionDate()
-            );
+    printf("USB-AI16-16A sample program version %s, %s\n"
+           "  This program demonstrates controlling a USB-AI16-16A device on\n"
+           "  the USB bus. For simplicity, it uses the first such device found\n"
+           "  on the bus.\n", 
+           AIOUSB_GetVersion(), 
+           AIOUSB_GetVersionDate()
+           );
+
     /*
      * MUST call AIOUSB_Init() before any meaningful AIOUSB functions;
      * AIOUSB_GetVersion() above is an exception
@@ -218,7 +237,7 @@ int main( int argc, char **argv ) {
      */
     printf("Using Clock speed %d to acquire data\n", (int)CLOCK_SPEED);
     AIOUSB_SetMiscClock( deviceIndex, CLOCK_SPEED );
-
+    /* exit(0); */
     result = ADC_BulkAcquire( deviceIndex, BULK_BYTES, dataBuf );
 
 
@@ -293,3 +312,73 @@ int main( int argc, char **argv ) {
  exit_sample:
     return ( int ) result;
 }
+
+void print_usage(int argc, char **argv,  struct option *options)
+{
+    fprintf(stderr,"%s - Options\n", argv[0] );
+    for ( int i =0 ; options[i].name != NULL ; i ++ ) {
+      fprintf(stderr,"\t-%c | --%s ", (char)options[i].val, options[i].name);
+      if( options[i].has_arg == optional_argument ) {
+        fprintf(stderr, " [ ARG ]\n");
+      } else if( options[i].has_arg == required_argument ) {
+        fprintf(stderr, " ARG\n");
+      } else {
+        fprintf(stderr,"\n");
+      }
+    }
+}
+
+void process_cmd_line( struct opts *options, int argc, char *argv[] )
+{
+
+    int c;
+    /* int digit_optind = 0; */
+    int error = 0;
+    /* int this_option_optind = optind ? optind : 1; */
+    int option_index = 0;
+
+    static struct option long_options[] = {
+      {"num_oversamples" ,  required_argument , 0,  'O' },
+      {"num_channels"    ,  required_argument , 0,  'n' },
+      {"num_scans"       ,  required_argument , 0,  'S' },
+      {"clock_speed"     ,  required_argument , 0,  'T' },
+      {"cal_channel"     ,  required_argument , 0,  'C' },
+      {"help"            ,  no_argument       , 0,  'h' },
+      {0,         0,                 0,  0 }
+    };
+    while (1) { 
+        c = getopt_long(argc, argv, "O:n:S:T:C:h", long_options, &option_index);
+        if( c == -1 )
+          break;
+        switch (c) {
+        case 'h':
+          print_usage(argc, argv, long_options );
+          _exit(1);
+          break;
+        case 'O':
+          options->num_oversamples = atoi(optarg);
+          break;
+        case 'n':
+            options->num_channels = atoi(optarg);
+            break;
+        case 'S':
+            options->num_scans = atoi(optarg);
+            break;
+        case 'T':
+            options->clock_speed = atoi(optarg);
+            break;
+        case 'C':
+            options->cal_channel = atoi(optarg);
+            break;
+        default:
+          fprintf(stderr, "Incorrect argument '%s'\n", optarg );
+          error = 1;
+          break;
+        }
+        if( error ) {
+            print_usage(argc, argv, long_options);
+            _exit(1);
+        }
+    }
+}
+
