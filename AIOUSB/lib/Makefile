@@ -27,6 +27,7 @@ ADCConfigBlock.o \
 AIOCommandLine.o \
 AIOConfiguration.o \
 AIOChannelRange.o \
+AIOCountsConverter.o \
 USBDevice.o
 
 
@@ -158,7 +159,7 @@ COMMONOPTS		+= -fPIC
 endif
 
 
-EXTRA_COPTS		:= -std=gnu99 -D_GNU_SOURCE
+EXTRA_COPTS		:= -D_GNU_SOURCE
 SELF_TEST_FLAGS		:= -DSELF_TEST
 SELF_TEST_LIBS		:= -lm -lpthread -laiousbdbg -lusb-1.0
 SELF_TEST_CXX_FLAGS	:= -D__aiousb_cplusplus -DSELF_TEST $(CXXFLAGS) -std=gnu++0x
