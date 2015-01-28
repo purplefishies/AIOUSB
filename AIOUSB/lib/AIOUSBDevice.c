@@ -129,6 +129,8 @@ AIORET_TYPE AIOUSBDeviceCopyADCConfigBlock( AIOUSBDevice *dev, ADCConfigBlock *n
 AIORET_TYPE _verify_device( AIOUSBDevice *dev ) 
 {
     AIORET_TYPE result = AIOUSB_SUCCESS;
+    if ( !dev ) 
+        return AIOUSB_ERROR_INVALID_DEVICE;
     if ( dev->isInit != AIOUSB_TRUE )
         return AIOUSB_ERROR_INVALID_DATA;
 

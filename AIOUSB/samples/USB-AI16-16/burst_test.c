@@ -56,8 +56,8 @@ main(int argc, char *argv[] )
     struct opts options = {100000, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , (char*)"output.txt", 0, 0, 15 , 0, 0, 0, 0, NULL };
     AIOContinuousBuf *buf = 0;
     unsigned read_count = 0;
-    unsigned short tobuf[32768] = {0};
-    unsigned tobufsize = 32768;
+    unsigned short tobuf[65536] = {0};
+    unsigned tobufsize = 65536;
     struct timespec foo , bar;
 
     AIORET_TYPE retval = AIOUSB_SUCCESS;
@@ -101,7 +101,6 @@ main(int argc, char *argv[] )
         unsigned char bufData[64];
         unsigned long bytesWritten = 0;
         GenericVendorWrite( 0, 0xDF, 0x0000, 0x001E, bufData, &bytesWritten  );
-        /* GenericVendorWrite( DeviceIndex, 0xDF, 0x0000, 0x001E, 1, &buf );  Windows call */
     }
 
     AIOContinuousBufSetOverSample( buf, 0 );

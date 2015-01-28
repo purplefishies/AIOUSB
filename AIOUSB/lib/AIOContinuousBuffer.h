@@ -40,7 +40,7 @@ typedef struct {
     pthread_attr_t tattr;
 #endif
     AIOUSB_WorkFn work;
-    unsigned long DeviceIndex;
+    int DeviceIndex;
     AIOBufferType *buffer;
     unsigned char *countsbuf;
     unsigned bufunitsize;
@@ -80,6 +80,14 @@ PUBLIC_EXTERN void DeleteAIOContinuousBuf( AIOContinuousBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufCopyData( AIOContinuousBuf *buf , unsigned short *data , unsigned *size );
 
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufInitConfiguration(  AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufInitADCConfigBlock( AIOContinuousBuf *buf, 
+                                                              unsigned size, 
+                                                              ADGainCode gainCode, 
+                                                              AIOUSB_BOOL diffMode, 
+                                                              unsigned char os, 
+                                                              AIOUSB_BOOL dfs 
+                                                              );
+
 PUBLIC_EXTERN AIOUSB_WorkFn AIOContinuousBufGetCallback( AIOContinuousBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetCallback(AIOContinuousBuf *buf , void *(*work)(void *object ) );
 
@@ -113,6 +121,11 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetDebug( AIOContinuousBuf *buf );
 
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetNumberScansToRead( AIOContinuousBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetNumberScansToRead( AIOContinuousBuf *buf , unsigned num_scans );
+
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetRemainingWriteSize( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetUnitSize( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufReset( AIOContinuousBuf *buf );
+
 
 
 /*-----------------------------  Deprecated / Refactored   -------------------------------*/

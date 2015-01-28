@@ -1017,6 +1017,10 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , AIORES
 {
     AIOUSBDevice *retval = NULL;
 
+    if ( !AIOUSB_IsInit() ) {
+        *result = AIOUSB_ERROR_NOT_INIT;
+        return NULL;
+    }
     if (DeviceIndex == diFirst) { /* find first device on bus */
         *result = AIOUSB_ERROR_FILE_NOT_FOUND;
         int index;
