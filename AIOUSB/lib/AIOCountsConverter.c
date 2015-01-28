@@ -201,8 +201,10 @@ TEST(Composite,FifoWriting )
      */
     retval = AIOFifoWrite( infifo, from_buf, total_size*sizeof(unsigned short) );
     EXPECT_GE( retval, 0 );
-    /* retval = ( infifo, from_buf, total_size*sizeof(unsigned short) ); */
+
+
     retval = cc->ConvertFifo( cc, outfifo, infifo , total_size*sizeof(unsigned short) );
+
     EXPECT_GE( retval, 0 );
     AIOFifoRead( outfifo, to_buf, num_channels*sizeof(double) );
 

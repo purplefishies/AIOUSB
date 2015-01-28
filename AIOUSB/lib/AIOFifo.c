@@ -18,10 +18,13 @@ namespace AIOUSB {
 
 AIOFifo *NewAIOFifo( unsigned int size )
 { 
-    AIOFifo *nfifo = (AIOFifo *)calloc(1,sizeof(AIOFifo));
-    nfifo->size = size;
-    nfifo->data = malloc(size);
+    AIOFifo *nfifo  = (AIOFifo *)calloc(1,sizeof(AIOFifo));
+    nfifo->size     = size;
+    nfifo->data     = malloc(size);
+    nfifo->Read     = AIOFifoRead;
+    nfifo->Write    = AIOFifoWrite;
     return nfifo;
+
 }
 
 void DeleteAIOFifo( AIOFifo *fifo ) 
@@ -77,11 +80,13 @@ TEST(Initialization,Callback )
     unsigned short *tobuf = (unsigned short *)malloc(20000);
     for( int i = 0; i < 10000; i ++ ) { frombuf[i] = i ; }
     
-    AIOFifoWrite( fifo, frombuf, 2000 );
-    AIOFifoWrite( fifo, frombuf, 2000 );
-    AIOFifoWrite( fifo, frombuf, 2000 );
-    AIOFifoWrite( fifo, frombuf, 2000 );
-    retval = AIOFifoRead( fifo, tobuf, 20000 ); 
+    fifo->Write( fifo, frombuf, 2000 );
+    fifo->Write( fifo, frombuf, 2000 );
+    fifo->Write( fifo, frombuf, 2000 );    
+    fifo->Write( fifo, frombuf, 2000 );
+
+    retval = fifo->Read( fifo, tobuf, 20000 );
+
     EXPECT_EQ( retval, 10000 );
     EXPECT_EQ( fifo->write_pos, 8000 );
     DeleteAIOFifo(fifo);

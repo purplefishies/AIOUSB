@@ -22,7 +22,9 @@ typedef struct aio_fifo {
     void *data;
     unsigned int size;
     unsigned int read_pos;
-    unsigned int write_pos;    
+    unsigned int write_pos;
+    AIORET_TYPE (*Read)( struct aio_fifo *fifo, void *tobuf, unsigned maxsize );
+    AIORET_TYPE (*Write)( struct aio_fifo *fifo, void *tobuf, unsigned maxsize );
 } AIOFifo;
 
 AIOFifo *NewAIOFifo( unsigned int size  );
