@@ -200,12 +200,12 @@ AIORET_VALUE Pop( AIOFifoTYPE *fifo )
 AIORET_TYPE PopN( AIOFifoTYPE *fifo, TYPE *in, unsigned N)
 {
     AIORET_TYPE retval = {0};
-    int tmpval = fifo->Read( (AIOFifo*)fifo, &in, sizeof(TYPE)*N );
+    int tmpval = fifo->Read( (AIOFifo*)fifo, in, sizeof(TYPE)*N );
 
     if( tmpval <= 0 ) {
         retval = -AIOUSB_FIFO_COPY_ERROR;
     } 
-
+    
     return retval;
 }
 
@@ -217,6 +217,7 @@ AIOFifoTYPE *NewAIOFifoTYPE( unsigned int size )
     nfifo->Push = Push;
     nfifo->PushN = PushN;
     nfifo->Pop = Pop;
+    nfifo->PopN = PopN;
     return nfifo;
 }
 void DeleteAIOFifoTYPE( AIOFifoTYPE *fifo )
@@ -425,8 +426,19 @@ TEST(NewType,PushAndPopArrays )
         get_right( &keepvalue,&tval);
         EXPECT_EQ( tval , i );
     }
-}
+    keepvalue = fifo->Pop( fifo );
+    EXPECT_EQ( keepvalue.left, 0 );
 
+    fifo->PushN( fifo, tmp, size );
+    ASSERT_EQ( tmp[3], 3 );
+    memset(tmp,0,sizeof(TYPE)*size );
+    ASSERT_EQ( tmp[3], 0 );
+
+    fifo->PopN( fifo, tmp, size );
+
+    ASSERT_EQ( tmp[3], 3 );
+
+}
 
 int main(int argc, char *argv[] )
 {
