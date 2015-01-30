@@ -167,7 +167,7 @@ find_package( GTestTap )
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 if( GTESTTAP_FOUND )
 
-  set(GTEST_FILES ADCConfigBlock.c AIOChannelMask.c AIOChannelRange.c AIOContinuousBuffer.c AIODeviceInfo.c AIODeviceTable.c AIOUSBDevice.c AIOUSB_Core.c DIOBuf.c USBDevice.c )
+  set(GTEST_FILES ADCConfigBlock.c AIOChannelMask.c AIOChannelRange.c AIOContinuousBuffer.c AIODeviceInfo.c AIODeviceTable.c AIOUSBDevice.c AIOUSB_Core.c DIOBuf.c USBDevice.c AIOFifo.c AIOEither.c)
   foreach( gtest ${GTEST_FILES} ) 
     set(MY_FLAGS "-DSELF_TEST -D__aiousb_cplusplus -DGTEST_TAP_PRINT_TO_STDOUT -std=gnu++0x"  )
     set(MY_LIBRARIES aiousbdbg usb-1.0 pthread m gtest aiousb aiousbcpp )
