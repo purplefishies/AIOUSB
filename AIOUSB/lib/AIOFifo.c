@@ -217,9 +217,8 @@ AIORET_TYPE AIOFifoReadAllOrNone( AIOFifo *fifo, void *tobuf , unsigned maxsize 
     return actsize;
 }
 
-/* Counts Fifo definition */
+
 TEMPLATE_AIOFIFO_API( Counts, uint16_t );
-/* Volts Fifo definition */
 TEMPLATE_AIOFIFO_API( Volts, double );
 
 

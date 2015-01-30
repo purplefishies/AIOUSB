@@ -33,7 +33,7 @@ typedef struct aio_counts_converter {
     void *buf;
     AIOGainRange *gain_ranges;
     AIORET_TYPE (*Convert)( struct aio_counts_converter *cc, void *tobuf, void *frombuf, unsigned num_bytes );
-    AIORET_TYPE (*ConvertFifo)( struct aio_counts_converter *cc, AIOFifo *tobuf, AIOFifo *frombuf , unsigned num_bytes );
+    AIORET_TYPE (*ConvertFifo)( struct aio_counts_converter *cc, void *tobuf, void *frombuf , unsigned num_bytes );
 } AIOCountsConverter;
 
 
@@ -43,7 +43,7 @@ PUBLIC_EXTERN void DeleteAIOCountsConverter( AIOCountsConverter *ccv );
 PUBLIC_EXTERN AIORET_TYPE AIOCountsConverterConvertNScans( AIOCountsConverter *ccv, int num_scans );
 PUBLIC_EXTERN AIORET_TYPE AIOCountsConverterConvertAllAvailableScans( AIOCountsConverter *ccv );
 PUBLIC_EXTERN AIORET_TYPE AIOCountsConverterConvert( AIOCountsConverter *cc, void *tobuf, void *frombuf, unsigned num_bytes );
-PUBLIC_EXTERN AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, AIOFifo *tobuf, AIOFifo *frombuf , unsigned num_bytes );
+PUBLIC_EXTERN AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, void *tobuf, void *frombuf , unsigned num_bytes );
 
 #ifdef __aiousb_cplusplus
 }

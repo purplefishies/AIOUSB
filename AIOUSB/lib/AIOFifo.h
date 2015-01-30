@@ -63,71 +63,75 @@ typedef struct new_aio_fifo {
 } AIOFifoTYPE;
 
 
-#define TEMPLATE_AIOFIFO_INTERFACE(NAME,TYPE)                                   \
-    typedef struct new_aio_fifo_##NAME {                                \
-        AIO_FIFO_INTERFACE;                                             \
-        LOCKING_MECHANISM;                                              \
-        AIORET_TYPE (*Push)( struct new_aio_fifo_##NAME *fifo, TYPE a ); \
-        AIORET_TYPE (*PushN)( struct new_aio_fifo_##NAME *fifo, TYPE *a, unsigned N ); \
-        AIOEither (*Pop)( struct new_aio_fifo_##NAME *fifo );           \
-        AIORET_TYPE (*PopN)( struct new_aio_fifo_##NAME *fifo , TYPE *a, unsigned N ); \
-    } AIOFifo##NAME;
-
-#define TEMPLATE_AIOFIFO_API(NAME,TYPE)                                         \
-AIORET_TYPE NAME##Push( AIOFifo##NAME *fifo, TYPE a )                           \
-{                                                                               \
-    TYPE tmp = a;                                                               \
-    int val = fifo->Write( (AIOFifo*)fifo, &tmp, sizeof(TYPE) );                \
-    return val;                                                                 \
-}                                                                               \
-AIORET_TYPE NAME##PushN( AIOFifo##NAME *fifo, TYPE *a, unsigned N )             \
-{                                                                               \
-    return fifo->Write( (AIOFifo*)fifo, a, N*sizeof(TYPE));                     \
-}                                                                               \
-AIOEither NAME##Pop( AIOFifo##NAME *fifo )                                      \
-{                                                                               \
-    TYPE tmp;                                                                   \
-    AIOEither retval = {0};                                                     \
-    int tmpval = fifo->Read( (AIOFifo*)fifo, &tmp, sizeof(TYPE) );              \
-                                                                                \
-    if( tmpval <= 0 ) {                                                         \
-        retval.left = tmpval;                                                   \
-    } else {                                                                    \
-        AIOEitherSetRight( &retval, fifo->kind, &tmp );                         \
-    }                                                                           \
-                                                                                \
-    return retval;                                                              \
-}                                                                               \
-AIORET_TYPE NAME##PopN( AIOFifo##NAME *fifo, TYPE *in, unsigned N)              \
-{                                                                               \
-    AIORET_TYPE retval = {0};                                                   \
-    int tmpval = fifo->Read( (AIOFifo*)fifo, in, sizeof(TYPE)*N );              \
-                                                                                \
-    if( tmpval <= 0 ) {                                                         \
-        retval = -AIOUSB_FIFO_COPY_ERROR;                                       \
-    }                                                                           \
-                                                                                \
-    return retval;                                                              \
-}                                                                               \
-AIOFifo##NAME *NewAIOFifo##NAME( unsigned int size )                            \
-{                                                                               \
-    AIOFifo##NAME *nfifo = (AIOFifo##NAME*)calloc(1,sizeof(AIOFifo##NAME));     \
-    AIOFifoInitialize( (AIOFifo*)nfifo , (size+1)*sizeof(TYPE), sizeof(TYPE));  \
-    nfifo->Push = NAME##Push;                                                   \
-    nfifo->PushN = NAME##PushN;                                                 \
-    nfifo->Pop = NAME##Pop;                                                     \
-    nfifo->PopN = NAME##PopN;                                                   \
-    nfifo->refsize = sizeof(TYPE);                                              \
-    nfifo->kind = aioeither_value_##TYPE;                                       \
-    return nfifo;                                                               \
-}                                                                               \
-void DeleteAIOFifo##NAME( AIOFifo##NAME *fifo )                                 \
-{                                                                               \
-    DeleteAIOFifo( (AIOFifo*)fifo);                                             \
-}                                                                               \
+#define TEMPLATE_AIOFIFO_INTERFACE(NAME,TYPE)                                                       \
+    typedef struct new_aio_fifo_##NAME {                                                            \
+        AIO_FIFO_INTERFACE;                                                                         \
+        LOCKING_MECHANISM;                                                                          \
+        AIORET_TYPE (*Push)( struct new_aio_fifo_##NAME *fifo, TYPE a );                            \
+        AIORET_TYPE (*PushN)( struct new_aio_fifo_##NAME *fifo, TYPE *a, unsigned N );              \
+        AIOEither (*Pop)( struct new_aio_fifo_##NAME *fifo );                                       \
+        AIORET_TYPE (*PopN)( struct new_aio_fifo_##NAME *fifo , TYPE *a, unsigned N );              \
+    } AIOFifo##NAME;                                                                                \
+    AIOFifo##NAME *NewAIOFifo##NAME( unsigned int size );                                           \
+    void DeleteAIOFifo##NAME( AIOFifo##NAME *fifo );                                 
 
 
+#define TEMPLATE_AIOFIFO_API(NAME,TYPE)                                                             \
+AIORET_TYPE NAME##Push( AIOFifo##NAME *fifo, TYPE a )                                               \
+{                                                                                                   \
+    TYPE tmp = a;                                                                                   \
+    int val = fifo->Write( (AIOFifo*)fifo, &tmp, sizeof(TYPE) );                                    \
+    return val;                                                                                     \
+}                                                                                                   \
+AIORET_TYPE NAME##PushN( AIOFifo##NAME *fifo, TYPE *a, unsigned N )                                 \
+{                                                                                                   \
+    return fifo->Write( (AIOFifo*)fifo, a, N*sizeof(TYPE));                                         \
+}                                                                                                   \
+AIOEither NAME##Pop( AIOFifo##NAME *fifo )                                                          \
+{                                                                                                   \
+    TYPE tmp;                                                                                       \
+    AIOEither retval = {0};                                                                         \
+    int tmpval = fifo->Read( (AIOFifo*)fifo, &tmp, sizeof(TYPE) );                                  \
+                                                                                                    \
+    if( tmpval <= 0 ) {                                                                             \
+        retval.left = tmpval;                                                                       \
+    } else {                                                                                        \
+        AIOEitherSetRight( &retval, fifo->kind, &tmp );                                             \
+    }                                                                                               \
+                                                                                                    \
+    return retval;                                                                                  \
+}                                                                                                   \
+AIORET_TYPE NAME##PopN( AIOFifo##NAME *fifo, TYPE *in, unsigned N)                                  \
+{                                                                                                   \
+    AIORET_TYPE retval = {0};                                                                       \
+    int tmpval = fifo->Read( (AIOFifo*)fifo, in, sizeof(TYPE)*N );                                  \
+                                                                                                    \
+    if( tmpval <= 0 ) {                                                                             \
+        retval = -AIOUSB_FIFO_COPY_ERROR;                                                           \
+    }                                                                                               \
+                                                                                                    \
+    return retval;                                                                                  \
+}                                                                                                   \
+AIOFifo##NAME *NewAIOFifo##NAME( unsigned int size )                                                \
+{                                                                                                   \
+    AIOFifo##NAME *nfifo = (AIOFifo##NAME*)calloc(1,sizeof(AIOFifo##NAME));                         \
+    AIOFifoInitialize( (AIOFifo*)nfifo , (size+1)*sizeof(TYPE), sizeof(TYPE));                      \
+    nfifo->Push = NAME##Push;                                                                       \
+    nfifo->PushN = NAME##PushN;                                                                     \
+    nfifo->Pop = NAME##Pop;                                                                         \
+    nfifo->PopN = NAME##PopN;                                                                       \
+    nfifo->refsize = sizeof(TYPE);                                                                  \
+    nfifo->kind = aioeither_value_##TYPE;                                                           \
+    return nfifo;                                                                                   \
+}                                                                                                   \
+void DeleteAIOFifo##NAME( AIOFifo##NAME *fifo )                                                     \
+{                                                                                                   \
+    DeleteAIOFifo( (AIOFifo*)fifo);                                                                 \
+}                                                                                                   \
+
+/* Counts Fifo definition */
 TEMPLATE_AIOFIFO_INTERFACE(Counts,uint16_t);
+/* Volts Fifo definition */
 TEMPLATE_AIOFIFO_INTERFACE(Volts,double);
 
 

@@ -54,8 +54,9 @@ double Convert( AIOGainRange range, unsigned short sum )
     return (range.max - range.min)*sum / (double)((( unsigned short )-1)+1) + range.min;
 }
 
-AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, AIOFifo *tobuf, AIOFifo *frombuf , unsigned num_bytes )
+AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, void *tobufptr, void *frombufptr , unsigned num_bytes )
 {
+    AIOFifo *tobuf = (AIOFifo*)tobufptr, *frombuf = (AIOFifo*)frombufptr;
     int allowed_scans = num_bytes / (cc->num_oversamples * cc->num_channels * cc->unit_size );
     AIORET_TYPE count = 0;
     double tmpvolt;
@@ -108,10 +109,6 @@ AIORET_TYPE AIOCountsConverterConvert( AIOCountsConverter *cc, void *to_buf, voi
 
 
 #ifdef SELF_TEST
-
-
-
-
 
 #include "AIOUSBDevice.h"
 #include "AIOFifo.h"
@@ -193,20 +190,20 @@ TEST(Composite,FifoWriting )
         from_buf[i] = (((unsigned short)-1)+1) / 2;
 
     AIOCountsConverter *cc = NewAIOCountsConverter( from_buf, num_channels, ranges, num_oversamples , sizeof(unsigned short)  );
-    AIOFifo *infifo  = NewAIOFifo(num_channels*num_oversamples*num_scans*sizeof(unsigned short) );
-    AIOFifo *outfifo = NewAIOFifo(num_channels*num_oversamples*num_scans*sizeof( double ) );
+
+    AIOFifoCounts *infifo = NewAIOFifoCounts( (unsigned)num_channels*num_oversamples*num_scans );
+    AIOFifoVolts *outfifo = NewAIOFifoVolts( num_channels*num_oversamples*num_scans );
 
     /**
      * @brief Load the fifo with values
      */
-    retval = infifo->Write( infifo, from_buf, total_size*sizeof(unsigned short) );
+    retval = infifo->Write( (AIOFifo*)infifo, from_buf, total_size*sizeof(unsigned short) );
     EXPECT_GE( retval, 0 );
-
 
     retval = cc->ConvertFifo( cc, outfifo, infifo , total_size*sizeof(unsigned short) );
 
     EXPECT_GE( retval, 0 );
-    AIOFifoRead( outfifo, to_buf, num_channels*sizeof(double) );
+    AIOFifoRead( (AIOFifo*)outfifo, to_buf, num_channels*sizeof(double) );
 
     for ( int i = 0 ; i < num_channels ; i ++ ) {
         EXPECT_EQ( to_buf[i], (ranges[0].max + ranges[0].min) / 2 );
