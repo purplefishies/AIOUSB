@@ -5,6 +5,7 @@
 #include "AIOEither.h"
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #ifdef __aiousb_cplusplus
 namespace AIOUSB
@@ -23,55 +24,33 @@ AIORET_TYPE AIOFifoWrite( AIOFifo *fifo, void *frombuf , unsigned maxsize );
 
 #ifdef HAS_THREAD
 #define LOCKING_MECHANISM  pthread_mutex_t lock;
-#define GRAB_RESOURCE(obj)    pthread_mutex_lock( &obj->lock );
-#define RELEASE_RESOURCE(obj) pthread_mutex_unlock( &obj->lock );
+#define GRAB_RESOURCE(obj)    pthread_mutex_lock( &obj->lock ); 
+#define RELEASE_RESOURCE(obj) pthread_mutex_unlock( &obj->lock ); 
 #else
 #define LOCKING_MECHANISM  ;
 #define GRAB_RESOURCE(obj) ;
 #define RELEASE_RESOURCE(obj);
 #endif
 
-#define AIO_FIFO_INTERFACE                                              \
-    void *data;                                                         \
-    unsigned int refsize;                                               \
-    unsigned int size;                                                  \
-    volatile unsigned int read_pos;                                     \
-    volatile unsigned int write_pos;                                    \
+#define AIO_FIFO_INTERFACE                                                      \
+    void *data;                                                                 \
+    unsigned int refsize;                                                       \
+    unsigned int size;                                                          \
+    volatile unsigned int read_pos;                                             \
+    volatile unsigned int write_pos;                                            \
+    AIO_EITHER_TYPE kind;                                                       \
     AIORET_TYPE (*Read)( struct aio_fifo *fifo, void *tobuf, unsigned maxsize ); \
     AIORET_TYPE (*Write)( struct aio_fifo *fifo, void *tobuf, unsigned maxsize ); \
-    size_t (*delta)( struct aio_fifo *fifo  );                          \
+    size_t (*delta)( struct aio_fifo *fifo  );                                  \
     size_t (*_calculate_size_write)( struct aio_fifo *fifo, unsigned maxsize ); \
     size_t (*_calculate_size_read)( struct aio_fifo *fifo, unsigned maxsize );
-
-/* typedef enum {  */
-/*     aioret_value_int = 1, */
-/*     aioret_value_int32_t = 1, */
-/*     aioret_value_uint32_t = 2, */
-/*     aioret_value_unsigned = 2, */
-/*     aioret_value_double_t = 3, */
-/*     aioret_value_double = 3, */
-/*     aioret_value_string = 4, */
-/*     aioret_value_obj, */
-/* } AIORET_VALUE_TYPE; */
-/* typedef union {  */
-/*     int i; */
-/*     unsigned int u; */
-/*     double d;  */
-/*     char *s; */
-/*     void *v; */
-/* } AIORET_VALUE_ITEM; */
-/* typedef struct aio_ret_value  { */
-/*     int left; */
-/*     AIORET_VALUE_ITEM right; */
-/*     AIORET_VALUE_TYPE type; */
-/* } AIORET_VALUE; */
 
 typedef struct aio_fifo { 
     AIO_FIFO_INTERFACE;
     LOCKING_MECHANISM;
 } AIOFifo;
 
-/* typedef unsigned int TYPE; */
+
 typedef uint32_t TYPE;
 
 typedef struct new_aio_fifo {
@@ -82,6 +61,75 @@ typedef struct new_aio_fifo {
     AIOEither (*Pop)( struct new_aio_fifo *fifo );
     AIORET_TYPE (*PopN)( struct new_aio_fifo *fifo , TYPE *a, unsigned N );
 } AIOFifoTYPE;
+
+
+#define TEMPLATE_AIOFIFO_INTERFACE(NAME,TYPE)                                   \
+    typedef struct new_aio_fifo_##NAME {                                \
+        AIO_FIFO_INTERFACE;                                             \
+        LOCKING_MECHANISM;                                              \
+        AIORET_TYPE (*Push)( struct new_aio_fifo_##NAME *fifo, TYPE a ); \
+        AIORET_TYPE (*PushN)( struct new_aio_fifo_##NAME *fifo, TYPE *a, unsigned N ); \
+        AIOEither (*Pop)( struct new_aio_fifo_##NAME *fifo );           \
+        AIORET_TYPE (*PopN)( struct new_aio_fifo_##NAME *fifo , TYPE *a, unsigned N ); \
+    } AIOFifo##NAME;
+
+#define TEMPLATE_AIOFIFO_API(NAME,TYPE)                                         \
+AIORET_TYPE NAME##Push( AIOFifo##NAME *fifo, TYPE a )                           \
+{                                                                               \
+    TYPE tmp = a;                                                               \
+    int val = fifo->Write( (AIOFifo*)fifo, &tmp, sizeof(TYPE) );                \
+    return val;                                                                 \
+}                                                                               \
+AIORET_TYPE NAME##PushN( AIOFifo##NAME *fifo, TYPE *a, unsigned N )             \
+{                                                                               \
+    return fifo->Write( (AIOFifo*)fifo, a, N*sizeof(TYPE));                     \
+}                                                                               \
+AIOEither NAME##Pop( AIOFifo##NAME *fifo )                                      \
+{                                                                               \
+    TYPE tmp;                                                                   \
+    AIOEither retval = {0};                                                     \
+    int tmpval = fifo->Read( (AIOFifo*)fifo, &tmp, sizeof(TYPE) );              \
+                                                                                \
+    if( tmpval <= 0 ) {                                                         \
+        retval.left = tmpval;                                                   \
+    } else {                                                                    \
+        AIOEitherSetRight( &retval, fifo->kind, &tmp );                         \
+    }                                                                           \
+                                                                                \
+    return retval;                                                              \
+}                                                                               \
+AIORET_TYPE NAME##PopN( AIOFifo##NAME *fifo, TYPE *in, unsigned N)              \
+{                                                                               \
+    AIORET_TYPE retval = {0};                                                   \
+    int tmpval = fifo->Read( (AIOFifo*)fifo, in, sizeof(TYPE)*N );              \
+                                                                                \
+    if( tmpval <= 0 ) {                                                         \
+        retval = -AIOUSB_FIFO_COPY_ERROR;                                       \
+    }                                                                           \
+                                                                                \
+    return retval;                                                              \
+}                                                                               \
+AIOFifo##NAME *NewAIOFifo##NAME( unsigned int size )                            \
+{                                                                               \
+    AIOFifo##NAME *nfifo = (AIOFifo##NAME*)calloc(1,sizeof(AIOFifo##NAME));     \
+    AIOFifoInitialize( (AIOFifo*)nfifo , (size+1)*sizeof(TYPE), sizeof(TYPE));  \
+    nfifo->Push = NAME##Push;                                                   \
+    nfifo->PushN = NAME##PushN;                                                 \
+    nfifo->Pop = NAME##Pop;                                                     \
+    nfifo->PopN = NAME##PopN;                                                   \
+    nfifo->refsize = sizeof(TYPE);                                              \
+    nfifo->kind = aioeither_value_##TYPE;                                       \
+    return nfifo;                                                               \
+}                                                                               \
+void DeleteAIOFifo##NAME( AIOFifo##NAME *fifo )                                 \
+{                                                                               \
+    DeleteAIOFifo( (AIOFifo*)fifo);                                             \
+}                                                                               \
+
+
+TEMPLATE_AIOFIFO_INTERFACE(Counts,uint16_t);
+TEMPLATE_AIOFIFO_INTERFACE(Volts,double);
+
 
 
 AIOFifo *NewAIOFifo( unsigned int size , unsigned int refsize );

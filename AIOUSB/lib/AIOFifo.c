@@ -99,11 +99,9 @@ AIORET_TYPE Push( AIOFifoTYPE *fifo, TYPE a )
     int val = fifo->Write( (AIOFifo*)fifo, &tmp, sizeof(TYPE) );
     return val;
 }
-
 AIORET_TYPE PushN( AIOFifoTYPE *fifo, TYPE *a, unsigned N ) {
     return fifo->Write( (AIOFifo*)fifo, a, N*sizeof(TYPE));
 }
-
 AIOEither Pop( AIOFifoTYPE *fifo )
 {
     TYPE tmp;
@@ -118,7 +116,6 @@ AIOEither Pop( AIOFifoTYPE *fifo )
 
     return retval;
 }
-
 AIORET_TYPE PopN( AIOFifoTYPE *fifo, TYPE *in, unsigned N)
 {
     AIORET_TYPE retval = {0};
@@ -130,6 +127,9 @@ AIORET_TYPE PopN( AIOFifoTYPE *fifo, TYPE *in, unsigned N)
     
     return retval;
 }
+
+
+
 
 
 AIOFifoTYPE *NewAIOFifoTYPE( unsigned int size )
@@ -217,6 +217,9 @@ AIORET_TYPE AIOFifoReadAllOrNone( AIOFifo *fifo, void *tobuf , unsigned maxsize 
     return actsize;
 }
 
+TEMPLATE_AIOFIFO_API( Counts, uint16_t );
+TEMPLATE_AIOFIFO_API( Volts, double );
+
 
 #ifdef __cplusplus
 }
@@ -228,6 +231,7 @@ AIORET_TYPE AIOFifoReadAllOrNone( AIOFifo *fifo, void *tobuf , unsigned maxsize 
 #include "gtest/gtest.h"
 #include "tap.h"
 #include <iostream>
+#include <math.h>
 using namespace AIOUSB;
 
 
@@ -359,8 +363,39 @@ TEST(NewType,PushAndPopArrays )
     fifo->PopN( fifo, tmp, size );
 
     ASSERT_EQ( tmp[3], 3 );
+}
+
+TEST(Counts,Testing )
+{
+    AIOFifoCounts *cfifo = NewAIOFifoCounts(1000);
+    unsigned short tmp[1000];
+    for( int i = 0; i < 1000 ; i ++ ) tmp[i] = i;
+    
+    cfifo->PushN( cfifo, tmp, 1000 );
+    
+    for( int i = 0; i < 1000 ; i ++ ) { 
+        AIOEither tval = cfifo->Pop(cfifo);
+
+        EXPECT_EQ( tval.right.s, tmp[i] );
+    }
 
 }
+
+TEST(Volts,Testing )
+{
+    AIOFifoVolts *cfifo = NewAIOFifoVolts(1000);
+    double tmp[1000];
+    for( int i = 0; i < 1000 ; i ++ ) tmp[i] = 3.342*sqrt((double)i);
+    
+    cfifo->PushN( cfifo, tmp, 1000 );
+    
+    for( int i = 0; i < 1000 ; i ++ ) { 
+        AIOEither tval = cfifo->Pop(cfifo);
+        EXPECT_EQ( tval.right.d, tmp[i] );
+    }
+
+}
+
 
 int main(int argc, char *argv[] )
 {

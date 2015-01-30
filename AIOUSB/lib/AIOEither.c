@@ -55,6 +55,13 @@ void AIOEitherSetRight(AIOEither *retval, AIO_EITHER_TYPE val , void *tmp, ... )
             retval->type = aioeither_value_unsigned;
         }
         break;
+    case aioeither_value_uint16_t:
+        {
+            uint16_t t = *(uint16_t*)tmp;
+            retval->right.us = t;
+            retval->type = aioeither_value_uint16_t;
+        }
+        break;
     case aioeither_value_double:
         {
             double t = *(double *)tmp;
@@ -101,6 +108,12 @@ void AIOEitherGetRight(AIOEither *retval, void *tmp, ... )
         {
             unsigned *t = (unsigned *)tmp;
             *t = retval->right.u;
+        }
+        break;
+    case aioeither_value_uint16_t:
+        {
+            uint16_t *t = (uint16_t*)tmp;
+            *t = retval->right.us;
         }
         break;
     case aioeither_value_double:
@@ -210,8 +223,19 @@ TEST(AIOEither,BasicAssignments)
     EXPECT_EQ( ((struct testobj*)&readvals)->c, tv_obj.c );
     AIOEitherClear( &a );
 
+}
 
+TEST(CanCreate,Shorts)
+{
+    AIOEither a = {0};
+    uint16_t tv_ui = 33;
+    char readvals[100];
 
+    AIOEitherSetRight( &a, aioeither_value_uint16_t, &tv_ui );
+    AIOEitherGetRight( &a, readvals, sizeof(struct testobj));
+
+    EXPECT_EQ( a.type, aioeither_value_uint16_t );
+    EXPECT_EQ( tv_ui, *(uint16_t*)&readvals[0] );
 
 }
 
