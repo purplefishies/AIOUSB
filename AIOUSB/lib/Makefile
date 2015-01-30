@@ -199,7 +199,7 @@ pywrapper:
 %_c_test: %.c $(SHCDBGLIB) $(SHCPPDBGLIB)
 	$(CC) $(TESTFLAGS) $(CFLAGS) $(SELF_TEST_FLAGS) $< -o $@ -L. $(SELF_TEST_LIBS)
 
-%_cpp_test: %.c $(SHCDBGLIB) $(SHCPPDBGLIB)
+%_cpp_test: %.c %.h $(SHCDBGLIB) $(SHCPPDBGLIB)
 	$(CXX) $(TESTFLAGS) $(SELF_TEST_CXX_FLAGS) $(subst _cpp_test,.c,$<) -o $@ -L. $(SELF_TEST_CXX_LIBS) $(LDFLAGS)
 
 tests/%_cpp_test: tests/%.cpp $(SHCDBGLIB) $(SHCPPDBGLIB)

@@ -61,7 +61,7 @@ AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, AIOFifo *tobu
     double tmpvolt;
     unsigned short *tmpbuf = (unsigned short *)malloc( allowed_scans * cc->num_channels * cc->unit_size * (1+cc->num_oversamples));
 
-    AIOFifoRead( frombuf, tmpbuf, allowed_scans * cc->num_channels * cc->unit_size * (1+cc->num_oversamples) );
+    frombuf->Read( frombuf, tmpbuf, allowed_scans * cc->num_channels * cc->unit_size * (1+cc->num_oversamples) );
 
     for ( int scan_count = 0, tobuf_pos = 0; scan_count < allowed_scans ; scan_count ++ ) {
         for ( unsigned ch = 0; ch < cc->num_channels; ch ++ , tobuf_pos ++ ) { 
@@ -73,7 +73,7 @@ AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, AIOFifo *tobu
             sum /= (cc->num_oversamples + 1);
 
             tmpvolt = Convert( cc->gain_ranges[ch], sum );
-            AIOFifoWrite( tobuf, &tmpvolt, sizeof(double));
+            tobuf->Write( tobuf, &tmpvolt, sizeof(double));
         }
     }
 
@@ -199,7 +199,7 @@ TEST(Composite,FifoWriting )
     /**
      * @brief Load the fifo with values
      */
-    retval = AIOFifoWrite( infifo, from_buf, total_size*sizeof(unsigned short) );
+    retval = infifo->Write( infifo, from_buf, total_size*sizeof(unsigned short) );
     EXPECT_GE( retval, 0 );
 
 
