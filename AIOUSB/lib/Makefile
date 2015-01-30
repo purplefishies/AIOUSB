@@ -21,6 +21,7 @@ AIOContinuousBuffer.o \
 AIOChannelMask.o \
 AIODeviceInfo.o \
 AIODeviceTable.o \
+AIOEither.o \
 AIOUSBDevice.o \
 DIOBuf.o \
 ADCConfigBlock.o \

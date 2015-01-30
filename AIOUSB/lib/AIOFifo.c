@@ -90,86 +90,8 @@ AIOFifo *NewAIOFifoAllOrNone( unsigned int size , unsigned refsize )
 }
 
 
-#define LOOKUP(T) aioret_value_ ## T
-void set_right(AIORET_VALUE *retval, AIORET_VALUE_TYPE val , void *tmp) {
-    switch(val) { 
-    case aioret_value_int:
-        {
-            int t = *(int *)tmp;
-            retval->right.i = t;
-            retval->type = aioret_value_int;
-        }
-        break;
-    case aioret_value_unsigned:
-        {
-            unsigned t = *(unsigned*)tmp;
-            retval->right.u = t;
-            retval->type = aioret_value_unsigned;
-        }
-        break;
-    case aioret_value_double:
-        {
-            double t = *(double *)tmp;
-            retval->right.d = t;
-            retval->type = aioret_value_double;
-        }
-        break;
-    case aioret_value_string:
-        { 
-            char *t = *(char **)tmp;
-            retval->right.s = t;
-            retval->type = aioret_value_string;
-        }
-        break;
-    case aioret_value_obj:
-        retval->right.v = (void *)*(int **)tmp;
-        retval->type = aioret_value_obj;
-        break;
-    default:
-        break;
-    }
-}
+#define LOOKUP(T) aioeither_value_ ## T
 
-void get_right(AIORET_VALUE *retval, void *tmp, ... ) {
-    va_list ap;
-    switch(retval->type) { 
-    case aioret_value_int:
-        {
-            int t = *(int *)tmp;
-            retval->right.i = t;
-            memcpy( tmp, &retval->right.i, sizeof( retval->right.i ) );
-        }
-        break;
-    case aioret_value_unsigned:
-        {
-            memcpy( tmp, &retval->right.u , sizeof( retval->right.u ));
-        }
-        break;
-    case aioret_value_double:
-        {
-            memcpy( &tmp, &retval->right.d , sizeof( retval->right.d ));
-        }
-        break;
-    case aioret_value_string:
-        { 
-            /* char *t = *(char **)tmp; */
-            /* retval->right.s = t; */
-            memcpy(tmp, retval->right.s, strlen(retval->right.s)+1);
-        }
-        break;
-    case aioret_value_obj:
-        {
-            va_start(ap, tmp);
-            int d = va_arg(ap, int);
-            va_end(ap);
-            memcpy(tmp, retval->right.v, d );
-        }
-        break;
-    default:
-        break;
-    }
-
-}
 
 AIORET_TYPE Push( AIOFifoTYPE *fifo, TYPE a )
 {
@@ -182,16 +104,16 @@ AIORET_TYPE PushN( AIOFifoTYPE *fifo, TYPE *a, unsigned N ) {
     return fifo->Write( (AIOFifo*)fifo, a, N*sizeof(TYPE));
 }
 
-AIORET_VALUE Pop( AIOFifoTYPE *fifo )
+AIOEither Pop( AIOFifoTYPE *fifo )
 {
     TYPE tmp;
-    AIORET_VALUE retval = {0};
+    AIOEither retval = {0};
     int tmpval = fifo->Read( (AIOFifo*)fifo, &tmp, sizeof(TYPE) );
 
     if( tmpval <= 0 ) {
         retval.left = tmpval;
     } else {
-        set_right( &retval, LOOKUP( uint32_t ), &tmp );
+        AIOEitherSetRight( &retval, LOOKUP( uint32_t ), &tmp );
     }
 
     return retval;
@@ -388,7 +310,7 @@ TEST(NewType,PushAndPop )
 {
     int size = 1000;
     int retval = 0;
-    AIORET_VALUE keepvalue;
+    AIOEither keepvalue;
     AIOFifoTYPE *fifo = AIOUSB::NewAIOFifoTYPE( size );
     TYPE *tmp = (TYPE*)malloc(sizeof(TYPE)*size);
     for( int i = 0 ; i < size ; i ++ ) tmp[i] = (TYPE)i;
@@ -402,7 +324,7 @@ TEST(NewType,PushAndPop )
         TYPE tval;
         keepvalue = fifo->Pop( fifo );
         EXPECT_EQ( keepvalue.left, 0 );
-        get_right( &keepvalue,&tval);
+        AIOEitherGetRight( &keepvalue,&tval);
         EXPECT_EQ( tval , i );
     }
     AIOUSB::DeleteAIOFifoTYPE( fifo );
@@ -412,7 +334,7 @@ TEST(NewType,PushAndPopArrays )
 {
     int size = 1000;
     int retval = 0;
-    AIORET_VALUE keepvalue;
+    AIOEither keepvalue;
     AIOFifoTYPE *fifo = AIOUSB::NewAIOFifoTYPE( size );
     TYPE *tmp = (TYPE*)malloc(sizeof(TYPE)*size);
     for( int i = 0 ; i < size ; i ++ ) tmp[i] = (TYPE)i;
@@ -423,7 +345,7 @@ TEST(NewType,PushAndPopArrays )
         TYPE tval;
         keepvalue = fifo->Pop( fifo );
         EXPECT_EQ( keepvalue.left, 0 );
-        get_right( &keepvalue,&tval);
+        AIOEitherGetRight( &keepvalue,&tval);
         EXPECT_EQ( tval , i );
     }
     keepvalue = fifo->Pop( fifo );

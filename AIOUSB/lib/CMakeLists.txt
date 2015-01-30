@@ -57,6 +57,7 @@ SET( tmp_aiousb_files
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOCountsConverter.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/AIODeviceInfo.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/AIODeviceTable.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOEither.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOFifo.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/ADCConfigBlock.c"  
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOUSBDevice.c"  
