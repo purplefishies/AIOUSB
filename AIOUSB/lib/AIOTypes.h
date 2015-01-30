@@ -381,6 +381,7 @@ CREATE_ENUM_W_START( ResultCode, 0,
                      AIOUSB_ERROR_INVALID_ADCCONFIG_OVERSAMPLE_SETTING,
                      AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING,
                      AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER,
+                     AIOUSB_FIFO_COPY_ERROR,
                      AIOUSB_ERROR_LIBUSB /* Always make the LIBUSB the last element */
                      );
 

@@ -89,16 +89,6 @@ AIOFifo *NewAIOFifoAllOrNone( unsigned int size , unsigned refsize )
     return nfifo;
 }
 
-AIORET_TYPE Push( AIOFifoTYPE *fifo, TYPE a )
-{
-    TYPE tmp = a;
-    int val = fifo->Write( (AIOFifo*)fifo, &tmp, sizeof(TYPE) );
-    return val;
-}
-
-AIORET_TYPE PushN( AIOFifoTYPE *fifo, TYPE *a, unsigned N ) {
-    return fifo->Write( (AIOFifo*)fifo, a, N*sizeof(TYPE));
-}
 
 #define LOOKUP(T) aioret_value_ ## T
 void set_right(AIORET_VALUE *retval, AIORET_VALUE_TYPE val , void *tmp) {
@@ -181,7 +171,16 @@ void get_right(AIORET_VALUE *retval, void *tmp, ... ) {
 
 }
 
+AIORET_TYPE Push( AIOFifoTYPE *fifo, TYPE a )
+{
+    TYPE tmp = a;
+    int val = fifo->Write( (AIOFifo*)fifo, &tmp, sizeof(TYPE) );
+    return val;
+}
 
+AIORET_TYPE PushN( AIOFifoTYPE *fifo, TYPE *a, unsigned N ) {
+    return fifo->Write( (AIOFifo*)fifo, a, N*sizeof(TYPE));
+}
 
 AIORET_VALUE Pop( AIOFifoTYPE *fifo )
 {
@@ -193,9 +192,19 @@ AIORET_VALUE Pop( AIOFifoTYPE *fifo )
         retval.left = tmpval;
     } else {
         set_right( &retval, LOOKUP( uint32_t ), &tmp );
-        /* retval.type = LOOKUP(uint32_t); */
-        /* retval.right.i = tmp; */
     }
+
+    return retval;
+}
+
+AIORET_TYPE PopN( AIOFifoTYPE *fifo, TYPE *in, unsigned N)
+{
+    AIORET_TYPE retval = {0};
+    int tmpval = fifo->Read( (AIOFifo*)fifo, &in, sizeof(TYPE)*N );
+
+    if( tmpval <= 0 ) {
+        retval = -AIOUSB_FIFO_COPY_ERROR;
+    } 
 
     return retval;
 }
@@ -209,6 +218,10 @@ AIOFifoTYPE *NewAIOFifoTYPE( unsigned int size )
     nfifo->PushN = PushN;
     nfifo->Pop = Pop;
     return nfifo;
+}
+void DeleteAIOFifoTYPE( AIOFifoTYPE *fifo )
+{
+    DeleteAIOFifo( (AIOFifo*)fifo);
 }
 
 
@@ -391,7 +404,27 @@ TEST(NewType,PushAndPop )
         get_right( &keepvalue,&tval);
         EXPECT_EQ( tval , i );
     }
+    AIOUSB::DeleteAIOFifoTYPE( fifo );
+}
 
+TEST(NewType,PushAndPopArrays )
+{
+    int size = 1000;
+    int retval = 0;
+    AIORET_VALUE keepvalue;
+    AIOFifoTYPE *fifo = AIOUSB::NewAIOFifoTYPE( size );
+    TYPE *tmp = (TYPE*)malloc(sizeof(TYPE)*size);
+    for( int i = 0 ; i < size ; i ++ ) tmp[i] = (TYPE)i;
+    
+    fifo->PushN( fifo, tmp, size ); /* Write the whole array at once */
+
+    for (int i = 0 ; i < size ; i ++ ) { 
+        TYPE tval;
+        keepvalue = fifo->Pop( fifo );
+        EXPECT_EQ( keepvalue.left, 0 );
+        get_right( &keepvalue,&tval);
+        EXPECT_EQ( tval , i );
+    }
 }
 
 

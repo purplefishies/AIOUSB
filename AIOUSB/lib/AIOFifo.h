@@ -85,7 +85,7 @@ typedef struct new_aio_fifo {
     AIORET_TYPE (*Push)( struct new_aio_fifo *fifo, TYPE a );
     AIORET_TYPE (*PushN)( struct new_aio_fifo *fifo, TYPE *a, unsigned N );
     AIORET_VALUE (*Pop)( struct new_aio_fifo *fifo );
-    AIORET_VALUE (*PopN)( struct new_aio_fifo *fifo , TYPE *a, unsigned N );
+    AIORET_TYPE (*PopN)( struct new_aio_fifo *fifo , TYPE *a, unsigned N );
 } AIOFifoTYPE;
 
 
