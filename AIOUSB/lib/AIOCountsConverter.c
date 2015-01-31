@@ -197,13 +197,15 @@ TEST(Composite,FifoWriting )
     /**
      * @brief Load the fifo with values
      */
-    retval = infifo->Write( (AIOFifo*)infifo, from_buf, total_size*sizeof(unsigned short) );
+
+    infifo->PushN( infifo, from_buf, total_size );
     EXPECT_GE( retval, 0 );
 
     retval = cc->ConvertFifo( cc, outfifo, infifo , total_size*sizeof(unsigned short) );
 
     EXPECT_GE( retval, 0 );
-    AIOFifoRead( (AIOFifo*)outfifo, to_buf, num_channels*sizeof(double) );
+
+    outfifo->PopN( outfifo, to_buf, num_channels );
 
     for ( int i = 0 ; i < num_channels ; i ++ ) {
         EXPECT_EQ( to_buf[i], (ranges[0].max + ranges[0].min) / 2 );
