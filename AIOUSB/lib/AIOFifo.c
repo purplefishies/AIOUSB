@@ -25,6 +25,12 @@ size_t delta( AIOFifo *fifo  )
     return ( fifo->write_pos < fifo->read_pos ? (fifo->read_pos - fifo->write_pos - 1 ) : ( (fifo->size - fifo->write_pos) + fifo->read_pos - 1 ));
 }
 
+AIORET_TYPE AIOFifoSizeRemaining( void *tmpfifo )
+{
+    AIOFifo *fifo = (AIOFifo*)tmpfifo;
+    return fifo->delta((AIOFifo*)fifo);
+}
+
 size_t rdelta( AIOFifo *fifo  ) 
 {
     return ( fifo->read_pos < fifo->write_pos ? (fifo->write_pos - fifo->read_pos ) : ( (fifo->size - fifo->read_pos) + fifo->write_pos ));
@@ -59,6 +65,7 @@ void AIOFifoInitialize( AIOFifo *nfifo, unsigned int size, unsigned refsize )
     nfifo->data     = malloc(size);
     nfifo->Read     = AIOFifoRead;
     nfifo->Write    = AIOFifoWrite;
+    nfifo->Reset    = AIOFifoReset;
     nfifo->delta    = delta;
     nfifo->_calculate_size_write = _calculate_size_write;
     nfifo->_calculate_size_read  = _calculate_size_read;
@@ -89,6 +96,11 @@ AIOFifo *NewAIOFifoAllOrNone( unsigned int size , unsigned refsize )
     return nfifo;
 }
 
+void AIOFifoReset( AIOFifo *fifo )
+{
+    assert(fifo);
+    fifo->read_pos = fifo->write_pos = 0;
+}
 
 #define LOOKUP(T) aioeither_value_ ## T
 

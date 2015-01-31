@@ -21,7 +21,7 @@
 #include "AIOChannelMask.h"
 #include "AIOUSB_Core.h"
 #include "AIODeviceTable.h"
-
+#include "AIOFifo.h"
 
 #ifdef __cplusplus
 namespace AIOUSB {
@@ -30,13 +30,14 @@ namespace AIOUSB {
 void *ActualWorkFunction( void *object );
 void *RawCountsWorkFunction( void *object );
 
-
 AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels )
 {
     assert( num_channels > 0 );
     /* AIOContinuousBuf *tmp  = NewAIOContinuousBufWithoutConfig( DeviceIndex, scancounts, num_channels, AIOUSB_TRUE ); */
     AIOContinuousBuf *tmp = NewAIOContinuousBufRawSmart( DeviceIndex, num_channels, scancounts, sizeof(unsigned short),0);
     AIOContinuousBufSetCallback( tmp, RawCountsWorkFunction );
+    tmp->PushN = AIOContinuousBufPushN;
+    tmp->PopN  = AIOContinuousBufPopN;
     return tmp;
 }
 
@@ -50,11 +51,11 @@ AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long DeviceIndex,
     assert( num_channels > 0 );
     AIOContinuousBuf *tmp  = (AIOContinuousBuf *)malloc(sizeof(AIOContinuousBuf));
 
-    /* tmp->size = num_channels * num_scans * (1+num_oversamples) ;/\* * ; unit_size *\/ */
     tmp->size = num_channels * num_scans * (1+num_oversamples) * unit_size;
 
     tmp->buffer = (AIOBufferType *)malloc( tmp->size*unit_size );
     tmp->bufunitsize = unit_size;
+    tmp->fifo   = NewAIOFifoCounts( num_channels * num_scans * (1+num_oversamples) );
 
     tmp->mask              = NewAIOChannelMask( num_channels );
     if ( num_channels > 32 ) {
@@ -110,7 +111,7 @@ AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex,
     assert( num_channels > 0 );
     AIOContinuousBuf *tmp  = (AIOContinuousBuf *)malloc(sizeof(AIOContinuousBuf));
     tmp->mask              = NewAIOChannelMask( num_channels );
-
+    tmp->fifo              = NewAIOFifoCounts( num_channels * scancounts );
     if ( num_channels > 32 ) { 
         char *bitstr = (char *)malloc( num_channels +1 );
         memset(bitstr, 49, num_channels ); /* Set all to 1s */
@@ -157,8 +158,20 @@ AIORET_TYPE AIOContinuousBuf_InitConfiguration(  AIOContinuousBuf *buf )
 {
     return AIOContinuousBufInitConfiguration( buf );
 }
-/*----------------------------------------------------------------------------*/
 
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOContinuousBufPushN(AIOContinuousBuf *buf ,unsigned short *frombuf, unsigned int N )
+{
+    return buf->fifo->PushN( buf->fifo, frombuf, N );
+}
+
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOContinuousBufPopN(AIOContinuousBuf *buf , unsigned short *frombuf, unsigned int N )
+{
+    return buf->fifo->PopN( buf->fifo, frombuf, N );
+}
+
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufInitADCConfigBlock( AIOContinuousBuf *buf, unsigned size, ADGainCode gainCode, AIOUSB_BOOL diffMode, unsigned char os, AIOUSB_BOOL dfs )
 {
     AIORESULT result = AIOUSB_SUCCESS;
@@ -198,7 +211,7 @@ AIORET_TYPE AIOContinuousBufInitADCConfigBlock( AIOContinuousBuf *buf, unsigned 
     return retval;
 }
 
-
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufInitConfiguration(  AIOContinuousBuf *buf ) 
 {
     ADCConfigBlock config;
@@ -311,9 +324,11 @@ void DeleteAIOContinuousBuf( AIOContinuousBuf *buf )
     DeleteAIOChannelMask( buf->mask );
     AIOContinuousBuf_DeleteTmpBuf( buf );
     free( buf->buffer );
+    DeleteAIOFifoCounts( buf->fifo );
     free( buf );
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBuf_SetCallback(AIOContinuousBuf *buf , void *(*work)(void *object ) ) { return AIOContinuousBufSetCallback( buf, work );}
 AIORET_TYPE AIOContinuousBufSetCallback(AIOContinuousBuf *buf , void *(*work)(void *object ) )
 {
@@ -374,7 +389,6 @@ AIORET_TYPE AIOContinuousBufSetNumberScansToRead( AIOContinuousBuf *buf , unsign
     return  AIOUSB_SUCCESS;
 }
 
-
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetNumberScansToRead( AIOContinuousBuf *buf )
 {
@@ -389,7 +403,7 @@ unsigned AIOContinuousBuf_BufSizeForCounts( AIOContinuousBuf * buf)
 
 /*----------------------------------------------------------------------------*/
 /**
- * @brief THis is an internal function, don't use it externally as it 
+ * @brief This is an internal function, don't use it externally as it 
  * will confuse you.
  *
  */
@@ -407,11 +421,13 @@ static unsigned write_size( AIOContinuousBuf *buf )
     return retval;
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetRemainingWriteSize( AIOContinuousBuf *buf )
 {
     return write_size(buf);
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetUnitSize( AIOContinuousBuf *buf )
 {
     return buf->bufunitsize;
@@ -420,8 +436,10 @@ AIORET_TYPE AIOContinuousBufGetUnitSize( AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBufReset( AIOContinuousBuf *buf )
 {
     AIOContinuousBufLock( buf );
-    set_read_pos(buf, 0 );
-    set_write_pos(buf, 0 );
+    /* set_read_pos(buf, 0 ); */
+    /* set_write_pos(buf, 0 ); */
+    buf->fifo->Reset( (AIOFifo*)buf->fifo );
+
     AIOContinuousBufUnlock( buf );
     return AIOUSB_SUCCESS;
 }
@@ -469,7 +487,8 @@ AIORET_TYPE AIOContinuousBufGetReadPosition( AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBufGetWritePosition( AIOContinuousBuf *buf )
 {
     assert(buf);
-    return get_write_pos( buf );
+    /* return get_write_pos( buf ); */
+    return buf->fifo->write_pos;
 }
 
 AIORET_TYPE AIOContinuousBufAvailableReadSize( AIOContinuousBuf *buf )
@@ -481,7 +500,7 @@ AIORET_TYPE AIOContinuousBufAvailableReadSize( AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBufGetSize( AIOContinuousBuf *buf )
 {
     assert(buf);
-    return buffer_size(buf);
+    return buf->fifo->delta( (AIOFifo*)buf->fifo );
 }
 
 AIORET_TYPE AIOContinuousBufGetStatus( AIOContinuousBuf *buf )
@@ -503,7 +522,8 @@ AIORET_TYPE AIOContinuousBufGetExitCode( AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBufCountScansAvailable(AIOContinuousBuf *buf) 
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    retval = AIOContinuousBufAvailableReadSize( buf ) / AIOContinuousBufNumberChannels(buf);
+    /* retval = AIOContinuousBufAvailableReadSize( buf ) / AIOContinuousBufNumberChannels(buf); */
+    retval = buf->fifo->delta( (AIOFifo *)buf->fifo ) / ( buf->fifo->refsize* AIOContinuousBufNumberChannels(buf));
     return retval;
 }
 
@@ -954,7 +974,8 @@ AIORET_TYPE AIOContinuousBufCopyData( AIOContinuousBuf *buf , unsigned short *da
 AIORET_TYPE AIOContinuousBufWriteCounts( AIOContinuousBuf *buf, unsigned short *data, unsigned datasize, unsigned size , AIOContinuousBufMode flag )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    retval += AIOContinuousBufWrite( buf, (AIOBufferType *)data, datasize, size , flag  );
+    /* retval += AIOContinuousBufWrite( buf, (AIOBufferType *)data, datasize, size , flag  ); */
+    retval += buf->fifo->PushN( buf->fifo, data, size / sizeof(unsigned short));
 
     return retval;
 }
@@ -1017,7 +1038,11 @@ void *RawCountsWorkFunction( void *object )
         if( bytes ) {
             /* only write bytes that exist */
             int tmpcount = MIN((int)((buffer_size(buf)-get_write_pos(buf)) - AIOContinuousBufNumberChannels(buf)), (int)(bytes/2) );
-            int tmp = AIOContinuousBufWriteCounts( buf, 
+            
+            /* buf->PushN( buf, data, bytes / sizeof(unsigned short)); */
+
+
+            int tmp = AIOContinuousBufWriteCounts( buf,
                                                    (unsigned short *)&data[0],
                                                    datasize/2,
                                                    tmpcount,
@@ -2482,24 +2507,27 @@ TEST(AIOContinuousBuf,OverflowTest)
 
     DeleteAIOContinuousBuf(buf);
 
-    buf = NewAIOContinuousBufForCounts( 0, num_scans, num_channels );
-    set_read_pos(buf, 7000 );
-    set_write_pos(buf, 7000 );
-
-    retval = AIOContinuousBufWriteCounts( buf, countbuf, size, 4000, AIOCONTINUOUS_BUF_NORMAL );
-    EXPECT_EQ( 4000, retval );
-    /* EXPECT_EQ( 0, get_write_pos(buf) );     */
-    EXPECT_EQ( AIOContinuousBufGetWritePosition( buf ), 1000 );
-    EXPECT_EQ( get_write_pos(buf ), 1000 );
-    /* EXPECT_EQ( 1000, AIOContinuousBufGetWritePosition( buf ) ); */
-
-    retval = AIOContinuousBufWriteCounts( buf, countbuf, size, 4000, AIOCONTINUOUS_BUF_NORMAL );
-    EXPECT_EQ( AIOContinuousBufGetWritePosition( buf ), 5000 );
-    /* EXPECT_EQ( 1000, retval ); */
-    /* EXPECT_EQ( 1000, get_write_pos(buf) );     */
-    DeleteAIOContinuousBuf(buf);
-
 }
+TEST(AIOContinuousBuf,WritingCounts ) 
+{
+    int num_channels = 16;
+    int num_scans = 5000, size = num_scans;
+    AIORET_TYPE retval;
+
+    unsigned short *tobuf = (unsigned short *)malloc( num_scans*num_channels*2 );
+
+    AIOContinuousBuf *buf = NewAIOContinuousBufForCounts( 0, num_scans, num_channels );
+
+    for ( int i = 0; i < num_channels*num_scans; i ++ ) tobuf[i] = i;
+
+    retval = buf->PushN( buf, tobuf, num_scans*num_channels );
+    EXPECT_EQ( retval, num_scans*num_channels*sizeof(unsigned short) );
+
+    DeleteAIOContinuousBuf(buf);
+    free(tobuf);
+    
+}
+
 
 TEST(AIOContinuousBuf,CleanupMemory)
 {
@@ -2524,7 +2552,6 @@ TEST(AIOContinuousBuf,StressTestOneRedux ) {
         stress_test_one( bufsize , bufsize - bufsize / i);
     }
 }
-
 
 class AIOBufParams {
 public:
@@ -2553,7 +2580,7 @@ TEST_P(AIOContinuousBufThreeParamTest,StressTestDrain)
     int count  =0;
     int retval = 0;
     buf = NewAIOContinuousBufTesting( 0, num_scans , num_channels , AIOUSB_FALSE );
-    unsigned short *data = (unsigned short *)malloc(num_scans*oversamples*num_channels*sizeof(unsigned short) );
+    unsigned short *data = (unsigned short *)malloc(num_scans*(oversamples+1)*num_channels*sizeof(unsigned short) );
 
     int numAccesDevices = 0;
     AIOUSB_Init();
@@ -2566,61 +2593,9 @@ TEST_P(AIOContinuousBufThreeParamTest,StressTestDrain)
 
     EXPECT_EQ( AIOContinuousBufGetOverSample( buf ), 255 );
 
-    /* while ( count < repeat_count ) { */
-    /*     read_data(data, num_scans*oversamples*num_channels ); */
-    /*     retval = AIOContinuousBufCopyData( buf, data , &tmpsize ); */
-    /*     datatransferred += retval; */
-    /*     ASSERT_GE( retval, 0 ); */
-    /*     count ++; */
-    /* } */
-    /* ASSERT_EQ(  buf->extra, expected ) << "Ch=" << num_scans << " 1st Remain=" << (int)buf->extra; */
-
     free(data);
     DeleteAIOContinuousBuf( buf );
 }
-
-/* num_scans = 1000 * ( tmpsize / (oversamples+1)); */
-/* /\** */
-/*  * @todo refactor this,...this is terrible, need a better default ADConfigBlock */
-/*  *\/ */
-/* AIODeviceTableGetDeviceAtIndex( 0, &result )->testing = true; */
-/* AIOUSBDeviceGetADCConfigBlock( AIODeviceTableGetDeviceAtIndex( 0, &result ) )->testing = true; */
-/* AIOUSBDeviceGetADCConfigBlock( AIODeviceTableGetDeviceAtIndex( 0 , &result ) )->device = AIODeviceTableGetDeviceAtIndex( 0, &result ); */
-/* AIOUSBDeviceGetADCConfigBlock( AIODeviceTableGetDeviceAtIndex( 0 , &result ) )->size = 20; */
-/* /\** */
-/*  * @brief this part sets up the num_oversample and range codes so we */
-/*  * can convert directly to floating point values */
-/*  *\/  */
-/* AIOContinuousBufInitConfiguration(buf); /\* Needed to enforce Testing mode *\/ */
-/* AIOContinuousBufSetAllGainCodeAndDiffMode( buf, AD_GAIN_CODE_0_5V , AIOUSB_FALSE ); */
-/* AIOContinuousBufSetOverSample( buf, 255 ); */
-/* AIOContinuousBufSetDiscardFirstSample( buf, 0 ); */
-/* datatransferred = 0; */
-/* /\* Load data with repeating data *\/ */
-/* while ( count < repeat_count ) { */
-/*     read_data(data, tmpsize ); */
-/*     retval = AIOContinuousBufCopyData( buf, data , &tmpsize ); */
-/*     datatransferred += retval; */
-/*     ASSERT_GE( retval, 0 ); */
-/*     count ++;  */
-/* } */
-/* ASSERT_EQ(  buf->extra, expected ) << "Ch=" << num_scans << " 1st Remain=" << (int)buf->extra; */
-/* ASSERT_EQ( datatransferred, get_write_pos(buf) ); */
-/* ASSERT_EQ( roundf(1000*(data[0] / 65538.0)*5.0), roundf(1000*buf->buffer[get_read_pos(buf)]) ); */
-/* /\* Drain the buffer *\/ */
-/* datatransferred = 0; */
-/* while ( get_read_pos(buf) != get_write_pos(buf) ) { */
-/*     datatransferred += AIOContinuousBufRead( buf, (AIOBufferType *)data, tmpsize, tmpsize ); */
-/* } */
-/* ASSERT_EQ( get_read_pos(buf), datatransferred ); */
-/* count = 0; */
-/* while ( count < repeat_count ) { */
-/*     memset(data,'\377', tmpsize * sizeof(short)); /\* Set to 0xffff *\/ */
-/*     retval = AIOContinuousBufCopyData( buf, data, &tmpsize ); */
-/*     count ++; */
-/* } */
-/* EXPECT_EQ( 5.0, buf->buffer[get_read_pos(buf)] ); */
-
 
 // Combine a bunch of different entities
 //INSTANTIATE_TEST_CASE_P(AllCombinations, AIOContinuousBufThreeParamTest, ::testing::Combine(::testing::ValuesIn(num_channels),::testing::ValuesIn(num_channels)));
@@ -2680,18 +2655,10 @@ TEST_P(AIOContinuousBufThreeParamTest,BufferScanCounting )
      * Aiocontbuf, then set the read position to match the write position, then write one more almost
      * buffer size of data. We should see that the new write position is 2*bytes read % size of the buffer
      */ 
-
     retval = AIOContinuousBufWriteCounts( buf, use_data, use_data_size, use_data_size, AIOCONTINUOUS_BUF_ALLORNONE );
     EXPECT_EQ( retval, use_data_size ) << "Number of bytes written should equal the full size of the buffer";
 
-    EXPECT_EQ( get_write_pos(buf) , retval );
-    set_read_pos(buf, get_write_pos(buf));
-
-    retval = AIOContinuousBufWriteCounts( buf, use_data, use_data_size, use_data_size, AIOCONTINUOUS_BUF_ALLORNONE );
-    EXPECT_EQ( retval, use_data_size );
-    
-    EXPECT_EQ( ( 2*retval )%AIOContinuousBufGetSize(buf) , get_write_pos(buf) );
-
+    EXPECT_EQ( AIOContinuousBufGetSize(buf)/ sizeof(unsigned short), (1)*num_channels );
 
     /*----------------------------------------------------------------------------*/
     /**< Cleanup */
@@ -2772,89 +2739,6 @@ TEST(AIOContinuousBuf,BasicFunctionality ) {
     DeleteAIOContinuousBuf( buf );
     free(readbuf);
     free(tmp);
-}
-
-/**
- * @note What is this test trying to do 
- *
- * @brief
- * 1. Createa  abuffer of size 16
- * 2. Setup usdata
- *
- * Checks: AIOContinuousBufReadIntegerScanCounts
- *
- * @param core_num  = An arbitrary number
- * @param num_scans = 2 * core_num;
- * @param num_channels
- *
- */
-TEST(AIOContinuousBuf, BasicCopyCountsVerification ) {
-    int core_num = 32768;
-    int num_scans = 2 * core_num;
-    AIORET_TYPE retval;
-    int failed = 0;
-
-    /* Represents USB transaction, smaller in size */
-    /* unsigned short tobuf[32768]  = {0}; */
-
-    unsigned char *data          = (unsigned char *)malloc( num_scans );
-    unsigned short *usdata       = (unsigned short *)&data[0];
-    unsigned short *tobuf        = (unsigned short *)calloc(1,core_num*sizeof(unsigned short ) );
-
-    AIOContinuousBuf *buf = NewAIOContinuousBufTesting(0, num_scans , 16 , AIOUSB_TRUE ); /**< Num channels is 16*num_scans  */
-
-    memset(data,0,num_scans);
-    for ( int i = 0; i < 32768 ;) { 
-        for ( int ch = 0; ch < 16 && i < 32768 ; ch ++ , i ++ ) { 
-            usdata[i] = (ch*20)+rand()%20;
-        }
-    }
-    /**
-     * @brief We set the write pointer 1 scan ahead, so we expect to have only 1 scan available
-     */
-    set_write_pos( buf, 16 );
-    set_read_pos( buf, 0 );
-    EXPECT_EQ( 1, AIOContinuousBufCountScansAvailable(buf) ) << "Minimum size is not correct\n";
-
-    /*----------------------------------------------------------------------------*/
-    /**
-     * @brief Reset write ptr, and set the read pointer 1 scan ahead
-     */
-    set_write_pos(buf, 0 );
-    set_read_pos(buf,AIOContinuousBufNumberChannels(buf));
-
-    EXPECT_EQ( AIOContinuousBufNumberChannels(buf), write_size(buf) ) << "We should only have 1 full scan available in the buffer\n";
-    EXPECT_EQ( num_scans*16, buffer_size(buf) ) << " Buffer size is not correct\n";
-
-    /*----------------------------------------------------------------------------*/
-  
-    /**
-     * @brief
-     * @li write half of the available space (of the buffer ) into the buffer.
-     * @li Verify that we can in fact write this amount
-     * @li Verify that we should have 
-     * 
-     *
-     */
-    AIOContinuousBufReset( buf );
-    retval = AIOContinuousBufWriteCounts( buf, usdata, num_scans/2, num_scans/2  , AIOCONTINUOUS_BUF_ALLORNONE );
-    EXPECT_GE( retval, 0 ) << "Unable to write half the buffer size into the buffer\n";
-    EXPECT_EQ( num_scans / 2/ AIOContinuousBufNumberChannels(buf), AIOContinuousBufCountScansAvailable(buf) ) << "Got incorrect number of counts\n";
-
-    if( AIOContinuousBufCountScansAvailable(buf)  ) { 
-        retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf , 32768, AIOContinuousBufNumberChannels(buf)-1 );
-        EXPECT_EQ( -AIOUSB_ERROR_NOT_ENOUGH_MEMORY, retval ) << "Incorrect error message when not enough memory is left\n";
-    }
-
-    retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf , 32768, 32768 );
-    EXPECT_GE( retval, 0 );
-    for( int i = 0, ch = 0 ; i < retval / AIOContinuousBufGetUnitSize(buf); i ++, ch = ((ch+1)% AIOContinuousBufNumberChannels(buf)) )
-        EXPECT_EQ( usdata[i], tobuf[i] ) << "Wasn't able to pass on value " << i << std::endl;
-
-    EXPECT_FALSE( failed ) << "did not get matching data\n";
-
-    DeleteAIOContinuousBuf(buf);
-    free(data);
 }
 
 
