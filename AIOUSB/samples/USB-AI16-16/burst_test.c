@@ -158,7 +158,7 @@ main(int argc, char *argv[] )
 
             if ( options.with_timing )
                 clock_gettime( CLOCK_MONOTONIC_RAW, &bar );
-            /* printf("Retval was %d\n",(int)retval); */
+
             if ( retval < AIOUSB_SUCCESS ) {
                 printf("not ok - ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf));
             } else {

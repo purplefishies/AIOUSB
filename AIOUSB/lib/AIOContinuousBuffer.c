@@ -2637,8 +2637,6 @@ TEST(AIOContinuousBuf,BasicFunctionality )
     
 
     /* Test reading */
-    /* retval = AIOContinuousBufRead( buf, readbuf, tmpsize/4, size*sizeof(AIOBufferType)/4); */
-    /* retval = buf->fifo->PopN( buf->fifo, readbuf, num_scans*num_channels ); */
     retval = AIOContinuousBufRead( buf, readbuf, num_scans*num_channels*2, num_scans*num_channels*2);
     EXPECT_EQ( retval , num_scans*num_channels*2 );
 
@@ -2648,15 +2646,15 @@ TEST(AIOContinuousBuf,BasicFunctionality )
     }
 
     /* /\* Testing writing, and then reading the integer number of scans remaining *\/ */
-    /* retval = AIOContinuousBufWrite( buf, frombuf , tmpsize, size*sizeof(AIOBufferType) , AIOCONTINUOUS_BUF_NORMAL  ); */
-    buf->fifo->PushN( buf->fifo, frombuf, num_scans*num_channels );
+    retval = AIOContinuousBufWrite( buf, frombuf , tmpsize, size*sizeof(AIOBufferType) , AIOCONTINUOUS_BUF_NORMAL  );
+    /* buf->fifo->PushN( buf->fifo, frombuf, num_scans*num_channels ); */
 
     ASSERT_GE( retval, AIOUSB_SUCCESS ) << "Should be able to write to an empty buffer" << get_write_pos(buf) << std::endl;
 
 
-    /* int num_scans_to_read = AIOContinuousBufCountScansAvailable( buf ); */
-    /* AIOContinuousBufReadIntegerScanCounts( buf, readbuf, tmpsize , tmpsize); */
-
+    int num_scans_to_read = AIOContinuousBufCountScansAvailable( buf );
+    retval = AIOContinuousBufReadIntegerScanCounts( buf, readbuf, tmpsize , tmpsize);
+    EXPECT_EQ( retval, num_scans*sizeof(uint16_t) );
 
     DeleteAIOContinuousBuf( buf );
 
