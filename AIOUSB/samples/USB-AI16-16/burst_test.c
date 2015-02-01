@@ -61,12 +61,13 @@ main(int argc, char *argv[] )
     struct timespec foo , bar;
 
     AIORET_TYPE retval = AIOUSB_SUCCESS;
+
+    process_cmd_line( &options, argc, argv );
     unsigned short *tmp = (unsigned short *)malloc(sizeof(unsigned short)*(options.buffer_size+1)*options.number_channels);
     if( !tmp ) {
       fprintf(stderr,"Can't allocate memory for temporary buffer \n");
       _exit(1);
     }
-    process_cmd_line( &options, argc, argv );
 
     AIOUSB_Init();
     GetDevices();
@@ -149,7 +150,11 @@ main(int argc, char *argv[] )
             if( options.with_timing ) 
                 clock_gettime( CLOCK_MONOTONIC_RAW, &foo );
 
-            retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf ,tobufsize, AIOContinuousBufNumberChannels(buf)*AIOContinuousBufCountScansAvailable(buf) );
+            retval = AIOContinuousBufReadIntegerScanCounts( buf, 
+                                                            tobuf ,
+                                                            tobufsize, 
+                                                            AIOContinuousBufNumberChannels(buf)*AIOContinuousBufCountScansAvailable(buf) 
+                                                            );
 
             if ( options.with_timing )
                 clock_gettime( CLOCK_MONOTONIC_RAW, &bar );

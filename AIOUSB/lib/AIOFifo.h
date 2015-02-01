@@ -115,10 +115,7 @@ AIORET_TYPE NAME##PopN( AIOFifo##NAME *fifo, TYPE *in, unsigned N)              
 {                                                                                                   \
     AIORET_TYPE retval = {0};                                                                       \
     int tmpval = fifo->Read( (AIOFifo*)fifo, in, sizeof(TYPE)*N );                                  \
-                                                                                                    \
-    if( tmpval <= 0 ) {                                                                             \
-        retval = -AIOUSB_FIFO_COPY_ERROR;                                                           \
-    }                                                                                               \
+    retval = ( tmpval < 0 ? -AIOUSB_ERROR_NOT_ENOUGH_MEMORY : tmpval );                             \
                                                                                                     \
     return retval;                                                                                  \
 }                                                                                                   \
@@ -130,6 +127,10 @@ AIOFifo##NAME *NewAIOFifo##NAME( unsigned int size )                            
     nfifo->PushN = NAME##PushN;                                                                     \
     nfifo->Pop = NAME##Pop;                                                                         \
     nfifo->PopN = NAME##PopN;                                                                       \
+    nfifo->_calculate_size_write = _calculate_size_aon_write;                                       \
+    nfifo->_calculate_size_read  = _calculate_size_aon_read;                                        \
+    nfifo->Write = AIOFifoWriteAllOrNone;                                                           \
+    nfifo->Read  = AIOFifoReadAllOrNone;                                                            \
     nfifo->delta = NAME##delta;                                                                     \
     nfifo->refsize = sizeof(TYPE);                                                                  \
     nfifo->kind = aioeither_value_##TYPE;                                                           \

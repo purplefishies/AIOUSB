@@ -128,15 +128,14 @@ AIOEither Pop( AIOFifoTYPE *fifo )
 
     return retval;
 }
+
 AIORET_TYPE PopN( AIOFifoTYPE *fifo, TYPE *in, unsigned N)
 {
     AIORET_TYPE retval = {0};
     int tmpval = fifo->Read( (AIOFifo*)fifo, in, sizeof(TYPE)*N );
 
-    if( tmpval <= 0 ) {
-        retval = -AIOUSB_FIFO_COPY_ERROR;
-    } 
-    
+    retval = ( tmpval < 0 ? -AIOUSB_FIFO_COPY_ERROR : retval );
+   
     return retval;
 }
 
@@ -191,7 +190,7 @@ AIORET_TYPE AIOFifoWrite( AIOFifo *fifo, void *frombuf , unsigned maxsize ) {
     if ( actsize ) {
         int basic_copy = MIN( actsize + fifo->write_pos, fifo->size ) - fifo->write_pos, wrap_copy = actsize - basic_copy;
         memcpy( &((char *)fifo->data)[fifo->write_pos], frombuf, basic_copy );
-        memcpy( &((char *)fifo->data)[0], &((char *)&frombuf)[basic_copy], wrap_copy );
+        memcpy( &((char *)fifo->data)[0], (void*)((char *)frombuf+basic_copy), wrap_copy );
         fifo->write_pos = (fifo->write_pos + actsize ) % fifo->size ;
     }
     RELEASE_RESOURCE( fifo );
@@ -208,9 +207,10 @@ AIORET_TYPE AIOFifoWriteAllOrNone( AIOFifo *fifo, void *frombuf , unsigned maxsi
     if ( actsize ) {
         int basic_copy = MIN( actsize + fifo->write_pos, fifo->size ) - fifo->write_pos, wrap_copy = actsize - basic_copy;
         memcpy( &((char *)fifo->data)[fifo->write_pos], frombuf, basic_copy );
-        memcpy( &((char *)fifo->data)[0], &((char *)&frombuf)[basic_copy], wrap_copy );
+        memcpy( &((char *)fifo->data)[0], (void*)((char *)frombuf+basic_copy), wrap_copy );
         fifo->write_pos = (fifo->write_pos + actsize ) % fifo->size ;
-    }
+    } 
+
     RELEASE_RESOURCE( fifo );
     return actsize;
 }
@@ -373,24 +373,56 @@ TEST(NewType,PushAndPopArrays )
     memset(tmp,0,sizeof(TYPE)*size );
     ASSERT_EQ( tmp[3], 0 );
 
-    fifo->PopN( fifo, tmp, size );
+    for ( int i  = 0; i < 10 ; i ++ ) {
+        retval = fifo->PopN( fifo, tmp, size );
+        EXPECT_GE( retval, 0 );
+        retval = fifo->PushN( fifo, tmp, size );
+        EXPECT_GE( retval, 0 );
+    }
 
-    ASSERT_EQ( tmp[3], 3 );
+
 }
 
 TEST(Counts,Testing )
 {
-    AIOFifoCounts *cfifo = NewAIOFifoCounts(1000);
-    unsigned short tmp[1000];
-    for( int i = 0; i < 1000 ; i ++ ) tmp[i] = i;
+    int size = 1000;
+    AIOFifoCounts *cfifo = NewAIOFifoCounts(size);
+    unsigned short tmp[size];
+    for( int i = 0; i < size ; i ++ ) tmp[i] = i;
     
-    cfifo->PushN( cfifo, tmp, 1000 );
+    cfifo->PushN( cfifo, tmp, size );
     
-    for( int i = 0; i < 1000 ; i ++ ) { 
+    for( int i = 0; i < size ; i ++ ) { 
         AIOEither tval = cfifo->Pop(cfifo);
 
         EXPECT_EQ( tval.right.s, tmp[i] );
     }
+    DeleteAIOFifoCounts( cfifo );
+
+    cfifo = NewAIOFifoCounts(size);
+    int num_scans = 4000;
+    int num_channels = 16;
+    cfifo = NewAIOFifoCounts( num_scans*num_channels );
+    int tmpsize = num_scans*num_channels*4;
+
+    uint16_t *frombuf = (uint16_t*)malloc( sizeof(uint16_t)*tmpsize );
+    AIORET_TYPE retval;
+    for ( int i = 0 ; i < tmpsize; i ++ ) { 
+        frombuf[i] = rand() % size;
+    }
+
+    retval = cfifo->PushN( cfifo, frombuf, tmpsize );
+
+    EXPECT_EQ( 0, retval ) << "Should have not enough memory error\n";
+    
+    cfifo->write_pos = cfifo->read_pos = cfifo->size;
+    retval = cfifo->PushN( cfifo, frombuf, size );
+    EXPECT_EQ( retval, size*sizeof(uint16_t) );
+
+    cfifo->write_pos = cfifo->read_pos = cfifo->size / 2;
+    retval = cfifo->PushN( cfifo, frombuf, size );
+    EXPECT_EQ( retval, size*sizeof(uint16_t) );
+
 
 }
 
