@@ -52,10 +52,6 @@ TEST(AIOContinuousBuf,BasicReadAndWritingTest)
 
 }
 
-
-/* class ParamTest : public ::testing::TestWithParam<Row> { */
-/* }; */
-
 class ParamTest : public ::testing::TestWithParam<std::tuple<int,int,int,int>> {};
 
 /**
@@ -72,46 +68,42 @@ class ParamTest : public ::testing::TestWithParam<std::tuple<int,int,int,int>> {
  */
 TEST_P(ParamTest, WriteMultipleTimesSizeOfBuffer )
 {
-    /* int num_channels_per_scan = 16; */
-    int num_channels_per_scan = std::get<0>(GetParam());
-    int num_scans = std::get<1>(GetParam());
-    int num_scans_to_read = 10*(num_scans+1);
-
-    int tobuf_size = num_channels_per_scan * (num_scans+1);
-    int use_data_size = num_channels_per_scan * (num_scans+1);
-    int read_scans = 0;
-    int lambda_write = std::get<2>(GetParam()), lambda_read = std::get<3>(GetParam());
-
-    unsigned short *use_data  = (unsigned short *)calloc(1, use_data_size * sizeof(unsigned short) );
-    unsigned short *tobuf     = (unsigned short *)calloc(1, tobuf_size * sizeof(unsigned short ) );
-    AIORET_TYPE retval;
-    AIOContinuousBuf *buf = NewAIOContinuousBufForCounts( 0, (num_scans+1), num_channels_per_scan );
-
-    /**
-     * @brief Keep reading and writing
-     */
-    // set_write_pos(buf, 0 );
-    // set_read_pos(buf,  0 );
-    int numrepeat = 0;
-    while ( read_scans < num_scans_to_read ) {
-        for ( int i = 0 ; i < lambda_write ; i ++ ) {
-            retval = AIOContinuousBufWriteCounts( buf, tobuf, tobuf_size, num_channels_per_scan, AIOCONTINUOUS_BUF_ALLORNONE );
-            if ( retval < 0 ) { 
-                std::cout << "";
-            }
-            // ASSERT_EQ( num_channels_per_scan, retval ) << "bufsize " << buffer_size(buf) << " read_pos " << AIOContinuousBufGetReadPosition(buf) << "   write_pos " << AIOContinuousBufGetWritePosition(buf) << std::endl;
-        }
-
-        for ( int i = 0 ; i < lambda_read ; i ++ ) {
-            ASSERT_GE( AIOContinuousBufCountScansAvailable(buf), 0 );
-            retval = AIOContinuousBufReadIntegerNumberOfScans( buf, tobuf, tobuf_size, 1 );
-            EXPECT_EQ( retval, 1 );
-            ASSERT_GE( retval, 0 );
-            read_scans += retval;
-        }
-        numrepeat ++;
-        std::cout << "";
-    }
+//     /* int num_channels_per_scan = 16; */
+//     int num_channels_per_scan = std::get<0>(GetParam());
+//     int num_scans = std::get<1>(GetParam());
+//     int num_scans_to_read = 10*(num_scans+1);
+//     int tobuf_size = num_channels_per_scan * (num_scans+1);
+//     int use_data_size = num_channels_per_scan * (num_scans+1);
+//     int read_scans = 0;
+//     int lambda_write = std::get<2>(GetParam()), lambda_read = std::get<3>(GetParam());
+//     unsigned short *use_data  = (unsigned short *)calloc(1, use_data_size * sizeof(unsigned short) );
+//     unsigned short *tobuf     = (unsigned short *)calloc(1, tobuf_size * sizeof(unsigned short ) );
+//     AIORET_TYPE retval;
+//     AIOContinuousBuf *buf = NewAIOContinuousBufForCounts( 0, (num_scans+1), num_channels_per_scan );
+//     /**
+//      * @brief Keep reading and writing
+//      */
+//     // set_write_pos(buf, 0 );
+//     // set_read_pos(buf,  0 );
+//     int numrepeat = 0;
+//     while ( read_scans < num_scans_to_read ) {
+//         for ( int i = 0 ; i < lambda_write ; i ++ ) {
+//             retval = AIOContinuousBufWriteCounts( buf, tobuf, tobuf_size, num_channels_per_scan, AIOCONTINUOUS_BUF_ALLORNONE );
+//             if ( retval < 0 ) { 
+//                 std::cout << "";
+//             }
+//             // ASSERT_EQ( num_channels_per_scan, retval ) << "bufsize " << buffer_size(buf) << " read_pos " << AIOContinuousBufGetReadPosition(buf) << "   write_pos " << AIOContinuousBufGetWritePosition(buf) << std::endl;
+//         }
+//         for ( int i = 0 ; i < lambda_read ; i ++ ) {
+//             ASSERT_GE( AIOContinuousBufCountScansAvailable(buf), 0 );
+//             retval = AIOContinuousBufReadIntegerNumberOfScans( buf, tobuf, tobuf_size, 1 );
+//             EXPECT_EQ( retval, 1 );
+//             ASSERT_GE( retval, 0 );
+//             read_scans += retval;
+//         }
+//         numrepeat ++;
+//         std::cout << "";
+//     }
 }
 
 std::vector<int> nscans { 128 , 100} ;
