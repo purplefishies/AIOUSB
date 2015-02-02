@@ -52,10 +52,6 @@ TEST(AIOContinuousBuf,BasicReadAndWritingTest)
 
 }
 
-
-/* class ParamTest : public ::testing::TestWithParam<Row> { */
-/* }; */
-
 class ParamTest : public ::testing::TestWithParam<std::tuple<int,int,int,int>> {};
 
 /**
