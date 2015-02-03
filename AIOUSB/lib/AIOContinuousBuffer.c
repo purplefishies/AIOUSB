@@ -552,20 +552,10 @@ AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf,
     }
 
     int num_scans = AIOContinuousBufCountScansAvailable( buf );
-    /* num_scans = MIN( (int)num_scans, (int)(tmpbuffer_size / (int)(tmpbuffer_size )*AIOContinuousBufNumberChannels(buf) ); */
 
     retval += buf->fifo->PopN( buf->fifo, read_buf, num_scans*AIOContinuousBufNumberChannels(buf) );
-
-    /* int numscans = MIN(size / AIOContinuousBufNumberChannels(buf), tmpbuffer_size / AIOContinuousBufNumberChannels(buf) ); */
-    /* for ( int i = 0, pos=0 ; i < numscans && (pos + AIOContinuousBufNumberChannels(buf)-1) < (int)size ; i ++ , pos += AIOContinuousBufNumberChannels(buf) ) { */
-    /*     if( i == 0 ) */
-    /*         retval = AIOUSB_SUCCESS; */
-    /*     if( debug ) {  */
-    /*         printf("Using i=%d\n",i ); */
-    /*     } */
-    /*     /\* Incorrect number *\/ */
-    /*     retval += AIOContinuousBufRead( buf, (AIOBufferType *)&read_buf[pos] , tmpbuffer_size - pos, AIOContinuousBufNumberChannels(buf)*AIOContinuousBufGetUnitSize(buf) ); */
-    /* } */
+    retval /= AIOContinuousBufNumberChannels(buf);
+    retval /= buf->fifo->refsize;
 
     return retval;
 }
@@ -2634,7 +2624,7 @@ TEST(AIOContinuousBuf,BasicFunctionality )
 
     int num_scans_to_read = AIOContinuousBufCountScansAvailable( buf );
     retval = AIOContinuousBufReadIntegerScanCounts( buf, readbuf, tmpsize , tmpsize);
-    EXPECT_EQ( retval, num_scans*sizeof(uint16_t) );
+    EXPECT_EQ( retval, num_scans );
 
     DeleteAIOContinuousBuf( buf );
 
