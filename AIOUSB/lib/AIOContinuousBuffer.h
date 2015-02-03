@@ -14,6 +14,7 @@
 #include "AIOChannelMask.h"
 #include "AIOUSB_ADC.h"
 #include "AIOTypes.h"
+#include "AIOFifo.h"
 #include "AIOUSB_Core.h"
 #include <pthread.h>
 #include <stdio.h>
@@ -32,7 +33,7 @@ namespace AIOUSB
 
 typedef void *(*AIOUSB_WorkFn)( void *obj );
 
-typedef struct {
+typedef struct aio_continuous_buf {
     void *(*callback)(void *object);
 #ifdef HAS_PTHREAD
     pthread_t worker;
@@ -41,6 +42,7 @@ typedef struct {
 #endif
     AIOUSB_WorkFn work;
     int DeviceIndex;
+    AIOFifoCounts *fifo;
     AIOBufferType *buffer;
     unsigned char *countsbuf;
     unsigned bufunitsize;
@@ -63,6 +65,8 @@ typedef struct {
     AIOBufferType *tmpbuf;
     unsigned tmpbufsize;
     volatile THREAD_STATUS status; /* Are we running, paused ..etc; */
+    AIORET_TYPE (*PushN)( struct aio_continuous_buf *buf, unsigned short *frombuf, unsigned int N );
+    AIORET_TYPE (*PopN)( struct aio_continuous_buf *buf, unsigned short *frombuf, unsigned int N );
 } AIOContinuousBuf;
 
 /*-----------------------------  Constructors  ------------------------------*/
@@ -126,6 +130,8 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetRemainingWriteSize( AIOContinuousBu
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetUnitSize( AIOContinuousBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufReset( AIOContinuousBuf *buf );
 
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufPushN(AIOContinuousBuf *buf ,unsigned short *frombuf, unsigned int N );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufPopN(AIOContinuousBuf *buf , unsigned short *frombuf, unsigned int N );
 
 
 /*-----------------------------  Deprecated / Refactored   -------------------------------*/

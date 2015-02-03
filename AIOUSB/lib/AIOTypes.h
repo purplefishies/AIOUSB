@@ -10,6 +10,8 @@
 #ifndef _AIOTYPES_H
 #define _AIOTYPES_H
 #define HAS_PTHREAD 1
+#include <stdint.h>
+
 
 typedef int AIORET_TYPE;        /* New return type is signed, negative indicates error */
 typedef unsigned long AIORESULT;
@@ -85,7 +87,7 @@ CREATE_ENUM_W_START( AIOContinuousBufMode, 0 ,
 #define foreach_array( i , ary, size )  i = ary[0]; \
                                         for ( int j = 0; j < size ; j ++, i = ary[i] )
 
-typedef double AIOBufferType;
+typedef uint16_t AIOBufferType;
 
 enum {
     MAX_USB_DEVICES               = 32

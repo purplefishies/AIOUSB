@@ -33,7 +33,7 @@ ifdef AIOUSBLIBDIR
 	CFLAGS			+= -I$(AIOUSBLIBDIR) 
 
 #       Dynamic Build Rule for aiousblib
-	AIOUSBLIB_BUILD		= $(LIBAIOUSB): $(ALL_AIOUSBLIBDIR_CFILES) ; cd $(AIOUSBLIBDIR) && $(MAKE) $(DEBUG_ARGS)
+	AIOUSBLIB_BUILD		= $(LIBAIOUSB): $(ALL_AIOUSBLIBDIR_CFILES) ; cd $(AIOUSBLIBDIR) && $(MAKE) CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" $(DEBUG_ARGS)
 else
 	LIBAIOUSB 		:= -laiousbdbg			# use default library search path
 	LIBAIOUSBCPP 		:= -laiousbcppdbg		# "     "      "       "      "
@@ -176,7 +176,7 @@ lib/TestCaseSetup.o: lib/TestCaseSetup.cpp lib/TestCaseSetup.h  $(LIBRARY_DEPS)
 	$(CPP) $(DEBUGOPTS) $(CXXFLAGS) $(OBJFILE_OPTS) $(COMMONOPTS) $(CPPOPTS) $< $(LIBPATH) -o $@
 
 %:%.o	$(COMMON_DEPS) $(LIBRARY_DEPS) 
-	$(CPP)  $(LDFLAGS) $(CXXFLAGS) $(DEBUGOPTS)  $(COMMONOPTS) $(CPPOPTS) $< $(COMMON_DEPS) $(CPPLIBS)  -o $@
+	$(CPP)  $(LDFLAGS) $(CXXFLAGS) $(DEBUGOPTS)  $(COMMONOPTS) $(CPPOPTS) $< $(COMMON_DEPS) $(CPPLIBS)  -o $@ $(LDFLAGS)
 
 
 #
@@ -186,6 +186,6 @@ lib/TestCaseSetup.o: lib/TestCaseSetup.cpp lib/TestCaseSetup.h  $(LIBRARY_DEPS)
 	$(CC) $(CFLAGS)  -D_GNU_SOURCE $(OBJFILE_OPTS) $(INCPATH) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $(COPTS) $<  -o $@
 
 %:%.c.o
-	$(CC) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $< $(CLIBS) -o $@
+	$(CC) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $< $(CLIBS) -o $@ $(LDFLAGS)
 
 

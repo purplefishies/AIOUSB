@@ -27,7 +27,7 @@ struct channel_range {
 
 
 struct opts {
-    int buffer_size;
+    int num_scans;
     int number_channels;
     int gain_code;
     unsigned max_count;
@@ -47,7 +47,7 @@ struct opts {
 void process_cmd_line( struct opts *, int argc, char *argv[] );
 void process_with_single_buf( struct opts *opts, AIOContinuousBuf *buf , FILE *fp, unsigned short *tobuf, unsigned short tobufsize);
 void process_with_looping_buf( struct opts *opts, AIOContinuousBuf *buf , FILE *fp, unsigned short *tobuf, unsigned short tobufsize);
-/* int check_channel_range(char *optarg); */
+
 struct channel_range *get_channel_range( char *optarg );
 
 int 
@@ -55,22 +55,26 @@ main(int argc, char *argv[] )
 {
     struct opts options = {100000, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , (char*)"output.txt", 0, 0, 15 , 0, 0, 0, 0, NULL };
     AIOContinuousBuf *buf = 0;
-    unsigned read_count = 0;
-    unsigned short tobuf[65536] = {0};
-    unsigned tobufsize = 65536;
+    /* unsigned short tobuf[65536] = {0}; */
+    /* unsigned tobufsize = 65536; */
     struct timespec foo , bar;
 
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    unsigned short *tmp = (unsigned short *)malloc(sizeof(unsigned short)*(options.buffer_size+1)*options.number_channels);
+
+    process_cmd_line( &options, argc, argv );
+
+    int tobufsize = (options.num_scans+1)*options.number_channels*20;
+    uint16_t *tobuf = (uint16_t *)malloc(sizeof(uint16_t)*tobufsize);
+
+    unsigned short *tmp = (unsigned short *)malloc(sizeof(unsigned short)*(options.num_scans+1)*options.number_channels);
     if( !tmp ) {
       fprintf(stderr,"Can't allocate memory for temporary buffer \n");
       _exit(1);
     }
-    process_cmd_line( &options, argc, argv );
 
     AIOUSB_Init();
     GetDevices();
-    buf = (AIOContinuousBuf *)NewAIOContinuousBufForCounts( 0, (options.buffer_size+1), options.number_channels );
+    buf = (AIOContinuousBuf *)NewAIOContinuousBufForCounts( 0, options.num_scans, options.number_channels );
     if( !buf ) {
       fprintf(stderr,"Can't allocate memory for temporary buffer \n");
       _exit(1);
@@ -143,36 +147,70 @@ main(int argc, char *argv[] )
     if ( options.with_timing ) 
         clock_gettime( CLOCK_MONOTONIC_RAW, &bar );
 
+
+#if 1
+    int scans_remaining;
+    int read_count = 0;
     while ( buf->status == RUNNING || AIOContinuousBufCountScansAvailable(buf) > 0 ) {
 
-        if ( AIOContinuousBufCountScansAvailable(buf) > 0 ) { 
-            if( options.with_timing ) 
-                clock_gettime( CLOCK_MONOTONIC_RAW, &foo );
+        if ( (scans_remaining = AIOContinuousBufCountScansAvailable(buf) ) ) { 
 
-            retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf ,tobufsize, AIOContinuousBufNumberChannels(buf)*AIOContinuousBufCountScansAvailable(buf) );
 
-            if ( options.with_timing )
-                clock_gettime( CLOCK_MONOTONIC_RAW, &bar );
-            /* printf("Retval was %d\n",(int)retval); */
-            if ( retval < AIOUSB_SUCCESS ) {
-                printf("not ok - ERROR reading from buffer at position: %d\n", AIOContinuousBufGetReadPosition(buf));
-            } else {
+            if ( scans_remaining ) { 
+                if ( options.with_timing )
+                    clock_gettime( CLOCK_MONOTONIC_RAW, &foo );
+                retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf, tobufsize, AIOContinuousBufNumberChannels(buf)*AIOContinuousBufCountScansAvailable(buf) );
+                if ( options.with_timing )
+                    clock_gettime( CLOCK_MONOTONIC_RAW, &bar );
+
+                read_count += retval;
+
                 if ( options.verbose )
                     fprintf(stderr,"Waiting : total=%u, readpos=%d, writepos=%d\n", read_count, 
                             AIOContinuousBufGetReadPosition(buf), AIOContinuousBufGetWritePosition(buf));
 
-                read_count += retval;
-                for( int i = 0, ch = 0 ; i < retval; i ++, ch = ((ch+1)% AIOContinuousBufNumberChannels(buf)) ) {
-                    if( options.with_timing ) 
+                retval = retval / sizeof(uint16_t);
+                for( int scan_count = 0; scan_count < retval / AIOContinuousBufNumberChannels(buf) ; scan_count ++ ) { 
+                    if( options.with_timing )
                         fprintf(fp ,"%d,%d,", (int)bar.tv_sec, (int)(( bar.tv_sec - foo.tv_sec )*1e9 + (bar.tv_nsec - foo.tv_nsec )));
-                    fprintf(fp,"%u,",tobuf[i] );
-                    if( (i+1) % AIOContinuousBufNumberChannels(buf) == 0 ) {
-                        fprintf(fp,"\n");
+                    for( int ch = 0 ; ch < AIOContinuousBufNumberChannels(buf); ch ++ ) {
+                        fprintf(fp,"%u,",tobuf[scan_count*AIOContinuousBufNumberChannels(buf)+ch] );
+                        if( (ch+1) % AIOContinuousBufNumberChannels(buf) == 0 ) {
+                            fprintf(fp,"\n");
+                        }
                     }
                 }
             }
+        } else {
+            /* sleep(1); */
+        }
+        
+    }
+#endif
+
+#if 0    
+    int scans_remaining = AIOContinuousBufCountScansAvailable(buf);
+    /* printf("Number of scans remaining is %d\n", scans_remaining ); */
+
+    retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf, tobufsize, AIOContinuousBufNumberChannels(buf)*AIOContinuousBufCountScansAvailable(buf) );
+    retval = retval / sizeof(uint16_t);
+    
+    for( int scan_count = 0; scan_count < retval / AIOContinuousBufNumberChannels(buf) ; scan_count ++ ) { 
+        for( int ch = 0 ; ch < AIOContinuousBufNumberChannels(buf); ch ++ ) {
+            if( options.with_timing )
+                fprintf(fp ,"%d,%d,", (int)bar.tv_sec, (int)(( bar.tv_sec - foo.tv_sec )*1e9 + (bar.tv_nsec - foo.tv_nsec )));
+            fprintf(fp,"%u,",tobuf[scan_count*AIOContinuousBufNumberChannels(buf)+ch] );
+            if( (ch+1) % AIOContinuousBufNumberChannels(buf) == 0 ) {
+                fprintf(fp,"\n");
+            }
         }
     }
+    
+#endif
+
+
+
+
 
     fclose(fp);
     fprintf(stderr,"Test completed...exiting\n");
@@ -239,7 +277,9 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] )
             fprintf(stderr,"Incorrect channel range spec, should be '--range START-END=GAIN_CODE', not %s\n", optarg );
             _exit(0);
           }
-          options->ranges = (struct channel_range **)realloc( options->ranges , options->number_ranges++  );
+
+          options->ranges = (struct channel_range **)realloc( options->ranges , (++options->number_ranges)*sizeof(struct channel_range*)  );
+
           options->ranges[options->number_ranges-1] = tmp;
           break;
         case 'h':
@@ -278,10 +318,10 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] )
           break;
         case 'b':
           /* printf("option b\n"); */
-          options->buffer_size = atoi(optarg);
-          if( options->buffer_size <= 0 || options->buffer_size > 1e8 ) {
+          options->num_scans = atoi(optarg);
+          if( options->num_scans <= 0 || options->num_scans > 1e8 ) {
               fprintf(stderr,"Warning: Buffer Size outside acceptable range (1,1e8), setting to 10000\n");
-              options->buffer_size = 10000;
+              options->num_scans = 10000;
           }
           break;
         default:
