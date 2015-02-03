@@ -208,7 +208,8 @@ AIORET_TYPE AIOFifoWriteAllOrNone( AIOFifo *fifo, void *frombuf , unsigned maxsi
         int basic_copy = MIN( actsize + fifo->write_pos, fifo->size ) - fifo->write_pos, wrap_copy = actsize - basic_copy;
         memcpy( &((char *)fifo->data)[fifo->write_pos], frombuf, basic_copy );
         memcpy( &((char *)fifo->data)[0], (void*)((char *)frombuf+basic_copy), wrap_copy );
-        fifo->write_pos = (fifo->write_pos + actsize ) % fifo->size ;
+        int tmp = (fifo->write_pos + actsize ) % fifo->size;
+        fifo->write_pos = tmp;
     } 
 
     RELEASE_RESOURCE( fifo );
