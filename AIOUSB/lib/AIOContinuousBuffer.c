@@ -2615,10 +2615,8 @@ TEST(AIOContinuousBuf,BasicFunctionality )
         EXPECT_EQ( frombuf[i], readbuf[i] );
     }
 
-    /* /\* Testing writing, and then reading the integer number of scans remaining *\/ */
+    /*  Testing writing, and then reading the integer number of scans remaining  */
     retval = AIOContinuousBufWrite( buf, frombuf , tmpsize, size*sizeof(AIOBufferType) , AIOCONTINUOUS_BUF_NORMAL  );
-    /* buf->fifo->PushN( buf->fifo, frombuf, num_scans*num_channels ); */
-
     ASSERT_GE( retval, AIOUSB_SUCCESS ) << "Should be able to write to an empty buffer" << get_write_pos(buf) << std::endl;
 
 

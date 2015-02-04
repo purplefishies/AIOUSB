@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <AIODataTypes.h>
+#include "AIOUSB_Log.h"
 #include <getopt.h>
 #include <ctype.h>
 #include <time.h>
@@ -40,6 +41,7 @@ struct opts {
     int slowacquire;
     int with_timing;
     int verbose;
+    int debug_level;
     struct channel_range **ranges;
 };
 
@@ -53,7 +55,7 @@ struct channel_range *get_channel_range( char *optarg );
 int 
 main(int argc, char *argv[] ) 
 {
-    struct opts options = {100000, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , (char*)"output.txt", 0, 0, 15 , 0, 0, 0, 0, NULL };
+    struct opts options = {100000, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , (char*)"output.txt", 0, 0, 15 , 0, 0, 0, 0, (AIO_DEBUG_LEVEL)7, NULL };
     AIOContinuousBuf *buf = 0;
     /* unsigned short tobuf[65536] = {0}; */
     /* unsigned tobufsize = 65536; */
@@ -151,26 +153,25 @@ main(int argc, char *argv[] )
 #if 1
     int scans_remaining;
     int read_count = 0;
-    while ( buf->status == RUNNING || AIOContinuousBufCountScansAvailable(buf) > 0 ) {
+    int scans_read = 0;
+    while ( buf->status == RUNNING || read_count < options.num_scans ) {
 
         if ( (scans_remaining = AIOContinuousBufCountScansAvailable(buf) ) ) { 
-
 
             if ( scans_remaining ) { 
                 if ( options.with_timing )
                     clock_gettime( CLOCK_MONOTONIC_RAW, &foo );
-                retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf, tobufsize, AIOContinuousBufNumberChannels(buf)*AIOContinuousBufCountScansAvailable(buf) );
+                scans_read = AIOContinuousBufReadIntegerScanCounts( buf, tobuf, tobufsize, AIOContinuousBufNumberChannels(buf)*AIOContinuousBufCountScansAvailable(buf) );
                 if ( options.with_timing )
                     clock_gettime( CLOCK_MONOTONIC_RAW, &bar );
 
-                read_count += retval;
+                read_count += scans_read;
 
                 if ( options.verbose )
-                    fprintf(stderr,"Waiting : total=%u, readpos=%d, writepos=%d\n", read_count, 
+                    fprintf(stdout,"Waiting : total=%u, readpos=%d, writepos=%d\n", read_count, 
                             AIOContinuousBufGetReadPosition(buf), AIOContinuousBufGetWritePosition(buf));
 
-                retval = retval / sizeof(uint16_t);
-                for( int scan_count = 0; scan_count < retval / AIOContinuousBufNumberChannels(buf) ; scan_count ++ ) { 
+                for( int scan_count = 0; scan_count < scans_read ; scan_count ++ ) { 
                     if( options.with_timing )
                         fprintf(fp ,"%d,%d,", (int)bar.tv_sec, (int)(( bar.tv_sec - foo.tv_sec )*1e9 + (bar.tv_nsec - foo.tv_nsec )));
                     for( int ch = 0 ; ch < AIOContinuousBufNumberChannels(buf); ch ++ ) {
@@ -213,7 +214,7 @@ main(int argc, char *argv[] )
 
 
     fclose(fp);
-    fprintf(stderr,"Test completed...exiting\n");
+    fprintf(stdout,"Test completed...exiting\n");
 
     return 0;
 }
@@ -226,15 +227,15 @@ void process_with_single_buf( struct opts *opts, AIOContinuousBuf *buf , FILE *f
 
 void print_usage(int argc, char **argv,  struct option *options)
 {
-    fprintf(stderr,"%s - Options\n", argv[0] );
+    fprintf(stdout,"%s - Options\n", argv[0] );
     for ( int i =0 ; options[i].name != NULL ; i ++ ) {
-      fprintf(stderr,"\t-%c | --%s ", (char)options[i].val, options[i].name);
+      fprintf(stdout,"\t-%c | --%s ", (char)options[i].val, options[i].name);
       if( options[i].has_arg == optional_argument ) {
-        fprintf(stderr, " [ ARG ]\n");
+        fprintf(stdout, " [ ARG ]\n");
       } else if( options[i].has_arg == required_argument ) {
-        fprintf(stderr, " ARG\n");
+        fprintf(stdout, " ARG\n");
       } else {
-        fprintf(stderr,"\n");
+        fprintf(stdout,"\n");
       }
     }
 }
@@ -251,30 +252,31 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] )
     int option_index = 0;
     
     static struct option long_options[] = {
-      {"buffersize",   required_argument, 0,  'b' },
-      {"numchannels",  required_argument, 0,  'n' },
-      {"gaincode",     required_argument, 0,  'g' },
-      {"clockrate",    required_argument, 0,  'c' },
-      {"help",         no_argument      , 0,  'h' },
-      {"maxcount",     required_argument, 0,  'm' },
-      {"reset",        no_argument,       0,  'r' },
-      {"startchannel", required_argument, 0,  's' },
-      {"endchannel"  , required_argument, 0,  'e' },
-      {"slowacquire" , no_argument      , 0,  'S' }, 
-      {"range",        required_argument, 0,  'R' },
-      {"timing",       no_argument      , 0,  'T' },
-      {"verbose",      no_argument      , 0,  'V' },
-      {0,         0,                 0,  0 }
-    };
+         {"debug",        required_argument, 0,  'D' },
+         {"buffersize",   required_argument, 0,  'b' },
+         {"numchannels",  required_argument, 0,  'n' },
+         {"gaincode",     required_argument, 0,  'g' },
+         {"clockrate",    required_argument, 0,  'c' },
+         {"help",         no_argument      , 0,  'h' },
+         {"maxcount",     required_argument, 0,  'm' },
+         {"reset",        no_argument,       0,  'r' },
+         {"startchannel", required_argument, 0,  's' },
+         {"endchannel"  , required_argument, 0,  'e' },
+         {"slowacquire" , no_argument      , 0,  'S' }, 
+         {"range",        required_argument, 0,  'R' },
+         {"timing",       no_argument      , 0,  'T' },
+         {"verbose",      no_argument      , 0,  'V' },
+         {0,         0,                 0,  0 }
+        };
     while (1) { 
       struct channel_range *tmp;
-        c = getopt_long(argc, argv, "b:n:g:c:m:hTV", long_options, &option_index);
+        c = getopt_long(argc, argv, "D:b:n:g:c:m:hTV", long_options, &option_index);
         if( c == -1 )
           break;
         switch (c) {
         case 'R':
           if( !( tmp = get_channel_range(optarg)) ) {
-            fprintf(stderr,"Incorrect channel range spec, should be '--range START-END=GAIN_CODE', not %s\n", optarg );
+            fprintf(stdout,"Incorrect channel range spec, should be '--range START-END=GAIN_CODE', not %s\n", optarg );
             _exit(0);
           }
 
@@ -283,12 +285,12 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] )
           options->ranges[options->number_ranges-1] = tmp;
           break;
         case 'h':
-          print_usage(argc, argv, long_options );
-          _exit(1);
-          break;
+            print_usage(argc, argv, long_options );
+            _exit(1);
+            break;
         case 'n':
-          options->number_channels = atoi(optarg);
-          break;
+            options->number_channels = atoi(optarg);
+            break;
         case 's':
             options->startchannel = atoi(optarg);
             break;
@@ -299,8 +301,12 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] )
             options->with_timing = 1;
             break;
         case 'S':
-          options->slowacquire = 1;
-          break;
+            options->slowacquire = 1;
+            break;
+        case 'D':
+            options->debug_level = (AIO_DEBUG_LEVEL)atoi(optarg);
+            AIOUSB_DEBUG_LEVEL  = options->debug_level;
+            break;
         case 'e':
           options->endchannel = atoi(optarg);
           break;
@@ -320,12 +326,12 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] )
           /* printf("option b\n"); */
           options->num_scans = atoi(optarg);
           if( options->num_scans <= 0 || options->num_scans > 1e8 ) {
-              fprintf(stderr,"Warning: Buffer Size outside acceptable range (1,1e8), setting to 10000\n");
+              fprintf(stdout,"Warning: Buffer Size outside acceptable range (1,1e8), setting to 10000\n");
               options->num_scans = 10000;
           }
           break;
         default:
-          fprintf(stderr, "Incorrect argument '%s'\n", optarg );
+          fprintf(stdout, "Incorrect argument '%s'\n", optarg );
           error = 1;
           break;
         }
@@ -336,7 +342,7 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] )
     }
     if( options->number_ranges == 0 ) { 
       if( options->startchannel && options->endchannel && options->number_channels ) {
-        fprintf(stderr,"Error: you can only specify -startchannel & -endchannel OR  --startchannel & --numberchannels\n");
+        fprintf(stdout,"Error: you can only specify -startchannel & -endchannel OR  --startchannel & --numberchannels\n");
         print_usage(argc, argv, long_options );
         _exit(1);
       } else if ( options->startchannel && options->number_channels ) {
@@ -386,7 +392,7 @@ struct channel_range *get_channel_range(char *optarg )
   char buf[BUFSIZ];
   struct channel_range *tmp = (struct channel_range *)malloc( sizeof(struct channel_range) );
   if( !tmp ) {
-    fprintf(stderr,"Unable to create a new channel range\n");
+    fprintf(stdout,"Unable to create a new channel range\n");
     return NULL;
   }
   MODE mode = BEGIN;
@@ -404,7 +410,7 @@ struct channel_range *get_channel_range(char *optarg )
       i ++ ;
       pos = i;
     } else if( mode == SCHANNEL ) {
-      fprintf(stderr,"Unknown flag while parsing Start_channel: '%c'\n", optarg[i] );
+      fprintf(stdout,"Unknown flag while parsing Start_channel: '%c'\n", optarg[i] );
       free(tmp);
       return NULL;
     } else if ( mode == ECHANNEL && isdigit(optarg[i] ) ) {
@@ -419,7 +425,7 @@ struct channel_range *get_channel_range(char *optarg )
       tmp->gaincode = atoi( buf );
       break;
     } else {
-      fprintf(stderr,"Unknown flag while parsing End_channel: '%c'\n", optarg[i] );
+      fprintf(stdout,"Unknown flag while parsing End_channel: '%c'\n", optarg[i] );
       free(tmp);
       return NULL;
     }
