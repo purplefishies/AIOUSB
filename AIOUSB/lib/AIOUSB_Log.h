@@ -9,10 +9,17 @@ namespace AIOUSB
 {
 #endif
 
+#ifndef DONT_USE_COLOR
 #define GREEN "\033[0;32m"
 #define RED "\031[0;32m"
 #define MAGENTA "\031[0;35m"
 #define CYAN "\031[0;36m"
+#else
+#define GREEN ""
+#define RED ""
+#define MAGENTA ""
+#define CYAN ""
+#endif
 
 #define AIO_DEVEL_STR GREEN"<Devel>"
 #define AIO_DEBUG_STR GREEN"<Debug>"
