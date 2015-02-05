@@ -80,7 +80,7 @@ SET( tmp_aiousb_files
 
 
 set( CMAKE_INCLUDE_CURRENT_DIR  true )
-
+add_definitions(-D_GNU_SOURCE)
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Generate 
@@ -149,12 +149,6 @@ add_dependencies( aiousbdbg aiousbdbg_copies )
 INCLUDE( build_samples )
 
 if( NOT CYGWIN )
-set(SELF_TEST_ENTRIES AIOContinuousBuffer.c )
-# foreach( selftest_file ${SELF_TEST_ENTRIES} )
-#   set(MY_FLAGS "-DAIOUSB_DEBUG_LOG -DAIO_DEBUG -DTAP_TEST -DHAS_PTHREAD -DSELF_TEST" )
-#   set(MY_LIBRARIES aiousbdbg usb-1.0 pthread m )
-#   build_selftest_c_file( aiousblibs ${selftest_file} ${MY_FLAGS} ${MY_LIBRARIES} )
-# endforeach( selftest_file ${SELF_TEST_ENTRIES}  )
 endif( NOT CYGWIN )
 
 
