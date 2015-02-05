@@ -80,7 +80,7 @@ typedef struct new_aio_fifo {
 #define TEMPLATE_AIOFIFO_API(NAME,TYPE)                                                             \
 AIORET_TYPE NAME##Push( AIOFifo##NAME *fifo, TYPE a )                                               \
 {                                                                                                   \
-    TYPE tmp = a;                                                                                   \
+    TYPE tmp = (TYPE)a;                                                                             \
     int val = fifo->Write( (AIOFifo*)fifo, &tmp, sizeof(TYPE) );                                    \
     return val;                                                                                     \
 }                                                                                                   \

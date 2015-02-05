@@ -51,12 +51,13 @@ AIORET_TYPE AIOCountsConverterConvertAllAvailableScans( AIOCountsConverter *ccv 
 
 double Convert( AIOGainRange range, unsigned short sum )
 {
-    return (range.max - range.min)*sum / (double)((( unsigned short )-1)+1) + range.min;
+    return ((double)(range.max - range.min)*sum )/ ((( unsigned short )-1)+1) + range.min;
 }
 
 AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, void *tobufptr, void *frombufptr , unsigned num_bytes )
 {
-    AIOFifoCounts *tofifo = (AIOFifoCounts*)tobufptr, *fromfifo = (AIOFifoCounts*)frombufptr;
+    AIOFifoVolts *tofifo     = (AIOFifoVolts*)tobufptr;
+    AIOFifoCounts *fromfifo  = (AIOFifoCounts*)frombufptr;
     int allowed_scans = num_bytes / ((cc->num_oversamples+1) * cc->num_channels * cc->unit_size );
     AIORET_TYPE count = 0;
     double tmpvolt;
@@ -73,7 +74,7 @@ AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, void *tobufpt
             }
             sum /= (cc->num_oversamples + 1);
 
-            tmpvolt = Convert( cc->gain_ranges[ch], sum );
+            tmpvolt = (double)Convert( cc->gain_ranges[ch], sum );
             tofifo->Push( tofifo, tmpvolt );
         }
     }
