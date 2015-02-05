@@ -56,13 +56,13 @@ double Convert( AIOGainRange range, unsigned short sum )
 
 AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, void *tobufptr, void *frombufptr , unsigned num_bytes )
 {
-    AIOFifo *tobuf = (AIOFifo*)tobufptr, *frombuf = (AIOFifo*)frombufptr;
-    int allowed_scans = num_bytes / (cc->num_oversamples * cc->num_channels * cc->unit_size );
+    AIOFifoCounts *tofifo = (AIOFifoCounts*)tobufptr, *fromfifo = (AIOFifoCounts*)frombufptr;
+    int allowed_scans = num_bytes / ((cc->num_oversamples+1) * cc->num_channels * cc->unit_size );
     AIORET_TYPE count = 0;
     double tmpvolt;
     unsigned short *tmpbuf = (unsigned short *)malloc( allowed_scans * cc->num_channels * cc->unit_size * (1+cc->num_oversamples));
 
-    frombuf->Read( frombuf, tmpbuf, allowed_scans * cc->num_channels * cc->unit_size * (1+cc->num_oversamples) );
+    fromfifo->PopN( fromfifo, tmpbuf, allowed_scans*cc->num_channels*(1+cc->num_oversamples));
 
     for ( int scan_count = 0, tobuf_pos = 0; scan_count < allowed_scans ; scan_count ++ ) {
         for ( unsigned ch = 0; ch < cc->num_channels; ch ++ , tobuf_pos ++ ) { 
@@ -74,7 +74,7 @@ AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, void *tobufpt
             sum /= (cc->num_oversamples + 1);
 
             tmpvolt = Convert( cc->gain_ranges[ch], sum );
-            tobuf->Write( tobuf, &tmpvolt, sizeof(double));
+            tofifo->Push( tofifo, tmpvolt );
         }
     }
 
@@ -177,7 +177,7 @@ TEST(Composite,FifoWriting )
     int num_oversamples  = 20;
     int num_scans        = 1000;
     int retval = 0;
-    int total_size       = num_channels * num_oversamples * num_scans;
+    int total_size       = num_channels * (num_oversamples+1) * num_scans;
 
     unsigned short *from_buf = (unsigned short *)malloc(total_size*sizeof(unsigned short));
     double *to_buf   = ( double *)malloc(total_size*sizeof(double));
@@ -191,15 +191,15 @@ TEST(Composite,FifoWriting )
 
     AIOCountsConverter *cc = NewAIOCountsConverter( from_buf, num_channels, ranges, num_oversamples , sizeof(unsigned short)  );
 
-    AIOFifoCounts *infifo = NewAIOFifoCounts( (unsigned)num_channels*num_oversamples*num_scans );
-    AIOFifoVolts *outfifo = NewAIOFifoVolts( num_channels*num_oversamples*num_scans );
+    AIOFifoCounts *infifo = NewAIOFifoCounts( (unsigned)num_channels*(num_oversamples+1)*num_scans );
+    AIOFifoVolts *outfifo = NewAIOFifoVolts( num_channels*(num_oversamples+1)*num_scans );
 
     /**
      * @brief Load the fifo with values
      */
 
-    infifo->PushN( infifo, from_buf, total_size );
-    EXPECT_GE( retval, 0 );
+    retval = infifo->PushN( infifo, from_buf, total_size );
+    EXPECT_GE( retval, total_size*sizeof(unsigned short) );
 
     retval = cc->ConvertFifo( cc, outfifo, infifo , total_size*sizeof(unsigned short) );
 
@@ -208,7 +208,7 @@ TEST(Composite,FifoWriting )
     outfifo->PopN( outfifo, to_buf, num_channels );
 
     for ( int i = 0 ; i < num_channels ; i ++ ) {
-        EXPECT_EQ( to_buf[i], (ranges[0].max + ranges[0].min) / 2 );
+        EXPECT_EQ( to_buf[i], (ranges[0].max + ranges[0].min) / 2 ) << "For i=" << i << std::endl;
     }
 }
 
