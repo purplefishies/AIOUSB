@@ -997,10 +997,7 @@ void *RawCountsWorkFunction( void *object )
 
         if( bytes ) {
             /* only write bytes that exist */
-
-            if ( ((AIOContinuousBuf_BufSizeForCounts(buf) - AIOContinuousBufNumberChannels(buf) ) - count ) < datasize ) {
-                bytes = ((AIOContinuousBuf_BufSizeForCounts(buf) - AIOContinuousBufNumberChannels(buf) ) - count );
-            }
+            bytes = ( AIOContinuousBuf_BufSizeForCounts(buf) - buf->fifo->refsize - count < datasize ? AIOContinuousBuf_BufSizeForCounts(buf) - buf->fifo->refsize - count : bytes );
 
             int tmp = buf->fifo->PushN( buf->fifo, (uint16_t*)data, bytes / sizeof(unsigned short));
 
