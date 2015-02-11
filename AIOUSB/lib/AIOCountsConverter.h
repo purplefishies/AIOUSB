@@ -11,6 +11,7 @@
 #define _AIO_COUNTS_CONVERTER_H
 
 #include "AIOTypes.h"
+#include "ADCConfigBlock.h"
 #include "AIOContinuousBuffer.h"
 #include "AIOFifo.h"
 
@@ -37,13 +38,17 @@ typedef struct aio_counts_converter {
 } AIOCountsConverter;
 
 
-PUBLIC_EXTERN AIOCountsConverter *NewAIOCountsConverter( void *buf, unsigned num_channels, AIOGainRange *ranges, unsigned num_oversamples,unsigned unit_size  );
+PUBLIC_EXTERN AIOCountsConverter *NewAIOCountsConverterWithBuffer( void *buf, unsigned num_channels, AIOGainRange *ranges, unsigned num_oversamples,unsigned unit_size  );
+PUBLIC_EXTERN AIOCountsConverter *NewAIOCountsConverter( unsigned num_channels, AIOGainRange *ranges, unsigned num_oversamples,unsigned unit_size  );
 PUBLIC_EXTERN AIOCountsConverter *NewAIOCountsConverterFromAIOContinuousBuf( void *buf);
 PUBLIC_EXTERN void DeleteAIOCountsConverter( AIOCountsConverter *ccv );
 PUBLIC_EXTERN AIORET_TYPE AIOCountsConverterConvertNScans( AIOCountsConverter *ccv, int num_scans );
 PUBLIC_EXTERN AIORET_TYPE AIOCountsConverterConvertAllAvailableScans( AIOCountsConverter *ccv );
 PUBLIC_EXTERN AIORET_TYPE AIOCountsConverterConvert( AIOCountsConverter *cc, void *tobuf, void *frombuf, unsigned num_bytes );
 PUBLIC_EXTERN AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, void *tobuf, void *frombuf , unsigned num_bytes );
+
+PUBLIC_EXTERN AIOGainRange* NewAIOGainRangeFromADCConfigBlock( ADCConfigBlock *adc );
+PUBLIC_EXTERN void  DeleteAIOGainRange( AIOGainRange* );
 
 #ifdef __aiousb_cplusplus
 }

@@ -57,17 +57,15 @@ int main( int argc, char **argv ) {
             nameSize = MAX_NAME_SIZE;
             result = QueryDeviceInfo( deviceIndex, &productID, &nameSize, name, &numDIOBytes, &numCounters );
             if( result == AIOUSB_SUCCESS ) {
-                if(
-                   productID >= USB_AI16_16A
-                   && productID <= USB_AIO12_128E
-                   ) {
-                    // found a USB-AI16-16A family device
-                    deviceFound = true;
+                if( productID >= USB_AI16_16A && productID <= USB_AIO12_128E ) {
+                    deviceFound = true;                    // found a USB-AI16-16A family device
                     break;
                 }
             } else
-                printf( "Error '%s' querying device at index %lu\n"
-                        , AIOUSB_GetResultCodeAsString( result ), deviceIndex );
+                printf( "Error '%s' querying device at index %lu\n", 
+                        AIOUSB_GetResultCodeAsString( result ), 
+                        deviceIndex 
+                        );
         }
         deviceIndex++;
         deviceMask >>= 1;

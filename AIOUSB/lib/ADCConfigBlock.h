@@ -10,13 +10,11 @@ namespace AIOUSB
 {
 #endif
 
-
-
 typedef struct aio_usb_driver AIOUSBDevice ;
 
 typedef struct mux_settings {
-    int ADCChannelsPerGroup;
-    int ADCMUXChannels;
+    unsigned long ADCChannelsPerGroup;
+    unsigned long ADCMUXChannels;
     AIOUSB_BOOL defined;
 } ADCMuxSettings;
 

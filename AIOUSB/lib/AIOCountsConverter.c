@@ -15,7 +15,25 @@
 namespace AIOUSB {
 #endif 
 
-AIOCountsConverter *NewAIOCountsConverter( void *buf, unsigned num_channels, AIOGainRange *ranges, unsigned num_oversamples, unsigned unit_size  ) {
+/*----------------------------------------------------------------------------*/
+AIOCountsConverter *NewAIOCountsConverterWithBuffer( void *buf, 
+                                                     unsigned num_channels, 
+                                                     AIOGainRange *ranges, 
+                                                     unsigned num_oversamples, 
+                                                     unsigned unit_size  
+                                                     ) 
+{
+    AIOCountsConverter *tmp = NewAIOCountsConverter( num_channels, ranges, num_oversamples , unit_size );
+    if (!tmp ) 
+        return NULL;
+
+    tmp->buf              = buf;
+
+    return tmp;
+}
+
+/*----------------------------------------------------------------------------*/
+AIOCountsConverter *NewAIOCountsConverter( unsigned num_channels, AIOGainRange *ranges, unsigned num_oversamples, unsigned unit_size  ) {
     AIOCountsConverter *tmp = (AIOCountsConverter *)malloc( sizeof(struct aio_counts_converter) );
     if (!tmp ) 
         return NULL;
@@ -23,37 +41,38 @@ AIOCountsConverter *NewAIOCountsConverter( void *buf, unsigned num_channels, AIO
     tmp->num_channels     = num_channels;
     tmp->gain_ranges      = ranges; /* Gain ranges should be same length as num_channels */
     tmp->unit_size        = unit_size;
-    tmp->buf              = buf;
     tmp->Convert          = AIOCountsConverterConvert;
     tmp->ConvertFifo      = AIOCountsConverterConvertFifo;
-
     return tmp;
 }
 
-
-
+/*----------------------------------------------------------------------------*/
 void DeleteAIOCountsConverter( AIOCountsConverter *ccv )
 {
     free(ccv);
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOCountsConverterConvertNScans( AIOCountsConverter *ccv, int num_scans )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     return retval;
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOCountsConverterConvertAllAvailableScans( AIOCountsConverter *ccv )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     return retval;
 }
 
+/*----------------------------------------------------------------------------*/
 double Convert( AIOGainRange range, unsigned short sum )
 {
     return ((double)(range.max - range.min)*sum )/ ((( unsigned short )-1)+1) + range.min;
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, void *tobufptr, void *frombufptr , unsigned num_bytes )
 {
     AIOFifoVolts *tofifo     = (AIOFifoVolts*)tobufptr;
@@ -104,6 +123,18 @@ AIORET_TYPE AIOCountsConverterConvert( AIOCountsConverter *cc, void *to_buf, voi
     return count;
 }
 
+PUBLIC_EXTERN AIOGainRange* NewAIOGainRangeFromADCConfigBlock( ADCConfigBlock *adc )
+{
+    assert(adc);
+    return NULL;
+}
+
+PUBLIC_EXTERN void DeleteAIOGainRange( AIOGainRange* agr )
+{
+    free(agr);
+}
+
+
 #ifdef __cplusplus
 }
 #endif
@@ -125,7 +156,7 @@ using namespace AIOUSB;
 TEST(Initialization,BasicInit )
 {
     unsigned short *counts = (unsigned short *)malloc(2000);
-    AIOCountsConverter *cc = NewAIOCountsConverter( counts, 16, NULL, 20 , sizeof(unsigned short)  );
+    AIOCountsConverter *cc = NewAIOCountsConverterWithBuffer( counts, 16, NULL, 20 , sizeof(unsigned short)  );
 
     DeleteAIOCountsConverter(cc);
 }
@@ -149,7 +180,7 @@ TEST(Initialization,Callback )
         ranges[i].min = -10.0;
     }
 
-    AIOCountsConverter *cc = NewAIOCountsConverter( from_buf, num_channels, ranges, num_oversamples , sizeof(unsigned short)  );
+    AIOCountsConverter *cc = NewAIOCountsConverterWithBuffer( from_buf, num_channels, ranges, num_oversamples , sizeof(unsigned short)  );
     
     for ( int i = 0; i < total_size; i++ )
         from_buf[i] = (((unsigned short)-1)+1) / 2;
@@ -190,7 +221,7 @@ TEST(Composite,FifoWriting )
     for ( int i = 0; i < total_size; i++ )
         from_buf[i] = (((unsigned short)-1)+1) / 2;
 
-    AIOCountsConverter *cc = NewAIOCountsConverter( from_buf, num_channels, ranges, num_oversamples , sizeof(unsigned short)  );
+    AIOCountsConverter *cc = NewAIOCountsConverterWithBuffer( from_buf, num_channels, ranges, num_oversamples , sizeof(unsigned short)  );
 
     AIOFifoCounts *infifo = NewAIOFifoCounts( (unsigned)num_channels*(num_oversamples+1)*num_scans );
     AIOFifoVolts *outfifo = NewAIOFifoVolts( num_channels*(num_oversamples+1)*num_scans );

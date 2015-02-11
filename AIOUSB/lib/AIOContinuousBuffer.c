@@ -22,6 +22,7 @@
 #include "AIOUSB_Core.h"
 #include "AIODeviceTable.h"
 #include "AIOFifo.h"
+#include "AIOCountsConverter.h"
 
 #ifdef __cplusplus
 namespace AIOUSB {
@@ -516,6 +517,7 @@ AIORET_TYPE AIOContinuousBufGetExitCode( AIOContinuousBuf *buf )
     return buf->exitcode;
 }
 
+/*----------------------------------------------------------------------------*/
 /**
  * @brief returns the number of Scans accross all channels that still 
  *       remain in the buffer
@@ -529,6 +531,7 @@ AIORET_TYPE AIOContinuousBufCountScansAvailable(AIOContinuousBuf *buf)
     return retval;
 }
 
+/*----------------------------------------------------------------------------*/
 /**
  * @brief will read in an integer number of scan counts if there is room.
  * @param buf 
@@ -560,7 +563,7 @@ AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf,
     return retval;
 }
 
-
+/*----------------------------------------------------------------------------*/
 /**
  * @brief will read in an integer number of scan counts if there is room.
  * @param buf 
@@ -1061,7 +1064,6 @@ void *ActualWorkFunction( void *object )
 {
     AIORET_TYPE retval;
     int usbresult;
-    /* sched_yield(); */
     AIOContinuousBuf *buf = (AIOContinuousBuf*)object;
     unsigned long result;
     int bytes;
@@ -1071,6 +1073,19 @@ void *ActualWorkFunction( void *object )
     unsigned char *data   = (unsigned char *)malloc( datasize );
     USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), &result );
 
+#ifdef TESTING
+    AIOGainRange *ranges = (AIOGainRange *)malloc(16*sizeof(AIOGainRange));
+    int num_channels = AIOContinuousBufNumberChannels(buf);
+    int num_oversamples = AIOContinuousBufGetOverSample(buf);
+    int num_scans = AIOContinuousBufGetNumberScansToRead(buf);
+    AIOCountsConverter *cc = NewAIOCountsConverter( num_channels,
+                                                    ranges,
+                                                    num_oversamples,
+                                                    buf->fifo->refsize
+                                                    );
+    AIOFifoCounts *infifo = NewAIOFifoCounts( (unsigned)num_channels*(num_oversamples+1)*num_scans );
+    AIOFifoVolts *outfifo = NewAIOFifoVolts( num_channels*(num_oversamples+1)*num_scans );
+#endif
     if ( result != AIOUSB_SUCCESS ) {
         retval = -result;
         goto out_ActualWorkFunction;
@@ -1087,7 +1102,8 @@ void *ActualWorkFunction( void *object )
 
         AIOUSB_DEVEL("libusb_bulk_transfer returned  %d as usbresult, bytes=%d\n", usbresult , (int)bytes);
         if( bytes ) {
-            retval = AIOContinuousBufCopyData( buf, (unsigned short*)data , (unsigned *)&bytes );
+            /* retval = AIOContinuousBufCopyData( buf, (unsigned short*)data , (unsigned *)&bytes ); */
+            
         } else if( usbresult < 0  && usbfail < usbfail_count ) {
             AIOUSB_ERROR("Error with usb: %d\n", (int)usbresult );
             usbfail ++;
