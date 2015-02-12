@@ -80,6 +80,7 @@ AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, void *tobufpt
     int allowed_scans = num_bytes / ((cc->num_oversamples+1) * cc->num_channels * cc->unit_size );
     AIORET_TYPE count = 0;
     double tmpvolt;
+    int pos;
     unsigned short *tmpbuf = (unsigned short *)malloc( allowed_scans * cc->num_channels * cc->unit_size * (1+cc->num_oversamples));
 
     fromfifo->PopN( fromfifo, tmpbuf, allowed_scans*cc->num_channels*(1+cc->num_oversamples));
@@ -88,7 +89,10 @@ AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, void *tobufpt
         for ( unsigned ch = 0; ch < cc->num_channels; ch ++ , tobuf_pos ++ ) { 
             unsigned sum = 0;
             for ( unsigned os = 0; os < cc->num_oversamples + 1; os ++ ) {
-                sum += ((unsigned short *)tmpbuf)[ (scan_count*cc->num_channels) + ch + os ];
+                pos = (scan_count *(cc->num_channels)*(cc->num_oversamples + 1)) + 
+                    ch * ( cc->num_oversamples + 1) + os;
+                /* sum += ((unsigned short *)tmpbuf)[ (scan_count*cc->num_channels) + ch + os ]; */
+                sum += tmpbuf[pos];
                 count += sizeof(unsigned short);
             }
             sum /= (cc->num_oversamples + 1);
@@ -103,6 +107,7 @@ AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, void *tobufpt
 
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOCountsConverterConvert( AIOCountsConverter *cc, void *to_buf, void *from_buf, unsigned num_bytes )
 {
     int allowed_scans = num_bytes / (cc->num_oversamples * cc->num_channels * cc->unit_size );

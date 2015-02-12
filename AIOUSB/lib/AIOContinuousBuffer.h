@@ -50,11 +50,11 @@ typedef struct aio_continuous_buf {
     unsigned usbbuf_size;
     unsigned divisora;
     unsigned divisorb;
-    unsigned _read_pos, _write_pos;
-    /* unsigned totalsize; */
     unsigned basesize;
     unsigned size;
-    unsigned scans_to_read;
+    unsigned num_oversamples;
+    unsigned num_channels;
+    unsigned num_scans;
     unsigned counter_control;
     unsigned timeout;
     AIORET_TYPE exitcode;
@@ -74,6 +74,8 @@ PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex ,
 PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex, unsigned scancounts , unsigned num_channels , AIOUSB_BOOL counts );
 PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels );
 PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex , unsigned scancounts , unsigned num_channels , AIOUSB_BOOL counts  );
+PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufForVolts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels, unsigned num_oversamples );
+
 
 PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long DeviceIndex, unsigned num_channels, unsigned num_scans,
                                                              unsigned unit_size, unsigned num_oversamples );
