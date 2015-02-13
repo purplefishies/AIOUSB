@@ -8,6 +8,7 @@
  */
 
 #include "AIOTypes.h"
+#include "AIOUSB_Core.h"
 #include "AIOCountsConverter.h"
 #include <pthread.h>
 
@@ -91,7 +92,6 @@ AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, void *tobufpt
             for ( unsigned os = 0; os < cc->num_oversamples + 1; os ++ ) {
                 pos = (scan_count *(cc->num_channels)*(cc->num_oversamples + 1)) + 
                     ch * ( cc->num_oversamples + 1) + os;
-                /* sum += ((unsigned short *)tmpbuf)[ (scan_count*cc->num_channels) + ch + os ]; */
                 sum += tmpbuf[pos];
                 count += sizeof(unsigned short);
             }
@@ -128,13 +128,24 @@ AIORET_TYPE AIOCountsConverterConvert( AIOCountsConverter *cc, void *to_buf, voi
     return count;
 }
 
+/*----------------------------------------------------------------------------*/
+
 PUBLIC_EXTERN AIOGainRange* NewAIOGainRangeFromADCConfigBlock( ADCConfigBlock *adc )
 {
-    assert(adc);
-    return NULL;
+    AIOGainRange *tmp = (AIOGainRange *)calloc(16,sizeof(AIOGainRange));
+    if (!tmp )
+        return tmp;
+
+    for ( int i = 0; i < AD_NUM_GAIN_CODE_REGISTERS ; i ++ ) {
+        tmp[i].min = adRanges[ adc->registers[i] ].minVolts;
+        tmp[i].max = adRanges[ adc->registers[i] ].minVolts + adRanges[ adc->registers[i] ].range;
+    }
+
+    return tmp;
 }
 
-PUBLIC_EXTERN void DeleteAIOGainRange( AIOGainRange* agr )
+/*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN void DeleteAIOGainRange( AIOGainRange *agr )
 {
     free(agr);
 }
@@ -148,6 +159,7 @@ PUBLIC_EXTERN void DeleteAIOGainRange( AIOGainRange* agr )
 #ifdef SELF_TEST
 
 #include "AIOUSBDevice.h"
+#include "AIOUSB_Core.h"
 #include "AIOFifo.h"
 #include "gtest/gtest.h"
 #include "tap.h"
@@ -249,6 +261,44 @@ TEST(Composite,FifoWriting )
     }
 }
 
+class AllGainCode : public ::testing::TestWithParam<ADGainCode> {};
+TEST_P( AllGainCode, FromADCConfigBlock )
+{
+    ADConfigBlock cb = {0};
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    ADCConfigBlockInitializeDefault( &cb );
+    ADGainCode gcode = GetParam();
+
+    /* Try several gain codes */
+    for ( int i = 0; i < 16 ; i ++ ) {
+        retval = ADCConfigBlockSetGainCode( &cb, i, gcode );
+        ASSERT_EQ(  0 , retval ) << "Able to set the channel's gain code correctly for channel '" << i << "'" << std::endl;
+
+        int tmp = ADCConfigBlockGetGainCode(&cb, i );
+        ASSERT_EQ( gcode, ADCConfigBlockGetGainCode(&cb, i )) << "Able to get the channel's gain code correctly for channel '" << i << "'" << std::endl;
+    }
+
+    /* Verify that we can copy these settings to the gaincode */
+    AIOGainRange *tmpvals = NewAIOGainRangeFromADCConfigBlock( &cb );
+    ASSERT_TRUE( tmpvals );
+
+    for ( int i = 0; i < 16 ; i ++ ) {
+        ASSERT_EQ( (adRanges[ gcode ].minVolts), tmpvals[i].min ) << "Able to get the Min value";
+        ASSERT_EQ( (adRanges[ gcode ].minVolts + adRanges[ gcode ].range), tmpvals[i].max ) << "Able to get the Max value";
+    }
+
+    DeleteAIOGainRange( tmpvals );
+}
+
+INSTANTIATE_TEST_CASE_P( TestRangeConversion, AllGainCode, ::testing::Values( AD_GAIN_CODE_0_10V,
+                                                                              AD_GAIN_CODE_10V,  
+                                                                              AD_GAIN_CODE_0_5V, 
+                                                                              AD_GAIN_CODE_5V,   
+                                                                              AD_GAIN_CODE_0_2V, 
+                                                                              AD_GAIN_CODE_2V,   
+                                                                              AD_GAIN_CODE_0_1V, 
+                                                                              AD_GAIN_CODE_1V    
+                                                                              ));
 
 
 int main(int argc, char *argv[] )

@@ -187,7 +187,7 @@ unsigned long ReadConfigBlock(unsigned long DeviceIndex,
         if ( result != AIOUSB_SUCCESS )
             return result;
 
-        ADCConfigBlockInitialize( &configBlock, configBlock.device );
+        ADCConfigBlockInitializeFromAIOUSBDevice( &configBlock, configBlock.device );
 
         if( configBlock.testing != AIOUSB_TRUE ) {
             int bytesTransferred = usb->usb_control_transfer(usb,
@@ -1077,10 +1077,10 @@ unsigned long ADC_SetConfig(
      }
 
      ADConfigBlock configBlock;
-     configBlock.device = deviceDesc;
-     configBlock.size   = deviceDesc->ConfigBytes;
-
-     memcpy(configBlock.registers, pConfigBuf, configBlock.size);
+     ADCConfigBlockCopy( &configBlock, &deviceDesc->cachedConfigBlock );
+     /* configBlock.device = deviceDesc; */
+     /* configBlock.size   = deviceDesc->ConfigBytes; */
+     /* memcpy(configBlock.registers, pConfigBuf, configBlock.size); */
      
      if( ! adcblock_valid_size( &configBlock ) ) {
           result = AIOUSB_ERROR_INVALID_ADCONFIG_CHANNEL_SETTING;

@@ -200,7 +200,7 @@ int USBDeviceFetchADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock )
     if ( !usb || !configBlock )
         return -AIOUSB_ERROR_INVALID_PARAMETER;
 
-    ADCConfigBlockInitialize( &config , &dev );
+    ADCConfigBlockInitializeFromAIOUSBDevice( &config , &dev );
     config.timeout = configBlock->timeout;
 
 

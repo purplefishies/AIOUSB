@@ -1259,7 +1259,7 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
     }
 
     /* Clear up the CachedConfigBlock */
-    ADCConfigBlockInitialize( &device->cachedConfigBlock , device );
+    ADCConfigBlockInitializeFromAIOUSBDevice( &device->cachedConfigBlock , device );
     device->cachedConfigBlock.size                              = device->ConfigBytes;
     device->cachedConfigBlock.testing                           = device->testing;
     device->cachedConfigBlock.mux_settings.ADCMUXChannels       = device->ADCMUXChannels;

@@ -67,7 +67,7 @@ AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long DeviceIndex,
     tmp->size             = num_channels * num_scans * (1+num_oversamples) * unit_size;
     tmp->buffer           = (AIOBufferType *)malloc( tmp->size*unit_size );
     tmp->bufunitsize      = unit_size;
-    /* tmp->fifo             = NewAIOFifoCounts( num_channels * num_scans * (1+num_oversamples) * unit_size / sizeof(uint16_t) ); */
+
     tmp->fifo             = NewAIOFifoCounts( num_channels * num_scans * unit_size / sizeof(uint16_t) );
     tmp->num_oversamples  = num_oversamples;
     tmp->mask             = NewAIOChannelMask( num_channels );
@@ -91,8 +91,6 @@ AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long DeviceIndex,
     tmp->exitcode       = 0;
     tmp->usbbuf_size    = 128*512;
 
-    /* tmp->_read_pos    = 0; */
-    /* tmp->_write_pos   = 0; */
     tmp->DeviceIndex  = DeviceIndex;
 
     /* for acquisition */
@@ -231,7 +229,7 @@ AIORET_TYPE AIOContinuousBufInitADCConfigBlock( AIOContinuousBuf *buf, unsigned 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufInitConfiguration(  AIOContinuousBuf *buf ) 
 {
-    ADCConfigBlock config;
+    ADCConfigBlock config = {0};
     unsigned long tmp;
     AIORET_TYPE retval = AIOUSB_SUCCESS;
 
@@ -242,12 +240,10 @@ AIORET_TYPE AIOContinuousBufInitConfiguration(  AIOContinuousBuf *buf )
         return -result;
     }
 
-    ADCConfigBlockInit( &config, deviceDesc, deviceDesc->ConfigBytes  );
+    /* ADCConfigBlockInit( &config, deviceDesc, deviceDesc->ConfigBytes  ); */
+    ADCConfigBlockCopy( &config, AIOUSBDeviceGetADCConfigBlock( deviceDesc ) );
 
-    config.testing = buf->testing;
     AIOContinuousBufSendPreConfig( buf );
-
-    /* tmp = AIOUSB_SetConfigBlock( AIOContinuousBufGetDeviceIndex( buf ), &config ); */
 
     tmp = ADC_SetConfig( AIOContinuousBufGetDeviceIndex( buf ), config.registers, &config.size );
     if ( tmp != AIOUSB_SUCCESS ) {
@@ -1068,37 +1064,36 @@ AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf,
                                  )
 {
     AIORET_TYPE usbresult;
-    uint16_t *counts = (uint16_t*)data;
-    int number_scans = datasize / ( AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOverSample(buf)+1)*sizeof(uint16_t));
-    *bytes = 0;
-    int pos;
-    for ( int scan_num = 0; scan_num < number_scans; scan_num ++ ) { 
 
-        for ( int channel_count = 0; channel_count < AIOContinuousBufNumberChannels(buf); channel_count ++ ) {
+    usbresult = usb->usb_bulk_transfer( usb,
+                                        0x86,
+                                        data,
+                                        datasize,
+                                        bytes,
+                                        timeout
+                                        );
 
-            for ( int os = 0; os < AIOContinuousBufGetOverSample(buf)+1 ; os ++ ) { 
-                pos = (scan_num *(AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOverSample(buf)+1))) + 
-                    channel_count * ( AIOContinuousBufGetOverSample(buf)+1 ) + os;
-                counts[pos] =  (uint16_t)(65536 / (AIOContinuousBufNumberChannels(buf)-1)) * channel_count;
-                *bytes += 2;
-            }
-        }
-    }
-    usbresult = number_scans*AIOContinuousBufNumberChannels(buf)*( AIOContinuousBufGetOverSample(buf)+1 )*sizeof(uint16_t);
     return usbresult;
-
-#if 0
-    AIORET_TYPE usbresult = usb->usb_bulk_transfer( usb,
-                                                    0x86,
-                                                    data,
-                                                    datasize,
-                                                    bytes,
-                                                    timeout
-                                                    );
-#endif
-    return usbresult;
-
 }
+
+/* #if 0 */
+/*     uint16_t *counts = (uint16_t*)data; */
+/*     int number_scans = datasize / ( AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOverSample(buf)+1)*sizeof(uint16_t)); */
+/*     *bytes = 0; */
+/*     int pos; */
+/*     for ( int scan_num = 0; scan_num < number_scans; scan_num ++ ) {  */
+/*         for ( int channel_count = 0; channel_count < AIOContinuousBufNumberChannels(buf); channel_count ++ ) { */
+/*             for ( int os = 0; os < AIOContinuousBufGetOverSample(buf)+1 ; os ++ ) {  */
+/*                 pos = (scan_num *(AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOverSample(buf)+1))) +  */
+/*                     channel_count * ( AIOContinuousBufGetOverSample(buf)+1 ) + os; */
+/*                 counts[pos] =  (uint16_t)(65536 / (AIOContinuousBufNumberChannels(buf)-1)) * channel_count; */
+/*                 *bytes += 2; */
+/*             } */
+/*         } */
+/*     } */
+/*     usbresult = number_scans*AIOContinuousBufNumberChannels(buf)*( AIOContinuousBufGetOverSample(buf)+1 )*sizeof(uint16_t); */
+/*     return usbresult; */
+/* #endif */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -1119,23 +1114,38 @@ void *ConvertCountsToVoltsFunction( void *object )
     unsigned tmpdatasize;
     int usbfail = 0, usbfail_count = 5;
     unsigned count = 0;
-
-    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), &result );
-    unsigned char *data   = (unsigned char *)malloc( datasize );
-
-
-    AIOGainRange *ranges = (AIOGainRange *)malloc(16*sizeof(AIOGainRange));
-    for ( int i = 0; i < 16; i ++ ) { 
-        ranges[i].max = 10.0;
-        ranges[i].min = -10.0;
-    }
     int num_channels = AIOContinuousBufNumberChannels(buf);
     int num_oversamples = AIOContinuousBufGetOverSample(buf);
     int num_scans = AIOContinuousBufGetNumberScansToRead(buf);
-
     AIOFifoCounts *infifo = NewAIOFifoCounts( (unsigned)num_channels*(num_oversamples+1)*num_scans );
     AIOFifoVolts *outfifo = (AIOFifoVolts*)buf->fifo;
-    AIOCountsConverter *cc = NewAIOCountsConverterWithBuffer( (unsigned short*)data, num_channels, ranges, num_oversamples , sizeof(unsigned short)  );
+
+
+    AIOGainRange *ranges;
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), &result );
+    unsigned char *data   = (unsigned char *)malloc( datasize );
+    AIOCountsConverter *cc;
+    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), &result );
+    if ( result != AIOUSB_SUCCESS )
+        goto out_ConvertCountsToVoltsFunction;
+    AIOUSBDeviceGetADCConfigBlock( dev );
+
+    /* AIOGainRange *ranges = (AIOGainRange *)malloc(16*sizeof(AIOGainRange)); */
+    /* for ( int i = 0; i < 16; i ++ ) {  */
+    /*     ranges[i].max = 10.0; */
+    /*     ranges[i].min = -10.0; */
+    /* } */
+    ranges = NewAIOGainRangeFromADCConfigBlock( AIOUSBDeviceGetADCConfigBlock( dev ) );
+    if ( !ranges )
+        goto out_ConvertCountsToVoltsFunction;
+
+    cc = NewAIOCountsConverterWithBuffer( (unsigned short*)data, num_channels, ranges, num_oversamples , sizeof(unsigned short)  );
+    if ( !cc ) 
+        goto out_ConvertCountsToVoltsFunction;
+    /* AIOGainRange *ranges = (AIOGainRange *)malloc(16*sizeof(AIOGainRange)); */
+    /* for ( int i = 0 ; i < 16 ; i ++ ) { */
+    /*     printf("do something\n"); */
+    /* } */
 
     /**
      * @brief Load the fifo with values
@@ -1189,43 +1199,15 @@ void *ConvertCountsToVoltsFunction( void *object )
             } 
         }
     }
-
+    out_ConvertCountsToVoltsFunction:
+    DeleteAIOFifoCounts(infifo);
+    DeleteAIOCountsConverter( cc );
 
     free(data);
     AIOUSB_DEVEL("Stopping\n");
     AIOContinuousBufCleanup( buf );
     pthread_exit((void*)&retval);
 }
-
-
-/* #if 0 */
-/*     while ( buf->status == RUNNING ) { */
-/*         usbresult = usb->usb_bulk_transfer( usb, */
-/*                                             0x86, */
-/*                                             data, */
-/*                                             datasize, */
-/*                                             &bytes, */
-/*                                             3000 */
-/*                                             ); */
-/*         AIOUSB_DEVEL("libusb_bulk_transfer returned  %d as usbresult, bytes=%d\n", usbresult , (int)bytes); */
-/*         if (  bytes ) { */
-/*             /\* retval = AIOContinuousBufCopyData( buf, (unsigned short*)data , (unsigned *)&bytes ); *\/ */
-/*         } else if (  usbresult < 0  && usbfail < usbfail_count ) { */
-/*             AIOUSB_ERROR("Error with usb: %d\n", (int)usbresult ); */
-/*             usbfail ++; */
-/*         } else { */
-/*             if (  usbfail >= usbfail_count  ){ */
-/*                 AIOUSB_ERROR("Erroring out. too many usb failures: %d\n", usbfail_count ); */
-/*                 retval = -(AIORET_TYPE)LIBUSB_RESULT_TO_AIOUSB_RESULT(usbresult); */
-/*                 AIOContinuousBufLock(buf); */
-/*                 buf->status = TERMINATED; */
-/*                 AIOContinuousBufUnlock(buf); */
-/*                 buf->exitcode = -(AIORET_TYPE)LIBUSB_RESULT_TO_AIOUSB_RESULT(usbresult); */
-/*             }  */
-/*         } */
-/*     } */
-/* #endif */ 
-
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE StartStreaming( AIOContinuousBuf *buf )

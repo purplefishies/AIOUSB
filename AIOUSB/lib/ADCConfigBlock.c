@@ -22,6 +22,9 @@ AIORET_TYPE ADCConfigBlockCopy( ADCConfigBlock *to, ADCConfigBlock *from )
     to->device   = from->device;
     to->size     = from->size ;
     to->testing  = from->testing;
+    to->timeout  = from->timeout;
+
+    memcpy( &to->mux_settings, &from->mux_settings, sizeof(ADCMuxSettings));
 
     memcpy( to->registers, from->registers, AD_MAX_CONFIG_REGISTERS +1 );
 
@@ -78,10 +81,29 @@ AIORET_TYPE ADCConfigBlockSetDevice( ADCConfigBlock *obj, AIOUSBDevice *dev )
 }
 
 /*----------------------------------------------------------------------------*/
+AIORET_TYPE ADCConfigBlockInitializeDefault( ADCConfigBlock *config )
+{
+    assert(config);
+    if ( !config )
+        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+
+    config->device        = NULL;
+    config->size          = 20;
+    config->testing       = AIOUSB_FALSE;
+    config->timeout       = 1000;
+
+    config->mux_settings.ADCMUXChannels       = 1024;
+    config->mux_settings.ADCChannelsPerGroup  = 1;
+
+    memset(config->registers,0, AD_CONFIG_REGISTERS );
+    return AIOUSB_SUCCESS;
+}
+
+/*----------------------------------------------------------------------------*/
 /**
  * @brief initializes an ADCConfigBlock using parameters from the AIOUSBDevice
  */
-AIORET_TYPE ADCConfigBlockInitialize( ADCConfigBlock *config , AIOUSBDevice *dev) 
+AIORET_TYPE ADCConfigBlockInitializeFromAIOUSBDevice( ADCConfigBlock *config , AIOUSBDevice *dev) 
 {
     assert(config);
     assert(dev);
@@ -97,6 +119,7 @@ AIORET_TYPE ADCConfigBlockInitialize( ADCConfigBlock *config , AIOUSBDevice *dev
 
     config->mux_settings.ADCMUXChannels       = dev->ADCMUXChannels;
     config->mux_settings.ADCChannelsPerGroup  = dev->ADCChannelsPerGroup;
+    config->mux_settings.defined              = AIOUSB_TRUE;
 
     memset(config->registers,0, AD_CONFIG_REGISTERS );
     return AIOUSB_SUCCESS;
@@ -132,6 +155,7 @@ int _adcblock_valid_channel_settings(AIORET_TYPE in, ADCConfigBlock *config , in
 }
 
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockSetSize( ADCConfigBlock *obj, unsigned size )
 {
     if ( !obj )
@@ -141,6 +165,7 @@ AIORET_TYPE ADCConfigBlockSetSize( ADCConfigBlock *obj, unsigned size )
     return AIOUSB_SUCCESS;
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockGetSize( const ADCConfigBlock *obj )
 {
     if ( !obj )
@@ -170,10 +195,6 @@ AIORET_TYPE ADCConfigBlockSetDebug( ADCConfigBlock *obj, AIOUSB_BOOL debug )
     obj->debug = debug;
     return result;
 }
-
-
-
-
 
 /*----------------------------------------------------------------------------*/
 unsigned char *ADCConfigBlockGetRegisters( ADCConfigBlock *config )
@@ -208,7 +229,6 @@ AIORET_TYPE ADCConfigBlockSetRangeSingle( ADCConfigBlock *config, unsigned long 
     return result;
 }
 
-
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockSetRegister( ADCConfigBlock *config, unsigned reg, unsigned char value )
 {
@@ -218,7 +238,6 @@ AIORET_TYPE ADCConfigBlockSetRegister( ADCConfigBlock *config, unsigned reg, uns
     config->registers[reg] = value;
     return AIOUSB_SUCCESS;
 }
-
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockGetTesting( const ADCConfigBlock *obj) 
@@ -237,7 +256,6 @@ AIORET_TYPE ADCConfigBlockGetDebug( const ADCConfigBlock *obj)
         return -AIOUSB_ERROR_INVALID_ADCCONFIG;
     return obj->debug;
 }
-
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -266,7 +284,6 @@ AIORET_TYPE ADCConfigBlockInit(ADCConfigBlock *config, AIOUSBDevice *deviceDesc,
     
     return AIOUSB_SUCCESS;
 }
-
 
 /*----------------------------------------------------------------------------*/
 void ADC_VerifyAndCorrectConfigBlock( ADCConfigBlock *configBlock , AIOUSBDevice *deviceDesc  )
@@ -338,16 +355,12 @@ AIORET_TYPE  ADCConfigBlockGetGainCode(const ADCConfigBlock *config, unsigned ch
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockSetGainCode(ADCConfigBlock *config, unsigned channel, unsigned char gainCode)
 {
-    /* if (!config || !config->device || !config->size )  */
     if (!config || !config->size )
         return -AIOUSB_ERROR_INVALID_DATA;
     if (!VALID_ENUM(ADGainCode,gainCode ) )
         return -AIOUSB_ERROR_INVALID_PARAMETER;
 
     AIORET_TYPE result = AIOUSB_SUCCESS;
-    /* AIOUSBDevice *deviceDesc = ADCConfigBlockGetAIOUSBDevice( config , &result ); */
-    /* if ( result != AIOUSB_SUCCESS ) */
-    /*     return -abs(result); */
 
     /* if ( !deviceDesc->ADCChannelsPerGroup  ) */
     /*     return  -AIOUSB_ERROR_INVALID_DEVICE_SETTING; */
@@ -359,7 +372,7 @@ AIORET_TYPE ADCConfigBlockSetGainCode(ADCConfigBlock *config, unsigned channel, 
     if (channel < AD_MAX_CHANNELS && channel < config->mux_settings.ADCMUXChannels) {
         int reg = AD_CONFIG_GAIN_CODE + channel / config->mux_settings.ADCChannelsPerGroup;
 
-        if ( reg > AD_NUM_GAIN_CODES )
+        if ( reg > AD_NUM_GAIN_CODE_REGISTERS )
             return -AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING;
 
         config->registers[ reg ] = (config->registers[ reg ] & 
@@ -370,7 +383,7 @@ AIORET_TYPE ADCConfigBlockSetGainCode(ADCConfigBlock *config, unsigned channel, 
     return result;
 }
 
-
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockSetEndChannel( ADCConfigBlock *config, unsigned char endChannel  )
 {
     if (!config || !config->size )
@@ -408,8 +421,6 @@ AIORET_TYPE ADCConfigBlockSetScanRange(ADCConfigBlock *config, unsigned startCha
     if (!config || !config->size )
         return -AIOUSB_ERROR_INVALID_ADCCONFIG;
 
-    /* AIOUSBDevice * deviceDesc = ( AIOUSBDevice* )config->device; */
-    /* unsigned adcmux_channels = ( deviceDesc ? deviceDesc->ADCMUXChannels : ( config->mux_settings.defined ? config->mux_settings.ADCMUXChannels : 0 )); */
     unsigned adcmux_channels = ( config->mux_settings.defined ? config->mux_settings.ADCMUXChannels : AD_MAX_CHANNELS );
 
     if ( endChannel < AD_MAX_CHANNELS && 
@@ -417,13 +428,11 @@ AIORET_TYPE ADCConfigBlockSetScanRange(ADCConfigBlock *config, unsigned startCha
          startChannel <= endChannel
         ) {
         if (config->size == AD_MUX_CONFIG_REGISTERS) {
-            /*
-             * this board has a MUX, so support more channels
-             */
+            /*<< this board has a MUX, so support more channels */
             config->registers[ AD_CONFIG_START_END ] = ( unsigned char )((endChannel << 4) | (startChannel & 0x0f));
             config->registers[ AD_CONFIG_MUX_START_END ] = ( unsigned char )((endChannel & 0xf0) | ((startChannel >> 4) & 0x0f));
         } else {
-            /*
+            /**
              * this board doesn't have a MUX, so support base
              * number of channels
              */
@@ -467,11 +476,11 @@ AIORET_TYPE ADCConfigBlockGetStartChannel( const ADCConfigBlock *config)
     if ( !config || config->size == 0 )
         return -AIOUSB_ERROR_INVALID_ADCCONFIG;
 
-
-    if (config->size == AD_MUX_CONFIG_REGISTERS)
+    if (config->size == AD_MUX_CONFIG_REGISTERS) {
         result = (AIORET_TYPE)((config->registers[ AD_CONFIG_MUX_START_END ] & 0x0f) << 4) | (config->registers[ AD_CONFIG_START_END ] & 0xf);
-    else
+    } else {
         result  = (AIORET_TYPE)(config->registers[ AD_CONFIG_START_END ] & 0xf);
+    }
  
     return result;
 }
@@ -1021,7 +1030,7 @@ TEST(ADCConfigBlock, YAMLRepresentation)
     AIOUSBDevice dev;
     AIOUSBDeviceInitializeWithProductID( &dev, USB_AIO16_16A );
 
-    ADCConfigBlockInitialize( &config, &dev );
+    ADCConfigBlockInitializeFromAIOUSBDevice( &config, &dev );
     /* Some random configurations */
 
     /* set the channels 3-5 to be 0-2V */
@@ -1047,7 +1056,7 @@ TEST(ADCConfigBlock, JSONRepresentation)
     AIOUSBDevice dev;
     AIOUSBDeviceInitializeWithProductID( &dev, USB_AIO16_16A );
 
-    ADCConfigBlockInitialize( &config, &dev );
+    ADCConfigBlockInitializeFromAIOUSBDevice( &config, &dev );
     /* Some random configurations */
 
     /* set the channels 3-5 to be 0-2V */
@@ -1083,9 +1092,8 @@ TEST(ADCConfigBlock,CopyConfigs )
 
     AIOUSBDeviceInitializeWithProductID( &dev, USB_AIO16_16A );
 
-
-    ADCConfigBlockInitialize( &from , &dev);
-    ADCConfigBlockInitialize( &to , &dev );
+    ADCConfigBlockInitializeFromAIOUSBDevice( &from , &dev);
+    ADCConfigBlockInitializeFromAIOUSBDevice( &to , &dev );
    
     /* verify copying the test state */
     from.testing = AIOUSB_TRUE;
@@ -1108,7 +1116,7 @@ TEST( ADCConfigBlock, CanSetDevice )
     ADCConfigBlock tmp;
     AIOUSBDevice device;
 
-    ADCConfigBlockInitialize( &tmp , &device );
+    ADCConfigBlockInitializeFromAIOUSBDevice( &tmp , &device );
     ADCConfigBlockSetTesting( &tmp, AIOUSB_TRUE );
     ADCConfigBlockSetDevice( &tmp, &device   ) ;
 

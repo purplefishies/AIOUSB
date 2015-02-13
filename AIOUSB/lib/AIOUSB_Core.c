@@ -763,7 +763,7 @@ AIORESULT AIOUSB_InitConfigBlock(ADConfigBlock *config, unsigned long DeviceInde
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
 
-    ADCConfigBlockInitialize( config , deviceDesc );
+    ADCConfigBlockInitializeFromAIOUSBDevice( config , deviceDesc );
 
     return result;
 }

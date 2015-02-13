@@ -14,6 +14,7 @@
 #include "ADCConfigBlock.h"
 #include "AIOContinuousBuffer.h"
 #include "AIOFifo.h"
+#include "ADCConfigBlock.h"
 
 
 #ifdef __aiousb_cplusplus

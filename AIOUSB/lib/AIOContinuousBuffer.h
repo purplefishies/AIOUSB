@@ -186,6 +186,8 @@ PUBLIC_EXTERN AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf 
 
 AIORET_TYPE AIOContinuousBufCleanup( AIOContinuousBuf *buf );
 
+
+
 #ifdef __aiousb_cplusplus
 }
 #endif
