@@ -21,12 +21,12 @@ typedef struct mux_settings {
 typedef struct adc_config_block {
     AIOUSBDevice *device; /**< Pointer to the device Descriptor */
     unsigned long size;
-    AIOUSB_BOOL testing; /**< For making Unit tests that don't talk to hardware */
     unsigned char registers[ AD_MAX_CONFIG_REGISTERS +1];
     unsigned timeout;
     ADCMuxSettings mux_settings;
     AIOUSB_BOOL discardFirstSample;
     AIOUSB_BOOL debug;
+    AIOUSB_BOOL testing; /**< For making Unit tests that don't talk to hardware */
 } ADCConfigBlock;
 
 typedef ADCConfigBlock ADConfigBlock;

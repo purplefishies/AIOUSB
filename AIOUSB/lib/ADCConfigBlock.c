@@ -1047,7 +1047,7 @@ TEST(ADCConfigBlock, YAMLRepresentation)
     /* Set external triggered */
     ADCConfigBlockSetScanRange( &config, 0, 15 );
 
-    EXPECT_STREQ( ADCConfigBlockToYAML( &config ), "---\nadcconfig:\n  channels:\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-2V\n    - gain: 0-2V\n    - gain: 0-2V\n    - gain: +-5V\n    - gain: +-5V\n    - gain: +-5V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n  calibration: Normal\n  trigger:\n     reference: sw\n     edge: rising-edge\n     refchannel: single-channel\n  start_channel: 0\n  end_channel: 15\n  oversample: 201\n  timeout: 1000\n" );
+    EXPECT_STREQ( ADCConfigBlockToYAML( &config ), "---\nadcconfig:\n  channels:\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-2V\n    - gain: 0-2V\n    - gain: 0-2V\n    - gain: +-5V\n    - gain: +-5V\n    - gain: +-5V\n    - gain: +-5V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n  calibration: Normal\n  trigger:\n     reference: sw\n     edge: rising-edge\n     refchannel: single-channel\n  start_channel: 0\n  end_channel: 15\n  oversample: 201\n  timeout: 1000\n" );
 }
 
 TEST(ADCConfigBlock, JSONRepresentation)
@@ -1072,12 +1072,12 @@ TEST(ADCConfigBlock, JSONRepresentation)
     /* Set external triggered */
     ADCConfigBlockSetScanRange( &config, 0, 15 );
 
-    EXPECT_STREQ("{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\",\"oversample\":\"201\",\"timeout\":\"1000\"}}", 
+    EXPECT_STREQ("{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\",\"oversample\":\"201\",\"timeout\":\"1000\"}}", 
                  ADCConfigBlockToJSON( &config ) );
 
 
     ADCConfigBlockSetOversample( &config, 102 );
-    EXPECT_STREQ("{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\",\"oversample\":\"102\",\"timeout\":\"1000\"}}", 
+    EXPECT_STREQ("{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\",\"oversample\":\"102\",\"timeout\":\"1000\"}}", 
                  ADCConfigBlockToJSON( &config ) );
     
 }

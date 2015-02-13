@@ -105,24 +105,20 @@ enum {
 typedef bool AIOUSB_BOOL;
 const bool AIOUSB_FALSE = false;
 const bool AIOUSB_TRUE = true;
-#if defined( ENABLE_BOOL_TYPE )
-typedef bool BOOL;
-const bool FALSE = false;
-const bool TRUE = true;
-#endif
 #else
+
 enum AIOUSB_BOOL_VAL {
     AIOUSB_FALSE                        = 0,
     AIOUSB_TRUE                         = 1
 };
+
 typedef enum AIOUSB_BOOL_VAL AIOUSB_BOOL;
-#if defined( ENABLE_BOOL_TYPE )
-enum BOOL {
-    FALSE                               = 0,
-    TRUE                                = 1
-};
-typedef enum BOOL BOOL;
-#endif
+/* unsigned char AIOUSB_BOOL_VAL */
+/* typedef unsigned char AIOUSB_BOOL; */
+/* AIOUSB_BOOL AIOUSB_FALSE = 0; */
+/* AIOUSB_BOOL AIOUSB_TRUE  = 1; */
+/* typedef enum AIOUSB_BOOL_VAL AIOUSB_BOOL; */
+
 #endif
 
 
