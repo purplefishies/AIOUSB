@@ -987,7 +987,6 @@ void *RawCountsWorkFunction( void *object )
         }
         printf("");
 #else
-
         usbresult = usb->usb_bulk_transfer( usb,
                                             0x86,
                                             data,
@@ -1605,16 +1604,16 @@ AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf )
      * see reference in [USB AIO documentation](http://accesio.com/MANUALS/USB-AIO%20Series.PDF)
      **/
     /* Start the clocks, and need to get going capturing data */
-    if (  (retval = ResetCounters(buf)) != AIOUSB_SUCCESS )
+    if ( (retval = ResetCounters(buf)) != AIOUSB_SUCCESS )
         goto out_AIOContinuousBufCallbackStart;
-    if (  (retval = SetConfig(buf)) != AIOUSB_SUCCESS )
+    if ( (retval = SetConfig(buf)) != AIOUSB_SUCCESS )
         goto out_AIOContinuousBufCallbackStart;
     if ( (retval = CalculateClocks( buf ) ) != AIOUSB_SUCCESS )
         goto out_AIOContinuousBufCallbackStart;
     /* Try a switch */
-    if (  (retval = StartStreaming(buf)) != AIOUSB_SUCCESS )
+    if ( (retval = StartStreaming(buf)) != AIOUSB_SUCCESS )
         goto out_AIOContinuousBufCallbackStart;
-    if (  ( retval = AIOContinuousBufLoadCounters( buf, buf->divisora, buf->divisorb )) != AIOUSB_SUCCESS)
+    if ( ( retval = AIOContinuousBufLoadCounters( buf, buf->divisora, buf->divisorb )) != AIOUSB_SUCCESS)
         goto out_AIOContinuousBufCallbackStart;
 
     retval = AIOContinuousBufStart( buf ); /* Startup the thread that handles the data acquisition */

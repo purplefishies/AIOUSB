@@ -21,6 +21,9 @@ USBDevice *_initialize( USBDevice *usb, libusb_device *dev, libusb_device_handle
     usb->usb_bulk_transfer     = usb_bulk_transfer;
     usb->usb_request           = usb_request;
     usb->usb_reset_device      = usb_reset_device;
+    usb->usb_put_config        = USBDevicePutADCConfigBlock;
+    usb->usb_get_config        = USBDeviceFetchADCConfigBlock;
+
     usb->device                = dev;
     usb->deviceHandle          = handle;
     usb->deviceDesc            = *deviceDesc;

@@ -20,6 +20,8 @@ typedef struct aiousb_device {
 
     int (*usb_request)( struct aiousb_device *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout );
     int (*usb_reset_device)(struct aiousb_device *usbdev );
+    int (*usb_put_config)( struct aiousb_device *usb, ADCConfigBlock *configBlock );
+    int (*usb_get_config)( struct aiousb_device *usb, ADCConfigBlock *configBlock );
 
     uint8_t timeout;
     libusb_device *device;

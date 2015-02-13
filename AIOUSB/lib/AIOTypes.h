@@ -113,11 +113,6 @@ enum AIOUSB_BOOL_VAL {
 };
 
 typedef enum AIOUSB_BOOL_VAL AIOUSB_BOOL;
-/* unsigned char AIOUSB_BOOL_VAL */
-/* typedef unsigned char AIOUSB_BOOL; */
-/* AIOUSB_BOOL AIOUSB_FALSE = 0; */
-/* AIOUSB_BOOL AIOUSB_TRUE  = 1; */
-/* typedef enum AIOUSB_BOOL_VAL AIOUSB_BOOL; */
 
 #endif
 
@@ -133,8 +128,6 @@ typedef enum AIOUSB_BOOL_VAL AIOUSB_BOOL;
             goto g;                                             \
         }                                                       \
     } while (0 )
-
-
 
 
 CREATE_ENUM_W_START(ProductIDS,0,
