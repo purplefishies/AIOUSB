@@ -240,8 +240,8 @@ AIORET_TYPE AIOContinuousBufInitConfiguration(  AIOContinuousBuf *buf )
         return -result;
     }
 
-    /* ADCConfigBlockInit( &config, deviceDesc, deviceDesc->ConfigBytes  ); */
-    ADCConfigBlockCopy( &config, AIOUSBDeviceGetADCConfigBlock( deviceDesc ) );
+    ADCConfigBlockInit( &config, deviceDesc, deviceDesc->ConfigBytes  );
+    /* ADCConfigBlockCopy( &config, AIOUSBDeviceGetADCConfigBlock( deviceDesc ) ); */
 
     AIOContinuousBufSendPreConfig( buf );
 
