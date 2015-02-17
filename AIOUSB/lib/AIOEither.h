@@ -43,6 +43,7 @@ typedef union {
 
 typedef struct aio_ret_value  {
     int left;
+    char *errmsg;
     AIO_EITHER_VALUE_ITEM right;
     AIO_EITHER_TYPE type;
     int size;
