@@ -942,6 +942,29 @@ AIORET_TYPE AIOContinuousBufWriteCounts( AIOContinuousBuf *buf, unsigned short *
     return retval;
 }
 
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf, 
+                                 USBDevice *usb, 
+                                 unsigned char endpoint, 
+                                 unsigned char *data,
+                                 int datasize,
+                                 int *bytes,
+                                 unsigned timeout 
+                                 )
+{
+    AIORET_TYPE usbresult;
+
+    usbresult = usb->usb_bulk_transfer( usb,
+                                        0x86,
+                                        data,
+                                        datasize,
+                                        bytes,
+                                        timeout
+                                        );
+
+    return usbresult;
+}
+
 
 /*----------------------------------------------------------------------------*/
 void *RawCountsWorkFunction( void *object )
@@ -952,7 +975,6 @@ void *RawCountsWorkFunction( void *object )
     AIOContinuousBuf *buf = (AIOContinuousBuf*)object;
     int bytes;
     srand(3);
-
     unsigned datasize = AIOContinuousBufNumberChannels(buf)*16*512;
 
     int usbfail = 0;
@@ -987,13 +1009,9 @@ void *RawCountsWorkFunction( void *object )
         }
         printf("");
 #else
-        usbresult = usb->usb_bulk_transfer( usb,
-                                            0x86,
-                                            data,
-                                            datasize,
-                                            &bytes,
-                                            3000
-                                            );
+
+        usbresult = aiocontbuf_get_data( buf, usb, 0x86, data, datasize, &bytes, 3000 );
+
 #endif
 
         AIOUSB_DEVEL("libusb_bulk_transfer returned  %d as usbresult, bytes=%d\n", usbresult , (int)bytes);
@@ -1052,28 +1070,7 @@ void *RawCountsWorkFunction( void *object )
   
 }
 
-/*----------------------------------------------------------------------------*/
-AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf, 
-                                 USBDevice *usb, 
-                                 unsigned char endpoint, 
-                                 unsigned char *data,
-                                 int datasize,
-                                 int *bytes,
-                                 unsigned timeout 
-                                 )
-{
-    AIORET_TYPE usbresult;
 
-    usbresult = usb->usb_bulk_transfer( usb,
-                                        0x86,
-                                        data,
-                                        datasize,
-                                        bytes,
-                                        timeout
-                                        );
-
-    return usbresult;
-}
 
 /* #if 0 */
 /*     uint16_t *counts = (uint16_t*)data; */
