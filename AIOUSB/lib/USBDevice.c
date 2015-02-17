@@ -59,7 +59,6 @@ USBDevice * NewUSBDevice( libusb_device *dev, libusb_device_handle *handle)
 {
     USBDevice *obj = (USBDevice *)calloc(sizeof(USBDevice), 1 );
     if ( obj ) {
-        /* _initialize( obj, dev, handle, NULL ); */
         LIBUSBArgs args = { dev, handle, NULL };
         InitializeUSBDevice( obj, &args ) ;
     }
@@ -86,13 +85,14 @@ int USBDeviceClose( USBDevice *usb )
     usb->deviceHandle = NULL;
 
     libusb_unref_device( usb->device );
-    /* if(device->deviceHandle != NULL) { */
-    /*     libusb_close(device->deviceHandle); */
-    /*     device->deviceHandle = NULL; */
-    /* } */
-    /* libusb_unref_device(device->device); */
+
     return AIOUSB_SUCCESS;
 }
+/* if(device->deviceHandle != NULL) { */
+/*     libusb_close(device->deviceHandle); */
+/*     device->deviceHandle = NULL; */
+/* } */
+/* libusb_unref_device(device->device); */
 
 /*----------------------------------------------------------------------------*/
 int FindUSBDevices( USBDevice **devs, int *size )
@@ -367,7 +367,6 @@ TEST(USBDevice,FindDevices )
     USBDevice *devs = NULL;
     int size = 0;
     FindUSBDevices( &devs, &size );
-    /* libusb_init(NULL); */
     
     EXPECT_GE( size, 0 );
     
