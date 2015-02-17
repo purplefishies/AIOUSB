@@ -20,6 +20,12 @@
 
 #include <dlfcn.h>
 
+typedef enum {
+    IN,
+    OUT
+} IO_DIRECTION;
+
+
 int (*orig_usb_control_transfer)( struct aiousb_device *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout );
 
 int (*orig_usb_bulk_transfer)( struct aiousb_device *dev_handle,
@@ -31,15 +37,26 @@ int (*orig_usb_reset_device)(struct aiousb_device *usbdev );
 int (*orig_usb_put_config)( struct aiousb_device *usb, ADCConfigBlock *configBlock );
 int (*orig_usb_get_config)( struct aiousb_device *usb, ADCConfigBlock *configBlock );
 
+FILE *outfile;
+
+
 int mock_usb_control_transfer( struct aiousb_device *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout )
 {
-    printf("Wrapping control ");
+    printf("Wrapping control\n");
+    IO_DIRECTION direction;
+    int retval;
     if ( request_type ==  USB_WRITE_TO_DEVICE ) {
-        printf("(out)\n");
+        direction = OUT;
     } else if ( request_type == USB_READ_FROM_DEVICE ) {
-        printf("(in)\n");
+        direction = IN;
     }
-    return orig_usb_control_transfer( usbdev, request_type, bRequest, wValue, wIndex, data, wLength, timeout );
+    retval = orig_usb_control_transfer( usbdev, request_type, bRequest, wValue, wIndex, data, wLength, timeout );
+    fprintf(outfile,"%s,%s,%2.2x,%2.2x,%2.2x,%2.2x,", "control", (direction == IN ? "in" : "out" ),request_type, bRequest,wValue,wIndex );
+    for( int i = 0; i < wLength; i ++ ) {
+        fprintf(outfile,"%2.2x ", (unsigned short)data[i] );
+    }
+    fprintf(outfile,"\n");
+    return retval;
 }
 
 int mock_usb_bulk_transfer( struct aiousb_device *dev_handle,
@@ -48,14 +65,24 @@ int mock_usb_bulk_transfer( struct aiousb_device *dev_handle,
 {
 
     printf("Wrapping bulk ");
+    IO_DIRECTION direction;
+    int retval;
+
     if ( endpoint & LIBUSB_ENDPOINT_OUT ) {
-        printf("(out)\n");
+        direction = OUT;
     } else if ( endpoint & LIBUSB_ENDPOINT_IN ) {
-        printf("(in)\n");
+        direction = IN;
     }
+    printf("(%s)\n", ( direction == IN ? "in" : "out" ));
 
-    return orig_usb_bulk_transfer( dev_handle, endpoint, data, length, actual_length, timeout );
+    retval = orig_usb_bulk_transfer( dev_handle, endpoint, data, length, actual_length, timeout );
+    fprintf(outfile,"%s,%s,%2.2x,%2.2x,%2.2x,", "bulk",(direction == IN ? "in" : "out" ), endpoint, length, *actual_length );
+    for( int i = 0; i < *actual_length; i ++ ) {
+        fprintf(outfile,"%2.2x ", (unsigned short)data[i] );
+    }
+    fprintf(outfile,"\n");
 
+    return retval;
 }
 
 int mock_usb_request( struct aiousb_device *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout )
@@ -73,7 +100,12 @@ int mock_usb_reset_device(struct aiousb_device *usbdev )
 int mock_usb_put_config( struct aiousb_device *usb, ADCConfigBlock *configBlock )
 {
     printf("Wrapping put_config\n");
-    return orig_usb_put_config( usb, configBlock );
+    int retval;
+    IO_DIRECTION direction = OUT;
+
+    retval = orig_usb_put_config( usb, configBlock );
+
+    return retval;
 }
 
 int mock_usb_get_config( struct aiousb_device *usb, ADCConfigBlock *configBlock )
@@ -101,18 +133,23 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
     printf("Wrapped the original !!\n");
     retval = init_usb_device( usb, args );
 
+    outfile = fopen("usb_datalog.txt","w");
+    if (!outfile ) {
+        fprintf(stderr,"Can't open outputfile\n");
+    }
+
     if ( !AIOEitherHasError( &retval ) ) {
         orig_usb_control_transfer  = usb->usb_control_transfer;
         orig_usb_bulk_transfer     = usb->usb_bulk_transfer;
         orig_usb_request           = usb->usb_request;
         orig_usb_reset_device      = usb->usb_reset_device;
-        orig_usb_put_config        = usb->usb_put_config;
-        orig_usb_get_config        = usb->usb_get_config;
+        /* orig_usb_put_config        = usb->usb_put_config; */
+        /* orig_usb_get_config        = usb->usb_get_config; */
 
         usb->usb_control_transfer  = mock_usb_control_transfer;
         usb->usb_bulk_transfer     = mock_usb_bulk_transfer;
-        usb->usb_put_config        = mock_usb_put_config;
-        usb->usb_get_config        = mock_usb_get_config;
+        /* usb->usb_put_config        = mock_usb_put_config; */
+        /* usb->usb_get_config        = mock_usb_get_config; */
         usb->usb_reset_device      = mock_usb_reset_device;
         usb->usb_request           = mock_usb_request;
     }
