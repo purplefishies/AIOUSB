@@ -9,33 +9,59 @@
 #include "USBDevice.h"
 #include "libusb.h"
 #include "AIODeviceTable.h"
+#include "AIOEither.h"
 
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
 
 /*----------------------------------------------------------------------------*/
-USBDevice *_initialize( USBDevice *usb, libusb_device *dev, libusb_device_handle *handle , struct libusb_device_descriptor *deviceDesc )
+AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
 {
-    usb->usb_control_transfer  = usb_control_transfer;
-    usb->usb_bulk_transfer     = usb_bulk_transfer;
-    usb->usb_request           = usb_request;
-    usb->usb_reset_device      = usb_reset_device;
-    usb->usb_put_config        = USBDevicePutADCConfigBlock;
-    usb->usb_get_config        = USBDeviceFetchADCConfigBlock;
+    AIOEither retval = {0};
+    assert(usb);
+    if ( !usb  ) {
+        retval.left = -AIOUSB_ERROR_INVALID_USBDEVICE;
+        retval.errmsg = strdup("Invalid USB object");
+    }
 
-    usb->device                = dev;
-    usb->deviceHandle          = handle;
-    usb->deviceDesc            = *deviceDesc;
-    return usb;
+    usb->device                = args->dev;
+    usb->deviceHandle          = args->handle;
+    usb->deviceDesc            = *args->deviceDesc;
+
+    int libusbResult = libusb_open(  usb->device, &usb->deviceHandle );
+    
+    if( libusbResult == LIBUSB_SUCCESS && usb->deviceHandle != NULL ) {
+        int kernelActive = libusb_kernel_driver_active( usb->deviceHandle, 0 );
+        if ( kernelActive == 1 ) {
+            libusbResult = libusb_claim_interface( usb->deviceHandle, 0 );
+            libusbResult = libusb_attach_kernel_driver( usb->deviceHandle, 0 );
+        }
+
+        usb->debug = AIOUSB_FALSE;
+        usb->usb_control_transfer  = usb_control_transfer;
+        usb->usb_bulk_transfer     = usb_bulk_transfer;
+        usb->usb_request           = usb_request;
+        usb->usb_reset_device      = usb_reset_device;
+        usb->usb_put_config        = USBDevicePutADCConfigBlock;
+        usb->usb_get_config        = USBDeviceFetchADCConfigBlock;
+
+    } else {
+        retval.left = -libusbResult;
+        asprintf(&retval.errmsg,"Error with libusb_open: %d\n", libusbResult );
+    }
+
+    return retval;
 }
 
 /*----------------------------------------------------------------------------*/
 USBDevice * NewUSBDevice( libusb_device *dev, libusb_device_handle *handle)
 {
     USBDevice *obj = (USBDevice *)calloc(sizeof(USBDevice), 1 );
-    if ( obj )
-        _initialize( obj, dev, handle, NULL );
+    if ( obj ) {
+        LIBUSBArgs args = { dev, handle, NULL };
+        InitializeUSBDevice( obj, &args ) ;
+    }
     return obj;
 }
 
@@ -59,13 +85,14 @@ int USBDeviceClose( USBDevice *usb )
     usb->deviceHandle = NULL;
 
     libusb_unref_device( usb->device );
-    /* if(device->deviceHandle != NULL) { */
-    /*     libusb_close(device->deviceHandle); */
-    /*     device->deviceHandle = NULL; */
-    /* } */
-    /* libusb_unref_device(device->device); */
+
     return AIOUSB_SUCCESS;
 }
+/* if(device->deviceHandle != NULL) { */
+/*     libusb_close(device->deviceHandle); */
+/*     device->deviceHandle = NULL; */
+/* } */
+/* libusb_unref_device(device->device); */
 
 /*----------------------------------------------------------------------------*/
 int FindUSBDevices( USBDevice **devs, int *size )
@@ -96,7 +123,10 @@ int FindUSBDevices( USBDevice **devs, int *size )
                       if(libusbDeviceDesc.idVendor == ACCES_VENDOR_ID) {
                           *size += 1;
                           *devs = (USBDevice*)realloc( *devs, (*size )*(sizeof(USBDevice)));
-                          _initialize( &(*devs)[*size-1] ,libusb_ref_device(usb_device) , NULL,  &libusbDeviceDesc );
+                          LIBUSBArgs args = { libusb_ref_device(usb_device), NULL, &libusbDeviceDesc };
+                          AIOEither usbretval = InitializeUSBDevice( &( *devs)[*size-1] , &args );
+                          if ( AIOEitherHasError( &usbretval ) )
+                              return -AIOUSB_ERROR_USB_INIT;
                           result += 1;
                       }
                 }
@@ -129,37 +159,6 @@ void DeleteUSBDevices( USBDevice *devices )
 void DeleteUSBDevice( USBDevice *dev )
 {
     free(dev);
-}
-
-/*----------------------------------------------------------------------------*/
-/**
- * @param DeviceIndex
- * @return struct libusb_device_handle *
- */
-int InitializeUSBDevice( USBDevice *usb )
-{
-    assert(usb);
-    if ( !usb  )
-        return -AIOUSB_ERROR_INVALID_USBDEVICE;
-
-    int result = AIOUSB_SUCCESS;
-
-    usb->debug = AIOUSB_FALSE;
-
-    int libusbResult = libusb_open(  usb->device, &usb->deviceHandle );
-    
-    if( libusbResult == LIBUSB_SUCCESS && usb->deviceHandle != NULL ) {
-        int kernelActive = libusb_kernel_driver_active( usb->deviceHandle, 0 );
-        if ( kernelActive == 1 ) {
-            libusbResult = libusb_claim_interface( usb->deviceHandle, 0 );
-            libusbResult = libusb_attach_kernel_driver( usb->deviceHandle, 0 );
-        }
-
-    } else {
-        result = -libusbResult;
-    }
-
-    return result;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -225,7 +224,6 @@ int USBDeviceFetchADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock )
         /*
          * check and correct settings read from device
          */
-
         result = ADCConfigBlockCopy( configBlock, &config );
     }
 
@@ -369,7 +367,6 @@ TEST(USBDevice,FindDevices )
     USBDevice *devs = NULL;
     int size = 0;
     FindUSBDevices( &devs, &size );
-    /* libusb_init(NULL); */
     
     EXPECT_GE( size, 0 );
     
@@ -392,42 +389,3 @@ int main(int argc, char *argv[] )
 
 #endif
 
-
-/* /\** */
-/*  * @param DeviceIndex */
-/*  * @return struct libusb_device_handle * */
-/*  *\/ */
-/* struct libusb_device_handle *AIOUSB_GetDeviceHandle(unsigned long DeviceIndex)  */
-/* { */
-/*     /\* libusb_set_debug(NULL, 4 ); *\/ */
-/*     AIORESULT result = AIOUSB_SUCCESS; */
-/*     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result ); */
-/*     if ( result != AIOUSB_SUCCESS ){ */
-/*         AIOUSB_UnLock(); */
-/*         return deviceHandle; */
-/*     } */
-/*     USBDevice *usb = AIOUSBDeviceGetUSBHandle( deviceDesc ); */
-/*     if(deviceHandle == NULL) { */
-/*         int libusbResult = libusb_open(deviceDesc->device, &deviceHandle); */
-/*         if( libusbResult == LIBUSB_SUCCESS && deviceHandle != NULL ) { */
-/*             int kernelActive = libusb_kernel_driver_active( deviceHandle, 0 ); */
-/*             if ( kernelActive == 1 ) { */
-/*                 libusbResult = libusb_claim_interface( deviceHandle, 0 ); */
-/*                 libusbResult = libusb_attach_kernel_driver( deviceHandle, 0 ); */
-/*             } */
-/*             deviceDesc->deviceHandle = deviceHandle; */
-/*           } */
-/*       } */
-/*     AIOUSB_UnLock(); */
-/*     return deviceHandle; */
-/* } */
-/*----------------------------------------------------------------------------*/
-/* USBDevice *AIODeviceTableGetUSBDevice( unsigned long DeviceIndex , AIORESULT *result )  */
-/* { */
-/*     if ( DeviceIndex > MAX_USB_DEVICES ) { */
-/*         if ( result ) */
-/*             *result = AIOUSB_ERROR_INVALID_PARAMETER; */
-/*         return NULL; */
-/*     } */
-/*     return NewUSBDevice( DeviceIndex ); */
-/* } */

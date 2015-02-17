@@ -1435,28 +1435,29 @@ AIORET_TYPE AIODeviceTablePopulateTable(void)
     AIORET_TYPE result;
     USBDevice *usbdevices = NULL;
     int size = 0;
+
     result = FindUSBDevices( &usbdevices, &size );
+
     if ( result < AIOUSB_SUCCESS ) 
         return result;
 
     for ( int i = 0; i < size ; i ++ ) {
         AIOUSBDevice *device = (AIOUSBDevice *)&deviceTable[ numAccesDevices++ ];
 
-        if ( i == 0 ) {
-            /* Setup the first USB device */
-
-        }
         unsigned productID = USBDeviceGetIdProduct( &usbdevices[i] );
         _setup_device_parameters( device, productID );
+        /* device->usb_device = usbdevices[i]; */
         device->usb_device = CopyUSBDevice( &usbdevices[i] );
-        InitializeUSBDevice( device->usb_device ); /* Sets up the internals for actually working */
     }
     
-    DeleteUSBDevices( usbdevices );
-
     AIOUSB_SetInit();
     return AIOUSB_SUCCESS;
 }
+
+/* device->usb_device = CopyUSBDevice( &usbdevices[i] ); */
+/* InitializeUSBDevice( device->usb_device ); /\* Sets up the internals for actually working *\/ */
+/* DeleteUSBDevices( usbdevices ); */
+
 
 /*----------------------------------------------------------------------------*/
 /**
