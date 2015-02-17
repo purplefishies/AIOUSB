@@ -5,6 +5,7 @@
 #include <libusb.h>
 #include <stdlib.h>
 #include "ADCConfigBlock.h"
+#include "AIOEither.h"
 
 #ifdef __aiousb_cplusplus
 namespace AIOUSB {
@@ -30,11 +31,20 @@ typedef struct aiousb_device {
     AIOUSB_BOOL debug;
 } USBDevice;
 
+typedef struct aiousb_libusb_args {
+    struct libusb_device *dev;
+    struct libusb_device_handle *handle;
+    struct libusb_device_descriptor *deviceDesc;
+} LIBUSBArgs;
+
 
 USBDevice * NewUSBDevice(libusb_device *dev, libusb_device_handle *handle );
 void DeleteUSBDevice( USBDevice *dev );
 USBDevice *CopyUSBDevice( USBDevice *usb );
-int InitializeUSBDevice( USBDevice *usb );
+
+/* int InitializeUSBDevice( USBDevice *usb ); */
+AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args );
+
 
 int FindUSBDevices( USBDevice **devs, int *size );
 void DeleteUSBDevices( USBDevice *devs);

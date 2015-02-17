@@ -1234,21 +1234,22 @@ AIORET_TYPE StartStreaming( AIOContinuousBuf *buf )
     return retval;
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE SetConfig( AIOContinuousBuf *buf )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     unsigned long result;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), &result );
-    if (result != AIOUSB_SUCCESS ) {
-        retval = (AIORET_TYPE)result;
-        goto out_SetConfig;
-    }
-    if (  AIOContinuousBufNumberChannels(buf) > 16 ) {
-      deviceDesc->cachedConfigBlock.size = AD_MUX_CONFIG_REGISTERS;
-    }
-    retval = ADC_WriteADConfigBlock( AIOContinuousBufGetDeviceIndex( buf ), &deviceDesc->cachedConfigBlock );
+    if ( result != AIOUSB_SUCCESS )
+        return result;
+    USBDevice *usb = AIOUSBDeviceGetUSBHandle( deviceDesc );
+    if ( !usb )
+        return AIOUSB_ERROR_INVALID_USBDEVICE;
 
- out_SetConfig:
+    ADCConfigBlock *config = AIOUSBDeviceGetADCConfigBlock( deviceDesc );
+
+    usb->usb_put_config( usb, config );
+
     return retval;
 }
 
@@ -1842,9 +1843,9 @@ AIORET_TYPE AIOContinuousBuf_SaveConfig( AIOContinuousBuf *buf ) { return AIOCon
 AIORET_TYPE AIOContinuousBufSaveConfig( AIOContinuousBuf *buf ) 
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    AIOContinuousBufLock(buf);
+
     SetConfig( buf );
-    AIOContinuousBufUnlock(buf);
+
     return retval;
 }
 

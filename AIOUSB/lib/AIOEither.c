@@ -156,6 +156,11 @@ int AIOEitherGetLeft(AIOEither *retval)
     return retval->left;
 }
 
+AIOUSB_BOOL AIOEitherHasError( AIOEither *retval )
+{
+    return (retval->left == 0 ? AIOUSB_FALSE : AIOUSB_TRUE );
+}
+
 
 #ifdef __cplusplus
 }

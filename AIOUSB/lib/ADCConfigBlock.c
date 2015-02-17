@@ -274,7 +274,7 @@ AIORET_TYPE ADCConfigBlockInit(ADCConfigBlock *config, AIOUSBDevice *deviceDesc,
     config->testing  = AIOUSB_FALSE;
     config->timeout  = deviceDesc->commTimeout;
 
-    memset(config->registers,(unsigned char)AD_GAIN_CODE_0_5V,16 );
+    memset(config->registers,(unsigned char)AD_GAIN_CODE_0_10V,16 );
     
     config->registers[AD_CONFIG_CAL_MODE]               = AD_CAL_MODE_NORMAL;
     config->registers[AD_CONFIG_TRIG_COUNT]             = AD_TRIGGER_CTR0_EXT | AD_TRIGGER_SCAN | AD_TRIGGER_TIMER;
