@@ -1070,27 +1070,6 @@ void *RawCountsWorkFunction( void *object )
   
 }
 
-
-
-/* #if 0 */
-/*     uint16_t *counts = (uint16_t*)data; */
-/*     int number_scans = datasize / ( AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOverSample(buf)+1)*sizeof(uint16_t)); */
-/*     *bytes = 0; */
-/*     int pos; */
-/*     for ( int scan_num = 0; scan_num < number_scans; scan_num ++ ) {  */
-/*         for ( int channel_count = 0; channel_count < AIOContinuousBufNumberChannels(buf); channel_count ++ ) { */
-/*             for ( int os = 0; os < AIOContinuousBufGetOverSample(buf)+1 ; os ++ ) {  */
-/*                 pos = (scan_num *(AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOverSample(buf)+1))) +  */
-/*                     channel_count * ( AIOContinuousBufGetOverSample(buf)+1 ) + os; */
-/*                 counts[pos] =  (uint16_t)(65536 / (AIOContinuousBufNumberChannels(buf)-1)) * channel_count; */
-/*                 *bytes += 2; */
-/*             } */
-/*         } */
-/*     } */
-/*     usbresult = number_scans*AIOContinuousBufNumberChannels(buf)*( AIOContinuousBufGetOverSample(buf)+1 )*sizeof(uint16_t); */
-/*     return usbresult; */
-/* #endif */
-
 /*----------------------------------------------------------------------------*/
 /**
  * @brief Main work function for collecting data. Also performs copies from 
@@ -1107,7 +1086,7 @@ void *ConvertCountsToVoltsFunction( void *object )
     unsigned long result;
     int bytes;
     unsigned datasize = 64*1024;
-    unsigned tmpdatasize;
+
     int usbfail = 0, usbfail_count = 5;
     unsigned count = 0;
     int num_channels = AIOContinuousBufNumberChannels(buf);
@@ -1120,17 +1099,13 @@ void *ConvertCountsToVoltsFunction( void *object )
     AIOGainRange *ranges;
     USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), &result );
     unsigned char *data   = (unsigned char *)malloc( datasize );
+
     AIOCountsConverter *cc;
     AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), &result );
     if ( result != AIOUSB_SUCCESS )
         goto out_ConvertCountsToVoltsFunction;
     AIOUSBDeviceGetADCConfigBlock( dev );
 
-    /* AIOGainRange *ranges = (AIOGainRange *)malloc(16*sizeof(AIOGainRange)); */
-    /* for ( int i = 0; i < 16; i ++ ) {  */
-    /*     ranges[i].max = 10.0; */
-    /*     ranges[i].min = -10.0; */
-    /* } */
     ranges = NewAIOGainRangeFromADCConfigBlock( AIOUSBDeviceGetADCConfigBlock( dev ) );
     if ( !ranges )
         goto out_ConvertCountsToVoltsFunction;
@@ -1138,10 +1113,6 @@ void *ConvertCountsToVoltsFunction( void *object )
     cc = NewAIOCountsConverterWithBuffer( (unsigned short*)data, num_channels, ranges, num_oversamples , sizeof(unsigned short)  );
     if ( !cc ) 
         goto out_ConvertCountsToVoltsFunction;
-    /* AIOGainRange *ranges = (AIOGainRange *)malloc(16*sizeof(AIOGainRange)); */
-    /* for ( int i = 0 ; i < 16 ; i ++ ) { */
-    /*     printf("do something\n"); */
-    /* } */
 
     /**
      * @brief Load the fifo with values
@@ -1149,11 +1120,14 @@ void *ConvertCountsToVoltsFunction( void *object )
    
     while ( buf->status == RUNNING  ) {
         
-        tmpdatasize = MIN( buf->num_scans*buf->num_channels*(buf->num_oversamples+1)*sizeof(uint16_t) - count, datasize );
+        /* tmpdatasize = MIN( buf->num_scans*buf->num_channels*(buf->num_oversamples+1)*sizeof(uint16_t) - count, datasize ); */
 
-        usbresult = aiocontbuf_get_data( buf, usb, 0x86, data, tmpdatasize, &bytes, 3000 );
-        
-        retval = infifo->PushN( infifo, (uint16_t*)data, bytes / sizeof(uint16_t));
+        usbresult = aiocontbuf_get_data( buf, usb, 0x86, data, datasize, &bytes, 3000 );
+
+        AIOUSB_DEVEL("Using counts=%d\n",bytes / 2 );
+
+        retval = infifo->PushN( infifo, (uint16_t*)data, bytes / 2 );
+        AIOUSB_DEVEL("Pushed %d bytes\n",retval );
 
         if (  retval >= 0 ) {
             count += retval;
@@ -1163,7 +1137,7 @@ void *ConvertCountsToVoltsFunction( void *object )
         if ( bytes ) {
             /* only write bytes that exist */
 
-            retval = cc->ConvertFifo( cc, outfifo, infifo , bytes );
+            retval = cc->ConvertFifo( cc, outfifo, infifo , bytes / sizeof(uint16_t) );
 
             bytes = ( AIOContinuousBuf_BufSizeForCounts(buf) - buf->fifo->refsize - count < datasize ? AIOContinuousBuf_BufSizeForCounts(buf) - buf->fifo->refsize - count : bytes );
 

@@ -24,22 +24,39 @@ AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf,
 {
     AIORET_TYPE usbresult;
     uint16_t *counts = (uint16_t*)data;
-    int number_scans = datasize / ( AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOverSample(buf)+1)*sizeof(uint16_t));
+    /* int number_scans = datasize / ( AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOverSample(buf)+1)*sizeof(uint16_t)); */
+    int number_scans = buf->num_scans;
     *bytes = 0;
     int pos;
-    for ( int scan_num = 0; scan_num < number_scans; scan_num ++ ) { 
+    static int scan_count = 0;
+    static int channel_count = 0;
+    static int os = 0;
+    int initial = (scan_count *(AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOverSample(buf)+1))) + 
+        channel_count * ( AIOContinuousBufGetOverSample(buf)+1 ) + os;
 
-        for ( int channel_count = 0; channel_count < AIOContinuousBufNumberChannels(buf); channel_count ++ ) {
-
-            for ( int os = 0; os < AIOContinuousBufGetOverSample(buf)+1 ; os ++ ) { 
-                pos = (scan_num *(AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOverSample(buf)+1))) + 
-                    channel_count * ( AIOContinuousBufGetOverSample(buf)+1 ) + os;
+    for ( ; scan_count < number_scans; scan_count ++ ) { 
+        for ( ; channel_count < AIOContinuousBufNumberChannels(buf); channel_count ++ ) {
+            for ( ; os < AIOContinuousBufGetOverSample(buf)+1 ; os ++ ) {
+                pos = (scan_count *(AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOverSample(buf)+1))) + 
+                    channel_count * ( AIOContinuousBufGetOverSample(buf)+1 ) + os - initial;
                 counts[pos] =  (uint16_t)(65535 / (AIOContinuousBufNumberChannels(buf)-1)) * channel_count;
+                if ( pos > 65536 /2 ) {
+                    fprintf(stderr,"ERROR: pos=%d\n", pos );
+                }
                 *bytes += 2;
+
+                if ( *bytes >= (datasize) ) { 
+                    os ++;
+                    goto end_aiocontbuf_get_data;
+                }
             }
+            os = 0;
         }
+        channel_count = 0;
     }
-    usbresult = number_scans*AIOContinuousBufNumberChannels(buf)*( AIOContinuousBufGetOverSample(buf)+1 )*sizeof(uint16_t);
+ end_aiocontbuf_get_data:
+    /* printf("Final value=%d\n",*bytes); */
+    /* usbresult = number_scans*AIOContinuousBufNumberChannels(buf)*( AIOContinuousBufGetOverSample(buf)+1 )*sizeof(uint16_t); */
+    usbresult = *bytes;
     return usbresult;
 }
-

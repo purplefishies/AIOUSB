@@ -10,6 +10,7 @@
 #include "AIOTypes.h"
 #include "AIOUSB_Core.h"
 #include "AIOCountsConverter.h"
+#include "AIOUSB_Log.h"
 #include <pthread.h>
 
 #ifdef __cplusplus
@@ -35,7 +36,7 @@ AIOCountsConverter *NewAIOCountsConverterWithBuffer( void *buf,
 
 /*----------------------------------------------------------------------------*/
 AIOCountsConverter *NewAIOCountsConverter( unsigned num_channels, AIOGainRange *ranges, unsigned num_oversamples, unsigned unit_size  ) {
-    AIOCountsConverter *tmp = (AIOCountsConverter *)malloc( sizeof(struct aio_counts_converter) );
+    AIOCountsConverter *tmp = (AIOCountsConverter *)calloc(1,sizeof(struct aio_counts_converter) );
     if (!tmp ) 
         return NULL;
     tmp->num_oversamples  = num_oversamples;
@@ -51,6 +52,12 @@ AIOCountsConverter *NewAIOCountsConverter( unsigned num_channels, AIOGainRange *
 void DeleteAIOCountsConverter( AIOCountsConverter *ccv )
 {
     free(ccv);
+}
+
+void AIOCountsConverterReset( AIOCountsConverter *cc )
+{
+    assert(cc);
+    cc->scan_count = cc->os_count = cc->channel_count = 0;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -74,34 +81,63 @@ double Convert( AIOGainRange range, unsigned short sum )
 }
 
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, void *tobufptr, void *frombufptr , unsigned num_bytes )
+/**
+ * @param cc Counts converter object
+ * @param tobufptr  ToFifo  ( double )
+ * @param frombufptr From Fifo (unsigned short )
+ * @param num_counts  number of counts to convert
+ * 
+ * @return 
+ */
+AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, void *tobufptr, void *frombufptr , unsigned num_counts )
 {
     AIOFifoVolts *tofifo     = (AIOFifoVolts*)tobufptr;
     AIOFifoCounts *fromfifo  = (AIOFifoCounts*)frombufptr;
-    int allowed_scans = num_bytes / ((cc->num_oversamples+1) * cc->num_channels * cc->unit_size );
+
     AIORET_TYPE count = 0;
     double tmpvolt;
     int pos;
-    unsigned short *tmpbuf = (unsigned short *)malloc( allowed_scans * cc->num_channels * cc->unit_size * (1+cc->num_oversamples));
+    int rounded_num_counts = num_counts;
+    unsigned short *tmpbuf = (unsigned short *)malloc( num_counts*sizeof(uint16_t) );
 
-    fromfifo->PopN( fromfifo, tmpbuf, allowed_scans*cc->num_channels*(1+cc->num_oversamples));
-
-    for ( int scan_count = 0, tobuf_pos = 0; scan_count < allowed_scans ; scan_count ++ ) {
-        for ( unsigned ch = 0; ch < cc->num_channels; ch ++ , tobuf_pos ++ ) { 
-            unsigned sum = 0;
-            for ( unsigned os = 0; os < cc->num_oversamples + 1; os ++ ) {
-                pos = (scan_count *(cc->num_channels)*(cc->num_oversamples + 1)) + 
-                    ch * ( cc->num_oversamples + 1) + os;
-                sum += tmpbuf[pos];
-                count += sizeof(unsigned short);
-            }
-            sum /= (cc->num_oversamples + 1);
-
-            tmpvolt = (double)Convert( cc->gain_ranges[ch], sum );
-            tofifo->Push( tofifo, tmpvolt );
-        }
+    int tmpval = fromfifo->PopN( fromfifo, tmpbuf, rounded_num_counts );
+    if ( tmpval != (int)rounded_num_counts*(int)sizeof(uint16_t ) ) {
+        return -3;
     }
 
+    int initial = (cc->scan_count *(cc->num_channels)*(cc->num_oversamples + 1)) + 
+        cc->channel_count * ( cc->num_oversamples + 1) + cc->os_count;
+
+    for ( int tobuf_pos = 0; count < rounded_num_counts ; cc->scan_count ++ ) {
+        for ( ; cc->channel_count < cc->num_channels && count < rounded_num_counts; cc->channel_count ++ , tobuf_pos ++  ) {
+            for ( ; cc->os_count < (cc->num_oversamples + 1) && count < rounded_num_counts; cc->os_count ++ ) {
+
+                pos = (cc->scan_count *(cc->num_channels)*(cc->num_oversamples + 1)) + 
+                    cc->channel_count * ( cc->num_oversamples + 1) + cc->os_count - initial;
+
+                cc->sum += tmpbuf[pos];
+
+                count ++;
+            }
+            if ( cc->os_count >= (cc->num_oversamples + 1) ) { 
+                cc->os_count = 0;
+                cc->sum /= (cc->num_oversamples + 1);
+                tmpvolt = (double)Convert( cc->gain_ranges[cc->channel_count], cc->sum );
+                tofifo->Push( tofifo, tmpvolt );
+                cc->sum = 0;
+            } else {
+                AIOUSB_DEVEL("Leaving !\n");
+                goto done_procssing;
+            }
+        }
+        if ( cc->channel_count >= cc->num_channels ) {
+            cc->channel_count = 0;
+        } else {
+            AIOUSB_DEVEL("other leaving\n");
+            goto done_procssing;
+        }
+    }
+ done_procssing:
     free(tmpbuf);
     return count;
 
@@ -218,6 +254,128 @@ TEST(Initialization,Callback )
 }
 
 
+/**
+ * @brief This test checks whether when we try to convert an incomplete number of 
+ *        channels and oversamples ( ie less than integer number of scans) , that
+ *        the conversion comes out correct.
+ */
+TEST(Composite,IncompleteConversion )
+{
+
+    int num_channels     = 16;
+    int num_oversamples  = 20;
+    int num_scans        = 1000;
+    int retval = 0;
+    int total_size        = num_channels * (num_oversamples+1) * num_scans;
+    AIOFifoCounts *infifo = NewAIOFifoCounts( (unsigned)num_channels*(num_oversamples+1)*num_scans );
+    AIOFifoVolts *outfifo = NewAIOFifoVolts( num_channels*(num_oversamples+1)*num_scans );
+    unsigned short *from_buf = (unsigned short *)malloc(total_size*sizeof(unsigned short));
+    int abspos = 0;
+    int channel_count, scan_count, os_count;
+
+
+    AIOGainRange *ranges = (AIOGainRange *)malloc(num_channels*sizeof(AIOGainRange));
+    for ( int i = 0; i < num_channels; i ++ ) {
+        ranges[i].max = 10.0;
+        ranges[i].min = 0.0;
+    }
+
+    AIOCountsConverter *cc = NewAIOCountsConverterWithBuffer( from_buf, num_channels, ranges, num_oversamples , sizeof(unsigned short)  );
+
+    channel_count = 0;
+    for ( os_count = 0; os_count < (num_oversamples + 1) / 3; os_count ++ , abspos ++ ) {
+        from_buf[abspos] = channel_count * 1000;
+    }
+
+    retval = infifo->PushN( infifo, from_buf, abspos );
+    retval = cc->ConvertFifo( cc, outfifo, infifo, abspos );
+    ASSERT_EQ( 0, cc->scan_count  );
+    ASSERT_EQ( 0, cc->channel_count );
+    ASSERT_EQ( abspos , cc->os_count );
+
+
+    retval = infifo->PushN( infifo, from_buf, (num_oversamples + 1) - abspos );
+    retval = cc->ConvertFifo( cc, outfifo, infifo, (num_oversamples + 1) - abspos  );
+    ASSERT_EQ( 0, cc->scan_count  );
+    ASSERT_EQ( 1, cc->channel_count );
+    ASSERT_EQ( 0 , cc->os_count );
+
+    retval = infifo->PushN( infifo, from_buf, (num_channels-1)*(num_oversamples+1) );
+    retval = cc->ConvertFifo( cc, outfifo, infifo, (num_channels-1)*(num_oversamples+1) );
+
+    ASSERT_EQ( 1, cc->scan_count  );
+    ASSERT_EQ( 0, cc->channel_count );
+    ASSERT_EQ( 0 , cc->os_count );
+
+    AIOFifoReset( (AIOFifo*)infifo);
+    AIOFifoReset( (AIOFifo*)outfifo);
+    AIOCountsConverterReset( cc );
+    abspos = 0;
+    for (  scan_count = 0; scan_count < num_scans / 3; scan_count ++ )  {
+        for (  channel_count = 0; channel_count < num_channels ; channel_count ++ ) {
+            for (  os_count = 0; os_count < num_oversamples + 1; os_count ++ , abspos ++ ) {
+                from_buf[abspos] = channel_count * 1000;
+            }
+        }
+    }
+
+    retval = infifo->PushN( infifo, from_buf, abspos );
+    retval = cc->ConvertFifo( cc, outfifo, infifo, abspos );
+    ASSERT_EQ( num_scans / 3, cc->scan_count  );
+    /* EXPECT_EQ( num_scans / 3*num_channels*sizeof(double), outfifo->write_pos ) ; */
+    
+    abspos = 0;
+    /* Now let's add a few extra channels extra */
+    for (  channel_count = 0; channel_count < num_channels / 3 ; channel_count ++ ) {
+        for ( os_count = 0; os_count < num_oversamples + 1; os_count ++ , abspos ++ ) {
+            from_buf[abspos] = channel_count * 1000;
+        }
+    }
+    /* last extra in terms of oversamples */
+    for ( os_count = 0; os_count < (num_oversamples + 1) / 3; os_count ++ , abspos ++ ) {
+        from_buf[abspos] = channel_count * 1000;
+    }
+
+    retval = infifo->PushN( infifo, from_buf, abspos );
+    retval = cc->ConvertFifo( cc, outfifo, infifo , abspos );
+    /* Verify that we have the outfifo has had the correct number of counts converted */
+    EXPECT_EQ( abspos, retval ) << "We should be able to read out " << abspos << " number of bytes which is not an integer number of scans";
+    ASSERT_EQ( (((num_scans / 3)*num_channels + channel_count)*sizeof(double)), outfifo->write_pos );
+
+    abspos = 0;
+    for ( ; os_count < num_oversamples + 1; os_count ++  , abspos ++ ) {
+        from_buf[abspos] = channel_count * 1000;
+    }
+    retval = infifo->PushN( infifo, from_buf, abspos );
+    retval = cc->ConvertFifo( cc, outfifo, infifo, abspos );
+    
+    ASSERT_EQ( num_channels / 3 + 1, cc->channel_count );
+    ASSERT_EQ( 0 , cc->os_count );
+    channel_count ++;
+
+    /* Read the remaining channels & oversamples to complete the one scan */
+    abspos = 0;
+    for ( ; channel_count < num_channels ; channel_count ++ ) {
+        for ( os_count = 0; os_count < num_oversamples + 1; os_count ++  , abspos ++ ) {
+            from_buf[abspos] = channel_count * 1000;
+        }
+    }
+    /* EXPECT_EQ( (num_channels - (num_channels/3))*(num_oversamples+1) + ( num_oversamples +1 - ((num_oversamples + 1) / 3)), abspos ); */
+
+    /* add the data */
+    retval = infifo->PushN( infifo, from_buf, abspos );
+    /* Convert it */
+    retval = cc->ConvertFifo( cc, outfifo, infifo , abspos );
+
+    /* Now we should (num_scans/3)+1 number of scans in the outfifo */
+
+    EXPECT_EQ( abspos, retval ) << "Should have read in the remaining for that one scan";
+
+    /* EXPECT_EQ( 42752, outfifo->write_pos ); */
+    EXPECT_EQ( AIOFifoReadSize(outfifo) , ((num_scans / 3)+1)*num_channels*sizeof(double) );
+}
+
+
 TEST(Composite,FifoWriting )
 {
 
@@ -250,7 +408,7 @@ TEST(Composite,FifoWriting )
     retval = infifo->PushN( infifo, from_buf, total_size );
     EXPECT_GE( retval, total_size*sizeof(unsigned short) );
 
-    retval = cc->ConvertFifo( cc, outfifo, infifo , total_size*sizeof(unsigned short) );
+    retval = cc->ConvertFifo( cc, outfifo, infifo, total_size );
 
     EXPECT_GE( retval, 0 );
 

@@ -31,6 +31,10 @@ typedef struct aio_counts_converter {
     unsigned num_oversamples;
     unsigned num_channels;
     unsigned unit_size;
+    unsigned scan_count;
+    unsigned channel_count;
+    unsigned os_count;
+    unsigned sum;
     AIOUSB_BOOL discardFirstSample;
     void *buf;
     AIOGainRange *gain_ranges;
@@ -42,9 +46,10 @@ typedef struct aio_counts_converter {
 PUBLIC_EXTERN AIOCountsConverter *NewAIOCountsConverterWithBuffer( void *buf, unsigned num_channels, AIOGainRange *ranges, unsigned num_oversamples,unsigned unit_size  );
 PUBLIC_EXTERN AIOCountsConverter *NewAIOCountsConverter( unsigned num_channels, AIOGainRange *ranges, unsigned num_oversamples,unsigned unit_size  );
 PUBLIC_EXTERN AIOCountsConverter *NewAIOCountsConverterFromAIOContinuousBuf( void *buf);
+PUBLIC_EXTERN void AIOCountsConverterReset( AIOCountsConverter *cc );
 PUBLIC_EXTERN void DeleteAIOCountsConverter( AIOCountsConverter *ccv );
-PUBLIC_EXTERN AIORET_TYPE AIOCountsConverterConvertNScans( AIOCountsConverter *ccv, int num_scans );
-PUBLIC_EXTERN AIORET_TYPE AIOCountsConverterConvertAllAvailableScans( AIOCountsConverter *ccv );
+PUBLIC_EXTERN AIORET_TYPE AIOCountsConverterConvertNScans( AIOCountsConverter *cc, int num_scans );
+PUBLIC_EXTERN AIORET_TYPE AIOCountsConverterConvertAllAvailableScans( AIOCountsConverter *cc );
 PUBLIC_EXTERN AIORET_TYPE AIOCountsConverterConvert( AIOCountsConverter *cc, void *tobuf, void *frombuf, unsigned num_bytes );
 PUBLIC_EXTERN AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, void *tobuf, void *frombuf , unsigned num_bytes );
 

@@ -70,13 +70,13 @@ CPPDBGLIB 	:= $(LIBPREFIX)aiousbcppdbg.$(STATICSUFFIX)
 
 
 ifdef DEBUG
-        DEBUGOPTS       += -ggdb $(DEBUG)
+        # DEBUGOPTS       += -ggdb $(DEBUG)
+	DEBUGOPTS	+= -g
 else
         DEBUGOPTS       := -DNDEBUG
 endif
 
-DEBUG_FLAGS	:= -ggdb 
-
+DEBUG_FLAGS	:= -g
 
 LIBS 		:= $(CLIB) $(CDBGLIB) $(CPPLIB) $(CPPDBGLIB)  $(SHCLIB) $(SHCDBGLIB) $(SHCPPLIB) $(SHCPPDBGLIB)
 override CFLAGS	+= -I. -I/usr/include/libusb-1.0 -std=gnu99
