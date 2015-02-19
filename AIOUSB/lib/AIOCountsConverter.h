@@ -31,6 +31,10 @@ typedef struct aio_counts_converter {
     unsigned num_oversamples;
     unsigned num_channels;
     unsigned unit_size;
+    unsigned scan_count;
+    unsigned channel_count;
+    unsigned os_count;
+    unsigned sum;
     AIOUSB_BOOL discardFirstSample;
     void *buf;
     AIOGainRange *gain_ranges;

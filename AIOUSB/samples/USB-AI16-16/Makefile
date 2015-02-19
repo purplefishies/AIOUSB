@@ -37,6 +37,9 @@ ifdef AIOUSBLIBDIR
 else
 	LIBAIOUSB 		:= -laiousbdbg			# use default library search path
 	LIBAIOUSBCPP 		:= -laiousbcppdbg		# "     "      "       "      "
+
+	LIBAIOUSB_CDEP		:= $(wildcard $(AIO_LIB_DIR)/*.so )
+	CFLAGS			+= -I$(AIO_LIB_DIR) 
 endif
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -144,6 +147,8 @@ $(AIO_LIB_DIR)/wrappers/java/$(JAVA_BUILT):
 %:	%.jar
 	LD_LIBRARY_PATH="$${AIO_LIB_DIR}:$${PWD}/../../lib/wrappers/java" java -classpath "::$${PWD}/../../lib/wrappers/java/AIOUSB.jar:$<" $@
 
+$(AIO_LIB_DIR)/%.so:	$(wildcard $(AIO_LIB_DIR)/*.c)
+	cd $(AIO_LIB_DIR) && $(MAKE) $(nodir $@)
 
 %.class:	%.java
 	$(JAVAC) -cp $(AIOUSBJAVALIBDIR)/AIOUSB.jar $<
@@ -182,10 +187,12 @@ lib/TestCaseSetup.o: lib/TestCaseSetup.cpp lib/TestCaseSetup.h  $(LIBRARY_DEPS)
 #
 # C Rules
 #
-%.c.o:%.c	$(COMMON_DEPS)
+%.c.o:%.c	$(LIBRARY_DEPS) $(COMMON_DEPS) 
+	@echo "Deps: $(LIBRARY_DEPS)"
 	$(CC) $(CFLAGS)  -D_GNU_SOURCE $(OBJFILE_OPTS) $(INCPATH) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $(COPTS) $<  -o $@
 
-%:%.c.o
+%:%.c.o		$(LIBRARY_DEPS)
+	@echo "Deps: $(LIBRARY_DEPS)"
 	$(CC) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $< $(CLIBS) -o $@ $(LDFLAGS)
 
 

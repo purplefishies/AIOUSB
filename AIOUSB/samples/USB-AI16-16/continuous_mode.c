@@ -137,7 +137,7 @@ main(int argc, char *argv[] )
 
         if ( (scans_remaining = AIOContinuousBufCountScansAvailable(buf) ) > 0 ) { 
 
-            /* if ( scans_remaining ) {  */
+            if ( scans_remaining == options.num_scans ) {
 
                 scans_read = AIOContinuousBufReadIntegerScanCounts( buf, (uint16_t*)tobuf, tobufsize, AIOContinuousBufNumberChannels(buf)*AIOContinuousBufCountScansAvailable(buf) );
 
@@ -152,7 +152,7 @@ main(int argc, char *argv[] )
                         }
                     }
                 }
-            /* } */
+            }
         } else {
         }
 
