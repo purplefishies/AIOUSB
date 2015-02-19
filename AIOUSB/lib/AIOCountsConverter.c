@@ -54,6 +54,12 @@ void DeleteAIOCountsConverter( AIOCountsConverter *ccv )
     free(ccv);
 }
 
+void AIOCountsConverterReset( AIOCountsConverter *cc )
+{
+    assert(cc);
+    cc->scan_count = cc->os_count = cc->channel_count = 0;
+}
+
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOCountsConverterConvertNScans( AIOCountsConverter *ccv, int num_scans )
 {
@@ -121,11 +127,17 @@ AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, void *tobufpt
                 cc->sum = 0;
             } else {
                 AIOUSB_DEVEL("Leaving !\n");
+                goto done_procssing;
             }
         }
-        cc->channel_count = 0;
+        if ( cc->channel_count >= cc->num_channels ) {
+            cc->channel_count = 0;
+        } else {
+            AIOUSB_DEVEL("other leaving\n");
+            goto done_procssing;
+        }
     }
-
+ done_procssing:
     free(tmpbuf);
     return count;
 
@@ -268,6 +280,37 @@ TEST(Composite,IncompleteConversion )
         ranges[i].min = 0.0;
     }
 
+    AIOCountsConverter *cc = NewAIOCountsConverterWithBuffer( from_buf, num_channels, ranges, num_oversamples , sizeof(unsigned short)  );
+
+    channel_count = 0;
+    for ( os_count = 0; os_count < (num_oversamples + 1) / 3; os_count ++ , abspos ++ ) {
+        from_buf[abspos] = channel_count * 1000;
+    }
+
+    retval = infifo->PushN( infifo, from_buf, abspos );
+    retval = cc->ConvertFifo( cc, outfifo, infifo, abspos );
+    ASSERT_EQ( 0, cc->scan_count  );
+    ASSERT_EQ( 0, cc->channel_count );
+    ASSERT_EQ( abspos , cc->os_count );
+
+
+    retval = infifo->PushN( infifo, from_buf, (num_oversamples + 1) - abspos );
+    retval = cc->ConvertFifo( cc, outfifo, infifo, (num_oversamples + 1) - abspos  );
+    ASSERT_EQ( 0, cc->scan_count  );
+    ASSERT_EQ( 1, cc->channel_count );
+    ASSERT_EQ( 0 , cc->os_count );
+
+    retval = infifo->PushN( infifo, from_buf, (num_channels-1)*(num_oversamples+1) );
+    retval = cc->ConvertFifo( cc, outfifo, infifo, (num_channels-1)*(num_oversamples+1) );
+
+    ASSERT_EQ( 1, cc->scan_count  );
+    ASSERT_EQ( 0, cc->channel_count );
+    ASSERT_EQ( 0 , cc->os_count );
+
+    AIOFifoReset( (AIOFifo*)infifo);
+    AIOFifoReset( (AIOFifo*)outfifo);
+    AIOCountsConverterReset( cc );
+    abspos = 0;
     for (  scan_count = 0; scan_count < num_scans / 3; scan_count ++ )  {
         for (  channel_count = 0; channel_count < num_channels ; channel_count ++ ) {
             for (  os_count = 0; os_count < num_oversamples + 1; os_count ++ , abspos ++ ) {
@@ -276,6 +319,12 @@ TEST(Composite,IncompleteConversion )
         }
     }
 
+    retval = infifo->PushN( infifo, from_buf, abspos );
+    retval = cc->ConvertFifo( cc, outfifo, infifo, abspos );
+    ASSERT_EQ( num_scans / 3, cc->scan_count  );
+    /* EXPECT_EQ( num_scans / 3*num_channels*sizeof(double), outfifo->write_pos ) ; */
+    
+    abspos = 0;
     /* Now let's add a few extra channels extra */
     for (  channel_count = 0; channel_count < num_channels / 3 ; channel_count ++ ) {
         for ( os_count = 0; os_count < num_oversamples + 1; os_count ++ , abspos ++ ) {
@@ -288,27 +337,30 @@ TEST(Composite,IncompleteConversion )
     }
 
     retval = infifo->PushN( infifo, from_buf, abspos );
-
-    AIOCountsConverter *cc = NewAIOCountsConverterWithBuffer( from_buf, num_channels, ranges, num_oversamples , sizeof(unsigned short)  );
-
     retval = cc->ConvertFifo( cc, outfifo, infifo , abspos );
     /* Verify that we have the outfifo has had the correct number of counts converted */
     EXPECT_EQ( abspos, retval ) << "We should be able to read out " << abspos << " number of bytes which is not an integer number of scans";
     ASSERT_EQ( (((num_scans / 3)*num_channels + channel_count)*sizeof(double)), outfifo->write_pos );
 
-
-
     abspos = 0;
     for ( ; os_count < num_oversamples + 1; os_count ++  , abspos ++ ) {
         from_buf[abspos] = channel_count * 1000;
     }
+    retval = infifo->PushN( infifo, from_buf, abspos );
+    retval = cc->ConvertFifo( cc, outfifo, infifo, abspos );
+    
+    ASSERT_EQ( num_channels / 3 + 1, cc->channel_count );
+    ASSERT_EQ( 0 , cc->os_count );
+    channel_count ++;
+
     /* Read the remaining channels & oversamples to complete the one scan */
+    abspos = 0;
     for ( ; channel_count < num_channels ; channel_count ++ ) {
         for ( os_count = 0; os_count < num_oversamples + 1; os_count ++  , abspos ++ ) {
             from_buf[abspos] = channel_count * 1000;
         }
     }
-    EXPECT_EQ( (num_channels - (num_channels/3))*(num_oversamples+1) + ( num_oversamples +1 - ((num_oversamples + 1) / 3)), abspos );
+    /* EXPECT_EQ( (num_channels - (num_channels/3))*(num_oversamples+1) + ( num_oversamples +1 - ((num_oversamples + 1) / 3)), abspos ); */
 
     /* add the data */
     retval = infifo->PushN( infifo, from_buf, abspos );
@@ -319,9 +371,8 @@ TEST(Composite,IncompleteConversion )
 
     EXPECT_EQ( abspos, retval ) << "Should have read in the remaining for that one scan";
 
-
+    /* EXPECT_EQ( 42752, outfifo->write_pos ); */
     EXPECT_EQ( AIOFifoReadSize(outfifo) , ((num_scans / 3)+1)*num_channels*sizeof(double) );
-
 }
 
 
