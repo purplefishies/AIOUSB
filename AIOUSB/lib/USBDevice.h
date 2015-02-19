@@ -5,6 +5,7 @@
 #include <libusb.h>
 #include <stdlib.h>
 #include "ADCConfigBlock.h"
+#include "AIOEither.h"
 
 #ifdef __aiousb_cplusplus
 namespace AIOUSB {
@@ -20,6 +21,8 @@ typedef struct aiousb_device {
 
     int (*usb_request)( struct aiousb_device *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout );
     int (*usb_reset_device)(struct aiousb_device *usbdev );
+    int (*usb_put_config)( struct aiousb_device *usb, ADCConfigBlock *configBlock );
+    int (*usb_get_config)( struct aiousb_device *usb, ADCConfigBlock *configBlock );
 
     uint8_t timeout;
     libusb_device *device;
@@ -28,11 +31,20 @@ typedef struct aiousb_device {
     AIOUSB_BOOL debug;
 } USBDevice;
 
+typedef struct aiousb_libusb_args {
+    struct libusb_device *dev;
+    struct libusb_device_handle *handle;
+    struct libusb_device_descriptor *deviceDesc;
+} LIBUSBArgs;
+
 
 USBDevice * NewUSBDevice(libusb_device *dev, libusb_device_handle *handle );
 void DeleteUSBDevice( USBDevice *dev );
 USBDevice *CopyUSBDevice( USBDevice *usb );
-int InitializeUSBDevice( USBDevice *usb );
+
+/* int InitializeUSBDevice( USBDevice *usb ); */
+AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args );
+
 
 int FindUSBDevices( USBDevice **devs, int *size );
 void DeleteUSBDevices( USBDevice *devs);

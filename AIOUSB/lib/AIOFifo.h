@@ -74,7 +74,8 @@ typedef struct new_aio_fifo {
         AIORET_TYPE (*PopN)( struct new_aio_fifo_##NAME *fifo , TYPE *a, unsigned N );              \
     } AIOFifo##NAME;                                                                                \
     AIOFifo##NAME *NewAIOFifo##NAME( unsigned int size );                                           \
-    void DeleteAIOFifo##NAME( AIOFifo##NAME *fifo );                                 
+    void DeleteAIOFifo##NAME( AIOFifo##NAME *fifo );                                                \
+    AIORET_TYPE AIOFifo##NAME ##Initialize( AIOFifo##NAME *nfifo );
 
 
 #define TEMPLATE_AIOFIFO_API(NAME,TYPE)                                                             \
@@ -119,10 +120,9 @@ AIORET_TYPE NAME##PopN( AIOFifo##NAME *fifo, TYPE *in, unsigned N)              
                                                                                                     \
     return retval;                                                                                  \
 }                                                                                                   \
-AIOFifo##NAME *NewAIOFifo##NAME( unsigned int size )                                                \
+AIORET_TYPE AIOFifo##NAME ##Initialize( AIOFifo##NAME *nfifo )                                       \
 {                                                                                                   \
-    AIOFifo##NAME *nfifo = (AIOFifo##NAME*)calloc(1,sizeof(AIOFifo##NAME));                         \
-    AIOFifoInitialize( (AIOFifo*)nfifo , (size+1)*sizeof(TYPE), sizeof(TYPE));                      \
+    AIORET_TYPE retval = {0};                                                                       \
     nfifo->Push = NAME##Push;                                                                       \
     nfifo->PushN = NAME##PushN;                                                                     \
     nfifo->Pop = NAME##Pop;                                                                         \
@@ -134,6 +134,13 @@ AIOFifo##NAME *NewAIOFifo##NAME( unsigned int size )                            
     nfifo->delta = NAME##delta;                                                                     \
     nfifo->refsize = sizeof(TYPE);                                                                  \
     nfifo->kind = aioeither_value_##TYPE;                                                           \
+    return retval;                                                                                  \
+}                                                                                                   \
+AIOFifo##NAME *NewAIOFifo##NAME( unsigned int size )                                                \
+{                                                                                                   \
+    AIOFifo##NAME *nfifo = (AIOFifo##NAME*)calloc(1,sizeof(AIOFifo##NAME));                         \
+    AIOFifoInitialize( (AIOFifo*)nfifo , (size+1)*sizeof(TYPE), sizeof(TYPE));                      \
+    AIOFifo##NAME ##Initialize( nfifo );                                                            \
     return nfifo;                                                                                   \
 }                                                                                                   \
 void DeleteAIOFifo##NAME( AIOFifo##NAME *fifo )                                                     \

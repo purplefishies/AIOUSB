@@ -293,7 +293,7 @@ static int CompareProductNames(const void *p1, const void *p2)
     return strcmp((*( ProductIDName** )p1)->name, (*( ProductIDName** )p2)->name);
 }
 
-
+/*----------------------------------------------------------------------------*/
 unsigned long QueryDeviceInfo( unsigned long DeviceIndex,
                                unsigned long *pPID,
                                unsigned long *pNameSize,
@@ -353,7 +353,7 @@ PRIVATE char *ProductIDToName(unsigned int productID)
     char *name = tmpstr;
 
 
-    /*
+    /**
      * productIDIndex[] represents an index into
      * productIDNameTable[], sorted by product ID;
      * specifically, it contains pointers into
@@ -645,6 +645,7 @@ char *GetSafeDeviceName(unsigned long DeviceIndex)
 
     return deviceName;
 }
+
 /*----------------------------------------------------------------------------*/ 
 AIORESULT _Initialize_Device_Desc(unsigned long DeviceIndex) 
 {
@@ -1258,9 +1259,12 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
     }
 
     /* Clear up the CachedConfigBlock */
-    ADCConfigBlockInitialize( &device->cachedConfigBlock , device );
-    device->cachedConfigBlock.size = device->ConfigBytes;
-    device->cachedConfigBlock.testing = device->testing;
+    ADCConfigBlockInitializeFromAIOUSBDevice( &device->cachedConfigBlock , device );
+    device->cachedConfigBlock.size                              = device->ConfigBytes;
+    device->cachedConfigBlock.testing                           = device->testing;
+    device->cachedConfigBlock.mux_settings.ADCMUXChannels       = device->ADCMUXChannels;
+    device->cachedConfigBlock.mux_settings.ADCChannelsPerGroup  = device->ADCChannelsPerGroup;
+    device->cachedConfigBlock.mux_settings.defined              = AIOUSB_TRUE;
 
     device->valid = AIOUSB_TRUE;
 }
@@ -1297,7 +1301,6 @@ AIORESULT AIODeviceTableSetDeviceID( int index, AIOUSBDevice *dev )
     return result;
 }
 
-
 /*----------------------------------------------------------------------------*/
 AIORESULT AIOUSB_GetAllDevices() 
 {
@@ -1309,20 +1312,18 @@ AIORESULT AIOUSB_GetAllDevices()
             AIORESULT res = AIOUSB_SUCCESS;
             AIODeviceTableGetDeviceAtIndex( index , &res );
             if ( res == AIOUSB_SUCCESS ) { 
-                const int MAX_NAME_SIZE = 100;
+                int MAX_NAME_SIZE = 100;
                 char name[ MAX_NAME_SIZE + 1 ];
                 unsigned long productID;
                 unsigned long nameSize = MAX_NAME_SIZE;
                 unsigned long numDIOBytes;
                 unsigned long numCounters;
 
-                const unsigned long result = QueryDeviceInfo(index, &productID, &nameSize, name, &numDIOBytes, &numCounters);
+                unsigned long result = QueryDeviceInfo(index, &productID, &nameSize, name, &numDIOBytes, &numCounters);
                 if(result == AIOUSB_SUCCESS) {
                     name[ nameSize ] = '\0';
                     deviceMask = (deviceMask << 1) | 1;
                 }
-
-
             }
         }
     }
@@ -1359,11 +1360,6 @@ void CloseAllDevices(void)
             USBDevice *usb = AIOUSBDeviceGetUSBHandle( device );
             if ( usb ) 
                 USBDeviceClose( usb );
-            /* if(device->deviceHandle != NULL) { */
-            /*     libusb_close(device->deviceHandle); */
-            /*     device->deviceHandle = NULL; */
-            /* } */
-            /* libusb_unref_device(device->device); */
         
             if(device->LastDIOData != NULL) {
                 free(device->LastDIOData);
@@ -1439,28 +1435,28 @@ AIORET_TYPE AIODeviceTablePopulateTable(void)
     AIORET_TYPE result;
     USBDevice *usbdevices = NULL;
     int size = 0;
+
     result = FindUSBDevices( &usbdevices, &size );
+
     if ( result < AIOUSB_SUCCESS ) 
         return result;
 
     for ( int i = 0; i < size ; i ++ ) {
         AIOUSBDevice *device = (AIOUSBDevice *)&deviceTable[ numAccesDevices++ ];
 
-        if ( i == 0 ) {
-            /* Setup the first USB device */
-
-        }
         unsigned productID = USBDeviceGetIdProduct( &usbdevices[i] );
         _setup_device_parameters( device, productID );
+        /* device->usb_device = usbdevices[i]; */
         device->usb_device = CopyUSBDevice( &usbdevices[i] );
-        InitializeUSBDevice( device->usb_device ); /* Sets up the internals for actually working */
     }
     
-    DeleteUSBDevices( usbdevices );
-
     AIOUSB_SetInit();
     return AIOUSB_SUCCESS;
 }
+
+/* device->usb_device = CopyUSBDevice( &usbdevices[i] ); */
+/* InitializeUSBDevice( device->usb_device ); /\* Sets up the internals for actually working *\/ */
+/* DeleteUSBDevices( usbdevices ); */
 
 
 /*----------------------------------------------------------------------------*/
@@ -1494,14 +1490,6 @@ unsigned long AIOUSB_Init(void)
                           } else {
                               AIOUSB_SetInit();
                           }
-                          /* const int libusbResult = libusb_init( NULL ); */
-                          /* if(libusbResult == LIBUSB_SUCCESS) { */
-                          /*       aiousbInit = AIOUSB_INIT_PATTERN; */
-                          /*       PopulateDeviceTable(); */
-                          /*   } else { */
-                          /*       pthread_mutex_destroy(&aiousbMutex); */
-                          /*       result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult); */
-                          /*   } */
 
                         } else
                           result = AIOUSB_ERROR_INVALID_MUTEX;
@@ -1516,20 +1504,9 @@ unsigned long AIOUSB_Init(void)
               AIOUSB_SetInit();
           }
 
-          /* const int libusbResult = libusb_init(NULL); */
-          /* if(libusbResult == LIBUSB_SUCCESS) { */
-          /*   /\** */
-          /*    * @note */
-          /*    * populate device table so users can use diFirst and diOnly immediately; be */
-          /*    * sure to call PopulateDeviceTable() after 'aiousbInit = AIOUSB_INIT_PATTERN;' */
-          /*    *\/ */
-          /*       aiousbInit = AIOUSB_INIT_PATTERN; */
-          /*       AIODeviceTablePopulateTable(); */
-          /*   } else { */
-          /*       result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult); */
-          /*   } */
 #endif
-      }
+
+    }
     return result;
 }
 

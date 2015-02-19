@@ -10,25 +10,23 @@ namespace AIOUSB
 {
 #endif
 
-
-
 typedef struct aio_usb_driver AIOUSBDevice ;
 
 typedef struct mux_settings {
-    int ADCChannelsPerGroup;
-    int ADCMUXChannels;
+    unsigned long ADCChannelsPerGroup;
+    unsigned long ADCMUXChannels;
     AIOUSB_BOOL defined;
 } ADCMuxSettings;
 
 typedef struct adc_config_block {
     AIOUSBDevice *device; /**< Pointer to the device Descriptor */
     unsigned long size;
-    AIOUSB_BOOL testing; /**< For making Unit tests that don't talk to hardware */
     unsigned char registers[ AD_MAX_CONFIG_REGISTERS +1];
     unsigned timeout;
     ADCMuxSettings mux_settings;
     AIOUSB_BOOL discardFirstSample;
     AIOUSB_BOOL debug;
+    AIOUSB_BOOL testing; /**< For making Unit tests that don't talk to hardware */
 } ADCConfigBlock;
 
 typedef ADCConfigBlock ADConfigBlock;
@@ -43,6 +41,7 @@ typedef struct lookup {
 
 
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockInit( ADCConfigBlock *, AIOUSBDevice *deviceDesc, unsigned int );
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockInitializeDefault( ADCConfigBlock *config );
 PUBLIC_EXTERN void ADC_VerifyAndCorrectConfigBlock( ADCConfigBlock *configBlock , AIOUSBDevice *deviceDesc  );
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetAllGainCodeAndDiffMode(ADCConfigBlock *config, unsigned gainCode, AIOUSB_BOOL differentialMode);
 
@@ -88,7 +87,8 @@ PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockCopy( ADCConfigBlock *to, ADCConfigBlock
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetDevice( ADCConfigBlock *obj, AIOUSBDevice *dev );
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetAIOUSBDevice( ADCConfigBlock *obj, AIOUSBDevice *dev );
 PUBLIC_EXTERN AIOUSBDevice *ADCConfigBlockGetAIOUSBDevice( ADCConfigBlock *obj, AIORET_TYPE *result );
-PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockInitialize( ADCConfigBlock *config , AIOUSBDevice *dev);
+/* PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockInitialize( ADCConfigBlock *config , AIOUSBDevice *dev); */
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockInitializeFromAIOUSBDevice( ADCConfigBlock *config , AIOUSBDevice *dev);
 
 
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetTesting( ADCConfigBlock *obj, AIOUSB_BOOL testing );

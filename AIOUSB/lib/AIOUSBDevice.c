@@ -321,7 +321,7 @@ TEST(Initialization, SetDifferentConfigBlocks )
     AIOUSBDeviceInitializeWithProductID( dev , USB_AIO16_16A );
 
     EXPECT_TRUE(conf);
-    ADCConfigBlockInitialize( conf, dev );
+    ADCConfigBlockInitializeFromAIOUSBDevice( conf, dev );
     
     EXPECT_GE( conf->size, AD_CONFIG_REGISTERS ) << "Should be initialized to correct value " << (int)AD_CONFIG_REGISTERS << "\n";
 
@@ -332,7 +332,7 @@ TEST(Initialization, SetDifferentConfigBlocks )
     result = AIOUSBDeviceSetADCConfigBlock( dev, conf );
     EXPECT_NE( result, AIOUSB_TRUE );
 
-    result = ADCConfigBlockInitialize( conf , dev ); 
+    result = ADCConfigBlockInitializeFromAIOUSBDevice( conf , dev ); 
     EXPECT_EQ( result, AIOUSB_SUCCESS );
 
     result = AIOUSBDeviceSetADCConfigBlock( dev, conf );
@@ -351,7 +351,7 @@ TEST(TestingFeatures, PropogateTesting )
 {
     AIOUSBDevice *dev = NewAIOUSBDevice(0) ;
     ADCConfigBlock conf;
-    ADCConfigBlockInitialize( &conf , dev );
+    ADCConfigBlockInitializeFromAIOUSBDevice( &conf , dev );
     
     AIOUSBDeviceSetADCConfigBlock( dev, &conf );
     

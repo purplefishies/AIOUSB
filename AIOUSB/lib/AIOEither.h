@@ -9,6 +9,7 @@
 #ifndef _AIOEITHER_H
 #define _AIOEITHER_H
 
+#include "AIOTypes.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
@@ -43,6 +44,7 @@ typedef union {
 
 typedef struct aio_ret_value  {
     int left;
+    char *errmsg;
     AIO_EITHER_VALUE_ITEM right;
     AIO_EITHER_TYPE type;
     int size;
@@ -56,7 +58,7 @@ void AIOEitherGetRight(AIOEither *retval, void *tmp, ... );
 
 void AIOEitherSetLeft(AIOEither *retval, int val );
 int  AIOEitherGetLeft(AIOEither *retval );
-
+AIOUSB_BOOL AIOEitherHasError( AIOEither *retval );
 
 
 #ifdef __aiousb_cplusplus

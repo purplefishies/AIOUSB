@@ -3,6 +3,7 @@
 
 #include <pthread.h>
 #include <stdio.h>
+#include "AIOTypes.h"
 
 #ifdef __aiousb_cplusplus
 namespace AIOUSB
@@ -42,19 +43,19 @@ namespace AIOUSB
 #undef AIOUSB_ERROR
 #undef AIOUSB_FATAL 
 
-typedef enum aio_error_levels { 
+#undef AIO_DEBUG_LEVEL
+
+typedef enum {
     AIOFATAL_LEVEL = 1,
     AIOERROR_LEVEL = 1,
     AIOINFO_LEVEL = 2,
     AIOWARN_LEVEL = 4,
+    AIODEFAULT_LOG_LEVEL = 7,
     AIODEBUG_LEVEL = 8,
-    AIODEVEL_LEVEL = 16,
+    AIODEVEL_LEVEL = 16
 } AIO_DEBUG_LEVEL;
 
 extern AIO_DEBUG_LEVEL AIOUSB_DEBUG_LEVEL;
-
-
-
 
 #ifdef AIOUSB_DEBUG_LOG
 /**
@@ -62,7 +63,6 @@ extern AIO_DEBUG_LEVEL AIOUSB_DEBUG_LEVEL;
  **/
 
 #define AIOUSB_TAP(x,...)  if( 1 ) { AIOUSB_LOG( ( x ? "ok -" : "not ok" ) __VA_ARGS__ ); }
-
 #define AIOUSB_DEVEL(...)  do { if ( AIOUSB_DEBUG_LEVEL & AIODEVEL_LEVEL ) { AIOUSB_LOG(AIO_DEVEL_STR __VA_ARGS__ ); } } while(0)
 #define AIOUSB_DEBUG(...)  do { if ( AIOUSB_DEBUG_LEVEL & AIODEBUG_LEVEL ) { AIOUSB_LOG(AIO_DEBUG_STR __VA_ARGS__ ); } } while(0)
 #define AIOUSB_WARN(...)   do { if ( AIOUSB_DEBUG_LEVEL & AIOWARN_LEVEL )  { AIOUSB_LOG(AIO_WARN_STR  __VA_ARGS__ ); } } while(0)

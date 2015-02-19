@@ -105,24 +105,15 @@ enum {
 typedef bool AIOUSB_BOOL;
 const bool AIOUSB_FALSE = false;
 const bool AIOUSB_TRUE = true;
-#if defined( ENABLE_BOOL_TYPE )
-typedef bool BOOL;
-const bool FALSE = false;
-const bool TRUE = true;
-#endif
 #else
+
 enum AIOUSB_BOOL_VAL {
     AIOUSB_FALSE                        = 0,
     AIOUSB_TRUE                         = 1
 };
+
 typedef enum AIOUSB_BOOL_VAL AIOUSB_BOOL;
-#if defined( ENABLE_BOOL_TYPE )
-enum BOOL {
-    FALSE                               = 0,
-    TRUE                                = 1
-};
-typedef enum BOOL BOOL;
-#endif
+
 #endif
 
 
@@ -137,8 +128,6 @@ typedef enum BOOL BOOL;
             goto g;                                             \
         }                                                       \
     } while (0 )
-
-
 
 
 CREATE_ENUM_W_START(ProductIDS,0,
@@ -358,6 +347,7 @@ CREATE_ENUM_W_START( ResultCode, 0,
                      AIOUSB_ERROR_HANDLE_EOF,
                      AIOUSB_ERROR_DEVICE_NOT_FOUND,
                      AIOUSB_ERROR_USBDEVICE_NOT_FOUND,
+                     AIOUSB_ERROR_USB_INIT,
                      AIOUSB_ERROR_INVALID_TIMEOUT,
                      AIOUSB_ERROR_INVALID_USBDEVICE,
                      AIOUSB_ERROR_INVALID_VOLTAGES,

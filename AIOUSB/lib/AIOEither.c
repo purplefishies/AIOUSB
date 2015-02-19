@@ -33,6 +33,10 @@ void AIOEitherClear( AIOEither *retval )
     default:
         ;
     }
+    if ( retval->errmsg ) {
+        free(retval->errmsg );
+        retval->errmsg = 0;
+    }
 
 }
     
@@ -152,6 +156,11 @@ int AIOEitherGetLeft(AIOEither *retval)
     return retval->left;
 }
 
+AIOUSB_BOOL AIOEitherHasError( AIOEither *retval )
+{
+    return (retval->left == 0 ? AIOUSB_FALSE : AIOUSB_TRUE );
+}
+
 
 #ifdef __cplusplus
 }
@@ -238,6 +247,32 @@ TEST(CanCreate,Shorts)
     EXPECT_EQ( tv_ui, *(uint16_t*)&readvals[0] );
 
 }
+
+typedef struct simple {
+    char *tmp;
+    int a;
+    double b;
+} Foo;
+
+
+AIOEither doIt( Foo *) 
+{
+    AIOEither retval = {0};
+    asprintf(&retval.errmsg, "Error got issue with %d\n", 3 );
+    retval.left = 3;
+    return retval;
+}
+
+TEST(CanCreate,Simple)
+{
+    Foo tmp = {NULL, 3,34.33 };
+    AIOEither retval = doIt( &tmp );
+    
+    EXPECT_EQ( 3,  AIOEitherGetLeft( &retval ) );
+    AIOEitherClear( &retval );
+
+}
+
 
 int main(int argc, char *argv[] )
 {

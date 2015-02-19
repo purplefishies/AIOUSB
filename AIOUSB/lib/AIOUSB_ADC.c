@@ -187,7 +187,7 @@ unsigned long ReadConfigBlock(unsigned long DeviceIndex,
         if ( result != AIOUSB_SUCCESS )
             return result;
 
-        ADCConfigBlockInitialize( &configBlock, configBlock.device );
+        ADCConfigBlockInitializeFromAIOUSBDevice( &configBlock, configBlock.device );
 
         if( configBlock.testing != AIOUSB_TRUE ) {
             int bytesTransferred = usb->usb_control_transfer(usb,
@@ -1058,41 +1058,34 @@ unsigned long ADC_SetConfig(
 
      unsigned endChannel;
      AIORESULT result;
-     if( pConfigBuf == NULL || ConfigBufSize == NULL )
+     if( !pConfigBuf || !ConfigBufSize )
           return AIOUSB_ERROR_INVALID_PARAMETER;
 
+     ADCConfigBlock configBlock = {0};
      AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
      if ( result  != AIOUSB_SUCCESS )
          return result;
+     USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
+     if ( result  != AIOUSB_SUCCESS )
+         return result;
 
-     if(deviceDesc->ConfigBytes == 0)
-         return AIOUSB_ERROR_NOT_SUPPORTED;
+     memcpy( &configBlock.registers, pConfigBuf, *ConfigBufSize );
+     configBlock.timeout  = deviceDesc->commTimeout;
+     configBlock.size     = *ConfigBufSize;
 
      /**
       * validate settings
       */
-     if(*ConfigBufSize < deviceDesc->ConfigBytes) {
-          *ConfigBufSize = deviceDesc->ConfigBytes;
-          return AIOUSB_ERROR_INVALID_PARAMETER;
+     if (*ConfigBufSize < deviceDesc->ConfigBytes) {
+         *ConfigBufSize = deviceDesc->ConfigBytes;
+         return AIOUSB_ERROR_INVALID_PARAMETER;
      }
-
-     ADConfigBlock configBlock;
-     configBlock.device = deviceDesc;
-     configBlock.size   = deviceDesc->ConfigBytes;
-
-     memcpy(configBlock.registers, pConfigBuf, configBlock.size);
      
-     if( ! adcblock_valid_size( &configBlock ) ) {
-          result = AIOUSB_ERROR_INVALID_ADCONFIG_CHANNEL_SETTING;
-          goto out_ADC_SetConfig;
-     }
-
      if( !adcblock_valid_channel_settings( &configBlock , deviceDesc->ADCMUXChannels )  ) {
           result = AIOUSB_ERROR_INVALID_ADCONFIG_CHANNEL_SETTING;
           goto out_ADC_SetConfig;
      }
-     /* if( !VALID_ENUM( ADCalMode , configBlock.registers[ AD_CONFIG_CAL_MODE ] ) ) { */
-     /* if( !(configBlock.registers[ AD_CONFIG_CAL_MODE ] >= 0 && configBlock.registers[ AD_CONFIG_CAL_MODE ] <= 6) ) {  */
+
      if( configBlock.registers[ AD_CONFIG_CAL_MODE ] >= 8 ) { 
           result = AIOUSB_ERROR_INVALID_ADCONFIG_CAL_SETTING;
           goto out_ADC_SetConfig;
@@ -1111,17 +1104,26 @@ unsigned long ADC_SetConfig(
      }
 
 
-     deviceDesc->cachedConfigBlock = configBlock;
 
-
-     result = WriteConfigBlock(DeviceIndex);
-
-     if(result == AIOUSB_SUCCESS)
-          *ConfigBufSize = configBlock.size;
+     usb->usb_put_config( usb, &configBlock );
 
 out_ADC_SetConfig:
      return result;
 }
+
+/* deviceDesc->cachedConfigBlock = configBlock; */
+/* result = WriteConfigBlock(DeviceIndex); */
+/* if(result == AIOUSB_SUCCESS) */
+/*      *ConfigBufSize = configBlock.size; */
+/* if( !VALID_ENUM( ADCalMode , configBlock.registers[ AD_CONFIG_CAL_MODE ] ) ) { */
+/* if( !(configBlock.registers[ AD_CONFIG_CAL_MODE ] >= 0 && configBlock.registers[ AD_CONFIG_CAL_MODE ] <= 6) ) {  */
+/* ADConfigBlock configBlock; */
+/* ADCConfigBlockCopy( &configBlock, &deviceDesc->cachedConfigBlock ); */
+/* configBlock.device = deviceDesc; */
+/* configBlock.size   = deviceDesc->ConfigBytes; */
+/* memcpy(configBlock.registers, pConfigBuf, configBlock.size); */
+
+
 
 /*----------------------------------------------------------------------------*/
 /** 
