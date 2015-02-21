@@ -34,12 +34,13 @@ typedef struct aio_counts_converter {
     unsigned scan_count;
     unsigned channel_count;
     unsigned os_count;
+    unsigned converted_count;
     unsigned sum;
-    AIOUSB_BOOL discardFirstSample;
     void *buf;
     AIOGainRange *gain_ranges;
     AIORET_TYPE (*Convert)( struct aio_counts_converter *cc, void *tobuf, void *frombuf, unsigned num_bytes );
     AIORET_TYPE (*ConvertFifo)( struct aio_counts_converter *cc, void *tobuf, void *frombuf , unsigned num_bytes );
+    AIOUSB_BOOL discardFirstSample;
 } AIOCountsConverter;
 
 

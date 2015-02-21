@@ -1129,15 +1129,15 @@ void *ConvertCountsToVoltsFunction( void *object )
         retval = infifo->PushN( infifo, (uint16_t*)data, bytes / 2 );
         AIOUSB_DEVEL("Pushed %d bytes\n",retval );
 
-        if (  retval >= 0 ) {
-            count += retval;
-        }
-
         AIOUSB_DEVEL("libusb_bulk_transfer returned  %d as usbresult, bytes=%d\n", usbresult , (int)bytes);
         if ( bytes ) {
             /* only write bytes that exist */
 
             retval = cc->ConvertFifo( cc, outfifo, infifo , bytes / sizeof(uint16_t) );
+
+            if (  retval >= 0 ) {
+                count += retval;
+            }
 
             bytes = ( AIOContinuousBuf_BufSizeForCounts(buf) - buf->fifo->refsize - count < datasize ? AIOContinuousBuf_BufSizeForCounts(buf) - buf->fifo->refsize - count : bytes );
 
@@ -1150,7 +1150,7 @@ void *ConvertCountsToVoltsFunction( void *object )
              * 1. count >= number we are supposed to read
              * 2. we don't have enough space
              */
-            if ( count >= buf->num_scans*buf->num_channels*(buf->num_oversamples+1)*sizeof(uint16_t) ) {
+            if ( count >= buf->num_scans*buf->num_channels ) {
                 AIOContinuousBufLock(buf);
                 buf->status = TERMINATED;
                 AIOContinuousBufUnlock(buf);
