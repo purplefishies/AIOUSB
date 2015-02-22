@@ -57,8 +57,6 @@ main(int argc, char *argv[] )
 {
     struct opts options = {100000, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , (char*)"output.txt", 0, 0, 15 , 0, 0, 0, 0, (AIO_DEBUG_LEVEL)7, NULL };
     AIOContinuousBuf *buf = 0;
-    /* unsigned short tobuf[65536] = {0}; */
-    /* unsigned tobufsize = 65536; */
     struct timespec foo , bar;
 
     AIORET_TYPE retval = AIOUSB_SUCCESS;
