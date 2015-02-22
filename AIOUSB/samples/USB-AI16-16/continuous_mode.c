@@ -38,7 +38,7 @@ void process_cmd_line( struct opts *, int argc, char *argv[] );
 int 
 main(int argc, char *argv[] ) 
 {
-    struct opts options = {100000, 16, 10, AD_GAIN_CODE_0_5V , 4000000 , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15,NULL };
+    struct opts options = {100000, 16, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15,NULL };
     AIOContinuousBuf *buf = 0;
     unsigned read_count = 0;
     AIORET_TYPE retval = AIOUSB_SUCCESS;
@@ -89,8 +89,10 @@ main(int argc, char *argv[] )
 
     /**< New simpler interface */
     AIOContinuousBufInitConfiguration( buf );
-    AIOContinuousBufSetAllGainCodeAndDiffMode( buf , options.gain_code , AIOUSB_FALSE );
+
+
     AIOContinuousBufSetOverSample( buf, options.num_oversamples );
+    AIOContinuousBufSetStartAndEndChannel( buf, options.start_channel, options.end_channel );
 
     if( !options.number_ranges ) { 
         AIOContinuousBufSetAllGainCodeAndDiffMode( buf , options.gain_code , AIOUSB_FALSE );
@@ -108,7 +110,6 @@ main(int argc, char *argv[] )
         }
     }
     AIOContinuousBufSaveConfig(buf);
-
 
     if ( retval < AIOUSB_SUCCESS ) {
         printf("Error setting up configuration\n");
