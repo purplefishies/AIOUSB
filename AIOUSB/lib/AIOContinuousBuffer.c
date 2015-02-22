@@ -975,7 +975,8 @@ void *RawCountsWorkFunction( void *object )
     AIOContinuousBuf *buf = (AIOContinuousBuf*)object;
     int bytes;
     srand(3);
-    unsigned datasize = AIOContinuousBufNumberChannels(buf)*16*512;
+    /* unsigned datasize = AIOContinuousBufNumberChannels(buf)*16*512; */
+    unsigned datasize = 64*1024;
 
     int usbfail = 0;
     int usbfail_count = 5;
@@ -1086,13 +1087,14 @@ void *ConvertCountsToVoltsFunction( void *object )
     unsigned long result;
     int bytes;
     unsigned datasize = 64*1024;
+    /* unsigned datasize = AIOContinuousBufNumberChannels(buf)*16*512; */
 
     int usbfail = 0, usbfail_count = 5;
     unsigned count = 0;
     int num_channels = AIOContinuousBufNumberChannels(buf);
     int num_oversamples = AIOContinuousBufGetOverSample(buf);
     int num_scans = AIOContinuousBufGetNumberScansToRead(buf);
-    AIOFifoCounts *infifo = NewAIOFifoCounts( MAX( datasize , (unsigned)num_channels*(num_oversamples+1)*num_scans ));
+    AIOFifoCounts *infifo = NewAIOFifoCounts( (unsigned)num_channels*(num_oversamples+1)*num_scans );
     AIOFifoVolts *outfifo = (AIOFifoVolts*)buf->fifo;
 
 
@@ -1120,11 +1122,11 @@ void *ConvertCountsToVoltsFunction( void *object )
    
     while ( buf->status == RUNNING  ) {
         
-        /* tmpdatasize = MIN( buf->num_scans*buf->num_channels*(buf->num_oversamples+1)*sizeof(uint16_t) - count, datasize ); */
-
         usbresult = aiocontbuf_get_data( buf, usb, 0x86, data, datasize, &bytes, 3000 );
 
         AIOUSB_DEVEL("Using counts=%d\n",bytes / 2 );
+
+        bytes = MIN( (int)(buf->num_channels * (buf->num_oversamples+1)*buf->num_scans * sizeof(uint16_t) - count*sizeof(uint16_t)), bytes ); 
 
         retval = infifo->PushN( infifo, (uint16_t*)data, bytes / 2 );
         AIOUSB_DEVEL("Pushed %d bytes\n",retval );
@@ -1133,14 +1135,11 @@ void *ConvertCountsToVoltsFunction( void *object )
         if ( bytes ) {
             /* only write bytes that exist */
 
-            /* bytes = ( AIOContinuousBuf_BufSizeForCounts(buf) - buf->fifo->refsize - count < datasize ? AIOContinuousBuf_BufSizeForCounts(buf) - buf->fifo->refsize - count : bytes ); */
-            bytes = MIN( (int)(buf->num_channels * (buf->num_oversamples+1)*buf->num_scans * sizeof(uint16_t) - count*sizeof(uint16_t)), bytes ); 
             retval = cc->ConvertFifo( cc, outfifo, infifo , bytes / sizeof(uint16_t) );
 
             if (  retval >= 0 ) {
                 count += retval;
             }
-
 
 
             AIOUSB_DEVEL("Pushed %d, size: %d\n", bytes / 2 , buf->fifo->size );
@@ -1171,13 +1170,17 @@ void *ConvertCountsToVoltsFunction( void *object )
             } 
         }
     }
-    out_ConvertCountsToVoltsFunction:
+ out_ConvertCountsToVoltsFunction:
     DeleteAIOFifoCounts(infifo);
     DeleteAIOCountsConverter( cc );
-
     free(data);
+    AIOContinuousBufLock(buf);
+    buf->status = TERMINATED;
+    AIOContinuousBufUnlock(buf);
     AIOUSB_DEVEL("Stopping\n");
     AIOContinuousBufCleanup( buf );
+    pthread_exit((void*)&retval);
+
     pthread_exit((void*)&retval);
 }
 

@@ -189,29 +189,6 @@ main(int argc, char *argv[] )
     }
 #endif
 
-#if 0    
-    int scans_remaining = AIOContinuousBufCountScansAvailable(buf);
-    /* printf("Number of scans remaining is %d\n", scans_remaining ); */
-
-    retval = AIOContinuousBufReadIntegerScanCounts( buf, tobuf, tobufsize, AIOContinuousBufNumberChannels(buf)*AIOContinuousBufCountScansAvailable(buf) );
-    retval = retval / sizeof(uint16_t);
-    
-    for( int scan_count = 0; scan_count < retval / AIOContinuousBufNumberChannels(buf) ; scan_count ++ ) { 
-        for( int ch = 0 ; ch < AIOContinuousBufNumberChannels(buf); ch ++ ) {
-            if( options.with_timing )
-                fprintf(fp ,"%d,%d,", (int)bar.tv_sec, (int)(( bar.tv_sec - foo.tv_sec )*1e9 + (bar.tv_nsec - foo.tv_nsec )));
-            fprintf(fp,"%u,",tobuf[scan_count*AIOContinuousBufNumberChannels(buf)+ch] );
-            if( (ch+1) % AIOContinuousBufNumberChannels(buf) == 0 ) {
-                fprintf(fp,"\n");
-            }
-        }
-    }
-    
-#endif
-
-
-
-
 
     fclose(fp);
     fprintf(stdout,"Test completed...exiting\n");
