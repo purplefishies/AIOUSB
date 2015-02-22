@@ -17,6 +17,18 @@
 namespace AIOUSB {
 #endif 
 
+int default_out( AIOCountsConverter *cc, unsigned rounded_num_counts )
+{
+    return cc->converted_count < rounded_num_counts;
+}
+
+int enhanced_out( AIOCountsConverter *cc, unsigned rounded_num_counts )
+{
+    int tmp =  ( cc->converted_count < rounded_num_counts && cc->scan_count < cc->num_scans );
+    return tmp;
+}
+
+
 /*----------------------------------------------------------------------------*/
 AIOCountsConverter *NewAIOCountsConverterWithBuffer( void *buf, 
                                                      unsigned num_channels, 
@@ -29,8 +41,26 @@ AIOCountsConverter *NewAIOCountsConverterWithBuffer( void *buf,
     if (!tmp ) 
         return NULL;
 
-    tmp->buf              = buf;
+    tmp->buf =   buf;
 
+    return tmp;
+}
+
+
+AIOCountsConverter *NewAIOCountsConverterWithScanLimiter( void *buf, 
+                                                          unsigned num_scans,
+                                                          unsigned num_channels, 
+                                                          AIOGainRange *ranges, 
+                                                          unsigned num_oversamples, 
+                                                          unsigned unit_size  
+                                                          ) 
+{
+    AIOCountsConverter *tmp = NewAIOCountsConverter( num_channels, ranges, num_oversamples , unit_size );
+    if (!tmp ) 
+        return NULL;
+    tmp->buf                  = buf;
+    tmp->num_scans            = num_scans;
+    tmp->continue_conversion  = enhanced_out;
     return tmp;
 }
 
@@ -45,6 +75,7 @@ AIOCountsConverter *NewAIOCountsConverter( unsigned num_channels, AIOGainRange *
     tmp->unit_size        = unit_size;
     tmp->Convert          = AIOCountsConverterConvert;
     tmp->ConvertFifo      = AIOCountsConverterConvertFifo;
+    tmp->continue_conversion = default_out;
     return tmp;
 }
 
@@ -80,6 +111,8 @@ double Convert( AIOGainRange range, unsigned short sum )
     return ((double)(range.max - range.min)*sum )/ ((( unsigned short )-1)+1) + range.min;
 }
 
+
+
 /*----------------------------------------------------------------------------*/
 /**
  * @param cc Counts converter object
@@ -108,7 +141,7 @@ AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc, void *tobufpt
     int initial = (cc->scan_count *(cc->num_channels)*(cc->num_oversamples + 1)) + 
         cc->channel_count * ( cc->num_oversamples + 1) + cc->os_count;
 
-    for ( int tobuf_pos = 0; cc->converted_count < rounded_num_counts ; cc->scan_count ++ ) {
+    for ( int tobuf_pos = 0; cc->continue_conversion( cc, rounded_num_counts) ; cc->scan_count ++ ) {
         for ( ; cc->channel_count < cc->num_channels && cc->converted_count < rounded_num_counts; cc->channel_count ++ , tobuf_pos ++  ) {
             for ( ; cc->os_count < (cc->num_oversamples + 1) && cc->converted_count < rounded_num_counts; cc->os_count ++ ) {
 

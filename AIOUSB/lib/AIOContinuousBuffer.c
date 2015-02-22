@@ -1112,7 +1112,8 @@ void *ConvertCountsToVoltsFunction( void *object )
     if ( !ranges )
         goto out_ConvertCountsToVoltsFunction;
 
-    cc = NewAIOCountsConverterWithBuffer( (unsigned short*)data, num_channels, ranges, num_oversamples , sizeof(unsigned short)  );
+    /* cc = NewAIOCountsConverterWithBuffer( (unsigned short*)data, num_channels, ranges, num_oversamples , sizeof(unsigned short)  ); */
+    cc = NewAIOCountsConverterWithScanLimiter( (unsigned short*)data, num_scans, num_channels, ranges, num_oversamples , sizeof(unsigned short)  );
     if ( !cc ) 
         goto out_ConvertCountsToVoltsFunction;
 
