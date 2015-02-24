@@ -286,6 +286,37 @@ AIORET_TYPE ADCConfigBlockInit(ADCConfigBlock *config, AIOUSBDevice *deviceDesc,
 }
 
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief 
+ * @param config 
+ * @param deviceDesc 
+ * @param size 
+ */
+AIORET_TYPE ADCConfigBlockInitForCounterScan(ADCConfigBlock *config, AIOUSBDevice *deviceDesc  )
+{
+    if ( !config )
+        return AIOUSB_ERROR_INVALID_PARAMETER;
+
+    config->device   = deviceDesc;
+    config->size     = deviceDesc->cachedConfigBlock.size;
+    config->testing  = AIOUSB_FALSE;
+    config->timeout  = deviceDesc->commTimeout;
+
+    memcpy( config->registers, deviceDesc->cachedConfigBlock.registers, config->size );
+    memcpy( &config->mux_settings,&deviceDesc->cachedConfigBlock.mux_settings, sizeof( deviceDesc->cachedConfigBlock.mux_settings));
+    
+    config->registers[AD_CONFIG_CAL_MODE]               = AD_CAL_MODE_NORMAL;
+    config->registers[AD_CONFIG_TRIG_COUNT]             = AD_TRIGGER_CTR0_EXT | AD_TRIGGER_SCAN | AD_TRIGGER_TIMER;
+    config->registers[AD_CONFIG_START_END]              = 0xF0;
+    config->registers[AD_CONFIG_MUX_START_END]          = 0;
+    config->registers[AD_CONFIG_START_STOP_CHANNEL_EX]  = 0;
+    
+
+    return AIOUSB_SUCCESS;
+}
+
+
+/*----------------------------------------------------------------------------*/
 void ADC_VerifyAndCorrectConfigBlock( ADCConfigBlock *configBlock , AIOUSBDevice *deviceDesc  )
 {
     unsigned channel;

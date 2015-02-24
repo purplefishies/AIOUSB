@@ -227,6 +227,14 @@ AIORET_TYPE AIOContinuousBufInitADCConfigBlock( AIOContinuousBuf *buf, unsigned 
 }
 
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief Sets up an AIOContinuousBuffer to perform Internal , counter based 
+ *        scanning. 
+ * 
+ * @param buf Our AIOContinuousBuffer
+ * @return AIOUSB_SUCCESS if successful,  value < 0 if not.
+ *
+ */
 AIORET_TYPE AIOContinuousBufInitConfiguration(  AIOContinuousBuf *buf ) 
 {
     ADCConfigBlock config = {0};
@@ -235,12 +243,13 @@ AIORET_TYPE AIOContinuousBufInitConfiguration(  AIOContinuousBuf *buf )
 
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), &result );
-    if ( result != AIOUSB_SUCCESS ){
+    if ( result != AIOUSB_SUCCESS ) {
         AIOUSB_UnLock();
         return -result;
     }
 
-    ADCConfigBlockInit( &config, deviceDesc, deviceDesc->ConfigBytes  );
+    ADCConfigBlockInitForCounterScan( &config, deviceDesc );
+    /* ADCConfigBlockInit( &config, deviceDesc, deviceDesc->ConfigBytes  ); */
     /* ADCConfigBlockCopy( &config, AIOUSBDeviceGetADCConfigBlock( deviceDesc ) ); */
 
     AIOContinuousBufSendPreConfig( buf );
@@ -1112,7 +1121,6 @@ void *ConvertCountsToVoltsFunction( void *object )
     if ( !ranges )
         goto out_ConvertCountsToVoltsFunction;
 
-    /* cc = NewAIOCountsConverterWithBuffer( (unsigned short*)data, num_channels, ranges, num_oversamples , sizeof(unsigned short)  ); */
     cc = NewAIOCountsConverterWithScanLimiter( (unsigned short*)data, num_scans, num_channels, ranges, num_oversamples , sizeof(unsigned short)  );
     if ( !cc ) 
         goto out_ConvertCountsToVoltsFunction;
@@ -1180,7 +1188,8 @@ void *ConvertCountsToVoltsFunction( void *object )
     AIOContinuousBufUnlock(buf);
     AIOUSB_DEVEL("Stopping\n");
     AIOContinuousBufCleanup( buf );
-    pthread_exit((void*)&retval);
+
+    AIOUSB_ClearFIFO( AIOContinuousBufGetDeviceIndex(buf) ,   CLEAR_FIFO_METHOD_NOW );
 
     pthread_exit((void*)&retval);
 }
@@ -1577,13 +1586,17 @@ int continuous_setup( USBDevice *usb , unsigned char *data, unsigned length )
 AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf )
 {
     AIORET_TYPE retval;
-    /** 
-     * Setup counters
+    /**
+     * @note Setup counters
      * see reference in [USB AIO documentation](http://accesio.com/MANUALS/USB-AIO%20Series.PDF)
      **/
+
     /* Start the clocks, and need to get going capturing data */
     if ( (retval = ResetCounters(buf)) != AIOUSB_SUCCESS )
         goto out_AIOContinuousBufCallbackStart;
+
+    /* AIOUSB_ClearFIFO( AIOContinuousBufGetDeviceIndex(buf) ,   CLEAR_FIFO_METHOD_NOW ); */
+
     if ( (retval = SetConfig(buf)) != AIOUSB_SUCCESS )
         goto out_AIOContinuousBufCallbackStart;
     if ( (retval = CalculateClocks( buf ) ) != AIOUSB_SUCCESS )
@@ -1591,10 +1604,16 @@ AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf )
     /* Try a switch */
     if ( (retval = StartStreaming(buf)) != AIOUSB_SUCCESS )
         goto out_AIOContinuousBufCallbackStart;
+
+    /**
+     * @note BufStart ( or bulk read ) must occur before loading the counters
+     */ 
+    retval = AIOContinuousBufStart( buf ); /* Startup the thread that handles the data acquisition */
+
     if ( ( retval = AIOContinuousBufLoadCounters( buf, buf->divisora, buf->divisorb )) != AIOUSB_SUCCESS)
         goto out_AIOContinuousBufCallbackStart;
 
-    retval = AIOContinuousBufStart( buf ); /* Startup the thread that handles the data acquisition */
+
 
     if (  retval != AIOUSB_SUCCESS )
         goto cleanup_AIOContinuousBufCallbackStart;

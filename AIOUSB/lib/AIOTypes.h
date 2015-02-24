@@ -289,6 +289,7 @@ CREATE_ENUM_W_START(FIFO_Method,0,
                     CLEAR_FIFO_METHOD_IMMEDIATE,
                     CLEAR_FIFO_METHOD_AUTO,
                     CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT = 5,
+                    CLEAR_FIFO_METHOD_NOW = 0x35,
                     CLEAR_FIFO_METHOD_WAIT = 86
                     )
 

@@ -550,10 +550,6 @@ unsigned long AIOUSB_ClearFIFO(
     int request;
     switch(Method) {
         /* case CLEAR_FIFO_METHOD_IMMEDIATE: */
-    default:
-        request = AUR_GEN_CLEAR_FIFO;
-        break;
-
     case CLEAR_FIFO_METHOD_AUTO:
         request = AUR_GEN_CLEAR_FIFO_NEXT;
         break;
@@ -565,6 +561,11 @@ unsigned long AIOUSB_ClearFIFO(
     case CLEAR_FIFO_METHOD_WAIT:
         request = AUR_GEN_CLEAR_FIFO_WAIT;
         break;
+
+    default:
+        request = AUR_GEN_CLEAR_FIFO;
+        break;
+
     }
           
     int bytesTransferred = usb->usb_control_transfer(usb,
