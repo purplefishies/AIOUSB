@@ -56,6 +56,7 @@ int mock_usb_control_transfer( struct aiousb_device *usbdev, uint8_t request_typ
         fprintf(outfile,"%2.2x ", (unsigned short)data[i] );
     }
     fprintf(outfile,"\n");
+    fflush(outfile);
     return retval;
 }
 

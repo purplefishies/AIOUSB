@@ -1,48 +1,14 @@
 /**
- * @file   AIOUSB_Core.h
+ * @file   sample2.c
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
  * @release $Format: %t$
- * @ingroup samples
+ *
  * @brief  
- *
- * @note All the API functions that DO NOT begin "AIOUSB_" are standard API functions, largely
- * documented in the <a href="USB Software Reference"> http://accesio.com/MANUALS/USB%20Software%20Reference.pdf</a>. 
- * The functions that DO begin with "AIOUSB_" are "extended" API functions added to the Linux
- * implementation. Source code lines in this sample program that are prefixed with the
- * comment highlight calls to the AIOUSB API.
- *
  * @see Compilation 
  * @see CmakeCompilation
  */
 
-/**
- * @ref libusb 
- * LIBUSB (http://www.libusb.org/) must be installed on the Linux box (the AIOUSB code
- * was developed using libusb version 1.0.3). After installing libusb, it may also be
- * necessary to set an environment variable so that the libusb and aiousb header files can
- * be located:
- *
- *     export CPATH=/usr/local/include/libusb-1.0/:/usr/local/include/aiousb/
- *
- * Once libusb is installed properly, it should be possible to compile the sample program
- * using the simple command:
- *
- * @ref make_C_sample
- *
- *
- * @ref 
- *
- *     make
- *
- * Alternatively, one can "manually" compile the sample program using the command:
- *
- *     g++ sample.cpp -laiousb -lusb-1.0 -o sample
- *
- * or, to enable debug features
- *
- *     g++ -ggdb sample.cpp -laiousbdbg -lusb-1.0 -o sample
- */
 
 #include <aiousb.h>
 #include <stdio.h>

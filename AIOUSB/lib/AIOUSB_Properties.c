@@ -186,24 +186,27 @@ unsigned long GetDeviceBySerialNumber(unsigned long *pSerialNumber)
 }
 
 /*----------------------------------------------------------------------------*/
-AIORESULT FindDevices( int **indices, int *length , int minProductID, int maxProductID  )
+AIORESULT FindDevices( int **where, int *length , int minProductID, int maxProductID  )
 {
     unsigned long deviceMask = AIOUSB_GetAllDevices();
+    static int indices[MAX_USB_DEVICES];
     int index = 0;
     AIORESULT retval = AIOUSB_ERROR_DEVICE_NOT_FOUND;
+    *length = 0;
 
     while ( deviceMask  ) {
         if ( deviceMask & 1 ) {
-            if ( deviceTable[index].ProductID >= (unsigned)minProductID && deviceTable[index].ProductID <= (unsigned)maxProductID ) {
-                *length += 1; 
-                *indices = (int *)realloc( *indices, (*length)*sizeof(int));
-                *indices[*length-1] = index;
+            if ( deviceTable[index].ProductID >= (unsigned)minProductID && 
+                 deviceTable[index].ProductID <= (unsigned)maxProductID ) {
+                indices[(*length)++] = index;
                 retval = AIOUSB_SUCCESS;
             }
         }
         index++;
         deviceMask >>= 1;
     }
+    if ( retval == AIOUSB_SUCCESS )
+        *where = indices;
     return retval;
 }
 

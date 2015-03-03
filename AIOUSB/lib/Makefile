@@ -101,7 +101,11 @@ testit:
 	@echo "CPPEXTRAOBJS=$(CPPEXTRAOBJS)"
 	@echo "Headers=$(HEADERS)"
 
+GTAGS_FILES	:= GPATH GRTAGS GSYMS GTAGS
+
 all_cscope: $(LIBS) cscope
+
+
 
 #*******************************  LIBRARIES  ********************************
 
@@ -210,12 +214,12 @@ mostlyclean:
 	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) 
 
 clean:
-	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) cscope.out
+	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) $(GTAGS_FILES)
 
 distclean: 
 	-rm -f $(LIBS) $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) cscope.out *_test* *.tap *.mexglx
-cscope:	
-	cscope -b 
+gtags:	
+	gtags
 
 matlab: 
 	@if [ -z "$$MATLAB_BIN_DIR" ] ; then echo "You must set MATLAB_BIN_DIR to the path to matlab binary"; exit 1; fi

@@ -181,7 +181,7 @@ struct testobj {
     int c;
 };
 
-TEST(AIOEither,BasicAssignments)
+TEST(AIOEitherTest,BasicAssignments)
 {
     AIOEither a = {0};
     int tv_int = 22;
