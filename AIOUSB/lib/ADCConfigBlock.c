@@ -120,7 +120,7 @@ AIORET_TYPE ADCConfigBlockInitializeFromAIOUSBDevice( ADCConfigBlock *config , A
     config->mux_settings.ADCMUXChannels       = dev->ADCMUXChannels;
     config->mux_settings.ADCChannelsPerGroup  = dev->ADCChannelsPerGroup;
     config->mux_settings.defined              = AIOUSB_TRUE;
-
+    config->clock_rate    = 1000;
     memset(config->registers,0, AD_CONFIG_REGISTERS );
     return AIOUSB_SUCCESS;
 }
@@ -723,6 +723,7 @@ const char *get_scan_mode(int code)
 #define CHANNELS_STRING "channels"
 #define CONFIG_STRING "adcconfig"
 #define OVERSAMPLE_STRING "oversample"
+#define CLOCKRATE_STRING "clock_rate"
 #define TIMEOUT_STRING "timeout"
 
 /*----------------------------------------------------------------------------*/
@@ -754,6 +755,7 @@ const char *get_scan_mode(int code)
  *     refchannel: all-channels
  *     reference: external
  *   oversample: 201
+ *   clockrate: 1000
  * @endverbatim
  */
 char *ADCConfigBlockToYAML(ADCConfigBlock *config)
@@ -779,6 +781,8 @@ char *ADCConfigBlockToYAML(ADCConfigBlock *config)
     sprintf( &tmpbuf[strlen(tmpbuf)], "  %s: %d\n", ENDCHANNEL_STRING, ADCConfigBlockGetEndChannel( config ));
     sprintf( &tmpbuf[strlen(tmpbuf)], "  %s: %d\n", OVERSAMPLE_STRING, ADCConfigBlockGetOversample( config ));
     sprintf( &tmpbuf[strlen(tmpbuf)], "  %s: %d\n", TIMEOUT_STRING, ADCConfigBlockGetTimeout( config ));
+
+    sprintf( &tmpbuf[strlen(tmpbuf)], "  %s: %d\n", CLOCKRATE_STRING, ADCConfigBlockGetClockRate( config ));
 
     return strdup(tmpbuf);
 }
@@ -830,6 +834,8 @@ EnumStringLookup EndChannel[] = {
 EnumStringLookup Oversample[] = {
     { 0, (char *)"0", (char *)"0" }
 };
+
+
 /*-----------------------  End settings for JSON read  -----------------------*/
 
 /*----------------------------------------------------------------------------*/
@@ -852,12 +858,13 @@ char *ADCConfigBlockToJSON(ADCConfigBlock *config)
              get_trigger_mode( config->registers[AD_REGISTER_TRIG_COUNT] ));
 
     sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%s\",", EDGE_STRING, get_edge_mode( config->registers[AD_REGISTER_TRIG_COUNT] ) );
-    sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%s\"", REFCHANNEL_STRING, get_scan_mode(config->registers[AD_REGISTER_TRIG_COUNT] ));
+    sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%s\"" , REFCHANNEL_STRING, get_scan_mode(config->registers[AD_REGISTER_TRIG_COUNT] ));
     sprintf( &tmpbuf[strlen(tmpbuf)], "},");
     sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%d\",", STARTCHANNEL_STRING, ADCConfigBlockGetStartChannel( config ));
     sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%d\",", ENDCHANNEL_STRING, ADCConfigBlockGetEndChannel( config ));
     sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%d\",", OVERSAMPLE_STRING, ADCConfigBlockGetOversample( config ));
-    sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%d\"", TIMEOUT_STRING, ADCConfigBlockGetTimeout( config ));
+    sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%d\",", TIMEOUT_STRING, ADCConfigBlockGetTimeout( config ));
+    sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%d\"" , CLOCKRATE_STRING, ADCConfigBlockGetClockRate( config ));
 
     strcat(tmpbuf,"}}");
 
@@ -920,6 +927,31 @@ cJSON *ADCConfigBlockGetJSONValueOrDefault( cJSON *config,
         retval.valueint = lookup[0].value;
         retval.valuedouble = (double)lookup[0].value;
     }
+    return &retval;
+}
+
+/*------------------------------------------------------------------------------*/
+cJSON *ADCConfigBlockGetJSONValueOrInt( cJSON *config,
+                                        char const *key, 
+                                        int val
+                                        )
+{
+    static cJSON retval;
+    cJSON *tmp;
+
+    if ( config && (tmp = cJSON_GetObjectItem(config, key ) ) ) {
+        char *foo = tmp->valuestring;
+
+        if ( !is_all_digits(foo) ) { 
+            retval.valueint = val;
+            retval.valuestring = NULL;
+        } else {
+            retval.valuestring  = foo;
+            retval.valueint     = atoi(foo);
+            retval.valuedouble  = (double)atol(foo);
+        }
+    }
+
     return &retval;
 }
 
@@ -1037,10 +1069,34 @@ ADCConfigBlock *NewADCConfigBlockFromJSON( char *str )
     else
         ADCConfigBlockSetTimeout( adc, 1000 ); /* 1000 uS */
 
+    tmp =  ADCConfigBlockGetJSONValueOrInt( adcconfig, 
+                                            "clock_rate", 
+                                            1000000 /(( ADCConfigBlockGetEndChannel(adc)-ADCConfigBlockGetStartChannel(adc)+1 )*
+                                                      ( ADCConfigBlockGetOversample(adc)+1))
+                                            );
+
+    ADCConfigBlockSetClockRate( adc, (ADCalMode)tmp->valueint );
+
     if ( json ) 
         cJSON_Delete(json);
     return adc;
 }
+
+void ADCConfigBlockSetClockRate( ADCConfigBlock *config, int clock_rate)
+{
+    assert(config);
+    config->clock_rate = clock_rate;
+}
+
+int ADCConfigBlockGetClockRate( ADCConfigBlock *config )
+{
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    assert(config);
+    retval = config->clock_rate;
+
+    return retval;
+}
+
 
 #ifdef __cplusplus
 }
@@ -1078,7 +1134,7 @@ TEST(ADCConfigBlock, YAMLRepresentation)
     /* Set external triggered */
     ADCConfigBlockSetScanRange( &config, 0, 15 );
 
-    EXPECT_STREQ( ADCConfigBlockToYAML( &config ), "---\nadcconfig:\n  channels:\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-2V\n    - gain: 0-2V\n    - gain: 0-2V\n    - gain: +-5V\n    - gain: +-5V\n    - gain: +-5V\n    - gain: +-5V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n  calibration: Normal\n  trigger:\n     reference: sw\n     edge: rising-edge\n     refchannel: single-channel\n  start_channel: 0\n  end_channel: 15\n  oversample: 201\n  timeout: 1000\n" );
+    EXPECT_STREQ( ADCConfigBlockToYAML( &config ), "---\nadcconfig:\n  channels:\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-2V\n    - gain: 0-2V\n    - gain: 0-2V\n    - gain: +-5V\n    - gain: +-5V\n    - gain: +-5V\n    - gain: +-5V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n    - gain: 0-10V\n  calibration: Normal\n  trigger:\n     reference: sw\n     edge: rising-edge\n     refchannel: single-channel\n  start_channel: 0\n  end_channel: 15\n  oversample: 201\n  timeout: 1000\n  clock_rate: 1000\n" );
 }
 
 TEST(ADCConfigBlock, JSONRepresentation)
@@ -1103,12 +1159,12 @@ TEST(ADCConfigBlock, JSONRepresentation)
     /* Set external triggered */
     ADCConfigBlockSetScanRange( &config, 0, 15 );
 
-    EXPECT_STREQ("{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\",\"oversample\":\"201\",\"timeout\":\"1000\"}}", 
+    EXPECT_STREQ("{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\",\"oversample\":\"201\",\"timeout\":\"1000\",\"clock_rate\":\"1000\"}}", 
                  ADCConfigBlockToJSON( &config ) );
 
 
     ADCConfigBlockSetOversample( &config, 102 );
-    EXPECT_STREQ("{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\",\"oversample\":\"102\",\"timeout\":\"1000\"}}", 
+    EXPECT_STREQ("{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\",\"oversample\":\"102\",\"timeout\":\"1000\",\"clock_rate\":\"1000\"}}", 
                  ADCConfigBlockToJSON( &config ) );
     
 }

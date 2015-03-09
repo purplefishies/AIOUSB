@@ -2,6 +2,7 @@
 #define _ADC_CONFIG_BLOCK_H
 
 #include "AIOTypes.h"
+#include "AIOEither.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -24,6 +25,7 @@ typedef struct adc_config_block {
     unsigned char registers[ AD_MAX_CONFIG_REGISTERS +1];
     unsigned timeout;
     ADCMuxSettings mux_settings;
+    int clock_rate;
     AIOUSB_BOOL discardFirstSample;
     AIOUSB_BOOL debug;
     AIOUSB_BOOL testing; /**< For making Unit tests that don't talk to hardware */
@@ -51,6 +53,9 @@ PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetRegister( ADCConfigBlock *config, uns
 
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetGainCode( const  ADCConfigBlock *config, unsigned channel );
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetGainCode(ADCConfigBlock *config, unsigned channel, unsigned char gainCode);
+
+PUBLIC_EXTERN void ADCConfigBlockSetClockRate( ADCConfigBlock *config, int clock_rate);
+PUBLIC_EXTERN int ADCConfigBlockGetClockRate( ADCConfigBlock *config );
 
 
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetScanRange(ADCConfigBlock *config, unsigned startChannel, unsigned endChannel);
