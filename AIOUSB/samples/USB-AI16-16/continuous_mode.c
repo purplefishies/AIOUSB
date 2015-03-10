@@ -60,7 +60,20 @@ main(int argc, char *argv[] )
         }
     }
 
+#ifdef __GNUC__
+    AIOUSB_FindDevices( &indices, &num_devices, LAMBDA( AIOUSB_BOOL, (AIOUSBDevice *dev), { 
+                if ( dev->ProductID >= USB_AI16_16A && dev->ProductID <= USB_AI12_128E ) { 
+                    return AIOUSB_TRUE;
+                } else if ( dev->ProductID >=  USB_AIO16_16A && dev->ProductID <= USB_AIO12_128E ) {
+                    return AIOUSB_TRUE;
+                } else {
+                    return AIOUSB_FALSE;
+                }
+            } ) 
+        );
+#else
     AIOUSB_FindDevices( &indices, &num_devices, fnd );
+#endif
 
     
     if ( num_devices <= 0 ) {

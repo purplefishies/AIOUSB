@@ -33,7 +33,8 @@ AIOFifo.o\
 USBDevice.o
 
 
-HEADERS	:=	$(wildcard *.h)
+HEADERS		:= $(wildcard *.h)
+TESTOBJS	:= $(wildcard $(PWD)/tests/*_test)
 
 include $(AIOUSB_ROOT)/Mkfiles/oses.inc
 
@@ -84,11 +85,11 @@ TESTFLAGS	:= -g
 SHARED_LIBS	:=  -lusb-1.0 -pthread -lm
 override CXXFLAGS += -I. -I/usr/include/libusb-1.0 -D__aiousb_cplusplus
 
-.PHONY : all testit
+.PHONY : all bist
 
 all : $(LIBS)
 
-testit:
+bist:
 	@echo $(CPPDBGOBJS)
 	@echo $(OSTYPE)
 	@echo $(CC_SHFLAGS)
@@ -100,6 +101,7 @@ testit:
 	@echo "CPPDBGOBJS=$(CPPDBGOBJS)"
 	@echo "CPPEXTRAOBJS=$(CPPEXTRAOBJS)"
 	@echo "Headers=$(HEADERS)"
+	@echo "tests: $(TESTOBJS)"
 
 GTAGS_FILES	:= GPATH GRTAGS GSYMS GTAGS
 
@@ -208,13 +210,13 @@ pywrapper:
 	$(CXX) $(TESTFLAGS) $(SELF_TEST_CXX_FLAGS) $(subst _cpp_test,.c,$<) -o $@ -L. $(SELF_TEST_CXX_LIBS) $(LDFLAGS)
 
 tests/%_cpp_test: tests/%.cpp $(SHCDBGLIB) $(SHCPPDBGLIB)
-	$(CXX) $(TESTFLAGS) $(SELF_TEST_CXX_FLAGS) $< -o $@ -L. $(SELF_TEST_CXX_LIBS)
+	$(CXX) $(TESTFLAGS) $(CXXFLAGS) $(SELF_TEST_CXX_FLAGS) $< -o $@ -L. $(SELF_TEST_CXX_LIBS)
 
 mostlyclean:
-	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) 
+	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS)
 
 clean:
-	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) $(GTAGS_FILES)
+	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) $(GTAGS_FILES) $(TESTOBJS)
 
 distclean: 
 	-rm -f $(LIBS) $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) cscope.out *_test* *.tap *.mexglx

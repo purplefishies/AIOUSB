@@ -16,24 +16,31 @@ TEST(Properties,FindingDevices )
     AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_DIO_32 );
     EXPECT_EQ( numDevices, 2 );
 
-#if 0
-    AIOUSB_BOOL g( AIOUSBDevice *dev ) { 
-        return AIOUSB_TRUE;
-    }
-#else
-    auto glambda = [](AIOUSBDevice *dev)->AIOUSB_BOOL { // std::cout << "Trying something\n"; 
-                                                        if ( dev->ProductID < USB_AIO16_16A || 
-                                                             dev->ProductID > USB_AIO16_16A ) 
-                                                            return AIOUSB_FALSE;
-                                                        else
-                                                            return AIOUSB_TRUE;
-    };
-#endif
+#if FANCY_LAMBDA
 
-    AIOUSB_FindDevices( &indices, &num_devices, glambda );
+    AIOUSB_FindDevices( &indices, &num_devices,  LAMBDA( AIOUSB_BOOL, (AIOUSBDevice *dev), {
+                std::cout << "Using fancy lambda\n";
+                if ( dev->ProductID < USB_AIO16_16A || 
+                     dev->ProductID > USB_AIO16_16A ) 
+                    return AIOUSB_FALSE;
+                else
+                    return AIOUSB_TRUE;
+            }
+            )
+            );
+
+#else
+    AIOUSB_FindDevices( &indices, &num_devices,  [](AIOUSBDevice *dev)->AIOUSB_BOOL {
+            if ( dev->ProductID < USB_AIO16_16A || 
+                 dev->ProductID > USB_AIO16_16A ) 
+                return AIOUSB_FALSE;
+            else
+                return AIOUSB_TRUE;
+        }
+        );
+#endif
     
     EXPECT_EQ( 1, num_devices ) << "Found only the one device we wanted\n";
-
 
 }
 

@@ -55,6 +55,18 @@ typedef struct ushort_array {
 namespace AIOUSB {
 #endif
 
+#ifndef __cplusplus
+#define LAMBDA(return_type, header, function_body)                      \
+    ({                                                                  \
+        return_type __fn ## __FILE__ ## __LINE__ header function_body   \
+            __fn ## __FILE__ ## __LINE__ ;                              \
+    })
+#else
+#define LAMBDA(return_type, header, function_body)      \
+    [] header -> return_type function_body
+#endif
+
+    /* LAMBDA( AIOUSB_BOOL, ( AIOUSBDevice *dev ), {  } ); */
 
 
 
