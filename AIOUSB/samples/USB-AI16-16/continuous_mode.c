@@ -49,7 +49,19 @@ main(int argc, char *argv[] )
 
     AIOUSB_Init();
     GetDevices();
-    FindDevices( &indices, &num_devices, USB_AIO16_16A, USB_AIO12_128E );
+
+    AIOUSB_BOOL fnd( AIOUSBDevice *dev ) { 
+        if ( dev->ProductID >= USB_AI16_16A && dev->ProductID <= USB_AI12_128E ) { 
+            return AIOUSB_TRUE;
+        } else if ( dev->ProductID >=  USB_AIO16_16A && dev->ProductID <= USB_AIO12_128E ) {
+            return AIOUSB_TRUE;
+        } else {
+            return AIOUSB_FALSE;
+        }
+    }
+
+    AIOUSB_FindDevices( &indices, &num_devices, fnd );
+
     
     if ( num_devices <= 0 ) {
         fprintf(stderr,"No devices were found\n");

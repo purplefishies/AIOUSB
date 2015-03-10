@@ -210,6 +210,32 @@ AIORESULT FindDevices( int **where, int *length , int minProductID, int maxProdu
     return retval;
 }
 
+
+/*----------------------------------------------------------------------------*/
+AIORESULT AIOUSB_FindDevices( int **where, int *length , AIOUSB_BOOL (*is_ok_device)( AIOUSBDevice *dev )  )
+{
+    unsigned long deviceMask = AIOUSB_GetAllDevices();
+    static int indices[MAX_USB_DEVICES];
+    int index = 0;
+    AIORESULT retval = AIOUSB_ERROR_DEVICE_NOT_FOUND;
+    *length = 0;
+
+    while ( deviceMask  ) {
+        if ( deviceMask & 1 ) {
+            if ( is_ok_device( &deviceTable[index] ) == AIOUSB_TRUE )  { 
+                retval = AIOUSB_SUCCESS;
+                indices[(*length)++] = index;
+            }
+        }
+        index++;
+        deviceMask >>= 1;
+    }
+    if ( retval == AIOUSB_SUCCESS )
+        *where = indices;
+    return retval;
+}
+
+
 /*----------------------------------------------------------------------------*/
 /**
  * @brief AIOUSB_GetDeviceProperties() returns a richer amount of information 

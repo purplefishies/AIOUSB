@@ -31,11 +31,9 @@ AIORET_TYPE AIOFifoSizeRemaining( void *tmpfifo )
     return fifo->delta((AIOFifo*)fifo);
 }
 
-
-
 size_t rdelta( AIOFifo *fifo  ) 
 {
-    return ( fifo->read_pos < fifo->write_pos ? (fifo->write_pos - fifo->read_pos ) : ( (fifo->size - fifo->read_pos) + fifo->write_pos ));
+    return ( fifo->read_pos <= fifo->write_pos ? (fifo->write_pos - fifo->read_pos ) : ( (fifo->size - fifo->read_pos) + fifo->write_pos ));
 }
 
 AIORET_TYPE AIOFifoReadSize( void *tmpfifo )

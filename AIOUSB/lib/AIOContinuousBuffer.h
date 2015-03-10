@@ -83,7 +83,7 @@ PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long Devic
 PUBLIC_EXTERN void DeleteAIOContinuousBuf( AIOContinuousBuf *buf );
 
 /*-----------------------------  Replacements  ------------------------------*/
-PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufCopyData( AIOContinuousBuf *buf , unsigned short *data , unsigned *size );
+
 
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufInitConfiguration(  AIOContinuousBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufInitADCConfigBlock( AIOContinuousBuf *buf, 
