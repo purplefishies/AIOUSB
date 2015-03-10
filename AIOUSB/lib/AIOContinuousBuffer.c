@@ -536,8 +536,8 @@ AIORET_TYPE AIOContinuousBufCountScansAvailable(AIOContinuousBuf *buf)
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
 
-    retval = ( buf->fifo->size -  buf->fifo->delta( (AIOFifo *)buf->fifo ) ) / ( buf->fifo->refsize* AIOContinuousBufNumberChannels(buf));
-
+    /* retval = ( buf->fifo->size -  buf->fifo->rdelta( (AIOFifo *)buf->fifo ) ) / ( buf->fifo->refsize* AIOContinuousBufNumberChannels(buf)); */
+    retval = (AIORET_TYPE)buf->fifo->rdelta( (AIOFifo*)buf->fifo ) / ( buf->fifo->refsize * AIOContinuousBufNumberChannels(buf) );
     return retval;
 }
 

@@ -43,6 +43,7 @@ AIORET_TYPE AIOFifoWrite( AIOFifo *fifo, void *frombuf , unsigned maxsize );
     AIORET_TYPE (*Write)( struct aio_fifo *fifo, void *tobuf, unsigned maxsize );    \
     void (*Reset)( struct aio_fifo *fifo );                                          \
     size_t (*delta)( struct aio_fifo *fifo  );                                       \
+    size_t (*rdelta)( struct aio_fifo *fifo  );                                      \
     size_t (*_calculate_size_write)( struct aio_fifo *fifo, unsigned maxsize );      \
     size_t (*_calculate_size_read)( struct aio_fifo *fifo, unsigned maxsize );
 

@@ -76,6 +76,7 @@ void AIOFifoInitialize( AIOFifo *nfifo, unsigned int size, unsigned refsize )
     nfifo->Write    = AIOFifoWrite;
     nfifo->Reset    = AIOFifoReset;
     nfifo->delta    = delta;
+    nfifo->rdelta   = rdelta;
     nfifo->_calculate_size_write = _calculate_size_write;
     nfifo->_calculate_size_read  = _calculate_size_read;
 #ifdef HAS_THREAD

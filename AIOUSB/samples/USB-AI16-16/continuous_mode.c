@@ -42,13 +42,21 @@ main(int argc, char *argv[] )
     AIOContinuousBuf *buf = 0;
     unsigned read_count = 0;
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    
+    int *indices;
+    int num_devices;
+
     process_cmd_line( &options, argc, argv );
 
     AIOUSB_Init();
     GetDevices();
+    FindDevices( &indices, &num_devices, USB_AIO16_16A, USB_AIO12_128E );
+    
+    if ( num_devices <= 0 ) {
+        fprintf(stderr,"No devices were found\n");
+        exit(1);
+    }
 
-    buf = NewAIOContinuousBufForVolts( 0, options.num_scans , options.num_channels , options.num_oversamples );
+    buf = NewAIOContinuousBufForVolts( indices[0], options.num_scans , options.num_channels , options.num_oversamples );
 
     if( !buf ) {
         fprintf(stderr,"Can't allocate memory for temporary buffer \n");
@@ -110,6 +118,11 @@ main(int argc, char *argv[] )
         }
     }
     AIOContinuousBufSaveConfig(buf);
+#ifdef TEST_GET_CONFIG
+    ADConfigBlock tmp;
+    tmp.size = 20;
+    ADC_GetConfig( 0, tmp.registers, &tmp.size );
+#endif
 
     if ( retval < AIOUSB_SUCCESS ) {
         printf("Error setting up configuration\n");
