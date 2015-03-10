@@ -2,7 +2,7 @@
  * @file   USBDeviceManager.cpp
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %t$
+ * @release $Format: %h$
  * @brief class USBDeviceManager implementation
  *
  */

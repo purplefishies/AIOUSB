@@ -2,7 +2,7 @@
  * @file   AIOContinuousBuffer.c
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @version $Format: %t$
+ * @version $Format: %h$
  * @brief This file contains the required structures for performing the continuous streaming
  *        buffers that talk to ACCES USB-AI* cards. The functionality in this file was wrapped
  *        up to provide a more unified interface for continuous streaming of acquisition data and 

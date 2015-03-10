@@ -2,7 +2,7 @@
  * @file   USBDevice.c
  * @author  $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @version $Format: %t$
+ * @version $Format: %h$
  */
 
 #include "AIOTypes.h"

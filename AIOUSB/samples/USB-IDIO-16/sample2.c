@@ -1,7 +1,7 @@
 /** 
  *  @date $Format: %ad$$
  *  @author $Format: %an <%ae>$
- *  @release $Format: %t$
+ *  @release $Format: %h$
  *  @desc Sample program to run the USB-IDIO-* or USB-IIRO-* programs
  */
 #include "aiousb.h"

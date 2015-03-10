@@ -2,7 +2,7 @@
  * @file   Counter.cpp
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %t$
+ * @release $Format: %h$
  * @brief  class Counter implementation
  *
  */

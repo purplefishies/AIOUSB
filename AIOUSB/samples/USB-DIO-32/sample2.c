@@ -2,7 +2,7 @@
  * @file   sample2.c
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %t$
+ * @release $Format: %h$
  *
  * @brief  
  * @see Compilation 

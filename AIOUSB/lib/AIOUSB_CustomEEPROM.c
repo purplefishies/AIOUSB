@@ -2,7 +2,7 @@
  * @file   AIOUSB_CustomEEPROM.c
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @version $Format: %t$
+ * @version $Format: %h$
  * @brief  General header files for EEProm functionality
  *
  */

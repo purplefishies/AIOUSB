@@ -2,7 +2,7 @@
  * @file   AIOUSB_ADC.c
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @version $Format: %t$
+ * @version $Format: %h$
  * @brief  Configuration functions for ADC elements
  *
  */

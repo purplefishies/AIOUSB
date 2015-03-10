@@ -2,7 +2,7 @@
  * @file   AIOUSB_Core.c
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @version $Format: %t$
+ * @version $Format: %h$
  * @brief  General header files for the AIOUSB library
  *
  */
@@ -166,7 +166,7 @@ static pthread_mutex_t aiousbMutex;
 #endif
 
 
-static const char VERSION_NUMBER[] = "$Format: %t$";
+static const char VERSION_NUMBER[] = "$Format: %h$";
 static const char VERSION_DATE[] = "$Format: %ad$";
 
 

@@ -2,7 +2,7 @@
  * @file   AIOTypes.h
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @version $Format: %t$
+ * @version $Format: %h$
  * @brief  
  *
  */

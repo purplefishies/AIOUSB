@@ -2,7 +2,7 @@
  * @file   AIOUSB_DAC.c
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @version $Format: %t$
+ * @version $Format: %h$
  * @brief Core code to handle DACs on AIOUSB devices.
  */
 

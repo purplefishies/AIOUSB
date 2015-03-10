@@ -2,7 +2,7 @@
  * @file   AIOContinuousBuffer.c
  * @author  $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %t$
+ * @release $Format: %h$
  * @brief AIOUSB sample program 
  * @todo Make the number of channels in the ContinuousBuffer match the number of channels in the
  *       config object

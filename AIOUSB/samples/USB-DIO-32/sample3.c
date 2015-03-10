@@ -2,7 +2,7 @@
  * @file   AIOUSB_Core.h
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %t$
+ * @release $Format: %h$
  * @ingroup samples
  * @brief  
  *

@@ -2,7 +2,7 @@
  * @file   DIOBuf.c
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @version $Format: %t$
+ * @version $Format: %h$
  * @brief  Buffers for DIO elements
  *
  */
