@@ -10,7 +10,6 @@
 #include "AIODeviceTable.h"
 #include "AIOUSB_Core.h"
 #include "USBDevice.h"
-#include <arpa/inet.h>
 
 #ifdef __cplusplus
 namespace AIOUSB {
@@ -18,6 +17,27 @@ namespace AIOUSB {
 
 #define MASK_BYTES_SIZE(device)  ((device->DIOBytes + BITS_PER_BYTE - 1) / BITS_PER_BYTE )
 #define TRISTATE_BYTES_SIZE(device) ((device->Tristates + BITS_PER_BYTE - 1) / BITS_PER_BYTE)
+
+/*----------------------------------------------------------------------------*/
+/**
+ * @desc Returns the number in Big-Endian format
+ */
+unsigned short aiousb_htons(unsigned short octaveOffset)
+{
+  short a;
+  char tmp1, tmp2;
+  a = 0xff;
+  tmp1 = *((char*)&a); 
+  if ( tmp1 == 0xff ) {	/* Little Endinan */
+    a = octaveOffset;
+    tmp1 = *((char*)&a); 
+    tmp2 = *(((char*)&a)+1);
+    *((char*)&a) = tmp2;
+    *(((char*)&a)+1) = tmp1;
+  }
+  return a;
+}
+
 
 /*----------------------------------------------------------------------------*/
 static unsigned short OctaveDacFromFreq(double *Hz) 
@@ -34,7 +54,7 @@ static unsigned short OctaveDacFromFreq(double *Hz)
             } else {
                 offset = ( int )round(2048.0 - (ldexp(2078, 10 + octave) / *Hz));
                 octaveOffset = (( unsigned short )octave << 12) | (( unsigned short )offset << 2);
-                octaveOffset = htons(octaveOffset);         // oscillator wants the value in big-endian format
+                octaveOffset = aiousb_htons(octaveOffset); // oscillator wants the value in big-endian format
             }
           *Hz = (2078 << octave) / (2.0 - offset / 1024.0);
       }
