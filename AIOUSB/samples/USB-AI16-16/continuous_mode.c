@@ -35,6 +35,18 @@ struct opts {
 struct channel_range *get_channel_range( char *optarg );
 void process_cmd_line( struct opts *, int argc, char *argv[] );
 
+AIOUSB_BOOL fnd( AIOUSBDevice *dev ) { 
+    if ( dev->ProductID >= USB_AI16_16A && dev->ProductID <= USB_AI12_128E ) { 
+        return AIOUSB_TRUE;
+    } else if ( dev->ProductID >=  USB_AIO16_16A && dev->ProductID <= USB_AIO12_128E ) {
+        return AIOUSB_TRUE;
+    } else {
+        return AIOUSB_FALSE;
+    }
+}
+
+
+
 int 
 main(int argc, char *argv[] ) 
 {
@@ -49,16 +61,6 @@ main(int argc, char *argv[] )
 
     AIOUSB_Init();
     GetDevices();
-
-    AIOUSB_BOOL fnd( AIOUSBDevice *dev ) { 
-        if ( dev->ProductID >= USB_AI16_16A && dev->ProductID <= USB_AI12_128E ) { 
-            return AIOUSB_TRUE;
-        } else if ( dev->ProductID >=  USB_AIO16_16A && dev->ProductID <= USB_AIO12_128E ) {
-            return AIOUSB_TRUE;
-        } else {
-            return AIOUSB_FALSE;
-        }
-    }
 
 #ifdef __GNUC__
     AIOUSB_FindDevices( &indices, &num_devices, LAMBDA( AIOUSB_BOOL, (AIOUSBDevice *dev), { 

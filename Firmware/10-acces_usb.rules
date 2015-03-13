@@ -61,6 +61,17 @@ SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="16
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="000f", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DIO-16A.hex"
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="800f", RUN+="/bin/chmod 0666 $tempnode"
 
+
+# USB-DIO-24 Rev B and newer
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0005", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DIO-32.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8005", RUN+="/bin/chmod 0666 $tempnode"
+
+
+# USB-DIO-24-Ctr Rev B and newer
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0006", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-DIO24-CTR6.hex"
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8006", RUN+="/bin/chmod 0666 $tempnode"
+
+
 # USB-IIRO-16
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0010", RUN+="/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/USB-IDIO-16.hex"
 SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8010", RUN+="/bin/chmod 0666 $tempnode"

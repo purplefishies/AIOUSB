@@ -32,11 +32,11 @@ AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf,
     static int channel_count = 0;
     static int os = 0;
     static char arduino_counter = 0;
-    int scale_down = 1;
+    double scale_down = 1;
     int noisy_ground = 30;
     int noisy_signal = 10;
     if ( getenv("MOCK_SCALE_DOWN") ) { 
-        scale_down = atoi(getenv("MOCK_SCALE_DOWN"));
+        scale_down = strtod(getenv("MOCK_SCALE_DOWN"),NULL);
     } 
     if ( getenv("MOCK_NOISY_GROUND") )  {
         noisy_ground = atoi(getenv("MOCK_NOISY_GROUND"));
@@ -67,7 +67,7 @@ AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf,
                         tmpval = ((arduino_counter) >> 6 ) & 1;
                     }
                     if ( tmpval == 1 ) { 
-                        tmpval = (65535 - ( rand() % noisy_signal )) / scale_down;
+                        tmpval = (int)((65535 - ( rand() % noisy_signal )) / scale_down);
                     } else {
                         tmpval = (rand() % noisy_ground );
                     }
