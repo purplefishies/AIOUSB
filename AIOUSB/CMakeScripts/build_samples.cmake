@@ -132,8 +132,8 @@ macro ( include_testcase_lib project )
 
 
   if ( USE_GCC AND NOT CYGWIN )
-    SET(CMAKE_C_FLAGS   "-std=gnu99" )
-    SET(CMAKE_CXX_FLAGS "-D__aiousb_cplusplus -fPIC" )
+    SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -std=gnu99" )
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__aiousb_cplusplus -fPIC" )
   endif( USE_GCC AND NOT CYGWIN )
 
 endmacro( include_testcase_lib )
