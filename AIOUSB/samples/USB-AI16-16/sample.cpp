@@ -22,7 +22,6 @@ int main( int argc, char **argv ) {
     ADConfigBlock configBlock = {0};
     char *calibration_type;
 
-    printf("Size of deviceIndex %d \n", sizeof(deviceIndex));
     printf("USB-AI16-16A sample program version %s, %s\n"
            "  This program demonstrates controlling a USB-AI16-16A device on\n"
            "  the USB bus. For simplicity, it uses the first such device found\n"
@@ -81,7 +80,7 @@ int main( int argc, char **argv ) {
     result = GetDeviceSerialNumber( deviceIndex, &serialNumber );
 
     if( result == AIOUSB_SUCCESS )
-        printf( "Serial number of device at index %llx\n", serialNumber  );
+        printf( "Serial number of device at index %llx\n", (long long)serialNumber  );
     else
         printf( "Error '%s' getting serial number of device at index %lu\n",
                 AIOUSB_GetResultCodeAsString( result ),
