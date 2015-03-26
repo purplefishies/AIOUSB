@@ -641,7 +641,8 @@ AIOUSB_WorkFn AIOContinuousBufGetCallback( AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBufSetClock( AIOContinuousBuf *buf, unsigned int hz )
 {
     assert(buf);
-    buf->hz = hz;
+    buf->hz = MIN( (unsigned)hz, (unsigned)(ROOTCLOCK / ( (AIOContinuousBufGetOverSample(buf)+1) * AIOContinuousBufNumberChannels(buf))) );
+
     return AIOUSB_SUCCESS;
 }
 
@@ -693,7 +694,7 @@ AIORET_TYPE CalculateClocks( AIOContinuousBuf *buf )
     assert(buf);
     int  hz = (int)buf->hz;
     float l;
-    int ROOTCLOCK = 10000000;
+
     int divisora, divisorb, divisorab;
     int min_err, err;
 

@@ -69,6 +69,8 @@ typedef struct aio_continuous_buf {
     AIORET_TYPE (*PopN)( struct aio_continuous_buf *buf, unsigned short *frombuf, unsigned int N );
 } AIOContinuousBuf;
 
+#define ROOTCLOCK 10000000
+
 /*-----------------------------  Constructors  ------------------------------*/
 PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex , unsigned scancounts, unsigned number_channels );
 PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex, unsigned scancounts , unsigned num_channels , AIOUSB_BOOL counts );
