@@ -17,7 +17,7 @@ int main( int argc, char **argv ) {
   
   unsigned long deviceMask;
   unsigned long result;
-  unsigned long serialNumber;
+  uint64_t serialNumber;
   double clockHz;
   const int BULK_BYTES = 100000; /* scans */
   unsigned long bytesRemaining = BULK_BYTES;

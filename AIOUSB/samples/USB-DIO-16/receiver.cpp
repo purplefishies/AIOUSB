@@ -70,7 +70,7 @@ int main( int argc, char **argv ) {
 		/*
 		 * parse command line
 		 */
-		unsigned long targetSerialNumber = strtoll( *( argv + 1 ), 0, 16 );
+		uint64_t targetSerialNumber = strtoll( *( argv + 1 ), 0, 16 );
 		unsigned long framePoints = strtol( *( argv + 2 ), 0, 0 );
 
 		/*

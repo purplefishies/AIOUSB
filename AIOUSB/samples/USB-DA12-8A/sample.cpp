@@ -87,7 +87,7 @@ main( int argc, char **argv ) {
             if( deviceFound ) {
                 AIOUSB_SetCommTimeout( deviceIndex, 500 );
 
-                unsigned long serialNumber;
+                uint64_t serialNumber;
                 result = GetDeviceSerialNumber( deviceIndex, &serialNumber );
                 if( result == AIOUSB_SUCCESS )
                     printf( "Serial number of device at index %lu: %llx\n", 

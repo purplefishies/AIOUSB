@@ -94,7 +94,7 @@ void TestCaseSetup::doPreSetup()
   AIOUSB_SetCommTimeout( DeviceIndex, 1000 );
   AIOUSB_SetDiscardFirstSample( DeviceIndex, AIOUSB_TRUE );
   
-  unsigned long serialNumber;
+  uint64_t serialNumber;
   int result = GetDeviceSerialNumber( DeviceIndex, &serialNumber );
   if( result != AIOUSB_SUCCESS  ) {
     std::stringstream er;

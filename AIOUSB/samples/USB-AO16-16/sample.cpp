@@ -53,24 +53,24 @@ int main( int argc, char **argv ) {
 		"  This program demonstrates controlling a USB-AO16-16A device on\n"
 		"  the USB bus. For simplicity, it uses the first such device found\n"
 		"  on the bus.\n"
-/*API*/	, AIOUSB_GetVersion(), AIOUSB_GetVersionDate()
+       	, AIOUSB_GetVersion(), AIOUSB_GetVersionDate()
 	);
 
 	/*
 	 * MUST call AIOUSB_Init() before any meaningful AIOUSB functions;
 	 * AIOUSB_GetVersion() above is an exception
 	 */
-/*API*/	unsigned long result = AIOUSB_Init();
+       	unsigned long result = AIOUSB_Init();
 	if( result == AIOUSB_SUCCESS ) {
 		/*
 		 * call GetDevices() to obtain "list" of devices found on the bus
 		 */
-/*API*/	unsigned long deviceMask = GetDevices();
+       	unsigned long deviceMask = GetDevices();
 		if( deviceMask != 0 ) {
 			/*
 			 * at least one ACCES device detected, but we want one of a specific type
 			 */
-/*API*/		AIOUSB_ListDevices();				// print list of all devices found on the bus
+       		AIOUSB_ListDevices();				// print list of all devices found on the bus
 			const int MAX_NAME_SIZE = 20;
 			char name[ MAX_NAME_SIZE + 2 ];
 			unsigned long productID, nameSize, numDIOBytes, numCounters;
@@ -80,7 +80,7 @@ int main( int argc, char **argv ) {
 				if( ( deviceMask & 1 ) != 0 ) {
 					// found a device, but is it the correct type?
 					nameSize = MAX_NAME_SIZE;
-/*API*/				result = QueryDeviceInfo( deviceIndex, &productID, &nameSize, name, &numDIOBytes, &numCounters );
+       				result = QueryDeviceInfo( deviceIndex, &productID, &nameSize, name, &numDIOBytes, &numCounters );
 					if( result == AIOUSB_SUCCESS ) {
 						if(
 							productID >= USB_AO16_16A
@@ -92,45 +92,45 @@ int main( int argc, char **argv ) {
 						}	// if( productID ...
 					} else
 						printf( "Error '%s' querying device at index %lu\n"
-/*API*/						, AIOUSB_GetResultCodeAsString( result ), deviceIndex );
+       						, AIOUSB_GetResultCodeAsString( result ), deviceIndex );
 				}	// if( ( deviceMask ...
 				deviceIndex++;
 				deviceMask >>= 1;
 			}	// while( deviceMask ...
 			if( deviceFound ) {
-/*API*/			AIOUSB_SetCommTimeout( deviceIndex, 500 );
+       			AIOUSB_SetCommTimeout( deviceIndex, 500 );
 
-				unsigned long serialNumber;
-/*API*/			result = GetDeviceSerialNumber( deviceIndex, &serialNumber );
+				uint64_t serialNumber;
+       			result = GetDeviceSerialNumber( deviceIndex, &serialNumber );
 				if( result == AIOUSB_SUCCESS )
 					printf( "Serial number of device at index %lu: %llx\n", deviceIndex, ( long long ) serialNumber );
 				else
 					printf( "Error '%s' getting serial number of device at index %lu\n"
-/*API*/					, AIOUSB_GetResultCodeAsString( result ), deviceIndex );
+       					, AIOUSB_GetResultCodeAsString( result ), deviceIndex );
 
 				/*
 				 * demonstrate getting enhanced device properties
 				 */
 				const int MAX_CHANNELS = 16;
 				DeviceProperties properties;
-/*API*/			result = AIOUSB_GetDeviceProperties( deviceIndex, &properties );
+       			result = AIOUSB_GetDeviceProperties( deviceIndex, &properties );
 				if( result == AIOUSB_SUCCESS )
 					printf( "Device properties successfully retrieved\n" );
 				else {
 					properties.DACChannels = MAX_CHANNELS;
 					printf( "Error '%s' getting device properties\n"
-/*API*/					, AIOUSB_GetResultCodeAsString( result ) );
+       					, AIOUSB_GetResultCodeAsString( result ) );
 				}	// if( result ...
 
 				/*
 				 * demonstrate setting output range
 				 */
-/*API*/			result = DACSetBoardRange( deviceIndex, DAC_RANGE_0_5V /* 0-5V */ );
+       			result = DACSetBoardRange( deviceIndex, DAC_RANGE_0_5V /* 0-5V */ );
 				if( result == AIOUSB_SUCCESS )
 					printf( "D/A output range successfully set\n" );
 				else
 					printf( "Error '%s' setting D/A ourput range\n"
-/*API*/					, AIOUSB_GetResultCodeAsString( result ) );
+       					, AIOUSB_GetResultCodeAsString( result ) );
 
 				/*
 				 * demonstrate writing to one D/A channel
@@ -138,12 +138,12 @@ int main( int argc, char **argv ) {
 				const int TEST_CHANNEL = 0;			// channels are numbered 0 to MAX_CHANNELS - 1
 				const unsigned MAX_COUNTS = 0xffff;	// the 16-bit and 12-bit devices both support 16-bit count values
 				const unsigned counts = MAX_COUNTS / 2;	// half of full scale
-/*API*/			result = DACDirect( deviceIndex, TEST_CHANNEL, counts );
+       			result = DACDirect( deviceIndex, TEST_CHANNEL, counts );
 				if( result == AIOUSB_SUCCESS )
 					printf( "%u D/A counts successfully output to channel %d\n", counts, TEST_CHANNEL );
 				else
 					printf( "Error '%s' attempting to output %u D/A counts successfully to channel %d\n"
-/*API*/					, AIOUSB_GetResultCodeAsString( result )
+       					, AIOUSB_GetResultCodeAsString( result )
 						, counts, TEST_CHANNEL );
 
 				/*
@@ -158,12 +158,12 @@ int main( int argc, char **argv ) {
 						/ properties.DACChannels
 					);
 				}	// for( int channel ...
-/*API*/			result = DACMultiDirect( deviceIndex, dacData, properties.DACChannels );
+       			result = DACMultiDirect( deviceIndex, dacData, properties.DACChannels );
 				if( result == AIOUSB_SUCCESS )
 					printf( "D/A counts successfully output to %u channels simultaneously\n", properties.DACChannels );
 				else
 					printf( "Error '%s' attempting to output D/A counts to %u channels simultaneously\n"
-/*API*/					, AIOUSB_GetResultCodeAsString( result )
+       					, AIOUSB_GetResultCodeAsString( result )
 						, properties.DACChannels );
 			} else
 				printf( "Failed to find USB-AO16-16A device\n" );
@@ -174,7 +174,7 @@ int main( int argc, char **argv ) {
 		 * MUST call AIOUSB_Exit() before program exits,
 		 * but only if AIOUSB_Init() succeeded
 		 */
-/*API*/	AIOUSB_Exit();
+       	AIOUSB_Exit();
 	}	// if( result ...
 	return ( int ) result;
 }	// main()

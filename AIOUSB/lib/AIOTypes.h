@@ -600,7 +600,7 @@ typedef struct {
 
 typedef struct  {
     char *Name;                      /**< null-terminated device name or 0 */
-    unsigned long SerialNumber;      /**< 64-bit serial number or 0 */
+    uint64_t SerialNumber;           /**< 64-bit serial number or 0 */
     unsigned ProductID;              /**< 16-bit product ID */
     unsigned DIOPorts;               /**< number of digital I/O ports (bytes) */
     unsigned Counters;               /**< number of 8254 counter blocks */

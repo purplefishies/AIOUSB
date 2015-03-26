@@ -111,7 +111,7 @@ int main( int argc, char **argv ) {
     AIOUSB_SetCommTimeout( deviceIndex, 1000 );
     AIOUSB_SetDiscardFirstSample( deviceIndex, AIOUSB_TRUE );
 
-    unsigned long serialNumber;
+    uint64_t serialNumber;
     result = GetDeviceSerialNumber( deviceIndex, &serialNumber );
     if( result == AIOUSB_SUCCESS )
         printf( "Serial number of device at index %lu: %llx\n", deviceIndex, ( long long ) serialNumber );
