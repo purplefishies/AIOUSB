@@ -8,10 +8,15 @@
 
 include $(AIOUSB_ROOT)/Mkfiles/oses.inc
 
+
+WARNINGS	= "!!!!!!\n\nWarning: C++ class lib code is deprecated and no longer supported\n\n!!!!!!\n"
+
+
 CPPSOURCES 	:= $(wildcard *.cpp)
 HPPSOURCES 	:= $(wildcard *.hpp)
 CPPOBJS 	:= $(subst .cpp,.o,$(CPPSOURCES))
 CPPDBGOBJS 	:= $(subst .o,.dbg.o,$(CPPOBJS))
+
 
 
 DOCDIR 		:= doc
@@ -56,9 +61,15 @@ SHCPPDBGLIB	:=$(LIBPREFIX)classaiousbdbg.$(LIBSUFFIX)
 LIBS 		:= $(STCPPLIB) $(STCPPDBGLIB) $(SHCPPLIB) $(SHCPPDBGLIB)
 
 
-.PHONY : all
+.PHONY : all warnings
+
+
 
 all : $(LIBS) 
+
+warnings:
+	@/bin/echo -ne $(WARNINGS)
+	@sleep 1
 
 
 completely_all: $(LIBS) $(DOCINDEX)
@@ -87,15 +98,15 @@ ifeq ("$(OSTYPE)","Darwin")
 
 
 else ifeq ("$(OSTYPE)","CYGWIN")
-$(SHCPPLIB) : $(CPPOBJS)
+$(SHCPPLIB) : $(CPPOBJS)  warnings
 	$(CXX) $(LDFLAGS) $(CXXFLAGS) $(CC_SHFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $(CPPOBJS) -Wl,--no-whole-archive $(SHARED_LIBS)
-$(SHCPPDBGLIB): $(CPPDBGOBJS)
+$(SHCPPDBGLIB): $(CPPDBGOBJS)  warnings
 	$(CXX) $(LDFLAGS) $(CXXFLAGS) $(CC_SHFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $(CPPDBGOBJS) -Wl,--no-whole-archive $(SHARED_LIBS)
 else				# Linux and UNIXes
-$(SHCPPLIB) : $(CPPOBJS)
+$(SHCPPLIB) : $(CPPOBJS)  warnings
 	$(CXX) $(CXXFLAGS) $(CFLAGS) $(LDFLAGS) $(CXX_SHFLAGS),$@ -o $@ $(CPPOBJS) $(SHARED_LIBS)
 
-$(SHCPPDBGLIB) : $(CPPDBGOBJS)
+$(SHCPPDBGLIB) : $(CPPDBGOBJS)  warnings
 	$(CXX) $(CXXFLAGS) $(CFLAGS) $(LDFLAGS) $(CXX_SHFLAGS),$@ -o $@ $(CPPDBGOBJS) $(SHARED_LIBS)
 endif
 
@@ -103,10 +114,10 @@ endif
 
 $(CPPOBJS) $(CPPDBGOBJS) : $(HPPSOURCES)
 
-%.o : %.cpp
+%.o : %.cpp  warnings
 	$(CXX) $(DEBUGOPTS) $(CXXFLAGS) $(CFLAGS) $(COMMONOPTS) $(CPPOPTS) $< -o $@
 
-%.dbg.o : %.cpp
+%.dbg.o : %.cpp  warnings
 	$(CXX)  $(DEBUGOPTS) $(CXXFLAGS) $(CFLAGS) $(COMMONOPTS) $(CPPOPTS) $< -o $@
 
 $(DOCINDEX) : Doxyfile $(HPPSOURCES) $(CPPSOURCES)
