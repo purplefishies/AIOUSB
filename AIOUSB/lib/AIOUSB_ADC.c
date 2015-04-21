@@ -1473,6 +1473,20 @@ unsigned long ADC_SetCal(
 }
 
 /*----------------------------------------------------------------------------*/
+
+AIOUSB_BOOL ADC_CanCalibrate( unsigned long productID )
+{
+    AIOUSB_BOOL retval = AIOUSB_TRUE;
+    if ( ((productID & 0xff) >= 0x40 ) && ( (productID & 0xff) <= 0x5D )) { 
+        retval = ( (productID % 5 == 2 ) || ( productID % 5  == 4 ));
+    } else {
+        retval = AIOUSB_FALSE;
+    }
+    return retval;
+}
+
+
+/*----------------------------------------------------------------------------*/
 /**
  * @param DeviceIndex
  * @return

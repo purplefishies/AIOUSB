@@ -74,6 +74,8 @@ PUBLIC_EXTERN AIORESULT ADC_SetCal(
 PUBLIC_EXTERN AIORESULT ADC_QueryCal(
     unsigned long DeviceIndex );
 
+PUBLIC_EXTERN AIOUSB_BOOL ADC_CanCalibrate( unsigned long ProductID );
+
 PUBLIC_EXTERN AIORESULT ADC_Initialize(
     unsigned long DeviceIndex,
     unsigned char *pConfigBuf,
