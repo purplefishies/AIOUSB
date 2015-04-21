@@ -426,6 +426,37 @@ AIORESULT DIO_Write1(
 /*----------------------------------------------------------------------------*/
 AIORESULT DIO_ReadAll(
                       unsigned long DeviceIndex,
+                      void *buf
+                      ) 
+{
+    if ( !buf ) 
+        return AIOUSB_ERROR_INVALID_PARAMETER;
+    AIORESULT result = AIOUSB_SUCCESS;
+    AIOUSBDevice *device = NULL;
+    USBDevice *usb = _check_dio_get_device_handle( DeviceIndex, &device,  &result );
+    if ( !usb || result != AIOUSB_SUCCESS )
+        return AIOUSB_ERROR_DEVICE_NOT_FOUND;
+
+    int bytesTransferred = usb->usb_control_transfer( usb,
+                                                      USB_READ_FROM_DEVICE, 
+                                                      AUR_DIO_READ,
+                                                      0,
+                                                      0,
+                                                      (unsigned char *)buf,
+                                                      device->DIOBytes,
+                                                      device->commTimeout
+                                                      );
+    
+    if( bytesTransferred != (int)device->DIOBytes )
+        result = LIBUSB_RESULT_TO_AIOUSB_RESULT( bytesTransferred );
+    
+    return result;
+}
+
+
+/*----------------------------------------------------------------------------*/
+AIORESULT DIO_ReadIntoDIOBuf(
+                      unsigned long DeviceIndex,
                       DIOBuf *buf
                       ) 
 {

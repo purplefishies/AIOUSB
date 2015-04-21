@@ -129,7 +129,7 @@ int main(int argc, char *argv[] )
 
    DIOBuf *buf= NewDIOBuf(0);
    int cdat;
-   DIO_ReadAll( deviceIndex, buf );
+   DIO_ReadIntoDIOBuf( deviceIndex, buf );
    printf("Binary was: %s\n", DIOBufToString( buf ) );
    printf("Hex was: %s\n", DIOBufToHex( buf ) );
    DIO_Read8( deviceIndex, 0, &cdat  );

@@ -66,10 +66,14 @@ PUBLIC_EXTERN unsigned long DIO_Write1(
                                        );
 
 
-PUBLIC_EXTERN unsigned long DIO_ReadAll(
-                                        unsigned long DeviceIndex,
-                                        DIOBuf *buf
-                                        );
+PUBLIC_EXTERN AIORESULT DIO_ReadIntoDIOBuf(
+                                           unsigned long DeviceIndex,
+                                           DIOBuf *buf
+                                           );
+
+PUBLIC_EXTERN AIORESULT DIO_ReadAll( unsigned long DeviceIndex, void *buf );
+
+
 PUBLIC_EXTERN unsigned long DIO_ReadAllToCharStr(
                                                  unsigned long DeviceIndex,
                                                  char *buf,

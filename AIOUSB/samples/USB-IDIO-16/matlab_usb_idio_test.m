@@ -82,11 +82,11 @@ for i=0:stopval
 end
 readData = calllib('libaiousb','NewDIOBuf', 10 );
 
-result = calllib('libaiousb','DIO_ReadAll', deviceIndex, readData );
+result = calllib('libaiousb','DIO_ReadIntoDIOBuf', deviceIndex, readData );
 
 calllib('libaiousb','DIOBufToString', readData ) 
 result = calllib('libaiousb','DIO_WriteAll', 0, libpointer('uint16', 21605  ) );
-result = calllib('libaiousb','DIO_ReadAll', deviceIndex, readData );
+result = calllib('libaiousb','DIO_ReadIntoDIOBuf', deviceIndex, readData );
 calllib('libaiousb','DIOBufToString', readData );
 val = sprintf('String was: %s', calllib('libaiousb','DIOBufToString',readData));
 disp(val);

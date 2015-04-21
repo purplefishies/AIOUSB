@@ -70,7 +70,7 @@ ulp_assign(outData, 0x5465 );
 DIO_WriteAll(deviceIndex, outData );
 disp('Reading back data');
 buf = DIOBuf(10)
-DIO_ReadAll( deviceIndex, buf );
+DIO_ReadIntoDIOBuf( deviceIndex, buf );
 val = sprintf("Binary was: %s", DIOBufToString(buf) );
 disp(val);
 val = sprintf("Hex was: %s", DIOBufToHex(buf) );
