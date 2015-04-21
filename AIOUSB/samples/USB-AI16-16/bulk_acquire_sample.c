@@ -20,6 +20,7 @@ struct opts {
     int cal_channel;
     int max_channels;
     int clock_scale;
+    int calibration_enabled;
 };
 
 void process_cmd_line( struct opts *, int argc, char *argv[] );
@@ -33,7 +34,7 @@ int main( int argc, char **argv ) {
     AIOUSB_BOOL deviceFound = AIOUSB_FALSE;
     ADConfigBlock configBlock;
 
-    struct opts options = {0, 16, 100000, 0 , 5 , 128 , 1 };
+    struct opts options = {0, 16, 100000, 0 , 5 , 128 , 1 , 0 };
 
     process_cmd_line( &options, argc, argv );
     int CAL_CHANNEL      = options.cal_channel;
@@ -92,6 +93,7 @@ int main( int argc, char **argv ) {
                    && productID <= USB_AIO12_128E
                    ) {
                     // found a USB-AI16-16A family device
+                    options.calibration_enabled = ADC_CanCalibrate( productID );
                     deviceFound = AIOUSB_TRUE;
                     break;				// from while()
                 }
@@ -145,34 +147,40 @@ int main( int argc, char **argv ) {
     /*
      * demonstrate automatic A/D calibration
      */
-    result = ADC_SetCal( deviceIndex, ":AUTO:" );
-    if( result == AIOUSB_SUCCESS )
-        printf( "Automatic calibration completed successfully\n" );
-    else
-        printf( "Error '%s' performing automatic A/D calibration\n", AIOUSB_GetResultCodeAsString( result ) );
 
-    /*
-     * verify that A/D ground calibration is correct
-     */
-    ADC_SetOversample( deviceIndex, 0 );
-    ADC_SetScanLimits( deviceIndex, CAL_CHANNEL, CAL_CHANNEL );
-    ADC_ADMode( deviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_GROUND );
-    result = ADC_GetScan( deviceIndex, counts );
-    if( result == AIOUSB_SUCCESS )
-        printf( "Ground counts = %u (should be approx. 0)\n", counts[ CAL_CHANNEL ] );
-    else
-        printf( "Error '%s' attempting to read ground counts\n", 
-                AIOUSB_GetResultCodeAsString( result ) );
+    if ( options.calibration_enabled ) { 
+        result = ADC_SetCal( deviceIndex, ":AUTO:" );
+        if( result == AIOUSB_SUCCESS )
+            printf( "Automatic calibration completed successfully\n" );
+        else
+            printf( "Error '%s' performing automatic A/D calibration\n", AIOUSB_GetResultCodeAsString( result ) );
+        
+        /*
+         * verify that A/D ground calibration is correct
+         */
 
-    /*
-     * verify that A/D reference calibration is correct
-     */
-    ADC_ADMode( deviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_REFERENCE );
-    result = ADC_GetScan( deviceIndex, counts );
-    if( result == AIOUSB_SUCCESS )
-        printf( "Reference counts = %u (should be approx. 65130)\n", counts[ CAL_CHANNEL ] );
-    else
-        printf( "Error '%s' attempting to read reference counts\n", AIOUSB_GetResultCodeAsString( result ) );
+        ADC_SetOversample( deviceIndex, 0 );
+        ADC_SetScanLimits( deviceIndex, CAL_CHANNEL, CAL_CHANNEL );
+        ADC_ADMode( deviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_GROUND );
+        result = ADC_GetScan( deviceIndex, counts );
+        if( result == AIOUSB_SUCCESS )
+            printf( "Ground counts = %u (should be approx. 0)\n", counts[ CAL_CHANNEL ] );
+        else
+            printf( "Error '%s' attempting to read ground counts\n", 
+                    AIOUSB_GetResultCodeAsString( result ) );
+
+
+        /*
+         * verify that A/D reference calibration is correct
+         */
+        ADC_ADMode( deviceIndex, 0 , AD_CAL_MODE_REFERENCE ); /* TriggerMode */
+        result = ADC_GetScan( deviceIndex, counts );
+        if( result == AIOUSB_SUCCESS )
+            printf( "Reference counts = %u (should be approx. 65130)\n", counts[ CAL_CHANNEL ] );
+        else
+            printf( "Error '%s' attempting to read reference counts\n", AIOUSB_GetResultCodeAsString( result ) );
+        
+    }
 
     /*
      * demonstrate scanning channels and measuring voltages
