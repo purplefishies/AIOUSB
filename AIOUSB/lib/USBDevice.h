@@ -52,7 +52,7 @@ void DeleteUSBDevices( USBDevice *devs);
 int USBDeviceClose( USBDevice *dev );
 
 
-USBDevice *AIODeviceTableGetUSBDevice( unsigned long DeviceIndex , AIORESULT *result );
+USBDevice *AIODeviceTableGetUSBDevice( unsigned long DeviceIndex , AIORESULT *res );
 int USBDeviceReadADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock );
 int USBDeviceGetIdProduct( USBDevice *device );
 int USBDeviceFetchADCConfigBlock( USBDevice *device, ADCConfigBlock *config );

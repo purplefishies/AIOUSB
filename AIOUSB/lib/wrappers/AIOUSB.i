@@ -304,7 +304,7 @@ unsigned long CTR_StartOutputFreq( unsigned long DeviceIndex,  unsigned long Blo
   }
 
 }
-%extend DIOBuf {
+%extend diobuf_type {
 
   DIOBuf( int size ) {
     return (DIOBuf *)NewDIOBuf( size );

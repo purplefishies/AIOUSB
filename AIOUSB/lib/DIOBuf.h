@@ -21,7 +21,7 @@ namespace AIOUSB {
 
 /* typedef AIOChannelMask DIOBuf; */
 typedef unsigned char DIOBufferType ;
-typedef struct {
+typedef struct diobuf_type {
     unsigned _size;
     unsigned char *_buffer;        /**> Actual elements  */
     char *_strbuf;                 /**> Display string   */

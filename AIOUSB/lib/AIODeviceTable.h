@@ -21,8 +21,8 @@ PUBLIC_EXTERN AIORESULT AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( int *
 PUBLIC_EXTERN AIORET_TYPE AIODeviceTablePopulateTable(void);
 PUBLIC_EXTERN AIORET_TYPE AIODeviceTablePopulateTableTest(unsigned long *products, int length );
 PUBLIC_EXTERN AIORESULT AIODeviceTableClearDevices( void );
-PUBLIC_EXTERN AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *result );
-PUBLIC_EXTERN USBDevice *AIODeviceTableGetUSBDeviceAtIndex( unsigned long DeviceIndex, AIORESULT *result );
+PUBLIC_EXTERN AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *res );
+PUBLIC_EXTERN USBDevice *AIODeviceTableGetUSBDeviceAtIndex( unsigned long DeviceIndex, AIORESULT *res );
 void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID );
 
 

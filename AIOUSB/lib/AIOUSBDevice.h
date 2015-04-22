@@ -105,7 +105,7 @@ AIOUSBDevice *NewAIOUSBDeviceFromJSON( char *str );
 
 AIORET_TYPE AIOUSBDeviceInitializeWithProductID( AIOUSBDevice *device , ProductIDS productID );
 USBDevice *AIOUSBDeviceGetUSBHandle( AIOUSBDevice *dev );
-USBDevice *AIOUSBDeviceGetUSBHandleFromDeviceIndex( unsigned long DeviceIndex, AIOUSBDevice **dev, AIORESULT *result );
+USBDevice *AIOUSBDeviceGetUSBHandleFromDeviceIndex( unsigned long DeviceIndex, AIOUSBDevice **dev, AIORESULT *res );
 
 AIORET_TYPE AIOUSBDeviceSetUSBHandle( AIOUSBDevice *dev, USBDevice *usb );
 

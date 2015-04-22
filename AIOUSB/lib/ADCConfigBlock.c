@@ -42,10 +42,10 @@ AIORET_TYPE DeleteADCConfigBlock( ADCConfigBlock *config )
 }
 
 /*----------------------------------------------------------------------------*/
-AIOUSBDevice *ADCConfigBlockGetAIOUSBDevice( ADCConfigBlock *obj , AIORET_TYPE *result ) 
+AIOUSBDevice *ADCConfigBlockGetAIOUSBDevice( ADCConfigBlock *obj , AIORET_TYPE *res ) 
 {
     if (!obj ) {
-        *result = -AIOUSB_ERROR_DEVICE_NOT_FOUND;
+        *res = -AIOUSB_ERROR_DEVICE_NOT_FOUND;
         return NULL;
     }
 
