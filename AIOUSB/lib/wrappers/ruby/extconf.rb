@@ -40,6 +40,11 @@ find_header("AIOUSB_Core.h",
             "/usr/local/include"
             )
 
+find_header("ADCConfigBlock.h",
+            ENV["AIO_LIB_DIR"],
+            "/usr/include",
+            "/usr/local/include"
+            )
 
 create_makefile('AIOUSB')
 
