@@ -310,7 +310,9 @@ void TestCaseSetup::doBulkAcquire(unsigned int blck_size, unsigned int ovr_sampl
 
   block_size          = ( blck_size <= 0 ? 100000  : blck_size );
   number_oversamples  = ( ovr_sampl <= 0 || ovr_sampl > 255 ? 10 : ovr_sampl );
-  double clock_speed      = ( clk_speed <= 0 ? 100000 : clk_speed );
+  double clock_speed  = ADC_GetMaxClockRate( deviceTable[DeviceIndex].ProductID,NUM_CHANNELS,number_oversamples );
+  
+
   //                                     scans       *    bytes / sample        *    1 sample + number_oversampless */
   const int BULK_BYTES = block_size  * NUM_CHANNELS  * sizeof( unsigned short ) *    11;
 
