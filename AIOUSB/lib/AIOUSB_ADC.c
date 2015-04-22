@@ -1408,6 +1408,159 @@ out_ADC_SetAllGainCodeAndDiffMode:
     return result;
 }
 
+/*----------------------------------------------------------------------------*/
+
+/**
+ * @brief Returns the maximum clock rate for the product in question and 
+ *        the number of oversamples + number of channels for the device
+ * @param ProductID produc we are looking up
+ * @param num_channels  Number of channels we will be sampling on
+ * @param num_oversamples  Number of oversamples we will be using
+ * 
+ * @return 
+ */
+
+PUBLIC_EXTERN AIORESULT ADC_GetMaxClockRate( unsigned long ProductID,
+                                             unsigned int num_channels,
+                                             unsigned int num_oversamples
+                                             )
+{
+    AIORESULT tmp = ADC_ClockRateForADCProduct( ProductID );
+    if ( !tmp ) { 
+        return tmp;
+    }
+    return tmp / ( num_channels * ( num_oversamples + 1));
+}
+
+PUBLIC_EXTERN AIORESULT ADC_ClockRateForADCProduct( unsigned long ProductID )
+{
+    switch ( ProductID ) { 
+    case USB_AIO16_16A:
+        return 500000;
+    case USB_AIO16_16E:
+        return 250000;
+    case USB_AI16_16A:
+        return 500000;
+    case USB_AI16_16E:
+        return 250000;
+    case USB_AIO12_16A:
+        return 500000;
+    case USB_AIO12_16:
+        return 250000;
+    case USB_AIO12_16E:
+        return 100000;
+    case USB_AI12_16A:
+        return 500000;
+    case USB_AI12_16:
+        return 250000;
+    case USB_AI12_16E:
+        return 100000;
+    case USB_AIO16_64MA:
+        return 500000;
+    case USB_AIO16_64ME:
+        return 250000;
+    case USB_AI16_64MA:
+        return 500000;
+    case USB_AI16_64ME:
+        return 250000;
+    case USB_AIO12_64MA:
+        return 500000;
+    case USB_AIO12_64M:
+        return 250000;
+    case USB_AIO12_64ME:
+        return 100000;
+    case USB_AI12_64MA:
+        return 500000;
+    case USB_AI12_64M:
+        return 250000;
+    case USB_AI12_64ME:
+        return 100000;
+    case USB_AIO16_128A:
+        return 500000;
+    case USB_AIO16_128E:
+        return 250000;
+    case USB_AI16_128A:
+        return 500000;
+    case USB_AI16_128E:
+        return 250000;
+    case USB_AIO16_96A:
+        return 500000;
+    case USB_AIO16_96E:
+        return 250000;
+    case USB_AI16_96A:
+        return 500000;
+    case USB_AI16_96E:
+        return 250000;
+    case USB_AIO16_64A:
+        return 500000;
+    case USB_AIO16_64E:
+        return 250000;
+    case USB_AI16_64A:
+        return 500000;
+    case USB_AI16_64E:
+        return 250000;
+    case USB_AIO16_32A:
+        return 500000;
+    case USB_AIO16_32E:
+        return 250000;
+    case USB_AI16_32A:
+        return 500000;
+    case USB_AI16_32E:
+        return 250000;
+    case USB_AIO12_128A:
+        return 500000;
+    case USB_AIO12_128:
+        return 250000;
+    case USB_AIO12_128E:
+        return 100000;
+    case USB_AI12_128A:
+        return 500000;
+    case USB_AI12_128:
+        return 250000;
+    case USB_AI12_128E:
+        return 100000;
+    case USB_AIO12_96A:
+        return 500000;
+    case USB_AIO12_96:
+        return 250000;
+    case USB_AIO12_96E:
+        return 100000;
+    case USB_AI12_96A:
+        return 500000;
+    case USB_AI12_96:
+        return 250000;
+    case USB_AI12_96E:
+        return 100000;
+    case USB_AIO12_64A:
+        return 500000;
+    case USB_AIO12_64:
+        return 250000;
+    case USB_AIO12_64E:
+        return 100000;
+    case USB_AI12_64A:
+        return 500000;
+    case USB_AI12_64:
+        return 250000;
+    case USB_AI12_64E:
+        return 100000;
+    case USB_AIO12_32A:
+        return 500000;
+    case USB_AIO12_32:
+        return 250000;
+    case USB_AIO12_32E:
+        return 100000;
+    case USB_AI12_32A:
+        return 500000;
+    case USB_AI12_32:
+        return 250000;
+    case USB_AI12_32E:
+        return 100000;
+    default:
+        return 0;
+    };
+}
+
+/*----------------------------------------------------------------------------*/
 /**
  * @brief
  * @param DeviceIndex

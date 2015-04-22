@@ -67,6 +67,15 @@ PUBLIC_EXTERN AIORESULT ADC_SetScanLimits(
     unsigned long StartChannel,
     unsigned long EndChannel );
 
+PUBLIC_EXTERN AIORESULT ADC_GetMaxClockRate( unsigned long ProductID,
+                                             unsigned int num_channels,
+                                             unsigned int num_oversamples
+                                             );
+
+PUBLIC_EXTERN AIORESULT ADC_ClockRateForADCProduct( unsigned long ProductID );
+
+
+
 PUBLIC_EXTERN AIORESULT ADC_SetCal(
     unsigned long DeviceIndex,
     const char *CalFileName );

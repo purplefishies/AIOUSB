@@ -51,7 +51,7 @@ int main( int argc, char **argv ) {
 
     int BULK_BYTES = NUM_SCANS * NUM_CHANNELS * sizeof( unsigned short ) * (NUM_OVERSAMPLES+1);
 
-    double CLOCK_SPEED = MIN((500000 * options.clock_scale ) / ( NUM_CHANNELS * (NUM_OVERSAMPLES+1)) , options.clock_speed );
+
 
     printf("USB-AI16-16A sample program version %s, %s\n"
            "This program demonstrates controlling a USB-AI16-16A device on\n"
@@ -111,6 +111,13 @@ int main( int argc, char **argv ) {
         goto out_sample;
     }
     /* AIOUSB_Reset( deviceIndex ); */
+
+    double CLOCK_SPEED = MIN(ADC_GetMaxClockRate( deviceTable[deviceIndex].ProductID,NUM_CHANNELS,NUM_OVERSAMPLES), options.clock_speed );
+    if ( CLOCK_SPEED == 0 ) {
+        fprintf(stderr, "Got incorrect minimum clock speed of 0 for device. It Looks like this ADC device (id=%#X) is not setup for ADC\n", deviceTable[deviceIndex].ProductID );
+        exit(1);
+    }
+
     AIOUSB_SetCommTimeout( deviceIndex, 1000 );
     AIOUSB_SetDiscardFirstSample( deviceIndex, AIOUSB_TRUE );
 
