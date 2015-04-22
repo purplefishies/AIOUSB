@@ -34,7 +34,7 @@ int main( int argc, char **argv ) {
     AIOUSB_BOOL deviceFound = AIOUSB_FALSE;
     ADConfigBlock configBlock;
 
-    struct opts options = {0, 16, 100000, 0 , 5 , 128 , 1 , 0 };
+    struct opts options = {0, 16, 100000, 500000 , 5 , 128 , 1 , 0 };
 
     process_cmd_line( &options, argc, argv );
     int CAL_CHANNEL      = options.cal_channel;
@@ -42,6 +42,7 @@ int main( int argc, char **argv ) {
     int NUM_CHANNELS     = options.num_channels;
     int NUM_OVERSAMPLES  = options.num_oversamples;
     int NUM_SCANS        = options.num_scans;
+    
    
 
     unsigned short counts[ MAX_CHANNELS ];
@@ -50,12 +51,12 @@ int main( int argc, char **argv ) {
 
     int BULK_BYTES = NUM_SCANS * NUM_CHANNELS * sizeof( unsigned short ) * (NUM_OVERSAMPLES+1);
 
-    double CLOCK_SPEED = (500000 * options.clock_scale ) / ( NUM_CHANNELS * (NUM_OVERSAMPLES+1) );
+    double CLOCK_SPEED = MIN((500000 * options.clock_scale ) / ( NUM_CHANNELS * (NUM_OVERSAMPLES+1)) , options.clock_speed );
 
     printf("USB-AI16-16A sample program version %s, %s\n"
-           "  This program demonstrates controlling a USB-AI16-16A device on\n"
-           "  the USB bus. For simplicity, it uses the first such device found\n"
-           "  on the bus.\n", 
+           "This program demonstrates controlling a USB-AI16-16A device on\n"
+           "the USB bus. For simplicity, it uses the first such device found\n"
+           "on the bus.\n", 
            AIOUSB_GetVersion(), 
            AIOUSB_GetVersionDate()
            );
