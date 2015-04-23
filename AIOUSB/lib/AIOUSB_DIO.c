@@ -15,8 +15,15 @@
 namespace AIOUSB {
 #endif
 
-#define MASK_BYTES_SIZE(device)  ((device->DIOBytes + BITS_PER_BYTE - 1) / BITS_PER_BYTE )
-#define TRISTATE_BYTES_SIZE(device) ((device->Tristates + BITS_PER_BYTE - 1) / BITS_PER_BYTE)
+int MASK_BYTES_SIZE(AIOUSBDevice *device) 
+{
+    return   ((device->DIOBytes + BITS_PER_BYTE - 1) / BITS_PER_BYTE );
+}
+
+int TRISTATE_BYTES_SIZE(AIOUSBDevice *device) 
+{
+    return  ((device->Tristates + BITS_PER_BYTE - 1) / BITS_PER_BYTE);
+}
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -93,11 +100,11 @@ USBDevice *_check_dio_get_device_handle( unsigned long DeviceIndex,
 }
 
 /*----------------------------------------------------------------------------*/
-AIORESULT DIO_Configure(
-                        unsigned long DeviceIndex,
-                        unsigned char bTristate,
-                        AIOChannelMask *mask,
-                        DIOBuf *buf
+AIORESULT DIO_ConfigureWithDIOBuf(
+                                  unsigned long DeviceIndex,
+                                  unsigned char bTristate,
+                                  AIOChannelMask *mask,
+                                  DIOBuf *buf
                         ) 
 {
     AIOUSBDevice  *device = NULL;
@@ -153,7 +160,7 @@ AIORESULT DIO_Configure(
 }
 
 /*----------------------------------------------------------------------------*/
-AIORESULT DIO_ConfigureRaw(
+AIORESULT DIO_Configure(
                            unsigned long DeviceIndex,
                            unsigned char bTristate,
                            void *pOutMask,
@@ -165,9 +172,9 @@ AIORESULT DIO_ConfigureRaw(
 
     AIORESULT result ;
     AIOUSBDevice *device = _check_dio( DeviceIndex, &result );
+    if ( result != AIOUSB_SUCCESS ) 
+        return result;
 
-    if ( device->LastDIOData != 0 ) 
-        return AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
 
     memcpy(device->LastDIOData, pData, device->DIOBytes);
 
@@ -554,7 +561,7 @@ AIORESULT DIO_Read8(
         goto out_DIO_Read8;
     }
     
-    if ( (result = DIO_ReadAll(DeviceIndex, readBuffer)) == AIOUSB_SUCCESS ) {
+    if ( (result = DIO_ReadAll(DeviceIndex, readBuffer->_buffer)) == AIOUSB_SUCCESS ) {
         char *tmp = DIOBufToBinary( readBuffer ); 
         *pdat = (int)tmp[ByteIndex];
     }

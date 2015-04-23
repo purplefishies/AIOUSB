@@ -20,19 +20,20 @@ namespace AIOUSB
 {
 #endif
 
+
+PUBLIC_EXTERN AIORESULT DIO_ConfigureWithDIOBuf(
+                                                unsigned long DeviceIndex,
+                                                unsigned char bTristate,
+                                                AIOChannelMask *mask,
+                                                DIOBuf *buf
+                                                );
+
 PUBLIC_EXTERN unsigned long DIO_Configure(
                                           unsigned long DeviceIndex,
                                           unsigned char bTristate,
-                                          AIOChannelMask *mask,
-                                          DIOBuf *buf
+                                          void *pOutMask,
+                                          void *pData
                                           );
-
-PUBLIC_EXTERN unsigned long DIO_ConfigureRaw(
-                                             unsigned long DeviceIndex,
-                                             unsigned char bTristate,
-                                             void *pOutMask,
-                                             void *pData
-                                             );
 
 PUBLIC_EXTERN unsigned long DIO_ConfigureEx( 
                                             unsigned long DeviceIndex, 

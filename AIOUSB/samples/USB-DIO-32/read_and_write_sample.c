@@ -45,11 +45,10 @@ int main( int argc, char **argv ) {
     struct DeviceInfo *device;
 
     printf(
-           "USB-DIO-32 sample program version 1.17, 26 November 2009\n"
-           "  AIOUSB library version %s, %s\n"
-           "  This program demonstrates communicating with %d USB-DIO-32 devices on\n"
-           "  the same USB bus. For simplicity, it uses the first %d such devices\n"
-           "  found on the bus.\n",
+           "USB-DIO-32 sample program version %s, %s\n"
+           "This program demonstrates communicating with %d USB-DIO-32 devices on\n"
+           "the same USB bus. For simplicity, it uses the first %d such devices\n"
+           "found on the bus.\n",
            AIOUSB_GetVersion(),
            AIOUSB_GetVersionDate(),
            DEVICES_REQUIRED,
@@ -138,36 +137,36 @@ int main( int argc, char **argv ) {
 
     for( port = 0; port <= 0xff; port ++ ) { 
         device->writeBuffer[0] = port;
-        result = DIO_ConfigureRaw( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
+        result = DIO_ConfigureWithDIOBuf( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
         usleep(10000);
     }
 
     for( port = 0; port <= 0xff; port ++ ) { 
         device->writeBuffer[1] = port;
-        result = DIO_ConfigureRaw( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
+        result = DIO_ConfigureWithDIOBuf( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
         usleep(10000);
     }
 
     for( port = 0; port <= 0xff; port ++ ) { 
         device->writeBuffer[2] = port;
-        result = DIO_ConfigureRaw( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
+        result = DIO_ConfigureWithDIOBuf( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
         usleep(10000);
     }
 
     for( port = 0; port <= 0xff; port ++ ) { 
         device->writeBuffer[3] = port;
-        result = DIO_ConfigureRaw( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
+        result = DIO_ConfigureWithDIOBuf( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
         usleep(10000);
     }
 
     for ( port = 0; port < 4 ; port ++ )  {
         device->writeBuffer[port] = 0xff;
     }
-    result = DIO_ConfigureRaw( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
+    result = DIO_ConfigureWithDIOBuf( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
 
     for ( int i =0 ; i <= 0xf ; i ++ ) { 
             device->outputMask[0] = (unsigned char )i;
-            result = DIO_ConfigureRaw( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
+            result = DIO_ConfigureWithDIOBuf( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
             if ( result != AIOUSB_SUCCESS ) 
                 break;
             usleep(100000);

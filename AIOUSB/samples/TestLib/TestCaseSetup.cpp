@@ -125,7 +125,7 @@ void TestCaseSetup::doDACDirectSetup()
     writeBuffer[ port ] = 0x11 * ( port + 1 );
   }
 
-  result = DIO_ConfigureRaw( DeviceIndex, AIOUSB_FALSE , outputMask, writeBuffer );
+  result = DIO_Configure( DeviceIndex, AIOUSB_FALSE , outputMask, writeBuffer );
 
   printf( "Writing patterns to devices:" );
   fflush( stdout );				// must do for "real-time" feedback
