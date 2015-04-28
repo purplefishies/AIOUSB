@@ -132,7 +132,7 @@ AIORESULT DIO_ConfigureWithDIOBuf(
     memcpy( dest, DIOBufToBinary(buf), device->DIOBytes );
     dest += device->DIOBytes;
 
-    for( unsigned i = 0; i < MASK_BYTES_SIZE( device ) ; i ++ ) {
+    for( int i = 0; i < MASK_BYTES_SIZE( device ) ; i ++ ) {
         char tmpmask;
         if ( (result = AIOChannelMaskGetMaskAtIndex( mask, &tmpmask, i ) != AIOUSB_SUCCESS ) ) { 
             return result;
