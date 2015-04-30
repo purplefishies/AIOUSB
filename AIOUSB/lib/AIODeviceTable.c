@@ -1454,11 +1454,6 @@ AIORET_TYPE AIODeviceTablePopulateTable(void)
     return AIOUSB_SUCCESS;
 }
 
-/* device->usb_device = CopyUSBDevice( &usbdevices[i] ); */
-/* InitializeUSBDevice( device->usb_device ); /\* Sets up the internals for actually working *\/ */
-/* DeleteUSBDevices( usbdevices ); */
-
-
 /*----------------------------------------------------------------------------*/
 /**
  * @brief AIOUSB_Init() and AIOUSB_Exit() are not thread-safe and

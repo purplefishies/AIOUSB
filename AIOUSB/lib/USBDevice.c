@@ -88,11 +88,6 @@ int USBDeviceClose( USBDevice *usb )
 
     return AIOUSB_SUCCESS;
 }
-/* if(device->deviceHandle != NULL) { */
-/*     libusb_close(device->deviceHandle); */
-/*     device->deviceHandle = NULL; */
-/* } */
-/* libusb_unref_device(device->device); */
 
 /*----------------------------------------------------------------------------*/
 int FindUSBDevices( USBDevice **devs, int *size )

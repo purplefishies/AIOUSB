@@ -63,29 +63,44 @@ void TestCaseSetup::resetCPU(void) {
 
 
 void TestCaseSetup::findDevice(void) {
-  unsigned long deviceMask = GetDevices();
-  unsigned long productID, nameSize, numDIOBytes, numCounters;
-  unsigned long result;
-  char name[ MAX_NAME_SIZE + 2 ];
+    unsigned long deviceMask = GetDevices();
+    unsigned long productID, nameSize, numDIOBytes, numCounters;
+    unsigned long result;
+    char name[ MAX_NAME_SIZE + 2 ];
 
-  while( deviceMask != 0 ) {
-    if( ( deviceMask & 1 ) != 0 ) {
-      // found a device, but is it the correct type?
-      nameSize = MAX_NAME_SIZE;
-      result = QueryDeviceInfo( this->DeviceIndex, &productID, &nameSize, name, &numDIOBytes, &numCounters );
-      if( result == AIOUSB_SUCCESS ) {
-        if( VALID_PRODUCT( productID ) ) {
-          deviceFound = true;
-          break;
+    while( deviceMask != 0 ) {
+        if( ( deviceMask & 1 ) != 0 ) {
+            // found a device, but is it the correct type?
+            nameSize = MAX_NAME_SIZE;
+            result = QueryDeviceInfo( this->DeviceIndex, &productID, &nameSize, name, &numDIOBytes, &numCounters );
+            if( result == AIOUSB_SUCCESS ) {
+                if( VALID_PRODUCT( productID ) ) {
+                    deviceFound = true;
+                    break;
+                }
+            } else {
+                throw std::string("Unable to find device");
+            }
         }
-      } else {
-        throw std::string("Unable to find device");
-      }
-    }	// if( ( deviceMask ...
-    this->DeviceIndex++;
-    deviceMask >>= 1;
-  }	// while( deviceMask ...
+        this->DeviceIndex++;
+        deviceMask >>= 1;
+    }
 }
+
+void TestCaseSetup::findDevice( AIOUSB_BOOL (*is_ok_device)( AIOUSBDevice *dev ) ) {
+    int *indices;
+    int num_devices;
+  
+    AIOUSB_FindDevices( &indices, &num_devices,  is_ok_device  );
+    if ( num_devices == 0 ) {
+        throw std::string("Unable to find a device\n");
+    }
+    DeviceIndex = indices[0];
+
+    calibration_enabled = ADC_CanCalibrate( deviceTable[DeviceIndex].ProductID );
+
+}
+
 
 void TestCaseSetup::doPreSetup()
 {
@@ -448,13 +463,18 @@ unsigned long TestCaseSetup::TEST_ADC_BulkPoll( unsigned long DeviceIndex,
 void TestCaseSetup::doVerifyGroundCalibration(void)
 {
   TRACE("doVerifyGroundCalibration:\tVerifying the ground counts\n");
-  ADC_SetOversample( DeviceIndex, 0 );
-  ADC_SetScanLimits( DeviceIndex, CAL_CHANNEL, CAL_CHANNEL );
-  ADC_ADMode( DeviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_GROUND );
-
-  int result = ADC_GetScan( DeviceIndex, this->counts );
-  THROW_IF_ERROR( result, "attempting to read ground counts" );
-  INFO("Ground counts = %u (should be approx. 0)\n", this->counts[ CAL_CHANNEL ] );
+  if ( calibration_enabled ) { 
+      ADC_SetOversample( DeviceIndex, 0 );
+      ADC_SetScanLimits( DeviceIndex, CAL_CHANNEL, CAL_CHANNEL );
+      ADC_ADMode( DeviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_GROUND );
+      
+      int result = ADC_GetScan( DeviceIndex, this->counts );
+      THROW_IF_ERROR( result, "attempting to read ground counts" );
+      INFO("Ground counts = %u (should be approx. 0)\n", this->counts[ CAL_CHANNEL ] );
+  } else  {
+      INFO("Unable to perform VerifyGroundCalibration on card\n");
+  }
+     
   TRACE("leaving doVerifyGroundCalibration\n");
 }
 
@@ -513,13 +533,17 @@ void TestCaseSetup::doSetAutoCalibration(void)
 {
   int result;
   TRACE("doSetAutoCalibtration:");
-  INFO("Setting Auto Calibration\n" );
   /*
    * demonstrate automatic A/D calibration
    */
-  result = ADC_SetCal( DeviceIndex, ":AUTO:" );
-  THROW_IF_ERROR( result, "performing automatic A/D calibration" );
-  INFO("A/D settings successfully configured\n");
+  if ( calibration_enabled ) { 
+      INFO("Setting Auto Calibration\n" );
+      result = ADC_SetCal( DeviceIndex, ":AUTO:" );
+      THROW_IF_ERROR( result, "performing automatic A/D calibration" );
+      INFO("A/D settings successfully configured\n");
+  } else {
+      INFO("Unable to perform SetAutoCalibration on card\n");
+  }
   TRACE("Done doSetAutoCalibtration\n");
 }
 
@@ -527,8 +551,7 @@ void TestCaseSetup::doTestSetAutoCalibration(void)
 {
   int result = 3;
   INFO("doTestSetAutoCalibration:\tTesting the auto calibration");
-  
-  
+    
   THROW_IF_ERROR( result, "Performing check of Auto calibration" );
   INFO("doTestSetAutoCalibration:\tAuto calibration testing completed successfully");
 }
@@ -541,11 +564,16 @@ void TestCaseSetup::doTestSetAutoCalibration(void)
 void TestCaseSetup::doVerifyReferenceCalibration(void)
 {
   TRACE("doVerifyReferenceCalibration:\t");
-  INFO( "Checking Reference Calibration\n");
-  ADC_ADMode( DeviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_REFERENCE );
-  int result = ADC_GetScan( DeviceIndex, counts );
-  THROW_IF_ERROR( result, "attempting to read reference counts" );
-  INFO( "eference counts = %u (should be approx. 65130)\n", counts[ CAL_CHANNEL ] );
+
+  if ( calibration_enabled ) { 
+      INFO( "Checking Reference Calibration\n");
+      ADC_ADMode( DeviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_REFERENCE );
+      int result = ADC_GetScan( DeviceIndex, counts );
+      THROW_IF_ERROR( result, "attempting to read reference counts" );
+      INFO( "Reference counts = %u (should be approx. 65130)\n", counts[ CAL_CHANNEL ] );
+  } else {
+      INFO("Unable to perform VerifyReferenceCalibration on card\n");
+  }
   TRACE("doVerifyReferenceCalibration:\tCompleted");
 }
 

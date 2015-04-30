@@ -78,6 +78,7 @@ class TestCaseSetup {
   TestCaseSetup();
   TestCaseSetup(int deviceIndex, int numChannels );
   void findDevice();
+  void findDevice( AIOUSB_BOOL (*find)( AIOUSBDevice *dev ) );
   void doSomething();
   void setCurrentDeviceIndex( int DeviceIndex );
   void doBulkConfigBlock();
@@ -139,7 +140,7 @@ class TestCaseSetup {
   unsigned int block_size;
   unsigned int clock_speed;
   int maxcounts;
-
+  AIOUSB_BOOL calibration_enabled;
 
 
  private:
