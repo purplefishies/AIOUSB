@@ -17,7 +17,7 @@ endif
 include $(AIOUSB_ROOT)/Mkfiles/oses.inc
 
 override CFLAGS        += -I$${AIO_LIB_DIR} -I/usr/include/libusb-1.0 -std=gnu99
-override CXXFLAGS      += -I$${AIO_LIB_DIR} -I$${AIO_CLASSLIB_DIR} -Ilib -I/usr/include/libusb-1.0 -D__aiousb_cplusplus
+override CXXFLAGS      += -I$${AIO_LIB_DIR} -I$${AIO_CLASSLIB_DIR} -Ilib -I/usr/include/libusb-1.0 -std=c++11 -D__aiousb_cplusplus
 
 override LDFLAGS       += -L$${AIO_LIB_DIR} -L$${AIO_CLASSLIB_DIR}
 
