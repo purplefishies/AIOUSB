@@ -78,13 +78,14 @@ main(int argc, char *argv[] )
 #else
     AIOUSB_FindDevices( &indices, &num_devices, fnd );
 #endif
-    options.index = ( options.index < 0 ? indices[0] : options.index );
+
     
     if ( num_devices <= 0 ) {
         fprintf(stderr,"No devices were found\n");
         exit(1);
     } else {
         fprintf(stderr,"Matching devices found at indices: ");
+        options.index = ( options.index < 0 ? indices[0] : options.index );
         int i;
         for (i = 0; i < num_devices - 1; i ++ ) { 
             fprintf(stderr, "%d",indices[i] );
@@ -94,12 +95,12 @@ main(int argc, char *argv[] )
         fprintf(stderr, " and %d: Using index=%d \n",indices[i], options.index);
     }
 
-    buf = NewAIOContinuousBufForVolts( indices[0], options.num_scans , options.num_channels , options.num_oversamples );
+    buf = NewAIOContinuousBufForVolts( options.index, options.num_scans , options.num_channels , options.num_oversamples );
 
     /**
      * 1. Each buf should have a device index associated with it, so 
      */
-    AIOContinuousBufSetDeviceIndex( buf, indices[0] );
+    AIOContinuousBufSetDeviceIndex( buf, options.index );
 
 
     if( !buf ) {

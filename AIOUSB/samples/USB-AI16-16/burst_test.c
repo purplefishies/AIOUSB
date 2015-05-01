@@ -42,6 +42,7 @@ struct opts {
     int with_timing;
     int verbose;
     int debug_level;
+    int index;
     struct channel_range **ranges;
 };
 
@@ -52,10 +53,21 @@ void process_with_looping_buf( struct opts *opts, AIOContinuousBuf *buf , FILE *
 
 struct channel_range *get_channel_range( char *optarg );
 
+AIOUSB_BOOL find_ai_board( AIOUSBDevice *dev ) { 
+    if ( dev->ProductID >= USB_AI16_16A && dev->ProductID <= USB_AI12_128E ) { 
+        return AIOUSB_TRUE;
+    } else if ( dev->ProductID >=  USB_AIO16_16A && dev->ProductID <= USB_AIO12_128E ) {
+        return AIOUSB_TRUE;
+    } else {
+            return AIOUSB_FALSE;
+    }
+}
+
+
 int 
 main(int argc, char *argv[] ) 
 {
-    struct opts options = {100000, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , (char*)"output.txt", 0, 0, 15 , 0, 0, 0, 0, (AIO_DEBUG_LEVEL)7, NULL };
+    struct opts options = {100000, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , (char*)"output.txt", 0, 0, 15 , 0, 0, 0, 0, (AIO_DEBUG_LEVEL)7, -1, NULL };
     AIOContinuousBuf *buf = 0;
     struct timespec foo , bar;
 
@@ -74,32 +86,34 @@ main(int argc, char *argv[] )
     }
 
     AIOUSB_Init();
-    GetDevices();
-    AIOUSB_BOOL fnd( AIOUSBDevice *dev ) { 
-        if ( dev->ProductID >= USB_AI16_16A && dev->ProductID <= USB_AI12_128E ) { 
-            return AIOUSB_TRUE;
-        } else if ( dev->ProductID >=  USB_AIO16_16A && dev->ProductID <= USB_AIO12_128E ) {
-            return AIOUSB_TRUE;
-        } else {
-            return AIOUSB_FALSE;
-        }
-    }
+    AIOUSB_ListDevices();
 
-    AIOUSB_FindDevices( &indices, &num_devices, fnd );
-
+    AIOUSB_FindDevices( &indices, &num_devices, find_ai_board );
    
     if ( num_devices <= 0 ) {
         fprintf(stderr,"No devices were found\n");
         exit(1);
-    }    
+    } else {
+        if ( options.index < 0 ) 
+            options.index = indices[0];
+        fprintf(stderr,"Matching devices found at indices: ");
+        options.index = ( options.index < 0 ? indices[0] : options.index );
+        int i;
+        for (i = 0; i < num_devices - 1; i ++ ) { 
+            fprintf(stderr, "%d",indices[i] );
+            if ( num_devices > 2 )
+                fprintf(stderr,", "); 
+        }
+        fprintf(stderr, " and %d: Using index=%d \n",indices[i], options.index);
+    }
 
-    buf = (AIOContinuousBuf *)NewAIOContinuousBufForCounts( indices[0], options.num_scans, options.number_channels );
+    buf = (AIOContinuousBuf *)NewAIOContinuousBufForCounts( options.index, options.num_scans, options.number_channels );
     if( !buf ) {
       fprintf(stderr,"Can't allocate memory for temporary buffer \n");
       _exit(1);
     }
 
-    AIOContinuousBufSetDeviceIndex( buf, indices[0] ); /* Assign the first matching device for this sample */
+    AIOContinuousBufSetDeviceIndex( buf, options.index ); /* Assign the first matching device for this sample */
 
     if( options.reset ) {
         fprintf(stderr,"Resetting device at index %d\n",buf->DeviceIndex );
@@ -261,11 +275,13 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] )
          {"range",        required_argument, 0,  'R' },
          {"timing",       no_argument      , 0,  'T' },
          {"verbose",      no_argument      , 0,  'V' },
+         {"index"  ,      required_argument, 0,  'i' },
+
          {0,         0,                 0,  0 }
         };
     while (1) { 
       struct channel_range *tmp;
-        c = getopt_long(argc, argv, "D:b:n:g:c:m:hTV", long_options, &option_index);
+        c = getopt_long(argc, argv, "D:b:n:g:c:m:hTVi:", long_options, &option_index);
         if( c == -1 )
           break;
         switch (c) {
@@ -288,6 +304,9 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] )
             break;
         case 's':
             options->startchannel = atoi(optarg);
+            break;
+        case 'i':
+            options->index = atoi(optarg);
             break;
         case 'V':
             options->verbose = 1;
