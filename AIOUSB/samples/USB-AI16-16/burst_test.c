@@ -98,17 +98,19 @@ main(int argc, char *argv[] )
       fprintf(stderr,"Can't allocate memory for temporary buffer \n");
       _exit(1);
     }
+
+    AIOContinuousBufSetDeviceIndex( buf, indices[0] ); /* Assign the first matching device for this sample */
+
     if( options.reset ) {
-      AIOContinuousBufResetDevice( buf );
-      _exit(0);
+        fprintf(stderr,"Resetting device at index %d\n",buf->DeviceIndex );
+        AIOContinuousBufResetDevice( buf );
+        _exit(0);
     }
     FILE *fp = fopen(options.outfile,"w");
     if( !fp ) {
       fprintf(stderr,"Unable to open '%s' for writing\n", options.outfile );
       _exit(1);
     }
-
-    AIOContinuousBufSetDeviceIndex( buf, indices[0] ); /* Assign the first matching device for this sample */
 
     /**
      * 2. Setup the Config object for Acquisition, either the more complicated 

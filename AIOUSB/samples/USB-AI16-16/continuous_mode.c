@@ -83,13 +83,22 @@ main(int argc, char *argv[] )
         exit(1);
     }
 
+
+
     buf = NewAIOContinuousBufForVolts( indices[0], options.num_scans , options.num_channels , options.num_oversamples );
+
+    /**
+     * 1. Each buf should have a device index associated with it, so 
+     */
+    AIOContinuousBufSetDeviceIndex( buf, indices[0] );
+
 
     if( !buf ) {
         fprintf(stderr,"Can't allocate memory for temporary buffer \n");
         exit(1);
     }
     if( options.reset ) {
+        fprintf(stderr,"Resetting device at index %d\n",buf->DeviceIndex );
         AIOContinuousBufResetDevice( buf );
         exit(0);
     }
@@ -99,10 +108,6 @@ main(int argc, char *argv[] )
         exit(1);
     }
   
-    /**
-     * 1. Each buf should have a device index associated with it, so 
-     */
-    AIOContinuousBufSetDeviceIndex( buf, indices[0] );
 
     /**
      * 2. Setup the Config object for Acquisition, either the more complicated 
