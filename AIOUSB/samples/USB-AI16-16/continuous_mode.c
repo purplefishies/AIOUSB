@@ -29,6 +29,7 @@ struct opts {
     int verbose;
     int start_channel;
     int end_channel;
+    int index;
     struct channel_range **ranges;
 };
 
@@ -50,7 +51,7 @@ AIOUSB_BOOL fnd( AIOUSBDevice *dev ) {
 int 
 main(int argc, char *argv[] ) 
 {
-    struct opts options = {100000, 16, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15,NULL };
+    struct opts options = {100000, 16, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15, -1, NULL };
     AIOContinuousBuf *buf = 0;
     unsigned read_count = 0;
     AIORET_TYPE retval = AIOUSB_SUCCESS;
@@ -60,7 +61,8 @@ main(int argc, char *argv[] )
     process_cmd_line( &options, argc, argv );
 
     AIOUSB_Init();
-    GetDevices();
+    /* GetDevices(); */
+    AIOUSB_ListDevices();
 
 #ifdef __GNUC__
     AIOUSB_FindDevices( &indices, &num_devices, LAMBDA( AIOUSB_BOOL, (AIOUSBDevice *dev), { 
@@ -76,14 +78,21 @@ main(int argc, char *argv[] )
 #else
     AIOUSB_FindDevices( &indices, &num_devices, fnd );
 #endif
-
+    options.index = ( options.index < 0 ? indices[0] : options.index );
     
     if ( num_devices <= 0 ) {
         fprintf(stderr,"No devices were found\n");
         exit(1);
+    } else {
+        fprintf(stderr,"Matching devices found at indices: ");
+        int i;
+        for (i = 0; i < num_devices - 1; i ++ ) { 
+            fprintf(stderr, "%d",indices[i] );
+            if ( num_devices > 2 )
+                fprintf(stderr,", "); 
+        }
+        fprintf(stderr, " and %d: Using index=%d \n",indices[i], options.index);
     }
-
-
 
     buf = NewAIOContinuousBufForVolts( indices[0], options.num_scans , options.num_channels , options.num_oversamples );
 
@@ -251,6 +260,7 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] ) {
         {"gaincode"         , required_argument, 0,  'g' },
         {"clockrate"        , required_argument, 0,  'c' },
         {"help"             , no_argument      , 0,  'h' },
+        {"index"            , required_argument, 0,  'i' },
         {"maxcount"         , required_argument, 0,  'm' },
         {"range"            , required_argument, 0,  'R' },
         {"reset"            , no_argument,       0,  'r' },
@@ -259,7 +269,7 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] ) {
     };
     while (1) { 
         struct channel_range *tmp;
-        c = getopt_long(argc, argv, "D:b:O:n:g:c:m:hR:V", long_options, &option_index);
+        c = getopt_long(argc, argv, "D:b:O:n:g:c:m:hR:Vi:", long_options, &option_index);
         if( c == -1 )
             break;
         switch (c) {
@@ -280,6 +290,9 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] ) {
         case 'h':
             print_usage(argc, argv, long_options );
             exit(1);
+            break;
+        case 'i':
+            options->index = atoi(optarg);
             break;
         case 'V':
             options->verbose = 1;
