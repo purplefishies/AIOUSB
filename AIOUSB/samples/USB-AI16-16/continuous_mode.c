@@ -102,7 +102,7 @@ main(int argc, char *argv[] )
     /**
      * 1. Each buf should have a device index associated with it, so 
      */
-    AIOContinuousBufSetDeviceIndex( buf, 0 );
+    AIOContinuousBufSetDeviceIndex( buf, indices[0] );
 
     /**
      * 2. Setup the Config object for Acquisition, either the more complicated 
