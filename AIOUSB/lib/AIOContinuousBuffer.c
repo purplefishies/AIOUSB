@@ -357,10 +357,10 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetStreamingBlockSize( AIOContinuousBu
 {
     if (!buf )
         return -AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER;
-    if ( blksize < 256 || blksize > 1024*64 ) { 
-        buf->data_size = 256;
+    if ( blksize < 512 || blksize > 1024*64 ) { 
+        buf->data_size = 512;
     } else {
-        buf->data_size = blksize;
+        buf->data_size = ( blksize / 512 ) * 512;
     }
     return AIOUSB_SUCCESS;
 }
@@ -2348,6 +2348,27 @@ TEST(AIOContinuousBuf,WritingCounts )
     
 }
 
+TEST(AIOContinuousBuf, StreamingSize ) 
+{
+    int num_channels = 16;
+    int num_scans = 5000, size = num_scans;
+    AIORET_TYPE retval;
+
+    unsigned short *tobuf = (unsigned short *)malloc( num_scans*num_channels*2 );
+
+    AIOContinuousBuf *buf = NewAIOContinuousBufForCounts( 0, num_scans, num_channels );
+
+    ASSERT_TRUE( buf );
+    ASSERT_EQ( AIOContinuousBufGetStreamingBlockSize(buf), 64*1024 ) << "default size is " << 64*1024 << "\n";
+
+    AIOContinuousBufSetStreamingBlockSize( buf, 513 );
+    ASSERT_EQ( AIOContinuousBufGetStreamingBlockSize(buf), 512 ) << "Rounding of bufsize to multiple of 512\n";
+
+    AIOContinuousBufSetStreamingBlockSize( buf, 1 );
+    ASSERT_EQ( AIOContinuousBufGetStreamingBlockSize(buf), 512 ) << "Minimum size is 512\n";
+
+    DeleteAIOContinuousBuf( buf );
+}
 
 TEST(AIOContinuousBuf,CleanupMemory)
 {
