@@ -30,6 +30,7 @@ struct opts {
     int start_channel;
     int end_channel;
     int index;
+    int block_size;
     struct channel_range **ranges;
 };
 
@@ -51,7 +52,7 @@ AIOUSB_BOOL fnd( AIOUSBDevice *dev ) {
 int 
 main(int argc, char *argv[] ) 
 {
-    struct opts options = {100000, 16, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15, -1, NULL };
+    struct opts options = {100000, 16, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15, -1, -1, NULL };
     AIOContinuousBuf *buf = 0;
     unsigned read_count = 0;
     AIORET_TYPE retval = AIOUSB_SUCCESS;
@@ -61,7 +62,6 @@ main(int argc, char *argv[] )
     process_cmd_line( &options, argc, argv );
 
     AIOUSB_Init();
-    /* GetDevices(); */
     AIOUSB_ListDevices();
 
 #ifdef __GNUC__
@@ -175,6 +175,16 @@ main(int argc, char *argv[] )
      * 3. Setup the sampling clock rate, in this case 
      *    10_000_000 / 1000
      */ 
+    if( options.block_size < 0 ) { 
+        options.block_size = 1024*64;
+    }
+
+    if ( options.clock_rate < 1000 ) { 
+        AIOContinuousBufSetStreamingBlockSize( buf, 512 );
+    } else  {
+        AIOContinuousBufSetStreamingBlockSize( buf, options.block_size );
+    }
+
     AIOContinuousBufSetClock( buf, options.clock_rate );
     /**
      * 4. Start the Callback that fills up the 
@@ -194,7 +204,6 @@ main(int argc, char *argv[] )
 
         if ( (scans_remaining = AIOContinuousBufCountScansAvailable(buf) ) > 0 ) { 
 
-            /* if ( scans_remaining == options.num_scans ) { */
             if ( scans_remaining > 0 ) { 
 
                 scans_remaining = MIN( scans_remaining, options.num_scans - read_count );
@@ -254,23 +263,24 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] ) {
     int option_index = 0;
     
     static struct option long_options[] = {
-        {"debug"            , required_argument, 0,  'D' },
-        {"num_scans"        , required_argument, 0,  'b' },
-        {"num_channels"     , required_argument, 0,  'n' },
-        {"num_oversamples"  , required_argument, 0,  'O' },
-        {"gaincode"         , required_argument, 0,  'g' },
-        {"clockrate"        , required_argument, 0,  'c' },
-        {"help"             , no_argument      , 0,  'h' },
-        {"index"            , required_argument, 0,  'i' },
-        {"maxcount"         , required_argument, 0,  'm' },
-        {"range"            , required_argument, 0,  'R' },
-        {"reset"            , no_argument,       0,  'r' },
-        {"verbose"          , no_argument,       0,  'V' },
-        {0                  , 0,                 0,   0  }
+        {"debug"            , required_argument, 0,  'D'   },
+        {"num_scans"        , required_argument, 0,  'b'   },
+        {"num_channels"     , required_argument, 0,  'n'   },
+        {"num_oversamples"  , required_argument, 0,  'O'   },
+        {"gaincode"         , required_argument, 0,  'g'   },
+        {"clockrate"        , required_argument, 0,  'c'   },
+        {"help"             , no_argument      , 0,  'h'   },
+        {"index"            , required_argument, 0,  'i'   },
+        {"maxcount"         , required_argument, 0,  'm'   },
+        {"range"            , required_argument, 0,  'R'   },
+        {"reset"            , no_argument,       0,  'r'   },
+        {"verbose"          , no_argument,       0,  'V'   },
+        {"block_size"       , required_argument, 0, 'B' },
+        {0                  , 0,                 0,   0    }
     };
     while (1) { 
         struct channel_range *tmp;
-        c = getopt_long(argc, argv, "D:b:O:n:g:c:m:hR:Vi:", long_options, &option_index);
+        c = getopt_long(argc, argv, "B:D:b:O:n:g:c:m:hR:Vi:", long_options, &option_index);
         if( c == -1 )
             break;
         switch (c) {
@@ -283,6 +293,9 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] ) {
             options->ranges = (struct channel_range **)realloc( options->ranges , (++options->number_ranges)*sizeof(struct channel_range*)  );
 
             options->ranges[options->number_ranges-1] = tmp;
+            break;
+        case 'B':
+            options->block_size = atoi( optarg );
             break;
         case 'D':
             options->debug_level = (AIO_DEBUG_LEVEL)atoi(optarg);

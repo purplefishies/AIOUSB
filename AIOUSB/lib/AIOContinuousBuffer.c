@@ -67,6 +67,7 @@ AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long DeviceIndex,
     tmp->size             = num_channels * num_scans * (1+num_oversamples) * unit_size;
     tmp->buffer           = (AIOBufferType *)malloc( tmp->size*unit_size );
     tmp->bufunitsize      = unit_size;
+    tmp->data_size        = 64*1024;
 
     tmp->fifo             = NewAIOFifoCounts( num_channels * num_scans * unit_size / sizeof(uint16_t) );
     tmp->num_oversamples  = num_oversamples;
@@ -125,6 +126,7 @@ AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex,
     AIOContinuousBuf *tmp  = (AIOContinuousBuf *)malloc(sizeof(AIOContinuousBuf));
     tmp->mask              = NewAIOChannelMask( num_channels );
     tmp->fifo              = NewAIOFifoCounts( num_channels * scancounts );
+    tmp->data_size         = 64*1024;
     if ( num_channels > 32 ) { 
         char *bitstr = (char *)malloc( num_channels +1 );
         memset(bitstr, 49, num_channels ); /* Set all to 1s */
@@ -349,6 +351,28 @@ void DeleteAIOContinuousBuf( AIOContinuousBuf *buf )
     DeleteAIOFifoCounts( buf->fifo );
     free( buf );
 }
+
+/*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetStreamingBlockSize( AIOContinuousBuf *buf, unsigned blksize)
+{
+    if (!buf )
+        return -AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER;
+    if ( blksize < 256 || blksize > 1024*64 ) { 
+        buf->data_size = 256;
+    } else {
+        buf->data_size = blksize;
+    }
+    return AIOUSB_SUCCESS;
+}
+
+/*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetStreamingBlockSize( AIOContinuousBuf *buf )
+{
+    if (!buf )
+        return -AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER;
+    return buf->data_size;
+}
+
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBuf_SetCallback(AIOContinuousBuf *buf , void *(*work)(void *object ) ) { return AIOContinuousBufSetCallback( buf, work );}
@@ -909,7 +933,7 @@ void *RawCountsWorkFunction( void *object )
     int bytes;
     srand(3);
     /* unsigned datasize = AIOContinuousBufNumberChannels(buf)*16*512; */
-    unsigned datasize = 64*1024;
+    unsigned datasize = buf->data_size;
 
     int usbfail = 0;
     int usbfail_count = 5;
@@ -1019,7 +1043,7 @@ void *ConvertCountsToVoltsFunction( void *object )
     AIOContinuousBuf *buf = (AIOContinuousBuf*)object;
     unsigned long result;
     int bytes;
-    unsigned datasize = 64*1024;
+    unsigned datasize = buf->data_size;
     /* unsigned datasize = AIOContinuousBufNumberChannels(buf)*16*512; */
 
     int usbfail = 0, usbfail_count = 5;
