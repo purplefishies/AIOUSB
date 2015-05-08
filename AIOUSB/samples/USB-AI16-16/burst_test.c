@@ -43,6 +43,7 @@ struct opts {
     int verbose;
     int debug_level;
     int index;
+    int block_size;
     struct channel_range **ranges;
 };
 
@@ -67,7 +68,7 @@ AIOUSB_BOOL find_ai_board( AIOUSBDevice *dev ) {
 int 
 main(int argc, char *argv[] ) 
 {
-    struct opts options = {100000, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , (char*)"output.txt", 0, 0, 15 , 0, 0, 0, 0, (AIO_DEBUG_LEVEL)7, -1, NULL };
+    struct opts options = {100000, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , (char*)"output.txt", 0, 0, 15 , 0, 0, 0, 0, (AIO_DEBUG_LEVEL)7, -1, -1, NULL };
     AIOContinuousBuf *buf = 0;
     struct timespec foo , bar;
 
@@ -159,6 +160,16 @@ main(int argc, char *argv[] )
         _exit(1);
     }
   
+    if( options.block_size < 0 ) { 
+        options.block_size = 1024*64;
+    }
+
+    if ( options.clock_rate < 1000 ) { 
+        AIOContinuousBufSetStreamingBlockSize( buf, 512 );
+    } else  {
+        AIOContinuousBufSetStreamingBlockSize( buf, options.block_size );
+    }
+
     /**
      * 3. Setup the sampling clock rate, in this case 
      *    10_000_000 / 1000
@@ -263,6 +274,7 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] )
     static struct option long_options[] = {
          {"debug",        required_argument, 0,  'D' },
          {"buffersize",   required_argument, 0,  'b' },
+         {"blocksize",    required_argument, 0,  'B' },
          {"numchannels",  required_argument, 0,  'n' },
          {"gaincode",     required_argument, 0,  'g' },
          {"clockrate",    required_argument, 0,  'c' },
@@ -281,7 +293,7 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] )
         };
     while (1) { 
       struct channel_range *tmp;
-        c = getopt_long(argc, argv, "D:b:n:g:c:m:hTVi:", long_options, &option_index);
+        c = getopt_long(argc, argv, "B:D:b:n:g:c:m:hTVi:", long_options, &option_index);
         if( c == -1 )
           break;
         switch (c) {
@@ -298,6 +310,9 @@ void process_cmd_line( struct opts *options, int argc, char *argv [] )
         case 'h':
             print_usage(argc, argv, long_options );
             _exit(1);
+            break;
+        case 'B':
+            options->block_size = atoi(optarg);
             break;
         case 'n':
             options->number_channels = atoi(optarg);
