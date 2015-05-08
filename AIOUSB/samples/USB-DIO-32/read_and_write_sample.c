@@ -105,8 +105,7 @@ int main( int argc, char **argv ) {
         printf( "Error: You need at least %d devices connected to run this sample\n", DEVICES_REQUIRED );
         goto exit_sample;
     }
-    unsigned port, pattern;
-    AIOUSB_BOOL correct;
+    unsigned port;
 
     for( index = 0; index < devicesFound; index++ ) {
         device = &deviceTable[ index ];
@@ -134,42 +133,46 @@ int main( int argc, char **argv ) {
 
     /* for ( port =0 ; port < 0xff ; port ++ ) {  */
     device->outputMask[0] = (unsigned char )0xff;
+    /* AIOChannelMask *outmask = NewAIOChannelMaskFromStr("11111111"); */
 
     for( port = 0; port <= 0xff; port ++ ) { 
         device->writeBuffer[0] = port;
-        result = DIO_ConfigureWithDIOBuf( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
+        result = DIO_Configure( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
         usleep(10000);
     }
 
     for( port = 0; port <= 0xff; port ++ ) { 
         device->writeBuffer[1] = port;
-        result = DIO_ConfigureWithDIOBuf( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
+        result = DIO_Configure( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
         usleep(10000);
     }
 
     for( port = 0; port <= 0xff; port ++ ) { 
         device->writeBuffer[2] = port;
-        result = DIO_ConfigureWithDIOBuf( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
+        result = DIO_Configure( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
         usleep(10000);
     }
 
     for( port = 0; port <= 0xff; port ++ ) { 
         device->writeBuffer[3] = port;
-        result = DIO_ConfigureWithDIOBuf( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
+        result = DIO_Configure( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
         usleep(10000);
     }
 
     for ( port = 0; port < 4 ; port ++ )  {
         device->writeBuffer[port] = 0xff;
     }
-    result = DIO_ConfigureWithDIOBuf( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
+    result = DIO_Configure( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
+
 
     for ( int i =0 ; i <= 0xf ; i ++ ) { 
-            device->outputMask[0] = (unsigned char )i;
-            result = DIO_ConfigureWithDIOBuf( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
-            if ( result != AIOUSB_SUCCESS ) 
-                break;
-            usleep(100000);
+        device->outputMask[0] = (unsigned char )i;
+        /* AIOChannelMask *outmask = NewAIOChannelMaskFromChr( (char)(unsigned char)i ); */
+            
+        result = DIO_Configure( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
+        if ( result != AIOUSB_SUCCESS ) 
+            break;
+        usleep(100000);
     }
 
     if( result == AIOUSB_SUCCESS )
@@ -182,6 +185,6 @@ exit_sample:
     AIOUSB_Exit();
 
 
-    return ( int ) 0;
+    return ( int ) exit_code;
 } 
 
