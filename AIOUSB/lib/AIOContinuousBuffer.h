@@ -73,8 +73,11 @@ typedef struct aio_continuous_buf {
 #define ROOTCLOCK 10000000
 
 /*-----------------------------  Constructors  ------------------------------*/
-PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex , unsigned scancounts, unsigned number_channels );
+PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBuf();
 PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex, unsigned scancounts , unsigned num_channels , AIOUSB_BOOL counts );
+PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufLegacy( unsigned long DeviceIndex, unsigned scancounts , unsigned num_channels );
+
+
 PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels );
 PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex , unsigned scancounts , unsigned num_channels , AIOUSB_BOOL counts  );
 PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufForVolts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels, unsigned num_oversamples );
@@ -82,6 +85,9 @@ PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufForVolts( unsigned long Devic
 
 PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long DeviceIndex, unsigned num_channels, unsigned num_scans,
                                                              unsigned unit_size, unsigned num_oversamples );
+
+
+/*-----------------------------  Destructor   -------------------------------*/
 
 PUBLIC_EXTERN void DeleteAIOContinuousBuf( AIOContinuousBuf *buf );
 

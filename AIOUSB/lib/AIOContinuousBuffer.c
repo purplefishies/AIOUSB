@@ -42,6 +42,22 @@ AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, unsig
     return tmp;
 }
 
+/*----------------------------------------------------------------------------*/
+AIOContinuousBuf *NewAIOContinuousBuf()
+{
+    AIOContinuousBuf *tmp = (AIOContinuousBuf *)calloc(1,sizeof(AIOContinuousBuf));
+    
+    return tmp;
+}
+
+AIOContinuousBuf *NewAIOContinuousBufLegacy( unsigned long DeviceIndex, unsigned scancounts , unsigned num_channels )
+{
+    AIOContinuousBuf *tmp = NewAIOContinuousBufWithoutConfig( DeviceIndex,  scancounts, num_channels , AIOUSB_FALSE );
+    return tmp;
+
+}
+
+/*----------------------------------------------------------------------------*/
  AIOContinuousBuf *NewAIOContinuousBufForVolts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels, unsigned num_oversamples )
 {
     assert( num_channels > 0 );
@@ -54,6 +70,7 @@ AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, unsig
     return tmp;
 }
 
+/*----------------------------------------------------------------------------*/
 AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long DeviceIndex, 
                                                unsigned num_channels,
                                                unsigned num_scans,
@@ -62,7 +79,7 @@ AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long DeviceIndex,
                                                )
 {
     assert( num_channels > 0 );
-    AIOContinuousBuf *tmp  = (AIOContinuousBuf *)malloc(sizeof(AIOContinuousBuf));
+    AIOContinuousBuf *tmp = NewAIOContinuousBuf();
 
     tmp->size             = num_channels * num_scans * (1+num_oversamples) * unit_size;
     tmp->buffer           = (AIOBufferType *)malloc( tmp->size*unit_size );
@@ -109,6 +126,8 @@ AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long DeviceIndex,
    
     return tmp;
 }
+
+/*----------------------------------------------------------------------------*/
 /**
  * @brief Constructor for AIOContinuousBuf object. Will set up the 
  * @param bufsize 
@@ -268,12 +287,6 @@ AIORET_TYPE AIOContinuousBufInitConfiguration(  AIOContinuousBuf *buf )
     return retval;
 }
 
-/*----------------------------------------------------------------------------*/
-AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex , unsigned scancounts , unsigned num_channels )
-{
-    AIOContinuousBuf *tmp = NewAIOContinuousBufWithoutConfig( DeviceIndex,  scancounts, num_channels , AIOUSB_FALSE );
-    return tmp;
-}
 
 /*----------------------------------------------------------------------------*/
 AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex , 
@@ -2072,7 +2085,7 @@ stress_test_one( int size , int readbuf_size )
     AIORET_TYPE retval;
     /* int readbuf_size = size - 10; */
     AIOBufferType *readbuf = (AIOBufferType *)malloc( readbuf_size*sizeof(AIOBufferType ));
-    AIOContinuousBuf *buf = NewAIOContinuousBuf( 0, size , 16 );
+    AIOContinuousBuf *buf = NewAIOContinuousBufLegacy( 0, size , 16 );
     AIOUSB_DEVEL("Original address is 0x%x\n", (int)(unsigned long)(AIOContinuousBuf *)buf );
     AIOContinuousBufReset( buf );
     AIOContinuousBufSetCallback( buf , doit );
@@ -2106,7 +2119,7 @@ stress_test_one( int size , int readbuf_size )
 
 void stress_test_read_channels( int bufsize, int keysize  ) 
 {
-    AIOContinuousBuf *buf = NewAIOContinuousBuf( 0,  bufsize , 16 );
+    AIOContinuousBuf *buf = NewAIOContinuousBufLegacy( 0,  bufsize , 16 );
     int mybufsize = (16*keysize);
     int stopval;
     AIOBufferType *tmp = (AIOBufferType *)malloc(mybufsize*sizeof(AIOBufferType ));
@@ -2145,7 +2158,7 @@ void stress_test_read_channels( int bufsize, int keysize  )
 
 void continuous_stress_test( int bufsize )
 {
-    AIOContinuousBuf *buf = NewAIOContinuousBuf( 0, bufsize , 16 );
+    AIOContinuousBuf *buf = NewAIOContinuousBufLegacy( 0, bufsize , 16 );
     int tmpsize = pow(16,(double)ceil( ((double)log((double)(bufsize/1000))) / log(16)));
     int keepgoing = 1;
     AIORET_TYPE retval;
@@ -2499,7 +2512,7 @@ TEST(AIOContinuousBuf,BasicFunctionality )
     int num_scans = 4000;
     int num_channels = 16;
     int size = num_scans*num_channels;
-    AIOContinuousBuf *buf = NewAIOContinuousBuf(0, num_scans  , num_channels );
+    AIOContinuousBuf *buf = NewAIOContinuousBufLegacy(0, num_scans  , num_channels );
     int tmpsize = 4*num_scans*num_channels;
 
     AIOBufferType *frombuf = (AIOBufferType *)malloc(tmpsize*sizeof(AIOBufferType ));
