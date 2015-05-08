@@ -189,6 +189,7 @@ AIORET_TYPE AIOChannelMaskSetMaskFromStr( AIOChannelMask *obj, const char *bitfi
 
     return ret;
 }
+
 /*----------------------------------------------------------------------------*/
 /**
  * @brief Creates a new AIOChannelMask object from a character string of 1's and 0's
@@ -201,6 +202,20 @@ AIOChannelMask *NewAIOChannelMaskFromStr( const char *bitfields ) {
     AIOChannelMaskSetMaskFromStr( tmp, bitfields );
     return tmp;
 }
+
+/*----------------------------------------------------------------------------*/
+AIOChannelMask *NewAIOChannelMaskFromChr( const char bits )
+{
+    AIOChannelMask *tmp = NewAIOChannelMask( sizeof(bits) );
+    char tmpbuf[9];
+    int i;
+    for ( i = 0; i <= 7 ; i ++ )
+        tmpbuf[i]= ( (bits & (1 << ( 7-i) )) ? '1' : '0' );
+    tmpbuf[8] = '\0';
+    AIOChannelMaskSetMaskFromStr( tmp, tmpbuf );
+    return tmp;
+}
+
 /*----------------------------------------------------------------------------*/
 /**
  * @brief Returns a string representation for the AIOChannel Bit mask in question
@@ -401,6 +416,16 @@ TEST(AIOChannelMask, Setup_After_null_initialization ) {
     EXPECT_STREQ( "1010", AIOChannelMaskToString( mask ));
     EXPECT_EQ(4, AIOChannelMaskNumberSignals( mask ));
     EXPECT_EQ(2, AIOChannelMaskNumberChannels( mask ));
+}
+TEST(AIOChannelMask, NewChannelMaskFromChar ) { 
+    AIOChannelMask *mask = NewAIOChannelMaskFromChr( (const char)0xAA ) ;
+    EXPECT_STREQ( "10101010", AIOChannelMaskToString(mask) );
+    
+    DeleteAIOChannelMask( mask );
+    
+    mask = NewAIOChannelMaskFromChr( -1 );
+    EXPECT_STREQ( "11111111", AIOChannelMaskToString(mask) );
+    DeleteAIOChannelMask( mask );
 }
 
 

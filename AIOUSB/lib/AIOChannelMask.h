@@ -28,6 +28,7 @@ typedef struct {
 PUBLIC_EXTERN AIOChannelMask *NewAIOChannelMask( unsigned size );
 PUBLIC_EXTERN void  DeleteAIOChannelMask( AIOChannelMask *mask );
 PUBLIC_EXTERN AIOChannelMask *NewAIOChannelMaskFromStr( const char *bitfields );
+PUBLIC_EXTERN AIOChannelMask *NewAIOChannelMaskFromChr( const char bits );
 
 
 PUBLIC_EXTERN char *AIOChannelMaskToString( AIOChannelMask *mask );
