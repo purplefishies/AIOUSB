@@ -945,7 +945,7 @@ void *RawCountsWorkFunction( void *object )
     AIOContinuousBuf *buf = (AIOContinuousBuf*)object;
     int bytes;
     srand(3);
-    /* unsigned datasize = AIOContinuousBufNumberChannels(buf)*16*512; */
+
     unsigned datasize = buf->data_size;
 
     int usbfail = 0;
@@ -1008,8 +1008,7 @@ void *RawCountsWorkFunction( void *object )
              * 2. we don't have enough space
              */
             if (  count >= AIOContinuousBuf_BufSizeForCounts(buf) - AIOContinuousBufNumberChannels(buf) ) {
-            /* if ( count >= AIOContinuousBufGetNumberScansToRead(buf) - AIOContinuousBufNumberChannels(buf) ) {  */
-            /* if ( count > buf->num_scans*buf->num_channels ) {  */
+
                 AIOContinuousBufLock(buf);
                 buf->status = TERMINATED;
                 AIOContinuousBufUnlock(buf);
@@ -1057,7 +1056,6 @@ void *ConvertCountsToVoltsFunction( void *object )
     unsigned long result;
     int bytes;
     unsigned datasize = buf->data_size;
-    /* unsigned datasize = AIOContinuousBufNumberChannels(buf)*16*512; */
 
     int usbfail = 0, usbfail_count = 5;
     unsigned count = 0;
@@ -1104,7 +1102,6 @@ void *ConvertCountsToVoltsFunction( void *object )
         AIOUSB_DEVEL("libusb_bulk_transfer returned  %d as usbresult, bytes=%d\n", usbresult , (int)bytes);
         if ( bytes ) {
             /* only write bytes that exist */
-
             retval = cc->ConvertFifo( cc, outfifo, infifo , bytes / sizeof(uint16_t) );
 
             if (  retval >= 0 ) {
@@ -1556,8 +1553,6 @@ AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf )
     if ( (retval = ResetCounters(buf)) != AIOUSB_SUCCESS )
         goto out_AIOContinuousBufCallbackStart;
 
-    /* AIOUSB_ClearFIFO( AIOContinuousBufGetDeviceIndex(buf) ,   CLEAR_FIFO_METHOD_NOW ); */
-
     if ( (retval = SetConfig(buf)) != AIOUSB_SUCCESS )
         goto out_AIOContinuousBufCallbackStart;
     if ( (retval = CalculateClocks( buf ) ) != AIOUSB_SUCCESS )
@@ -1729,7 +1724,7 @@ AIORET_TYPE AIOContinuousBufSetTesting( AIOContinuousBuf *buf, AIOUSB_BOOL testi
         return -AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER;
 
     AIOContinuousBufLock( buf );
-    /* ADC_SetTestingMode( AIOUSB_GetConfigBlock( AIOContinuousBuf_GetDeviceIndex(buf)), testing ); */
+
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *device = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), &result );
     if ( result != AIOUSB_SUCCESS ) 
@@ -2289,7 +2284,7 @@ void stress_copy_counts (int bufsize)
     DeleteAIOContinuousBuf(buf);
     /* --buffersize 1000000 --numchannels 16  --clockrate 10000; */
     buf = NewAIOContinuousBufTesting( 0, 1000000, 16 , AIOUSB_TRUE );
-    /* set_write_pos(buf, 16384 ); */
+
     memset(usdata,0,bufsize/2);
     AIOContinuousBufWriteCounts( buf, usdata, bufsize/2,bufsize/2 , AIOCONTINUOUS_BUF_OVERRIDE );
     failed = 0;
