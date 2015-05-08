@@ -90,22 +90,24 @@ macro ( build_gtest_test_file project cpp_file  cflags link_libraries )
   SET_SOURCE_FILES_PROPERTIES( ${out_test_file}  PROPERTIES LANGUAGE CXX)
   SET_TARGET_PROPERTIES( ${test_target} PROPERTIES OUTPUT_NAME ${test_target} ) 
   SET_TARGET_PROPERTIES( ${test_target} PROPERTIES COMPILE_FLAGS ${cflags} ) 
-  # MESSAGE(STATUS "Using libs: ${link_libraries}" )
+
   TARGET_LINK_LIBRARIES( ${test_target} ${link_libraries} )
 
 endmacro ( build_gtest_test_file  )
 
 
-macro ( build_all_samples project ) 
+function ( build_all_samples project ) 
   file( GLOB C_FILES ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/*.c" )
   file( GLOB CXX_FILES ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp" )
   foreach( c_file ${C_FILES} )
     build_sample_c_file( ${project} ${c_file} )
   endforeach( c_file )
+  # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++0x" )
+  # MESSAGE(STATUS "CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}" )
   foreach( cpp_file ${CXX_FILES} )
     build_sample_cpp_file( ${project} ${cpp_file} )
   endforeach( cpp_file )
-endmacro ( build_all_samples )
+endfunction ( build_all_samples )
 
 macro ( include_testcase_lib project )
   IF( NOT AIOUSB_INCLUDE_DIR)
@@ -133,7 +135,7 @@ macro ( include_testcase_lib project )
 
   if ( USE_GCC AND NOT CYGWIN )
     SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -std=gnu99" )
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__aiousb_cplusplus -fPIC" )
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__aiousb_cplusplus -fPIC --std=c++0x " )
   endif( USE_GCC AND NOT CYGWIN )
 
 endmacro( include_testcase_lib )

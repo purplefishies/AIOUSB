@@ -33,7 +33,7 @@ class AI16_DataPoint {
 	friend class AnalogInputSubsystem;
 	friend class std::vector<AI16_DataPoint>;
 
-protected:
+public:
 	int counts;            // A/D count data
 	int channel;           // channel associated with count data
 	int range;             // range associated with count data
@@ -41,7 +41,7 @@ protected:
 
 	AI16_DataPoint();
 
-public:
+
 
 	/**
 	 * Gets the channel number from which this data point was captured.
