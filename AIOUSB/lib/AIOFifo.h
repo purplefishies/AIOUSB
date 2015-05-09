@@ -170,6 +170,7 @@ AIORET_TYPE Push( AIOFifoTYPE *fifo, TYPE a );
 AIORET_TYPE PushN( AIOFifoTYPE *fifo, TYPE *a, unsigned N );
 AIORET_TYPE AIOFifoSizeRemaining( void *fifo );
 AIORET_TYPE AIOFifoReadSize( void *tmpfifo );
+AIORET_TYPE AIOFifoGetSize( void *fifo );
 
 #endif
 

@@ -31,6 +31,13 @@ AIORET_TYPE AIOFifoSizeRemaining( void *tmpfifo )
     return fifo->delta((AIOFifo*)fifo);
 }
 
+AIORET_TYPE AIOFifoGetSize( void *tmpfifo )
+{
+    assert(tmpfifo);
+    AIOFifo *fifo = (AIOFifo*)tmpfifo;
+    return fifo->size / fifo->refsize - 1;
+}
+
 size_t rdelta( AIOFifo *fifo  ) 
 {
     return ( fifo->read_pos <= fifo->write_pos ? (fifo->write_pos - fifo->read_pos ) : ( (fifo->size - fifo->read_pos) + fifo->write_pos ));
@@ -40,6 +47,14 @@ AIORET_TYPE AIOFifoReadSize( void *tmpfifo )
 {
     AIOFifo *fifo = (AIOFifo*)tmpfifo;
     return rdelta( (AIOFifo*)fifo  );
+}
+
+AIORET_TYPE AIOFifoResize( AIOFifo *fifo, size_t newsize )
+{
+    fifo->data = realloc( fifo->data, newsize );
+    if ( !fifo->data ) 
+        return -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+    return AIOUSB_SUCCESS;
 }
 
 
@@ -448,6 +463,12 @@ TEST(Volts,Testing )
         EXPECT_EQ( tval.right.d, tmp[i] );
     }
 
+}
+
+TEST(AIOFifo, Resizing ) 
+{
+    AIOFifoVolts *vfifo = NewAIOFifoVolts( 1000 );
+    EXPECT_EQ( AIOFifoGetSize( vfifo ), 1000 ) << "Expected straight forward number of volts remaining";
 }
 
 
