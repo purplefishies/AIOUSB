@@ -69,8 +69,6 @@ AIORET_TYPE AIOFifoResize( AIOFifo *fifo, size_t newsize )
     return AIOUSB_SUCCESS;
 }
 
-
-
 size_t _calculate_size_write( AIOFifo *fifo, unsigned maxsize)
 {
     int actsize = MIN(MIN( maxsize, fifo->size ), fifo->delta(fifo ));

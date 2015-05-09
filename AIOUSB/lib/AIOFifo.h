@@ -20,6 +20,7 @@ void DeleteAIOFifo( AIOFifo *fifo );
 AIORET_TYPE AIOFifoRead( AIOFifo *fifo, void *tobuf , unsigned maxsize );
 AIORET_TYPE AIOFifoWrite( AIOFifo *fifo, void *frombuf , unsigned maxsize );
 
+
 #else
 
 #ifdef HAS_THREAD
@@ -177,7 +178,7 @@ AIORET_TYPE PushN( AIOFifoTYPE *fifo, TYPE *a, unsigned N );
 AIORET_TYPE AIOFifoSizeRemaining( void *fifo );
 AIORET_TYPE AIOFifoReadSize( void *tmpfifo );
 AIORET_TYPE AIOFifoGetSize( void *fifo );
-
+AIORET_TYPE AIOFifoResize( AIOFifo *fifo, size_t newsize );
 #endif
 
 
