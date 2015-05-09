@@ -2593,8 +2593,8 @@ TEST(AIOContinuousBuf, NewConstructor )
 {
     AIOContinuousBuf *tmp= NewAIOContinuousBuf();
     ASSERT_TRUE( tmp );
-    /* AIOContinuousBufSetNumberOfChannels( tmp , 10 ); */
-    /* EXPECT_EQ( 10, AIOContinuousBufGetNumberOfChannels( tmp ) ); */
+    AIOContinuousBufSetNumberOfChannels( tmp , 10 );
+    EXPECT_EQ( 10, AIOContinuousBufGetNumberOfChannels( tmp ) );
     DeleteAIOContinuousBuf( tmp );
 }
 
