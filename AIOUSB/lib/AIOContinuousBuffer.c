@@ -50,9 +50,13 @@ AIOContinuousBuf *NewAIOContinuousBuf()
         tmp->data_size        = 64*1024;
         tmp->hz = 10000;
         tmp->timeout = 1000;
+        tmp->num_scans = 1024;
+        tmp->num_channels = 16;
+        tmp->DeviceIndex = -1;
 #ifdef HAS_PTHREAD
         tmp->lock = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;   /* Threading mutex Setup */
 #endif
+        tmp->fifo = NewAIOFifoCounts( tmp->num_channels * tmp->num_scans );
     }
     return tmp;
 }
@@ -392,6 +396,29 @@ void DeleteAIOContinuousBuf( AIOContinuousBuf *buf )
     DeleteAIOFifoCounts( buf->fifo );
     free( buf );
 }
+
+/*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetCountsBuffer( AIOContinuousBuf *buf )
+{
+    assert(buf);
+    if ( !buf ) 
+        return -AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER;
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    
+    return retval;
+}
+
+/*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetVoltsBuffer( AIOContinuousBuf *buf )
+{
+    assert(buf);
+    if ( !buf ) 
+        return -AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER;
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    return retval;
+    
+}
+
 
 /*----------------------------------------------------------------------------*/
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetStreamingBlockSize( AIOContinuousBuf *buf, unsigned blksize)
@@ -1004,28 +1031,7 @@ void *RawCountsWorkFunction( void *object )
 
     while ( buf->status == RUNNING  ) {
 
-#ifdef TESTING
-        FILE *tmpf;
-        tmpf = fopen("tmpdata.txt","w");
-        unsigned short *usdata = (unsigned short *)&data[0];
-        int tval = MIN(AIOContinuousBuf_NumberWriteScansInCounts(buf)/AIOContinuousBufNumberChannels(buf), 
-                       datasize / 2 / AIOContinuousBufNumberChannels(buf) );
-        int trand = (rand() % tval + 1 );
-        bytes = 2*AIOContinuousBufNumberChannels(buf)*trand;
-        for( int i = 0, ch = 0; i < AIOContinuousBufNumberChannels(buf)*trand; i ++ , ch = ((ch+1)%AIOContinuousBufNumberChannels(buf))) {
-            usdata[i] = ch*1000 + rand()%20;
-            fprintf(tmpf, "%u,",usdata[i] );
-            if (  (ch +1) % AIOContinuousBufNumberChannels(buf) == 0 ) {
-                totalcount ++;
-                fprintf(tmpf,"\n",usdata[i] );
-            }
-        }
-        printf("");
-#else
-
         usbresult = aiocontbuf_get_data( buf, usb, 0x86, data, datasize, &bytes, 3000 );
-
-#endif
 
         AIOUSB_DEVEL("libusb_bulk_transfer returned  %d as usbresult, bytes=%d\n", usbresult , (int)bytes);
 
@@ -1069,9 +1075,7 @@ void *RawCountsWorkFunction( void *object )
             } 
         }
     }
-#ifdef TESTING
-    fclose(tmpf);
-#endif
+
  out_RawCountsWorkFunction:
     AIOContinuousBufLock(buf);
     buf->status = TERMINATED;
@@ -2226,15 +2230,6 @@ void continuous_stress_test( int bufsize )
         }
 #endif
     }
-#ifdef TESTING
-    set_read_pos(buf,0);
-    for(int i = 0; i < get_write_pos(buf) /16 ; i ++ ) {
-        for( int j =0; j < 16 ; j ++ ) { 
-            printf("%f,", buf->buffer[i*16+j] );
-        }
-        printf("\n");
-    }
-#endif
 
     ASSERT_GE( retval, AIOUSB_SUCCESS ) << "Able to finish reading buffer\n";
 }
@@ -2604,6 +2599,9 @@ TEST(AIOContinuousBuf,BasicFunctionality )
     free(frombuf);
 }
 
+/* this test case builds up
+ * parts of the new constructor 
+ */
 TEST(AIOContinuousBuf, NewConstructor ) 
 {
     AIOContinuousBuf *buf= NewAIOContinuousBuf();
@@ -2612,6 +2610,12 @@ TEST(AIOContinuousBuf, NewConstructor )
     EXPECT_EQ( 10, AIOContinuousBufGetNumberOfChannels( buf ) );
     AIOContinuousBufReadIntegerSetNumberOfScans( buf, 1024 );
     EXPECT_EQ( 1024, AIOContinuousBufReadIntegerGetNumberOfScans( buf ));
+
+    /* Set the type of internal buffer */
+    /* AIOContinuousBufSetCounts */
+
+
+
     DeleteAIOContinuousBuf( buf );
 }
 
