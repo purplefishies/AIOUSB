@@ -637,6 +637,21 @@ AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf,
     return retval;
 }
 
+
+AIORET_TYPE AIOContinuousBufReadIntegerGetNumberOfScans( AIOContinuousBuf *buf )
+{
+    assert(buf);
+    return buf->num_scans;
+}
+
+AIORET_TYPE AIOContinuousBufReadIntegerSetNumberOfScans( AIOContinuousBuf *buf, unsigned num_scans )
+{
+    assert(buf);
+    buf->num_scans = num_scans;
+    return AIOUSB_SUCCESS;
+}
+
+
 /*----------------------------------------------------------------------------*/
 /**
  * @brief will read in an integer number of scan counts if there is room.
@@ -2591,11 +2606,13 @@ TEST(AIOContinuousBuf,BasicFunctionality )
 
 TEST(AIOContinuousBuf, NewConstructor ) 
 {
-    AIOContinuousBuf *tmp= NewAIOContinuousBuf();
-    ASSERT_TRUE( tmp );
-    AIOContinuousBufSetNumberOfChannels( tmp , 10 );
-    EXPECT_EQ( 10, AIOContinuousBufGetNumberOfChannels( tmp ) );
-    DeleteAIOContinuousBuf( tmp );
+    AIOContinuousBuf *buf= NewAIOContinuousBuf();
+    ASSERT_TRUE( buf );
+    AIOContinuousBufSetNumberOfChannels( buf , 10 );
+    EXPECT_EQ( 10, AIOContinuousBufGetNumberOfChannels( buf ) );
+    AIOContinuousBufReadIntegerSetNumberOfScans( buf, 1024 );
+    EXPECT_EQ( 1024, AIOContinuousBufReadIntegerGetNumberOfScans( buf ));
+    DeleteAIOContinuousBuf( buf );
 }
 
 
