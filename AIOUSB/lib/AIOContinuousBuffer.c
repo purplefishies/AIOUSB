@@ -299,8 +299,6 @@ AIORET_TYPE AIOContinuousBufInitConfiguration(  AIOContinuousBuf *buf )
     }
 
     ADCConfigBlockInitForCounterScan( &config, deviceDesc );
-    /* ADCConfigBlockInit( &config, deviceDesc, deviceDesc->ConfigBytes  ); */
-    /* ADCConfigBlockCopy( &config, AIOUSBDeviceGetADCConfigBlock( deviceDesc ) ); */
 
     AIOContinuousBufSendPreConfig( buf );
 
@@ -1594,6 +1592,12 @@ AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf )
      * @note Setup counters
      * see reference in [USB AIO documentation](http://accesio.com/MANUALS/USB-AIO%20Series.PDF)
      **/
+    assert(buf);
+    if ( !buf ) 
+        return -AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER;
+    
+    if ( AIOContinuousBufGetDeviceIndex(buf) < 0 ) 
+        return -AIOUSB_ERROR_INVALID_DEVICE;
 
     /* Start the clocks, and need to get going capturing data */
     if ( (retval = ResetCounters(buf)) != AIOUSB_SUCCESS )
@@ -2605,6 +2609,7 @@ TEST(AIOContinuousBuf,BasicFunctionality )
 TEST(AIOContinuousBuf, NewConstructor ) 
 {
     AIOContinuousBuf *buf= NewAIOContinuousBuf();
+    AIORET_TYPE retval;
     ASSERT_TRUE( buf );
     AIOContinuousBufSetNumberOfChannels( buf , 10 );
     EXPECT_EQ( 10, AIOContinuousBufGetNumberOfChannels( buf ) );
@@ -2613,7 +2618,9 @@ TEST(AIOContinuousBuf, NewConstructor )
 
     /* Set the type of internal buffer */
     /* AIOContinuousBufSetCounts */
-
+    retval = AIOContinuousBufCallbackStart( buf );
+    ASSERT_LE( retval, 0 ) << "Shouldn't bea ble to call Bufcallback start when no device index set";
+    EXPECT_EQ( retval, -AIOUSB_ERROR_INVALID_DEVICE );
 
 
     DeleteAIOContinuousBuf( buf );
