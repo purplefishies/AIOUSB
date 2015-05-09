@@ -54,7 +54,6 @@ AIOContinuousBuf *NewAIOContinuousBufLegacy( unsigned long DeviceIndex, unsigned
 {
     AIOContinuousBuf *tmp = NewAIOContinuousBufWithoutConfig( DeviceIndex,  scancounts, num_channels , AIOUSB_FALSE );
     return tmp;
-
 }
 
 /*----------------------------------------------------------------------------*/
