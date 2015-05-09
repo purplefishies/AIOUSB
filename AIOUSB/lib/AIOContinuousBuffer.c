@@ -46,13 +46,42 @@ AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, unsig
 AIOContinuousBuf *NewAIOContinuousBuf()
 {
     AIOContinuousBuf *tmp = (AIOContinuousBuf *)calloc(1,sizeof(AIOContinuousBuf));
-    
+    if ( tmp ) { 
+        tmp->data_size        = 64*1024;
+        tmp->hz = 10000;
+        tmp->timeout = 1000;
+#ifdef HAS_PTHREAD
+        tmp->lock = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;   /* Threading mutex Setup */
+#endif
+    }
     return tmp;
 }
 
-AIOContinuousBuf *NewAIOContinuousBufLegacy( unsigned long DeviceIndex, unsigned scancounts , unsigned num_channels )
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetNumberOfChannels( AIOContinuousBuf * buf)
+{
+    assert( buf );
+    return buf->num_channels;
+       
+}
+
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetNumberOfChannels( AIOContinuousBuf * buf, unsigned num_channels )
+{
+    
+    assert( buf );
+    buf->num_channels = num_channels;
+    return AIOUSB_SUCCESS;
+}
+
+
+PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufLegacy( unsigned long DeviceIndex, unsigned scancounts , unsigned num_channels )
 {
     AIOContinuousBuf *tmp = NewAIOContinuousBufWithoutConfig( DeviceIndex,  scancounts, num_channels , AIOUSB_FALSE );
+
+    /* if ( !tmp )  */
+    /*     return tmp; */
+    /* AIOContinuousBufSetDebug( tmp, DeviceIndex ); */
+    /* AIOContinuousBufSetNumberScansToRead( tmp, scancounts ); */
+    /* AIOContinuousBufSetNumberOfChannels( tmp, num_channels ); */
     return tmp;
 }
 
@@ -100,13 +129,11 @@ AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long DeviceIndex,
     }
 
     tmp->testing        = AIOUSB_FALSE;
-
     tmp->num_scans      = num_scans;
     tmp->num_channels   = num_channels;
     tmp->basesize       = unit_size;
 
     tmp->exitcode       = 0;
-    tmp->usbbuf_size    = 128*512;
 
     tmp->DeviceIndex  = DeviceIndex;
 
@@ -169,7 +196,6 @@ AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex,
     }
     tmp->basesize     = scancounts;
     tmp->exitcode     = 0;
-    tmp->usbbuf_size  = 128*512;
 
     tmp->DeviceIndex  = DeviceIndex;
 
@@ -357,9 +383,12 @@ void AIOContinuousBuf_DeleteTmpBuf( AIOContinuousBuf *buf )
  */
 void DeleteAIOContinuousBuf( AIOContinuousBuf *buf )
 {
-    DeleteAIOChannelMask( buf->mask );
+    if ( buf->mask )
+        DeleteAIOChannelMask( buf->mask );
     AIOContinuousBuf_DeleteTmpBuf( buf );
-    free( buf->buffer );
+    if ( buf->buffer )
+        free( buf->buffer );
+    if ( buf->fifo  )
     DeleteAIOFifoCounts( buf->fifo );
     free( buf );
 }
@@ -888,7 +917,6 @@ AIORET_TYPE AIOContinuousBufWrite( AIOContinuousBuf *buf,
 {
     AIORET_TYPE retval;
     ERR_UNLESS_VALID_ENUM( AIOContinuousBufMode ,  flag );
-    
     /* First try to lock the buffer */
     /* printf("trying to lock buffer for write\n"); */
     AIOContinuousBufLock( buf );
@@ -1761,13 +1789,14 @@ AIORET_TYPE AIOContinuousBufSetDebug( AIOContinuousBuf *buf, AIOUSB_BOOL debug )
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *device = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), &result );
     if ( result != AIOUSB_SUCCESS )
-        return -result;
+        goto out_AIOContinuousBufUnlock;
 
     result = ADCConfigBlockSetDebug( AIOUSBDeviceGetADCConfigBlock( device ), debug );
     if ( result != AIOUSB_SUCCESS )
-        return -result;
+        goto out_AIOContinuousBufUnlock;
 
     buf->debug = debug;
+ out_AIOContinuousBufUnlock:
     AIOContinuousBufUnlock( buf );
     return result;
 }
@@ -2077,7 +2106,6 @@ void
 stress_test_one( int size , int readbuf_size )
 {
     AIORET_TYPE retval;
-    /* int readbuf_size = size - 10; */
     AIOBufferType *readbuf = (AIOBufferType *)malloc( readbuf_size*sizeof(AIOBufferType ));
     AIOContinuousBuf *buf = NewAIOContinuousBufLegacy( 0, size , 16 );
     AIOUSB_DEVEL("Original address is 0x%x\n", (int)(unsigned long)(AIOContinuousBuf *)buf );
@@ -2560,6 +2588,16 @@ TEST(AIOContinuousBuf,BasicFunctionality )
 
     free(frombuf);
 }
+
+TEST(AIOContinuousBuf, NewConstructor ) 
+{
+    AIOContinuousBuf *tmp= NewAIOContinuousBuf();
+    ASSERT_TRUE( tmp );
+    /* AIOContinuousBufSetNumberOfChannels( tmp , 10 ); */
+    /* EXPECT_EQ( 10, AIOContinuousBufGetNumberOfChannels( tmp ) ); */
+    DeleteAIOContinuousBuf( tmp );
+}
+
 
 
 #include <unistd.h>
