@@ -148,6 +148,12 @@ void DeleteAIOFifo##NAME( AIOFifo##NAME *fifo )                                 
 {                                                                                                   \
     DeleteAIOFifo( (AIOFifo*)fifo);                                                                 \
 }                                                                                                   \
+AIORET_TYPE AIOFifo##NAME ##Resize( AIOFifo##NAME *nfifo , size_t size )                            \
+{                                                                                                   \
+    AIORET_TYPE retval = {0};                                                                       \
+    retval = _AIOFifoResize( (AIOFifo *)nfifo, (size+1)*sizeof(TYPE));                              \
+    return retval;                                                                                  \
+}                                                                                                   \
 
 /* Counts Fifo definition */
 TEMPLATE_AIOFIFO_INTERFACE(Counts,uint16_t);

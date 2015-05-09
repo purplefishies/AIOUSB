@@ -49,13 +49,26 @@ AIORET_TYPE AIOFifoReadSize( void *tmpfifo )
     return rdelta( (AIOFifo*)fifo  );
 }
 
-AIORET_TYPE AIOFifoResize( AIOFifo *fifo, size_t newsize )
+AIORET_TYPE _AIOFifoResize( AIOFifo *fifo, size_t newsize )
 {
     fifo->data = realloc( fifo->data, newsize );
     if ( !fifo->data ) 
         return -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+    else 
+        fifo->size = newsize;
     return AIOUSB_SUCCESS;
 }
+
+AIORET_TYPE AIOFifoResize( AIOFifo *fifo, size_t newsize )
+{
+    fifo->data = realloc( fifo->data, (newsize+1)*fifo->refsize );
+    if ( !fifo->data ) 
+        return -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+    else 
+        fifo->size = (newsize+1)*fifo->refsize;
+    return AIOUSB_SUCCESS;
+}
+
 
 
 size_t _calculate_size_write( AIOFifo *fifo, unsigned maxsize)
@@ -469,6 +482,20 @@ TEST(AIOFifo, Resizing )
 {
     AIOFifoVolts *vfifo = NewAIOFifoVolts( 1000 );
     EXPECT_EQ( AIOFifoGetSize( vfifo ), 1000 ) << "Expected straight forward number of volts remaining";
+
+    DeleteAIOFifoVolts( vfifo );
+
+    AIOFifoCounts *counts = NewAIOFifoCounts( 1000 );
+    EXPECT_EQ( AIOFifoGetSize( counts ), 1000 ) << "Expected straight forward number of counts remaining";
+
+    AIOFifoCountsResize( counts, 1001 );
+    EXPECT_EQ( AIOFifoGetSize( counts ), 1001 ) << "Expected straight forward number of counts remaining";
+
+    AIOFifoResize( (AIOFifo*)counts, 123 );
+    EXPECT_EQ( AIOFifoGetSize( counts ), 123 ) << "Generic resize function";
+
+    DeleteAIOFifoCounts( counts );
+
 }
 
 
