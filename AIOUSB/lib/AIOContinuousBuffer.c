@@ -73,6 +73,11 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetNumberOfChannels( AIOContinuousBuf 
     
     assert( buf );
     buf->num_channels = num_channels;
+    if ( (buf->fifo->size % num_channels ) != 0 ) {
+        printf("Need to change\n");
+    } /* else no need to change */
+
+
     return AIOUSB_SUCCESS;
 }
 
@@ -599,11 +604,18 @@ AIORET_TYPE AIOContinuousBufAvailableReadSize( AIOContinuousBuf *buf )
     return read_size(buf);
 }
 
-AIORET_TYPE AIOContinuousBufGetSize( AIOContinuousBuf *buf )
+AIORET_TYPE AIOContinuousBufGetRemainingSize( AIOContinuousBuf *buf )
 {
     assert(buf);
     return buf->fifo->delta( (AIOFifo*)buf->fifo );
 }
+
+AIORET_TYPE AIOContinuousBufGetSize( AIOContinuousBuf *buf )
+{
+    assert(buf);
+    return buf->fifo->size;
+}
+
 
 AIORET_TYPE AIOContinuousBufGetStatus( AIOContinuousBuf *buf )
 {
@@ -673,6 +685,8 @@ AIORET_TYPE AIOContinuousBufReadIntegerSetNumberOfScans( AIOContinuousBuf *buf, 
 {
     assert(buf);
     buf->num_scans = num_scans;
+
+
     return AIOUSB_SUCCESS;
 }
 
@@ -2527,7 +2541,7 @@ TEST_P(AIOContinuousBufThreeParamTest,BufferScanCounting )
     retval = AIOContinuousBufWriteCounts( buf, use_data, use_data_size, use_data_size, AIOCONTINUOUS_BUF_ALLORNONE );
     EXPECT_EQ( retval, use_data_size ) << "Number of bytes written should equal the full size of the buffer";
 
-    EXPECT_EQ( AIOContinuousBufGetSize(buf)/ sizeof(unsigned short), (1)*num_channels );
+    EXPECT_EQ( AIOContinuousBufGetRemainingSize(buf)/ sizeof(unsigned short), (1)*num_channels );
 
     /*----------------------------------------------------------------------------*/
     /**< Cleanup */
@@ -2611,8 +2625,11 @@ TEST(AIOContinuousBuf, NewConstructor )
     AIOContinuousBuf *buf= NewAIOContinuousBuf();
     AIORET_TYPE retval;
     ASSERT_TRUE( buf );
-    AIOContinuousBufSetNumberOfChannels( buf , 10 );
-    EXPECT_EQ( 10, AIOContinuousBufGetNumberOfChannels( buf ) );
+    AIOContinuousBufSetNumberOfChannels( buf , 9 );
+    EXPECT_EQ( 9, AIOContinuousBufGetNumberOfChannels( buf ) );
+
+
+
     AIOContinuousBufReadIntegerSetNumberOfScans( buf, 1024 );
     EXPECT_EQ( 1024, AIOContinuousBufReadIntegerGetNumberOfScans( buf ));
 
@@ -2621,6 +2638,8 @@ TEST(AIOContinuousBuf, NewConstructor )
     retval = AIOContinuousBufCallbackStart( buf );
     ASSERT_LE( retval, 0 ) << "Shouldn't bea ble to call Bufcallback start when no device index set";
     EXPECT_EQ( retval, -AIOUSB_ERROR_INVALID_DEVICE );
+
+    /* EXPECT_EQ( 10*1024, AIOContinuousBufGetRemainingSize(buf)  ) << "Size has been updated correctly"; */
 
 
     DeleteAIOContinuousBuf( buf );
