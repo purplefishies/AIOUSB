@@ -93,34 +93,20 @@ PUBLIC_EXTERN const char *AIOUSB_GetResultCodeAsString( unsigned long value );  
 
 
 PUBLIC_EXTERN double AIOUSB_CountsToVolts(unsigned long DeviceIndex,unsigned channel, unsigned short counts );
-PUBLIC_EXTERN unsigned long AIOUSB_MultipleCountsToVolts(
-                                                         unsigned long DeviceIndex,
-                                                         unsigned startChannel,
-                                                         unsigned endChannel,
-                                                         const unsigned short counts[],
-                                                         double volts[] );
-PUBLIC_EXTERN unsigned short AIOUSB_VoltsToCounts(unsigned long DeviceIndex,
-                                                  unsigned channel,
-                                                  double volts );
 
-PUBLIC_EXTERN unsigned long AIOUSB_MultipleVoltsToCounts(unsigned long DeviceIndex,
-                                                         unsigned startChannel,
-                                                         unsigned endChannel,
-                                                         const double volts[],
-                                                         unsigned short counts[] );
+PUBLIC_EXTERN unsigned long AIOUSB_MultipleCountsToVolts( unsigned long DeviceIndex, unsigned startChannel, unsigned endChannel, const unsigned short counts[], double volts[] ); 
 
-PUBLIC_EXTERN unsigned long AIOUSB_ADC_LoadCalTable(unsigned long DeviceIndex,
-                                                    const char *fileName );
+PUBLIC_EXTERN unsigned short AIOUSB_VoltsToCounts(unsigned long DeviceIndex, unsigned channel, double volts );
 
-PUBLIC_EXTERN unsigned long AIOUSB_ADC_SetCalTable(unsigned long DeviceIndex,
-                                                   const unsigned short calTable[] );
-PUBLIC_EXTERN unsigned long AIOUSB_ClearFIFO(unsigned long DeviceIndex,
-                                             FIFO_Method Method
-                                             );
+PUBLIC_EXTERN unsigned long AIOUSB_MultipleVoltsToCounts(unsigned long DeviceIndex, unsigned startChannel, unsigned endChannel, const double volts[], unsigned short counts[] );
 
-PUBLIC_EXTERN long AIOUSB_GetStreamingBlockSize(
-                                                unsigned long DeviceIndex
-                                                );
+PUBLIC_EXTERN unsigned long AIOUSB_ADC_LoadCalTable(unsigned long DeviceIndex, const char *fileName ); 
+
+PUBLIC_EXTERN unsigned long AIOUSB_ADC_SetCalTable(unsigned long DeviceIndex, const unsigned short calTable[] );
+
+PUBLIC_EXTERN unsigned long AIOUSB_ClearFIFO(unsigned long DeviceIndex, FIFO_Method Method );
+ 
+PUBLIC_EXTERN long AIOUSB_GetStreamingBlockSize( unsigned long DeviceIndex ); 
 
 PUBLIC_EXTERN AIORESULT AIOUSB_EnsureOpen( unsigned long DeviceIndex );
 PUBLIC_EXTERN unsigned int ProductNameToID( const char *name );
@@ -133,30 +119,24 @@ PUBLIC_EXTERN unsigned AIOUSB_GetOversample( const ADConfigBlock *config );
 PUBLIC_EXTERN void AIOUSB_SetOversample( ADConfigBlock *config, unsigned overSample );
 
 
-PUBLIC_EXTERN int AIOUSB_BulkTransfer( struct libusb_device_handle *dev_handle,
-                                       unsigned char endpoint, unsigned char *data, 
-                                        int length, int *transferred, unsigned int timeout );
+PUBLIC_EXTERN int AIOUSB_BulkTransfer( struct libusb_device_handle *dev_handle, unsigned char endpoint, unsigned char *data, int length, int *transferred, unsigned int timeout ); 
+
 
 PUBLIC_EXTERN unsigned ADC_GetOversample_Cached( ADConfigBlock *config );
 PUBLIC_EXTERN unsigned ADC_GainCode_Cached( ADConfigBlock *config, unsigned channel);
 
-PUBLIC_EXTERN AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex, 
-                                                   unsigned short *counts,
-                                                   unsigned *size ,
-                                                   unsigned numChannels
-                                                   );
+PUBLIC_EXTERN AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex, unsigned short *counts, unsigned *size , unsigned numChannels ); 
+
 
 AIORESULT AIOUSB_InitConfigBlock(ADConfigBlock *config, unsigned long DeviceIndex, AIOUSB_BOOL defaults);
 
 
 PUBLIC_EXTERN AIORESULT AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short counts[] );
-PUBLIC_EXTERN AIORESULT AIOUSB_ArrayCountsToVolts( unsigned long DeviceIndex, int startChannel,
-                                                        int numChannels, const unsigned short counts[], double volts[] );
-PUBLIC_EXTERN AIORESULT AIOUSB_ArrayVoltsToCounts( unsigned long DeviceIndex, int startChannel,
-                                                        int numChannels, const double volts[], unsigned short counts[] );
+PUBLIC_EXTERN AIORESULT AIOUSB_ArrayCountsToVolts( unsigned long DeviceIndex, int startChannel, int numChannels, const unsigned short counts[], double volts[] );
 
+PUBLIC_EXTERN AIORESULT AIOUSB_ArrayVoltsToCounts( unsigned long DeviceIndex, int startChannel, int numChannels, const double volts[], unsigned short counts[] ); 
 
-PUBLIC_EXTERN AIORESULT GenericVendorRead( unsigned long deviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, void *bufData , unsigned long *bytes_read  );
+PUBLIC_EXTERN AIORESULT GenericVendorRead( unsigned long deviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, void *bufData , unsigned long *bytes_read );
 
 PUBLIC_EXTERN AIORESULT GenericVendorWrite( unsigned long DeviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, void *bufData, unsigned long *bytes_write );
 PUBLIC_EXTERN AIORESULT AIOUSB_Validate_Device( unsigned long DeviceIndex );
