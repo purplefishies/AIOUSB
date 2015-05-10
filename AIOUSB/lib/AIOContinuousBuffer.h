@@ -82,8 +82,7 @@ PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long Device
 PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufForVolts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels, unsigned num_oversamples );
 
 
-PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long DeviceIndex, unsigned num_channels, unsigned num_scans,
-                                                             unsigned unit_size, unsigned num_oversamples );
+PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long DeviceIndex, unsigned num_channels, unsigned num_scans,unsigned unit_size, unsigned num_oversamples );
 
 
 /*-----------------------------  Destructor   -------------------------------*/
@@ -94,13 +93,7 @@ PUBLIC_EXTERN void DeleteAIOContinuousBuf( AIOContinuousBuf *buf );
 
 
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufInitConfiguration(  AIOContinuousBuf *buf );
-PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufInitADCConfigBlock( AIOContinuousBuf *buf, 
-                                                              unsigned size, 
-                                                              ADGainCode gainCode, 
-                                                              AIOUSB_BOOL diffMode, 
-                                                              unsigned char os, 
-                                                              AIOUSB_BOOL dfs 
-                                                              );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufInitADCConfigBlock( AIOContinuousBuf *buf, unsigned size,ADGainCode gainCode, AIOUSB_BOOL diffMode, unsigned char os, AIOUSB_BOOL dfs );
 
 PUBLIC_EXTERN AIOUSB_WorkFn AIOContinuousBufGetCallback( AIOContinuousBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetCallback(AIOContinuousBuf *buf , void *(*work)(void *object ) );

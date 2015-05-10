@@ -50,8 +50,7 @@ PUBLIC_EXTERN AIOCountsConverter *NewAIOCountsConverterWithBuffer( void *buf, un
 PUBLIC_EXTERN AIOCountsConverter *NewAIOCountsConverter( unsigned num_channels, AIOGainRange *ranges, unsigned num_oversamples,unsigned unit_size  );
 PUBLIC_EXTERN AIOCountsConverter *NewAIOCountsConverterFromAIOContinuousBuf( void *buf);
 
-PUBLIC_EXTERN AIOCountsConverter *NewAIOCountsConverterWithScanLimiter( void *buf, unsigned num_scans, unsigned num_channels,  AIOGainRange *ranges, 
-                                                                        unsigned num_oversamples,unsigned unit_size );
+PUBLIC_EXTERN AIOCountsConverter *NewAIOCountsConverterWithScanLimiter( void *buf, unsigned num_scans, unsigned num_channels,  AIOGainRange *ranges, unsigned num_oversamples,unsigned unit_size );
 
 PUBLIC_EXTERN void AIOCountsConverterReset( AIOCountsConverter *cc );
 PUBLIC_EXTERN void DeleteAIOCountsConverter( AIOCountsConverter *ccv );

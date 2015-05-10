@@ -26,8 +26,7 @@ PUBLIC_EXTERN USBDevice *AIODeviceTableGetUSBDeviceAtIndex( unsigned long Device
 void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID );
 
 
-PUBLIC_EXTERN unsigned long QueryDeviceInfo( unsigned long DeviceIndex, unsigned long *pPID, unsigned long *pNameSize, 
-                                             char *pName, unsigned long *pDIOBytes, unsigned long *pCounters );
+PUBLIC_EXTERN unsigned long QueryDeviceInfo( unsigned long DeviceIndex, unsigned long *pPID, unsigned long *pNameSize, char *pName, unsigned long *pDIOBytes, unsigned long *pCounters );
 PUBLIC_EXTERN AIORET_TYPE GetDevices(void);
 
 PUBLIC_EXTERN char *GetSafeDeviceName( unsigned long DeviceIndex );
