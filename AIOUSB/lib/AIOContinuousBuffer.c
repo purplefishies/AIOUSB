@@ -74,9 +74,11 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetNumberOfChannels( AIOContinuousBuf 
     assert( buf );
     buf->num_channels = num_channels;
     if ( (buf->fifo->size % num_channels ) != 0 ) {
-        printf("Need to change\n");
+        /* printf("Need to change\n"); */
+        AIOFifoResize( (AIOFifo*)buf->fifo,  (((AIOFifoGetSize(buf->fifo) + num_channels) / num_channels)*num_channels ));
+        /* AIOFifoResize( (AIOFifo*)buf->fifo, (( buf->fifo->size + num_channels ) / num_channels)*num_channels ); */
     } /* else no need to change */
-
+    
 
     return AIOUSB_SUCCESS;
 }
@@ -613,7 +615,8 @@ AIORET_TYPE AIOContinuousBufGetRemainingSize( AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBufGetSize( AIOContinuousBuf *buf )
 {
     assert(buf);
-    return buf->fifo->size;
+    /* return buf->fifo->size; */
+    return AIOFifoGetSize( buf->fifo );
 }
 
 
@@ -2624,9 +2627,14 @@ TEST(AIOContinuousBuf, NewConstructor )
 {
     AIOContinuousBuf *buf= NewAIOContinuousBuf();
     AIORET_TYPE retval;
+    int origsize = AIOContinuousBufGetSize(buf);
     ASSERT_TRUE( buf );
     AIOContinuousBufSetNumberOfChannels( buf , 9 );
     EXPECT_EQ( 9, AIOContinuousBufGetNumberOfChannels( buf ) );
+    /* printf("Orig: %d\n", origsize ); */
+    EXPECT_GE( AIOContinuousBufGetSize(buf) , origsize );
+    /* printf("New: %d\n", AIOContinuousBufGetSize(buf) ); */
+    EXPECT_EQ(0, ( AIOContinuousBufGetSize( buf ) % 9 )) << "New buf size should be integer multiple of Num_channels\n";
 
 
 
