@@ -24,7 +24,7 @@ AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf,
 {
     AIORET_TYPE usbresult;
     uint16_t *counts = (uint16_t*)data;
-    /* int number_scans = datasize / ( AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOverSample(buf)+1)*sizeof(uint16_t)); */
+    /* int number_scans = datasize / ( AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOversample(buf)+1)*sizeof(uint16_t)); */
     int number_scans = buf->num_scans;
     *bytes = 0;
     int pos;
@@ -46,14 +46,14 @@ AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf,
     }
 
 
-    int initial = (scan_count *(AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOverSample(buf)+1))) + 
-        channel_count * ( AIOContinuousBufGetOverSample(buf)+1 ) + os;
+    int initial = (scan_count *(AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOversample(buf)+1))) + 
+        channel_count * ( AIOContinuousBufGetOversample(buf)+1 ) + os;
 
     for ( ; scan_count < number_scans; scan_count ++ ) { 
         for ( ; channel_count < AIOContinuousBufNumberChannels(buf); channel_count ++ ) {
-            for ( ; os < AIOContinuousBufGetOverSample(buf)+1 ; os ++ ) {
-                pos = (scan_count *(AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOverSample(buf)+1))) + 
-                    channel_count * ( AIOContinuousBufGetOverSample(buf)+1 ) + os - initial;
+            for ( ; os < AIOContinuousBufGetOversample(buf)+1 ; os ++ ) {
+                pos = (scan_count *(AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOversample(buf)+1))) + 
+                    channel_count * ( AIOContinuousBufGetOversample(buf)+1 ) + os - initial;
 
                 /* counts[pos] =  (uint16_t)(65535 / (AIOContinuousBufNumberChannels(buf)-1)) * channel_count; */
                 int tmpval;
@@ -93,7 +93,7 @@ AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf,
     }
  end_aiocontbuf_get_data:
     /* printf("Final value=%d\n",*bytes); */
-    /* usbresult = number_scans*AIOContinuousBufNumberChannels(buf)*( AIOContinuousBufGetOverSample(buf)+1 )*sizeof(uint16_t); */
+    /* usbresult = number_scans*AIOContinuousBufNumberChannels(buf)*( AIOContinuousBufGetOversample(buf)+1 )*sizeof(uint16_t); */
     usbresult = *bytes;
     return usbresult;
 }

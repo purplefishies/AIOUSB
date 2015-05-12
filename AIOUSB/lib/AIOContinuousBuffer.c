@@ -760,7 +760,7 @@ AIOUSB_WorkFn AIOContinuousBufGetCallback( AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBufSetClock( AIOContinuousBuf *buf, unsigned int hz )
 {
     assert(buf);
-    buf->hz = MIN( (unsigned)hz, (unsigned)(ROOTCLOCK / ( (AIOContinuousBufGetOverSample(buf)+1) * AIOContinuousBufNumberChannels(buf))) );
+    buf->hz = MIN( (unsigned)hz, (unsigned)(ROOTCLOCK / ( (AIOContinuousBufGetOversample(buf)+1) * AIOContinuousBufNumberChannels(buf))) );
 
     return AIOUSB_SUCCESS;
 }
@@ -1118,7 +1118,7 @@ void *ConvertCountsToVoltsFunction( void *object )
     int usbfail = 0, usbfail_count = 5;
     unsigned count = 0;
     int num_channels = AIOContinuousBufNumberChannels(buf);
-    int num_oversamples = AIOContinuousBufGetOverSample(buf);
+    int num_oversamples = AIOContinuousBufGetOversample(buf);
     int num_scans = AIOContinuousBufGetNumberScansToRead(buf);
     AIOFifoCounts *infifo = NewAIOFifoCounts( (unsigned)num_channels*(num_oversamples+1)*num_scans );
     AIOFifoVolts *outfifo = (AIOFifoVolts*)buf->fifo;
@@ -1971,8 +1971,8 @@ AIORET_TYPE AIOContinuousBufSetOverSample( AIOContinuousBuf *buf, unsigned os )
 }
 
 /*------------------------------------------------------------------------*/
-AIORET_TYPE AIOContinuousBuf_GetOverSample( AIOContinuousBuf *buf ) { return AIOContinuousBufGetOverSample( buf ); }
-AIORET_TYPE AIOContinuousBufGetOverSample( AIOContinuousBuf *buf ) {
+AIORET_TYPE AIOContinuousBuf_GetOverSample( AIOContinuousBuf *buf ) { return AIOContinuousBufGetOversample( buf ); }
+AIORET_TYPE AIOContinuousBufGetOversample( AIOContinuousBuf *buf ) {
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *device = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), &result );
     if ( result != AIOUSB_SUCCESS )
@@ -1980,6 +1980,28 @@ AIORET_TYPE AIOContinuousBufGetOverSample( AIOContinuousBuf *buf ) {
 
     return ADCConfigBlockGetOversample( AIOUSBDeviceGetADCConfigBlock( device ) );
 }
+
+AIORET_TYPE AIOContinuousBufSetOversample( AIOContinuousBuf *buf, size_t num_oversamples )
+{
+    AIORESULT result = AIOUSB_SUCCESS;
+    assert(buf);
+    if ( !buf ) 
+        return -AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER;
+
+    AIOUSBDevice *device = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), &result );
+    if ( result != AIOUSB_SUCCESS )
+        return -result;
+    
+    ADCConfigBlockSetOversample( AIOUSBDeviceGetADCConfigBlock( device ), num_oversamples );
+    
+    buf->num_oversamples = num_oversamples;
+    return AIOUSB_SUCCESS;
+
+}
+
+
+
+
 
 /*------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBuf_SetAllGainCodeAndDiffMode( AIOContinuousBuf *buf, ADGainCode gain, AIOUSB_BOOL diff ) {
@@ -2479,7 +2501,7 @@ TEST_P(AIOContinuousBufThreeParamTest,StressTestDrain)
 
     AIOContinuousBufInitADCConfigBlock( buf, 20, AD_GAIN_CODE_0_5V, AIOUSB_FALSE , 255, AIOUSB_FALSE );
 
-    EXPECT_EQ( AIOContinuousBufGetOverSample( buf ), 255 );
+    EXPECT_EQ( AIOContinuousBufGetOversample( buf ), 255 );
 
     free(data);
     DeleteAIOContinuousBuf( buf );
@@ -2622,9 +2644,14 @@ TEST(AIOContinuousBuf,BasicFunctionality )
  */
 TEST(AIOContinuousBuf, NewConstructor ) 
 {
+    int numDevices = 0;
+    AIODeviceTableInit();    
+    AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_AIO16_16A );
+    EXPECT_EQ( numDevices, 1 );
     AIOContinuousBuf *buf= NewAIOContinuousBuf();
     AIORET_TYPE retval;
     int origsize = AIOContinuousBufGetSize(buf);
+    int num_oversamples = 3;
     ASSERT_TRUE( buf );
     AIOContinuousBufSetNumberOfChannels( buf , 9 );
     EXPECT_EQ( 9, AIOContinuousBufGetNumberOfChannels( buf ) );
@@ -2633,6 +2660,11 @@ TEST(AIOContinuousBuf, NewConstructor )
     /* printf("New: %d\n", AIOContinuousBufGetSize(buf) ); */
     EXPECT_EQ(0, ( AIOContinuousBufGetSize( buf ) % 9 )) << "New buf size should be integer multiple of Num_channels\n";
 
+    AIOContinuousBufSetDeviceIndex( buf, 0 );
+
+
+    AIOContinuousBufSetOversample( buf, num_oversamples );
+    EXPECT_EQ( AIOContinuousBufGetOversample( buf ), num_oversamples );
 
 
     AIOContinuousBufReadIntegerSetNumberOfScans( buf, 1024 );
@@ -2640,9 +2672,9 @@ TEST(AIOContinuousBuf, NewConstructor )
 
     /* Set the type of internal buffer */
     /* AIOContinuousBufSetCounts */
-    retval = AIOContinuousBufCallbackStart( buf );
-    ASSERT_LE( retval, 0 ) << "Shouldn't bea ble to call Bufcallback start when no device index set";
-    EXPECT_EQ( retval, -AIOUSB_ERROR_INVALID_DEVICE );
+    /* retval = AIOContinuousBufCallbackStart( buf ); */
+    /* ASSERT_LE( retval, 0 ) << "Shouldn't bea ble to call Bufcallback start when no device index set"; */
+    /* EXPECT_EQ( retval, -AIOUSB_ERROR_INVALID_DEVICE ); */
 
     /* EXPECT_EQ( 10*1024, AIOContinuousBufGetRemainingSize(buf)  ) << "Size has been updated correctly"; */
 
