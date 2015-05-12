@@ -76,7 +76,6 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetNumberOfChannels( AIOContinuousBuf 
     if ( (buf->fifo->size % num_channels ) != 0 ) {
         /* printf("Need to change\n"); */
         AIOFifoResize( (AIOFifo*)buf->fifo,  (((AIOFifoGetSize(buf->fifo) + num_channels) / num_channels)*num_channels ));
-        /* AIOFifoResize( (AIOFifo*)buf->fifo, (( buf->fifo->size + num_channels ) / num_channels)*num_channels ); */
     } /* else no need to change */
     
 
@@ -88,11 +87,6 @@ PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufLegacy( unsigned long DeviceI
 {
     AIOContinuousBuf *tmp = NewAIOContinuousBufWithoutConfig( DeviceIndex,  scancounts, num_channels , AIOUSB_FALSE );
 
-    /* if ( !tmp )  */
-    /*     return tmp; */
-    /* AIOContinuousBufSetDebug( tmp, DeviceIndex ); */
-    /* AIOContinuousBufSetNumberScansToRead( tmp, scancounts ); */
-    /* AIOContinuousBufSetNumberOfChannels( tmp, num_channels ); */
     return tmp;
 }
 
@@ -660,6 +654,7 @@ AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf,
                                                    )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
+    int num_scans;
     assert(buf);
     if ( !buf )
         return -AIOUSB_ERROR_INVALID_DEVICE_SETTING;
@@ -667,12 +662,14 @@ AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf,
     if (  size < (unsigned)AIOContinuousBufNumberChannels(buf) ) {
         return -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
     }
-
-    int num_scans = AIOContinuousBufCountScansAvailable( buf );
+    AIOContinuousBufLock( buf );    
+    num_scans = AIOContinuousBufCountScansAvailable( buf );
 
     retval += buf->fifo->PopN( buf->fifo, read_buf, num_scans*AIOContinuousBufNumberChannels(buf) );
     retval /= AIOContinuousBufNumberChannels(buf);
     retval /= buf->fifo->refsize;
+
+    AIOContinuousBufUnlock( buf );
 
     return retval;
 }
@@ -975,7 +972,6 @@ AIORET_TYPE AIOContinuousBufWrite( AIOContinuousBuf *buf,
     AIORET_TYPE retval;
     ERR_UNLESS_VALID_ENUM( AIOContinuousBufMode ,  flag );
     /* First try to lock the buffer */
-    /* printf("trying to lock buffer for write\n"); */
     AIOContinuousBufLock( buf );
     int N = size / (buf->fifo->refsize );
 
@@ -990,8 +986,9 @@ AIORET_TYPE AIOContinuousBufWrite( AIOContinuousBuf *buf,
 AIORET_TYPE AIOContinuousBufWriteCounts( AIOContinuousBuf *buf, unsigned short *data, unsigned datasize, unsigned size , AIOContinuousBufMode flag )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    /* retval += AIOContinuousBufWrite( buf, (AIOBufferType *)data, datasize, size , flag  ); */
+    AIOContinuousBufLock( buf );
     retval += buf->fifo->PushN( buf->fifo, data, size / sizeof(unsigned short));
+    AIOContinuousBufUnlock( buf );
 
     return retval;
 }
