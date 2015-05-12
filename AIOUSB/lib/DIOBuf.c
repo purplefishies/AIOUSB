@@ -363,8 +363,6 @@ int main( int argc , char *argv[] )
 #ifdef GTEST_TAP_PRINT_TO_STDOUT
   delete listeners.Release(listeners.default_result_printer());
 #endif
-    listeners.Append( new tap::TapListener() );
-
     
     DIOBuf *buf = NewDIOBuf( 100 );
     DeleteDIOBuf( buf );

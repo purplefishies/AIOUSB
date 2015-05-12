@@ -1703,7 +1703,6 @@ main(int argc, char *argv[] )
   delete listeners.Release(listeners.default_result_printer());
 #endif
 
-  listeners.Append( new tap::TapListener() );
   return RUN_ALL_TESTS();  
 
 }
