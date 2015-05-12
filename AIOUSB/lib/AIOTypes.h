@@ -11,6 +11,7 @@
 #define _AIOTYPES_H
 #define HAS_PTHREAD 1
 #include <stdint.h>
+#include <assert.h>
 
 
 typedef int AIORET_TYPE;        /* New return type is signed, negative indicates error */
@@ -104,6 +105,14 @@ typedef uint16_t AIOBufferType;
 enum {
     MAX_USB_DEVICES               = 32
 };
+
+
+#define ASSERT(...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { return -AIOUSB_ERROR_INVALID_DATA; }
+#define ASSERT_VALID_DATA(err,... ) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { return err; }
+#define ASSERT_USB(...) ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_USBDEVICE, __VA_ARGS__ )
+#define ASSERT_CONFIG(...) ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_USBDEVICE, __VA_ARGS__ )
+#define ASSERT_AIOCONTBUF(...) ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, __VA_ARGS__ );
+
 
 
 /**
