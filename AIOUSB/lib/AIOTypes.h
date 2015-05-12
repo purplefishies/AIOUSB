@@ -107,11 +107,12 @@ enum {
 };
 
 
-#define ASSERT(...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { return -AIOUSB_ERROR_INVALID_DATA; }
-#define ASSERT_VALID_DATA(err,... ) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { return err; }
-#define ASSERT_USB(...) ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_USBDEVICE, __VA_ARGS__ )
-#define ASSERT_CONFIG(...) ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_USBDEVICE, __VA_ARGS__ )
-#define ASSERT_AIOCONTBUF(...) ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, __VA_ARGS__ );
+#define AIO_ASSERT(...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { return -AIOUSB_ERROR_INVALID_PARAMETER; }
+#define AIO_ASSERT_VALID_DATA(err,... ) assert( __VA_ARGS__ ) ; if (!( __VA_ARGS__) ) { return err; }
+#define AIO_ASSERT_USB(...) AIO_ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_USBDEVICE, __VA_ARGS__ )
+#define AIO_ASSERT_CONFIG(...) AIO_ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_ADCCONFIG , __VA_ARGS__ )
+#define AIO_ASSERT_AIOCONTBUF(...) AIO_ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, __VA_ARGS__ );
+#define AIO_ASSERT_AIOEITHER(err,msg,...) assert( __VA_ARGS__ ); if ( !(__VA_ARGS__) ) { AIOEither tmp; tmp.left = err; tmp.errmsg=strdup(msg); return tmp; }
 
 
 

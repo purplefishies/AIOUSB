@@ -15,15 +15,18 @@
 namespace AIOUSB {
 #endif
 
+    /* AIO_ASSERT_USB(usb); */
+
 /*----------------------------------------------------------------------------*/
 AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
 {
     AIOEither retval = {0};
-    assert(usb);
-    if ( !usb  ) {
-        retval.left = -AIOUSB_ERROR_INVALID_USBDEVICE;
-        retval.errmsg = strdup("Invalid USB object");
-    }
+
+    AIO_ASSERT_AIOEITHER(-AIOUSB_ERROR_INVALID_USBDEVICE,"Invalid usb object", usb );
+    /* if ( !usb  ) { */
+    /*     retval.left = -AIOUSB_ERROR_INVALID_USBDEVICE; */
+    /*     retval.errmsg = strdup("Invalid USB object"); */
+    /* } */
 
     usb->device                = args->dev;
     usb->deviceHandle          = args->handle;
@@ -77,9 +80,7 @@ USBDevice *CopyUSBDevice( USBDevice *usb )
 /*----------------------------------------------------------------------------*/
 int USBDeviceClose( USBDevice *usb )
 {
-    assert(usb);
-    if (!usb )
-        return -AIOUSB_ERROR_INVALID_USBDEVICE;
+    AIO_ASSERT_USB(usb);
     
     libusb_close(usb->deviceHandle);
     usb->deviceHandle = NULL;
@@ -136,9 +137,7 @@ int FindUSBDevices( USBDevice **devs, int *size )
 /*----------------------------------------------------------------------------*/
 int USBDeviceGetIdProduct( USBDevice *device )
 {
-    assert(device);
-    if ( !device ) 
-        return -AIOUSB_ERROR_INVALID_USBDEVICE;
+    AIO_ASSERT_USB(device);
 
     return (int)device->deviceDesc.idProduct;
 }
@@ -157,12 +156,10 @@ void DeleteUSBDevice( USBDevice *dev )
 }
 
 /*----------------------------------------------------------------------------*/
-
 int USBDeviceSetDebug( USBDevice *usb, AIOUSB_BOOL debug )
 {
-    assert(usb);
-    if (!usb)
-        return -AIOUSB_ERROR_INVALID_USBDEVICE;
+    AIO_ASSERT_USB(usb);
+
     usb->debug = debug;
     return AIOUSB_SUCCESS;
 }
@@ -183,8 +180,6 @@ libusb_device_handle *get_usb_device( USBDevice *dev )
     return dev->deviceHandle;
 }
 
-
-
 /*----------------------------------------------------------------------------*/
 int USBDeviceFetchADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock )
 {
@@ -192,14 +187,11 @@ int USBDeviceFetchADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock )
     AIOUSBDevice dev;
     ADCConfigBlock config;
 
-    assert(configBlock);
-    assert(usb);
-    if ( !usb || !configBlock )
-        return -AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ASSERT_CONFIG(configBlock);
+    AIO_ASSERT_USB(usb);
 
     ADCConfigBlockInitializeFromAIOUSBDevice( &config , &dev );
     config.timeout = configBlock->timeout;
-
 
     if( configBlock->testing != AIOUSB_TRUE ) {
         int bytesTransferred = usb->usb_control_transfer( usb, 
@@ -231,9 +223,9 @@ int USBDeviceFetchADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock )
 int USBDevicePutADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock )
 {
     int retval;
-    assert(usb != NULL && configBlock != NULL );
-    if ( !usb || !configBlock )
-        return -AIOUSB_ERROR_INVALID_PARAMETER;
+
+    AIO_ASSERT_USB(usb);
+    AIO_ASSERT_CONFIG( configBlock );
 
     if( configBlock->testing != AIOUSB_TRUE ) {
         int bytesTransferred = usb->usb_control_transfer( usb, 
@@ -368,6 +360,12 @@ TEST(USBDevice,FindDevices )
     for ( int i = 0 ;i < size ; i ++ ) {
         EXPECT_GE( USBDeviceGetIdProduct( &devs[i] ), 0 );
     }
+
+}
+
+TEST(USBDevice,FailsCorrectly)
+{
+    ASSERT_DEATH( { USBDevice *usb = NULL; USBDeviceClose(usb); }, "Assertion `usb' failed.");
 
 }
 
