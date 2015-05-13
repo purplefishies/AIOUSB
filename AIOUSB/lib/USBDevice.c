@@ -15,8 +15,6 @@
 namespace AIOUSB {
 #endif
 
-    /* AIO_ASSERT_USB(usb); */
-
 /*----------------------------------------------------------------------------*/
 AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
 {
@@ -94,11 +92,13 @@ int USBDeviceClose( USBDevice *usb )
 int FindUSBDevices( USBDevice **devs, int *size )
 {
     int result = 0;
+
+    AIO_ASSERT_VALID_DATA( -AIOUSB_ERROR_INVALID_DATA, devs );
+    AIO_ASSERT( size );
+
     *size = 0;
 
-    if ( !devs ) {
-        return -AIOUSB_ERROR_INVALID_DATA;
-    }
+
     int libusbResult = libusb_init( NULL );
     if (libusbResult != LIBUSB_SUCCESS)
         return -libusbResult;
@@ -152,6 +152,8 @@ void DeleteUSBDevices( USBDevice *devices )
 /*----------------------------------------------------------------------------*/
 void DeleteUSBDevice( USBDevice *dev )
 {
+    AIO_ASSERT_NO_RETURN(dev);
+
     free(dev);
 }
 
@@ -208,9 +210,7 @@ int USBDeviceFetchADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock )
             result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
             goto out_ReadConfigBlock;
         }
-        /*
-         * check and correct settings read from device
-         */
+        /*check and correct settings read from device */
         result = ADCConfigBlockCopy( configBlock, &config );
     }
 
@@ -251,8 +251,11 @@ int usb_control_transfer(struct aiousb_device *dev_handle,
                          uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
                          unsigned char *data, uint16_t wLength, unsigned int timeout)
 {
-    AIOUSB_UnLock();
-    return libusb_control_transfer( get_usb_device( dev_handle ),
+    /* AIOUSB_UnLock(); */
+    libusb_device_handle *handle = get_usb_device( dev_handle );
+    AIO_ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_LIBUSB_DEVICE_HANDLE, handle );
+
+    return libusb_control_transfer( handle,
                                     request_type,
                                     bRequest,
                                     wValue,
@@ -273,25 +276,33 @@ int usb_control_transfer(struct aiousb_device *dev_handle,
  * parameter specifies the longest permitted delay between packets,
  * not the total time to complete the transfer request
  */
-int usb_bulk_transfer( USBDevice *dev_handle,
-                      unsigned char endpoint, 
-                      unsigned char *data, 
-                      int length,
-                      int *actual_length, 
-                      unsigned int timeout
+int usb_bulk_transfer( USBDevice *usb,
+                       unsigned char endpoint, 
+                       unsigned char *data, 
+                       int length,
+                       int *actual_length, 
+                       unsigned int timeout
                       )
 {
     int libusbResult = LIBUSB_SUCCESS;
     int total = 0;
+
+    AIO_ASSERT_USB( usb );
+    AIO_ASSERT( data );
+    AIO_ASSERT( actual_length );
+
+    libusb_device_handle *handle = get_usb_device( usb );
+    AIO_ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_LIBUSB_DEVICE_HANDLE, handle );
+
     while (length > 0) {
           int bytes;
-          libusbResult = libusb_bulk_transfer(get_usb_device( dev_handle ), 
-                                              endpoint, 
-                                              data, 
-                                              length, 
-                                              &bytes, 
-                                              timeout
-                                              );
+          libusbResult = libusb_bulk_transfer( handle , 
+                                               endpoint, 
+                                               data, 
+                                               length, 
+                                               &bytes, 
+                                               timeout
+                                               );
           if (libusbResult == LIBUSB_SUCCESS) {
               if(bytes > 0) {
                   total += bytes;
@@ -305,7 +316,7 @@ int usb_bulk_transfer( USBDevice *dev_handle,
              * if we get a timeout and no data was transferred, then
              * treat it as an error condition
              */
-              if(bytes > 0) {
+              if (bytes > 0) {
                   total += bytes;
                   data += bytes;
                   length -= bytes;
@@ -329,6 +340,8 @@ int usb_request(struct aiousb_device *dev_handle,
 /*----------------------------------------------------------------------------*/
 int usb_reset_device( struct aiousb_device *usb )
 {
+    AIO_ASSERT_USB( usb );
+
     int libusbResult = libusb_reset_device( usb->deviceHandle  );
     return libusbResult;
 }
@@ -365,8 +378,18 @@ TEST(USBDevice,FindDevices )
 
 TEST(USBDevice,FailsCorrectly)
 {
-    ASSERT_DEATH( { USBDevice *usb = NULL; USBDeviceClose(usb); }, "Assertion `usb' failed.");
-
+    unsigned char endpoint;
+    unsigned char *data = 0;
+    int length;
+    int *actual_length = 0;
+    unsigned int timeout;
+    USBDevice *usb = NULL; 
+    ASSERT_DEATH( { USBDeviceClose(usb); }, "Assertion `usb' failed.");
+    ASSERT_DEATH( { usb_bulk_transfer(usb,endpoint,data,length,actual_length,timeout); }, "Assertion `usb' failed.");
+    usb = (USBDevice *)42;
+    ASSERT_DEATH( { usb_bulk_transfer(usb,endpoint,data,length,actual_length,timeout); }, "Assertion `data' failed");
+    data = (unsigned char *)42;
+    ASSERT_DEATH( { usb_bulk_transfer(usb,endpoint,data,length,actual_length,timeout); }, "Assertion `actual_length' failed");
 }
 
 

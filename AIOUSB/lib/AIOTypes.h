@@ -11,6 +11,7 @@
 #define _AIOTYPES_H
 #define HAS_PTHREAD 1
 #include <stdint.h>
+#include <stdlib.h>
 #include <assert.h>
 
 
@@ -107,7 +108,9 @@ enum {
 };
 
 
+
 #define AIO_ASSERT(...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { return -AIOUSB_ERROR_INVALID_PARAMETER; }
+#define AIO_ASSERT_NO_RETURN(...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { exit(-AIOUSB_ERROR_INVALID_PARAMETER); }
 #define AIO_ASSERT_VALID_DATA(err,... ) assert( __VA_ARGS__ ) ; if (!( __VA_ARGS__) ) { return err; }
 #define AIO_ASSERT_USB(...) AIO_ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_USBDEVICE, __VA_ARGS__ )
 #define AIO_ASSERT_CONFIG(...) AIO_ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_ADCCONFIG , __VA_ARGS__ )
@@ -396,6 +399,7 @@ CREATE_ENUM_W_START( ResultCode, 0,
                      AIOUSB_ERROR_INVALID_ADCCONFIG_OVERSAMPLE_SETTING,
                      AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING,
                      AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER,
+                     AIOUSB_ERROR_INVALID_LIBUSB_DEVICE_HANDLE,
                      AIOUSB_FIFO_COPY_ERROR,
                      AIOUSB_ERROR_LIBUSB /* Always make the LIBUSB the last element */
                      );
