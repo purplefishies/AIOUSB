@@ -111,12 +111,14 @@ enum {
 
 #define AIO_ASSERT(...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { return -AIOUSB_ERROR_INVALID_PARAMETER; }
 #define AIO_ASSERT_NO_RETURN(...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { exit(-AIOUSB_ERROR_INVALID_PARAMETER); }
+#define AIO_ASSERT_ERR_NO_RETURN(err,...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { exit(-err); }
 #define AIO_ASSERT_VALID_DATA(err,... ) assert( __VA_ARGS__ ) ; if (!( __VA_ARGS__) ) { return err; }
 #define AIO_ASSERT_USB(...) AIO_ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_USBDEVICE, __VA_ARGS__ )
 #define AIO_ASSERT_CONFIG(...) AIO_ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_ADCCONFIG , __VA_ARGS__ )
 #define AIO_ASSERT_AIOCONTBUF(...) AIO_ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, __VA_ARGS__ );
 #define AIO_ASSERT_AIOEITHER(err,msg,...) assert( __VA_ARGS__ ); if ( !(__VA_ARGS__) ) { AIOEither tmp; tmp.left = err; tmp.errmsg=strdup(msg); return tmp; }
 
+#define AIO_ERROR_VALID_DATA(err,...) if ( !(__VA_ARGS__) ) { return err; }
 
 
 /**

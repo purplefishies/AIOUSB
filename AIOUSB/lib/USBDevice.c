@@ -21,10 +21,7 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
     AIOEither retval = {0};
 
     AIO_ASSERT_AIOEITHER(-AIOUSB_ERROR_INVALID_USBDEVICE,"Invalid usb object", usb );
-    /* if ( !usb  ) { */
-    /*     retval.left = -AIOUSB_ERROR_INVALID_USBDEVICE; */
-    /*     retval.errmsg = strdup("Invalid USB object"); */
-    /* } */
+    AIO_ASSERT_AIOEITHER(-AIOUSB_ERROR_INVALID_PARAMETER,"Invalid args", args ); 
 
     usb->device                = args->dev;
     usb->deviceHandle          = args->handle;
@@ -145,6 +142,8 @@ int USBDeviceGetIdProduct( USBDevice *device )
 /*----------------------------------------------------------------------------*/
 void DeleteUSBDevices( USBDevice *devices )
 {
+    AIO_ASSERT_NO_RETURN( devices );
+
     free(devices);
     libusb_exit(NULL);
 }
@@ -177,6 +176,7 @@ libusb_device_handle *USBDeviceGetUSBDeviceHandle( USBDevice *usb )
 /*----------------------------------------------------------------------------*/
 libusb_device_handle *get_usb_device( USBDevice *dev )
 {
+    
     if ( !dev ) 
         return NULL;
     return dev->deviceHandle;
@@ -206,15 +206,13 @@ int USBDeviceFetchADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock )
                                                           config.timeout
                                                           );
         
-        if ( bytesTransferred != ( int ) config.size) {
+        if ( bytesTransferred != ( int ) config.size)
             result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-            goto out_ReadConfigBlock;
-        }
-        /*check and correct settings read from device */
-        result = ADCConfigBlockCopy( configBlock, &config );
+        else
+            result = ADCConfigBlockCopy( configBlock, &config );
+    } else {
+        result = configBlock->size;
     }
-
- out_ReadConfigBlock:
 
     return result;
 }
@@ -227,7 +225,9 @@ int USBDevicePutADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock )
     AIO_ASSERT_USB(usb);
     AIO_ASSERT_CONFIG( configBlock );
 
-    if( configBlock->testing != AIOUSB_TRUE ) {
+    if( configBlock->testing == AIOUSB_TRUE ) {
+        retval = (int)configBlock->size;
+    } else {
         int bytesTransferred = usb->usb_control_transfer( usb, 
                                                           USB_WRITE_TO_DEVICE,
                                                           AUR_ADC_SET_CONFIG,
@@ -238,7 +238,7 @@ int USBDevicePutADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock )
                                                           configBlock->timeout
                                                           );
         if ( bytesTransferred != (int)configBlock->size ) {
-            
+            retval = -LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
         } else {
             retval = bytesTransferred;
         }
@@ -251,9 +251,9 @@ int usb_control_transfer(struct aiousb_device *dev_handle,
                          uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
                          unsigned char *data, uint16_t wLength, unsigned int timeout)
 {
-    /* AIOUSB_UnLock(); */
+
     libusb_device_handle *handle = get_usb_device( dev_handle );
-    AIO_ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_LIBUSB_DEVICE_HANDLE, handle );
+    AIO_ERROR_VALID_DATA(-AIOUSB_ERROR_INVALID_LIBUSB_DEVICE_HANDLE, handle );
 
     return libusb_control_transfer( handle,
                                     request_type,
@@ -292,7 +292,7 @@ int usb_bulk_transfer( USBDevice *usb,
     AIO_ASSERT( actual_length );
 
     libusb_device_handle *handle = get_usb_device( usb );
-    AIO_ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_LIBUSB_DEVICE_HANDLE, handle );
+    AIO_ERROR_VALID_DATA(-AIOUSB_ERROR_INVALID_LIBUSB_DEVICE_HANDLE, handle );
 
     while (length > 0) {
           int bytes;
@@ -390,6 +390,12 @@ TEST(USBDevice,FailsCorrectly)
     ASSERT_DEATH( { usb_bulk_transfer(usb,endpoint,data,length,actual_length,timeout); }, "Assertion `data' failed");
     data = (unsigned char *)42;
     ASSERT_DEATH( { usb_bulk_transfer(usb,endpoint,data,length,actual_length,timeout); }, "Assertion `actual_length' failed");
+
+    usb = NULL;
+    LIBUSBArgs *args = NULL;
+    ASSERT_DEATH( { InitializeUSBDevice(usb, args); } , "Assertion `usb' failed" );
+    usb = (USBDevice*)42;
+    ASSERT_DEATH( { InitializeUSBDevice(usb, args); } , "Assertion `args' failed" );
 }
 
 
