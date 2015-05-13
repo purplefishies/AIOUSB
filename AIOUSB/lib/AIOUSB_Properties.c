@@ -326,7 +326,7 @@ AIORET_TYPE AIOUSB_ShowDevices( AIODisplayType display_type )
 
     switch ( display_type ) {
     case BASIC:
-        printf("ACCES devices");
+        printf("ACCES devices\n");
         break;
     case TERSE:
         printf("AIODevices:\n");
