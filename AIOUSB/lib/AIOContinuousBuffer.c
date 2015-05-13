@@ -34,7 +34,7 @@ void *RawCountsWorkFunction( void *object );
 /*-----------------------------  Constructors  -----------------------------*/
 AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels )
 {
-    assert( num_channels > 0 );
+    AIO_ASSERT_RET(NULL, num_channels > 0 );
     AIOContinuousBuf *tmp = NewAIOContinuousBufRawSmart( DeviceIndex, num_channels, scancounts, sizeof(unsigned short),0);
     AIOContinuousBufSetCallback( tmp, RawCountsWorkFunction );
     tmp->PushN = AIOContinuousBufPushN;
@@ -63,7 +63,7 @@ AIOContinuousBuf *NewAIOContinuousBuf()
 
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetNumberOfChannels( AIOContinuousBuf * buf)
 {
-    assert( buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     return buf->num_channels;
        
 }
@@ -71,7 +71,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetNumberOfChannels( AIOContinuousBuf 
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetNumberOfChannels( AIOContinuousBuf * buf, unsigned num_channels )
 {
     
-    assert( buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     buf->num_channels = num_channels;
     if ( (buf->fifo->size % num_channels ) != 0 ) {
         /* printf("Need to change\n"); */
@@ -93,13 +93,15 @@ PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufLegacy( unsigned long DeviceI
 /*----------------------------------------------------------------------------*/
  AIOContinuousBuf *NewAIOContinuousBufForVolts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels, unsigned num_oversamples )
 {
-    assert( num_channels > 0 );
+    AIO_ASSERT_RET(NULL, num_channels > 0 );
 
     AIOContinuousBuf *tmp = NewAIOContinuousBufRawSmart( DeviceIndex, num_channels, scancounts, sizeof(double), num_oversamples ); 
-    AIOContinuousBufSetCallback( tmp, ConvertCountsToVoltsFunction );
-    tmp->PushN = AIOContinuousBufPushN;
-    tmp->PopN  = AIOContinuousBufPopN;
-    AIOFifoVoltsInitialize( (AIOFifoVolts*)tmp->fifo );
+    if ( tmp ) {
+        AIOContinuousBufSetCallback( tmp, ConvertCountsToVoltsFunction );
+        tmp->PushN = AIOContinuousBufPushN;
+        tmp->PopN  = AIOContinuousBufPopN;
+        AIOFifoVoltsInitialize( (AIOFifoVolts*)tmp->fifo );
+    }
     return tmp;
 }
 
@@ -111,9 +113,10 @@ AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long DeviceIndex,
                                                unsigned num_oversamples
                                                )
 {
-    assert( num_channels > 0 );
+    AIO_ASSERT_RET(NULL, num_channels > 0 );
     AIOContinuousBuf *tmp = NewAIOContinuousBuf();
-
+    AIO_ERROR_VALID_DATA(NULL, tmp );
+        
     tmp->size             = num_channels * num_scans * (1+num_oversamples) * unit_size;
     tmp->buffer           = (AIOBufferType *)malloc( tmp->size*unit_size );
     tmp->bufunitsize      = unit_size;
@@ -172,7 +175,7 @@ AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex,
                                                     unsigned num_channels , 
                                                     AIOUSB_BOOL counts )
 {
-    assert( num_channels > 0 );
+    AIO_ASSERT_RET(NULL, num_channels > 0 );
     AIOContinuousBuf *tmp  = (AIOContinuousBuf *)malloc(sizeof(AIOContinuousBuf));
     tmp->mask              = NewAIOChannelMask( num_channels );
     tmp->fifo              = NewAIOFifoCounts( num_channels * scancounts );
@@ -272,7 +275,7 @@ AIORET_TYPE AIOContinuousBufInitADCConfigBlock( AIOContinuousBuf *buf, unsigned 
 
     AIOContinuousBufInitConfiguration( buf ); /* Needed to enforce Testing mode */
     AIOContinuousBufSetAllGainCodeAndDiffMode( buf, gainCode , diffMode );
-    AIOContinuousBufSetOverSample( buf, os );
+    AIOContinuousBufSetOversample( buf, os );
     AIOContinuousBufSetDiscardFirstSample( buf, dfs );
     return retval;
 }
@@ -1952,8 +1955,8 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetTimeout( AIOContinuousBuf *buf )
 }
 
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE AIOContinuousBuf_SetOverSample( AIOContinuousBuf *buf, unsigned os ) { return AIOContinuousBufSetOverSample(buf,os);}
-AIORET_TYPE AIOContinuousBufSetOverSample( AIOContinuousBuf *buf, unsigned os )
+AIORET_TYPE AIOContinuousBuf_SetOversample( AIOContinuousBuf *buf, unsigned os ) { return AIOContinuousBufSetOversample(buf,os);}
+AIORET_TYPE AIOContinuousBufSetOversample( AIOContinuousBuf *buf, unsigned os )
 {
     assert(buf);
     AIOContinuousBufLock( buf );
@@ -1970,6 +1973,9 @@ AIORET_TYPE AIOContinuousBufSetOverSample( AIOContinuousBuf *buf, unsigned os )
     return result;
 }
 
+AIORET_TYPE AIOContinuousBufSetOverSample( AIOContinuousBuf *buf, size_t os ) { return AIOContinuousBufSetOversample(buf, os); } 
+
+
 /*------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBuf_GetOverSample( AIOContinuousBuf *buf ) { return AIOContinuousBufGetOversample( buf ); }
 AIORET_TYPE AIOContinuousBufGetOversample( AIOContinuousBuf *buf ) {
@@ -1980,27 +1986,6 @@ AIORET_TYPE AIOContinuousBufGetOversample( AIOContinuousBuf *buf ) {
 
     return ADCConfigBlockGetOversample( AIOUSBDeviceGetADCConfigBlock( device ) );
 }
-
-AIORET_TYPE AIOContinuousBufSetOversample( AIOContinuousBuf *buf, size_t num_oversamples )
-{
-    AIORESULT result = AIOUSB_SUCCESS;
-    assert(buf);
-    if ( !buf ) 
-        return -AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER;
-
-    AIOUSBDevice *device = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), &result );
-    if ( result != AIOUSB_SUCCESS )
-        return -result;
-    
-    ADCConfigBlockSetOversample( AIOUSBDeviceGetADCConfigBlock( device ), num_oversamples );
-    
-    buf->num_oversamples = num_oversamples;
-    return AIOUSB_SUCCESS;
-
-}
-
-
-
 
 
 /*------------------------------------------------------------------------*/
@@ -2682,7 +2667,16 @@ TEST(AIOContinuousBuf, NewConstructor )
     DeleteAIOContinuousBuf( buf );
 }
 
-
+TEST(AIOContiuousBuf,FailCorrectly)
+{
+    
+    unsigned long DeviceIndex = 0;
+    unsigned scancounts = 1024;
+    unsigned num_channels = 0;
+    AIOUSB_BOOL counts  = AIOUSB_FALSE;
+    
+    ASSERT_DEATH( { NewAIOContinuousBufWithoutConfig(DeviceIndex,scancounts, num_channels,counts);  }, "Assertion `num_channels > 0' failed");
+}
 
 #include <unistd.h>
 #include <stdio.h>

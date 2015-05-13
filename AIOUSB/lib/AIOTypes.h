@@ -121,6 +121,12 @@ enum {
 #define AIO_ASSERT_AIOCONTBUF(...) AIO_ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, __VA_ARGS__ );
 #define AIO_ASSERT_AIOEITHER(err,msg,...) assert( __VA_ARGS__ ); if ( !(__VA_ARGS__) ) { AIOEither tmp; tmp.left = err; tmp.errmsg=strdup(msg); return tmp; }
 
+/**
+ * @brief AIO_ERROR * are just like the regular ASSERTIONS meaning that they 
+ * argument should evaluate to true otherwise it will fail.
+ *
+ */
+
 #define AIO_ERROR_VALID_DATA(err,...) if ( !(__VA_ARGS__) ) { return err; }
 #define AIO_ERROR_AIOEITHER_VALID_DATA(err,...) if ( !(__VA_ARGS__) ) { \
         AIOEither tmp; tmp.left = err; tmp.errmsg=NULL; return tmp; }
