@@ -49,7 +49,7 @@ unsigned short aiousb_htons(unsigned short octaveOffset)
 /*----------------------------------------------------------------------------*/
 static unsigned short OctaveDacFromFreq(double *Hz) 
 {
-    assert(Hz != 0);
+    AIO_ASSERT( Hz );
     unsigned short octaveOffset = 0;
     if(*Hz > 0) {
           if(*Hz > 40000000.0)
@@ -71,11 +71,16 @@ static unsigned short OctaveDacFromFreq(double *Hz)
 /*----------------------------------------------------------------------------*/
 AIOUSBDevice *_check_dio( unsigned long DeviceIndex, AIORESULT *result ) 
 {
-    AIOUSBDevice *device = AIODeviceTableGetDeviceAtIndex( DeviceIndex, result );
+    AIO_ASSERT_RET(NULL, result );
 
-    if ( *result != AIOUSB_SUCCESS || !device ) {
-        return NULL;
-    } 
+    AIOUSBDevice *device = AIODeviceTableGetDeviceAtIndex( DeviceIndex, result );
+    
+    AIO_ERROR_VALID_DATA(NULL, device );
+    AIO_ERROR_VALID_DATA(NULL, *result == AIOUSB_SUCCESS );
+
+    /* if ( *result != AIOUSB_SUCCESS || !device ) { */
+    /*     return NULL; */
+    /* }  */
 
     if ( device->DIOBytes == 0) {
         *result = AIOUSB_ERROR_NOT_SUPPORTED;
@@ -90,11 +95,16 @@ USBDevice *_check_dio_get_device_handle( unsigned long DeviceIndex,
                                          AIOUSBDevice **device,  
                                          AIORESULT *result ) 
 {
-    USBDevice *deviceHandle = NULL;
+    AIO_ASSERT_RET(NULL, device );
+    AIO_ASSERT_RET(NULL, result );
+
+    /* USBDevice *deviceHandle = NULL; */
     *device = _check_dio( DeviceIndex, result );
-    if( *result != AIOUSB_SUCCESS ) {
-        return deviceHandle;
-    }
+    AIO_ERROR_VALID_DATA(NULL, *result == AIOUSB_SUCCESS );
+
+    /* if( *result != AIOUSB_SUCCESS ) { */
+    /*     return deviceHandle; */
+    /* } */
 
     return AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex , result );
 }
@@ -595,24 +605,28 @@ AIORESULT DIO_Read1(
 /*----------------------------------------------------------------------------*/
 AIOUSBDevice *_check_dio_stream( unsigned long DeviceIndex , AIORESULT *result ) 
 {
+    AIO_ASSERT_RET(NULL, result );
     AIOUSBDevice *device = _check_dio( DeviceIndex, result );
 
-    if(device->bDIOStream == AIOUSB_FALSE) {
-        *result = AIOUSB_ERROR_NOT_SUPPORTED;
-        return NULL;
-    }
-    if(device->bDIOOpen) {
-        *result = AIOUSB_ERROR_OPEN_FAILED;
-        return NULL;
-    }
+    AIO_ERROR_VALID_DATA_W_CODE( NULL,*result = AIOUSB_ERROR_NOT_SUPPORTED , device->bDIOStream == AIOUSB_TRUE );
+
+    /* if(device->bDIOStream == AIOUSB_FALSE) { */
+    /*     *result = AIOUSB_ERROR_NOT_SUPPORTED; */
+    /*     return NULL; */
+    /* } */
+
+    AIO_ERROR_VALID_DATA_W_CODE(NULL, *result = AIOUSB_ERROR_OPEN_FAILED,  !device->bDIOOpen );
+
+    /* if(device->bDIOOpen) { */
+    /*     *result = AIOUSB_ERROR_OPEN_FAILED; */
+    /*     return NULL; */
+    /* } */
     return device;
 }
 
 /*----------------------------------------------------------------------------*/
-AIORESULT DIO_StreamOpen(
-                         unsigned long DeviceIndex,
-                         unsigned long bIsRead
-                         ) 
+AIORESULT DIO_StreamOpen( unsigned long DeviceIndex,
+                          unsigned long bIsRead ) 
 {
     AIORESULT result;
     AIOUSBDevice *device = NULL;
@@ -778,3 +792,73 @@ AIORESULT DIO_StreamFrame(
 }
 #endif
 
+/*****************************************************************************
+ * Self-test 
+ * @note This section is for stress testing the Continuous buffer in place
+ * without using the USB features
+ *
+ ****************************************************************************/ 
+
+#ifdef SELF_TEST
+
+#include "AIOUSBDevice.h"
+#include "gtest/gtest.h"
+#include "tap.h"
+#include <iostream>
+using namespace AIOUSB;
+
+
+TEST(DIO,CheckingFunctions)
+{
+    unsigned long DeviceIndex = 0;
+    AIOUSBDevice *device;
+    AIORESULT result = AIOUSB_ERROR_INVALID_DEVICE;
+    int numDevices = 0;
+    AIODeviceTableInit();    
+    AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_DIO_32 );
+
+    ASSERT_DEATH( {_check_dio_get_device_handle( DeviceIndex, &device, NULL ); }, "Assertion `result' failed");
+    ASSERT_DEATH( {_check_dio_get_device_handle( DeviceIndex, NULL, NULL ); }, "Assertion `device' failed");
+
+    ASSERT_DEATH( {_check_dio( DeviceIndex, NULL ); },"Assertion `result' failed"); 
+
+    ASSERT_DEATH( { OctaveDacFromFreq(NULL); }, "Assertion `Hz' failed");
+
+    /* Two settings to induce failure */
+    deviceTable[DeviceIndex].bDIOStream = AIOUSB_FALSE;
+    deviceTable[DeviceIndex].bDIOOpen = AIOUSB_TRUE;
+    
+    device = _check_dio_stream( DeviceIndex, &result );
+
+   
+    ASSERT_FALSE( device );
+    ASSERT_EQ( AIOUSB_ERROR_NOT_SUPPORTED, result );
+    deviceTable[DeviceIndex].bDIOStream = AIOUSB_TRUE;
+
+    
+    device = _check_dio_stream( DeviceIndex, &result );
+    ASSERT_FALSE( device );
+
+ }
+
+
+#include <unistd.h>
+#include <stdio.h>
+
+
+int main(int argc, char *argv[] )
+{
+  
+  AIORET_TYPE retval;
+
+  testing::InitGoogleTest(&argc, argv);
+  testing::TestEventListeners & listeners = testing::UnitTest::GetInstance()->listeners();
+#ifdef GTEST_TAP_PRINT_TO_STDOUT
+  delete listeners.Release(listeners.default_result_printer());
+#endif
+
+  return RUN_ALL_TESTS();  
+
+}
+
+#endif

@@ -130,6 +130,7 @@ enum {
 #define AIO_ERROR_VALID_DATA(err,...) if ( !(__VA_ARGS__) ) { return err; }
 #define AIO_ERROR_AIOEITHER_VALID_DATA(err,...) if ( !(__VA_ARGS__) ) { \
         AIOEither tmp; tmp.left = err; tmp.errmsg=NULL; return tmp; }
+#define AIO_ERROR_VALID_DATA_W_CODE(err, code, ... ) if ( !(__VA_ARGS__) ) { do { code; } while(0); return err; }
 
 
 /**
