@@ -169,29 +169,25 @@ AIORESULT DIO_Configure(
                            void *pData
                            ) 
 {
-    if( !pOutMask  || !pData  || ( bTristate != AIOUSB_FALSE && bTristate != AIOUSB_TRUE ))
-        return AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ASSERT( bTristate == AIOUSB_FALSE || bTristate == AIOUSB_TRUE );
+    AIO_ASSERT( pOutMask );
+    AIO_ASSERT( pData );
 
     AIORESULT result ;
     AIOUSBDevice *device = _check_dio( DeviceIndex, &result );
-    if ( result != AIOUSB_SUCCESS ) 
-        return result;
-
+    AIO_ERROR_VALID_DATA(result, result == AIOUSB_SUCCESS );
 
     memcpy(device->LastDIOData, pData, device->DIOBytes);
 
     USBDevice *deviceHandle = _check_dio_get_device_handle( DeviceIndex, &device, &result );
 
-    if ( !deviceHandle ) {
-        return AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-    }
-    
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
+
     int bufferSize = device->DIOBytes + 2 * MASK_BYTES_SIZE( device );
 
     unsigned char *configBuffer = ( unsigned char* )malloc(bufferSize);
-
-    if (!configBuffer )
-        return AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+    
+    AIO_ERROR_VALID_DATA(AIOUSB_ERROR_NOT_ENOUGH_MEMORY, configBuffer );
 
     unsigned char *dest = configBuffer;
     memcpy(dest, pData, device->DIOBytes);
@@ -225,15 +221,16 @@ AIORESULT DIO_ConfigureEx(
                           void *pTristateMask 
                            ) 
 { 
-    if( !pOutMask  || !pData || ! pTristateMask )
-        return AIOUSB_ERROR_INVALID_PARAMETER;
+
+    AIO_ASSERT( pOutMask );
+    AIO_ASSERT( pData );
+    AIO_ASSERT( pTristateMask );
+  
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *device = NULL;
     USBDevice * deviceHandle = _check_dio_get_device_handle( DeviceIndex, &device, &result );
 
-    if ( !deviceHandle ) {
-        return AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-    }
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_DEVICE_NOT_CONNECTED, result == AIOUSB_SUCCESS );
 
     memcpy(device->LastDIOData, pData, device->DIOBytes);
 
@@ -790,7 +787,7 @@ AIORESULT DIO_StreamFrame(
 using namespace AIOUSB;
 
 
-TEST(DIO,CheckingFunctions)
+TEST(DIO,CheckingInternalFunctions)
 {
     unsigned long DeviceIndex = 0;
     AIOUSBDevice *device;
@@ -841,6 +838,29 @@ TEST(DIO,CheckingFunctions)
     ASSERT_FALSE( device );
 
  }
+
+TEST(DIO,CheckConfigureEx) 
+{   
+    unsigned long DeviceIndex = 0;
+    AIOUSBDevice *device;
+    AIORESULT result = AIOUSB_ERROR_INVALID_DEVICE;
+    int numDevices = 0;
+    void *pOutMask = NULL;
+    void *pData = NULL ;
+    void *pTristateMask = NULL;
+
+    ASSERT_DEATH( {DIO_ConfigureEx(DeviceIndex, pOutMask,pData,pTristateMask); },"Assertion `pOutMask' failed"); 
+
+    ASSERT_DEATH( {DIO_ConfigureEx(DeviceIndex, (void *)42,pData,pTristateMask); },"Assertion `pData' failed"); 
+
+    AIODeviceTableInit();    
+    AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_DIO_32 );
+
+    result = DIO_ConfigureEx(DeviceIndex, (void *)42,(void*)42,(void*)42);
+    ASSERT_EQ( AIOUSB_ERROR_DEVICE_NOT_CONNECTED, result );
+
+}
+
 
 #include <unistd.h>
 #include <stdio.h>
