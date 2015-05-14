@@ -132,6 +132,13 @@ set( AIOUSB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}  )
 get_filename_component(LIBUSB_DIRECTORY ${LIBUSB_1_LIBRARIES} DIRECTORY )
 link_directories( ${LIBUSB_DIRECTORY} )
 
+SET_TARGET_PROPERTIES( aiousbdbg PROPERTIES COMPILE_FLAGS "-DNDEBUG" )
+SET_TARGET_PROPERTIES( aiousbcppdbg PROPERTIES COMPILE_FLAGS "-DNDEBUG" )
+
+GET_TARGET_PROPERTY( FOO aiousbdbg COMPILE_FLAGS  )
+MESSAGE(STATUS "Cflags for debug is ${FOO}")
+
+
 target_link_libraries( aiousb ${CORELIBS} ${EXTRA_LIBS} -L${LIBUSB_DIRECTORY} )
 target_link_libraries( aiousbcpp ${CORELIBS} ${EXTRA_LIBS}  -L${LIBUSB_DIRECTORY} )
 target_link_libraries( aiousbcppdbg ${CORELIBS} ${EXTRA_LIBS}  -L${LIBUSB_DIRECTORY} )
@@ -166,6 +173,7 @@ if( GTESTTAP_FOUND )
     set(MY_FLAGS "${CXX_FLAGS} -DSELF_TEST -D__aiousb_cplusplus -std=gnu++0x"  )
     set(MY_LIBRARIES aiousbdbg usb-1.0 pthread m ${GTEST_BOTH_LIBRARIES} aiousb aiousbcpp )
     # MESSAGE(STATUS "Libraries: ${MY_LIBRARIES}")
+    # set(MY_FLAGS "${MY_FLAGS} -DNDEBUG" )
     build_gtest_cpp_file( aiousblibs ${gtest}  ${MY_FLAGS} "${MY_LIBRARIES}"  )
   endforeach(gtest ${GTEST_FILES} ) 
 
@@ -175,10 +183,11 @@ if( GTESTTAP_FOUND )
   FILE( GLOB GTESTING_FILES tests/*.cpp )
   foreach( gtest_file ${GTESTING_FILES} ) 
     # MESSAGE(STATUS "Trying out file ${gtest_file}")
+    set(MY_LIBRARIES usb-1.0 pthread m ${GTEST_BOTH_LIBRARIES} aiousbcppdbg )
+    # MESSAGE(STATUS "MY_LIBRARIES=  ${MY_LIBRARIES}" )
     build_gtest_test_file( aiousblibs ${gtest_file} ${MY_FLAGS} "${MY_LIBRARIES}" )
   endforeach( gtest_file )
 endif( GTESTTAP_FOUND )
-
 
 if( BUILD_MATLAB AND BUILD_AIOUSB_SHARED ) 
   MESSAGE(STATUS "Building Matlab")

@@ -141,7 +141,7 @@ main(int argc, char *argv[] )
     AIOContinuousBufInitConfiguration( buf );
 
 
-    AIOContinuousBufSetOverSample( buf, options.num_oversamples );
+    AIOContinuousBufSetOversample( buf, options.num_oversamples );
     AIOContinuousBufSetStartAndEndChannel( buf, options.start_channel, options.end_channel );
 
     if( !options.number_ranges ) { 

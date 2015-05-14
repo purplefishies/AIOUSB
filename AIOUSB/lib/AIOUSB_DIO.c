@@ -110,19 +110,24 @@ AIORESULT DIO_ConfigureWithDIOBuf(
     int bufferSize;
     int bytesTransferred;
 
-    if ( !mask  || !buf  || ( bTristate != AIOUSB_FALSE && bTristate != AIOUSB_TRUE ) )
-        return AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ASSERT( bTristate == AIOUSB_FALSE || bTristate == AIOUSB_TRUE );
+    AIO_ASSERT_CHANNELMASK( mask );
+    AIO_ASSERT_DIOBUF( buf );
+
 
     USBDevice *deviceHandle = _check_dio_get_device_handle( DeviceIndex, &device, &result );
-    if ( device->LastDIOData == 0 )
-        return AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
+
+    AIO_ERROR_VALID_DATA(-AIOUSB_ERROR_NOT_ENOUGH_MEMORY, device->LastDIOData != 0 );
 
     memcpy(device->LastDIOData, DIOBufToBinary(buf), DIOBufByteSize( buf ) );
     bufferSize = device->DIOBytes + MASK_BYTES_SIZE(device);
     configBuffer = ( char* )malloc( bufferSize );
-    if ( !configBuffer ) {
+    
+    /* AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_ENOUGH_MEMORY, configBuffer ); */
+
+    if ( !configBuffer )
         return AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
-    }
 
     dest = configBuffer;
 
@@ -836,7 +841,6 @@ TEST(DIO,CheckingFunctions)
     ASSERT_FALSE( device );
 
  }
-
 
 #include <unistd.h>
 #include <stdio.h>
