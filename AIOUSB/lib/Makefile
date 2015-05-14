@@ -219,7 +219,7 @@ clean:
 	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) $(GTAGS_FILES) $(TESTOBJS)
 
 distclean: 
-	-rm -f $(LIBS) $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) cscope.out *_test* *.tap *.mexglx
+	-rm -f $(LIBS) $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) $(TESTOBJS) cscope.out *_test* *.tap *.mexglx
 gtags:	
 	gtags
 
