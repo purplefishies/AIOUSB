@@ -79,11 +79,6 @@ AIOUSBDevice *_check_dio( unsigned long DeviceIndex, AIORESULT *result )
     AIO_ERROR_VALID_DATA(NULL, *result == AIOUSB_SUCCESS );
 
     AIO_ERROR_VALID_DATA_W_CODE(NULL, *result = AIOUSB_ERROR_NOT_SUPPORTED, device->DIOBytes != 0 );
-    /* if ( device->DIOBytes == 0) { */
-    /*     *result = AIOUSB_ERROR_NOT_SUPPORTED; */
-    /*     return NULL; */
-    /* } */
-
     return device;
 }
 
@@ -95,13 +90,8 @@ USBDevice *_check_dio_get_device_handle( unsigned long DeviceIndex,
     AIO_ASSERT_RET(NULL, device );
     AIO_ASSERT_RET(NULL, result );
 
-    /* USBDevice *deviceHandle = NULL; */
     *device = _check_dio( DeviceIndex, result );
     AIO_ERROR_VALID_DATA(NULL, *result == AIOUSB_SUCCESS );
-
-    /* if( *result != AIOUSB_SUCCESS ) { */
-    /*     return deviceHandle; */
-    /* } */
 
     return AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex , result );
 }
@@ -607,17 +597,8 @@ AIOUSBDevice *_check_dio_stream( unsigned long DeviceIndex , AIORESULT *result )
 
     AIO_ERROR_VALID_DATA_W_CODE( NULL,*result = AIOUSB_ERROR_NOT_SUPPORTED , device->bDIOStream == AIOUSB_TRUE );
 
-    /* if(device->bDIOStream == AIOUSB_FALSE) { */
-    /*     *result = AIOUSB_ERROR_NOT_SUPPORTED; */
-    /*     return NULL; */
-    /* } */
-
     AIO_ERROR_VALID_DATA_W_CODE(NULL, *result = AIOUSB_ERROR_OPEN_FAILED,  !device->bDIOOpen );
 
-    /* if(device->bDIOOpen) { */
-    /*     *result = AIOUSB_ERROR_OPEN_FAILED; */
-    /*     return NULL; */
-    /* } */
     return device;
 }
 
