@@ -78,14 +78,11 @@ AIOUSBDevice *_check_dio( unsigned long DeviceIndex, AIORESULT *result )
     AIO_ERROR_VALID_DATA(NULL, device );
     AIO_ERROR_VALID_DATA(NULL, *result == AIOUSB_SUCCESS );
 
-    /* if ( *result != AIOUSB_SUCCESS || !device ) { */
+    AIO_ERROR_VALID_DATA_W_CODE(NULL, *result = AIOUSB_ERROR_NOT_SUPPORTED, device->DIOBytes != 0 );
+    /* if ( device->DIOBytes == 0) { */
+    /*     *result = AIOUSB_ERROR_NOT_SUPPORTED; */
     /*     return NULL; */
-    /* }  */
-
-    if ( device->DIOBytes == 0) {
-        *result = AIOUSB_ERROR_NOT_SUPPORTED;
-        return NULL;
-    }
+    /* } */
 
     return device;
 }
@@ -813,7 +810,9 @@ TEST(DIO,CheckingFunctions)
     unsigned long DeviceIndex = 0;
     AIOUSBDevice *device;
     AIORESULT result = AIOUSB_ERROR_INVALID_DEVICE;
+    
     int numDevices = 0;
+    int tmp;
     AIODeviceTableInit();    
     AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_DIO_32 );
 
@@ -821,6 +820,15 @@ TEST(DIO,CheckingFunctions)
     ASSERT_DEATH( {_check_dio_get_device_handle( DeviceIndex, NULL, NULL ); }, "Assertion `device' failed");
 
     ASSERT_DEATH( {_check_dio( DeviceIndex, NULL ); },"Assertion `result' failed"); 
+
+    tmp = deviceTable[0].DIOBytes;
+    deviceTable[0].DIOBytes = 0;
+
+    /* Verify that DIOBytes is checked */
+    device = _check_dio( DeviceIndex, &result);
+    ASSERT_FALSE( device );
+    ASSERT_EQ( AIOUSB_ERROR_NOT_SUPPORTED, result );
+    deviceTable[0].DIOBytes = tmp;
 
     ASSERT_DEATH( { OctaveDacFromFreq(NULL); }, "Assertion `Hz' failed");
 
