@@ -666,7 +666,6 @@ AIORESULT DIO_StreamSetClocks(
         result = AIOUSB_ERROR_USBDEVICE_NOT_FOUND;
         goto out_DIO_StreamSetClocks;
     }
-    
 
     /**
      * @note  
@@ -718,17 +717,17 @@ AIORESULT DIO_StreamFrame(
                           unsigned long *BytesTransferred
                           ) 
 {
-    if( FramePoints == 0 || pFrameData == NULL || BytesTransferred == NULL )
-        return AIOUSB_ERROR_INVALID_PARAMETER;
-    AIORESULT result = AIOUSB_SUCCESS;
+
+    AIO_ASSERT( pFrameData );
+    AIO_ASSERT( BytesTransferred );
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_PARAMETER, FramePoints );
+
     AIOUSBDevice *device = NULL;
+    AIORESULT result = AIOUSB_SUCCESS;
     USBDevice *deviceHandle = _check_dio_get_device_handle( DeviceIndex, &device, &result );
 
-    if (!deviceHandle ) {
-        return AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-    } else if ( result != AIOUSB_SUCCESS ) {
-        return result;
-    }
+    AIO_ERROR_VALID_DATA(AIOUSB_ERROR_DEVICE_NOT_CONNECTED, deviceHandle ); 
+    AIO_ERROR_VALID_DATA(result, result == AIOUSB_SUCCESS );
 
     unsigned char endpoint = device->bDIORead ? (LIBUSB_ENDPOINT_IN | USB_BULK_READ_ENDPOINT) : (LIBUSB_ENDPOINT_OUT | USB_BULK_WRITE_ENDPOINT);
     int streamingBlockSize = ( int )device->StreamingBlockSize * sizeof(unsigned short);
@@ -791,7 +790,9 @@ TEST(DIO,CheckingFunctions)
     unsigned long DeviceIndex = 0;
     AIOUSBDevice *device;
     AIORESULT result = AIOUSB_ERROR_INVALID_DEVICE;
-    
+
+    USBDevice *usb;
+
     int numDevices = 0;
     int tmp;
     AIODeviceTableInit();    
@@ -799,6 +800,12 @@ TEST(DIO,CheckingFunctions)
 
     ASSERT_DEATH( {_check_dio_get_device_handle( DeviceIndex, &device, NULL ); }, "Assertion `result' failed");
     ASSERT_DEATH( {_check_dio_get_device_handle( DeviceIndex, NULL, NULL ); }, "Assertion `device' failed");
+
+    result = AIOUSB_SUCCESS;
+    usb = _check_dio_get_device_handle( DeviceIndex, &device, &result );
+    ASSERT_FALSE( usb );
+    ASSERT_EQ( -AIOUSB_ERROR_INVALID_USBDEVICE , result );
+
 
     ASSERT_DEATH( {_check_dio( DeviceIndex, NULL ); },"Assertion `result' failed"); 
 
