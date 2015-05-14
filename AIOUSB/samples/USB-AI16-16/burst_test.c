@@ -140,7 +140,7 @@ main(int argc, char *argv[] )
         GenericVendorWrite( 0, 0xDF, 0x0000, 0x001E, bufData, &bytesWritten  );
     }
 
-    AIOContinuousBufSetOverSample( buf, 0 );
+    AIOContinuousBufSetOversample( buf, 0 );
     AIOContinuousBufSetStartAndEndChannel( buf, options.startchannel, options.endchannel );
     if( !options.number_ranges ) { 
         AIOContinuousBufSetAllGainCodeAndDiffMode( buf , options.gain_code , AIOUSB_FALSE );
