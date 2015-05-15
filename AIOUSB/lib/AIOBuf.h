@@ -13,6 +13,8 @@ namespace AIOUSB
 #endif
 
 typedef enum {
+    AIO_ERROR_BUF = -1,
+    AIO_DEFAULT_BUF = 1,
     AIO_COUNTS_BUF = 2,
     AIO_VOLTS_BUF  = 8
 } AIOBufType;
@@ -38,7 +40,8 @@ typedef struct aio_cmd {
 
 PUBLIC_EXTERN AIOBuf * NewAIOBuf( AIOBufType type , size_t size );
 PUBLIC_EXTERN AIORET_TYPE DeleteAIOBuf( AIOBuf *type );
-PUBLIC_EXTERN AIORET_TYPE AIOBufSize( AIOBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOBufGetSize( AIOBuf *buf );
+PUBLIC_EXTERN AIOBufType AIOBufGetType( AIOBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOBufRead( AIOBuf *buf, void *tobuf, size_t size_tobuf );
 PUBLIC_EXTERN AIOBufIterator *AIOBufGetIterator( AIOBuf *buf );
 PUBLIC_EXTERN AIOUSB_BOOL AIOBufIteratorIsValid( AIOBufIterator *biter );
