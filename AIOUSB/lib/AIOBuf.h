@@ -43,6 +43,7 @@ PUBLIC_EXTERN AIORET_TYPE DeleteAIOBuf( AIOBuf *type );
 PUBLIC_EXTERN AIORET_TYPE AIOBufGetSize( AIOBuf *buf );
 PUBLIC_EXTERN AIOBufType AIOBufGetType( AIOBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOBufRead( AIOBuf *buf, void *tobuf, size_t size_tobuf );
+PUBLIC_EXTERN AIORET_TYPE AIOBufWrite( AIOBuf *buf, void *frombuf, size_t size_frombuf );
 PUBLIC_EXTERN AIOBufIterator *AIOBufGetIterator( AIOBuf *buf );
 PUBLIC_EXTERN AIOUSB_BOOL AIOBufIteratorIsValid( AIOBufIterator *biter );
 PUBLIC_EXTERN void AIOBufIteratorNext( AIOBufIterator *biter );

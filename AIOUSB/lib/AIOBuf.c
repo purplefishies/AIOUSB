@@ -86,6 +86,20 @@ AIORET_TYPE AIOBufRead( AIOBuf *buf, void *tobuf, size_t size_tobuf )
 }
 
 /*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOBufWrite( AIOBuf *buf, void *frombuf, size_t size_frombuf )
+{
+    AIO_ASSERT( buf );
+    AIO_ASSERT( frombuf );
+    int obufsize;
+
+    AIO_ASSERT_RET( -AIOUSB_ERROR_INVALID_AIOBUFTYPE, (obufsize = (int)AIOBufGetTotalSize(buf) ) >= 0 );
+
+    int act_size = MIN( obufsize, (int)size_frombuf );
+    memcpy( buf->_buf, frombuf, act_size );
+    return act_size;
+}
+
+/*----------------------------------------------------------------------------*/
 AIOBufIterator *AIOBufGetIterator( AIOBuf *buf )
 {
     AIOBufIterator *tmp = NULL;
@@ -113,6 +127,7 @@ void AIOBufIteratorNext( AIOBufIterator *biter )
 
 #ifdef SELF_TEST
 #include "AIOUSBDevice.h"
+#include "AIOTypes.h"
 #include "gtest/gtest.h"
 
 using namespace AIOUSB;
@@ -139,6 +154,26 @@ TEST(AIOBuf, CreationAndDestruction)
     ASSERT_EQ( AIOUSB_SUCCESS, retval );
 
 }
+
+TEST(AIOBuf, WriteIntoBuffer )
+{
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIOBuf *buf = NewAIOBuf( AIO_DEFAULT_BUF, 100 );
+    char tmp[110];
+    ASSERT_TRUE(tmp);
+
+    for( int i = 0; i < sizeof(tmp); i ++ ) tmp[i] = (char )i;
+
+    retval = AIOBufWrite( buf, tmp, sizeof(tmp) );
+    ASSERT_EQ( 100, retval );
+
+    EXPECT_EQ( 0 ,  memcmp( tmp, buf->_buf, sizeof( retval )) );
+
+    retval = DeleteAIOBuf( buf );
+    ASSERT_EQ( AIOUSB_SUCCESS, retval );
+
+}
+
 
 
 int main(int argc, char *argv[] )
