@@ -81,7 +81,15 @@ PUBLIC_EXTERN AIOBufType AIOBufGetType( AIOBuf *buf )
 AIORET_TYPE AIOBufRead( AIOBuf *buf, void *tobuf, size_t size_tobuf )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIO_ASSERT( buf );
+    AIO_ASSERT( tobuf );
     
+    int ibufsize;
+    
+    AIO_ASSERT_RET(-AIOUSB_ERROR_INVALID_AIOBUFTYPE, (ibufsize = (int)AIOBufGetTotalSize(buf) ) >= 0  );
+
+    int act_size = MIN( ibufsize, (int)size_tobuf );
+    memcpy( tobuf, buf->_buf, act_size );
     return retval;
 }
 
@@ -160,6 +168,7 @@ TEST(AIOBuf, WriteIntoBuffer )
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     AIOBuf *buf = NewAIOBuf( AIO_DEFAULT_BUF, 100 );
     char tmp[110];
+    char tmp2[100];
     ASSERT_TRUE(tmp);
 
     for( int i = 0; i < sizeof(tmp); i ++ ) tmp[i] = (char )i;
@@ -168,6 +177,11 @@ TEST(AIOBuf, WriteIntoBuffer )
     ASSERT_EQ( 100, retval );
 
     EXPECT_EQ( 0 ,  memcmp( tmp, buf->_buf, sizeof( retval )) );
+    
+    AIOBufRead( buf, tmp2, sizeof(tmp2));
+    EXPECT_EQ( 0 ,  memcmp( tmp2, tmp, sizeof( tmp2 )) );
+
+
 
     retval = DeleteAIOBuf( buf );
     ASSERT_EQ( AIOUSB_SUCCESS, retval );
