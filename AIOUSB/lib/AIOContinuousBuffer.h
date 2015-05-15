@@ -16,6 +16,7 @@
 #include "AIOTypes.h"
 #include "AIOFifo.h"
 #include "AIOUSB_Core.h"
+#include "AIOBuf.h"
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -175,7 +176,13 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_ResetDevice( AIOContinuousBuf *buf)  
 
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufLock( AIOContinuousBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufUnlock( AIOContinuousBuf *buf );
+
+
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufCallbackStartCallbackAcquisition( AIOContinuousBuf *buf, AIOCmd *cmd, AIORET_TYPE (*callback)( AIOBuf *buf) );
+
+
+
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetReadPosition( AIOContinuousBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetWritePosition( AIOContinuousBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufAvailableReadSize( AIOContinuousBuf *buf );

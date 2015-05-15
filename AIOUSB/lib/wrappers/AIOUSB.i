@@ -44,8 +44,8 @@
 %}
 
 %newobject CreateSmartBuffer;
-%newobject NewBuffer;
-%delobject AIOBuf::DeleteBuffer;
+%newobject NewAIOBuf;
+%delobject AIOBuf::DeleteAIOBuf;
 
 #if defined(SWIGPYTHON)
 %typemap(in) unsigned char *gainCodes {
@@ -297,10 +297,10 @@ unsigned long CTR_StartOutputFreq( unsigned long DeviceIndex,  unsigned long Blo
 
 %extend AIOBuf {
   AIOBuf(int bufsize)  {
-    return (AIOBuf *)NewBuffer( bufsize );
+    return (AIOBuf *)NewAIOBuf( bufsize );
   }
   ~AIOBuf()  {
-    DeleteBuffer($self);
+    DeleteAIOBuf$self);
   }
 
 }

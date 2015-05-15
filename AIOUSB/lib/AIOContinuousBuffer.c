@@ -1597,6 +1597,26 @@ int continuous_setup( USBDevice *usb , unsigned char *data, unsigned length )
 }
 
 /*----------------------------------------------------------------------------*/
+
+/**
+ * @brief Sets up a smart continuos mode acquisition allowing the user
+ * to specify a callback function that is called based on the arguments constructed
+ * in AIOCmd *cmd.  The user can specify that the callback is called after each 
+ * oversample,  full chanell, full scan, or N number of scans.  
+ *
+ * @param buf 
+ * @param cmd 
+ * @param callback 
+ * @return >= 0 if successful, < 0 if failure
+ */
+AIORET_TYPE AIOContinuousBufCallbackStartCallbackAcquisition( AIOContinuousBuf *buf, AIOCmd *cmd, AIORET_TYPE (*callback)( AIOBuf *buf) )
+{
+    AIORET_TYPE tmp = AIOUSB_SUCCESS;
+    return tmp;
+}
+
+
+/*----------------------------------------------------------------------------*/
 /**
  * @brief Setups the Automated runs for continuous mode runs
  * @param buf 

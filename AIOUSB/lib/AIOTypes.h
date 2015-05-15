@@ -622,11 +622,11 @@ typedef enum  {
  * without making the user keep track of the memory management
  */
 
-typedef struct {
-  int bufsize;
-  unsigned short *buffer;
-  unsigned long bytes_remaining;
-} AIOBuf ;
+/* typedef struct { */
+/*   int bufsize; */
+/*   unsigned short *buffer; */
+/*   unsigned long bytes_remaining; */
+/* } AIOBuf ; */
 
 /* extern unsigned long GetDevices( void ); */
 

@@ -2,6 +2,7 @@
 #define _AIOUSB_ADC_H
 
 #include "AIOTypes.h"
+#include "AIOBuf.h"
 #include "ADCConfigBlock.h"
 #include "USBDevice.h"
 
@@ -102,13 +103,14 @@ PUBLIC_EXTERN AIOUSB_BOOL AIOUSB_IsDiscardFirstSample( unsigned long DeviceIndex
 PUBLIC_EXTERN unsigned long AIOUSB_SetDiscardFirstSample(unsigned long DeviceIndex,AIOUSB_BOOL discard );
 
 
-PUBLIC_EXTERN AIOBuf *NewBuffer( unsigned int bufsize );
-PUBLIC_EXTERN void DeleteBuffer( AIOBuf *buf );
+/* PUBLIC_EXTERN AIOBuf *NewBuffer( unsigned int bufsize ); */
+/* PUBLIC_EXTERN void DeleteBuffer( AIOBuf *buf ); */
 PUBLIC_EXTERN AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex );
 
 PUBLIC_EXTERN unsigned long AIOUSB_ADC_InternalCal( unsigned long DeviceIndex, AIOUSB_BOOL autoCal, unsigned short returnCalTable[], const char *saveFileName ); 
 
-PUBLIC_EXTERN AIORET_TYPE  BulkPoll(unsigned long DeviceIndex, AIOBuf * );
+/* PUBLIC_EXTERN AIORET_TYPE  BulkPoll(unsigned long DeviceIndex, AIOBuf * ); */
+/* PUBLIC_EXTERN AIORET_TYPE  BulkPoll(unsigned long DeviceIndex, AIOBuf * ); */
 
 PUBLIC_EXTERN unsigned char *ADC_GetADConfigBlock_Registers( ADConfigBlock *config );
 

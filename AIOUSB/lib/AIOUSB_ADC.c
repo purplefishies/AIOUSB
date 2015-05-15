@@ -1949,39 +1949,35 @@ static void *BulkAcquireWorker(void *params)
 }
 
 /*----------------------------------------------------------------------------*/
-AIOBuf *
-NewBuffer( unsigned int bufsize )
-{
-     AIOBuf *tmp = (AIOBuf*)malloc( sizeof( AIOBuf) );
-     if( !tmp ) {
-          aio_errno = -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
-          goto out_ret;
-     }
-
-     tmp->bytes_remaining = 0;
-     tmp->bufsize = bufsize;
-  
-     /* printf("allocating space %d bytes\n",(int)tmp->bufsize ); */
-     tmp->buffer = (unsigned short *)malloc( tmp->bufsize );
-     if( !tmp->buffer ) {
-          aio_errno = -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
-          free(tmp);
-          tmp = NULL;
-     }
-out_ret:
-     return tmp;
-}
-
-void
-DeleteBuffer( AIOBuf *buf )
-{
-  if( !buf ) 
-    return;
-
-  if( buf->buffer ) 
-    free(buf->buffer );
-  free(buf);
-}
+/* AIOBuf * */
+/* NewBuffer( unsigned int bufsize ) */
+/* { */
+/*      AIOBuf *tmp = (AIOBuf*)malloc( sizeof( AIOBuf) ); */
+/*      if( !tmp ) { */
+/*           aio_errno = -AIOUSB_ERROR_NOT_ENOUGH_MEMORY; */
+/*           goto out_ret; */
+/*      } */
+/*      tmp->bytes_remaining = 0; */
+/*      tmp->bufsize = bufsize; */
+/*      /\* printf("allocating space %d bytes\n",(int)tmp->bufsize ); *\/ */
+/*      tmp->buffer = (unsigned short *)malloc( tmp->bufsize ); */
+/*      if( !tmp->buffer ) { */
+/*           aio_errno = -AIOUSB_ERROR_NOT_ENOUGH_MEMORY; */
+/*           free(tmp); */
+/*           tmp = NULL; */
+/*      } */
+/* out_ret: */
+/*      return tmp; */
+/* } */
+/* void */
+/* DeleteBuffer( AIOBuf *buf ) */
+/* { */
+/*   if( !buf )  */
+/*     return; */
+/*   if( buf->buffer )  */
+/*     free(buf->buffer ); */
+/*   free(buf); */
+/* } */
 
 /** 
  * @brief After setting up your oversamples and such, creates a new
@@ -2000,39 +1996,37 @@ AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex )
   }
   
   long size = ((1 + ADC_GetOversample( DeviceIndex ) ) * 16 * sizeof( unsigned short ) * AIOUSB_GetStreamingBlockSize(DeviceIndex)) ;
-  AIOBuf *tmp = NewBuffer( size );
+  AIOBuf *tmp = NewAIOBuf( AIO_COUNTS_BUF, size );
   
   return tmp;
 }
 
-AIORET_TYPE  
-BulkAcquire(
-            unsigned long DeviceIndex,
-            AIOBuf *aiobuf,
-            int size
-            )
-{
-  AIORET_TYPE result = 0;
-  result = ADC_BulkAcquire( DeviceIndex, aiobuf->bufsize , aiobuf->buffer );
-  aiobuf->bytes_remaining = aiobuf->bufsize;
-  return result;
+/* AIORET_TYPE   */
+/* BulkAcquire( */
+/*             unsigned long DeviceIndex, */
+/*             AIOBuf *aiobuf, */
+/*             int size */
+/*             ) */
+/* { */
+/*   AIORET_TYPE result = 0; */
+/*   result = ADC_BulkAcquire( DeviceIndex, aiobuf->bufsize , aiobuf->buffer ); */
+/*   aiobuf->bytes_remaining = aiobuf->bufsize; */
+/*   return result; */
+/* } */
 
-}
 
-
-AIORET_TYPE  
-BulkPoll(
-         unsigned long DeviceIndex,
-         AIOBuf *aiobuf
-         )
-{
-  AIORET_TYPE result= AIOUSB_SUCCESS;
-  unsigned long retval = ADC_BulkPoll( DeviceIndex, &(aiobuf->bytes_remaining) );
-  if( retval != AIOUSB_SUCCESS ) 
-    result = - retval;
-
-  return result;
-}
+/* AIORET_TYPE   */
+/* BulkPoll( */
+/*          unsigned long DeviceIndex, */
+/*          AIOBuf *aiobuf */
+/*          ) */
+/* { */
+/*   AIORET_TYPE result= AIOUSB_SUCCESS; */
+/*   unsigned long retval = ADC_BulkPoll( DeviceIndex, &(aiobuf->bytes_remaining) ); */
+/*   if( retval != AIOUSB_SUCCESS )  */
+/*     result = - retval; */
+/*   return result; */
+/* } */
 
 /*----------------------------------------------------------------------------*/
 /**
