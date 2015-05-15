@@ -122,12 +122,9 @@ AIORESULT DIO_ConfigureWithDIOBuf(
 
     memcpy(device->LastDIOData, DIOBufToBinary(buf), DIOBufByteSize( buf ) );
     bufferSize = device->DIOBytes + MASK_BYTES_SIZE(device);
-    configBuffer = ( char* )malloc( bufferSize );
-    
-    /* AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_ENOUGH_MEMORY, configBuffer ); */
 
-    if ( !configBuffer )
-        return AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+    configBuffer = ( char* )malloc( bufferSize );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_ENOUGH_MEMORY, configBuffer );
 
     dest = configBuffer;
 
@@ -237,8 +234,7 @@ AIORESULT DIO_ConfigureEx(
     int bufferSize = device->DIOBytes + MASK_BYTES_SIZE( device) + TRISTATE_BYTES_SIZE(device);
     unsigned char *configBuffer = ( unsigned char* )malloc(bufferSize);
 
-    if (!configBuffer )
-        return AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+    AIO_ERROR_VALID_DATA(AIOUSB_ERROR_NOT_ENOUGH_MEMORY, configBuffer );
 
     unsigned char *dest = configBuffer;
     memcpy(dest, pData, device->DIOBytes);
@@ -271,21 +267,19 @@ AIORESULT DIO_ConfigurationQuery(
                                  void *pTristateMask
                                  ) 
 {
-    if( !pOutMask || pTristateMask == NULL )
-        return AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ASSERT( pOutMask );
+    AIO_ASSERT( pTristateMask );
+
     AIORESULT result = AIOUSB_SUCCESS;
-    AIOUSBDevice *device = _check_dio( DeviceIndex, &result );    
+    AIOUSBDevice *device;    
     USBDevice *deviceHandle = _check_dio_get_device_handle( DeviceIndex, &device, &result );
 
-    if (!deviceHandle ) {
-        return AIOUSB_ERROR_DEVICE_NOT_FOUND;
-    }
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
 
     int bufferSize = MASK_BYTES_SIZE( device ) + TRISTATE_BYTES_SIZE( device );
     unsigned char *configBuffer = ( unsigned char* )malloc(bufferSize);
 
-    if ( !configBuffer ) 
-        return AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+    AIO_ERROR_VALID_DATA(AIOUSB_ERROR_NOT_ENOUGH_MEMORY, configBuffer );
 
     int bytesTransferred = deviceHandle->usb_control_transfer(deviceHandle,
                                                               USB_READ_FROM_DEVICE,
@@ -547,27 +541,26 @@ AIORESULT DIO_Read8(
                     int *pdat
                     ) 
 {
+    AIO_ASSERT( pdat );
+    
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *device = NULL;
     DIOBuf *readBuffer;
-    if ( !_check_dio_get_device_handle( DeviceIndex, &device,  &result ) || result != AIOUSB_SUCCESS ) {
-        goto out_DIO_Read8;
-    }
 
+    _check_dio_get_device_handle( DeviceIndex, &device, &result );
+
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
+ 
     readBuffer = NewDIOBuf( device->DIOBytes );
-    if ( !readBuffer ) {
-        result =  AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
-        goto out_DIO_Read8;
-    }
-    
+
+    AIO_ERROR_VALID_DATA(AIOUSB_ERROR_NOT_ENOUGH_MEMORY, readBuffer );
+
     if ( (result = DIO_ReadAll(DeviceIndex, readBuffer->_buffer)) == AIOUSB_SUCCESS ) {
         char *tmp = DIOBufToBinary( readBuffer ); 
         *pdat = (int)tmp[ByteIndex];
     }
 
     DeleteDIOBuf( readBuffer );
-
- out_DIO_Read8:
 
     return result;
 }
@@ -581,6 +574,9 @@ AIORESULT DIO_Read1(
 {
     char result = AIOUSB_SUCCESS;
     int value = 0;
+    
+    AIO_ASSERT( bit );
+
     if((result = DIO_Read8(DeviceIndex, BitIndex / BITS_PER_BYTE, &value )) >= AIOUSB_SUCCESS) {
          unsigned char bitMask = 1 << (( int )BitIndex % BITS_PER_BYTE);
         if((value & bitMask) != 0)
@@ -608,11 +604,11 @@ AIOUSBDevice *_check_dio_stream( unsigned long DeviceIndex , AIORESULT *result )
 AIORESULT DIO_StreamOpen( unsigned long DeviceIndex,
                           unsigned long bIsRead ) 
 {
-    AIORESULT result;
+    AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *device = NULL;
     USBDevice *deviceHandle = _check_dio_get_device_handle( DeviceIndex, &device, &result );
-    if (! deviceHandle ) 
-        return AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
+
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
 
     int bytesTransferred = deviceHandle->usb_control_transfer(deviceHandle,
                                                               USB_WRITE_TO_DEVICE,
@@ -654,8 +650,9 @@ AIORESULT DIO_StreamSetClocks(
                               double *WriteClockHz
                               ) 
 {
-    if( *ReadClockHz < 0 || *WriteClockHz < 0  )
-        return AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ASSERT( ReadClockHz );
+    AIO_ASSERT( WriteClockHz );
+
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *device = NULL;
     int CONFIG_BLOCK_SIZE = 5;
@@ -848,8 +845,11 @@ TEST(DIO,CheckConfigureEx)
     void *pOutMask = NULL;
     void *pData = NULL ;
     void *pTristateMask = NULL;
+    int bitindex = 0;
 
     ASSERT_DEATH( {DIO_ConfigureEx(DeviceIndex, pOutMask,pData,pTristateMask); },"Assertion `pOutMask' failed"); 
+    ASSERT_DEATH( {DIO_ConfigurationQuery(DeviceIndex, pOutMask, pTristateMask ); }, "Assertion `pOutMask' failed" );
+    ASSERT_DEATH( {DIO_Read1(DeviceIndex,bitindex, NULL) ; } , "Assertion `bit' failed" );
 
     ASSERT_DEATH( {DIO_ConfigureEx(DeviceIndex, (void *)42,pData,pTristateMask); },"Assertion `pData' failed"); 
 
@@ -858,6 +858,11 @@ TEST(DIO,CheckConfigureEx)
 
     result = DIO_ConfigureEx(DeviceIndex, (void *)42,(void*)42,(void*)42);
     ASSERT_EQ( AIOUSB_ERROR_DEVICE_NOT_CONNECTED, result );
+    result = DIO_StreamOpen( DeviceIndex , bitindex );
+    ASSERT_EQ( -AIOUSB_ERROR_INVALID_USBDEVICE, result );
+
+    result = DIO_Read8( DeviceIndex, bitindex , &bitindex);
+    ASSERT_EQ( -AIOUSB_ERROR_INVALID_USBDEVICE, result );
 
 }
 
