@@ -66,8 +66,10 @@ AIORET_TYPE AIOBufGetTotalSize( AIOBuf *buf )
     return buf->size * (int)buf->type;
 }
 
+
+
 /*----------------------------------------------------------------------------*/
-PUBLIC_EXTERN AIOBufType AIOBufGetType( AIOBuf *buf )
+AIOBufType AIOBufGetType( AIOBuf *buf )
 {
     AIO_ASSERT_RET( AIO_ERROR_BUF, buf );
 
@@ -75,6 +77,17 @@ PUBLIC_EXTERN AIOBufType AIOBufGetType( AIOBuf *buf )
     
     return retval;
 }
+
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOBufGetTypeSize( AIOBuf *buf )
+{
+    AIO_ASSERT( buf );
+    
+    AIOBufType retval = buf->type;
+
+    return (AIORET_TYPE)(int)retval;
+}
+
 
 /*----------------------------------------------------------------------------*/
 
@@ -110,8 +123,15 @@ AIORET_TYPE AIOBufWrite( AIOBuf *buf, void *frombuf, size_t size_frombuf )
 /*----------------------------------------------------------------------------*/
 AIOBufIterator *AIOBufGetIterator( AIOBuf *buf )
 {
+    AIO_ASSERT_RET(NULL,buf);
+
     AIOBufIterator *tmp = NULL;
+    tmp = (AIOBufIterator *)calloc(1,sizeof(AIOBufIterator));
     
+    tmp->loc = buf->_buf;
+    tmp->next = AIOBufIteratorNext;
+    tmp->buf = buf;
+
     return tmp;
 }
 
@@ -119,13 +139,33 @@ AIOBufIterator *AIOBufGetIterator( AIOBuf *buf )
 AIOUSB_BOOL AIOBufIteratorIsValid( AIOBufIterator *biter )
 {
     AIOUSB_BOOL retval = AIOUSB_TRUE;
+    void *tmp;
+    switch ( AIOBufGetTypeSize( biter->buf ) ) { 
+    case 1:
+        tmp = (void *)( (char *)biter->buf->_buf + AIOBufGetTotalSize( biter->buf ) );
+        if ( biter->loc >= tmp ) 
+            retval = AIOUSB_FALSE;
+        break;
+    case 2:
+        tmp = (void*)( (short *)biter->buf->_buf + AIOBufGetTotalSize( biter->buf ) );
+        if ( biter->loc >= tmp ) 
+            retval = AIOUSB_FALSE;
+        break;
+    case 4:
+    case 8:
+        break;
+    default:
+        break;
+    }
+
     return retval;
 }
 
 /*----------------------------------------------------------------------------*/
 void AIOBufIteratorNext( AIOBufIterator *biter )
 {
-    printf("do something\n");
+    /* printf("do something\n"); */
+    /* biter->loc += biter->size; */
 }
 
 
@@ -188,7 +228,37 @@ TEST(AIOBuf, WriteIntoBuffer )
 
 }
 
+TEST(AIOBufIterator,GoThroughAllValues)
+{
+    AIORET_TYPE retval =  AIOUSB_SUCCESS;
+    AIOBuf *buf = NewAIOBuf( AIO_COUNTS_BUF, 100 );
+    AIOBuf *tmpbuf = NewAIOBuf( AIO_COUNTS_BUF, 0 );
+    AIOBufIterator *iter;
+    unsigned short *counts;
+    int i = 0;
+    for ( counts = (uint16_t *)buf->_buf, i = 0; counts < (uint16_t*)buf->_buf + 100; counts += 1 , i ++ )
+        *counts = (short)i;
+    
+    ASSERT_DEATH({ iter = AIOBufGetIterator( NULL ); }, "Assertion `buf' failed" );
 
+    iter = AIOBufGetIterator( buf );
+    ASSERT_TRUE( iter );
+    ASSERT_TRUE( iter->buf );
+
+    ASSERT_TRUE( iter->loc );
+    ASSERT_TRUE( iter->next );
+    ASSERT_TRUE( AIOBufIteratorIsValid( iter ) );
+    
+    iter = AIOBufGetIterator( tmpbuf );
+    ASSERT_FALSE( AIOBufIteratorIsValid( iter ));
+
+    /* for ( ; iter ; iter->next(iter) ) { */
+    /* } */
+
+    retval = DeleteAIOBuf( buf );
+    ASSERT_EQ( AIOUSB_SUCCESS, retval );
+
+}
 
 int main(int argc, char *argv[] )
 {

@@ -30,7 +30,7 @@ typedef struct aiobuf {
 } AIOBuf;
 
 typedef struct aiobuf_iterator {
-    size_t pos;
+    AIOBuf *buf;
     void *loc;
     void (*next)(struct aiobuf_iterator *);
 } AIOBufIterator;
