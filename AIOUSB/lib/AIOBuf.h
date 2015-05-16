@@ -19,6 +19,9 @@ typedef enum {
     AIO_VOLTS_BUF  = 8
 } AIOBufType;
 
+
+
+
 typedef struct aiobuf {
     size_t size;
     void *_buf;
@@ -35,6 +38,7 @@ typedef struct aiobuf_iterator {
 typedef struct aio_cmd {
     int stop_scan;
     int stop_scan_arg;
+    int channel;
 } AIOCmd;
 
 

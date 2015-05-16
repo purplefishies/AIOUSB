@@ -17,6 +17,7 @@
 
 #include "AIOUSB_Log.h"
 #include "AIOContinuousBuffer.h"
+#include "AIOBuf.h"
 #include "ADCConfigBlock.h"
 #include "AIOChannelMask.h"
 #include "AIOUSB_Core.h"
@@ -643,6 +644,33 @@ AIORET_TYPE AIOContinuousBufCountScansAvailable(AIOContinuousBuf *buf)
 }
 
 /*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOContinuousBufCountsAvailable(AIOContinuousBuf *buf) 
+{
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+
+    retval = (AIORET_TYPE)buf->fifo->rdelta( (AIOFifo*)buf->fifo ) / ( buf->fifo->refsize * AIOContinuousBufNumberChannels(buf) );
+    return retval;
+}
+
+AIORET_TYPE AIOContinuousBufOversamplesAvailable(AIOContinuousBuf *buf) 
+{
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+
+    retval = (AIORET_TYPE)buf->fifo->rdelta( (AIOFifo*)buf->fifo ) / ( buf->fifo->refsize * AIOContinuousBufNumberChannels(buf) );
+    return retval;
+}
+
+AIORET_TYPE AIOContinuousBufGetDataAvailable( AIOContinuousBuf *buf )
+{
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+
+    return retval;
+}
+
+
+
+
+/*----------------------------------------------------------------------------*/
 /**
  * @brief will read in an integer number of scan counts if there is room.
  * @param buf 
@@ -731,6 +759,13 @@ AIORET_TYPE AIOContinuousBufReadIntegerNumberOfScans( AIOContinuousBuf *buf,
     return retval;
 }
 
+
+AIORET_TYPE AIOContinuousBufReadSingle( AIOContinuousBuf *buf, AIOBuf *tobuf, size_t  size_to_read )
+{
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    return retval;
+
+}
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufReadCompleteScanCounts( AIOContinuousBuf *buf, 
@@ -1359,6 +1394,7 @@ out_AIOContinuousBufLoadCounters:
     return retval;
 }
 
+/*----------------------------------------------------------------------------*/
 int continuous_end( USBDevice *usb , unsigned char *data, unsigned length )
 {
     int retval = 0;
@@ -1426,7 +1462,7 @@ int continuous_end( USBDevice *usb , unsigned char *data, unsigned length )
     return retval;
 }
 
-
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufCleanup( AIOContinuousBuf *buf )
 {
     AIORET_TYPE retval;
@@ -1441,6 +1477,7 @@ AIORET_TYPE AIOContinuousBufCleanup( AIOContinuousBuf *buf )
     return retval;
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufPreSetup( AIOContinuousBuf * buf )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
@@ -1596,8 +1633,13 @@ int continuous_setup( USBDevice *usb , unsigned char *data, unsigned length )
     return usbval;
 }
 
-/*----------------------------------------------------------------------------*/
+typedef  enum {
+    AIO_PER_OVERSAMPLE = 1,
+    AIO_PER_CHANNEL,
+    AIO_PER_SCANS
+} AIO_SCAN_TYPE;
 
+/*----------------------------------------------------------------------------*/
 /**
  * @brief Sets up a smart continuos mode acquisition allowing the user
  * to specify a callback function that is called based on the arguments constructed
@@ -1611,9 +1653,70 @@ int continuous_setup( USBDevice *usb , unsigned char *data, unsigned length )
  */
 AIORET_TYPE AIOContinuousBufCallbackStartCallbackAcquisition( AIOContinuousBuf *buf, AIOCmd *cmd, AIORET_TYPE (*callback)( AIOBuf *buf) )
 {
-    AIORET_TYPE tmp = AIOUSB_SUCCESS;
-    return tmp;
+    AIOBuf **bufs = (AIOBuf **)calloc(5,sizeof(AIOBuf*));
+    int i;
+    int size = 1000;
+    int num_bufs = 5;
+    size_t data_to_read;
+    int tmp_remaining;
+    int data_read;
+    int total;
+    AIOBuf *tobuf;
+
+    for ( i = 0; i < num_bufs; i ++ ) {
+        bufs[i] = NewAIOBuf( AIO_COUNTS_BUF, size );
+        if ( !bufs[i] ) {
+            for ( i = i-1; i > 0 ; i --  ) {
+                DeleteAIOBuf( bufs[i] );
+            }
+            return -AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+        }
+    }
+    int pos = 0;
+
+    while ( buf->status == RUNNING ) {
+
+        switch ( cmd->channel ) {
+        case AIO_PER_OVERSAMPLE:
+            data_to_read = 1 * sizeof(short);
+            break;
+        case AIO_PER_CHANNEL:
+            data_to_read = buf->num_oversamples * sizeof(short);
+            break;
+        case AIO_PER_SCANS:
+            data_to_read = buf->num_oversamples * sizeof(short)* buf->num_channels;
+            break;
+        default:
+            break;
+        } 
+
+        if ( (tmp_remaining = AIOContinuousBufGetDataAvailable(buf) ) > 0 ) { 
+            if ( tmp_remaining > 0 ) { 
+                tobuf = bufs[pos];
+
+                data_to_read =  tmp_remaining / data_to_read;
+                data_read = AIOContinuousBufReadSingle( buf, tobuf, data_to_read );
+                total += data_read;
+                pos = ( pos + 1 )% num_bufs;
+            }
+        }
+    }
+
+    for ( i = 0; i < num_bufs; i ++ ) {
+        DeleteAIOBuf( bufs[i] );
+    }
+
+    return total;
 }
+
+/* for( int scan_count = 0; scan_count < scans_read ; scan_count ++ ) {  */
+/*     for( int ch = 0 ; ch < AIOContinuousBufNumberChannels(buf); ch ++ ) { */
+/*         /\* fprintf(fp,"%lf,",tobuf[scan_count*AIOContinuousBufNumberChannels(buf)+ch] ); *\/ */
+/*         /\* if( (ch+1) % AIOContinuousBufNumberChannels(buf) == 0 ) { *\/ */
+/*         /\*     fprintf(fp,"\n"); *\/ */
+/*         /\* } *\/ */
+/*     } */
+/* } */
 
 
 /*----------------------------------------------------------------------------*/
