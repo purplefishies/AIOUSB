@@ -310,6 +310,9 @@ TEST(AIOBufIterator,GoThroughAllValues)
 
     retval = DeleteAIOBuf( buf );
     ASSERT_EQ( AIOUSB_SUCCESS, retval );
+    
+    retval = DeleteAIOBuf( tmpbuf );
+    ASSERT_EQ( AIOUSB_SUCCESS, retval );
 
 }
 
