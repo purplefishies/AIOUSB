@@ -41,6 +41,8 @@ typedef struct aio_cmd {
     int channel;
 } AIOCmd;
 
+typedef long double AIO_NUMBER;
+
 
 PUBLIC_EXTERN AIOBuf * NewAIOBuf( AIOBufType type , size_t size );
 PUBLIC_EXTERN AIORET_TYPE DeleteAIOBuf( AIOBuf *type );
