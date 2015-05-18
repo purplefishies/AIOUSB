@@ -423,6 +423,7 @@ TEST(Counts,Testing )
     int size = 1000;
     AIOFifoCounts *cfifo = NewAIOFifoCounts(size);
     unsigned short tmp[size];
+    AIORET_TYPE retval;
     for( int i = 0; i < size ; i ++ ) tmp[i] = i;
     
     cfifo->PushN( cfifo, tmp, size );
@@ -430,7 +431,7 @@ TEST(Counts,Testing )
     for( int i = 0; i < size ; i ++ ) { 
         AIOEither tval = cfifo->Pop(cfifo);
 
-        EXPECT_EQ( tval.right.s, tmp[i] );
+        EXPECT_EQ( AIOEitherToShort( &tval , &retval ), tmp[i] );
     }
     DeleteAIOFifoCounts( cfifo );
 
@@ -441,7 +442,7 @@ TEST(Counts,Testing )
     int tmpsize = num_scans*num_channels*4;
 
     uint16_t *frombuf = (uint16_t*)malloc( sizeof(uint16_t)*tmpsize );
-    AIORET_TYPE retval;
+
     for ( int i = 0 ; i < tmpsize; i ++ ) { 
         frombuf[i] = rand() % size;
     }
@@ -465,13 +466,14 @@ TEST(Volts,Testing )
 {
     AIOFifoVolts *cfifo = NewAIOFifoVolts(1000);
     double tmp[1000];
+    AIORET_TYPE retval;
     for( int i = 0; i < 1000 ; i ++ ) tmp[i] = 3.342*sqrt((double)i);
     
     cfifo->PushN( cfifo, tmp, 1000 );
     
     for( int i = 0; i < 1000 ; i ++ ) { 
         AIOEither tval = cfifo->Pop(cfifo);
-        EXPECT_EQ( tval.right.d, tmp[i] );
+        EXPECT_EQ( AIOEitherToDouble( &tval, &retval ), tmp[i] );
     }
 
 }

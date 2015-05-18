@@ -7,8 +7,9 @@
  *
  */
 
-#include "AIOEither.h"
+
 #include "AIOTypes.h"
+#include "AIOEither.h"
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -25,10 +26,10 @@ void AIOEitherClear( AIOEither *retval )
     assert(retval);
     switch(retval->type) { 
     case aioeither_value_string:
-        free(retval->right.st);
+        free(retval->right.object);
         break;
     case aioeither_value_obj:
-        free(retval->right.v);
+        free(retval->right.object);
         break;
     default:
         ;
@@ -48,35 +49,42 @@ void AIOEitherSetRight(AIOEither *retval, AIO_EITHER_TYPE val , void *tmp, ... )
     case aioeither_value_int:
         {
             int t = *(int *)tmp;
-            retval->right.i = t;
+            *(int *)(&retval->right.number) = t;
             retval->type = aioeither_value_int;
         }
         break;
     case aioeither_value_unsigned:
         {
             unsigned t = *(unsigned*)tmp;
-            retval->right.u = t;
+            *(unsigned *)(&retval->right.number) = t;
             retval->type = aioeither_value_unsigned;
         }
         break;
     case aioeither_value_uint16_t:
         {
             uint16_t t = *(uint16_t*)tmp;
-            retval->right.us = t;
+            *(uint16_t *)&retval->right.number = t;
             retval->type = aioeither_value_uint16_t;
         }
         break;
     case aioeither_value_double:
         {
             double t = *(double *)tmp;
-            retval->right.d = t;
+            *(double *)&retval->right.number = t;
             retval->type = aioeither_value_double;
         }
         break;
+    case aioeither_value_longdouble_t:
+         {
+            long double t = *(long double *)tmp;
+            *(long double *)&retval->right.number = t;
+            retval->type = aioeither_value_longdouble_t;
+        }
+         break;
     case aioeither_value_string:
         { 
             char *t = *(char **)tmp;
-            retval->right.st = strdup(t);
+            retval->right.object = strdup(t);
             retval->size     = strlen(t)+1;
             retval->type     = aioeither_value_string;
         }
@@ -86,10 +94,10 @@ void AIOEitherSetRight(AIOEither *retval, AIO_EITHER_TYPE val , void *tmp, ... )
             va_start(ap, tmp);
             int d = va_arg(ap, int);
             va_end(ap);
-            retval->right.v = malloc(d);
+            retval->right.object = malloc(d);
             retval->type = aioeither_value_obj;
             retval->size = d;
-            memcpy(retval->right.v, tmp, d );
+            memcpy(retval->right.object, tmp, d );
         }
         break;
     default:
@@ -105,30 +113,36 @@ void AIOEitherGetRight(AIOEither *retval, void *tmp, ... )
     case aioeither_value_int:
         {
             int *t = (int *)tmp;
-            *t = retval->right.i;
+            *t = *(int*)(&retval->right.number);
         }
         break;
     case aioeither_value_unsigned:
         {
             unsigned *t = (unsigned *)tmp;
-            *t = retval->right.u;
+            *t = *(unsigned*)(&retval->right.number);
         }
         break;
     case aioeither_value_uint16_t:
         {
             uint16_t *t = (uint16_t*)tmp;
-            *t = retval->right.us;
+            *t = *(uint16_t*)(&retval->right.number);
         }
         break;
-    case aioeither_value_double:
+    case aioeither_value_double_t:
         {
             double *t = (double *)tmp;
-            *t = retval->right.d;
+            *t = *(double*)(&retval->right.number);
+        }
+        break;
+    case aioeither_value_longdouble_t:
+        {
+            long double *t = (long double *)tmp;
+            *t = *(long double*)(&retval->right.number);
         }
         break;
     case aioeither_value_string:
         { 
-            memcpy(tmp, retval->right.st, strlen(retval->right.st)+1);
+            memcpy(tmp, retval->right.object, strlen((char *)retval->right.object)+1);
         }
         break;
     case aioeither_value_obj:
@@ -136,7 +150,7 @@ void AIOEitherGetRight(AIOEither *retval, void *tmp, ... )
             va_start(ap, tmp);
             int d = va_arg(ap, int);
             va_end(ap);
-            memcpy(tmp, retval->right.v, d );
+            memcpy(tmp, retval->right.object, d );
         }
         break;
     default:
@@ -160,6 +174,46 @@ AIOUSB_BOOL AIOEitherHasError( AIOEither *retval )
 {
     return (retval->left == 0 ? AIOUSB_FALSE : AIOUSB_TRUE );
 }
+
+char *AIOEitherToString( AIOEither *retval, AIORET_TYPE *result )
+{
+    AIO_ASSERT_RET( NULL, result );
+
+
+    return (char *)&(retval->right.object);
+
+}
+
+int AIOEitherToInt( AIOEither *retval, AIORET_TYPE *result )
+{
+    AIO_ASSERT_RET(0xffffffff,result );
+    return *(int *)&(retval->right.number);
+}
+
+short AIOEitherToShort( AIOEither *retval, AIORET_TYPE *result )
+{
+    AIO_ASSERT_RET(0xffff,result );
+    return *(short *)&(retval->right.number);
+}
+
+unsigned AIOEitherToUnsigned( AIOEither *retval, AIORET_TYPE *result )
+{
+    AIO_ASSERT_RET(0xffffffff, result );
+    return *(unsigned *)&(retval->right.number);
+}
+
+double AIOEitherToDouble( AIOEither *retval, AIORET_TYPE *result )
+{
+    AIO_ASSERT_RET(0xffffffff, result );
+    return *(double *)&(retval->right.number);
+}
+
+AIO_NUMBER AIOEitherToAIONumber( AIOEither *retval, AIORET_TYPE *result )
+{
+    AIO_ASSERT_RET(0xffffffffffffffff, result );
+    return *(AIO_NUMBER *)&(retval->right.number);
+}
+
 
 
 #ifdef __cplusplus
@@ -188,6 +242,7 @@ TEST(AIOEitherTest,BasicAssignments)
 
     uint32_t tv_uint = 23;
     double tv_double = 3.14159;
+    long double tv_ld = 2323244234234.3434;
     char *tv_str = (char *)"A String";
     char readvals[100];
     struct testobj tv_obj = {1,2,3};
@@ -205,6 +260,11 @@ TEST(AIOEitherTest,BasicAssignments)
     AIOEitherSetRight( &a, aioeither_value_double_t , &tv_double );
     AIOEitherGetRight( &a, readvals );
     EXPECT_EQ( tv_double, *(double*)&readvals[0] );
+    AIOEitherClear( &a );
+
+    AIOEitherSetRight( &a, aioeither_value_longdouble_t , &tv_ld );
+    AIOEitherGetRight( &a, readvals );
+    EXPECT_EQ( tv_ld, *(long double*)&readvals[0] );
     AIOEitherClear( &a );
 
     AIOEitherSetRight( &a, aioeither_value_string, &tv_str );

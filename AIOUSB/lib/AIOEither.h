@@ -28,18 +28,14 @@ typedef enum {
     aioeither_vlaue_int16_t = 4,
     aioeither_value_double_t = 5,
     aioeither_value_double = 5,
-    aioeither_value_string = 6,
+    aioeither_value_string,
+    aioeither_value_longdouble_t,
     aioeither_value_obj,
 } AIO_EITHER_TYPE;
 
-typedef union { 
-    int i;
-    unsigned int u;
-    uint16_t us;
-    int16_t s;
-    double d; 
-    char *st;
-    void *v;
+typedef struct aio_either_val {
+    AIO_NUMBER number;
+    void *object;
 } AIO_EITHER_VALUE_ITEM;
 
 typedef struct aio_ret_value  {
@@ -59,6 +55,14 @@ void AIOEitherGetRight(AIOEither *retval, void *tmp, ... );
 void AIOEitherSetLeft(AIOEither *retval, int val );
 int  AIOEitherGetLeft(AIOEither *retval );
 AIOUSB_BOOL AIOEitherHasError( AIOEither *retval );
+
+char *AIOEitherToString( AIOEither *retval, AIORET_TYPE *result );
+int AIOEitherToInt( AIOEither *retval, AIORET_TYPE *result );
+short AIOEitherToShort( AIOEither *retval, AIORET_TYPE *result );
+unsigned AIOEitherToUnsigned( AIOEither *retval, AIORET_TYPE *result );
+double AIOEitherToDouble( AIOEither *retval, AIORET_TYPE *result );
+AIO_NUMBER AIOEitherToAIONumber( AIOEither *retval, AIORET_TYPE *result );
+
 
 
 #ifdef __aiousb_cplusplus

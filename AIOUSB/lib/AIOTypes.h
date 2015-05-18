@@ -157,6 +157,10 @@ typedef enum AIOUSB_BOOL_VAL AIOUSB_BOOL;
 
 #endif
 
+typedef long double AIO_NUMBER;
+
+
+
 
 #define EXIT_FN_IF_NO_VALID_USB( d, r, f, u, g ) do {           \
         if ( !d ) {                                             \
