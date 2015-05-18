@@ -111,8 +111,9 @@ enum {
 
 #define AIO_ASSERT(...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { return -AIOUSB_ERROR_INVALID_PARAMETER; }
 #define AIO_ASSERT_RET(ret,...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { return ret; }
+#define AIO_ASSERT_NO_RETURN(...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { return; }
+#define AIO_ASSERT_EXIT(...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { exit(-AIOUSB_ERROR_INVALID_PARAMETER); }
 
-#define AIO_ASSERT_NO_RETURN(...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { exit(-AIOUSB_ERROR_INVALID_PARAMETER); }
 #define AIO_ASSERT_ERR_NO_RETURN(err,...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { exit(-err); }
 #define AIO_ASSERT_VALID_DATA(err,... ) assert( __VA_ARGS__ ) ; if (!( __VA_ARGS__) ) { return err; }
 #define AIO_ASSERT_USB(...) AIO_ASSERT_VALID_DATA(-AIOUSB_ERROR_INVALID_USBDEVICE, __VA_ARGS__ )
@@ -133,6 +134,34 @@ enum {
 #define AIO_ERROR_AIOEITHER_VALID_DATA(err,...) if ( !(__VA_ARGS__) ) { \
         AIOEither tmp; tmp.left = err; tmp.errmsg=NULL; return tmp; }
 #define AIO_ERROR_VALID_DATA_W_CODE(err, code, ... ) if ( !(__VA_ARGS__) ) { do { code; } while(0); return err; }
+
+#if !(defined (G_STMT_START) && defined (G_STMT_END))
+#define G_STMT_START  do
+#if defined (_MSC_VER) && (_MSC_VER >= 1500)
+#define G_STMT_END \
+    __pragma(warning(push)) \
+    __pragma(warning(disable:4127)) \
+    while(0) \
+    __pragma(warning(pop))
+#else
+#define G_STMT_END    while (0)
+#endif
+#endif
+
+
+
+#if (defined (__i386__) || defined (__x86_64__)) && defined (__GNUC__) && __GNUC__ >= 2
+#  define G_BREAKPOINT()        G_STMT_START{ __asm__ __volatile__ ("int $03"); }G_STMT_END
+#elif (defined (_MSC_VER) || defined (__DMC__)) && defined (_M_IX86)
+#  define G_BREAKPOINT()        G_STMT_START{ __asm int 3h }G_STMT_END
+#elif defined (_MSC_VER)
+#  define G_BREAKPOINT()        G_STMT_START{ __debugbreak(); }G_STMT_END
+#elif defined (__alpha__) && !defined(__osf__) && defined (__GNUC__) && __GNUC__ >= 2
+#  define G_BREAKPOINT()        G_STMT_START{ __asm__ __volatile__ ("bpt"); }G_STMT_END
+#else   /* !__i386__ && !__alpha__ */
+#  define G_BREAKPOINT()        G_STMT_START{ raise (SIGTRAP); }G_STMT_END
+#endif  /* __i386__ */
+
 
 
 /**

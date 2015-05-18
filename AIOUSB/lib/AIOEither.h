@@ -46,6 +46,8 @@ typedef struct aio_ret_value  {
     int size;
 } AIOEither;
 
+#define AIO_ERROR_VALUE 0xffffffffffffffff
+
 
 void AIOEitherClear( AIOEither *retval );
 
