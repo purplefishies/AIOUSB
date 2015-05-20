@@ -28,6 +28,7 @@ typedef enum {
     aioeither_vlaue_int16_t = 4,
     aioeither_value_double_t = 5,
     aioeither_value_double = 5,
+    aioeither_value_uint8_t,
     aioeither_value_string,
     aioeither_value_longdouble_t,
     aioeither_value_obj,
