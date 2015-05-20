@@ -64,6 +64,8 @@ short AIOEitherToShort( AIOEither *retval, AIORET_TYPE *result );
 unsigned AIOEitherToUnsigned( AIOEither *retval, AIORET_TYPE *result );
 double AIOEitherToDouble( AIOEither *retval, AIORET_TYPE *result );
 AIO_NUMBER AIOEitherToAIONumber( AIOEither *retval, AIORET_TYPE *result );
+AIORET_TYPE AIOEitherToAIORetType( AIOEither either );
+
 
 
 

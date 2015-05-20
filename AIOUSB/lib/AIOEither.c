@@ -183,14 +183,14 @@ char *AIOEitherToString( AIOEither *retval, AIORET_TYPE *result )
     return (char *)&(retval->right.object);
 
 }
-
-#define AIO_EITHER_CHECK_VALUE( RETVAL, TYPE )   \
-    if ( RETVAL->left ) {                        \
-        *result = RETVAL->left;                  \
-    } else {                                     \
-        *result = AIOUSB_SUCCESS;                \
-        return *(TYPE *)&(RETVAL->right.number);  \
-    }                                            \
+ 
+#define AIO_EITHER_CHECK_VALUE( RETVAL, TYPE )          \
+    if ( RETVAL->left ) {                               \
+        *result = RETVAL->left;                         \
+    } else {                                            \
+        *result = AIOUSB_SUCCESS;                       \
+        return *(TYPE *)&(RETVAL->right.number);        \
+    }                                                   \
     return (TYPE)AIO_ERROR_VALUE;
 
 
@@ -225,13 +225,10 @@ AIO_NUMBER AIOEitherToAIONumber( AIOEither *retval, AIORET_TYPE *result )
     AIO_EITHER_CHECK_VALUE( retval, AIO_NUMBER );
 }
 
-#define  AIOEITHER_TO_INT( retval, result )  {            \
-        AIORET_TYPE tmpresult = AIOUSB_SUCCESS;           \
-        int tmp = AIOEitherToInt( &retval, &tmpresult );  \
-        AIO_ASSERT( result );                             \
-    }
-
-
+AIORET_TYPE AIOEitherToAIORetType( AIOEither either )
+{
+    return either.left;
+}
 
 
 #ifdef __cplusplus
@@ -387,9 +384,8 @@ TEST(AIOEither,CheckCompound)
                 2;});
         }, "Assertion `tmpresult == AIOUSB_SUCCESS' failed");
 
-    /* ASSERT_EQ( 2, value ); */
-
     either.left = 0;
+
     value = ({ 
             AIORET_TYPE tmpresult = AIOUSB_SUCCESS;
             int tmp = AIOEitherToInt( &either, &tmpresult );
@@ -400,7 +396,20 @@ TEST(AIOEither,CheckCompound)
     EXPECT_EQ( 2, value );
 }
 
+AIOEither test_fn( void )
+{
+    AIOEither tmp = {0};
+    tmp.left = -AIOUSB_ERROR_INVALID_MEMORY;
+    *(int *)&tmp.right = 32;
+    return tmp;
+}
 
+
+TEST(AIOEither, BuiltInAssertType ) 
+{
+    AIOEither retval = test_fn();
+    EXPECT_EQ( -AIOUSB_ERROR_INVALID_MEMORY, AIOEitherToAIORetType( retval ) );
+}
 
 int main(int argc, char *argv[] )
 {
