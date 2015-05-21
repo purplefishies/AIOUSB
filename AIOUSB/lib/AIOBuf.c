@@ -121,16 +121,16 @@ AIORET_TYPE AIOBufWrite( AIOBuf *buf, void *frombuf, size_t size_frombuf )
 }
 
 /*----------------------------------------------------------------------------*/
-AIOBufIterator *AIOBufGetIterator( AIOBuf *buf )
+AIOBufIterator AIOBufGetIterator( AIOBuf *buf )
 {
-    AIO_ASSERT_RET(NULL,buf);
 
-    AIOBufIterator *tmp = NULL;
-    tmp = (AIOBufIterator *)calloc(1,sizeof(AIOBufIterator));
+    AIO_ASSERT_RET((AIOBufIterator){0},buf);
+
+    AIOBufIterator tmp = {0};
     
-    tmp->loc = buf->_buf;
-    tmp->next = AIOBufIteratorNext;
-    tmp->buf = buf;
+    tmp.loc = buf->_buf;
+    tmp.next = AIOBufIteratorNext;
+    tmp.buf = buf;
 
     return tmp;
 }
@@ -152,51 +152,47 @@ AIOUSB_BOOL AIOBufIteratorIsValid( AIOBufIterator *biter )
 void AIOBufIteratorNext( AIOBufIterator *biter )
 {
     biter->loc = (void *)((char*)biter->loc + AIOBufGetTypeSize(biter->buf));
-    /* printf("do something\n"); */
-    /* biter->loc += biter->size; */
 }
 
-
-
-AIO_NUMBER AIOBufIteratorGetValue( AIOBufIterator *biter )
+/*----------------------------------------------------------------------------*/
+/**
+ * @brief Returns a value from the current interator. Casts up to the largest
+ *        number we have and then a user can Cast down to the number they
+ *        wish to actually use. 
+ * @todo make this better instead of using memcpy, just cast directly
+ * @param biter Iterator 
+ * @return AIO_NUMBER large precision number.
+ */
+AIOEither AIOBufIteratorGetValue( AIOBufIterator *biter )
 {
-    AIO_NUMBER retval;
-    switch ( AIOBufGetTypeSize( biter->buf ) ) { 
-    case 2:
+    AIO_ASSERT_RET( (AIOEither){.left = AIOUSB_ERROR_INVALID_PARAMETER }, biter );
+    AIOEither retval = {0};
+
+    switch ( AIOBufGetType( biter->buf ) ) { 
+    case AIO_COUNTS_BUF:
         { 
             uint16_t tmp;
             memcpy(&tmp, biter->loc , sizeof(uint16_t ));
-            retval = (AIO_NUMBER)tmp;
+            AIOEitherSetRight( &retval, aioeither_value_uint16_t, &tmp );
         }
         break;
-    case 4:
+    case AIO_VOLTS_BUF:
         {
-            uint32_t tmp;
-            memcpy(&tmp, biter->loc, sizeof(uint32_t));
-            retval = (AIO_NUMBER)tmp;
+            double tmp;
+            memcpy(&tmp, biter->loc, sizeof(double));
+            AIOEitherSetRight( &retval, aioeither_value_double_t , &tmp );
         }
         break;
-    case 8:
-        {
-            uint64_t tmp;
-            memcpy(&tmp, biter->loc, sizeof(uint64_t));
-            retval = (AIO_NUMBER)tmp;
-        }
-        break;
-    case 16:
-        {
-            AIO_NUMBER tmp;
-            memcpy(&tmp, biter->loc, sizeof(AIO_NUMBER));
-            retval = tmp;
-        }
-        break;
-    default:                    /* 1 byte */
+    case AIO_DEFAULT_BUF:
+
         {
             uint8_t tmp;
             memcpy(&tmp, biter->loc, sizeof(uint64_t));
-            retval = (AIO_NUMBER)tmp;
+            AIOEitherSetRight( &retval, aioeither_value_uint8_t, &tmp );
         }
         break;
+    default:
+        AIOEitherSetLeft( &retval, -AIOUSB_ERROR_INVALID_AIOBUFTYPE);
     }
     return retval;
 }
@@ -257,61 +253,6 @@ TEST(AIOBuf, WriteIntoBuffer )
 
 
     retval = DeleteAIOBuf( buf );
-    ASSERT_EQ( AIOUSB_SUCCESS, retval );
-
-}
-
-TEST(AIOBufIterator,GoThroughAllValues)
-{
-    AIORET_TYPE retval =  AIOUSB_SUCCESS;
-    AIOBuf *buf = NewAIOBuf( AIO_COUNTS_BUF, 100 );
-    uint16_t testvalues[100];
-    AIOBuf *tmpbuf = NewAIOBuf( AIO_COUNTS_BUF, 0 );
-    AIOBufIterator *iter;
-    unsigned short *counts;
-    int i = 0;
-    for ( counts = (uint16_t *)buf->_buf, i = 0; counts < (uint16_t*)buf->_buf + 100; counts += 1 , i ++ )
-        *counts = (uint16_t)i;
-    
-    ASSERT_DEATH({ iter = AIOBufGetIterator( NULL ); }, "Assertion `buf' failed" );
-
-    iter = AIOBufGetIterator( buf );
-    ASSERT_TRUE( iter );
-    ASSERT_TRUE( iter->buf );
-
-    ASSERT_TRUE( iter->loc );
-    ASSERT_TRUE( iter->next );
-    ASSERT_TRUE( AIOBufIteratorIsValid( iter ) );
-    
-    iter = AIOBufGetIterator( tmpbuf );
-    ASSERT_FALSE( AIOBufIteratorIsValid( iter ));
-
-    iter = AIOBufGetIterator( buf );
-    iter->loc = &((uint16_t *)buf->_buf)[100];
-    ASSERT_FALSE( AIOBufIteratorIsValid( iter )) << "Very end should indicate we've gone too far\n";
-
-    iter->loc = &((uint16_t *)buf->_buf)[99];
-    ASSERT_TRUE( AIOBufIteratorIsValid( iter )) << "Still should have an element left\n";
-
-    iter->next(iter);
-    ASSERT_EQ( iter->loc, &((uint16_t *)buf->_buf)[100] );
-
-    iter = AIOBufGetIterator( buf );
-    iter->next(iter);
-    ASSERT_EQ( iter->loc, &((uint16_t *)buf->_buf)[1] );
-    
-
-    int j = 0;
-    for ( iter = AIOBufGetIterator( buf ), j = 0; AIOBufIteratorIsValid(iter); iter->next(iter) , j ++ ) {
-        testvalues[j] = AIOBufIteratorGetValue(iter);
-    }
-
-    ASSERT_EQ( 0, memcmp( testvalues, buf->_buf , sizeof(testvalues)) );
-
-    retval = DeleteAIOBuf( buf );
-    ASSERT_EQ( AIOUSB_SUCCESS, retval );
-    
-    retval = DeleteAIOBuf( tmpbuf );
     ASSERT_EQ( AIOUSB_SUCCESS, retval );
 
 }
