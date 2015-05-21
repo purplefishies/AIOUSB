@@ -1691,14 +1691,11 @@ AIORET_TYPE AIOContinuousBufCallbackStartCallbackAcquisition( AIOContinuousBuf *
         } 
 
         if ( (tmp_remaining = AIOContinuousBufGetDataAvailable(buf) ) > 0 ) { 
-            if ( tmp_remaining > 0 ) { 
-                tobuf = bufs[pos];
-
-                data_to_read =  tmp_remaining / data_to_read;
-                data_read = AIOContinuousBufReadSingle( buf, tobuf, data_to_read );
-                total += data_read;
-                pos = ( pos + 1 )% num_bufs;
-            }
+            tobuf = bufs[pos];
+            data_to_read =  tmp_remaining / data_to_read;
+            data_read = AIOContinuousBufReadSingle( buf, tobuf, data_to_read );
+            total += data_read;
+            pos = ( pos + 1 )% num_bufs;
         }
     }
 
@@ -2778,13 +2775,25 @@ TEST(AIOContinuousBuf, NewConstructor )
     AIOContinuousBufReadIntegerSetNumberOfScans( buf, 1024 );
     EXPECT_EQ( 1024, AIOContinuousBufReadIntegerGetNumberOfScans( buf ));
 
-    /* Set the type of internal buffer */
-    /* AIOContinuousBufSetCounts */
-    /* retval = AIOContinuousBufCallbackStart( buf ); */
-    /* ASSERT_LE( retval, 0 ) << "Shouldn't bea ble to call Bufcallback start when no device index set"; */
-    /* EXPECT_EQ( retval, -AIOUSB_ERROR_INVALID_DEVICE ); */
+ 
+    DeleteAIOContinuousBuf( buf );
+}
 
-    /* EXPECT_EQ( 10*1024, AIOContinuousBufGetRemainingSize(buf)  ) << "Size has been updated correctly"; */
+/**
+ * @brief Goal is to have a simple buffer, write some data into it, and then
+ *        have the callback be allerted when we have one oversample available
+ *
+ */ 
+TEST(AIOContinuousBuf, CopyIndividualOversamples )
+{
+    AIOContinuousBuf *buf= NewAIOContinuousBuf();
+    short tmpbuf[1024];
+    memset(tmpbuf,0,1024*sizeof(short));
+
+    AIOContinuousBufSetNumberOfChannels( buf , 9 );
+    EXPECT_EQ( 9, AIOContinuousBufGetNumberOfChannels( buf ) );
+    int origsize = AIOContinuousBufGetSize(buf);
+    EXPECT_GE( origsize, 0 );
 
 
     DeleteAIOContinuousBuf( buf );
