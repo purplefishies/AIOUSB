@@ -31,6 +31,7 @@ namespace AIOUSB {
 
 void *ConvertCountsToVoltsFunction( void *object );
 void *RawCountsWorkFunction( void *object );
+AIORET_TYPE _AIOContinuousBufResizeFifo( AIOContinuousBuf *buf );
 
 /*-----------------------------  Constructors  -----------------------------*/
 AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels )
@@ -69,18 +70,23 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetNumberOfChannels( AIOContinuousBuf 
        
 }
 
+/**
+ * @brief will set the number of channels that this AIOcontinuousbuf watches and if the number isn't
+ *        divisibly into the total size of the fifo, the fifo gets resized
+ */
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetNumberOfChannels( AIOContinuousBuf * buf, unsigned num_channels )
 {
     
     AIO_ASSERT_AIOCONTBUF( buf );
     buf->num_channels = num_channels;
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
     if ( (buf->fifo->size % num_channels ) != 0 ) {
         /* printf("Need to change\n"); */
-        AIOFifoResize( (AIOFifo*)buf->fifo,  (((AIOFifoGetSize(buf->fifo) + num_channels) / num_channels)*num_channels ));
-    } /* else no need to change */
-    
+        /* AIOFifoResize( (AIOFifo*)buf->fifo,  (((AIOFifoGetSize(buf->fifo) + num_channels) / num_channels)*num_channels )); */
+        retval = _AIOContinuousBufResizeFifo( buf );
+    }
 
-    return AIOUSB_SUCCESS;
+    return retval;
 }
 
 
@@ -2075,11 +2081,30 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetTimeout( AIOContinuousBuf *buf )
 }
 
 /*----------------------------------------------------------------------------*/
+AIORET_TYPE _AIOContinuousBufResizeFifo( AIOContinuousBuf *buf )
+{
+    AIO_ASSERT( buf );
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER_NUM_CHANNELS, buf->num_channels );
+
+    int tmpval = buf->num_channels * (1 + buf->num_oversamples );
+    AIORET_TYPE retval = AIOFifoResize( (AIOFifo*)buf->fifo,  (((AIOFifoGetSize(buf->fifo) + tmpval) / tmpval)*tmpval ));
+    
+    return retval;
+
+}
+
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBuf_SetOversample( AIOContinuousBuf *buf, unsigned os ) { return AIOContinuousBufSetOversample(buf,os);}
 AIORET_TYPE AIOContinuousBufSetOversample( AIOContinuousBuf *buf, unsigned os )
 {
-    assert(buf);
+    AIO_ASSERT(buf);
+
     AIOContinuousBufLock( buf );
+    
+    buf->num_oversamples = ( os > 255 ? 255 : os );
+    /* AIOFifoResize( (AIOFifo*)buf->fifo,  (((AIOFifoGetSize(buf->fifo) + num_channels) / num_channels)*num_channels )); */
+    _AIOContinuousBufResizeFifo( buf );
+
     AIORESULT result = AIOUSB_SUCCESS;
     AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), &result );
     if ( result != AIOUSB_SUCCESS )  {
@@ -2744,7 +2769,8 @@ TEST(AIOContinuousBuf,BasicFunctionality )
     free(frombuf);
 }
 
-/* this test case builds up
+/**
+ * This test case builds up
  * parts of the new constructor 
  */
 TEST(AIOContinuousBuf, NewConstructor ) 
@@ -2756,27 +2782,26 @@ TEST(AIOContinuousBuf, NewConstructor )
     AIOContinuousBuf *buf= NewAIOContinuousBuf();
     AIORET_TYPE retval;
     int origsize = AIOContinuousBufGetSize(buf);
-    int num_oversamples = 3;
+    int num_oversamples = 7;
+    int num_channels = 9;
     ASSERT_TRUE( buf );
-    AIOContinuousBufSetNumberOfChannels( buf , 9 );
-    EXPECT_EQ( 9, AIOContinuousBufGetNumberOfChannels( buf ) );
-    /* printf("Orig: %d\n", origsize ); */
-    EXPECT_GE( AIOContinuousBufGetSize(buf) , origsize );
-    /* printf("New: %d\n", AIOContinuousBufGetSize(buf) ); */
-    EXPECT_EQ(0, ( AIOContinuousBufGetSize( buf ) % 9 )) << "New buf size should be integer multiple of Num_channels\n";
+    AIOContinuousBufSetNumberOfChannels( buf , num_channels );
+    EXPECT_EQ( num_channels, AIOContinuousBufGetNumberOfChannels( buf ) );
 
-    AIOContinuousBufSetDeviceIndex( buf, 0 );
+    ASSERT_TRUE( buf->fifo->size % num_channels != 0 ) << "Changing the number of channels should adjust the fifo size " <<
+        "so that it is divisible by the number of channels and oversamples\n";
 
+    ASSERT_EQ( 0, AIOFifoGetSize( buf->fifo ) % num_channels  );
 
-    AIOContinuousBufSetOversample( buf, num_oversamples );
-    EXPECT_EQ( AIOContinuousBufGetOversample( buf ), num_oversamples );
+    /**
+     * Now make sure that if the number of channels changes, that we 
+     * also resize
+     */
 
+    AIOContinuousBufSetOversample( buf, num_oversamples ); 
+    ASSERT_EQ( 0, AIOFifoGetSize( buf->fifo ) % (num_oversamples+1)  ) << "Must be divisible by 1 + the number of oversamples\n";
 
-    AIOContinuousBufReadIntegerSetNumberOfScans( buf, 1024 );
-    EXPECT_EQ( 1024, AIOContinuousBufReadIntegerGetNumberOfScans( buf ));
-
- 
-    DeleteAIOContinuousBuf( buf );
+     DeleteAIOContinuousBuf( buf );
 }
 
 /**
