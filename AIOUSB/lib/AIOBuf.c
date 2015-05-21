@@ -165,7 +165,9 @@ void AIOBufIteratorNext( AIOBufIterator *biter )
  */
 AIOEither AIOBufIteratorGetValue( AIOBufIterator *biter )
 {
-    AIO_ASSERT_RET( (AIOEither){.left = AIOUSB_ERROR_INVALID_PARAMETER }, biter );
+    AIOEither bad = {0};
+    bad.left = AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ASSERT_RET( bad, biter );
     AIOEither retval = {0};
 
     switch ( AIOBufGetType( biter->buf ) ) { 
