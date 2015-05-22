@@ -63,8 +63,7 @@ typedef struct aio_continuous_buf {
     AIOUSB_BOOL debug;
     unsigned extra;                     /**< Keeps track of under writes */
     AIOChannelMask *mask;               /**< Used for keeping track of channels */
-    AIOBufferType *tmpbuf;
-    unsigned tmpbufsize;
+
     volatile THREAD_STATUS status; /* Are we running, paused ..etc; */
     AIORET_TYPE (*PushN)( struct aio_continuous_buf *buf, unsigned short *frombuf, unsigned int N );
     AIORET_TYPE (*PopN)( struct aio_continuous_buf *buf, unsigned short *frombuf, unsigned int N );

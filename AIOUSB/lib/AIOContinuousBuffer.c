@@ -158,8 +158,7 @@ AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long DeviceIndex,
     tmp->hz           = 100000; /**> Default value of 100khz  */
     tmp->timeout      = 1000;   /**> Default Timeout of 1000us  */
     tmp->extra        = 0;
-    tmp->tmpbuf       = NULL;
-    tmp->tmpbufsize   = 0;
+
 #ifdef HAS_PTHREAD
     tmp->lock = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;   /* Threading mutex Setup */
 #endif
@@ -219,8 +218,7 @@ AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex,
     tmp->hz           = 100000; /**> Default value of 100khz  */
     tmp->timeout      = 1000;   /**> Default Timeout of 1000us  */
     tmp->extra        = 0;
-    tmp->tmpbuf       = NULL;
-    tmp->tmpbufsize   = 0;
+
 #ifdef HAS_PTHREAD
     tmp->lock = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;   /* Threading mutex Setup */
 #endif
@@ -338,18 +336,6 @@ AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex ,
 }
 
 /*----------------------------------------------------------------------------*/
-AIOBufferType *AIOContinuousBufCreateTmpBuf( AIOContinuousBuf *buf, unsigned size )
-{
-    if ( ! buf->tmpbuf || buf->tmpbufsize != size ) {
-        if ( buf->tmpbuf )
-            free(buf->tmpbuf);
-        buf->tmpbuf = (AIOBufferType *)malloc(sizeof(AIOBufferType)*size);
-        buf->tmpbufsize = size;
-    }
-    return buf->tmpbuf;
-}
-
-/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBuf_SendPreConfig( AIOContinuousBuf *buf ) {
     return AIOContinuousBufSendPreConfig( buf );
 }
@@ -383,14 +369,6 @@ AIORET_TYPE AIOContinuousBufSendPreConfig( AIOContinuousBuf *buf )
 }
 
 /*----------------------------------------------------------------------------*/
-void AIOContinuousBuf_DeleteTmpBuf( AIOContinuousBuf *buf )
-{
-    if ( buf->tmpbuf || buf->tmpbufsize > 0 ) {
-        free(buf->tmpbuf);
-    }
-}
-
-/*----------------------------------------------------------------------------*/
 /**
  * @brief Destructor for AIOContinuousBuf object
  */
@@ -398,7 +376,7 @@ void DeleteAIOContinuousBuf( AIOContinuousBuf *buf )
 {
     if ( buf->mask )
         DeleteAIOChannelMask( buf->mask );
-    AIOContinuousBuf_DeleteTmpBuf( buf );
+
     if ( buf->buffer )
         free( buf->buffer );
     if ( buf->fifo  )
@@ -2585,14 +2563,6 @@ TEST(AIOContinuousBuf, StreamingSize )
     DeleteAIOContinuousBuf( buf );
 }
 
-TEST(AIOContinuousBuf,CleanupMemory)
-{
-    int actual_bufsize = 10, buf_unit = 10;
-    AIOContinuousBuf *buf = NewAIOContinuousBufTesting( 0, actual_bufsize , buf_unit , AIOUSB_FALSE );
-    AIOContinuousBufCreateTmpBuf(buf, 100 );
-    DeleteAIOContinuousBuf(buf);
-}
-
 class AIOBufParams {
 public:
     int num_scans;
@@ -2801,7 +2771,7 @@ TEST(AIOContinuousBuf, NewConstructor )
     AIOContinuousBufSetOversample( buf, num_oversamples ); 
     ASSERT_EQ( 0, AIOFifoGetSize( buf->fifo ) % (num_oversamples+1)  ) << "Must be divisible by 1 + the number of oversamples\n";
 
-     DeleteAIOContinuousBuf( buf );
+    DeleteAIOContinuousBuf( buf );
 }
 
 /**
