@@ -98,7 +98,6 @@ void AIOFifoInitialize( AIOFifo *nfifo, unsigned int size, unsigned refsize )
     nfifo->data     = malloc(size);
     nfifo->Read     = AIOFifoRead;
     nfifo->Write    = AIOFifoWrite;
-    nfifo->Reset    = AIOFifoReset;
     nfifo->delta    = delta;
     nfifo->rdelta   = rdelta;
     nfifo->_calculate_size_write = _calculate_size_write;
@@ -130,9 +129,10 @@ AIOFifo *NewAIOFifoAllOrNone( unsigned int size , unsigned refsize )
     return nfifo;
 }
 
-void AIOFifoReset( AIOFifo *fifo )
+void AIOFifoReset( void *tmpfifo )
 {
-    assert(fifo);
+    assert(tmpfifo);
+    AIOFifo *fifo = (AIOFifo*)tmpfifo;
     fifo->read_pos = fifo->write_pos = 0;
 }
 

@@ -532,7 +532,8 @@ AIORET_TYPE AIOContinuousBufReset( AIOContinuousBuf *buf )
 {
     AIOContinuousBufLock( buf );
 
-    buf->fifo->Reset( (AIOFifo*)buf->fifo );
+    /* buf->fifo->Reset( (AIOFifo*)buf->fifo ); */
+    AIOFifoReset( buf->fifo );
 
     AIOContinuousBufUnlock( buf );
     return AIOUSB_SUCCESS;
@@ -2824,7 +2825,12 @@ TEST(AIOContinuousBuf, CopyIndividualOversamples )
     
     /* check position */
     ASSERT_EQ( 1, buf->fifo->write_pos / sizeof(short) );
-    
+
+    /* AIOFifoCountsReset( buf->fifo ); */
+    /* buf->fifo->Reset( buf->fifo ); */
+    /* G_BREAKPOINT(); */
+    AIOFifoReset( buf->fifo );
+    ASSERT_EQ( 0, buf->fifo->write_pos / sizeof(short) );
 
     DeleteAIOContinuousBuf( buf );
 }

@@ -42,11 +42,13 @@ AIORET_TYPE AIOFifoWrite( AIOFifo *fifo, void *frombuf , unsigned maxsize );
     AIO_EITHER_TYPE kind;                                                            \
     AIORET_TYPE (*Read)( struct aio_fifo *fifo, void *tobuf, unsigned maxsize );     \
     AIORET_TYPE (*Write)( struct aio_fifo *fifo, void *tobuf, unsigned maxsize );    \
-    void (*Reset)( struct aio_fifo *fifo );                                          \
+    void (*Reset)( void *fifo );                                                     \
     size_t (*delta)( struct aio_fifo *fifo  );                                       \
     size_t (*rdelta)( struct aio_fifo *fifo  );                                      \
     size_t (*_calculate_size_write)( struct aio_fifo *fifo, unsigned maxsize );      \
     size_t (*_calculate_size_read)( struct aio_fifo *fifo, unsigned maxsize );
+
+    /* void (*Reset)( struct aio_fifo *fifo );                                          \ */
 
 typedef struct aio_fifo { 
     AIO_FIFO_INTERFACE;
@@ -80,6 +82,7 @@ typedef struct new_aio_fifo {
     void DeleteAIOFifo##NAME( AIOFifo##NAME *fifo );                                                \
     AIORET_TYPE AIOFifo##NAME ##Initialize( AIOFifo##NAME *nfifo );
 
+/* void (*Reset)( struct new_aio_fifo_##NAME *fifo );                                          \ */
 
 #define TEMPLATE_AIOFIFO_API(NAME,TYPE)                                                             \
 AIORET_TYPE NAME##Push( AIOFifo##NAME *fifo, TYPE a )                                               \
@@ -123,7 +126,10 @@ AIORET_TYPE NAME##PopN( AIOFifo##NAME *fifo, TYPE *in, unsigned N)              
                                                                                                     \
     return retval;                                                                                  \
 }                                                                                                   \
-AIORET_TYPE AIOFifo##NAME ##Initialize( AIOFifo##NAME *nfifo )                                       \
+void AIOFifo##NAME ##Reset( void *nfifo ) {                                                         \
+    AIOFifoReset( (AIOFifo*)nfifo );                                                                \
+}                                                                                                   \
+AIORET_TYPE AIOFifo##NAME ##Initialize( AIOFifo##NAME *nfifo )                                      \
 {                                                                                                   \
     AIORET_TYPE retval = {0};                                                                       \
     nfifo->Push = NAME##Push;                                                                       \
@@ -134,6 +140,7 @@ AIORET_TYPE AIOFifo##NAME ##Initialize( AIOFifo##NAME *nfifo )                  
     nfifo->_calculate_size_read  = _calculate_size_aon_read;                                        \
     nfifo->Write = AIOFifoWriteAllOrNone;                                                           \
     nfifo->Read  = AIOFifoReadAllOrNone;                                                            \
+    nfifo->Reset = AIOFifo##NAME ##Reset;                                                           \
     nfifo->delta = NAME##delta;                                                                     \
     nfifo->refsize = sizeof(TYPE);                                                                  \
     nfifo->kind = aioeither_value_##TYPE;                                                           \
@@ -155,7 +162,8 @@ AIORET_TYPE AIOFifo##NAME ##Resize( AIOFifo##NAME *nfifo , size_t size )        
     AIORET_TYPE retval = {0};                                                                       \
     retval = _AIOFifoResize( (AIOFifo *)nfifo, (size+1)*sizeof(TYPE));                              \
     return retval;                                                                                  \
-}                                                                                                   \
+}
+
 
 /* Counts Fifo definition */
 TEMPLATE_AIOFIFO_INTERFACE(Counts,uint16_t);
@@ -167,7 +175,7 @@ TEMPLATE_AIOFIFO_INTERFACE(Volts,double);
 AIOFifo *NewAIOFifo( unsigned int size , unsigned int refsize );
 void DeleteAIOFifo( AIOFifo *fifo );
 
-void AIOFifoReset( AIOFifo *fifo );
+void AIOFifoReset( void *fifo );
 AIORET_TYPE AIOFifoRead( AIOFifo *fifo, void *tobuf , unsigned maxsize );
 AIORET_TYPE AIOFifoWrite( AIOFifo *fifo, void *frombuf , unsigned maxsize );
 AIORET_TYPE AIOFifoWriteAllOrNone( AIOFifo *fifo, void *frombuf , unsigned maxsize );
