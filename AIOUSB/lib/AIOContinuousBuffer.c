@@ -60,6 +60,9 @@ AIOContinuousBuf *NewAIOContinuousBuf()
         tmp->lock = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;   /* Threading mutex Setup */
 #endif
         tmp->fifo = (AIOFifoTYPE *)NewAIOFifoCounts( tmp->num_channels * tmp->num_scans );
+
+        tmp->PushN = AIOContinuousBufPushN;
+        tmp->PopN  = AIOContinuousBufPopN;
     }
     return tmp;
 }
@@ -83,7 +86,6 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetNumberOfChannels( AIOContinuousBuf 
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     if ( (buf->fifo->size % num_channels ) != 0 ) {
         /* printf("Need to change\n"); */
-        /* AIOFifoResize( (AIOFifo*)buf->fifo,  (((AIOFifoGetSize(buf->fifo) + num_channels) / num_channels)*num_channels )); */
         retval = _AIOContinuousBufResizeFifo( buf );
     }
 
@@ -2808,13 +2810,21 @@ TEST(AIOContinuousBuf, CopyIndividualOversamples )
 {
     AIOContinuousBuf *buf= NewAIOContinuousBuf();
     short tmpbuf[1024];
-    memset(tmpbuf,0,1024*sizeof(short));
+    for ( int i = 0; i < sizeof(tmpbuf)/sizeof(short); i ++ )
+        tmpbuf[i] = i;
 
     AIOContinuousBufSetNumberOfChannels( buf , 9 );
     EXPECT_EQ( 9, AIOContinuousBufGetNumberOfChannels( buf ) );
     int origsize = AIOContinuousBufGetSize(buf);
     EXPECT_GE( origsize, 0 );
 
+    /* _AIOContinuousBufWrite( buf, &tmpbuf[0], 1 ); */
+    /* buf->fifo->PushN( buf->fifo, &tmpbuf[0], sizeof(short)); */
+    AIOContinuousBufPushN( buf, (unsigned short*)tmpbuf, sizeof(short)/sizeof(short));
+    
+    /* check position */
+    ASSERT_EQ( 1, buf->fifo->write_pos / sizeof(short) );
+    
 
     DeleteAIOContinuousBuf( buf );
 }
