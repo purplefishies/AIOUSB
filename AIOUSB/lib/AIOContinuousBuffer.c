@@ -2826,11 +2826,12 @@ TEST(AIOContinuousBuf, CopyIndividualOversamples )
     /* check position */
     ASSERT_EQ( 1, buf->fifo->write_pos / sizeof(short) );
 
-    /* AIOFifoCountsReset( buf->fifo ); */
-    /* buf->fifo->Reset( buf->fifo ); */
-    /* G_BREAKPOINT(); */
     AIOFifoReset( buf->fifo );
     ASSERT_EQ( 0, buf->fifo->write_pos / sizeof(short) );
+
+    AIOContinuousBufPushN( buf, (unsigned short*)tmpbuf, sizeof(tmpbuf)/sizeof(short));
+
+    ASSERT_EQ( sizeof(tmpbuf)/sizeof(short) , buf->fifo->write_pos / sizeof(short) );
 
     DeleteAIOContinuousBuf( buf );
 }
