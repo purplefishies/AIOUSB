@@ -34,6 +34,12 @@ namespace AIOUSB
 
 typedef void *(*AIOUSB_WorkFn)( void *obj );
 
+ typedef enum {
+     AIO_CONT_BUF_TYPE_COUNTS,
+     AIO_CONT_BUF_TYPE_VOLTS,
+ } AIO_CONT_BUF_TYPE;
+
+
 typedef struct aio_continuous_buf {
     void *(*callback)(void *object);
 #ifdef HAS_PTHREAD
@@ -43,7 +49,8 @@ typedef struct aio_continuous_buf {
 #endif
     AIOUSB_WorkFn work;
     int DeviceIndex;
-    AIOFifoCounts *fifo;
+    /* AIOFifoCounts *fifo; */
+    AIOFifoTYPE *fifo;
     AIOBufferType *buffer;
     unsigned char *countsbuf;
     unsigned bufunitsize;
@@ -65,6 +72,7 @@ typedef struct aio_continuous_buf {
     AIOChannelMask *mask;               /**< Used for keeping track of channels */
 
     volatile THREAD_STATUS status; /* Are we running, paused ..etc; */
+    AIO_CONT_BUF_TYPE type;
     AIORET_TYPE (*PushN)( struct aio_continuous_buf *buf, unsigned short *frombuf, unsigned int N );
     AIORET_TYPE (*PopN)( struct aio_continuous_buf *buf, unsigned short *frombuf, unsigned int N );
 } AIOContinuousBuf;

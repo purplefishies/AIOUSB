@@ -145,7 +145,7 @@ AIORET_TYPE Push( AIOFifoTYPE *fifo, TYPE a )
     int val = fifo->Write( (AIOFifo*)fifo, &tmp, sizeof(TYPE) );
     return val;
 }
-AIORET_TYPE PushN( AIOFifoTYPE *fifo, TYPE *a, unsigned N ) {
+AIORET_TYPE PushN( AIOFifoTYPE *fifo, INPUT_TYPE *a, unsigned N ) {
     return fifo->Write( (AIOFifo*)fifo, a, N*sizeof(TYPE));
 }
 AIOEither Pop( AIOFifoTYPE *fifo )
@@ -163,7 +163,7 @@ AIOEither Pop( AIOFifoTYPE *fifo )
     return retval;
 }
 
-AIORET_TYPE PopN( AIOFifoTYPE *fifo, TYPE *in, unsigned N)
+AIORET_TYPE PopN( AIOFifoTYPE *fifo, INPUT_TYPE *in, unsigned N)
 {
     AIORET_TYPE retval = {0};
     int tmpval = fifo->Read( (AIOFifo*)fifo, in, sizeof(TYPE)*N );
@@ -172,10 +172,6 @@ AIORET_TYPE PopN( AIOFifoTYPE *fifo, TYPE *in, unsigned N)
    
     return retval;
 }
-
-
-
-
 
 AIOFifoTYPE *NewAIOFifoTYPE( unsigned int size )
 {

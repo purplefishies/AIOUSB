@@ -55,14 +55,15 @@ typedef struct aio_fifo {
 
 
 typedef uint32_t TYPE;
+typedef void INPUT_TYPE;
 
 typedef struct new_aio_fifo {
     AIO_FIFO_INTERFACE;
     LOCKING_MECHANISM;
     AIORET_TYPE (*Push)( struct new_aio_fifo *fifo, TYPE a );
-    AIORET_TYPE (*PushN)( struct new_aio_fifo *fifo, TYPE *a, unsigned N );
+    AIORET_TYPE (*PushN)( struct new_aio_fifo *fifo, INPUT_TYPE *a, unsigned N );
     AIOEither (*Pop)( struct new_aio_fifo *fifo );
-    AIORET_TYPE (*PopN)( struct new_aio_fifo *fifo , TYPE *a, unsigned N );
+    AIORET_TYPE (*PopN)( struct new_aio_fifo *fifo , INPUT_TYPE *a, unsigned N );
 } AIOFifoTYPE;
 
 
@@ -174,7 +175,8 @@ AIORET_TYPE AIOFifoReadAllOrNone( AIOFifo *fifo, void *tobuf , unsigned maxsize 
 
 AIOFifoTYPE *NewAIOFifoTYPE( unsigned int size );
 AIORET_TYPE Push( AIOFifoTYPE *fifo, TYPE a );
-AIORET_TYPE PushN( AIOFifoTYPE *fifo, TYPE *a, unsigned N );
+AIORET_TYPE PushN( AIOFifoTYPE *fifo, INPUT_TYPE *a, unsigned N );
+AIORET_TYPE PopN( AIOFifoTYPE *fifo, INPUT_TYPE *a, unsigned N );
 AIORET_TYPE AIOFifoSizeRemaining( void *fifo );
 AIORET_TYPE AIOFifoReadSize( void *tmpfifo );
 AIORET_TYPE AIOFifoGetSize( void *fifo );
