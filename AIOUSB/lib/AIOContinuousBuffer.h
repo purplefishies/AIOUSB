@@ -35,8 +35,8 @@ namespace AIOUSB
 typedef void *(*AIOUSB_WorkFn)( void *obj );
 
  typedef enum {
-     AIO_CONT_BUF_TYPE_COUNTS,
-     AIO_CONT_BUF_TYPE_VOLTS,
+     AIO_CONT_BUF_TYPE_COUNTS = 2,
+     AIO_CONT_BUF_TYPE_VOLTS = 8,
  } AIO_CONT_BUF_TYPE;
 
 

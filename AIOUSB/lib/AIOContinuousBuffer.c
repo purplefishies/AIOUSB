@@ -63,6 +63,7 @@ AIOContinuousBuf *NewAIOContinuousBuf()
 
         tmp->PushN = AIOContinuousBufPushN;
         tmp->PopN  = AIOContinuousBufPopN;
+        tmp->type = AIO_CONT_BUF_TYPE_COUNTS; /* Default type */
     }
     return tmp;
 }
@@ -1003,6 +1004,19 @@ AIORET_TYPE _AIOContinuousBufWrite( AIOContinuousBuf *buf , void *input, size_t 
     return AIOUSB_SUCCESS;
 
 }
+
+AIORET_TYPE _AIOContinuousBufRead( AIOContinuousBuf *buf , void *tobuf, size_t size )
+{
+    AIO_ASSERT( buf );
+    AIO_ASSERT( tobuf );
+    AIORET_TYPE retval;
+
+    retval = buf->fifo->PopN( buf->fifo, tobuf, (int)size );
+
+    return retval;
+}
+
+
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -2813,8 +2827,14 @@ TEST(AIOContinuousBuf, CopyIndividualOversamples )
 {
     AIOContinuousBuf *buf= NewAIOContinuousBuf();
     short tmpbuf[1024];
+    short tmpbuf2[1024];
+    AIORET_TYPE retval;
+    memset(tmpbuf2,0,sizeof(tmpbuf2));
     for ( int i = 0; i < sizeof(tmpbuf)/sizeof(short); i ++ )
         tmpbuf[i] = i;
+
+
+    ASSERT_GT( (int)buf->type, 0 );
 
     AIOContinuousBufSetNumberOfChannels( buf , 9 );
     EXPECT_EQ( 9, AIOContinuousBufGetNumberOfChannels( buf ) );
@@ -2835,9 +2855,18 @@ TEST(AIOContinuousBuf, CopyIndividualOversamples )
 
     AIOFifoReset( buf->fifo );
     
+
     _AIOContinuousBufWrite( buf, tmpbuf, 1024*sizeof(short) );
+
     ASSERT_EQ( sizeof(tmpbuf)/sizeof(short) , buf->fifo->write_pos / sizeof(short) );
+
+    /* Goal is to do small reads of certain sizes */
     
+
+    retval = _AIOContinuousBufRead( buf, tmpbuf2, 1024 );
+    ASSERT_GE( retval , 0 );
+
+    ASSERT_EQ( sizeof(tmpbuf2), buf->fifo->read_pos );
 
     DeleteAIOContinuousBuf( buf );
 }
