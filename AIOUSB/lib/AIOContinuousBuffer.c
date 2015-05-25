@@ -981,28 +981,19 @@ AIORET_TYPE AIOContinuousBuf_SmartCountsToVolts( AIOContinuousBuf *buf,
 }
 
 /*----------------------------------------------------------------------------*/
+
+/**
+ * @brief only write the number of elements. size is calculated
+ * automatically based on the underlying type
+ */
 AIORET_TYPE _AIOContinuousBufWrite( AIOContinuousBuf *buf , void *input, size_t size )
 {
     AIO_ASSERT( buf );
     AIO_ASSERT( input );
 
-    int N = size / (buf->fifo->refsize );
-    int i;
-    
-    for ( i = 0 ; i < N ; i ++ ) {
-        switch ( buf->type ) {
-        case AIO_CONT_BUF_TYPE_COUNTS:
-            buf->fifo->Push( buf->fifo, ((unsigned short*)input)[i]  );
-            break;
-        case AIO_CONT_BUF_TYPE_VOLTS:
-            buf->fifo->Push( buf->fifo, ((double *)input)[i] );
-            break;
-        default:
-            return -AIOUSB_ERROR_INVALID_AIOBUFTYPE;
-        }
-    }
-    return AIOUSB_SUCCESS;
+    buf->fifo->PushN( buf->fifo, input, size );
 
+    return AIOUSB_SUCCESS;
 }
 
 AIORET_TYPE _AIOContinuousBufRead( AIOContinuousBuf *buf , void *tobuf, size_t size )
@@ -2856,7 +2847,7 @@ TEST(AIOContinuousBuf, CopyIndividualOversamples )
     AIOFifoReset( buf->fifo );
     
 
-    _AIOContinuousBufWrite( buf, tmpbuf, 1024*sizeof(short) );
+    _AIOContinuousBufWrite( buf, tmpbuf, 1024 );
 
     ASSERT_EQ( sizeof(tmpbuf)/sizeof(short) , buf->fifo->write_pos / sizeof(short) );
 
