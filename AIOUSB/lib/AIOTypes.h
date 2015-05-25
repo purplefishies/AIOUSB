@@ -658,14 +658,6 @@ typedef enum  {
  * without making the user keep track of the memory management
  */
 
-/* typedef struct { */
-/*   int bufsize; */
-/*   unsigned short *buffer; */
-/*   unsigned long bytes_remaining; */
-/* } AIOBuf ; */
-
-/* extern unsigned long GetDevices( void ); */
-
 typedef struct  {
     char *Name;                      /**< null-terminated device name or 0 */
     uint64_t SerialNumber;           /**< 64-bit serial number or 0 */
