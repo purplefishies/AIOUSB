@@ -991,9 +991,11 @@ AIORET_TYPE _AIOContinuousBufWrite( AIOContinuousBuf *buf , void *input, size_t 
     for ( i = 0 ; i < N ; i ++ ) {
         switch ( buf->type ) {
         case AIO_CONT_BUF_TYPE_COUNTS:
-            buf->fifo->PushN( buf->fifo, &((unsigned short*)input)[i], 1 );
+            buf->fifo->Push( buf->fifo, ((unsigned short*)input)[i]  );
+            break;
         case AIO_CONT_BUF_TYPE_VOLTS:
-            buf->fifo->PushN( buf->fifo, &((double *)input)[i] , 1 );
+            buf->fifo->Push( buf->fifo, ((double *)input)[i] );
+            break;
         default:
             return -AIOUSB_ERROR_INVALID_AIOBUFTYPE;
         }
@@ -2819,8 +2821,6 @@ TEST(AIOContinuousBuf, CopyIndividualOversamples )
     int origsize = AIOContinuousBufGetSize(buf);
     EXPECT_GE( origsize, 0 );
 
-    /* _AIOContinuousBufWrite( buf, &tmpbuf[0], 1 ); */
-    /* buf->fifo->PushN( buf->fifo, &tmpbuf[0], sizeof(short)); */
     AIOContinuousBufPushN( buf, (unsigned short*)tmpbuf, sizeof(short)/sizeof(short));
     
     /* check position */
@@ -2832,6 +2832,12 @@ TEST(AIOContinuousBuf, CopyIndividualOversamples )
     AIOContinuousBufPushN( buf, (unsigned short*)tmpbuf, sizeof(tmpbuf)/sizeof(short));
 
     ASSERT_EQ( sizeof(tmpbuf)/sizeof(short) , buf->fifo->write_pos / sizeof(short) );
+
+    AIOFifoReset( buf->fifo );
+    
+    _AIOContinuousBufWrite( buf, tmpbuf, 1024*sizeof(short) );
+    ASSERT_EQ( sizeof(tmpbuf)/sizeof(short) , buf->fifo->write_pos / sizeof(short) );
+    
 
     DeleteAIOContinuousBuf( buf );
 }
