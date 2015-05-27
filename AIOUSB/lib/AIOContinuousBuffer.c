@@ -86,7 +86,6 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetNumberOfChannels( AIOContinuousBuf 
     buf->num_channels = num_channels;
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     if ( (buf->fifo->size % num_channels ) != 0 ) {
-        /* printf("Need to change\n"); */
         retval = _AIOContinuousBufResizeFifo( buf );
     }
 
@@ -533,7 +532,6 @@ AIORET_TYPE AIOContinuousBufReset( AIOContinuousBuf *buf )
 {
     AIOContinuousBufLock( buf );
 
-    /* buf->fifo->Reset( (AIOFifo*)buf->fifo ); */
     AIOFifoReset( buf->fifo );
 
     AIOContinuousBufUnlock( buf );
@@ -575,48 +573,51 @@ unsigned read_size( AIOContinuousBuf *buf )
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetReadPosition( AIOContinuousBuf *buf )
 {
-    assert(buf);
-    /* return get_read_pos( buf ); */
+    AIO_ASSERT(buf);
+
     return buf->fifo->read_pos;
 }
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetWritePosition( AIOContinuousBuf *buf )
 {
-    assert(buf);
-    /* return get_write_pos( buf ); */
+    AIO_ASSERT(buf);
+
     return buf->fifo->write_pos;
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufAvailableReadSize( AIOContinuousBuf *buf )
 {
-    assert(buf);
+    AIO_ASSERT(buf);
     return read_size(buf);
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetRemainingSize( AIOContinuousBuf *buf )
 {
-    assert(buf);
+    AIO_ASSERT(buf);
     return buf->fifo->delta( (AIOFifo*)buf->fifo );
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetSize( AIOContinuousBuf *buf )
 {
-    assert(buf);
-    /* return buf->fifo->size; */
+    AIO_ASSERT(buf);
     return AIOFifoGetSize( buf->fifo );
 }
 
-
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetStatus( AIOContinuousBuf *buf )
 {
-    assert(buf);
+    AIO_ASSERT(buf);
     return (AIORET_TYPE)buf->status;
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetExitCode( AIOContinuousBuf *buf )
 {
-    assert(buf);
+    AIO_ASSERT(buf);
     return buf->exitcode;
 }
 
@@ -642,6 +643,7 @@ AIORET_TYPE AIOContinuousBufCountsAvailable(AIOContinuousBuf *buf)
     return retval;
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufOversamplesAvailable(AIOContinuousBuf *buf) 
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
@@ -650,6 +652,7 @@ AIORET_TYPE AIOContinuousBufOversamplesAvailable(AIOContinuousBuf *buf)
     return retval;
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetDataAvailable( AIOContinuousBuf *buf )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
@@ -676,7 +679,7 @@ AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf,
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     int num_scans;
-    assert(buf);
+    AIO_ASSERT(buf);
     if ( !buf )
         return -AIOUSB_ERROR_INVALID_DEVICE_SETTING;
 
@@ -698,13 +701,13 @@ AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf,
 
 AIORET_TYPE AIOContinuousBufReadIntegerGetNumberOfScans( AIOContinuousBuf *buf )
 {
-    assert(buf);
+    AIO_ASSERT(buf);
     return buf->num_scans;
 }
 
 AIORET_TYPE AIOContinuousBufReadIntegerSetNumberOfScans( AIOContinuousBuf *buf, unsigned num_scans )
 {
-    assert(buf);
+    AIO_ASSERT(buf);
     buf->num_scans = num_scans;
 
 
@@ -728,7 +731,7 @@ AIORET_TYPE AIOContinuousBufReadIntegerNumberOfScans( AIOContinuousBuf *buf,
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     int debug = 0;
-    assert(buf);
+    AIO_ASSERT(buf);
     if ( !buf )
         return -AIOUSB_ERROR_INVALID_DEVICE_SETTING;
 
@@ -787,7 +790,7 @@ AIOUSB_WorkFn AIOContinuousBufGetCallback( AIOContinuousBuf *buf )
 
 AIORET_TYPE AIOContinuousBufSetClock( AIOContinuousBuf *buf, unsigned int hz )
 {
-    assert(buf);
+    AIO_ASSERT(buf);
     buf->hz = MIN( (unsigned)hz, (unsigned)(ROOTCLOCK / ( (AIOContinuousBufGetOversample(buf)+1) * AIOContinuousBufNumberChannels(buf))) );
 
     return AIOUSB_SUCCESS;
@@ -838,7 +841,7 @@ AIORET_TYPE AIOContinuousBufStart( AIOContinuousBuf *buf )
  */
 AIORET_TYPE CalculateClocks( AIOContinuousBuf *buf )
 {
-    assert(buf);
+    AIO_ASSERT(buf);
     int  hz = (int)buf->hz;
     float l;
 
@@ -898,7 +901,7 @@ AIORET_TYPE CalculateClocks( AIOContinuousBuf *buf )
 /** create thread to launch function */
 AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf )
 {
-    assert(buf);
+    AIO_ASSERT(buf);
     AIORET_TYPE retval = pthread_create( &(buf->worker), NULL , callback, (void *)buf  );
     if (  retval != 0 ) {
         retval = -abs(retval);
@@ -915,8 +918,8 @@ AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBuf_SetChannelMask( AIOContinuousBuf *buf, AIOChannelMask *mask ) { return AIOContinuousBufSetChannelMask( buf, mask ); }
 AIORET_TYPE AIOContinuousBufSetChannelMask( AIOContinuousBuf *buf, AIOChannelMask *mask )
 {
-    assert(buf);
-    assert(mask);
+    AIO_ASSERT(buf);
+    AIO_ASSERT(mask);
     buf->mask   = mask;
     buf->extra  = 0;
     return 0;
@@ -925,7 +928,7 @@ AIORET_TYPE AIOContinuousBufSetChannelMask( AIOContinuousBuf *buf, AIOChannelMas
 AIORET_TYPE AIOContinuousBuf_NumberSignals( AIOContinuousBuf *buf ) { return AIOContinuousBufNumberSignals( buf ); }
 AIORET_TYPE AIOContinuousBufNumberSignals( AIOContinuousBuf *buf )
 {
-    assert(buf);
+    AIO_ASSERT(buf);
     return AIOChannelMaskNumberSignals(buf->mask );
 }
 
@@ -933,7 +936,7 @@ AIORET_TYPE AIOContinuousBufNumberSignals( AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBuf_NumberChannels( AIOContinuousBuf *buf ) { return AIOContinuousBufNumberChannels(buf); }
 AIORET_TYPE AIOContinuousBufNumberChannels( AIOContinuousBuf *buf ) 
 {
-    assert(buf);
+    AIO_ASSERT(buf);
     return AIOChannelMaskNumberSignals(buf->mask );
 }
 
@@ -956,7 +959,7 @@ AIORET_TYPE AIOContinuousBuf_SmartCountsToVolts( AIOContinuousBuf *buf,
                                                  AIOBufferType *tobuf, 
                                                  unsigned *pos )
 {
-    assert(buf);
+    AIO_ASSERT(buf);
     AIORET_TYPE retval = 0;
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), &result );
@@ -966,7 +969,7 @@ AIORET_TYPE AIOContinuousBuf_SmartCountsToVolts( AIOContinuousBuf *buf,
     }
 
     int number_channels = AIOContinuousBufNumberChannels(buf);
-    assert(channel);
+    AIO_ASSERT(channel);
     if (  ! deviceDesc ) {
         retval = -1;
     } else {
@@ -1748,7 +1751,7 @@ AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf )
      * @note Setup counters
      * see reference in [USB AIO documentation](http://accesio.com/MANUALS/USB-AIO%20Series.PDF)
      **/
-    assert(buf);
+    AIO_ASSERT(buf);
     if ( !buf ) 
         return -AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER;
     
@@ -2067,7 +2070,7 @@ AIORET_TYPE AIOContinuousBufSetChannelRange( AIOContinuousBuf *buf,
 /*----------------------------------------------------------------------------*/
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetTimeout( AIOContinuousBuf *buf, unsigned timeout )
 {
-    assert(buf);
+    AIO_ASSERT(buf);
     AIOContinuousBufLock( buf );
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     AIORESULT result = AIOUSB_SUCCESS;
@@ -2086,7 +2089,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetTimeout( AIOContinuousBuf *buf, uns
 
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetTimeout( AIOContinuousBuf *buf )
 {
-    assert(buf);
+    AIO_ASSERT(buf);
     if (!buf )
         return -AIOUSB_ERROR_INVALID_DEVICE;
     
