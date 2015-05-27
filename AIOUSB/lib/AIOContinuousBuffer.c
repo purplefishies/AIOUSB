@@ -2111,25 +2111,23 @@ AIORET_TYPE AIOContinuousBuf_SetOversample( AIOContinuousBuf *buf, unsigned os )
 AIORET_TYPE AIOContinuousBufSetOversample( AIOContinuousBuf *buf, unsigned os )
 {
     AIO_ASSERT(buf);
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIOUSBDevice *device = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), (AIORESULT*)&retval );
+    if ( retval != AIOUSB_SUCCESS ) 
+        return retval;
 
     AIOContinuousBufLock( buf );
     
-    buf->num_oversamples = ( os > 255 ? 255 : os );
-    /* AIOFifoResize( (AIOFifo*)buf->fifo,  (((AIOFifoGetSize(buf->fifo) + num_channels) / num_channels)*num_channels )); */
-    _AIOContinuousBufResizeFifo( buf );
-
-    AIORESULT result = AIOUSB_SUCCESS;
-    AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), &result );
-    if ( result != AIOUSB_SUCCESS )  {
-        result = -AIOUSB_ERROR_INVALID_DEVICE_SETTING;
-        goto fail;
+    if ( buf->num_oversamples != os ) {
+        buf->num_oversamples = ( os > 255 ? 255 : os );
+        retval = _AIOContinuousBufResizeFifo( buf );
     }
+    ADCConfigBlockSetOversample( AIOUSBDeviceGetADCConfigBlock( device ), os );
 
-    result = ADC_SetOversample( AIOContinuousBufGetDeviceIndex(buf), os );     
- fail:
     AIOContinuousBufUnlock( buf );
-    return result;
+    return retval;
 }
+
 
 AIORET_TYPE AIOContinuousBufSetOverSample( AIOContinuousBuf *buf, size_t os ) { return AIOContinuousBufSetOversample(buf, os); } 
 
@@ -2790,6 +2788,9 @@ TEST(AIOContinuousBuf, NewConstructor )
     int num_oversamples = 7;
     int num_channels = 9;
     ASSERT_TRUE( buf );
+
+    AIOContinuousBufSetDeviceIndex( buf, numDevices - 1 );
+
     AIOContinuousBufSetNumberOfChannels( buf , num_channels );
     EXPECT_EQ( num_channels, AIOContinuousBufGetNumberOfChannels( buf ) );
 
@@ -2803,7 +2804,8 @@ TEST(AIOContinuousBuf, NewConstructor )
      * also resize
      */
 
-    AIOContinuousBufSetOversample( buf, num_oversamples ); 
+    retval = AIOContinuousBufSetOversample( buf, num_oversamples ); 
+    ASSERT_GE( 0, retval );
     ASSERT_EQ( 0, AIOFifoGetSize( buf->fifo ) % (num_oversamples+1)  ) << "Must be divisible by 1 + the number of oversamples\n";
 
     DeleteAIOContinuousBuf( buf );
@@ -2814,18 +2816,25 @@ TEST(AIOContinuousBuf, NewConstructor )
  *        have the callback be allerted when we have one oversample available
  *
  */ 
-TEST(AIOContinuousBuf, CopyIndividualOversamples )
+TEST(AIOContinuousBuf, NewAPIForReading )
 {
+    int numDevices = 0;
+    AIODeviceTableInit();    
+    AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_AIO16_16A );
     AIOContinuousBuf *buf= NewAIOContinuousBuf();
     short tmpbuf[1024];
     short tmpbuf2[1024];
     AIORET_TYPE retval;
+    int num_oversamples = 7;
+
     memset(tmpbuf2,0,sizeof(tmpbuf2));
     for ( int i = 0; i < sizeof(tmpbuf)/sizeof(short); i ++ )
         tmpbuf[i] = i;
 
 
     ASSERT_GT( (int)buf->type, 0 );
+
+    AIOContinuousBufSetDeviceIndex( buf, numDevices - 1);
 
     AIOContinuousBufSetNumberOfChannels( buf , 9 );
     EXPECT_EQ( 9, AIOContinuousBufGetNumberOfChannels( buf ) );
@@ -2852,12 +2861,20 @@ TEST(AIOContinuousBuf, CopyIndividualOversamples )
     ASSERT_EQ( sizeof(tmpbuf)/sizeof(short) , buf->fifo->write_pos / sizeof(short) );
 
     /* Goal is to do small reads of certain sizes */
-    
-
     retval = _AIOContinuousBufRead( buf, tmpbuf2, 1024 );
     ASSERT_GE( retval , 0 );
+    EXPECT_EQ( 0 ,  memcmp( tmpbuf, tmpbuf2, sizeof( tmpbuf2 )));
 
-    ASSERT_EQ( sizeof(tmpbuf2), buf->fifo->read_pos );
+    ASSERT_EQ( sizeof(tmpbuf2), buf->fifo->read_pos );    
+    
+    AIOFifoReset( buf->fifo );
+    /* Start with getting all of the remaining oversamples */
+
+    AIOContinuousBufSetOversample( buf , num_oversamples );
+    EXPECT_EQ( AIOContinuousBufGetOversample(buf ), num_oversamples );
+
+    retval = _AIOContinuousBufRead( buf, tmpbuf2, buf->num_oversamples );
+    ASSERT_GE( retval, 0 );
 
     DeleteAIOContinuousBuf( buf );
 }
