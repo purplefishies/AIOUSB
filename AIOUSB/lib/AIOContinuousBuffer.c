@@ -498,7 +498,7 @@ unsigned AIOContinuousBuf_BufSizeForCounts( AIOContinuousBuf * buf)
 
 /*----------------------------------------------------------------------------*/
 /**
- * @brief This is an internal function, don't use it externally as it 
+ * @internal This is an internal function, don't use it externally as it 
  * will confuse you.
  *
  */
@@ -660,9 +660,6 @@ AIORET_TYPE AIOContinuousBufGetDataAvailable( AIOContinuousBuf *buf )
     return retval;
 }
 
-
-
-
 /*----------------------------------------------------------------------------*/
 /**
  * @brief will read in an integer number of scan counts if there is room.
@@ -698,13 +695,14 @@ AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf,
     return retval;
 }
 
-
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufReadIntegerGetNumberOfScans( AIOContinuousBuf *buf )
 {
     AIO_ASSERT(buf);
     return buf->num_scans;
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufReadIntegerSetNumberOfScans( AIOContinuousBuf *buf, unsigned num_scans )
 {
     AIO_ASSERT(buf);
@@ -752,7 +750,7 @@ AIORET_TYPE AIOContinuousBufReadIntegerNumberOfScans( AIOContinuousBuf *buf,
     return retval;
 }
 
-
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufReadSingle( AIOContinuousBuf *buf, AIOBuf *tobuf, size_t  size_to_read )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
@@ -898,6 +896,7 @@ AIORET_TYPE CalculateClocks( AIOContinuousBuf *buf )
     return AIOUSB_SUCCESS;
 }
 
+/*----------------------------------------------------------------------------*/
 /** create thread to launch function */
 AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf )
 {
@@ -909,6 +908,7 @@ AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf )
     return retval;
 }
 
+/*----------------------------------------------------------------------------*/
 /**
  * @brief Sets the channel mask
  * @param buf 
@@ -1751,12 +1751,9 @@ AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf )
      * @note Setup counters
      * see reference in [USB AIO documentation](http://accesio.com/MANUALS/USB-AIO%20Series.PDF)
      **/
-    AIO_ASSERT(buf);
-    if ( !buf ) 
-        return -AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER;
-    
-    if ( AIOContinuousBufGetDeviceIndex(buf) < 0 ) 
-        return -AIOUSB_ERROR_INVALID_DEVICE;
+    AIO_ASSERT_RET(-AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf);
+
+    AIO_ASSERT_RET(-AIOUSB_ERROR_INVALID_DEVICE, AIOContinuousBufGetDeviceIndex(buf) >= 0 );
 
     /* Start the clocks, and need to get going capturing data */
     if ( (retval = ResetCounters(buf)) != AIOUSB_SUCCESS )
