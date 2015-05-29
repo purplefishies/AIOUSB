@@ -89,6 +89,8 @@ int USBDeviceClose( USBDevice *usb )
 int FindUSBDevices( USBDevice **devs, int *size )
 {
     int result = 0;
+    int numAccesDevices = 0;
+    libusb_device **deviceList = 0;
 
     AIO_ASSERT_VALID_DATA( -AIOUSB_ERROR_INVALID_DATA, devs );
     AIO_ASSERT( size );
@@ -97,15 +99,12 @@ int FindUSBDevices( USBDevice **devs, int *size )
 
 
     int libusbResult = libusb_init( NULL );
-    if (libusbResult != LIBUSB_SUCCESS)
-        return -libusbResult;
+    AIO_ERROR_VALID_DATA( -libusbResult, libusbResult == LIBUSB_SUCCESS );
 
-    int numAccesDevices = 0;
-    libusb_device **deviceList;
 
     int numDevices = libusb_get_device_list(NULL, &deviceList);
     if (numDevices > 0) {
-          for ( int index = 0; index < numDevices && numAccesDevices < MAX_USB_DEVICES; index++) {
+        for ( int index = 0; index < numDevices && numAccesDevices < MAX_USB_DEVICES; index++, numAccesDevices ++) {
                 struct libusb_device_descriptor libusbDeviceDesc;
                 libusb_device *usb_device = deviceList[ index ];
 

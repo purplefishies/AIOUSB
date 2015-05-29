@@ -2244,7 +2244,7 @@ void *newdoit(void *object )
   return (void*)NULL;
 }
 
-/** 
+/**
  * @param object 
  * @return 
  */
@@ -2270,7 +2270,7 @@ void *doit( void *object )
     return NULL;
 }
 
-/** 
+/**
  * @param object 
  * @return 
  */

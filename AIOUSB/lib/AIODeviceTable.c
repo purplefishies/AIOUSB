@@ -1446,7 +1446,7 @@ AIORET_TYPE AIODeviceTablePopulateTable(void)
 
         unsigned productID = USBDeviceGetIdProduct( &usbdevices[i] );
         _setup_device_parameters( device, productID );
-        /* device->usb_device = usbdevices[i]; */
+
         device->usb_device = CopyUSBDevice( &usbdevices[i] );
     }
     
