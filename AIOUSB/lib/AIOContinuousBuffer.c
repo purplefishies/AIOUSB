@@ -1751,9 +1751,8 @@ AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf )
      * @note Setup counters
      * see reference in [USB AIO documentation](http://accesio.com/MANUALS/USB-AIO%20Series.PDF)
      **/
-    AIO_ASSERT_RET(-AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf);
-
-    AIO_ASSERT_RET(-AIOUSB_ERROR_INVALID_DEVICE, AIOContinuousBufGetDeviceIndex(buf) >= 0 );
+    AIO_ASSERT_AIORET_TYPE(AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf);
+    AIO_ASSERT_AIORET_TYPE(AIOUSB_ERROR_INVALID_DEVICE, AIOContinuousBufGetDeviceIndex(buf) >= 0 );
 
     /* Start the clocks, and need to get going capturing data */
     if ( (retval = ResetCounters(buf)) != AIOUSB_SUCCESS )
@@ -2097,7 +2096,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetTimeout( AIOContinuousBuf *buf )
 AIORET_TYPE _AIOContinuousBufResizeFifo( AIOContinuousBuf *buf )
 {
     AIO_ASSERT( buf );
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER_NUM_CHANNELS, buf->num_channels );
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER_NUM_CHANNELS, buf->num_channels );
 
     int tmpval = buf->num_channels * (1 + buf->num_oversamples );
     AIORET_TYPE retval = AIOFifoResize( (AIOFifo*)buf->fifo,  (((AIOFifoGetSize(buf->fifo) + tmpval) / tmpval)*tmpval ));

@@ -99,7 +99,7 @@ AIORET_TYPE AIOBufRead( AIOBuf *buf, void *tobuf, size_t size_tobuf )
     
     int ibufsize;
     
-    AIO_ASSERT_RET(-AIOUSB_ERROR_INVALID_AIOBUFTYPE, (ibufsize = (int)AIOBufGetTotalSize(buf) ) >= 0  );
+    AIO_ASSERT_AIORET_TYPE(-AIOUSB_ERROR_INVALID_AIOBUFTYPE, (ibufsize = (int)AIOBufGetTotalSize(buf) ) >= 0  );
 
     int act_size = MIN( ibufsize, (int)size_tobuf );
     memcpy( tobuf, buf->_buf, act_size );
@@ -113,7 +113,7 @@ AIORET_TYPE AIOBufWrite( AIOBuf *buf, void *frombuf, size_t size_frombuf )
     AIO_ASSERT( frombuf );
     int obufsize;
 
-    AIO_ASSERT_RET( -AIOUSB_ERROR_INVALID_AIOBUFTYPE, (obufsize = (int)AIOBufGetTotalSize(buf) ) >= 0 );
+    AIO_ASSERT_AIORET_TYPE( -AIOUSB_ERROR_INVALID_AIOBUFTYPE, (obufsize = (int)AIOBufGetTotalSize(buf) ) >= 0 );
 
     int act_size = MIN( obufsize, (int)size_frombuf );
     memcpy( buf->_buf, frombuf, act_size );

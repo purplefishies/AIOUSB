@@ -111,6 +111,7 @@ enum {
 
 #define AIO_ASSERT(...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { return -AIOUSB_ERROR_INVALID_PARAMETER; }
 #define AIO_ASSERT_RET(ret,...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { return ret; }
+#define AIO_ASSERT_AIORET_TYPE(ret,...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { return -abs(ret); }
 #define AIO_ASSERT_NO_RETURN(...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { return; }
 #define AIO_ASSERT_EXIT(...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { exit(-AIOUSB_ERROR_INVALID_PARAMETER); }
 
@@ -131,6 +132,7 @@ enum {
  */
 
 #define AIO_ERROR_VALID_DATA(err,...) if ( !(__VA_ARGS__) ) { return err; }
+#define AIO_ERROR_VALID_DATA_RETVAL( err, ... ) if ( !(__VA_ARGS__) ) { return -abs(err); }
 #define AIO_ERROR_AIOEITHER_VALID_DATA(err,...) if ( !(__VA_ARGS__) ) { \
         AIOEither tmp; tmp.left = err; tmp.errmsg=NULL; return tmp; }
 #define AIO_ERROR_VALID_DATA_W_CODE(err, code, ... ) if ( !(__VA_ARGS__) ) { do { code; } while(0); return err; }
