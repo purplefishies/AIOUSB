@@ -11,13 +11,11 @@ namespace AIOUSB {
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockCopy( ADCConfigBlock *to, ADCConfigBlock *from ) 
 {
-    assert(to != NULL && from != NULL );
-    if ( !to || !from ) 
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, to );
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, from );
 
     AIORET_TYPE result = AIOUSB_SUCCESS;
-    if ( from->size <  AD_CONFIG_REGISTERS )
-        return -AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_PARAMETER, from->size >= AD_CONFIG_REGISTERS );
     
     to->device   = from->device;
     to->size     = from->size ;
@@ -34,9 +32,8 @@ AIORET_TYPE ADCConfigBlockCopy( ADCConfigBlock *to, ADCConfigBlock *from )
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE DeleteADCConfigBlock( ADCConfigBlock *config )
 {
-    assert(config);
-    if (!config )
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+    AIO_ASSERT_AIORET_TYPE(AIOUSB_ERROR_INVALID_ADCCONFIG, config );
+
     free(config);
     return AIOUSB_SUCCESS;
 }
@@ -56,9 +53,8 @@ AIOUSBDevice *ADCConfigBlockGetAIOUSBDevice( ADCConfigBlock *obj , AIORET_TYPE *
 AIORESULT _check_ADCConfigBlock( ADCConfigBlock *obj )
 {
     AIORESULT result = AIOUSB_SUCCESS;
-    if ( !obj ) {
-        result = AIOUSB_ERROR_INVALID_DATA;
-    }
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_DATA , obj );
+
     return result;
 }
 
@@ -83,9 +79,7 @@ AIORET_TYPE ADCConfigBlockSetDevice( ADCConfigBlock *obj, AIOUSBDevice *dev )
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockInitializeDefault( ADCConfigBlock *config )
 {
-    assert(config);
-    if ( !config )
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config );
 
     config->device        = NULL;
     config->size          = 20;
@@ -105,12 +99,8 @@ AIORET_TYPE ADCConfigBlockInitializeDefault( ADCConfigBlock *config )
  */
 AIORET_TYPE ADCConfigBlockInitializeFromAIOUSBDevice( ADCConfigBlock *config , AIOUSBDevice *dev) 
 {
-    assert(config);
-    assert(dev);
-    if ( !config )
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
-    if ( !dev ) 
-        return -AIOUSB_ERROR_INVALID_DEVICE;
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config );
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_DEVICE, dev );
 
     config->device        = dev;
     config->size          = dev->ConfigBytes;
@@ -121,7 +111,9 @@ AIORET_TYPE ADCConfigBlockInitializeFromAIOUSBDevice( ADCConfigBlock *config , A
     config->mux_settings.ADCChannelsPerGroup  = dev->ADCChannelsPerGroup;
     config->mux_settings.defined              = AIOUSB_TRUE;
     config->clock_rate    = 1000;
+
     memset(config->registers,0, AD_CONFIG_REGISTERS );
+
     return AIOUSB_SUCCESS;
 }
 
@@ -178,9 +170,8 @@ AIORET_TYPE ADCConfigBlockGetSize( const ADCConfigBlock *obj )
 AIORET_TYPE ADCConfigBlockSetTesting( ADCConfigBlock *obj, AIOUSB_BOOL testing ) 
 {
     AIORET_TYPE result = AIOUSB_SUCCESS;
-    assert(obj);
-    if ( !obj ) 
-        return -AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ASSERT( obj );
+
     obj->testing = testing;
     return result;
 }
@@ -189,18 +180,10 @@ AIORET_TYPE ADCConfigBlockSetTesting( ADCConfigBlock *obj, AIOUSB_BOOL testing )
 AIORET_TYPE ADCConfigBlockSetDebug( ADCConfigBlock *obj, AIOUSB_BOOL debug ) 
 {
     AIORET_TYPE result = AIOUSB_SUCCESS;
-    assert(obj);
-    if ( !obj ) 
-        return -AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ASSERT( obj );
+
     obj->debug = debug;
     return result;
-}
-
-/*----------------------------------------------------------------------------*/
-unsigned char *ADCConfigBlockGetRegisters( ADCConfigBlock *config )
-{
-    assert(config);
-    return config->registers;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -209,18 +192,12 @@ AIORET_TYPE ADCConfigBlockSetRangeSingle( ADCConfigBlock *config, unsigned long 
     assert(config && config->device && config->size );
     AIORET_TYPE result = AIOUSB_SUCCESS;
 
-    if ( !config || !config->device || !config->size )
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config && config->device && config->size );
+    AIO_ASSERT( VALID_ENUM( ADGainCode, gainCode ) );
 
-    if ( !VALID_ENUM( ADGainCode, gainCode ) ) 
-        return -AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_PARAMETER, 
+                                 channel <= AD_MAX_CHANNELS && channel < config->mux_settings.ADCMUXChannels );
 
-    /* AIOUSBDevice *deviceDesc = ADCConfigBlockGetAIOUSBDevice( config , &result ); */
-    /* if (result != AIOUSB_SUCCESS ) */
-    /*     return -AIOUSB_ERROR_INVALID_DEVICE; */
-    /* if ( channel > AD_MAX_CHANNELS || channel >= deviceDesc->ADCMUXChannels ) */
-    if ( channel > AD_MAX_CHANNELS || channel >= config->mux_settings.ADCMUXChannels )
-        return -AIOUSB_ERROR_INVALID_PARAMETER;
 
     int reg = AD_CONFIG_GAIN_CODE + channel / config->mux_settings.ADCChannelsPerGroup;
 
@@ -232,9 +209,9 @@ AIORET_TYPE ADCConfigBlockSetRangeSingle( ADCConfigBlock *config, unsigned long 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockSetRegister( ADCConfigBlock *config, unsigned reg, unsigned char value )
 {
-    assert(config);
-    if ( reg > AD_MAX_CONFIG_REGISTERS )
-        return -AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ASSERT( config );
+    AIO_ASSERT( reg <= AD_MAX_CONFIG_REGISTERS );
+
     config->registers[reg] = value;
     return AIOUSB_SUCCESS;
 }
@@ -242,18 +219,15 @@ AIORET_TYPE ADCConfigBlockSetRegister( ADCConfigBlock *config, unsigned reg, uns
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockGetTesting( const ADCConfigBlock *obj) 
 {
-    assert(obj);
-    if ( !obj ) 
-        return -AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ASSERT( obj );
+
     return obj->testing;
 }
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockGetDebug( const ADCConfigBlock *obj) 
 {
-    assert(obj);
-    if ( !obj ) 
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+    AIO_ASSERT( obj );
     return obj->debug;
 }
 
@@ -266,8 +240,7 @@ AIORET_TYPE ADCConfigBlockGetDebug( const ADCConfigBlock *obj)
  */
 AIORET_TYPE ADCConfigBlockInit(ADCConfigBlock *config, AIOUSBDevice *deviceDesc, unsigned size )
 {
-    if ( !config )
-        return AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ASSERT( config );
 
     config->device   = deviceDesc;
     config->size     = size;
@@ -294,8 +267,7 @@ AIORET_TYPE ADCConfigBlockInit(ADCConfigBlock *config, AIOUSBDevice *deviceDesc,
  */
 AIORET_TYPE ADCConfigBlockInitForCounterScan(ADCConfigBlock *config, AIOUSBDevice *deviceDesc  )
 {
-    if ( !config )
-        return AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ASSERT( config );
 
     config->device   = deviceDesc;
     config->size     = deviceDesc->cachedConfigBlock.size;
@@ -311,7 +283,6 @@ AIORET_TYPE ADCConfigBlockInitForCounterScan(ADCConfigBlock *config, AIOUSBDevic
     config->registers[AD_CONFIG_MUX_START_END]          = 0;
     config->registers[AD_CONFIG_START_STOP_CHANNEL_EX]  = 0;
     
-
     return AIOUSB_SUCCESS;
 }
 
@@ -347,11 +318,8 @@ void ADC_VerifyAndCorrectConfigBlock( ADCConfigBlock *configBlock , AIOUSBDevice
 AIORET_TYPE ADCConfigBlockSetAllGainCodeAndDiffMode(ADCConfigBlock *config, unsigned gainCode, AIOUSB_BOOL differentialMode)
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    if (!config || !config->size ) 
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
-
-    if ( !VALID_ENUM( ADGainCode, gainCode ) ) 
-        return -AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ASSERT( config );
+    AIO_ASSERT( VALID_ENUM( ADGainCode, gainCode ) );
 
     if (differentialMode)
         gainCode |= AD_DIFFERENTIAL_MODE;
@@ -365,11 +333,11 @@ AIORET_TYPE ADCConfigBlockSetAllGainCodeAndDiffMode(ADCConfigBlock *config, unsi
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE  ADCConfigBlockGetGainCode(const ADCConfigBlock *config, unsigned channel)
 {
-    if ( !config )
-        return -AIOUSB_ERROR_INVALID_DATA;
-
+    AIO_ASSERT( config );
     unsigned gainCode = FIRST_ENUM(ADGainCode);
-    if ( config != 0 &&  config->size != 0 ) {
+    
+
+    if ( config->size != 0 ) {
     /* if ( config != 0 && config->device != 0 &&   config->size != 0 ) {  */
         /* AIOUSBDevice *deviceDesc = ( AIOUSBDevice* )config->device; */
         /* if (channel < AD_MAX_CHANNELS && channel < deviceDesc->ADCMUXChannels) { */
@@ -386,25 +354,20 @@ AIORET_TYPE  ADCConfigBlockGetGainCode(const ADCConfigBlock *config, unsigned ch
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockSetGainCode(ADCConfigBlock *config, unsigned channel, unsigned char gainCode)
 {
-    if (!config || !config->size )
-        return -AIOUSB_ERROR_INVALID_DATA;
-    if (!VALID_ENUM(ADGainCode,gainCode ) )
-        return -AIOUSB_ERROR_INVALID_PARAMETER;
-
     AIORET_TYPE result = AIOUSB_SUCCESS;
 
-    /* if ( !deviceDesc->ADCChannelsPerGroup  ) */
-    /*     return  -AIOUSB_ERROR_INVALID_DEVICE_SETTING; */
-    if ( !config->mux_settings.ADCChannelsPerGroup ) 
-        return  -AIOUSB_ERROR_INVALID_DEVICE_SETTING;
+    AIO_ASSERT( config );
+    AIO_ASSERT( VALID_ENUM(ADGainCode,gainCode ) );
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_DEVICE_SETTING, config->mux_settings.ADCChannelsPerGroup );
 
     /* if (channel < AD_MAX_CHANNELS && channel < deviceDesc->ADCMUXChannels) { */
     /*     int reg = AD_CONFIG_GAIN_CODE + channel / deviceDesc->ADCChannelsPerGroup; */
     if (channel < AD_MAX_CHANNELS && channel < config->mux_settings.ADCMUXChannels) {
         int reg = AD_CONFIG_GAIN_CODE + channel / config->mux_settings.ADCChannelsPerGroup;
 
-        if ( reg > AD_NUM_GAIN_CODE_REGISTERS )
-            return -AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING;
+        /* if ( reg > AD_NUM_GAIN_CODE_REGISTERS ) */
+        /*     return -AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING; */
+        AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING, reg <= AD_NUM_GAIN_CODE_REGISTERS );
 
         config->registers[ reg ] = (config->registers[ reg ] & 
                                     ~( unsigned char )AD_GAIN_CODE_MASK) | 
@@ -417,8 +380,9 @@ AIORET_TYPE ADCConfigBlockSetGainCode(ADCConfigBlock *config, unsigned channel, 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockSetEndChannel( ADCConfigBlock *config, unsigned char endChannel  )
 {
-    if (!config || !config->size )
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+    AIO_ASSERT( config && config->size );
+
+
     if ( config->size == AD_MUX_CONFIG_REGISTERS) {
         config->registers[ AD_CONFIG_START_END ]         = (unsigned char)((LOW_BITS(endChannel)<<4 )  | LOW_BITS(config->registers[ AD_CONFIG_START_END ]      ));
         config->registers[ AD_CONFIG_MUX_START_END ]     = (unsigned char)( HIGH_BITS(endChannel)      | LOW_BITS(config->registers[ AD_CONFIG_MUX_START_END ]  ));
@@ -434,8 +398,8 @@ AIORET_TYPE ADCConfigBlockSetEndChannel( ADCConfigBlock *config, unsigned char e
  */
 AIORET_TYPE ADCConfigBlockSetStartChannel( ADCConfigBlock *config, unsigned char startChannel  )
 {
-    if (!config || !config->size )
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config );
+
     if ( config->size == AD_MUX_CONFIG_REGISTERS) {
         config->registers[ AD_CONFIG_START_END ]     = (unsigned char)( HIGH_BITS(config->registers[ AD_CONFIG_START_END ])     | LOW_BITS(startChannel));
         config->registers[ AD_CONFIG_MUX_START_END ] = (unsigned char)( HIGH_BITS(config->registers[ AD_CONFIG_MUX_START_END ]) | ( HIGH_BITS(startChannel) >> 4 ));
@@ -449,8 +413,8 @@ AIORET_TYPE ADCConfigBlockSetStartChannel( ADCConfigBlock *config, unsigned char
 AIORET_TYPE ADCConfigBlockSetScanRange(ADCConfigBlock *config, unsigned startChannel, unsigned endChannel)
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    if (!config || !config->size )
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config && config->size );
 
     unsigned adcmux_channels = ( config->mux_settings.defined ? config->mux_settings.ADCMUXChannels : AD_MAX_CHANNELS );
 
@@ -493,8 +457,7 @@ AIORET_TYPE ADCConfigBlockGetCalMode(const ADCConfigBlock *config)
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
 
-    if (!config || !config->size ) 
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config );
 
     retval = config->registers[ AD_CONFIG_CAL_MODE ];
     return retval;
@@ -504,8 +467,8 @@ AIORET_TYPE ADCConfigBlockGetCalMode(const ADCConfigBlock *config)
 AIORET_TYPE ADCConfigBlockGetStartChannel( const ADCConfigBlock *config)
 {
     AIORET_TYPE result = AIOUSB_SUCCESS;
-    if ( !config || config->size == 0 )
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config && config->size );
+
 
     if (config->size == AD_MUX_CONFIG_REGISTERS) {
         result = (AIORET_TYPE)((config->registers[ AD_CONFIG_MUX_START_END ] & 0x0f) << 4) | (config->registers[ AD_CONFIG_START_END ] & 0xf);
@@ -520,8 +483,8 @@ AIORET_TYPE ADCConfigBlockGetStartChannel( const ADCConfigBlock *config)
 AIORET_TYPE ADCConfigBlockGetEndChannel( const ADCConfigBlock *config)
 {
     AIORET_TYPE endChannel = AIOUSB_SUCCESS;
-    if (!config || !config->size ) 
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config && config->size );
+
 
     if ( config->size == AD_MUX_CONFIG_REGISTERS)
         endChannel = (AIORET_TYPE)(config->registers[ AD_CONFIG_MUX_START_END ] & 0xf0)
@@ -536,8 +499,8 @@ AIORET_TYPE ADCConfigBlockGetEndChannel( const ADCConfigBlock *config)
 AIORET_TYPE ADCConfigBlockGetOversample( const ADCConfigBlock *config )
 {
     AIORET_TYPE result = AIOUSB_SUCCESS;
-    if ( !config )
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config );
+
     result = config->registers[ AD_CONFIG_OVERSAMPLE ];
     return result;
 }
@@ -546,8 +509,8 @@ AIORET_TYPE ADCConfigBlockGetOversample( const ADCConfigBlock *config )
 AIORET_TYPE ADCConfigBlockSetOversample( ADCConfigBlock *config, unsigned overSample )
 {
     AIORET_TYPE result = AIOUSB_SUCCESS;
-    if ( !config )
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config );
+
     config->registers[ AD_CONFIG_OVERSAMPLE ] = ( unsigned char )overSample;
     return result;
 }
@@ -555,15 +518,15 @@ AIORET_TYPE ADCConfigBlockSetOversample( ADCConfigBlock *config, unsigned overSa
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockGetTimeout( const ADCConfigBlock *config )
 {
-    if ( !config ) 
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config );
+
     return config->timeout;
 }
 
 AIORET_TYPE ADCConfigBlockSetTimeout( ADCConfigBlock *config, unsigned timeout )
 {
-    if ( !config ) 
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config );
+
     config->timeout = timeout;
     return AIOUSB_SUCCESS;
 }
@@ -572,8 +535,7 @@ AIORET_TYPE ADCConfigBlockSetTimeout( ADCConfigBlock *config, unsigned timeout )
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockGetTriggerMode(const ADCConfigBlock *config)
 {
-    if (!config || !config->size ) 
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config );
 
     AIORET_TYPE triggerMode = 0;
     triggerMode = config->registers[ AD_CONFIG_TRIG_COUNT ] & ( unsigned char )AD_TRIGGER_VALID_MASK;
@@ -584,36 +546,41 @@ AIORET_TYPE ADCConfigBlockGetTriggerMode(const ADCConfigBlock *config)
 AIORET_TYPE ADCConfigBlockSetTriggerMode(ADCConfigBlock *config, unsigned triggerMode )
 {
     AIORET_TYPE result = AIOUSB_SUCCESS;
-    if (!config || !config->size ) 
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
-    if ( (triggerMode  & ~AD_TRIGGER_VALID_MASK ) != 0 )
-        return -AIOUSB_ERROR_INVALID_DATA;
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config && config->size);
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_DATA, !(triggerMode  & ~AD_TRIGGER_VALID_MASK ) )
 
     config->registers[ AD_CONFIG_TRIG_COUNT ] = triggerMode;
     return result;
 }
 
+
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockSetDifferentialMode(ADCConfigBlock *config, unsigned channel, AIOUSB_BOOL differentialMode)
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    if ( !config || config->device != 0 || !config->size )
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config && config->size);
     
-    /* AIOUSBDevice * deviceDesc = ( AIOUSBDevice* )config->device; */
+    AIOUSBDevice * deviceDesc = ( AIOUSBDevice* )config->device;
+
     /* if ( channel >= deviceDesc->ADCMUXChannels || channel >= AD_MAX_CHANNELS ) */
     /*     return -AIOUSB_ERROR_INVALID_DATA; */
+    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_DATA, channel < deviceDesc->ADCMUXChannels && channel < AD_MAX_CHANNELS );
+    
     if ( channel >= config->mux_settings.ADCMUXChannels || channel >= AD_MAX_CHANNELS )
         return -AIOUSB_ERROR_INVALID_DATA;
     if ( !config->mux_settings.ADCChannelsPerGroup ) 
         return -AIOUSB_ERROR_INVALID_DEVICE_FUNCTIONAL_PARAMETER;
 
+    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_DEVICE_FUNCTIONAL_PARAMETER, deviceDesc->ADCChannelsPerGroup );
     /* if ( !deviceDesc->ADCChannelsPerGroup )  */
     /*     return -AIOUSB_ERROR_INVALID_DEVICE_FUNCTIONAL_PARAMETER; */
-    /* int reg = AD_CONFIG_GAIN_CODE + channel / deviceDesc->ADCChannelsPerGroup; */
+
     int reg = AD_CONFIG_GAIN_CODE + channel / config->mux_settings.ADCChannelsPerGroup;
-    if ( reg < AD_NUM_GAIN_CODE_REGISTERS ) 
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING;
+
+    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING , reg >= AD_NUM_GAIN_CODE_REGISTERS );
+    /* if ( reg < AD_NUM_GAIN_CODE_REGISTERS )  */
+    /*     return -AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING; */
+
     if (differentialMode)
         config->registers[ reg ] |= ( unsigned char )AD_DIFFERENTIAL_MODE;
     else
@@ -625,9 +592,8 @@ AIORET_TYPE ADCConfigBlockSetDifferentialMode(ADCConfigBlock *config, unsigned c
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE _assist_trigger_select( ADCConfigBlock *config, AIOUSB_BOOL val , int setting )
 {
-    assert(config);
-    if ( !config )
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config && config->size);
+
     config->registers[AD_REGISTER_TRIG_COUNT] = (config->registers[AD_REGISTER_TRIG_COUNT] & ~setting) | ( val ? setting : 0 );
     return AIOUSB_SUCCESS;
 }
@@ -1082,19 +1048,18 @@ ADCConfigBlock *NewADCConfigBlockFromJSON( char *str )
     return adc;
 }
 
-void ADCConfigBlockSetClockRate( ADCConfigBlock *config, int clock_rate)
+AIORET_TYPE ADCConfigBlockSetClockRate( ADCConfigBlock *config, int clock_rate)
 {
-    assert(config);
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config );
     config->clock_rate = clock_rate;
+    return AIOUSB_SUCCESS;
 }
 
-int ADCConfigBlockGetClockRate( ADCConfigBlock *config )
+AIORET_TYPE ADCConfigBlockGetClockRate( ADCConfigBlock *config )
 {
-    AIORET_TYPE retval = AIOUSB_SUCCESS;
-    assert(config);
-    retval = config->clock_rate;
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config );
 
-    return retval;
+    return (AIORET_TYPE)config->clock_rate;
 }
 
 
@@ -1233,6 +1198,79 @@ TEST( ADCConfigBlock, SetRange )
     EXPECT_EQ( 1, ADCConfigBlockGetStartChannel( &config ));
     EXPECT_EQ( 13, ADCConfigBlockGetEndChannel( &config ));
     
+}
+
+TEST(ADConfigBlock, ADCConfigBlockSetRangeSingleCheck)
+{
+    ASSERT_EQ( 1,1 );
+    /* AIORET_TYPE ADCConfigBlockSetRangeSingle( ADCConfigBlock *config, unsigned long channel, unsigned char gainCode ) */
+    /* { */
+    /* assert(config && config->device && config->size ); */
+    /* AIORET_TYPE result = AIOUSB_SUCCESS; */
+
+    /* AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config && config->device && config->size ); */
+    /* AIO_ASSERT( VALID_ENUM( ADGainCode, gainCode ) ); */
+
+    /* if ( !VALID_ENUM( ADGainCode, gainCode ) )  */
+    /*     return -AIOUSB_ERROR_INVALID_PARAMETER; */
+    /* AIOUSBDevice *deviceDesc = ADCConfigBlockGetAIOUSBDevice( config , &result ); */
+    /* if (result != AIOUSB_SUCCESS ) */
+    /*     return -AIOUSB_ERROR_INVALID_DEVICE; */
+    /* if ( channel > AD_MAX_CHANNELS || channel >= deviceDesc->ADCMUXChannels ) */
+    /* if ( channel > AD_MAX_CHANNELS || channel >= config->mux_settings.ADCMUXChannels ) */
+    /*     return -AIOUSB_ERROR_INVALID_PARAMETER; */
+
+}
+TEST(ADCConfigBlock, ADCConfigBlockSetTriggerModeTest ) {
+
+    ADCConfigBlock config = {0};
+    config.size = 20;
+    unsigned triggerMode = 64;
+
+    AIORET_TYPE retval;
+    
+    ASSERT_DEATH( { retval = ADCConfigBlockSetTriggerMode( &config, triggerMode );}, "Assertion `.*triggerMode.*AD_TRIGGER_VALID_MASK" );
+    triggerMode = 24;
+    retval = ADCConfigBlockSetTriggerMode( &config, triggerMode );
+    ASSERT_GE( retval, 0 );
+   
+}
+
+TEST(ADCConfigBlock,SetDifferentialModeTest ) {
+    ASSERT_EQ(1,1);
+/* AIORET_TYPE ADCConfigBlockSetDifferentialMode(ADCConfigBlock *config, unsigned channel, AIOUSB_BOOL differentialMode) */
+/* { */
+/*     AIORET_TYPE retval = AIOUSB_SUCCESS; */
+/*     AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config && config->size); */
+    
+/*     /\* AIOUSBDevice * deviceDesc = ( AIOUSBDevice* )config->device; *\/ */
+/*     /\* if ( channel >= deviceDesc->ADCMUXChannels || channel >= AD_MAX_CHANNELS ) *\/ */
+/*     /\*     return -AIOUSB_ERROR_INVALID_DATA; *\/ */
+/*     AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_DATA, channel < deviceDesc->ADCMUXChannels && channel < AD_MAX_CHANNELS ); */
+    
+/*     if ( channel >= config->mux_settings.ADCMUXChannels || channel >= AD_MAX_CHANNELS ) */
+/*         return -AIOUSB_ERROR_INVALID_DATA; */
+/*     if ( !config->mux_settings.ADCChannelsPerGroup )  */
+/*         return -AIOUSB_ERROR_INVALID_DEVICE_FUNCTIONAL_PARAMETER; */
+
+/*     AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_DEVICE_FUNCTIONAL_PARAMETER, deviceDesc->ADCChannelsPerGroup ); */
+/*     /\* if ( !deviceDesc->ADCChannelsPerGroup )  *\/ */
+/*     /\*     return -AIOUSB_ERROR_INVALID_DEVICE_FUNCTIONAL_PARAMETER; *\/ */
+
+/*     int reg = AD_CONFIG_GAIN_CODE + channel / config->mux_settings.ADCChannelsPerGroup; */
+
+/*     AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING , reg >= AD_NUM_GAIN_CODE_REGISTERS ); */
+/*     /\* if ( reg < AD_NUM_GAIN_CODE_REGISTERS )  *\/ */
+/*     /\*     return -AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING; *\/ */
+
+/*     if (differentialMode) */
+/*         config->registers[ reg ] |= ( unsigned char )AD_DIFFERENTIAL_MODE; */
+/*     else */
+/*         config->registers[ reg ] &= ~( unsigned char )AD_DIFFERENTIAL_MODE; */
+
+/*     return retval; */
+/* } */
+
 }
 
 

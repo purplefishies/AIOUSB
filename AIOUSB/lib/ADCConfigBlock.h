@@ -48,14 +48,13 @@ PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockInitializeDefault( ADCConfigBlock *confi
 PUBLIC_EXTERN void ADC_VerifyAndCorrectConfigBlock( ADCConfigBlock *configBlock , AIOUSBDevice *deviceDesc  );
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetAllGainCodeAndDiffMode(ADCConfigBlock *config, unsigned gainCode, AIOUSB_BOOL differentialMode);
 
-PUBLIC_EXTERN unsigned char *ADCConfigBlockGetRegisters( ADCConfigBlock *config );
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetRegister( ADCConfigBlock *config, unsigned reg, unsigned char value );
 
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetGainCode( const  ADCConfigBlock *config, unsigned channel );
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetGainCode(ADCConfigBlock *config, unsigned channel, unsigned char gainCode);
 
-PUBLIC_EXTERN void ADCConfigBlockSetClockRate( ADCConfigBlock *config, int clock_rate);
-PUBLIC_EXTERN int ADCConfigBlockGetClockRate( ADCConfigBlock *config );
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetClockRate( ADCConfigBlock *config, int clock_rate);
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetClockRate( ADCConfigBlock *config );
 
 
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetScanRange(ADCConfigBlock *config, unsigned startChannel, unsigned endChannel);
