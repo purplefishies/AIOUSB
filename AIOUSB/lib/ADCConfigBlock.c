@@ -1210,24 +1210,13 @@ TEST(ADConfigBlock, ADCConfigBlockSetRangeSingleCheck)
     retval = ADCConfigBlockSetRangeSingle( &config, channel, gain );
     ASSERT_GE( retval, -AIOUSB_ERROR_INVALID_ADCCONFIG_MUX_SETTING );
 
+    config.mux_settings.ADCChannelsPerGroup = 1;
+    config.mux_settings.ADCMUXChannels = 128;
+
+    retval = ADCConfigBlockSetRangeSingle( &config, channel, gain );
+    ASSERT_GE( retval, 0 );
 
     ASSERT_DEATH( { ADCConfigBlockSetRangeSingle( &config, channel, 15 ); } , "gainCode >=.*gainCode <=.*" );
-    /* AIORET_TYPE ADCConfigBlockSetRangeSingle( ADCConfigBlock *config, unsigned long channel, unsigned char gainCode ) */
-    /* { */
-    /* assert(config && config->device && config->size ); */
-    /* AIORET_TYPE result = AIOUSB_SUCCESS; */
-
-    /* AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config && config->device && config->size ); */
-    /* AIO_ASSERT( VALID_ENUM( ADGainCode, gainCode ) ); */
-
-    /* if ( !VALID_ENUM( ADGainCode, gainCode ) )  */
-    /*     return -AIOUSB_ERROR_INVALID_PARAMETER; */
-    /* AIOUSBDevice *deviceDesc = ADCConfigBlockGetAIOUSBDevice( config , &result ); */
-    /* if (result != AIOUSB_SUCCESS ) */
-    /*     return -AIOUSB_ERROR_INVALID_DEVICE; */
-    /* if ( channel > AD_MAX_CHANNELS || channel >= deviceDesc->ADCMUXChannels ) */
-    /* if ( channel > AD_MAX_CHANNELS || channel >= config->mux_settings.ADCMUXChannels ) */
-    /*     return -AIOUSB_ERROR_INVALID_PARAMETER; */
 
 }
 TEST(ADCConfigBlock, ADCConfigBlockSetTriggerModeTest ) {
