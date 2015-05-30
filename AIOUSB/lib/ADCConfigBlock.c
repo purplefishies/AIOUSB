@@ -558,27 +558,14 @@ AIORET_TYPE ADCConfigBlockSetDifferentialMode(ADCConfigBlock *config, unsigned c
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config && config->size);
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_PARAMETER, channel <= AD_MAX_CHANNELS );
+
+    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_ADCCONFIG_MUX_SETTING, config->mux_settings.ADCChannelsPerGroup );
+    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_PARAMETER, channel <= config->mux_settings.ADCMUXChannels );
     
-    AIOUSBDevice * deviceDesc = ( AIOUSBDevice* )config->device;
+    int reg = AD_CONFIG_GAIN_CODE + channel % config->mux_settings.ADCChannelsPerGroup;
 
-    /* if ( channel >= deviceDesc->ADCMUXChannels || channel >= AD_MAX_CHANNELS ) */
-    /*     return -AIOUSB_ERROR_INVALID_DATA; */
-    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_DATA, channel < deviceDesc->ADCMUXChannels && channel < AD_MAX_CHANNELS );
-    
-    if ( channel >= config->mux_settings.ADCMUXChannels || channel >= AD_MAX_CHANNELS )
-        return -AIOUSB_ERROR_INVALID_DATA;
-    if ( !config->mux_settings.ADCChannelsPerGroup ) 
-        return -AIOUSB_ERROR_INVALID_DEVICE_FUNCTIONAL_PARAMETER;
-
-    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_DEVICE_FUNCTIONAL_PARAMETER, deviceDesc->ADCChannelsPerGroup );
-    /* if ( !deviceDesc->ADCChannelsPerGroup )  */
-    /*     return -AIOUSB_ERROR_INVALID_DEVICE_FUNCTIONAL_PARAMETER; */
-
-    int reg = AD_CONFIG_GAIN_CODE + channel / config->mux_settings.ADCChannelsPerGroup;
-
-    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING , reg >= AD_NUM_GAIN_CODE_REGISTERS );
-    /* if ( reg < AD_NUM_GAIN_CODE_REGISTERS )  */
-    /*     return -AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING; */
+    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING , reg < AD_NUM_GAIN_CODE_REGISTERS );
 
     if (differentialMode)
         config->registers[ reg ] |= ( unsigned char )AD_DIFFERENTIAL_MODE;
@@ -1235,39 +1222,17 @@ TEST(ADCConfigBlock, ADCConfigBlockSetTriggerModeTest ) {
 }
 
 TEST(ADCConfigBlock,SetDifferentialModeTest ) {
-    ASSERT_EQ(1,1);
-/* AIORET_TYPE ADCConfigBlockSetDifferentialMode(ADCConfigBlock *config, unsigned channel, AIOUSB_BOOL differentialMode) */
-/* { */
-/*     AIORET_TYPE retval = AIOUSB_SUCCESS; */
-/*     AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config && config->size); */
-    
-/*     /\* AIOUSBDevice * deviceDesc = ( AIOUSBDevice* )config->device; *\/ */
-/*     /\* if ( channel >= deviceDesc->ADCMUXChannels || channel >= AD_MAX_CHANNELS ) *\/ */
-/*     /\*     return -AIOUSB_ERROR_INVALID_DATA; *\/ */
-/*     AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_DATA, channel < deviceDesc->ADCMUXChannels && channel < AD_MAX_CHANNELS ); */
-    
-/*     if ( channel >= config->mux_settings.ADCMUXChannels || channel >= AD_MAX_CHANNELS ) */
-/*         return -AIOUSB_ERROR_INVALID_DATA; */
-/*     if ( !config->mux_settings.ADCChannelsPerGroup )  */
-/*         return -AIOUSB_ERROR_INVALID_DEVICE_FUNCTIONAL_PARAMETER; */
+    ADCConfigBlock config = {0};
+    config.size = 20;
+    config.mux_settings.ADCChannelsPerGroup = 1;
+    config.mux_settings.ADCMUXChannels = 128;
+    int channel = 3;
+    AIORET_TYPE retval;
 
-/*     AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_DEVICE_FUNCTIONAL_PARAMETER, deviceDesc->ADCChannelsPerGroup ); */
-/*     /\* if ( !deviceDesc->ADCChannelsPerGroup )  *\/ */
-/*     /\*     return -AIOUSB_ERROR_INVALID_DEVICE_FUNCTIONAL_PARAMETER; *\/ */
+    retval =  ADCConfigBlockSetDifferentialMode( &config, channel, AIOUSB_TRUE );
+    ASSERT_GE( retval, 0 );
 
-/*     int reg = AD_CONFIG_GAIN_CODE + channel / config->mux_settings.ADCChannelsPerGroup; */
-
-/*     AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING , reg >= AD_NUM_GAIN_CODE_REGISTERS ); */
-/*     /\* if ( reg < AD_NUM_GAIN_CODE_REGISTERS )  *\/ */
-/*     /\*     return -AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING; *\/ */
-
-/*     if (differentialMode) */
-/*         config->registers[ reg ] |= ( unsigned char )AD_DIFFERENTIAL_MODE; */
-/*     else */
-/*         config->registers[ reg ] &= ~( unsigned char )AD_DIFFERENTIAL_MODE; */
-
-/*     return retval; */
-/* } */
+    ASSERT_DEATH( {ADCConfigBlockSetDifferentialMode( &config, 1024, AIOUSB_TRUE );}, "Assertion `channel <= AD_MAX_CHANNELS" );
 
 }
 
