@@ -39,12 +39,14 @@ AIORET_TYPE DeleteADCConfigBlock( ADCConfigBlock *config )
 }
 
 /*----------------------------------------------------------------------------*/
-AIOUSBDevice *ADCConfigBlockGetAIOUSBDevice( ADCConfigBlock *obj , AIORET_TYPE *res ) 
+AIOUSBDevice *ADCConfigBlockGetAIOUSBDevice( ADCConfigBlock *obj , AIORET_TYPE *result ) 
 {
-    if (!obj ) {
-        *res = -AIOUSB_ERROR_DEVICE_NOT_FOUND;
-        return NULL;
-    }
+    AIO_ERROR_VALID_DATA_W_CODE(NULL, 
+                                { if (result) *result = AIOUSB_ERROR_DEVICE_NOT_FOUND;
+                                    errno = AIO_MAKE_ERROR(AIOUSB_ERROR_DEVICE_NOT_FOUND);
+                                },
+                                obj 
+                                );
 
     return obj->device;
 }
@@ -1230,6 +1232,20 @@ TEST(ADCConfigBlock,SetDifferentialModeTest ) {
     ASSERT_GE( retval, 0 );
 
     ASSERT_DEATH( {ADCConfigBlockSetDifferentialMode( &config, 1024, AIOUSB_TRUE );}, "Assertion `channel <= AD_MAX_CHANNELS" );
+
+}
+
+TEST(ADCChannels, SomeFunctions ) {
+    ADCConfigBlock config = {0};
+    AIORET_TYPE retval;
+    AIOUSBDevice *dev = NULL;
+    dev = ADCConfigBlockGetAIOUSBDevice( &config, NULL);
+    ASSERT_FALSE( dev );
+
+    dev = ADCConfigBlockGetAIOUSBDevice( NULL, NULL);
+
+    ASSERT_EQ( errno, AIO_MAKE_ERROR( AIOUSB_ERROR_DEVICE_NOT_FOUND ) );
+
 
 }
 
