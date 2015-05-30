@@ -189,15 +189,14 @@ AIORET_TYPE ADCConfigBlockSetDebug( ADCConfigBlock *obj, AIOUSB_BOOL debug )
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockSetRangeSingle( ADCConfigBlock *config, unsigned long channel, unsigned char gainCode )
 {
-    assert(config && config->device && config->size );
+
     AIORET_TYPE result = AIOUSB_SUCCESS;
 
-    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config && config->device && config->size );
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config && config->size );
     AIO_ASSERT( VALID_ENUM( ADGainCode, gainCode ) );
-
-    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_PARAMETER, 
-                                 channel <= AD_MAX_CHANNELS && channel < config->mux_settings.ADCMUXChannels );
-
+    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_PARAMETER, channel <= AD_MAX_CHANNELS );
+    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_ADCCONFIG_MUX_SETTING, config->mux_settings.ADCChannelsPerGroup );
+    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_PARAMETER, channel <= config->mux_settings.ADCMUXChannels );
 
     int reg = AD_CONFIG_GAIN_CODE + channel / config->mux_settings.ADCChannelsPerGroup;
 
@@ -1202,7 +1201,17 @@ TEST( ADCConfigBlock, SetRange )
 
 TEST(ADConfigBlock, ADCConfigBlockSetRangeSingleCheck)
 {
-    ASSERT_EQ( 1,1 );
+    ADCConfigBlock config = {0};
+    config.size = 20;
+    ADGainCode gain = AD_GAIN_CODE_2V;
+    unsigned long channel = 2;
+    AIORET_TYPE retval ;
+
+    retval = ADCConfigBlockSetRangeSingle( &config, channel, gain );
+    ASSERT_GE( retval, -AIOUSB_ERROR_INVALID_ADCCONFIG_MUX_SETTING );
+
+
+    ASSERT_DEATH( { ADCConfigBlockSetRangeSingle( &config, channel, 15 ); } , "gainCode >=.*gainCode <=.*" );
     /* AIORET_TYPE ADCConfigBlockSetRangeSingle( ADCConfigBlock *config, unsigned long channel, unsigned char gainCode ) */
     /* { */
     /* assert(config && config->device && config->size ); */
