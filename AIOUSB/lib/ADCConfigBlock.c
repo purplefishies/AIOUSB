@@ -67,13 +67,12 @@ AIORET_TYPE ADCConfigBlockSetAIOUSBDevice( ADCConfigBlock *obj, AIOUSBDevice *de
 
 AIORET_TYPE ADCConfigBlockSetDevice( ADCConfigBlock *obj, AIOUSBDevice *dev )
 {
-    AIORESULT result = _check_ADCConfigBlock( obj );
-    if ( result != AIOUSB_SUCCESS )
-        return result;
-    if ( !dev )
-        return AIOUSB_ERROR_INVALID_DEVICE;
+
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_CONFIG, obj );
+    AIO_ASSERT(dev);
+
     obj->device = dev;
-    return result;
+    return AIOUSB_SUCCESS;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -150,8 +149,7 @@ int _adcblock_valid_channel_settings(AIORET_TYPE in, ADCConfigBlock *config , in
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockSetSize( ADCConfigBlock *obj, unsigned size )
 {
-    if ( !obj )
-        return AIOUSB_ERROR_INVALID_ADCCONFIG;
+    AIO_ASSERT_AIORET_TYPE(AIOUSB_ERROR_INVALID_ADCCONFIG, obj );
 
     obj->size = size;
     return AIOUSB_SUCCESS;
@@ -160,8 +158,7 @@ AIORET_TYPE ADCConfigBlockSetSize( ADCConfigBlock *obj, unsigned size )
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockGetSize( const ADCConfigBlock *obj )
 {
-    if ( !obj )
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG;
+    AIO_ASSERT_AIORET_TYPE(AIOUSB_ERROR_INVALID_ADCCONFIG, obj );
 
     return obj->size;
 }
