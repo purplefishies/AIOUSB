@@ -227,7 +227,7 @@ mostlyclean:
 	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS)
 
 clean:
-	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) $(GTAGS_FILES) $(TESTOBJS)
+	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) $(GTAGS_FILES) $(TESTOBJS) $(CPPTEST_FILES)
 
 distclean: 
 	-rm -f $(LIBS) $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) $(TESTOBJS) cscope.out *_test* *.tap *.mexglx
