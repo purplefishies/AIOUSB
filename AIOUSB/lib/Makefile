@@ -37,6 +37,10 @@ USBDevice.o
 HEADERS		:= $(wildcard *.h)
 TESTOBJS	:= $(wildcard $(PWD)/tests/*_test)
 
+TESTFILES	:= $(shell grep  -lP "\bmain\b" *.c)
+CPPTEST_FILES 	:= $(patsubst %.c,%_cpp_test,$(TESTFILES))
+
+
 include $(AIOUSB_ROOT)/Mkfiles/oses.inc
 
 ifeq ("$(OSTYPE)","Darwin") 
@@ -72,7 +76,6 @@ CPPDBGLIB 	:= $(LIBPREFIX)aiousbcppdbg.$(STATICSUFFIX)
 
 
 ifdef DEBUG
-        # DEBUGOPTS       += -ggdb $(DEBUG)
 	DEBUGOPTS	+= -g
 else
         DEBUGOPTS       := -DNDEBUG
@@ -108,6 +111,8 @@ GTAGS_FILES	:= GPATH GRTAGS GSYMS GTAGS
 
 all_cscope: $(LIBS) cscope
 
+test:	$(CPPTEST_FILES)
+	for i in $(CPPTEST_FILES); do ./$$i ;  done 
 
 
 #*******************************  LIBRARIES  ********************************
