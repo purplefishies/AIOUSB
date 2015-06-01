@@ -112,7 +112,12 @@ GTAGS_FILES	:= GPATH GRTAGS GSYMS GTAGS
 all_cscope: $(LIBS) cscope
 
 test:	$(CPPTEST_FILES)
-	for i in $(CPPTEST_FILES); do ./$$i ;  done 
+	for i in $(CPPTEST_FILES); \
+		do ./$$i 2>/dev/null >/dev/null; \
+		if [ "$$?" != "0" ] ; then echo "$$i had an error"; exit 1; fi \
+	done
+
+
 
 
 #*******************************  LIBRARIES  ********************************
