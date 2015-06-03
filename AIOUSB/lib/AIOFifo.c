@@ -260,6 +260,9 @@ AIORET_TYPE AIOFifoReadAllOrNone( AIOFifo *fifo, void *tobuf , unsigned maxsize 
     return actsize;
 }
 
+AIORET_TYPE AIOFifoReadPosition( void *nfifo )   { return ((AIOFifo *)nfifo)->read_pos ;  } ;
+AIORET_TYPE AIOFifoWritePosition( void *nfifo )  { return ((AIOFifo *)nfifo)->write_pos;  } ;
+
 
 TEMPLATE_AIOFIFO_API( Counts, uint16_t );
 TEMPLATE_AIOFIFO_API( Volts, double );

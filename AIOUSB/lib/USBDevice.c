@@ -98,9 +98,7 @@ int FindUSBDevices( USBDevice **devs, int *size )
     *size = 0;
 
 
-    int libusbResult = libusb_init( NULL );
-    AIO_ERROR_VALID_DATA( -libusbResult, libusbResult == LIBUSB_SUCCESS );
-
+    int libusbResult = LIBUSB_SUCCESS;
 
     int numDevices = libusb_get_device_list(NULL, &deviceList);
     if (numDevices > 0) {
@@ -365,6 +363,7 @@ TEST(USBDevice,FindDevices )
 {
     USBDevice *devs = NULL;
     int size = 0;
+    libusb_init( NULL );        /* Required for FindUSBDevices */
     FindUSBDevices( &devs, &size );
     
     EXPECT_GE( size, 0 );

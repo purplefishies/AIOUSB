@@ -1407,12 +1407,13 @@ AIORESULT NewPopulateTable( AIODevicePopulator *dp )
     if ( ! dp )
         return AIOUSB_ERROR_INVALID_PARAMETER;
 
+    AIODeviceTableInit();
+
     dp->get_device_ids( dp  );
     for ( int i = 0; i < MIN( dp->size, MAX_USB_DEVICES ) ; ) {
         AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &i , dp->products[i] , NULL );
     }
 
-    AIOUSB_SetInit();
     return result;
 }
 
@@ -1450,7 +1451,6 @@ AIORET_TYPE AIODeviceTablePopulateTable(void)
         device->usb_device = CopyUSBDevice( &usbdevices[i] );
     }
     
-    AIOUSB_SetInit();
     return AIOUSB_SUCCESS;
 }
 
@@ -1465,7 +1465,6 @@ AIORET_TYPE AIODeviceTablePopulateTable(void)
 unsigned long AIOUSB_Init(void) 
 {
     AIORESULT result = AIOUSB_SUCCESS;
-    AIORET_TYPE retval = AIOUSB_SUCCESS;
 
     if(!AIOUSB_IsInit()) {
           AIODeviceTableInit();
@@ -1482,8 +1481,6 @@ unsigned long AIOUSB_Init(void)
                           if ( AIODeviceTablePopulateTable() != AIOUSB_SUCCESS ) {
                               pthread_mutex_destroy(&aiousbMutex);
                               result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult);
-                          } else {
-                              AIOUSB_SetInit();
                           }
 
                         } else
@@ -1494,10 +1491,7 @@ unsigned long AIOUSB_Init(void)
             } else
               result = AIOUSB_ERROR_INVALID_MUTEX;
 #else
-          retval  = AIODeviceTablePopulateTable();
-          if ( retval >= AIOUSB_SUCCESS ) {
-              AIOUSB_SetInit();
-          }
+          result  = AIODeviceTablePopulateTable();
 
 #endif
 

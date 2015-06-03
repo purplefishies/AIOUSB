@@ -171,7 +171,6 @@ TEMPLATE_AIOFIFO_INTERFACE(Counts,uint16_t);
 TEMPLATE_AIOFIFO_INTERFACE(Volts,double);
 
 
-
 AIOFifo *NewAIOFifo( unsigned int size , unsigned int refsize );
 void DeleteAIOFifo( AIOFifo *fifo );
 
@@ -189,6 +188,10 @@ AIORET_TYPE AIOFifoSizeRemaining( void *fifo );
 AIORET_TYPE AIOFifoReadSize( void *tmpfifo );
 AIORET_TYPE AIOFifoGetSize( void *fifo );
 AIORET_TYPE AIOFifoResize( AIOFifo *fifo, size_t newsize );
+
+PUBLIC_EXTERN AIORET_TYPE AIOFifoReadPosition( void *nfifo );
+PUBLIC_EXTERN AIORET_TYPE AIOFifoWritePosition( void *nfifo );
+
 #endif
 
 

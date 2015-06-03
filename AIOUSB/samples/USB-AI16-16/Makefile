@@ -188,11 +188,9 @@ lib/TestCaseSetup.o: lib/TestCaseSetup.cpp lib/TestCaseSetup.h  $(LIBRARY_DEPS)
 # C Rules
 #
 %.c.o:%.c	$(LIBRARY_DEPS) $(COMMON_DEPS) 
-	@echo "Deps: $(LIBRARY_DEPS)"
 	$(CC) $(CFLAGS)  -D_GNU_SOURCE $(OBJFILE_OPTS) $(INCPATH) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $(COPTS) $<  -o $@
 
 %:%.c.o		$(LIBRARY_DEPS)
-	@echo "Deps: $(LIBRARY_DEPS)"
 	$(CC) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $< $(CLIBS) -o $@ $(LDFLAGS)
 
 
