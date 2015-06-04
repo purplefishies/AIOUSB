@@ -51,7 +51,7 @@ int mock_usb_control_transfer( struct aiousb_device *usbdev, uint8_t request_typ
         direction = IN;
     }
     retval = orig_usb_control_transfer( usbdev, request_type, bRequest, wValue, wIndex, data, wLength, timeout );
-    fprintf(outfile,"%s,%s,%#2.2x,%#2.2x,%#2.2x,%#2.2x,", "control", (direction == IN ? "in" : "out" ),request_type, bRequest,wValue,wIndex );
+    fprintf(outfile,"%s,%s,%#2.2x,%#2.2x,%#4.4x,%#4.4x,", "control", (direction == IN ? "in" : "out" ),request_type, bRequest,wValue,wIndex );
     for( int i = 0; i < wLength; i ++ ) {
         fprintf(outfile,"%2.2x ", (unsigned short)data[i] );
     }
