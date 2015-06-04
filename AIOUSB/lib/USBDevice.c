@@ -85,11 +85,15 @@ int USBDeviceClose( USBDevice *usb )
     return AIOUSB_SUCCESS;
 }
 
+AIORET_TYPE AddDevice( int *size , int index, libusb_device **deviceList, USBDevice **devs , struct libusb_device_descriptor *libusbDeviceDesc );
+AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , USBDevice **devs , int *size );
+
+
 /*----------------------------------------------------------------------------*/
 int FindUSBDevices( USBDevice **devs, int *size )
 {
     int result = 0;
-    int numAccesDevices = 0;
+
     libusb_device **deviceList = 0;
 
     AIO_ASSERT_VALID_DATA( -AIOUSB_ERROR_INVALID_DATA, devs );
@@ -97,35 +101,57 @@ int FindUSBDevices( USBDevice **devs, int *size )
 
     *size = 0;
 
-
-    int libusbResult = LIBUSB_SUCCESS;
-
-    int numDevices = libusb_get_device_list(NULL, &deviceList);
-    if (numDevices > 0) {
-        for ( int index = 0; index < numDevices && numAccesDevices < MAX_USB_DEVICES; index++, numAccesDevices ++) {
-                struct libusb_device_descriptor libusbDeviceDesc;
-                libusb_device *usb_device = deviceList[ index ];
-
-                libusbResult = libusb_get_device_descriptor(usb_device, &libusbDeviceDesc);
-
-                if(libusbResult == LIBUSB_SUCCESS) {
-
-                      if(libusbDeviceDesc.idVendor == ACCES_VENDOR_ID) {
-                          *size += 1;
-                          *devs = (USBDevice*)realloc( *devs, (*size )*(sizeof(USBDevice)));
-                          LIBUSBArgs args = { libusb_ref_device(usb_device), NULL, &libusbDeviceDesc };
-                          AIOEither usbretval = InitializeUSBDevice( &( *devs)[*size-1] , &args );
-                          if ( AIOEitherHasError( &usbretval ) )
-                              return -AIOUSB_ERROR_USB_INIT;
-                          result += 1;
-                      }
-                }
-          }
-    }
+    AddAllACCESUSBDevices( deviceList, devs, size );
 
     libusb_free_device_list(deviceList, AIOUSB_TRUE);
 
     return result;
+}
+
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , USBDevice **devs , int *size )
+{
+    AIORET_TYPE result = AIOUSB_SUCCESS;
+    int numAccesDevices = 0;
+    int numDevices = libusb_get_device_list(NULL, &deviceList);
+    if (numDevices > 0) {
+        for ( int index = 0; index < numDevices && numAccesDevices < MAX_USB_DEVICES; index++, numAccesDevices ++) {
+            struct libusb_device_descriptor libusbDeviceDesc;
+            libusb_device *usb_device = deviceList[ index ];
+
+            int libusbResult = libusb_get_device_descriptor(usb_device, &libusbDeviceDesc);
+
+            if (libusbResult == LIBUSB_SUCCESS) {
+
+                if (libusbDeviceDesc.idVendor == ACCES_VENDOR_ID) {
+                    *size += 1;
+                    *devs = (USBDevice*)realloc( *devs, (*size )*(sizeof(USBDevice)));
+                    LIBUSBArgs args = { libusb_ref_device(usb_device), NULL, &libusbDeviceDesc };
+                    AIOEither usbretval = InitializeUSBDevice( &( *devs)[*size-1] , &args );
+                    if ( AIOEitherHasError( &usbretval ) )
+                        return -AIOUSB_ERROR_USB_INIT;
+                    result += 1;
+                }
+            }
+        }
+    }
+    return (AIORET_TYPE)result;
+}
+
+
+/*----------------------------------------------------------------------------*/
+ AIORET_TYPE AddDevice( int *size , int index, libusb_device **deviceList, USBDevice **devs , struct libusb_device_descriptor *libusbDeviceDesc )
+{
+    AIORET_TYPE retval  = AIOUSB_SUCCESS;
+    libusb_device *usb_device = deviceList[ index ];
+    *size += 1;
+    *devs = (USBDevice*)realloc( *devs, (*size )*(sizeof(USBDevice)));
+    LIBUSBArgs args = { libusb_ref_device(usb_device), NULL, libusbDeviceDesc };
+    AIOEither usbretval = InitializeUSBDevice( &( *devs)[*size-1] , &args );
+    if ( AIOEitherHasError( &usbretval ) )
+        return -AIOUSB_ERROR_USB_INIT;
+    retval = (AIORET_TYPE)1;
+    return retval;
 }
 
 /*----------------------------------------------------------------------------*/
