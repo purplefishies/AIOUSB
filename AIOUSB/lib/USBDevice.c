@@ -85,9 +85,6 @@ int USBDeviceClose( USBDevice *usb )
     return AIOUSB_SUCCESS;
 }
 
-AIORET_TYPE AddDevice( int *size , int index, libusb_device **deviceList, USBDevice **devs , struct libusb_device_descriptor *libusbDeviceDesc );
-AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , USBDevice **devs , int *size );
-
 
 /*----------------------------------------------------------------------------*/
 int FindUSBDevices( USBDevice **devs, int *size )

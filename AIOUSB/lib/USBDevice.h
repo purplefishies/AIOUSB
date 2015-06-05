@@ -47,6 +47,7 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args );
 
 
 int FindUSBDevices( USBDevice **devs, int *size );
+AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , USBDevice **devs , int *size );
 void DeleteUSBDevices( USBDevice *devs);
 
 int USBDeviceClose( USBDevice *dev );
