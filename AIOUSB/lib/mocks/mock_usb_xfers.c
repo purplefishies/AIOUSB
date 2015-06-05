@@ -109,13 +109,17 @@ int mock_usb_control_transfer(struct aiousb_device *dev_handle,
 {
 
     libusb_device_handle *handle = get_usb_device( dev_handle );
-    AIO_ERROR_VALID_DATA(-AIOUSB_ERROR_INVALID_LIBUSB_DEVICE_HANDLE, handle );
+    /* AIO_ERROR_VALID_DATA(-AIOUSB_ERROR_INVALID_LIBUSB_DEVICE_HANDLE, handle ); */
+    printf("Mock control ");
 
     if ( request_type ==  USB_WRITE_TO_DEVICE ) {
         direction = OUT;
+        printf(" OUT ");
     } else if ( request_type == USB_READ_FROM_DEVICE ) {
+        printf(" IN ");
         direction = IN;
     }
+    printf("\n");
     switch ( direction ) {
     case IN:
         switch ( bRequest ) {
@@ -146,11 +150,12 @@ int mock_usb_bulk_transfer( USBDevice *usb,
 {
     int libusbResult = LIBUSB_SUCCESS;
     int total = 0;
-
+    printf("Fake mock_usb_bulk_transfer\n");
     AIO_ASSERT_USB( usb );
     AIO_ASSERT( data );
     AIO_ASSERT( actual_length );
-
+    sleep(1);
+    *actual_length = length;
     return length;
 }
 
