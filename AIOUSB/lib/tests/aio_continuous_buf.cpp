@@ -40,7 +40,7 @@ TEST(AIOContinuousBuf,BasicReadAndWritingTest)
     int num_channels = 1;
     int num_scans = 5000, size = num_scans;
 
-    AIOContinuousBuf *buf =  NewAIOContinuousBufTesting( 0, num_scans , num_channels , AIOUSB_FALSE );
+    AIOContinuousBuf *buf =  NewAIOContinuousBufForCounts( 0, num_scans , num_channels );
     AIOBufferType *tmp = (AIOBufferType*)calloc(1,size*sizeof(AIOBufferType));
     unsigned short *countbuf = (unsigned short *)calloc(1,size*sizeof(unsigned short));
     AIORET_TYPE retval;
@@ -130,7 +130,7 @@ TEST_F( AIOContinuousBufSetup, SetsTesting ) {
     AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_AIO16_16A );
     EXPECT_EQ( numDevices, 1 );
 
-    AIOContinuousBuf * buf = NewAIOContinuousBufTesting( 0, actual_bufsize , buf_unit , AIOUSB_FALSE );
+    AIOContinuousBuf * buf = NewAIOContinuousBufForCounts( 0, actual_bufsize , buf_unit );
     AIOContinuousBufSetTesting( buf, AIOUSB_TRUE );
 
     AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ) , &result );
@@ -152,7 +152,7 @@ TEST(AIOContinuousBuf, CanAssignDeviceToConfig) {
     AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_AIO16_16A );
     EXPECT_EQ( numDevices, 1 );
 
-    AIOContinuousBuf *buf = NewAIOContinuousBufTesting( 0, 10, 16 , AIOUSB_TRUE );
+    AIOContinuousBuf *buf = NewAIOContinuousBufForCounts( 0, 10, 16 );
     AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ) , &result );
     ASSERT_EQ( result , AIOUSB_SUCCESS );
     ADCConfigBlock *ad = AIOUSBDeviceGetADCConfigBlock ( dev );
