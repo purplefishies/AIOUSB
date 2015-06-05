@@ -12,6 +12,12 @@
 
 #include <dlfcn.h>
 
+typedef enum {
+    IN,
+    OUT
+} IO_DIRECTION;
+
+
 static int libusb_file_number = 0;
 
 /*----------------------------------------------------------------------------*/
@@ -97,11 +103,14 @@ int mock_usb_bulk_transfer(struct aiousb_device *dev_handle,
                       int *actual_length, unsigned int timeout
                       )
 {
-    if ( request_type == USB_READ_FROM_DEVICE ) { 
-        printf("Reading\n");
-    } else {
-        printf("Writing\n");
+    IO_DIRECTION direction;
+
+    if ( endpoint & LIBUSB_ENDPOINT_OUT ) {
+        direction = OUT;
+    } else if ( endpoint & LIBUSB_ENDPOINT_IN ) {
+        direction = IN;
     }
+
     printf("MockUSB Bulk");
     return length;
 }
