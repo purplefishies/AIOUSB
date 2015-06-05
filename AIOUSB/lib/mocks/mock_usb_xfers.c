@@ -44,7 +44,7 @@ int mock_usb_bulk_transfer( USBDevice *usb,
                             unsigned int timeout
                             );
 
-
+int mock_usb_reset_device( struct aiousb_device *usb );
 int mock_USBDevicePutADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock );
 int mock_USBDeviceFetchADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock );
 
@@ -74,6 +74,7 @@ AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , USBDevice **devs
                     usb->usb_bulk_transfer     = mock_usb_bulk_transfer;
                     usb->usb_put_config        = mock_USBDevicePutADCConfigBlock;
                     usb->usb_get_config        = mock_USBDeviceFetchADCConfigBlock;  
+                    usb->usb_reset_device      = mock_usb_reset_device;
                     struct libusb_device_descriptor tmp = {
                         .bLength = 18,
                         .bDescriptorType = 1,
@@ -154,9 +155,9 @@ int mock_usb_bulk_transfer( USBDevice *usb,
     AIO_ASSERT_USB( usb );
     AIO_ASSERT( data );
     AIO_ASSERT( actual_length );
-    sleep(1);
+    usleep(100);
     *actual_length = length;
-    return length;
+    return 0;
 }
 
 int mock_USBDevicePutADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock )
@@ -175,5 +176,10 @@ int mock_USBDeviceFetchADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlo
     }
     memcpy( configBlock->registers, KEEP->registers, KEEP->size );
 
+    return 0;
+}
+int mock_usb_reset_device( struct aiousb_device *usb )
+{    
+    printf("Fake mock_usb_reset_device\n");
     return 0;
 }

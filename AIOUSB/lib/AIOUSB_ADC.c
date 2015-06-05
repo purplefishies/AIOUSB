@@ -224,7 +224,7 @@ unsigned long ReadConfigBlock(unsigned long DeviceIndex,
  */
 unsigned long WriteConfigBlock(unsigned long DeviceIndex)
 {
-    /* libusb_device_handle *deviceHandle; */
+
     ADConfigBlock *configBlock;
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
@@ -342,12 +342,6 @@ RETURN_AIOUSB_GetBulkAcquire:
  * @brief Performs a scan and averages the voltage values.
  * @param DeviceIndex
  * @param counts
- *
- *
- *
- *
- *
- *
  * @return
  */
 PRIVATE unsigned long AIOUSB_GetScan(
@@ -368,23 +362,19 @@ PRIVATE unsigned long AIOUSB_GetScan(
         return AIOUSB_ERROR_INVALID_PARAMETER;
 
     AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
-    if ( result  != AIOUSB_SUCCESS )
-        return result;
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
+
     USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex , &result );
-    if ( result != AIOUSB_SUCCESS )
-        return result;
 
-    if(deviceDesc->bADCStream == AIOUSB_FALSE) {
-        result = AIOUSB_ERROR_NOT_SUPPORTED;
-        goto out_AIOUSB_GetScan;
-    }
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
+    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_NOT_SUPPORTED , deviceDesc->bADCStream == AIOUSB_TRUE );
+    /* if (deviceDesc->bADCStream == AIOUSB_FALSE) { */
+    /*     result = AIOUSB_ERROR_NOT_SUPPORTED; */
+    /*     goto out_AIOUSB_GetScan; */
+    /* } */
+    /* if ( result != AIOUSB_SUCCESS ) */
+    /*     goto out_AIOUSB_GetScan; */
 
-    /* Save config */
-    /* result = ReadConfigBlock(DeviceIndex, AIOUSB_FALSE); */
-    
-    
-    if ( result != AIOUSB_SUCCESS )
-        goto out_AIOUSB_GetScan;
 
     origConfigBlock     = deviceDesc->cachedConfigBlock;
     ADC_GetConfig( DeviceIndex, origConfigBlock.registers, &origConfigBlock.size );
@@ -534,7 +524,7 @@ PRIVATE unsigned long AIOUSB_GetScan(
                                               deviceDesc->commTimeout
                                               );
 
-        if (libusbresult != LIBUSB_SUCCESS) {
+        if (libusbresult <= LIBUSB_SUCCESS) {
             result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbresult);
         } else if (bytesTransferred != numSamples * sizeof(unsigned short) ) {
             result = AIOUSB_ERROR_INVALID_DATA;
@@ -565,14 +555,12 @@ PRIVATE unsigned long AIOUSB_GetScan(
             }
         }
     }
-    /* else */
-    /*            result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred); */
 
         
     out_freebuf_AIOUSB_GetScan:
         free(sampleBuffer);
     
-    if(configChanged) {
+    if (configChanged) {
 
         deviceDesc->cachedConfigBlock = origConfigBlock;
         WriteConfigBlock(DeviceIndex);
@@ -837,20 +825,14 @@ unsigned long ADC_GetChannelV(
  * @param pBuf
  * @return
  */
-unsigned long ADC_GetScanV(
-                           unsigned long DeviceIndex,
-                           double *pBuf
-                           )
+unsigned long ADC_GetScanV( unsigned long DeviceIndex, double *pBuf )
 {
-    if ( !pBuf )
-        return AIOUSB_ERROR_INVALID_PARAMETER;
-
+    AIO_ASSERT( pBuf );
 
     AIORESULT result = AIOUSB_Validate(&DeviceIndex);
     if ( result != AIOUSB_SUCCESS )
         return result;
 
-    /* AIOUSBDevice *deviceDesc = &deviceTable[ DeviceIndex ]; */
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
     if ( result != AIOUSB_SUCCESS ) 
         return result;
@@ -1110,19 +1092,6 @@ unsigned long ADC_SetConfig(
 out_ADC_SetConfig:
      return result;
 }
-
-/* deviceDesc->cachedConfigBlock = configBlock; */
-/* result = WriteConfigBlock(DeviceIndex); */
-/* if(result == AIOUSB_SUCCESS) */
-/*      *ConfigBufSize = configBlock.size; */
-/* if( !VALID_ENUM( ADCalMode , configBlock.registers[ AD_CONFIG_CAL_MODE ] ) ) { */
-/* if( !(configBlock.registers[ AD_CONFIG_CAL_MODE ] >= 0 && configBlock.registers[ AD_CONFIG_CAL_MODE ] <= 6) ) {  */
-/* ADConfigBlock configBlock; */
-/* ADCConfigBlockCopy( &configBlock, &deviceDesc->cachedConfigBlock ); */
-/* configBlock.device = deviceDesc; */
-/* configBlock.size   = deviceDesc->ConfigBytes; */
-/* memcpy(configBlock.registers, pConfigBuf, configBlock.size); */
-
 
 
 /*----------------------------------------------------------------------------*/
@@ -1832,6 +1801,7 @@ static void *startAcquire(void *params)
     int num_reads = 0;
 
 
+
 /*----------------------------------------------------------------------------*/
 /**
  * @brief we assume the parameters passed to BulkAcquireWorker() have
@@ -1842,19 +1812,20 @@ static void *startAcquire(void *params)
 static void *BulkAcquireWorker(void *params)
 {
     static unsigned long result = AIOUSB_SUCCESS;
-    if ( !params ) {
-        result = AIOUSB_ERROR_INVALID_PARAMETER;
-        return &result;
-    }
+    AIO_ERROR_VALID_DATA_W_CODE( &result, result = AIOUSB_ERROR_INVALID_PARAMETER, params ); 
+    USBDevice *usb;
         
     struct BulkAcquireWorkerParams * acquireParams = ( struct BulkAcquireWorkerParams* )params;
     int libusbResult;
-    /* AIOUSBDevice * deviceDesc = &deviceTable[ acquireParams->DeviceIndex ]; */
+
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( acquireParams->DeviceIndex, &result );
     if ( result != AIOUSB_SUCCESS ) 
         return &result;
 
-    libusb_device_handle * deviceHandle = AIOUSB_GetDeviceHandle(acquireParams->DeviceIndex);
+    usb = AIOUSBDeviceGetUSBHandle( deviceDesc );
+    AIO_ERROR_VALID_DATA_W_CODE( &result, result = AIOUSB_ERROR_INVALID_USBDEVICE , usb );
+
+
     pthread_t startAcquireThread;
     unsigned long streamingBlockSize , bytesRemaining;
     int threadResult;
@@ -1865,11 +1836,6 @@ static void *BulkAcquireWorker(void *params)
 
     int bytesTransferred;
     unsigned char *data;
-
-    if ( !deviceHandle ) {
-        result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-        goto out_BulkAcquireWorker;
-    }
 
     /* Needed to allow us to start bulk acquire waiting before we signal the board to start collecting data */
     threadResult = pthread_create( &startAcquireThread, NULL, startAcquire , params );
@@ -1896,13 +1862,15 @@ static void *BulkAcquireWorker(void *params)
         clock_gettime( CLOCK_MONOTONIC_RAW, &foo );
         deltas[num_reads++] =  ( foo.tv_sec - bar.tv_sec )*1e9 + (foo.tv_nsec - bar.tv_nsec );
 #endif
-        libusbResult = libusb_bulk_transfer(deviceHandle, 
-                                            LIBUSB_ENDPOINT_IN | USB_BULK_READ_ENDPOINT, 
-                                            data, 
-                                            (int)bytesToTransfer, 
-                                            &bytesTransferred, 
-                                            4000
-                                            );
+
+        libusbResult = usb->usb_bulk_transfer(usb,
+                                              LIBUSB_ENDPOINT_IN | USB_BULK_READ_ENDPOINT,
+                                              data,
+                                              (int)bytesToTransfer,
+                                              &bytesTransferred,
+                                              4000
+                                              );
+
 #ifdef PNA_TESTING
         clock_gettime( CLOCK_MONOTONIC_RAW, &bar );
         transactions[tindex++] = bytesTransferred;
@@ -1947,37 +1915,6 @@ static void *BulkAcquireWorker(void *params)
     free(params);
     return 0;
 }
-
-/*----------------------------------------------------------------------------*/
-/* AIOBuf * */
-/* NewBuffer( unsigned int bufsize ) */
-/* { */
-/*      AIOBuf *tmp = (AIOBuf*)malloc( sizeof( AIOBuf) ); */
-/*      if( !tmp ) { */
-/*           aio_errno = -AIOUSB_ERROR_NOT_ENOUGH_MEMORY; */
-/*           goto out_ret; */
-/*      } */
-/*      tmp->bytes_remaining = 0; */
-/*      tmp->bufsize = bufsize; */
-/*      /\* printf("allocating space %d bytes\n",(int)tmp->bufsize ); *\/ */
-/*      tmp->buffer = (unsigned short *)malloc( tmp->bufsize ); */
-/*      if( !tmp->buffer ) { */
-/*           aio_errno = -AIOUSB_ERROR_NOT_ENOUGH_MEMORY; */
-/*           free(tmp); */
-/*           tmp = NULL; */
-/*      } */
-/* out_ret: */
-/*      return tmp; */
-/* } */
-/* void */
-/* DeleteBuffer( AIOBuf *buf ) */
-/* { */
-/*   if( !buf )  */
-/*     return; */
-/*   if( buf->buffer )  */
-/*     free(buf->buffer ); */
-/*   free(buf); */
-/* } */
 
 /** 
  * @brief After setting up your oversamples and such, creates a new
