@@ -536,7 +536,7 @@ static unsigned long GetDeviceName(unsigned long DeviceIndex, char **name)
     AIORESULT result = AIOUSB_SUCCESS;
     AIO_ASSERT( name );
 
-    int srcLength,srcIndex, dstIndex, bytesTransferred;
+    int srcLength,  bytesTransferred;
     unsigned char descData[CYPRESS_MAX_DESC_SIZE];
     USBDevice *usb;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
@@ -566,13 +566,12 @@ static unsigned long GetDeviceName(unsigned long DeviceIndex, char **name)
 
     /* SEE Note 1 */
     srcLength = ( int )((descData[ 0 ] - 2) / 2);
-    srcIndex = 2;
 
     deviceDesc->cachedName = ( char* )malloc(CYPRESS_MAX_DESC_SIZE + 2);
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_ENOUGH_MEMORY, deviceDesc->cachedName  );
 
 
-    for(srcIndex = 2 , dstIndex = 0; dstIndex < srcLength && dstIndex < AIOUSB_MAX_NAME_SIZE; srcIndex += 2 , dstIndex++ ) {
+    for(int srcIndex = 2 , dstIndex = 0; dstIndex < srcLength && dstIndex < AIOUSB_MAX_NAME_SIZE; srcIndex += 2 , dstIndex++ ) {
         deviceDesc->cachedName[ dstIndex ] = descData[ srcIndex ];
     }
 
