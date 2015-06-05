@@ -614,8 +614,12 @@ CREATE_ENUM_W_START( ADGainCode, 0,
                      AUR_ADC_IMMEDIATE                       = 0xBF,
                      AUR_DIO_SPI_WRITE                       = 0xC0,
                      AUR_DIO_SPI_READ                        = 0xC1,
-                     AUR_ADC_GET_CONFIG                      = 0xD2
-                     )
+                     AUR_ADC_GET_CONFIG                      = 0xD2,
+                     CYPRESS_GET_DESC                        = 0x06
+                     );
+
+
+
 
 #undef BITS_PER_BYTE
 enum {
@@ -626,6 +630,9 @@ enum {
     COUNTERS_PER_BLOCK            = 3,
     COUNTER_NUM_MODES             = 6,
     DAC_RESET                     = 0x80,
+    CYPRESS_DESC_PARAMS           = 0x0302,  /* 03 = decscriptor type, 02 = index */
+    CYPRESS_MAX_DESC_SIZE         = 256,
+    AIOUSB_MAX_NAME_SIZE          = 100,
 
     EEPROM_SERIAL_NUMBER_ADDRESS  = 0x1DF8,
     EEPROM_CUSTOM_BASE_ADDRESS    = 0x1E00,

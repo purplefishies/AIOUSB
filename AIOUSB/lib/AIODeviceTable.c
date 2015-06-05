@@ -508,96 +508,77 @@ USBDevice *AIODeviceTableGetUSBDeviceAtIndex( unsigned long DeviceIndex, AIORESU
 }
 
 /*----------------------------------------------------------------------------*/
+/**
+ * @param DeviceIndex 
+ * @param name 
+ * @brief descriptor strings returned by the device are Unicode, not
+ *        ASCII, and occupy two bytes per character, so we need to handle our
+ *        maximum lengths accordingly
+ * @note 1 
+ * @verbatim
+ * extract device name from descriptor and copy to cached name buffer
+ * descData[ 0 ] = 1 (descriptor length) + 1 (descriptor type) + 2 (Unicode) * string_length
+ * descData[ 1 ] = \x03 (descriptor type: string)
+ * descData[ 2 ] = low byte of first character of Unicode string
+ * descData[ 3 ] = \0 (high byte)
+ * descData[ 4 ] = low byte of second character of string
+ * descData[ 5 ] = \0 (high byte)
+ * ...
+ * descData[ string_length * 2 ] = low byte of last character of string
+ * descData[ string_length * 2 + 1 ] = \0 (high byte)
+ * @endverbatim
+ * @return 
+ *
+ */
 static unsigned long GetDeviceName(unsigned long DeviceIndex, char **name) 
 {
 
     AIORESULT result = AIOUSB_SUCCESS;
-    AIOUSBDevice *deviceDesc = _get_device( DeviceIndex, &result );
-    int MAX_NAME_SIZE = 100, srcLength,srcIndex, dstIndex, bytesTransferred;
-    char *deviceName;
-    unsigned char *descData;
+    AIO_ASSERT( name );
+
+    int srcLength,srcIndex, dstIndex, bytesTransferred;
+    unsigned char descData[CYPRESS_MAX_DESC_SIZE];
     USBDevice *usb;
-    const int CYPRESS_GET_DESC = 0x06;
-    const int DESC_PARAMS = 0x0302;           /**03 = descriptor type: string; 02 = index */
-    const int MAX_DESC_SIZE = 256;           // bytes, not characters
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_DEVICE_NOT_FOUND, result == AIOUSB_SUCCESS );
 
-    if ( result != AIOUSB_SUCCESS ) 
-        return AIOUSB_ERROR_DEVICE_NOT_FOUND;
-
-    if (deviceDesc->cachedName != 0) {
-        *name = deviceDesc->cachedName; /* name is cached, return it*/
-        goto out_GetDeviceName;
-    }
-
-    /* name is not yet cached, so request it from the device  */
-
-    deviceName = ( char* )malloc(MAX_NAME_SIZE + 2);
-
-    if ( !deviceName ) {
-        result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+    if ( deviceDesc->cachedName ) {
+        *name = deviceDesc->cachedName;
         goto out_GetDeviceName;
     }
 
     usb = AIOUSBDeviceGetUSBHandle( deviceDesc );
-    if (!usb ) {
-        result = AIOUSB_ERROR_USBDEVICE_NOT_FOUND;
-        goto free_deviceName_GetDeviceName;
-    }
-    /*
-     * descriptor strings returned by the device are
-     * Unicode, not ASCII, and occupy two bytes per
-     * character, so we need to handle our maximum
-     * lengths accordingly
-     */
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_USBDEVICE_NOT_FOUND, usb );
 
-    descData = ( unsigned char* )malloc(MAX_DESC_SIZE);
-    if ( !descData ) {
-        result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
-        goto free_deviceName_GetDeviceName;
-    }
 
     bytesTransferred = usb->usb_control_transfer(usb,
                                                  USB_READ_FROM_DEVICE,
                                                  CYPRESS_GET_DESC,
-                                                 DESC_PARAMS,
+                                                 CYPRESS_DESC_PARAMS,
                                                  0,
                                                  descData,
-                                                 MAX_DESC_SIZE,
+                                                 CYPRESS_MAX_DESC_SIZE,
                                                  deviceDesc->commTimeout
                                                  );
-    if (bytesTransferred == MAX_DESC_SIZE) {
-        /**
-         * @verbatim
-         * extract device name from descriptor and copy to cached name buffer
-         *
-         * descData[ 0 ] = 1 (descriptor length) + 1 (descriptor type) + 2 (Unicode) * string_length
-         * descData[ 1 ] = \x03 (descriptor type: string)
-         * descData[ 2 ] = low byte of first character of Unicode string
-         * descData[ 3 ] = \0 (high byte)
-         * descData[ 4 ] = low byte of second character of string
-         * descData[ 5 ] = \0 (high byte)
-         * ...
-         * descData[ string_length * 2 ] = low byte of last character of string
-         * descData[ string_length * 2 + 1 ] = \0 (high byte)
-         * @endverbatim
-         */
 
-        srcLength = ( int )((descData[ 0 ] - 2) / 2);               // characters, not bytes
+    AIO_ERROR_VALID_DATA( LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred), bytesTransferred == CYPRESS_MAX_DESC_SIZE );
 
-        /* srcIndex=2 =='slow byte first char */ 
-        for(srcIndex = 2 , dstIndex = 0; dstIndex < srcLength && dstIndex < MAX_NAME_SIZE; srcIndex += 2 , dstIndex++ ) {
-            deviceName[ dstIndex ] = descData[ srcIndex ];
-        }
-        deviceName[ dstIndex ] = 0; /* null-terminate */
+    /* SEE Note 1 */
+    srcLength = ( int )((descData[ 0 ] - 2) / 2);
+    srcIndex = 2;
 
-        *name = deviceDesc->cachedName = strdup(deviceName);
+    deviceDesc->cachedName = ( char* )malloc(CYPRESS_MAX_DESC_SIZE + 2);
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_ENOUGH_MEMORY, deviceDesc->cachedName  );
 
-    } else {
-        result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+
+    for(srcIndex = 2 , dstIndex = 0; dstIndex < srcLength && dstIndex < AIOUSB_MAX_NAME_SIZE; srcIndex += 2 , dstIndex++ ) {
+        deviceDesc->cachedName[ dstIndex ] = descData[ srcIndex ];
     }
-    free(descData);
- free_deviceName_GetDeviceName:
-    free(deviceName);
+
+    *name = deviceDesc->cachedName;
+
+
  out_GetDeviceName:
 
     return result;
@@ -625,22 +606,9 @@ char *GetSafeDeviceName(unsigned long DeviceIndex)
          * name from the local product name table
          */
 
-        unsigned long res = GetDeviceName(DeviceIndex, &deviceName);
-        if(res != AIOUSB_SUCCESS) {
-            /*
-             * failed to get name from device, so fall back to local table after all
-             */
+        GetDeviceName(DeviceIndex, &deviceName); /* if we fail, use name from devicetable */
+        deviceName = ProductIDToName(deviceDesc->ProductID);
 
-            deviceName = ProductIDToName(deviceDesc->ProductID);
-
-        } else {
-            /*
-             * device doesn't support getting its product name, so use local
-             * product name table
-             */
-            deviceName = ProductIDToName(deviceDesc->ProductID);
-
-        }
     }
 
     return deviceName;
