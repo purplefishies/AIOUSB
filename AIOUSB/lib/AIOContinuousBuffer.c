@@ -439,17 +439,6 @@ static unsigned buffer_size( AIOContinuousBuf *buf )
     return buf->fifo->size;
 }
 
-void set_read_pos(AIOContinuousBuf *buf , unsigned pos )
-{
-    assert(buf);
-    buf->fifo->read_pos = ( pos > buf->fifo->size-1 ? buf->fifo->size-1 : pos );
-}
-
-void set_write_pos(AIOContinuousBuf *buf , unsigned pos )
-{
-    buf->fifo->write_pos = ( pos > buf->fifo->size-1 ? buf->fifo->size-1 : pos );
-}
-
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufSetNumberScansToRead( AIOContinuousBuf *buf , unsigned num_scans )
 {
