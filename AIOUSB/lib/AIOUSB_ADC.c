@@ -98,20 +98,6 @@ unsigned char *ADC_GetConfigRegisters( ADConfigBlock *config )
 }
 
 /*----------------------------------------------------------------------------*/
-void ADC_SetTestingMode(ADConfigBlock *config, AIOUSB_BOOL testing )
-{
-  assert(config);
-  config->testing = testing;
-}
-
-/*----------------------------------------------------------------------------*/
-AIOUSB_BOOL ADC_GetTestingMode(ADConfigBlock *config, AIOUSB_BOOL testing )
-{
-  assert(config);
-  return config->testing;
-}
-
-/*----------------------------------------------------------------------------*/
 AIORET_TYPE ADC_WriteADConfigBlock( unsigned long DeviceIndex , ADConfigBlock *config )
 {
     AIORESULT result = AIOUSB_SUCCESS;
@@ -571,12 +557,6 @@ PRIVATE unsigned long AIOUSB_GetScan(
     return result;
 }
 
-/*--------------------------------------------------------------------------*/
-unsigned ADC_GetOversample_Cached( ADConfigBlock *config )
-{
-  assert(config);
-  return config->registers[ AD_CONFIG_OVERSAMPLE ];
-}
 
 /*--------------------------------------------------------------------------*/
 unsigned ADC_GainCode_Cached( ADConfigBlock *config, unsigned channel)
@@ -624,7 +604,7 @@ AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex,
 
 
     AIOUSB_BOOL discardFirstSample  = deviceDesc->discardFirstSample;
-    unsigned numOverSamples         = ADC_GetOversample_Cached( &deviceDesc->cachedConfigBlock );
+    unsigned numOverSamples         = 2;/* ADC_GetOversample_Cached( &deviceDesc->cachedConfigBlock ); */
     unsigned long sum;
     int repeat = 0;
     for ( cur = 0, pos = 0; cur < *size ; ) {
