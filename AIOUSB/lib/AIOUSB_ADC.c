@@ -567,12 +567,6 @@ unsigned ADC_GainCode_Cached( ADConfigBlock *config, unsigned channel)
   return gainCode;
 }
 
-/*--------------------------------------------------------------------------*/
-/* AIOUSBDevice *AIOUSB_GetDevice_NoCheck( unsigned long DeviceIndex  ) */
-/* { */
-/*   return &deviceTable[DeviceIndex]; */
-/* } */
-
 /**
  * @brief Combines the oversample channels as well as combines the rules for removing
  *       the first discard channel if it is enabled. Channels are average and then 
@@ -1552,14 +1546,13 @@ unsigned long ADC_SetScanLimits(
  * @return
  */
 unsigned long ADC_SetCal(
-    unsigned long DeviceIndex,
-    const char *CalFileName
-    )
+                         unsigned long DeviceIndex,
+                         const char *CalFileName
+                         )
 {
-    if(CalFileName == NULL)
-        return AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ASSERT( CalFileName );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_DATA, strlen(CalFileName) > 0 );
 
-    assert(strlen(CalFileName) > 0);
     AIORESULT result;
     if(strcmp(CalFileName, ":AUTO:") == 0)
         result = AIOUSB_ADC_InternalCal(DeviceIndex, AIOUSB_TRUE, 0, 0);
@@ -1599,8 +1592,9 @@ unsigned long ADC_QueryCal(
 {
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
-    if ( result != AIOUSB_SUCCESS ) 
-        return result;
+
+    AIO_ERROR_VALID_DATA( result , result == AIOUSB_SUCCESS );
+
     USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
     if ( result != AIOUSB_SUCCESS ) 
         return result;
@@ -2995,41 +2989,42 @@ unsigned char AIOUSB_GetRegister(ADConfigBlock *cb, unsigned int Register)
  * we have to lock some of these functions because they access the device table; we don't
  * have to lock functions that don't access the device table
  */
-
 /*----------------------------------------------------------------------------*/
-void AIOUSB_SetAllGainCodeAndDiffMode(ADConfigBlock *config, unsigned gainCode, AIOUSB_BOOL differentialMode)
+AIORET_TYPE AIOUSB_SetAllGainCodeAndDiffMode(ADConfigBlock *config, unsigned gainCode, AIOUSB_BOOL differentialMode)
 {
-    assert(config != 0);
-    if(
-        config != 0 &&
-        config->device != 0 &&
-        config->size != 0 &&
-        gainCode >= FIRST_ENUM(ADGainCode) &&
-        gainCode <= LAST_ENUM(ADGainCode)
-        ) {
-          if(differentialMode)
-              gainCode |= AD_DIFFERENTIAL_MODE;
-          unsigned channel;
-          for(channel = 0; channel < AD_NUM_GAIN_CODE_REGISTERS; channel++)
-              config->registers[ AD_CONFIG_GAIN_CODE + channel ] = gainCode;
-      }
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIO_ASSERT( config );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCONFIG_SETTING, config->device );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCONFIG_SETTING, config->size );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_GAINCODE, gainCode <= FIRST_ENUM( ADGainCode) && gainCode <= LAST_ENUM(ADGainCode) );
+
+    if(differentialMode)
+        gainCode |= AD_DIFFERENTIAL_MODE;
+    unsigned channel;
+    for(channel = 0; channel < AD_NUM_GAIN_CODE_REGISTERS; channel++)
+        config->registers[ AD_CONFIG_GAIN_CODE + channel ] = gainCode;
+
+    return retval;
 }
 
 /*----------------------------------------------------------------------------*/
-unsigned AIOUSB_GetGainCode(const ADConfigBlock *config, unsigned channel)
+AIORET_TYPE AIOUSB_GetGainCode(const ADConfigBlock *config, unsigned channel)
 {
-    assert(config != 0);
-    unsigned gainCode = FIRST_ENUM(ADGainCode);             // return reasonable value on error
+    AIORET_TYPE retval = FIRST_ENUM(ADGainCode);             // return reasonable value on error
+    AIO_ASSERT( config );
+
     if( config != 0 && config->device != 0 &&   config->size != 0 ) { 
         const AIOUSBDevice *const deviceDesc = ( DeviceDescriptor* )config->device;
         if(channel < AD_MAX_CHANNELS && channel < deviceDesc->ADCMUXChannels) {
-            assert(deviceDesc->ADCChannelsPerGroup != 0);
-            gainCode = (config->registers[ AD_CONFIG_GAIN_CODE + channel / deviceDesc->ADCChannelsPerGroup ]
+
+            AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_DEVICE_SETTING, deviceDesc->ADCChannelsPerGroup != 0 );
+
+            retval = (config->registers[ AD_CONFIG_GAIN_CODE + channel / deviceDesc->ADCChannelsPerGroup ]
                         & ( unsigned char )AD_GAIN_CODE_MASK
                         );
         }
     }
-    return gainCode;
+    return retval;
 }
 
 /*----------------------------------------------------------------------------*/

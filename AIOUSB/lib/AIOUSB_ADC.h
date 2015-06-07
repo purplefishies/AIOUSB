@@ -79,8 +79,8 @@ PUBLIC_EXTERN AIORESULT ADC_SetOversample( unsigned long DeviceIndex, unsigned c
 PUBLIC_EXTERN AIORESULT WriteConfigBlock(unsigned long DeviceIndex);
 PUBLIC_EXTERN AIORESULT ReadConfigBlock(unsigned long DeviceIndex,AIOUSB_BOOL forceRead  );
 
-PUBLIC_EXTERN void AIOUSB_SetAllGainCodeAndDiffMode( ADConfigBlock *config, unsigned gainCode, AIOUSB_BOOL differentialMode );
-PUBLIC_EXTERN unsigned AIOUSB_GetGainCode( const ADConfigBlock *config, unsigned channel );
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetAllGainCodeAndDiffMode( ADConfigBlock *config, unsigned gainCode, AIOUSB_BOOL differentialMode );
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetGainCode( const ADConfigBlock *config, unsigned channel );
 PUBLIC_EXTERN void AIOUSB_SetGainCode( ADConfigBlock *config, unsigned channel, unsigned gainCode );
 PUBLIC_EXTERN AIOUSB_BOOL AIOUSB_IsDifferentialMode( const ADConfigBlock *config, unsigned channel );
 PUBLIC_EXTERN void AIOUSB_SetDifferentialMode( ADConfigBlock *config, unsigned channel, AIOUSB_BOOL differentialMode );
