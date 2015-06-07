@@ -284,7 +284,6 @@ AIORET_TYPE ADCConfigBlockInitForCounterScan(ADCConfigBlock *config, AIOUSBDevic
     return AIOUSB_SUCCESS;
 }
 
-
 /*----------------------------------------------------------------------------*/
 void ADC_VerifyAndCorrectConfigBlock( ADCConfigBlock *configBlock , AIOUSBDevice *deviceDesc  )
 {
@@ -329,23 +328,19 @@ AIORET_TYPE ADCConfigBlockSetAllGainCodeAndDiffMode(ADCConfigBlock *config, unsi
 }
 
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE  ADCConfigBlockGetGainCode(const ADCConfigBlock *config, unsigned channel)
+AIORET_TYPE ADCConfigBlockGetGainCode(const ADCConfigBlock *config, unsigned channel)
 {
     AIO_ASSERT( config );
     unsigned gainCode = FIRST_ENUM(ADGainCode);
-    
 
-    if ( config->size != 0 ) {
-    /* if ( config != 0 && config->device != 0 &&   config->size != 0 ) {  */
-        /* AIOUSBDevice *deviceDesc = ( AIOUSBDevice* )config->device; */
-        /* if (channel < AD_MAX_CHANNELS && channel < deviceDesc->ADCMUXChannels) { */
-        if ( channel < AD_MAX_CHANNELS && channel < config->mux_settings.ADCMUXChannels) {
-            assert( config->mux_settings.ADCChannelsPerGroup != 0);
-            gainCode = (config->registers[ AD_CONFIG_GAIN_CODE + channel / config->mux_settings.ADCChannelsPerGroup ]
-                        & ( unsigned char )AD_GAIN_CODE_MASK
-                        );
-        }
-    }
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_SETTING, config->size );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_CHANNEL_NUMBER, channel < AD_MAX_CHANNELS && channel < config->mux_settings.ADCMUXChannels );    
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_CHANNELS_PER_GROUP_SETTING , config->mux_settings.ADCChannelsPerGroup );
+
+    gainCode = (config->registers[ AD_CONFIG_GAIN_CODE + channel / config->mux_settings.ADCChannelsPerGroup ]
+                & ( unsigned char )AD_GAIN_CODE_MASK
+                );
+
     return (AIORET_TYPE)gainCode;
 }
 
@@ -357,21 +352,15 @@ AIORET_TYPE ADCConfigBlockSetGainCode(ADCConfigBlock *config, unsigned channel, 
     AIO_ASSERT( config );
     AIO_ASSERT( VALID_ENUM(ADGainCode,gainCode ) );
     AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_DEVICE_SETTING, config->mux_settings.ADCChannelsPerGroup );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_CHANNEL_NUMBER, channel < AD_MAX_CHANNELS && channel < config->mux_settings.ADCMUXChannels );    
 
-    /* if (channel < AD_MAX_CHANNELS && channel < deviceDesc->ADCMUXChannels) { */
-    /*     int reg = AD_CONFIG_GAIN_CODE + channel / deviceDesc->ADCChannelsPerGroup; */
-    if (channel < AD_MAX_CHANNELS && channel < config->mux_settings.ADCMUXChannels) {
-        int reg = AD_CONFIG_GAIN_CODE + channel / config->mux_settings.ADCChannelsPerGroup;
-
-        /* if ( reg > AD_NUM_GAIN_CODE_REGISTERS ) */
-        /*     return -AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING; */
-        AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING, reg <= AD_NUM_GAIN_CODE_REGISTERS );
-
-        config->registers[ reg ] = (config->registers[ reg ] & 
-                                    ~( unsigned char )AD_GAIN_CODE_MASK) | 
-                                   ( unsigned char )(gainCode & AD_GAIN_CODE_MASK);
-    }
+    int reg = AD_CONFIG_GAIN_CODE + channel / config->mux_settings.ADCChannelsPerGroup;
     
+    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING, reg <= AD_NUM_GAIN_CODE_REGISTERS );
+
+    config->registers[ reg ] = (config->registers[ reg ] & 
+                                ~( unsigned char )AD_GAIN_CODE_MASK) | ( unsigned char )(gainCode & AD_GAIN_CODE_MASK);
+   
     return result;
 }
 
