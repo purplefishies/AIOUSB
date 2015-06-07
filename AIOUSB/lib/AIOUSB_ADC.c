@@ -3034,26 +3034,27 @@ AIORET_TYPE AIOUSB_GetGainCode(const ADConfigBlock *config, unsigned channel)
  * @param channel
  * @param gainCode
  */
-void AIOUSB_SetGainCode(ADConfigBlock *config, unsigned channel, unsigned gainCode)
+AIORET_TYPE AIOUSB_SetGainCode(ADConfigBlock *config, unsigned channel, unsigned gainCode)
 {
-    assert(config != 0);
-    if(
-        config != 0 &&
-        config->device != 0 &&
-        config->size != 0 &&
-        VALID_ENUM(ADGainCode, gainCode)
-       ) {
-        AIOUSBDevice * deviceDesc = ( DeviceDescriptor* )config->device;
-        if(channel < AD_MAX_CHANNELS && channel < deviceDesc->ADCMUXChannels) {
-                assert(deviceDesc->ADCChannelsPerGroup != 0);
-                int reg = AD_CONFIG_GAIN_CODE + channel / deviceDesc->ADCChannelsPerGroup;
-                assert(reg < AD_NUM_GAIN_CODE_REGISTERS);
-                config->registers[ reg ]
-                    = (config->registers[ reg ] & ~( unsigned char )AD_GAIN_CODE_MASK)
-                    | ( unsigned char )(gainCode & AD_GAIN_CODE_MASK);
-        }
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_ADCCONFIG, config );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_SETTING, config->device );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_SETTING, config->size );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_GAINCODE, VALID_ENUM(ADGainCode, gainCode));
 
-      }
+
+    AIOUSBDevice * deviceDesc = ( DeviceDescriptor* )config->device;
+    if(channel < AD_MAX_CHANNELS && channel < deviceDesc->ADCMUXChannels) {
+        AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_DEVICE_SETTING, deviceDesc->ADCChannelsPerGroup );
+        int reg = AD_CONFIG_GAIN_CODE + channel / deviceDesc->ADCChannelsPerGroup;
+        AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_DEVICE_SETTING, reg < AD_NUM_GAIN_CODE_REGISTERS )
+
+        config->registers[ reg ]
+            = (config->registers[ reg ] & ~( unsigned char )AD_GAIN_CODE_MASK)
+            | ( unsigned char )(gainCode & AD_GAIN_CODE_MASK);
+    }
+    
+    return retval;
 }
 /*----------------------------------------------------------------------------*/
 /**
