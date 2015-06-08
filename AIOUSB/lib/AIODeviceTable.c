@@ -948,46 +948,43 @@ AIORESULT  _Card_Specific_Settings(unsigned long DeviceIndex)
  * @param DeviceIndex
  * @return
  */
-AIORESULT AIOUSB_EnsureOpen(unsigned long DeviceIndex)
-{
-    AIORESULT result = AIOUSB_SUCCESS;
-    AIOUSBDevice *device = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
-    if ( result != AIOUSB_SUCCESS )
-        return result;
+ AIORET_TYPE AIOUSB_EnsureOpen(unsigned long DeviceIndex)
+ {
+     AIORET_TYPE result = AIOUSB_SUCCESS;
+     AIOUSBDevice *device = AIODeviceTableGetDeviceAtIndex( DeviceIndex, (AIORESULT*)&result );
+     if ( result != AIOUSB_SUCCESS )
+         return result;
 
-    if ( !device->usb_device  ) {
-        if ( device->bDeviceWasHere) 
-            result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-        else 
-            result = AIOUSB_ERROR_USBDEVICE_NOT_FOUND;
-        goto RETURN_AIOUSB_EnsureOpen;
-    }  
+     if ( !device->usb_device  ) {
+         if ( device->bDeviceWasHere) 
+             result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
+         else 
+             result = AIOUSB_ERROR_USBDEVICE_NOT_FOUND;
+         goto RETURN_AIOUSB_EnsureOpen;
+     }  
    
-    if (device->bOpen) {
-        result = AIOUSB_ERROR_OPEN_FAILED;
-        goto RETURN_AIOUSB_EnsureOpen;
-    }
-    if (result == AIOUSB_SUCCESS) {
-          _Initialize_Device_Desc(DeviceIndex);
-          result |= _Card_Specific_Settings(DeviceIndex);
-          if (result != AIOUSB_SUCCESS)
-              goto RETURN_AIOUSB_EnsureOpen;
-          if (device->DIOConfigBits == 0)
-              device->DIOConfigBits = device->DIOBytes;
-      }
-RETURN_AIOUSB_EnsureOpen:
-    return result;
-}
+     if (device->bOpen) {
+         result = AIOUSB_ERROR_OPEN_FAILED;
+         goto RETURN_AIOUSB_EnsureOpen;
+     }
+     if (result == AIOUSB_SUCCESS) {
+         _Initialize_Device_Desc(DeviceIndex);
+         result |= _Card_Specific_Settings(DeviceIndex);
+         if (result != AIOUSB_SUCCESS)
+             goto RETURN_AIOUSB_EnsureOpen;
+         if (device->DIOConfigBits == 0)
+             device->DIOConfigBits = device->DIOBytes;
+     }
+ RETURN_AIOUSB_EnsureOpen:
+     return result;
+ }
 
 /*----------------------------------------------------------------------------*/ 
 AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , AIORESULT *result ) 
 {
     AIOUSBDevice *retval = NULL;
+    AIO_ERROR_VALID_DATA_W_CODE( NULL, *result = AIOUSB_ERROR_NOT_INIT, AIOUSB_IsInit());
 
-    if ( !AIOUSB_IsInit() ) {
-        *result = AIOUSB_ERROR_NOT_INIT;
-        return NULL;
-    }
     if (DeviceIndex == diFirst) { /* find first device on bus */
         *result = AIOUSB_ERROR_FILE_NOT_FOUND;
         int index;
@@ -1364,24 +1361,6 @@ typedef struct device_populator {
     int numAccesDevices;
 } AIODevicePopulator;
 
-/*----------------------------------------------------------------------------*/
-
-AIORESULT NewPopulateTable( AIODevicePopulator *dp ) 
-{
-    AIORESULT result = AIOUSB_SUCCESS;
-
-    if ( ! dp )
-        return AIOUSB_ERROR_INVALID_PARAMETER;
-
-    AIODeviceTableInit();
-
-    dp->get_device_ids( dp  );
-    for ( int i = 0; i < MIN( dp->size, MAX_USB_DEVICES ) ; ) {
-        AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &i , dp->products[i] , NULL );
-    }
-
-    return result;
-}
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -1428,9 +1407,9 @@ AIORET_TYPE AIODeviceTablePopulateTable(void)
  * and then the AIOUSB_Exit() once at the end after every thread acquiring
  * data has been stopped.
  */
-unsigned long AIOUSB_Init(void) 
+AIORET_TYPE AIOUSB_Init(void) 
 {
-    AIORESULT result = AIOUSB_SUCCESS;
+    AIORET_TYPE result = AIOUSB_SUCCESS;
 
     if (!AIOUSB_IsInit()) {
           AIODeviceTableInit();
@@ -1594,7 +1573,14 @@ class DeviceTableSetup : public ::testing::Test
             setenv("AIODEVICETABLE_PRODUCT_IDS","USB-AIO16-16A,USB-DIO-32" , 1 );
         }
 
-        NewPopulateTable((AIODevicePopulator *)tp );
+        /* NewPopulateTable((AIODevicePopulator *)tp ); */
+        AIODeviceTableInit();
+        
+        tp->get_device_ids( (AIODevicePopulator*)tp  );
+        for ( int i = 0; i < MIN( tp->size, MAX_USB_DEVICES ) ; ) {
+            AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &i , tp->products[i] , NULL );
+        }
+
     }
   
     virtual void TearDown() { 

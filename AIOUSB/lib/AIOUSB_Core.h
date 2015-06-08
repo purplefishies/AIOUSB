@@ -108,7 +108,6 @@ PUBLIC_EXTERN unsigned long AIOUSB_ClearFIFO(unsigned long DeviceIndex, FIFO_Met
  
 PUBLIC_EXTERN long AIOUSB_GetStreamingBlockSize( unsigned long DeviceIndex ); 
 
-PUBLIC_EXTERN AIORESULT AIOUSB_EnsureOpen( unsigned long DeviceIndex );
 PUBLIC_EXTERN unsigned int ProductNameToID( const char *name );
 
 PUBLIC_EXTERN struct libusb_device_handle *AIOUSB_GetDeviceHandle( unsigned long DeviceIndex );

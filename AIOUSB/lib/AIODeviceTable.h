@@ -32,8 +32,8 @@ PUBLIC_EXTERN AIORET_TYPE GetDevices(void);
 PUBLIC_EXTERN char *GetSafeDeviceName( unsigned long DeviceIndex );
 PUBLIC_EXTERN char *ProductIDToName( unsigned int productID );
 
-PUBLIC_EXTERN AIORESULT AIOUSB_Init(void);
-PUBLIC_EXTERN AIORESULT AIOUSB_EnsureOpen(unsigned long DeviceIndex);
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_Init(void);
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_EnsureOpen(unsigned long DeviceIndex);
 PUBLIC_EXTERN AIOUSB_BOOL AIOUSB_IsInit();
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_Exit();
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_Reset( unsigned long DeviceIndex );
