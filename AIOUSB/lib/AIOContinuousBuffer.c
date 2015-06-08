@@ -939,7 +939,8 @@ AIORET_TYPE AIOContinuousBuf_SmartCountsToVolts( AIOContinuousBuf *buf,
         retval = -1;
     } else {
       for(unsigned ch = 0; ch < count;  ch ++ , *channel = ((*channel+1)% number_channels ) , *pos += 1 ) {
-          unsigned gain = ADC_GainCode_Cached( &deviceDesc->cachedConfigBlock , *channel );
+          int gain = ADCConfigBlockGetGainCode( &deviceDesc->cachedConfigBlock, *channel );
+          AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_GAINCODE, gain >= AIOUSB_SUCCESS );
           struct ADRange *range = &adRanges[ gain ];
           tobuf[ *pos ] = ( (( double )data[ ch ] / ( double )AI_16_MAX_COUNTS) * range->range ) + range->minVolts;
           retval += 1;

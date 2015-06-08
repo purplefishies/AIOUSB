@@ -120,11 +120,6 @@ PUBLIC_EXTERN void AIOUSB_SetOversample( ADConfigBlock *config, unsigned overSam
 PUBLIC_EXTERN int AIOUSB_BulkTransfer( struct libusb_device_handle *dev_handle, unsigned char endpoint, unsigned char *data, int length, int *transferred, unsigned int timeout ); 
 
 
-PUBLIC_EXTERN unsigned ADC_GetOversample_Cached( ADConfigBlock *config );
-PUBLIC_EXTERN unsigned ADC_GainCode_Cached( ADConfigBlock *config, unsigned channel);
-
-PUBLIC_EXTERN AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex, unsigned short *counts, unsigned *size , unsigned numChannels ); 
-
 
 AIORESULT AIOUSB_InitConfigBlock(ADConfigBlock *config, unsigned long DeviceIndex, AIOUSB_BOOL defaults);
 

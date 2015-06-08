@@ -436,7 +436,6 @@ PRIVATE AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short co
      * Needs to be the correct values written out ...
      * Should resemble (04|05) F0 0E
      */
-
     if ( configChanged )
         result = USBDevicePutADCConfigBlock( usb, &deviceDesc->cachedConfigBlock );
 
@@ -526,78 +525,6 @@ PRIVATE AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short co
  out_AIOUSB_GetScan:
 
     return result;
-}
-
-
-/*--------------------------------------------------------------------------*/
-unsigned ADC_GainCode_Cached( ADConfigBlock *config, unsigned channel)
-{
-  assert(config);
-  AIOUSBDevice *deviceDesc = (AIOUSBDevice *)config->device;
-  unsigned gainCode = (config->registers[ AD_CONFIG_GAIN_CODE + channel / deviceDesc->ADCChannelsPerGroup ] & ( unsigned char )AD_GAIN_CODE_MASK );
-  return gainCode;
-}
-
-/**
- * @brief Combines the oversample channels as well as combines the rules for removing
- *       the first discard channel if it is enabled. Channels are average and then 
- *       the resulting array size is altered to reflect the new size of the counts
- *       that has been reduced by replacing all oversamples of each channel
- *       with the average value.
- * @param DeviceIndex 
- * @param counts 
- * @param size 
- * @return 
- */
-AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex, 
-                                                   unsigned short *counts,
-                                                   unsigned *size ,
-                                                   unsigned numChannels
-                                                   )
-{
-    unsigned pos, cur;
-    if (counts == NULL)
-        return (AIORET_TYPE)-AIOUSB_ERROR_INVALID_PARAMETER;
-    AIORESULT result = AIOUSB_SUCCESS;
-    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
-    if ( result != AIOUSB_SUCCESS ) 
-        return result;
-
-
-    if ( !deviceDesc )
-        return (AIORET_TYPE)-AIOUSB_ERROR_INVALID_DATA;
-
-
-    AIOUSB_BOOL discardFirstSample  = deviceDesc->discardFirstSample;
-    unsigned numOverSamples         = 2;/* ADC_GetOversample_Cached( &deviceDesc->cachedConfigBlock ); */
-    unsigned long sum;
-    int repeat = 0;
-    for ( cur = 0, pos = 0; cur < *size ; ) {
-        for ( unsigned channel = 0; channel < numChannels && cur < *size; channel ++ , pos ++) {
-            sum = 0;
-            /* Needs bail out when cur > *size */
-            for( unsigned os = 0; os <= numOverSamples && cur < *size; os ++ , cur ++ ) {
-              /* printf("Pos=%d, Cur=%d, Ch=%d, Os=%d\n", pos, cur, channel,os); */
-                if ( discardFirstSample && os == 0 ) {
-                } else {
-                    sum += counts[cur];
-                }
-            }
-            if ( discardFirstSample ) { 
-              if ( numOverSamples ) {
-                sum = (sum / numOverSamples);                
-              } else {
-                sum = ( sum / (numOverSamples + 1));
-              }
-            } else {
-              sum = ( sum / (numOverSamples + 1));
-            }
-            counts[pos] = (unsigned short)sum;
-        }
-        repeat ++;
-    }
-    *size = pos;
-    return (AIORET_TYPE)pos;
 }
 
 /**
