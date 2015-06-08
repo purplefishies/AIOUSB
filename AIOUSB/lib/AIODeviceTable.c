@@ -374,8 +374,7 @@ PRIVATE char *ProductIDToName(unsigned int productID)
     static unsigned long productIDIndexCreated = 0;
     if(productIDIndexCreated != INIT_PATTERN) {
         /* build index of product IDs */
-        int index;
-        for(index = 0; index < NUM_PROD_NAMES; index++)
+        for(int index = 0; index < NUM_PROD_NAMES; index++)
             productIDIndex[ index ] = &productIDNameTable[ index ];
 
         qsort(productIDIndex, NUM_PROD_NAMES, sizeof(ProductIDName *), CompareProductIDs);
@@ -417,11 +416,10 @@ PRIVATE char *ProductIDToName(unsigned int productID)
  *
  * @return
  */
-PRIVATE unsigned int ProductNameToID(const char *name) 
+PRIVATE AIORET_TYPE ProductNameToID(const char *name) 
 {
-    assert(name != 0);
-
-    unsigned int productID = 0;
+    AIO_ASSERT( name );
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
 
     /*
      * productNameIndex[] represents an index into
@@ -453,34 +451,29 @@ PRIVATE unsigned int ProductNameToID(const char *name)
     ProductIDName *pKey = &key;
     ProductIDName **product = ( ProductIDName** )bsearch(&pKey, productNameIndex, NUM_PROD_NAMES, sizeof(ProductIDName *), CompareProductNames);
     if (product != 0)
-        productID = (*product)->id;
+        retval = (*product)->id;
 
-    return productID;
+    return retval;
 }
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE GetDevices(void) 
 {
     unsigned long deviceMask = 0;
+    int index;
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_INIT, AIOUSB_IsInit() );
+    /**
+     * @note
+     * we clear the device table to erase references to devices
+     * which may have been unplugged; any device indexes to devices
+     * that have not been unplugged, which the user may be using,
+     * _should_ still be valid
+     */
 
-    if ( AIOUSB_IsInit() ) {
-      /**
-       * @note
-       * we clear the device table to erase references to devices
-       * which may have been unplugged; any device indexes to devices
-       * that have not been unplugged, which the user may be using,
-       * _should_ still be valid
-       */
-        /* AIODeviceTableClearDevices(); */
-        int index;
-        for(index = 0; index < MAX_USB_DEVICES; index++) {
-            if ( deviceTable[index].usb_device != NULL && deviceTable[index].valid == AIOUSB_TRUE )
-                deviceMask =  (deviceMask << 1) | 1;
-        }
-    } else {
-        return -AIOUSB_ERROR_NOT_INIT;
+    for(index = 0; index < MAX_USB_DEVICES; index++) {
+        if ( deviceTable[index].usb_device != NULL && deviceTable[index].valid == AIOUSB_TRUE )
+            deviceMask =  (deviceMask << 1) | 1;
     }
-
 
     return (AIORET_TYPE)deviceMask;
 }
@@ -489,21 +482,13 @@ AIORET_TYPE GetDevices(void)
 USBDevice *AIODeviceTableGetUSBDeviceAtIndex( unsigned long DeviceIndex, AIORESULT *result )
 {
     AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( DeviceIndex , result );
-    if ( !dev && *result == AIOUSB_SUCCESS )  {
-        *result = -AIOUSB_ERROR_DEVICE_NOT_FOUND;
-        return NULL;
-    } else if ( *result != AIOUSB_SUCCESS ) { 
-        return NULL;
-    } else {
-        USBDevice *usb = AIOUSBDeviceGetUSBHandle( dev );
-        if ( !usb ) {
-            *result = -AIOUSB_ERROR_INVALID_USBDEVICE;
-            return NULL;
-        } else {
-            *result = AIOUSB_SUCCESS;
-            return usb;
-        }
-    }
+    AIO_ERROR_VALID_DATA_W_CODE( NULL, *result = -AIOUSB_ERROR_DEVICE_NOT_FOUND, dev );
+    AIO_ERROR_VALID_DATA( NULL, *result == AIOUSB_SUCCESS );
+
+    USBDevice *usb = AIOUSBDeviceGetUSBHandle( dev );
+    AIO_ERROR_VALID_DATA_W_CODE( NULL, *result = -AIOUSB_ERROR_INVALID_USBDEVICE, usb );
+
+    return usb;
 }
 
 /*----------------------------------------------------------------------------*/
