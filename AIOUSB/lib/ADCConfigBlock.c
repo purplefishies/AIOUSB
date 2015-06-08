@@ -118,7 +118,7 @@ AIORET_TYPE ADCConfigBlockInitializeFromAIOUSBDevice( ADCConfigBlock *config , A
     return AIOUSB_SUCCESS;
 }
 
-int _adcblock_valid_channel_settings(AIORET_TYPE in, ADCConfigBlock *config , int ADCMUXChannels )
+AIORET_TYPE _adcblock_valid_channel_settings(AIORET_TYPE in, ADCConfigBlock *config , int ADCMUXChannels )
 {
     if ( in != AIOUSB_SUCCESS ) 
         return in;
@@ -133,16 +133,11 @@ int _adcblock_valid_channel_settings(AIORET_TYPE in, ADCConfigBlock *config , in
     }
     
     endChannel = ADCConfigBlockGetEndChannel( config );
-    if ( endChannel < 0 ) 
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG_CHANNEL_SETTING;
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_ADCCONFIG_CHANNEL_SETTING, endChannel < 0 );
     
     startChannel = ADCConfigBlockGetStartChannel( config );
-    if ( endChannel < 0 ) 
-        return -AIOUSB_ERROR_INVALID_ADCCONFIG_CHANNEL_SETTING;
-    
-    if ( endChannel >= (int)ADCMUXChannels || startChannel > endChannel ) {
-        result = -AIOUSB_ERROR_INVALID_ADCCONFIG_CHANNEL_SETTING;
-    }
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_ADCCONFIG_CHANNEL_SETTING, startChannel < 0 );
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_ADCCONFIG_CHANNEL_SETTING, endChannel < ADCMUXChannels && startChannel <= endChannel );
     
     return result;
 }

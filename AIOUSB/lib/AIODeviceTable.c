@@ -429,16 +429,16 @@ PRIVATE unsigned int ProductNameToID(const char *name)
      * ProductIDToName())
      */
 
-    static ProductIDName const *productNameIndex[ NUM_PROD_NAMES ];
+    static ProductIDName *productNameIndex[ NUM_PROD_NAMES ];
     /** index of product names in productIDNameTable[] */
 
-    const unsigned long INIT_PATTERN = 0x7e6b2017ul;
+    unsigned long INIT_PATTERN = 0x7e6b2017ul;
     /** random pattern */
 
     static unsigned long productNameIndexCreated = 0;
     /** == INIT_PATTERN if index has been created */
 
-    if(productNameIndexCreated != INIT_PATTERN) {
+    if (productNameIndexCreated != INIT_PATTERN) {
         /* build index of product names */
         int index;
         for(index = 0; index < NUM_PROD_NAMES; index++)
@@ -450,10 +450,9 @@ PRIVATE unsigned int ProductNameToID(const char *name)
     ProductIDName key;                                   // key.id not used
     strncpy(key.name, name, PROD_NAME_SIZE);
     key.name[ PROD_NAME_SIZE ] = 0;                     // in case strncpy() doesn't copy null
-    const ProductIDName *const pKey = &key;
-    const ProductIDName **product
-        = ( const ProductIDName** )bsearch(&pKey, productNameIndex, NUM_PROD_NAMES, sizeof(ProductIDName *), CompareProductNames);
-    if(product != 0)
+    ProductIDName *pKey = &key;
+    ProductIDName **product = ( ProductIDName** )bsearch(&pKey, productNameIndex, NUM_PROD_NAMES, sizeof(ProductIDName *), CompareProductNames);
+    if (product != 0)
         productID = (*product)->id;
 
     return productID;
@@ -599,7 +598,7 @@ char *GetSafeDeviceName(unsigned long DeviceIndex)
         return deviceName;
 
 
-    if(deviceDesc->bGetName) {
+    if (deviceDesc->bGetName) {
         /*
          * device supports getting its product name, so use it instead of the
          * name from the local product name table
@@ -655,7 +654,7 @@ AIORESULT  _Card_Specific_Settings(unsigned long DeviceIndex)
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *device = _get_device( DeviceIndex , &result );
 
-    if( result != AIOUSB_SUCCESS ) 
+    if ( result != AIOUSB_SUCCESS ) 
         return result;
 
     switch(device->ProductID) {
@@ -797,7 +796,7 @@ AIORESULT  _Card_Specific_Settings(unsigned long DeviceIndex)
           device->ConfigBytes = 20;
           device->RangeShift = 0;
           device->bClearFIFO = AIOUSB_TRUE;
-          if((device->ProductID & 0x0100) != 0) {
+          if ((device->ProductID & 0x0100) != 0) {
                 device->bDACBoardRange = AIOUSB_TRUE;
                 device->ImmDACs = 2;
             }
@@ -823,7 +822,7 @@ AIORESULT  _Card_Specific_Settings(unsigned long DeviceIndex)
           device->ConfigBytes = 21;
           device->RangeShift = 2;
           device->bClearFIFO = AIOUSB_TRUE;
-          if((device->ProductID & 0x0100) != 0) {
+          if ((device->ProductID & 0x0100) != 0) {
                 device->bDACBoardRange = AIOUSB_TRUE;
                 device->ImmDACs = 2;
             }
@@ -883,7 +882,7 @@ AIORESULT  _Card_Specific_Settings(unsigned long DeviceIndex)
           device->ConfigBytes = 21;
           device->RangeShift = 3;
           device->bClearFIFO = AIOUSB_TRUE;
-          if((device->ProductID & 0x0100) != 0) {
+          if ((device->ProductID & 0x0100) != 0) {
                 device->bDACBoardRange = AIOUSB_TRUE;
                 device->ImmDACs = 2;
             }
@@ -930,7 +929,7 @@ AIORESULT  _Card_Specific_Settings(unsigned long DeviceIndex)
                 device->ImmDACs = 4;
                 break;
             }
-          if((device->ProductID & 1) == 0)
+          if ((device->ProductID & 1) == 0)
               device->ImmADCs = 2;
           break;
 
@@ -971,9 +970,9 @@ AIORESULT AIOUSB_EnsureOpen(unsigned long DeviceIndex)
     if (result == AIOUSB_SUCCESS) {
           _Initialize_Device_Desc(DeviceIndex);
           result |= _Card_Specific_Settings(DeviceIndex);
-          if(result != AIOUSB_SUCCESS)
+          if (result != AIOUSB_SUCCESS)
               goto RETURN_AIOUSB_EnsureOpen;
-          if(device->DIOConfigBits == 0)
+          if (device->DIOConfigBits == 0)
               device->DIOConfigBits = device->DIOBytes;
       }
 RETURN_AIOUSB_EnsureOpen:
@@ -998,7 +997,7 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , AIORES
                 break;
             }
         }
-    } else if(DeviceIndex == diOnly) {
+    } else if (DeviceIndex == diOnly) {
         /*
          * find first device on bus, ensuring that it's the only device
          */
@@ -1040,20 +1039,20 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
     device->ProductID = productID;
     device->StreamingBlockSize = 31ul * 1024ul;
     device->bGetName = AIOUSB_TRUE;             // most boards support this feature
-    if(productID == USB_DIO_32) {
+    if (productID == USB_DIO_32) {
         device->DIOBytes = 4;
         device->Counters = 3;
         device->RootClock = 3000000;
-    } else if(productID == USB_DIO_48) {
+    } else if (productID == USB_DIO_48) {
         device->DIOBytes = 6;
-    } else if(productID == USB_DIO_96) {
+    } else if (productID == USB_DIO_96) {
         device->DIOBytes = 12;
-    } else if( productID >= USB_DI16A_REV_A1 && productID <= USB_DI16A_REV_A2 ) {
+    } else if ( productID >= USB_DI16A_REV_A1 && productID <= USB_DI16A_REV_A2 ) {
         device->DIOBytes = 1;
         device->bDIOStream = AIOUSB_TRUE;
         device->bDIOSPI = AIOUSB_TRUE;
         device->bClearFIFO = AIOUSB_TRUE;
-    } else if(
+    } else if (
               productID >= USB_DIO_16H &&
               productID <= USB_DIO_16A
               ) {
@@ -1062,7 +1061,7 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
         device->bDIOStream = AIOUSB_TRUE;
         device->bDIOSPI = AIOUSB_TRUE;
         device->bClearFIFO = AIOUSB_TRUE;
-    } else if(
+    } else if (
               productID == USB_IIRO_16 ||
               productID == USB_II_16 ||
               productID == USB_RO_16 ||
@@ -1072,7 +1071,7 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
               ) {
         device->DIOBytes = 4;
         device->WDGBytes = 2;
-    } else if(
+    } else if (
               productID == USB_IDIO_16 ||
               productID == USB_II_16_OLD ||
               productID == USB_IDO_16 ||
@@ -1082,7 +1081,7 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
               ) {
         device->DIOBytes = 4;
         device->WDGBytes = 2;
-    } else if(
+    } else if (
               productID >= USB_DA12_8A_REV_A &&
               productID <= USB_DA12_8A
               ) {
@@ -1091,23 +1090,23 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
         device->DACsUsed = 5;
         device->bGetName = AIOUSB_FALSE;
         device->RootClock = 12000000;
-    } else if(productID == USB_DA12_8E) {
+    } else if (productID == USB_DA12_8E) {
         device->ImmDACs = 8;
         device->bGetName = AIOUSB_FALSE;
-    } else if(productID == USB_CTR_15) {
+    } else if (productID == USB_CTR_15) {
         device->Counters = 5;
         device->bGateSelectable = AIOUSB_TRUE;
         device->RootClock = 10000000;
-    } else if(
+    } else if (
               productID == USB_IIRO4_2SM ||
               productID == USB_IIRO4_COM
               ) {
         device->DIOBytes = 2;
-    } else if(productID == USB_DIO16RO8) {
+    } else if (productID == USB_DIO16RO8) {
         device->DIOBytes = 3;
-    } else if(productID == PICO_DIO16RO8) {
+    } else if (productID == PICO_DIO16RO8) {
         device->DIOBytes = 3;
-    } else if(
+    } else if (
               (productID >= USB_AI16_16A && productID <= USB_AI12_16E) ||
               (productID >= USB_AIO16_16A && productID <= USB_AIO12_16E)
               ) {
@@ -1121,11 +1120,11 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
         device->ADCChannelsPerGroup = 1;
         device->ConfigBytes = AD_CONFIG_REGISTERS;
         device->bClearFIFO = AIOUSB_TRUE;
-        if(productID & 0x0100) {
+        if (productID & 0x0100) {
             device->ImmDACs = 2;
             device->bDACBoardRange = AIOUSB_TRUE;
         }
-    } else if(
+    } else if (
               (productID >= USB_AI16_64MA && productID <= USB_AI12_64ME) ||
               (productID >= USB_AIO16_64MA && productID <= USB_AIO12_64ME)
               ) {
@@ -1139,11 +1138,11 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
         device->ADCChannelsPerGroup = 4;
         device->ConfigBytes = AD_MUX_CONFIG_REGISTERS;
         device->bClearFIFO = AIOUSB_TRUE;
-        if(productID & 0x0100) {
+        if (productID & 0x0100) {
             device->ImmDACs = 2;
             device->bDACBoardRange = AIOUSB_TRUE;
         }
-    } else if(
+    } else if (
               (productID >= USB_AI16_32A && productID <= USB_AI12_128E) ||
               (productID >= USB_AIO16_32A && productID <= USB_AIO12_128E)
               ) {
@@ -1171,7 +1170,7 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
         device->ADCChannelsPerGroup = 8;
         device->ConfigBytes = AD_MUX_CONFIG_REGISTERS;
         device->bClearFIFO = AIOUSB_TRUE;
-        if(productID & 0x0100) {
+        if (productID & 0x0100) {
             device->ImmDACs = 2;
             device->bDACBoardRange = AIOUSB_TRUE;
         }
@@ -1182,7 +1181,7 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
       device->bDIOStream    = AIOUSB_TRUE;
       device->bClearFIFO    = AIOUSB_TRUE;
       device->bDACDIOClock  = AIOUSB_TRUE;
-    } else if(
+    } else if (
               productID >= USB_AO16_16A &&
               productID <= USB_AO12_4
               ) {
@@ -1214,12 +1213,12 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
             device->ImmDACs = 4;
             break;
         }
-        if((productID & 0x0001) == 0)
+        if ((productID & 0x0001) == 0)
             device->ImmADCs = 2;
     }
 
     /* allocate I/O image buffers */
-    if(device->DIOBytes > 0) {
+    if (device->DIOBytes > 0) {
         /* calloc() zeros memory */
         device->LastDIOData = ( unsigned char* )calloc(device->DIOBytes, sizeof(unsigned char));
         // assert(device->LastDIOData != 0);
@@ -1273,7 +1272,7 @@ AIORESULT AIOUSB_GetAllDevices()
 {
     AIORESULT deviceMask = 0;
     
-    if(AIOUSB_IsInit()) {
+    if (AIOUSB_IsInit()) {
         int index;
         for (index = 0; index < MAX_USB_DEVICES; index++) {
             AIORESULT res = AIOUSB_SUCCESS;
@@ -1287,7 +1286,7 @@ AIORESULT AIOUSB_GetAllDevices()
                 unsigned long numCounters;
 
                 unsigned long result = QueryDeviceInfo(index, &productID, &nameSize, name, &numDIOBytes, &numCounters);
-                if(result == AIOUSB_SUCCESS) {
+                if (result == AIOUSB_SUCCESS) {
                     name[ nameSize ] = '\0';
                     deviceMask = (deviceMask << 1) | 1;
                 }
@@ -1316,7 +1315,7 @@ AIORET_TYPE AIODeviceTablePopulateTableTest(unsigned long *products, int length 
 /*----------------------------------------------------------------------------*/
 void CloseAllDevices(void) 
 {
-    if(!AIOUSB_IsInit())
+    if (!AIOUSB_IsInit())
         return;
     int index;
     AIORESULT result = AIOUSB_SUCCESS;
@@ -1328,12 +1327,12 @@ void CloseAllDevices(void)
             if ( usb ) 
                 USBDeviceClose( usb );
         
-            if(device->LastDIOData != NULL) {
+            if (device->LastDIOData != NULL) {
                 free(device->LastDIOData);
                 device->LastDIOData = NULL;
             }
         
-            if(device->cachedName != NULL) {
+            if (device->cachedName != NULL) {
                 free(device->cachedName);
                 device->cachedName = NULL;
             }
@@ -1433,13 +1432,13 @@ unsigned long AIOUSB_Init(void)
 {
     AIORESULT result = AIOUSB_SUCCESS;
 
-    if(!AIOUSB_IsInit()) {
+    if (!AIOUSB_IsInit()) {
           AIODeviceTableInit();
 #if defined(AIOUSB_ENABLE_MUTEX)
           pthread_mutexattr_t mutexAttr;
-          if(pthread_mutexattr_init(&mutexAttr) == 0) {
-                if(pthread_mutexattr_settype(&mutexAttr, PTHREAD_MUTEX_RECURSIVE) == 0) {
-                    if(pthread_mutex_init(&aiousbMutex, &mutexAttr) == 0) {
+          if (pthread_mutexattr_init(&mutexAttr) == 0) {
+                if (pthread_mutexattr_settype(&mutexAttr, PTHREAD_MUTEX_RECURSIVE) == 0) {
+                    if (pthread_mutex_init(&aiousbMutex, &mutexAttr) == 0) {
                         /**
                          * @note
                          * populate device table so users can use diFirst and diOnly immediately; be
@@ -1467,42 +1466,38 @@ unsigned long AIOUSB_Init(void)
 }
 
 /*----------------------------------------------------------------------------*/
-void AIOUSB_Exit()
+AIORET_TYPE AIOUSB_Exit()
 {
-    if(AIOUSB_IsInit()) {
-          CloseAllDevices();
-          libusb_exit(NULL);
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_INIT, AIOUSB_IsInit() );
+
+    CloseAllDevices();
+    libusb_exit(NULL);
 #if defined(AIOUSB_ENABLE_MUTEX)
-          pthread_mutex_destroy(&aiousbMutex);
+    pthread_mutex_destroy(&aiousbMutex);
 #endif
-          aiousbInit = 0;
-      }
+    aiousbInit = 0;
+    return retval;
 }
 
 /*----------------------------------------------------------------------------*/
-unsigned long AIOUSB_Reset( unsigned long DeviceIndex )
+AIORET_TYPE AIOUSB_Reset( unsigned long DeviceIndex )
 {
-    AIORESULT result = AIOUSB_SUCCESS;
-
-
-    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
-    if ( result != AIOUSB_SUCCESS )
-        return result;
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    int libusbResult;
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, (AIORESULT*)&retval );
+    if ( retval != AIOUSB_SUCCESS )
+        return retval;
 
     USBDevice *usb = AIOUSBDeviceGetUSBHandle( deviceDesc );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_DEVICE_NOT_CONNECTED, usb );
 
-    if(usb != NULL) {
+    libusbResult = usb->usb_reset_device(usb);
+    if (libusbResult != LIBUSB_SUCCESS )
+        retval = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult);
+    usleep(250000);
 
-        int libusbResult = usb->usb_reset_device(usb);
-        if (libusbResult != LIBUSB_SUCCESS )
-            result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult);
-        usleep(250000);
-    } else {
-        result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-
-    }
-
-    return result;
+    return retval;
 }
 
 
@@ -1566,9 +1561,9 @@ AIORET_TYPE test_get_device_ids( AIODevicePopulator *self )
         for ( char *token = strtok_r( tmp, delim, &pos );  token ; token = strtok_r(NULL, delim , &pos) ) {
             if (token == NULL)
                 break;
-            if( strlen(token) > 3 && strncmp(token,"USB",3 ) == 0 ) {
+            if ( strlen(token) > 3 && strncmp(token,"USB",3 ) == 0 ) {
                 unsigned int tmpproduct = ProductNameToID( token );
-                if( tmpproduct ) { 
+                if ( tmpproduct ) { 
                     /* printf("Using %d\n", tmpproduct ); */
                     self->size ++;
                     self->products = (unsigned long *)realloc( self->products, (self->size)*sizeof(unsigned long)) ;

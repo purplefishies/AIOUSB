@@ -35,8 +35,8 @@ PUBLIC_EXTERN char *ProductIDToName( unsigned int productID );
 PUBLIC_EXTERN AIORESULT AIOUSB_Init(void);
 PUBLIC_EXTERN AIORESULT AIOUSB_EnsureOpen(unsigned long DeviceIndex);
 PUBLIC_EXTERN AIOUSB_BOOL AIOUSB_IsInit();
-PUBLIC_EXTERN void AIOUSB_Exit();
-PUBLIC_EXTERN AIORESULT AIOUSB_Reset( unsigned long DeviceIndex );
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_Exit();
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_Reset( unsigned long DeviceIndex );
 PUBLIC_EXTERN void AIODeviceTableInit(void);
 
 
