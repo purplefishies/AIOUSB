@@ -29,6 +29,9 @@ PUBLIC_EXTERN AIORESULT ADC_SetAllGainCodeAndDiffMode( unsigned long DeviceIndex
 
 
 PUBLIC_EXTERN AIORESULT ADC_GetScan( unsigned long DeviceIndex, unsigned short *pBuf );
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short counts[] );
+
+
  
 PUBLIC_EXTERN AIORESULT ADC_GetConfig( unsigned long DeviceIndex, unsigned char *pConfigBuf, unsigned long *ConfigBufSize );
 

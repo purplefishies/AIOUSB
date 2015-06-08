@@ -129,7 +129,6 @@ PUBLIC_EXTERN AIORET_TYPE cull_and_average_counts( unsigned long DeviceIndex, un
 AIORESULT AIOUSB_InitConfigBlock(ADConfigBlock *config, unsigned long DeviceIndex, AIOUSB_BOOL defaults);
 
 
-PUBLIC_EXTERN AIORESULT AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short counts[] );
 PUBLIC_EXTERN AIORESULT AIOUSB_ArrayCountsToVolts( unsigned long DeviceIndex, int startChannel, int numChannels, const unsigned short counts[], double volts[] );
 
 PUBLIC_EXTERN AIORESULT AIOUSB_ArrayVoltsToCounts( unsigned long DeviceIndex, int startChannel, int numChannels, const double volts[], unsigned short counts[] ); 

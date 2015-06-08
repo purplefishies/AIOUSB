@@ -329,118 +329,93 @@ RETURN_AIOUSB_GetBulkAcquire:
  * @param DeviceIndex
  * @param counts
  * @return
+ * @note In theory, all the A/D functions, including AIOUSB_GetScan(), should work
+ * in all measurement modes, including calibration mode; in practice,
+ * however, the device will return only a single sample in calibration mode;
+ * therefore, users must be careful to select a single channel and set
+ * oversample to zero during calibration mode; attempting to read more than
+ * one channel or use an oversample setting of more than zero in calibration
+ * mode will result in a timeout error; as a convenience to the user we
+ * automatically impose this restriction here in AIOUSB_GetScan(); if the
+ * device is changed to permit normal use of the A/D functions in
+ * calibration mode, we will have to modify this function to somehow
+ * recognize which devices support that capability, or simply delete this
+ * restriction altogether and rely on the users' good judgment
+ *
+ * @note The oversample setting dictates how many samples to take _in addition_ to
+ * the primary sample; if oversample is zero, we take just one sample for
+ * each channel; if oversample is greater than zero then we average the
+ * primary sample and all of its over-samples; if the discardFirstSample
+ * setting is enabled, then we discard the primary sample, leaving just the
+ * over-samples; thus, if discardFirstSample is enabled, we must take at
+ * least one over-sample in order to have any data left; there's another
+ * complication: the device buffer is limited to a small number of samples,
+ * so we have to limit the number of over-samples to what the device buffer
+ * can accommodate, so the actual oversample setting depends on the number
+ * of channels being scanned; we also preserve and restore the original
+ * oversample setting specified by the user; since the user is expecting to
+ * average (1 + oversample) samples, then if discardFirstSample is enabled
+ * we simply always add one
  */
-PRIVATE unsigned long AIOUSB_GetScan(
-                                     unsigned long DeviceIndex,
-                                     unsigned short counts[]
-                                     )
+PRIVATE AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short counts[] )
 {
     ADConfigBlock origConfigBlock;
     AIOUSB_BOOL configChanged, discardFirstSample; 
     int samplesToAverage = 0, sampleIndex = 0;
     int numChannels, samplesPerChannel, libusbresult;
-    unsigned numSamples, overSample, triggerMode,  bytesTransferred;     
+    unsigned numSamples, overSample, bytesTransferred;     
+
     unsigned short *sampleBuffer;
-    AIORESULT result = AIOUSB_SUCCESS;
+    AIORET_TYPE result = AIOUSB_SUCCESS;
     unsigned char bcdata[] = {0x05,0x00,0x00,0x00 };
 
-    if (counts == NULL)
-        return AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ASSERT( counts );
 
-    AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
+    AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , (AIORESULT*)&result );
     AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
 
-    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex , &result );
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex , (AIORESULT*)&result );
 
     AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
     AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_NOT_SUPPORTED , deviceDesc->bADCStream == AIOUSB_TRUE );
-    /* if (deviceDesc->bADCStream == AIOUSB_FALSE) { */
-    /*     result = AIOUSB_ERROR_NOT_SUPPORTED; */
-    /*     goto out_AIOUSB_GetScan; */
-    /* } */
-    /* if ( result != AIOUSB_SUCCESS ) */
-    /*     goto out_AIOUSB_GetScan; */
-
 
     origConfigBlock     = deviceDesc->cachedConfigBlock;
-    ADC_GetConfig( DeviceIndex, origConfigBlock.registers, &origConfigBlock.size );
+
+    result = USBDeviceFetchADCConfigBlock( usb, &origConfigBlock );
+    AIO_ASSERT_RET( result, result >= AIOUSB_SUCCESS );
 
     configChanged       = AIOUSB_FALSE;
     discardFirstSample  = deviceDesc->discardFirstSample;
-    overSample          = AIOUSB_GetOversample(&deviceDesc->cachedConfigBlock);
+    overSample          = ADCConfigBlockGetOversample(&deviceDesc->cachedConfigBlock);
 
-    numChannels = AIOUSB_GetEndChannel(&deviceDesc->cachedConfigBlock) - AIOUSB_GetStartChannel(&deviceDesc->cachedConfigBlock) + 1;
+    numChannels = ADCConfigBlockGetEndChannel( &deviceDesc->cachedConfigBlock ) - 
+                  ADCConfigBlockGetStartChannel( &deviceDesc->cachedConfigBlock) + 1;
 
-    /**
-     * in theory, all the A/D functions, including AIOUSB_GetScan(),
-     * should work in all measurement modes, including calibration
-     * mode; in practice, however, the device will return only a
-     * single sample in calibration mode; therefore, users must be
-     * careful to select a single channel and set oversample to zero
-     * during calibration mode; attempting to read more than one
-     * channel or use an oversample setting of more than zero in
-     * calibration mode will result in a timeout error; as a
-     * convenience to the user we automatically impose this
-     * restriction here in AIOUSB_GetScan(); if the device is changed
-     * to permit normal use of the A/D functions in calibration mode,
-     * we will have to modify this function to somehow recognize which
-     * devices support that capability, or simply delete this
-     * restriction altogether and rely on the users' good judgment
-     */
-
-    /* unsigned calMode = AIOUSB_GetCalMode(&deviceDesc->cachedConfigBlock); */
-    if ( AIOUSB_GetCalMode(&deviceDesc->cachedConfigBlock) == AD_CAL_MODE_GROUND || AIOUSB_GetCalMode(&deviceDesc->cachedConfigBlock) == AD_CAL_MODE_REFERENCE) {
+    if ( ADCConfigBlockGetCalMode(&deviceDesc->cachedConfigBlock) == AD_CAL_MODE_GROUND || ADCConfigBlockGetCalMode(&deviceDesc->cachedConfigBlock) == AD_CAL_MODE_REFERENCE) {
         if (numChannels > 1) {
-            AIOUSB_SetScanRange(&deviceDesc->cachedConfigBlock, AIOUSB_GetStartChannel(&deviceDesc->cachedConfigBlock), AIOUSB_GetStartChannel(&deviceDesc->cachedConfigBlock) );
+            ADCConfigBlockSetScanRange(&deviceDesc->cachedConfigBlock, ADCConfigBlockGetStartChannel(&deviceDesc->cachedConfigBlock), ADCConfigBlockGetStartChannel(&deviceDesc->cachedConfigBlock) );
             numChannels = 1;
             configChanged = AIOUSB_TRUE;
         }
         if (overSample > 0) {
-            AIOUSB_SetOversample(&deviceDesc->cachedConfigBlock, 0 );
+            ADCConfigBlockSetOversample(&deviceDesc->cachedConfigBlock, 0 );
             configChanged = AIOUSB_TRUE;
         }
         discardFirstSample = AIOUSB_FALSE;           // this feature can't be used in calibration mode either
     }
 
-    /** turn scan on and turn timer and external trigger off */
-    /* unsigned origTriggerMode = AIOUSB_GetTriggerMode(&deviceDesc->cachedConfigBlock); */
-    /* unsigned triggerMode =   */
-    /*     AIOUSB_GetTriggerMode(&deviceDesc->cachedConfigBlock); */
-    /* triggerMode |= AD_TRIGGER_SCAN;                                              // enable scan */
-    /* triggerMode &= ~(AD_TRIGGER_TIMER | AD_TRIGGER_EXTERNAL);         // disable timer and external trigger */
-    /* if (triggerMode !=  AIOUSB_GetTriggerMode(&deviceDesc->cachedConfigBlock) ) { */
-    triggerMode = (AIOUSB_GetTriggerMode(&deviceDesc->cachedConfigBlock) | AD_TRIGGER_SCAN) & ( ~(AD_TRIGGER_TIMER | AD_TRIGGER_EXTERNAL));
-    if ( triggerMode != AIOUSB_GetTriggerMode(&deviceDesc->cachedConfigBlock ) ) {
-        AIOUSB_SetTriggerMode(&deviceDesc->cachedConfigBlock, triggerMode);
-        configChanged = AIOUSB_TRUE;
-    }
-
     /**
-     * the oversample setting dictates how many samples to take _in
-     * addition_ to the primary sample; if oversample is zero, we take
-     * just one sample for each channel; if oversample is greater than
-     * zero then we average the primary sample and all of its
-     * over-samples; if the discardFirstSample setting is enabled,
-     * then we discard the primary sample, leaving just the
-     * over-samples; thus, if discardFirstSample is enabled, we must
-     * take at least one over-sample in order to have any data left;
-     * there's another complication: the device buffer is limited to a
-     * small number of samples, so we have to limit the number of
-     * over-samples to what the device buffer can accommodate, so the
-     * actual oversample setting depends on the number of channels
-     * being scanned; we also preserve and restore the original
-     * oversample setting specified by the user; since the user is
-     * expecting to average (1 + oversample) samples, then if
-     * discardFirstSample is enabled we simply always add one
+     * Turn scan on and turn timer and external trigger off 
      */
+    ADCConfigBlockSetTriggerMode( &deviceDesc->cachedConfigBlock,
+                                  ( ADCConfigBlockGetTriggerMode( &deviceDesc->cachedConfigBlock ) | AD_TRIGGER_SCAN) &
+                                  (  ~(AD_TRIGGER_TIMER | AD_TRIGGER_EXTERNAL) ) );
+    configChanged = AIOUSB_TRUE;
 
-    /* unsigned origOverSample = overSample; */
-    /* unsigned origOverSample  */
-    samplesPerChannel = 1 + AIOUSB_GetOversample(&deviceDesc->cachedConfigBlock );
+    samplesPerChannel = 1 + ADCConfigBlockGetOversample(&deviceDesc->cachedConfigBlock );
 
     if (discardFirstSample)
         samplesPerChannel++;
-
     if (samplesPerChannel > 256)
         samplesPerChannel = 256;               /* rained by maximum oversample of 255 */
 
@@ -452,24 +427,22 @@ PRIVATE unsigned long AIOUSB_GetScan(
         samplesPerChannel = DEVICE_SAMPLE_BUFFER_SIZE / numChannels;
 
     overSample = samplesPerChannel - 1;
-    if (overSample != AIOUSB_GetOversample(&deviceDesc->cachedConfigBlock ) ) {
-        AIOUSB_SetOversample(&deviceDesc->cachedConfigBlock, overSample);
+    if (overSample != (unsigned)ADCConfigBlockGetOversample(&deviceDesc->cachedConfigBlock ) ) {
+        ADCConfigBlockSetOversample(&deviceDesc->cachedConfigBlock, overSample);
         configChanged = AIOUSB_TRUE;
     }
 
     /**
      * Needs to be the correct values written out ...
      * Should resemble (04|05) F0 0E
-     *
      */
-    if (configChanged) {
-        result = WriteConfigBlock(DeviceIndex);
-    }
+
+    if ( configChanged )
+        result = USBDevicePutADCConfigBlock( usb, &deviceDesc->cachedConfigBlock );
+
 
     numSamples = numChannels * samplesPerChannel;
-    /* unsigned short numSamplesHigh = ( unsigned short )(numSamples >> 16); */
-    /* unsigned short numSamplesLow = ( unsigned short )numSamples; */
-    /* int numBytes = numSamples * sizeof(unsigned short); */
+ 
     sampleBuffer = ( unsigned short* )malloc( numSamples * sizeof(unsigned short) );
     if (!sampleBuffer ) {
         result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
@@ -536,8 +509,7 @@ PRIVATE unsigned long AIOUSB_GetScan(
                 int sample;
                 for(sample = 0; sample < samplesToAverage; sample++)
                     sampleSum += sampleBuffer[ sampleIndex++ ];
-                counts[ channel ] = ( unsigned short )
-                    ((sampleSum + samplesToAverage / 2) / samplesToAverage);
+                counts[ channel ] = ( unsigned short )((sampleSum + samplesToAverage / 2) / samplesToAverage);
             }
         }
     }
@@ -547,9 +519,8 @@ PRIVATE unsigned long AIOUSB_GetScan(
         free(sampleBuffer);
     
     if (configChanged) {
-
         deviceDesc->cachedConfigBlock = origConfigBlock;
-        WriteConfigBlock(DeviceIndex);
+        result = USBDevicePutADCConfigBlock( usb, &deviceDesc->cachedConfigBlock );
     }
 
  out_AIOUSB_GetScan:
@@ -822,7 +793,7 @@ unsigned long ADC_GetScanV( unsigned long DeviceIndex, double *pBuf )
         return AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
 
     result = ADC_GetScan(DeviceIndex, counts);
-    if ( result != AIOUSB_SUCCESS )
+    if ( result <= AIOUSB_SUCCESS )
         return result;
     
     /**
@@ -862,13 +833,10 @@ unsigned long ADC_GetScanV( unsigned long DeviceIndex, double *pBuf )
  * @param pBuf
  * @return
  */
-unsigned long ADC_GetScan(
-                          unsigned long DeviceIndex,
-                          unsigned short *pBuf
-                          )
+unsigned long ADC_GetScan( unsigned long DeviceIndex,unsigned short *pBuf )
 {
     unsigned startChannel;
-    AIORESULT result;
+    AIORET_TYPE  result;
     AIOUSBDevice * deviceDesc;
     if (pBuf == NULL) {
         result =  AIOUSB_ERROR_INVALID_PARAMETER;
@@ -899,7 +867,8 @@ unsigned long ADC_GetScan(
     memset(pBuf, 0, deviceDesc->ADCMUXChannels * sizeof(unsigned short));
     startChannel = AIOUSB_GetStartChannel(&deviceDesc->cachedConfigBlock);
 
-    return AIOUSB_GetScan(DeviceIndex, pBuf + startChannel);
+    result = AIOUSB_GetScan(DeviceIndex, pBuf + startChannel);
+    return (unsigned long)result;
  err_ADC_GetScan:
 
     return result;

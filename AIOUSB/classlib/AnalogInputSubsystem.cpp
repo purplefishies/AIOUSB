@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <string.h>
 #include <AIOUSB_Core.h>
+#include "AIOUSB_ADC.h"
 #include "AIODeviceTable.h"
 #include "AIOUSBDevice.h"
 #include "aiousb.h"
@@ -927,7 +928,7 @@ UShortArray AnalogInputSubsystem::readCounts( int startChannel, int numChannels 
 	}	// if( calMode ...
 	setScanRange( startChannel, numChannels );
 	UShortArray counts( numChannels );
-	const int result = AIOUSB_GetScan( getDeviceIndex(), counts.data() );
+	const int result = (int)AIOUSB_GetScan( getDeviceIndex(), counts.data() );
 	if( result != AIOUSB_SUCCESS )
 		throw OperationFailedException( result );
 
