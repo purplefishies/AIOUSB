@@ -510,7 +510,7 @@ PRIVATE unsigned long AIOUSB_GetScan(
                                               deviceDesc->commTimeout
                                               );
 
-        if (libusbresult <= LIBUSB_SUCCESS) {
+        if (libusbresult != LIBUSB_SUCCESS) {
             result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbresult);
         } else if (bytesTransferred != numSamples * sizeof(unsigned short) ) {
             result = AIOUSB_ERROR_INVALID_DATA;

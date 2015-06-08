@@ -37,6 +37,7 @@ int main( int argc, char **argv ) {
     if( deviceMask != 0 ) {
       // at least one ACCES device detected, but we want one of a specific type
       // AIOUSB_ListDevices();
+        AIOUSB_ListDevices();
       TestCaseSetup tcs( 0, opts.number_channels );
       try { 
         tcs.findDevice( [](AIOUSBDevice *dev)->AIOUSB_BOOL {
