@@ -179,6 +179,7 @@ AIORET_TYPE AIOFifoRead( AIOFifo *fifo, void *tobuf , unsigned maxsize );
 AIORET_TYPE AIOFifoWrite( AIOFifo *fifo, void *frombuf , unsigned maxsize );
 AIORET_TYPE AIOFifoWriteAllOrNone( AIOFifo *fifo, void *frombuf , unsigned maxsize );
 AIORET_TYPE AIOFifoReadAllOrNone( AIOFifo *fifo, void *tobuf , unsigned maxsize );
+AIORET_TYPE AIOFifoGetRefSize( void *fifo );
 
 AIOFifoTYPE *NewAIOFifoTYPE( unsigned int size );
 AIORET_TYPE Push( AIOFifoTYPE *fifo, TYPE a );
@@ -187,6 +188,7 @@ AIORET_TYPE PopN( AIOFifoTYPE *fifo, INPUT_TYPE *a, unsigned N );
 AIORET_TYPE AIOFifoSizeRemaining( void *fifo );
 AIORET_TYPE AIOFifoReadSize( void *tmpfifo );
 AIORET_TYPE AIOFifoGetSize( void *fifo );
+AIORET_TYPE AIOFifoGetSizeNumElements( void *tmpfifo );
 AIORET_TYPE AIOFifoResize( AIOFifo *fifo, size_t newsize );
 
 PUBLIC_EXTERN AIORET_TYPE AIOFifoReadPosition( void *nfifo );

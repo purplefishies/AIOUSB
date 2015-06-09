@@ -33,10 +33,18 @@ AIORET_TYPE AIOFifoSizeRemaining( void *tmpfifo )
 
 AIORET_TYPE AIOFifoGetSize( void *tmpfifo )
 {
-    assert(tmpfifo);
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOFIFO, tmpfifo );
+    AIOFifo *fifo = (AIOFifo*)tmpfifo;
+    return fifo->size - fifo->refsize ;
+}
+
+AIORET_TYPE AIOFifoGetSizeNumElements( void *tmpfifo )
+{
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOFIFO, tmpfifo );
     AIOFifo *fifo = (AIOFifo*)tmpfifo;
     return fifo->size / fifo->refsize - 1;
 }
+
 
 size_t rdelta( AIOFifo *fifo  ) 
 {
@@ -135,6 +143,13 @@ void AIOFifoReset( void *tmpfifo )
     AIOFifo *fifo = (AIOFifo*)tmpfifo;
     fifo->read_pos = fifo->write_pos = 0;
 }
+
+AIORET_TYPE AIOFifoGetRefSize( void *tmpfifo )
+{
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOFIFO, tmpfifo );
+    return ((AIOFifo *)tmpfifo)->refsize;
+}
+
 
 #define LOOKUP(T) aioeither_value_ ## T
 
@@ -480,18 +495,18 @@ TEST(Volts,Testing )
 TEST(AIOFifo, Resizing ) 
 {
     AIOFifoVolts *vfifo = NewAIOFifoVolts( 1000 );
-    EXPECT_EQ( AIOFifoGetSize( vfifo ), 1000 ) << "Expected straight forward number of volts remaining";
+    EXPECT_EQ( AIOFifoGetSizeNumElements( vfifo ), 1000 ) << "Expected straight forward number of volts remaining";
 
     DeleteAIOFifoVolts( vfifo );
 
     AIOFifoCounts *counts = NewAIOFifoCounts( 1000 );
-    EXPECT_EQ( AIOFifoGetSize( counts ), 1000 ) << "Expected straight forward number of counts remaining";
+    EXPECT_EQ( AIOFifoGetSizeNumElements( counts ), 1000 ) << "Expected straight forward number of counts remaining";
 
     AIOFifoCountsResize( counts, 1001 );
-    EXPECT_EQ( AIOFifoGetSize( counts ), 1001 ) << "Expected straight forward number of counts remaining";
+    EXPECT_EQ( AIOFifoGetSizeNumElements( counts ), 1001 ) << "Expected straight forward number of counts remaining";
 
     AIOFifoResize( (AIOFifo*)counts, 123 );
-    EXPECT_EQ( AIOFifoGetSize( counts ), 123 ) << "Generic resize function";
+    EXPECT_EQ( AIOFifoGetSizeNumElements( counts ), 123 ) << "Generic resize function";
 
     DeleteAIOFifoCounts( counts );
 
