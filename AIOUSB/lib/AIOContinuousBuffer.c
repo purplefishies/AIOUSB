@@ -543,13 +543,6 @@ AIORET_TYPE AIOContinuousBufGetWritePosition( AIOContinuousBuf *buf )
 }
 
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE AIOContinuousBufAvailableReadSize( AIOContinuousBuf *buf )
-{
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
-    return read_size(buf);
-}
-
-/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetRemainingSize( AIOContinuousBuf *buf )
 {
     AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
@@ -1453,7 +1446,6 @@ AIORET_TYPE AIOContinuousBufPreSetup( AIOContinuousBuf * buf )
 
     /* Write 02 00 02 00 */
     /* 40 bc 00 00 00 00 04 00 */
-  
     usbval = usb->usb_control_transfer( usb, 
                                         USB_WRITE_TO_DEVICE,
                                         AUR_CTR_MODE,
@@ -1663,15 +1655,6 @@ AIORET_TYPE AIOContinuousBufCallbackStartCallbackAcquisition( AIOContinuousBuf *
 
     return total;
 }
-
-/* for( int scan_count = 0; scan_count < scans_read ; scan_count ++ ) {  */
-/*     for( int ch = 0 ; ch < AIOContinuousBufNumberChannels(buf); ch ++ ) { */
-/*         /\* fprintf(fp,"%lf,",tobuf[scan_count*AIOContinuousBufNumberChannels(buf)+ch] ); *\/ */
-/*         /\* if( (ch+1) % AIOContinuousBufNumberChannels(buf) == 0 ) { *\/ */
-/*         /\*     fprintf(fp,"\n"); *\/ */
-/*         /\* } *\/ */
-/*     } */
-/* } */
 
 
 /*----------------------------------------------------------------------------*/
