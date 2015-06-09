@@ -662,49 +662,6 @@ RETURN_AIOUSB_Validate_Device:
     return result;
 }
 
-/*----------------------------------------------------------------------------*/
-/**
- * @param DeviceIndex
- * @param channel
- * @param counts
- * @return
- */
-double AIOUSB_CountsToVolts(
-    unsigned long DeviceIndex,
-    unsigned channel,
-    unsigned short counts
-    )
-{
-    double volts;
-
-    if (AIOUSB_ArrayCountsToVolts(DeviceIndex, channel, 1, &counts, &volts) != AIOUSB_SUCCESS)
-        volts = 0.0;
-    return volts;
-}
-
-/*----------------------------------------------------------------------------*/
-/**
- * @param DeviceIndex
- * @param startChannel
- * @param endChannel
- * @param counts
- * @return
- */
-unsigned long AIOUSB_MultipleCountsToVolts(
-                                           unsigned long DeviceIndex,
-                                           unsigned startChannel,
-                                           unsigned endChannel,
-                                           const unsigned short counts[],
-                                           double volts[]
-                                           )
-{
-    return AIOUSB_ArrayCountsToVolts(DeviceIndex, 
-                                     startChannel, 
-                                     endChannel - startChannel + 1,
-                                     counts + startChannel, 
-                                     volts + startChannel
-                                     );
-}
 /*------------------------------------------------------------------------*/
 /**
  * @param DeviceIndex
@@ -723,25 +680,6 @@ unsigned short AIOUSB_VoltsToCounts(
     if(AIOUSB_ArrayVoltsToCounts(DeviceIndex, channel, 1, &volts, &counts) != AIOUSB_SUCCESS)
         counts = 0;
     return counts;
-}
-/*------------------------------------------------------------------------*/
-/**
- * @param DeviceIndex
- * @param startChannel
- * @param endChannel
- * @param volts
- * @return
- */
-unsigned long AIOUSB_MultipleVoltsToCounts(
-    unsigned long DeviceIndex,
-    unsigned startChannel,
-    unsigned endChannel,
-    const double volts[],     /* deviceDesc->ADCMUXChannels */
-    unsigned short counts[]     /* deviceDesc->ADCMUXChannels */
-    )
-{
-    return AIOUSB_ArrayVoltsToCounts(DeviceIndex, startChannel, endChannel - startChannel + 1,
-                                     volts + startChannel, counts + startChannel);
 }
 
 /*------------------------------------------------------------------------*/

@@ -1097,8 +1097,7 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
         device->RootClock = 10000000;
         device->bADCStream = AIOUSB_TRUE;
         device->ImmADCs = 1;
-        device->ADCChannels
-            = device->ADCMUXChannels = 16;
+        device->ADCChannels = device->ADCMUXChannels = 16;
         device->ADCChannelsPerGroup = 1;
         device->ConfigBytes = AD_CONFIG_REGISTERS;
         device->bClearFIFO = AIOUSB_TRUE;

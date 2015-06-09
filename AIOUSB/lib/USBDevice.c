@@ -206,14 +206,13 @@ libusb_device_handle *get_usb_device( USBDevice *dev )
 int USBDeviceFetchADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock )
 {
     int result = AIOUSB_SUCCESS;
-    AIOUSBDevice dev;
+
     ADCConfigBlock config;
 
     AIO_ASSERT_CONFIG(configBlock);
     AIO_ASSERT_USB(usb);
 
-    ADCConfigBlockInitializeFromAIOUSBDevice( &config , &dev );
-    config.timeout = configBlock->timeout;
+    memcpy( &config, configBlock, sizeof( ADCConfigBlock ));
 
     if( configBlock->testing != AIOUSB_TRUE ) {
         int bytesTransferred = usb->usb_control_transfer( usb, 

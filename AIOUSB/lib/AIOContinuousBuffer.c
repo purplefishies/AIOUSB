@@ -1031,36 +1031,25 @@ AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf,
 /*----------------------------------------------------------------------------*/
 void *RawCountsWorkFunction( void *object )
 {
-    AIORET_TYPE retval = AIOUSB_SUCCESS;
-    AIORESULT result = AIOUSB_SUCCESS;
-    int usbresult;
+    static AIORET_TYPE retval = AIOUSB_SUCCESS;
     AIOContinuousBuf *buf = (AIOContinuousBuf*)object;
-    int bytes;
-    srand(3);
-
-    unsigned datasize = buf->data_size;
-
-    int usbfail = 0;
-    int usbfail_count = 5;
-    unsigned char *data  = (unsigned char *)malloc( datasize );
+    AIO_ASSERT_RET( NULL, object );
+    int usbfail = 0, usbfail_count = 5;
     unsigned count = 0;
-    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), &result );
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), (AIORESULT*)&retval );
+    AIO_ERROR_VALID_DATA( &retval, retval == AIOUSB_SUCCESS );
 
-    if ( result != AIOUSB_SUCCESS ) {
-        buf->exitcode = -(AIORET_TYPE)result;
-        retval = -result;
-        goto out_RawCountsWorkFunction;
-    }
+
+    unsigned char *data  = (unsigned char *)malloc( buf->data_size );
 
     while ( buf->status == RUNNING  ) {
-
-        usbresult = aiocontbuf_get_data( buf, usb, 0x86, data, datasize, &bytes, 3000 );
+        int bytes;
+        int usbresult = aiocontbuf_get_data( buf, usb, 0x86, data, buf->data_size, &bytes, 3000 );
 
         AIOUSB_DEVEL("libusb_bulk_transfer returned  %d as usbresult, bytes=%d\n", usbresult , (int)bytes);
 
-        if (  bytes ) {
-            /* only write bytes that exist */
-            bytes = ( AIOContinuousBuf_BufSizeForCounts(buf) - buf->fifo->refsize - count < datasize ? AIOContinuousBuf_BufSizeForCounts(buf) - buf->fifo->refsize - count : bytes );
+        if (  bytes ) {         /* only write bytes that exist */
+            bytes = ( AIOContinuousBuf_BufSizeForCounts(buf) - buf->fifo->refsize - count < buf->data_size ? AIOContinuousBuf_BufSizeForCounts(buf) - buf->fifo->refsize - count : bytes );
 
             int tmp = buf->fifo->PushN( buf->fifo, (uint16_t*)data, bytes / sizeof(unsigned short));
 
@@ -1088,7 +1077,7 @@ void *RawCountsWorkFunction( void *object )
             AIOUSB_ERROR("Error with usb: %d\n", (int)usbresult );
             usbfail ++;
         } else {
-            if (  usbfail >= usbfail_count  ){
+            if (  usbfail >= usbfail_count  ) {
                 AIOUSB_ERROR("Erroring out. too many usb failures: %d\n", usbfail_count );
                 retval = -(AIORET_TYPE)LIBUSB_RESULT_TO_AIOUSB_RESULT(usbresult);
                 AIOContinuousBufLock(buf);
@@ -1099,12 +1088,12 @@ void *RawCountsWorkFunction( void *object )
         }
     }
 
- out_RawCountsWorkFunction:
     AIOContinuousBufLock(buf);
     buf->status = TERMINATED;
     AIOContinuousBufUnlock(buf);
     AIOUSB_DEVEL("Stopping\n");
     AIOContinuousBufCleanup( buf );
+    free(data);
     pthread_exit((void*)&retval);
   
 }
@@ -1119,56 +1108,52 @@ void *RawCountsWorkFunction( void *object )
  */
 void *ConvertCountsToVoltsFunction( void *object )
 {
-    AIORET_TYPE retval;
-    int usbresult;
-    AIOContinuousBuf *buf = (AIOContinuousBuf*)object;
-    unsigned long result;
-    int bytes;
-    unsigned datasize = buf->data_size;
+    static AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIO_ERROR_VALID_DATA_W_CODE( &retval, retval = AIOUSB_ERROR_INVALID_PARAMETER, object );
 
+    AIOContinuousBuf *buf = (AIOContinuousBuf*)object;
+    AIOGainRange *ranges;
     int usbfail = 0, usbfail_count = 5;
     unsigned count = 0;
     int num_channels = AIOContinuousBufNumberChannels(buf);
     int num_oversamples = AIOContinuousBufGetOversample(buf);
     int num_scans = AIOContinuousBufGetNumberScansToRead(buf);
     AIOFifoCounts *infifo = NewAIOFifoCounts( (unsigned)num_channels*(num_oversamples+1)*num_scans );
+    AIO_ERROR_VALID_DATA_W_CODE( &retval, retval = AIOUSB_ERROR_INVALID_AIOFIFO, infifo );
     AIOFifoVolts *outfifo = (AIOFifoVolts*)buf->fifo;
 
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), (AIORESULT*)&retval );
+    AIO_ERROR_VALID_DATA( &retval, retval == AIOUSB_SUCCESS );
 
-    AIOGainRange *ranges;
-    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), &result );
-    unsigned char *data   = (unsigned char *)malloc( datasize );
 
     AIOCountsConverter *cc;
-    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), &result );
-    if ( result != AIOUSB_SUCCESS )
-        goto out_ConvertCountsToVoltsFunction;
-    AIOUSBDeviceGetADCConfigBlock( dev );
+    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), (AIORESULT*)&retval );
+    AIO_ERROR_VALID_DATA( &retval, retval == AIOUSB_SUCCESS );
 
     ranges = NewAIOGainRangeFromADCConfigBlock( AIOUSBDeviceGetADCConfigBlock( dev ) );
-    if ( !ranges )
-        goto out_ConvertCountsToVoltsFunction;
+    AIO_ERROR_VALID_DATA_W_CODE( &retval, retval = AIOUSB_ERROR_INVALID_GAINCODE, ranges );
+
+    unsigned char *data   = (unsigned char *)malloc( buf->data_size );
+    AIO_ERROR_VALID_DATA_W_CODE( &retval, retval = AIOUSB_ERROR_NOT_ENOUGH_MEMORY, data );
 
     cc = NewAIOCountsConverterWithScanLimiter( (unsigned short*)data, num_scans, num_channels, ranges, num_oversamples , sizeof(unsigned short)  );
-    if ( !cc ) 
-        goto out_ConvertCountsToVoltsFunction;
+    AIO_ERROR_VALID_DATA_W_CODE( &retval, free(data); retval = AIOUSB_ERROR_INVALID_COUNTS_CONVERTER, cc );
+
 
     /**
-     * @brief Load the fifo with values
+     * @brief create temporary buffer and then Load the fifo with values
      */
    
     while ( buf->status == RUNNING  ) {
-        
-        usbresult = aiocontbuf_get_data( buf, usb, 0x86, data, datasize, &bytes, 3000 );
+        int bytes;
+        int usbresult = aiocontbuf_get_data( buf, usb, 0x86, data, buf->data_size, &bytes, 3000 );
+        AIOUSB_DEVEL("libusb_bulk_transfer returned  %d as usbresult, bytes=%d\n", usbresult , (int)bytes);
 
         AIOUSB_DEVEL("Using counts=%d\n",bytes / 2 );
 
         bytes = MIN( (int)(buf->num_channels * (buf->num_oversamples+1)*buf->num_scans * sizeof(uint16_t) - count*sizeof(uint16_t)), bytes ); 
-
         retval = infifo->PushN( infifo, (uint16_t*)data, bytes / 2 );
-        AIOUSB_DEVEL("Pushed %d bytes\n",retval );
 
-        AIOUSB_DEVEL("libusb_bulk_transfer returned  %d as usbresult, bytes=%d\n", usbresult , (int)bytes);
         if ( bytes ) {
             /* only write bytes that exist */
             retval = cc->ConvertFifo( cc, outfifo, infifo , bytes / sizeof(uint16_t) );
@@ -1206,7 +1191,7 @@ void *ConvertCountsToVoltsFunction( void *object )
             } 
         }
     }
- out_ConvertCountsToVoltsFunction:
+
     DeleteAIOFifoCounts(infifo);
     DeleteAIOCountsConverter( cc );
     free(data);
