@@ -520,15 +520,6 @@ AIORET_TYPE AIOContinuousBufNumberWriteScansInCounts( AIOContinuousBuf *buf )
 }
 
 /*----------------------------------------------------------------------------*/
-/**
- * @brief Returns the amount of data available in the buffer
- */
-unsigned read_size( AIOContinuousBuf *buf ) 
-{
-    return ( buffer_size(buf) - write_size(buf) );
-}
-
-/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetReadPosition( AIOContinuousBuf *buf )
 {
     AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
@@ -2257,46 +2248,6 @@ stress_test_one( int size , int readbuf_size )
     DeleteAIOContinuousBuf( buf );
     free(readbuf);
 }
-
-
-void stress_test_read_channels( int bufsize, int keysize  ) 
-{
-    AIOContinuousBuf *buf = NewAIOContinuousBufLegacy( 0,  bufsize , 16 );
-    int mybufsize = (16*keysize);
-    int stopval;
-    AIOBufferType *tmp = (AIOBufferType *)malloc(mybufsize*sizeof(AIOBufferType ));
-    AIORET_TYPE retval;
-    AIOContinuousBufSetCallback( buf , channel16_doit);
-    AIOContinuousBufReset( buf );
-    retval = AIOContinuousBufStart( buf );
-    if (  retval < AIOUSB_SUCCESS )
-        goto out_stress_test_read_channels;
-
-    for ( int i = 0; i < 2000; i ++ ) {
-        retval = AIOContinuousBufRead( buf, tmp, mybufsize, mybufsize );
-        AIOUSB_DEVEL("Read %d bytes\n", (int)retval );
-        usleep(rand()%100);
-        if ( retval < AIOUSB_SUCCESS )
-            goto out_stress_test_read_channels;
-    }
-    AIOContinuousBufEnd( buf );
-    /* Now read out all of the remaining sizes */
-    stopval =read_size(buf) / mybufsize;
-    if (  stopval == 0 )
-        stopval = 1;
-    for( int i = 1 ; i <= stopval ; i ++ ) {
-        retval = AIOContinuousBufRead( buf, tmp, mybufsize, mybufsize );
-    }
-    retval = AIOContinuousBufRead( buf, tmp, mybufsize, mybufsize );
-
- out_stress_test_read_channels:
-  
-    EXPECT_EQ( retval, AIOUSB_SUCCESS );
-
-    free(tmp);
-    DeleteAIOContinuousBuf( buf );
-}
-
 
 void continuous_stress_test( int bufsize )
 {
