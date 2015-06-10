@@ -57,7 +57,7 @@ typedef struct aio_continuous_buf {
     unsigned hz;
     unsigned divisora;
     unsigned divisorb;
-    unsigned basesize;
+    unsigned base_size;
     unsigned size;
     unsigned num_oversamples;
     unsigned num_channels;
@@ -73,14 +73,14 @@ typedef struct aio_continuous_buf {
 
     volatile THREAD_STATUS status; /* Are we running, paused ..etc; */
     AIO_CONT_BUF_TYPE type;
-    AIORET_TYPE (*PushN)( struct aio_continuous_buf *buf, unsigned short *frombuf, unsigned int N );
-    AIORET_TYPE (*PopN)( struct aio_continuous_buf *buf, unsigned short *frombuf, unsigned int N );
+    AIORET_TYPE (*PushN)( struct aio_continuous_buf *buf, void *frombuf, unsigned int N );
+    AIORET_TYPE (*PopN)( struct aio_continuous_buf *buf, void *frombuf, unsigned int N );
 } AIOContinuousBuf;
 
 #define ROOTCLOCK 10000000
 
 /*-----------------------------  Constructors  ------------------------------*/
-PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBuf();
+ PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex, unsigned num_channels, unsigned num_oversamples, unsigned base_size );
 PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex, unsigned scancounts , unsigned num_channels , AIOUSB_BOOL counts );
 PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufLegacy( unsigned long DeviceIndex, unsigned scancounts , unsigned num_channels );
 
@@ -117,6 +117,8 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetOversample( AIOContinuousBuf *buf )
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetOversample( AIOContinuousBuf *buf, unsigned num_oversamples );
 
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufNumberChannels( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetBaseSize( AIOContinuousBuf *buf , size_t newbase );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetBaseSize( AIOContinuousBuf *buf  );
 
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetTesting( AIOContinuousBuf *buf, AIOUSB_BOOL testing );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetTesting( AIOContinuousBuf *buf );
@@ -151,8 +153,8 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetRemainingWriteSize( AIOContinuousBu
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetUnitSize( AIOContinuousBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufReset( AIOContinuousBuf *buf );
 
-PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufPushN(AIOContinuousBuf *buf ,unsigned short *frombuf, unsigned int N );
-PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufPopN(AIOContinuousBuf *buf , unsigned short *frombuf, unsigned int N );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufPushN(AIOContinuousBuf *buf ,void  *frombuf, unsigned int N );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufPopN(AIOContinuousBuf *buf , void *tobuf, unsigned int N );
 
 
 /*-----------------------------  Deprecated / Refactored   -------------------------------*/
