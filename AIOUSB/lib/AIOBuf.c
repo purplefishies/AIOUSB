@@ -79,6 +79,14 @@ AIOBufType AIOBufGetType( AIOBuf *buf )
 }
 
 /*----------------------------------------------------------------------------*/
+void *AIOBufGetRaw( AIOBuf *buf )
+{
+    AIO_ASSERT_RET(NULL, buf );
+    return buf->_buf;
+}
+
+
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOBufGetTypeSize( AIOBuf *buf )
 {
     AIO_ASSERT( buf );

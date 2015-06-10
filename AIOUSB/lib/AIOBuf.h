@@ -20,11 +20,10 @@ typedef enum {
 } AIOBufType;
 
 
-
-
 typedef struct aiobuf {
     size_t size;
     void *_buf;
+    size_t endpos;
     AIOBufType type;
     AIOUSB_BOOL defined;
 } AIOBuf;
@@ -46,6 +45,7 @@ PUBLIC_EXTERN AIOBuf * NewAIOBuf( AIOBufType type , size_t size );
 PUBLIC_EXTERN AIORET_TYPE DeleteAIOBuf( AIOBuf *type );
 PUBLIC_EXTERN AIORET_TYPE AIOBufGetSize( AIOBuf *buf );
 PUBLIC_EXTERN AIOBufType AIOBufGetType( AIOBuf *buf );
+PUBLIC_EXTERN void *AIOBufGetRaw( AIOBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOBufRead( AIOBuf *buf, void *tobuf, size_t size_tobuf );
 PUBLIC_EXTERN AIORET_TYPE AIOBufWrite( AIOBuf *buf, void *frombuf, size_t size_frombuf );
 PUBLIC_EXTERN AIOBufIterator AIOBufGetIterator( AIOBuf *buf );

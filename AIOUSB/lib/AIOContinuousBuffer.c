@@ -82,6 +82,7 @@ AIOContinuousBuf *NewAIOContinuousBuf( unsigned long deviceIndex, unsigned num_c
         tmp->PushN = AIOContinuousBufPushN;
         tmp->PopN  = AIOContinuousBufPopN;
         tmp->type = AIO_CONT_BUF_TYPE_COUNTS;
+        AIOContinuousBufSetCallback( tmp, RawCountsWorkFunction );
 
 #if 0
     if ( num_channels > 32 ) {
@@ -413,30 +414,6 @@ AIORET_TYPE AIOContinuousBufReset( AIOContinuousBuf *buf )
     AIOFifoReset( buf->fifo );
     AIOContinuousBufUnlock( buf );
     return AIOUSB_SUCCESS;
-}
-
-/*----------------------------------------------------------------------------*/
-static unsigned write_size_num_scan_counts( AIOContinuousBuf *buf ) 
-{
-    AIO_ASSERT_AIOCONTBUF( buf );
-    float tmp = write_size(buf) / AIOContinuousBufNumberChannels(buf);
-    if (  tmp > (int)tmp ) {
-        tmp = (int)tmp;
-    } else {
-        tmp = ( tmp - 1 < 0 ? 0 : tmp -1 );
-    }
-    return (unsigned)tmp;
-}
-
-/*----------------------------------------------------------------------------*/
-AIORET_TYPE AIOContinuousBuf_NumberWriteScansInCounts( AIOContinuousBuf *buf ) { return AIOContinuousBufNumberWriteScansInCounts( buf ); }
-AIORET_TYPE AIOContinuousBufNumberWriteScansInCounts( AIOContinuousBuf *buf ) 
-{
-    AIO_ASSERT_AIOCONTBUF( buf );
-    AIORET_TYPE num_channels = AIOContinuousBufNumberChannels(buf);
-    if ( num_channels < AIOUSB_SUCCESS )
-        return num_channels;
-    return num_channels*write_size_num_scan_counts( buf ) ;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -783,7 +760,7 @@ AIORET_TYPE AIOContinuousBuf_NumberChannels( AIOContinuousBuf *buf ) { return AI
 AIORET_TYPE AIOContinuousBufNumberChannels( AIOContinuousBuf *buf ) 
 {
     AIO_ASSERT_AIOCONTBUF( buf );
-    return AIOChannelMaskNumberSignals(buf->mask );
+    return AIOChannelMaskNumberSignals( buf->mask );
 }
 
 /*----------------------------------------------------------------------------*/
@@ -1458,6 +1435,26 @@ typedef  enum {
 } AIO_SCAN_TYPE;
 
 /*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOContinuousBufNumberSamplesAvailable( AIOContinuousBuf *buf )
+{
+    AIO_ASSERT_AIOCONTBUF( buf );
+    return AIOFifoReadSizeNumElements( buf->fifo );
+}
+
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOContinuousBufReadNSamples( AIOContinuousBuf *buf, void *tobuf, size_t n_to_read )
+{
+    AIO_ASSERT_AIOCONTBUF( buf );
+    return _AIOContinuousBufRead( buf, tobuf, n_to_read );
+}
+
+AIORET_TYPE AIOContinuousBufInitiateCallbackAcquisition( AIOContinuousBuf *buf )
+{
+    AIO_ASSERT_AIOCONTBUF( buf );
+    return AIOContinuousBufCallbackStart(buf);
+}
+
+/*----------------------------------------------------------------------------*/
 /**
  * @brief Sets up a smart continuos mode acquisition allowing the user
  * to specify a callback function that is called based on the arguments constructed
@@ -1471,11 +1468,14 @@ typedef  enum {
  */
 AIORET_TYPE AIOContinuousBufCallbackStartCallbackAcquisition( AIOContinuousBuf *buf, AIOCmd *cmd, AIORET_TYPE (*callback)( AIOBuf *buf) )
 {
-    AIOBuf **bufs = (AIOBuf **)calloc(5,sizeof(AIOBuf*));
-    int i;
-    int size = 1000;
+    AIO_ASSERT_AIOCONTBUF( buf );
+    AIO_ASSERT_RET(AIOUSB_ERROR_INVALID_AIOCMD, cmd );
+    AIO_ASSERT_RET(AIOUSB_ERROR_INVALID_CALLBACK, callback );
     int num_bufs = 5;
-    size_t data_to_read;
+    AIOBuf **bufs = (AIOBuf **)calloc(num_bufs,sizeof(AIOBuf*));
+    int size = 4096;
+    int i;
+    size_t num_samples_to_read;
     int tmp_remaining;
     int data_read;
     int total;
@@ -1496,24 +1496,27 @@ AIORET_TYPE AIOContinuousBufCallbackStartCallbackAcquisition( AIOContinuousBuf *
 
         switch ( cmd->channel ) {
         case AIO_PER_OVERSAMPLE:
-            data_to_read = 1 * sizeof(short);
+            num_samples_to_read = 1;
             break;
         case AIO_PER_CHANNEL:
-            data_to_read = buf->num_oversamples * sizeof(short);
+            num_samples_to_read = buf->num_oversamples;
             break;
         case AIO_PER_SCANS:
-            data_to_read = buf->num_oversamples * sizeof(short)* buf->num_channels;
+            num_samples_to_read = buf->num_oversamples * buf->num_channels;
             break;
         default:
+            num_samples_to_read = 1;
             break;
         } 
 
-        if ( (tmp_remaining = AIOContinuousBufGetDataAvailable(buf) ) > 0 ) { 
+        if ( ( tmp_remaining = AIOContinuousBufNumberSamplesAvailable(buf) ) > 0 ) { 
             tobuf = bufs[pos];
-            data_to_read =  tmp_remaining / data_to_read;
-            data_read = AIOContinuousBufReadSingle( buf, tobuf, data_to_read );
+            /* num_samples_to_read = tmp_remaining / num_samples_to_read; */
+            data_read = AIOContinuousBufPopN( buf, AIOBufGetRaw(tobuf), num_samples_to_read );
+            tobuf->endpos = data_read;
             total += data_read;
             pos = ( pos + 1 )% num_bufs;
+            callback(tobuf);
         }
     }
 
@@ -1530,26 +1533,22 @@ AIORET_TYPE AIOContinuousBufCallbackStartCallbackAcquisition( AIOContinuousBuf *
  * @brief Setups the Automated runs for continuous mode runs
  * @param buf 
  * @return 
+ * @note Setup counters
+ * see reference in [USB AIO documentation](http://accesio.com/MANUALS/USB-AIO%20Series.PDF)
  */
 AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf )
 {
     AIORET_TYPE retval;
-    /**
-     * @note Setup counters
-     * see reference in [USB AIO documentation](http://accesio.com/MANUALS/USB-AIO%20Series.PDF)
-     **/
     AIO_ASSERT_AIOCONTBUF( buf );
     AIO_ASSERT_AIORET_TYPE(AIOUSB_ERROR_INVALID_DEVICE, AIOContinuousBufGetDeviceIndex(buf) >= 0 );
 
     /* Start the clocks, and need to get going capturing data */
     if ( (retval = ResetCounters(buf)) != AIOUSB_SUCCESS )
         goto out_AIOContinuousBufCallbackStart;
-
     if ( (retval = SetConfig(buf)) != AIOUSB_SUCCESS )
         goto out_AIOContinuousBufCallbackStart;
     if ( (retval = CalculateClocks( buf ) ) != AIOUSB_SUCCESS )
         goto out_AIOContinuousBufCallbackStart;
-    /* Try a switch */
     if ( (retval = StartStreaming(buf)) != AIOUSB_SUCCESS )
         goto out_AIOContinuousBufCallbackStart;
 
@@ -1561,9 +1560,7 @@ AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf )
     if ( ( retval = AIOContinuousBufLoadCounters( buf, buf->divisora, buf->divisorb )) != AIOUSB_SUCCESS)
         goto out_AIOContinuousBufCallbackStart;
 
-
-
-    if (  retval != AIOUSB_SUCCESS )
+    if ( retval != AIOUSB_SUCCESS )
         goto cleanup_AIOContinuousBufCallbackStart;
     /**
      * Allow the other command to be run
@@ -2465,6 +2462,33 @@ TEST(AIOContinuousBuf,ChangeUnitSize)
 
 
     ASSERT_TRUE( buf );
+}
+
+TEST(AIOContinuousBuf,ReadingIntegerSamples)
+{
+    AIOContinuousBuf *buf = NewAIOContinuousBuf(0,16,0,1024);
+    uint16_t counts[1024];
+    uint16_t tobuf[1024];
+    AIORET_TYPE retval;
+
+    for ( int i = 0; i < sizeof(counts)/sizeof(uint16_t) ; i ++ ) {
+        counts[i] = (uint16_t)i;
+    }
+
+    retval = AIOContinuousBufPushN(buf , counts, 40 );
+    ASSERT_GE( retval, 0 );
+    /* First check that we have samples available */
+    retval = AIOContinuousBufNumberSamplesAvailable( buf );
+    ASSERT_EQ( 40, retval );
+
+    retval = AIOContinuousBufPopN( buf, tobuf, 20 );
+    /* retval = AIOContinuousBufReadNSamples( buf, tobuf, 20 ); */
+    ASSERT_EQ( 20*sizeof(uint16_t), retval );
+    ASSERT_EQ( 20, AIOContinuousBufNumberSamplesAvailable( buf ) );
+    /* retval = AIOContinuousBufPushN(buf , counts, 40 ); */
+
+    DeleteAIOContinuousBuf( buf );
+
 }
 
 
