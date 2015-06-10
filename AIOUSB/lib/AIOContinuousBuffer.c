@@ -1476,9 +1476,9 @@ AIORET_TYPE AIOContinuousBufCallbackStartCallbackAcquisition( AIOContinuousBuf *
     int size = 4096;
     int i;
     size_t num_samples_to_read;
-    int tmp_remaining;
     int data_read;
     int total;
+    int tmp_remaining;
     AIOBuf *tobuf;
 
     for ( i = 0; i < num_bufs; i ++ ) {
@@ -1491,8 +1491,9 @@ AIORET_TYPE AIOContinuousBufCallbackStartCallbackAcquisition( AIOContinuousBuf *
         }
     }
     int pos = 0;
+    int num_total_samples = AIOContinuousBufGetNumberOfChannels(buf)*(1+AIOContinuousBufGetOversample(buf))*AIOContinuousBufGetNumberScansToRead(buf);
 
-    while ( buf->status == RUNNING ) {
+    while ( buf->status == RUNNING || num_total_samples > 0 ) {
 
         switch ( cmd->channel ) {
         case AIO_PER_OVERSAMPLE:
@@ -1513,6 +1514,7 @@ AIORET_TYPE AIOContinuousBufCallbackStartCallbackAcquisition( AIOContinuousBuf *
             tobuf = bufs[pos];
             /* num_samples_to_read = tmp_remaining / num_samples_to_read; */
             data_read = AIOContinuousBufPopN( buf, AIOBufGetRaw(tobuf), num_samples_to_read );
+            num_total_samples -= data_read / 2;
             tobuf->endpos = data_read;
             total += data_read;
             pos = ( pos + 1 )% num_bufs;
