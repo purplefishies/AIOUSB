@@ -235,23 +235,20 @@ AIORET_TYPE AIOContinuousBufInitConfiguration(  AIOContinuousBuf *buf )
     unsigned long tmp;
     AIORET_TYPE retval = AIOUSB_SUCCESS;
 
-    AIORESULT result = AIOUSB_SUCCESS;
-    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), &result );
-    AIO_ERROR_VALID_AIORET_TYPE( result, result == AIOUSB_SUCCESS );
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), (AIORESULT*)&retval );
+    AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS );
 
     ADCConfigBlockInitForCounterScan( &config, deviceDesc );
 
     AIOContinuousBufSendPreConfig( buf );
 
     tmp = ADC_SetConfig( AIOContinuousBufGetDeviceIndex( buf ), config.registers, &config.size );
-    if ( tmp != AIOUSB_SUCCESS ) {
-        retval = -(AIORET_TYPE)tmp;
-    }
+    AIO_ERROR_VALID_AIORET_TYPE( tmp, tmp == AIOUSB_SUCCESS );
+
         
     tmp = ADCConfigBlockCopy( AIOUSBDeviceGetADCConfigBlock( deviceDesc ), &config );
-    if ( tmp != AIOUSB_SUCCESS ) {
-        retval = -(AIORET_TYPE)tmp;
-    }
+    AIO_ERROR_VALID_AIORET_TYPE( tmp, tmp == AIOUSB_SUCCESS );
+
     return retval;
 }
 
@@ -262,13 +259,12 @@ AIORET_TYPE AIOContinuousBuf_SendPreConfig( AIOContinuousBuf *buf ) {
 AIORET_TYPE AIOContinuousBufSendPreConfig( AIOContinuousBuf *buf )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    AIORESULT result = AIOUSB_SUCCESS;
+
     unsigned wLength = 0x1, wIndex = 0x0, wValue = 0x0, bRequest = AUR_PROBE_CALFEATURE;
     int usbresult = 0;
     unsigned char data[1];
-    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), &result );
-    if ( result != AIOUSB_SUCCESS )
-        return -result;
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), (AIORESULT*)&retval );
+    AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS );
 
     if (  !buf->testing ) {
         usbresult = usb->usb_control_transfer( usb,
@@ -280,11 +276,9 @@ AIORET_TYPE AIOContinuousBufSendPreConfig( AIOContinuousBuf *buf )
                                                wLength,
                                                buf->timeout
                                                );
+        AIO_ERROR_VALID_AIORET_TYPE( LIBUSB_RESULT_TO_AIOUSB_RESULT( usbresult ), usbresult >= 0 );
     }
-    
-    if (usbresult < 0 ) {
-        retval = -(AIORET_TYPE)LIBUSB_RESULT_TO_AIOUSB_RESULT( usbresult );
-    }
+
     return retval;
 }
 
@@ -292,22 +286,24 @@ AIORET_TYPE AIOContinuousBufSendPreConfig( AIOContinuousBuf *buf )
 /**
  * @brief Destructor for AIOContinuousBuf object
  */
-void DeleteAIOContinuousBuf( AIOContinuousBuf *buf )
+AIORET_TYPE DeleteAIOContinuousBuf( AIOContinuousBuf *buf )
 {
+    AIO_ASSERT_AIOCONTBUF( buf );
     if ( buf->mask )
         DeleteAIOChannelMask( buf->mask );
-
     if ( buf->buffer )
         free( buf->buffer );
     if ( buf->fifo  )
         DeleteAIOFifoCounts( (AIOFifoCounts *)buf->fifo );
     free( buf );
+    return AIOUSB_SUCCESS;
 }
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufSetCountsBuffer( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     return retval;
 }
@@ -315,7 +311,7 @@ AIORET_TYPE AIOContinuousBufSetCountsBuffer( AIOContinuousBuf *buf )
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufSetVoltsBuffer( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     return retval;
     
@@ -338,7 +334,7 @@ AIORET_TYPE AIOContinuousBufSetStreamingBlockSize( AIOContinuousBuf *buf, unsign
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetStreamingBlockSize( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET(AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     return buf->data_size;
 }
 
@@ -347,7 +343,7 @@ AIORET_TYPE AIOContinuousBufGetStreamingBlockSize( AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBuf_SetCallback(AIOContinuousBuf *buf , void *(*work)(void *object ) ) { return AIOContinuousBufSetCallback( buf, work );}
 AIORET_TYPE AIOContinuousBufSetCallback(AIOContinuousBuf *buf , void *(*work)(void *object ) )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIO_ASSERT( work );
     AIOContinuousBufLock( buf );
     buf->callback = work;
@@ -359,7 +355,7 @@ AIORET_TYPE AIOContinuousBufSetCallback(AIOContinuousBuf *buf , void *(*work)(vo
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufSetNumberScansToRead( AIOContinuousBuf *buf , unsigned num_scans )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     buf->num_scans = num_scans;
     return  AIOUSB_SUCCESS;
 }
@@ -367,14 +363,14 @@ AIORET_TYPE AIOContinuousBufSetNumberScansToRead( AIOContinuousBuf *buf , unsign
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetNumberScansToRead( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     return buf->num_scans;
 }
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBuf_BufSizeForCounts( AIOContinuousBuf * buf) 
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     return AIOFifoGetSize( buf->fifo ) + AIOFifoGetRefSize(buf->fifo);
 }
 
@@ -401,20 +397,20 @@ static unsigned write_size( AIOContinuousBuf *buf )
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetRemainingWriteSize( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     return write_size(buf);
 }
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetUnitSize( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     return buf->unit_size;
 }
 
  AIORET_TYPE AIOContinuousBufSetUnitSize( AIOContinuousBuf *buf , uint16_t new_unit_size)
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     buf->unit_size = new_unit_size;
     AIORET_TYPE retval = _AIOContinuousBufResizeFifo( buf );
     return retval;
@@ -422,7 +418,7 @@ AIORET_TYPE AIOContinuousBufGetUnitSize( AIOContinuousBuf *buf )
 
 AIORET_TYPE AIOContinuousBufReset( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIOContinuousBufLock( buf );
     AIOFifoReset( buf->fifo );
     AIOContinuousBufUnlock( buf );
@@ -432,7 +428,7 @@ AIORET_TYPE AIOContinuousBufReset( AIOContinuousBuf *buf )
 /*----------------------------------------------------------------------------*/
 static unsigned write_size_num_scan_counts( AIOContinuousBuf *buf ) 
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     float tmp = write_size(buf) / AIOContinuousBufNumberChannels(buf);
     if (  tmp > (int)tmp ) {
         tmp = (int)tmp;
@@ -446,7 +442,7 @@ static unsigned write_size_num_scan_counts( AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBuf_NumberWriteScansInCounts( AIOContinuousBuf *buf ) { return AIOContinuousBufNumberWriteScansInCounts( buf ); }
 AIORET_TYPE AIOContinuousBufNumberWriteScansInCounts( AIOContinuousBuf *buf ) 
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIORET_TYPE num_channels = AIOContinuousBufNumberChannels(buf);
     if ( num_channels < AIOUSB_SUCCESS )
         return num_channels;
@@ -456,48 +452,48 @@ AIORET_TYPE AIOContinuousBufNumberWriteScansInCounts( AIOContinuousBuf *buf )
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetReadPosition( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     return buf->fifo->read_pos;
 }
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetWritePosition( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     return buf->fifo->write_pos;
 }
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetRemainingSize( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     return buf->fifo->delta( (AIOFifo*)buf->fifo );
 }
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetSize( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     return AIOFifoGetSize( buf->fifo );
 }
 
 AIORET_TYPE AIOContinuousBufGetSizeNumElements( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     return AIOFifoGetSizeNumElements( buf->fifo );
 }
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetStatus( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     return (AIORET_TYPE)buf->status;
 }
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetExitCode( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     return buf->exitcode;
 }
 
@@ -508,7 +504,7 @@ AIORET_TYPE AIOContinuousBufGetExitCode( AIOContinuousBuf *buf )
  */
 AIORET_TYPE AIOContinuousBufCountScansAvailable(AIOContinuousBuf *buf) 
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     retval = (AIORET_TYPE)buf->fifo->rdelta( (AIOFifo*)buf->fifo ) / ( buf->fifo->refsize * AIOContinuousBufNumberChannels(buf) );
     return retval;
@@ -517,7 +513,7 @@ AIORET_TYPE AIOContinuousBufCountScansAvailable(AIOContinuousBuf *buf)
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufCountsAvailable(AIOContinuousBuf *buf) 
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     retval = (AIORET_TYPE)buf->fifo->rdelta( (AIOFifo*)buf->fifo ) / ( buf->fifo->refsize * AIOContinuousBufNumberChannels(buf) );
     return retval;
@@ -526,7 +522,7 @@ AIORET_TYPE AIOContinuousBufCountsAvailable(AIOContinuousBuf *buf)
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetDataAvailable( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIORET_TYPE retval = AIOUSB_SUCCESS;
 
     return retval;
@@ -548,7 +544,7 @@ AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf,
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     int num_scans;
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIO_ASSERT( read_buf );
     AIO_ERROR_VALID_AIORET_TYPE( AIOUSB_ERROR_NOT_ENOUGH_MEMORY, size >= (unsigned)AIOContinuousBufNumberChannels(buf) );
 
@@ -567,14 +563,14 @@ AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf,
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufReadIntegerGetNumberOfScans( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     return buf->num_scans;
 }
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufReadIntegerSetNumberOfScans( AIOContinuousBuf *buf, unsigned num_scans )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     buf->num_scans = num_scans;
     return AIOUSB_SUCCESS;
 }
@@ -595,7 +591,7 @@ AIORET_TYPE AIOContinuousBufReadIntegerNumberOfScans( AIOContinuousBuf *buf,
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     int debug = 0;
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIO_ERROR_VALID_AIORET_TYPE( AIOUSB_ERROR_NOT_ENOUGH_MEMORY, tmpbuffer_size >= (unsigned)( AIOContinuousBufNumberChannels(buf)*num_scans ) );
 
     for ( int i = 0, pos = 0;  i < (int)num_scans && (int)( pos + AIOContinuousBufNumberChannels(buf)-1 ) < (int)tmpbuffer_size ; i++ , pos += AIOContinuousBufNumberChannels(buf) ) {
@@ -649,7 +645,7 @@ AIOUSB_WorkFn AIOContinuousBufGetCallback( AIOContinuousBuf *buf )
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufSetClock( AIOContinuousBuf *buf, unsigned int hz )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     buf->hz = MIN( (unsigned)hz, (unsigned)(ROOTCLOCK / ( (AIOContinuousBufGetOversample(buf)+1) * AIOContinuousBufNumberChannels(buf))) );
 
     return AIOUSB_SUCCESS;
@@ -664,7 +660,7 @@ AIORET_TYPE AIOContinuousBufSetClock( AIOContinuousBuf *buf, unsigned int hz )
  */
 AIORET_TYPE AIOContinuousBufStart( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIORET_TYPE retval = AIOUSB_SUCCESS;
 #ifdef HAS_PTHREAD
     buf->status = RUNNING;
@@ -701,7 +697,7 @@ AIORET_TYPE AIOContinuousBufStart( AIOContinuousBuf *buf )
  */
 AIORET_TYPE CalculateClocks( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     int  hz = (int)buf->hz;
     float l;
 
@@ -728,7 +724,7 @@ AIORET_TYPE CalculateClocks( AIOContinuousBuf *buf )
 
             min_err = abs(((ROOTCLOCK / hz) - (int)(divisora * l)));
       
-            for( unsigned lv = l ; lv >= 2 ; lv -- ) {
+            for ( unsigned lv = l ; lv >= 2 ; lv -- ) {
                 unsigned olddivisora = (int)round((double)divisorab / lv);
                 if (  olddivisora > 0xffff ) { 
                     AIOUSB_DEVEL( "Found value > 0xff..resetting" );
@@ -761,7 +757,7 @@ AIORET_TYPE CalculateClocks( AIOContinuousBuf *buf )
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIORET_TYPE retval = pthread_create( &(buf->worker), NULL , callback, (void *)buf  );
 
     return retval;
@@ -777,7 +773,7 @@ AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBuf_SetChannelMask( AIOContinuousBuf *buf, AIOChannelMask *mask ) { return AIOContinuousBufSetChannelMask( buf, mask ); }
 AIORET_TYPE AIOContinuousBufSetChannelMask( AIOContinuousBuf *buf, AIOChannelMask *mask )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIO_ASSERT(mask);
     buf->mask   = mask;
     buf->extra  = 0;
@@ -788,7 +784,7 @@ AIORET_TYPE AIOContinuousBuf_NumberSignals( AIOContinuousBuf *buf ) { return AIO
 AIORET_TYPE AIOContinuousBufNumberSignals( AIOContinuousBuf *buf )
 {
 
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     return AIOChannelMaskNumberSignals(buf->mask );
 }
 
@@ -796,7 +792,7 @@ AIORET_TYPE AIOContinuousBufNumberSignals( AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBuf_NumberChannels( AIOContinuousBuf *buf ) { return AIOContinuousBufNumberChannels(buf); }
 AIORET_TYPE AIOContinuousBufNumberChannels( AIOContinuousBuf *buf ) 
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     return AIOChannelMaskNumberSignals(buf->mask );
 }
 
@@ -819,7 +815,7 @@ AIORET_TYPE AIOContinuousBuf_SmartCountsToVolts( AIOContinuousBuf *buf,
                                                  AIOBufferType *tobuf, 
                                                  unsigned *pos )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIO_ASSERT( channel );
     AIO_ASSERT( data );
     AIO_ASSERT( tobuf );
@@ -831,7 +827,7 @@ AIORET_TYPE AIOContinuousBuf_SmartCountsToVolts( AIOContinuousBuf *buf,
     int number_channels = AIOContinuousBufNumberChannels(buf);
 
 
-    for(unsigned ch = 0; ch < count;  ch ++ , *channel = ((*channel+1)% number_channels ) , *pos += 1 ) {
+    for (unsigned ch = 0; ch < count;  ch ++ , *channel = ((*channel+1)% number_channels ) , *pos += 1 ) {
         int gain = ADCConfigBlockGetGainCode( &deviceDesc->cachedConfigBlock, *channel );
         AIO_ERROR_VALID_AIORET_TYPE( AIOUSB_ERROR_INVALID_GAINCODE, gain >= AIOUSB_SUCCESS );
         struct ADRange *range = &adRanges[ gain ];
@@ -1201,11 +1197,9 @@ AIORET_TYPE ResetCounters( AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBufLoadCounters( AIOContinuousBuf *buf, unsigned countera, unsigned counterb )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    AIORESULT result = AIOUSB_SUCCESS;
 
-    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), &result );
-    if ( result != AIOUSB_SUCCESS ) 
-        return -result;
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), (AIORESULT*)&retval );
+    AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS );
 
     unsigned wValue = 0x7400;
     unsigned wLength = 0;
@@ -1221,10 +1215,8 @@ AIORET_TYPE AIOContinuousBufLoadCounters( AIOContinuousBuf *buf, unsigned counte
                                            wLength,
                                            timeout
                                            );
-    if ( usbval != 0 ) {
-        retval = -(AIORET_TYPE)LIBUSB_RESULT_TO_AIOUSB_RESULT(usbval);
-        goto out_AIOContinuousBufLoadCounters;
-    }
+    AIO_ERROR_VALID_AIORET_TYPE( LIBUSB_RESULT_TO_AIOUSB_RESULT(usbval), usbval == 0 );
+
     wValue = 0xb600;
     usbval = usb->usb_control_transfer(usb,
                                        USB_WRITE_TO_DEVICE, 
@@ -1235,10 +1227,8 @@ AIORET_TYPE AIOContinuousBufLoadCounters( AIOContinuousBuf *buf, unsigned counte
                                        wLength,
                                        timeout
                                        );
-    if ( usbval != 0 )
-        retval = -(AIORET_TYPE)LIBUSB_RESULT_TO_AIOUSB_RESULT(usbval);
+    AIO_ERROR_VALID_AIORET_TYPE( LIBUSB_RESULT_TO_AIOUSB_RESULT(usbval), usbval == 0 );
 
-out_AIOContinuousBufLoadCounters:
     return retval;
 }
 
@@ -1313,13 +1303,11 @@ int continuous_end( USBDevice *usb , unsigned char *data, unsigned length )
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufCleanup( AIOContinuousBuf *buf )
 {
-    AIORET_TYPE retval;
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
     unsigned char data[4] = {0};
-    AIORESULT result = AIOUSB_SUCCESS;
 
-    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), &result );
-    if ( result != AIOUSB_SUCCESS )
-        return -result;
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), (AIORESULT*)&retval );
+    AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS );
     
     retval = (AIORET_TYPE)continuous_end( usb, data, 4 );
     return retval;
@@ -1330,16 +1318,13 @@ AIORET_TYPE AIOContinuousBufPreSetup( AIOContinuousBuf * buf )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     int usbval;
-    AIORESULT result;
+
     unsigned char data[0];
     unsigned wLength = 0;
     int wValue  = 0x7400, wIndex = 0;
     unsigned timeout = 7000;
-    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), &result );
-    if (result != AIOUSB_SUCCESS ) {
-        retval = -result;
-        goto out_AIOContinuousBufPreSetup;
-    }
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), (AIORESULT*)&retval );
+    AIO_ERROR_VALID_DATA_RETVAL( retval, retval == AIOUSB_SUCCESS );
 
     /* Write 02 00 02 00 */
     /* 40 bc 00 00 00 00 04 00 */
@@ -1352,10 +1337,8 @@ AIORET_TYPE AIOContinuousBufPreSetup( AIOContinuousBuf * buf )
                                         wLength,
                                         timeout
                                         );
-    if (  usbval != AIOUSB_SUCCESS ) {
-        retval = -usbval;
-        goto out_AIOContinuousBufPreSetup;
-    }
+    AIO_ERROR_VALID_AIORET_TYPE( usbval, usbval >= AIOUSB_SUCCESS );
+
     wValue = 0xb600;
 
     /* Read c0 bc 00 00 00 00 04 00 */ 
@@ -1368,12 +1351,10 @@ AIORET_TYPE AIOContinuousBufPreSetup( AIOContinuousBuf * buf )
                                         wLength,
                                         timeout
                                       );
-    if (  usbval != 0 )
-        retval = -usbval;
+    AIO_ERROR_VALID_AIORET_TYPE( usbval, usbval >= 0 );
 
- out_AIOContinuousBufPreSetup:
+
     return retval;
-
 }
 
 /*----------------------------------------------------------------------------*/
@@ -1613,22 +1594,18 @@ AIORET_TYPE AIOContinuousBuf_ResetDevice(AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBufResetDevice( AIOContinuousBuf *buf) 
 {
     AIO_ASSERT_AIORET_TYPE(AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf);
-    unsigned char data[2] = {0x01};
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    AIORESULT result = AIOUSB_SUCCESS;
+    unsigned char data[2] = {0x01};
     int usbval;
-    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), &result );
-    if ( result != AIOUSB_SUCCESS ) {
-        retval = -result;
-        goto out_AIOContinuousBuf_ResetDevice;
-    }
-  
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), (AIORESULT*)&retval );
+    AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS);
+
     usbval = usb->usb_control_transfer(usb, 0x40, 0xA0, 0xE600, 0 , data, 1, buf->timeout );
     data[0] = 0;
 
     usbval = usb->usb_control_transfer(usb, 0x40, 0xA0, 0xE600, 0 , data, 1, buf->timeout );
     retval = (AIORET_TYPE )usbval;
- out_AIOContinuousBuf_ResetDevice:
+
     return retval;
 }
 
@@ -1694,25 +1671,20 @@ AIORET_TYPE AIOContinuousBufSimpleSetupConfig( AIOContinuousBuf *buf, ADGainCode
 {
     AIO_ASSERT_AIORET_TYPE(AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf);
 
-    AIORET_TYPE retval;
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
     ADCConfigBlock configBlock = {0};
-    AIORESULT result = AIOUSB_SUCCESS;
-    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf) , &result );
-    if ( result != AIOUSB_SUCCESS ){
-        AIOUSB_UnLock();
-        return result;
-    }
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf) , (AIORESULT*)&retval );
+    AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS );
 
     ADCConfigBlockInit( &configBlock, deviceDesc, AIOUSB_FALSE );
-
     ADCConfigBlockSetAllGainCodeAndDiffMode( &configBlock, gainCode, AIOUSB_FALSE );
     ADCConfigBlockSetTriggerMode( &configBlock, AD_TRIGGER_SCAN | AD_TRIGGER_TIMER ); /* 0x05 */
     ADCConfigBlockSetScanRange( &configBlock, 0, 15 ); /* All 16 channels */
 
     ADC_QueryCal( AIOContinuousBufGetDeviceIndex(buf) );
     retval = ADC_SetConfig( AIOContinuousBufGetDeviceIndex(buf), configBlock.registers, &configBlock.size );
-    if ( retval != AIOUSB_SUCCESS ) 
-        return (AIORET_TYPE)(-retval);
+    AIO_ERROR_VALID_AIORET_TYPE( retval , retval == AIOUSB_SUCCESS );
+
     return retval;
 }
 
@@ -1750,8 +1722,8 @@ AIORET_TYPE AIOContinuousBufSetTesting( AIOContinuousBuf *buf, AIOUSB_BOOL testi
 
     AIOContinuousBufLock( buf );
 
-    AIORESULT retval = AIOUSB_SUCCESS;
-    AIOUSBDevice *device = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), &retval );
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIOUSBDevice *device = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), (AIORESULT*)&retval );
     AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS );
 
     retval = AIOUSBDeviceSetTesting( device, testing );
@@ -1880,7 +1852,7 @@ AIORET_TYPE AIOContinuousBufSetChannelRange( AIOContinuousBuf *buf,
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufSetTimeout( AIOContinuousBuf *buf, unsigned timeout )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIOContinuousBufLock( buf );
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), (AIORESULT*)&retval );
@@ -1897,7 +1869,7 @@ AIORET_TYPE AIOContinuousBufSetTimeout( AIOContinuousBuf *buf, unsigned timeout 
 
 AIORET_TYPE AIOContinuousBufGetTimeout( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     
     return buf->timeout;
 }
@@ -1919,7 +1891,7 @@ AIORET_TYPE _AIOContinuousBufResizeFifo( AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBuf_SetOversample( AIOContinuousBuf *buf, unsigned os ) { return AIOContinuousBufSetOversample(buf,os);}
 AIORET_TYPE AIOContinuousBufSetOversample( AIOContinuousBuf *buf, unsigned os )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     AIOUSBDevice *device = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), (AIORESULT*)&retval );
     AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS );
@@ -1943,7 +1915,7 @@ AIORET_TYPE AIOContinuousBufSetOverSample( AIOContinuousBuf *buf, size_t os ) { 
 /*------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBuf_GetOverSample( AIOContinuousBuf *buf ) { return AIOContinuousBufGetOversample( buf ); }
 AIORET_TYPE AIOContinuousBufGetOversample( AIOContinuousBuf *buf ) {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     return buf->num_oversamples;
 }
 
@@ -1954,10 +1926,10 @@ AIORET_TYPE AIOContinuousBuf_SetAllGainCodeAndDiffMode( AIOContinuousBuf *buf, A
 }
 AIORET_TYPE AIOContinuousBufSetAllGainCodeAndDiffMode( AIOContinuousBuf *buf, ADGainCode gain, AIOUSB_BOOL diff )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIOContinuousBufLock( buf );
-    AIORESULT retval = AIOUSB_SUCCESS;
-    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), &retval );
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), (AIORESULT*)&retval );
     AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS );
 
     retval = ADCConfigBlockSetAllGainCodeAndDiffMode( AIOUSBDeviceGetADCConfigBlock( dev ), gain, diff );
@@ -1969,10 +1941,10 @@ AIORET_TYPE AIOContinuousBufSetAllGainCodeAndDiffMode( AIOContinuousBuf *buf, AD
 AIORET_TYPE AIOContinuousBuf_SetDiscardFirstSample(  AIOContinuousBuf *buf , AIOUSB_BOOL discard ){ return AIOContinuousBufSetDiscardFirstSample( buf, discard ); }
 AIORET_TYPE AIOContinuousBufSetDiscardFirstSample(  AIOContinuousBuf *buf , AIOUSB_BOOL discard ) 
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIOContinuousBufLock( buf );
-    AIORESULT retval = AIOUSB_SUCCESS;
-    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), &retval );
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), (AIORESULT*)&retval );
     AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS );
     
     dev->discardFirstSample = discard;
@@ -1985,7 +1957,7 @@ AIORET_TYPE AIOContinuousBufSetDiscardFirstSample(  AIOContinuousBuf *buf , AIOU
 AIORET_TYPE AIOContinuousBuf_GetDeviceIndex( AIOContinuousBuf *buf ) {return AIOContinuousBufGetDeviceIndex( buf ); }
 AIORET_TYPE AIOContinuousBufGetDeviceIndex( AIOContinuousBuf *buf )
 {
-    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIO_ASSERT_RET( AIOUSB_ERROR_DEVICE_NOT_FOUND, buf->DeviceIndex >= 0 );
     return (AIORET_TYPE)buf->DeviceIndex;
 }
@@ -2110,20 +2082,6 @@ AIORET_TYPE read_data( unsigned short *data , unsigned size)
     data[i] = i % 256;
   }
   return (AIORET_TYPE)size;
-}
-
-/* 
- * Dummy setup
- */
-void dummy_init(void)
-{
-    int numAccesDevices = 0;
-    aiousbInit = AIOUSB_INIT_PATTERN;
-    AIOUSB_Init();
-    AIORESULT result = AIOUSB_SUCCESS;
-    AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numAccesDevices, USB_AIO12_128E, NULL );
-    AIOUSBDevice *device = AIODeviceTableGetDeviceAtIndex( numAccesDevices ,  &result );
-
 }
 
 int bufsize = 1000;

@@ -95,7 +95,7 @@ PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long Devic
 
 /*-----------------------------  Destructor   -------------------------------*/
 
-PUBLIC_EXTERN void DeleteAIOContinuousBuf( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE DeleteAIOContinuousBuf( AIOContinuousBuf *buf );
 
 /*-----------------------------  Replacements  ------------------------------*/
 
