@@ -53,7 +53,7 @@ typedef struct aio_continuous_buf {
     AIOFifoTYPE *fifo;
     AIOBufferType *buffer;
     unsigned char *countsbuf;
-    unsigned bufunitsize;
+    unsigned unit_size;
     unsigned hz;
     unsigned divisora;
     unsigned divisorb;

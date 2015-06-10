@@ -56,14 +56,15 @@ AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, unsig
 {
     AIOContinuousBuf *tmp = (AIOContinuousBuf *)calloc(1,sizeof(AIOContinuousBuf));
     if ( tmp ) { 
-        tmp->DeviceIndex = deviceIndex;
+        tmp->DeviceIndex      = deviceIndex;
         tmp->data_size        = 64*1024;
-        tmp->hz = 10000;
-        tmp->timeout = 1000;
-        tmp->num_scans = base_size;
-        tmp->num_oversamples = num_oversamples;
-        tmp->base_size = base_size;
-        tmp->num_channels = num_channels;
+        tmp->hz               = 10000;
+        tmp->timeout          = 1000;
+        tmp->num_scans        = base_size;
+        tmp->num_oversamples  = num_oversamples;
+        tmp->base_size        = base_size;
+        tmp->num_channels     = num_channels;
+        tmp->unit_size        = sizeof(uint16_t);
 #ifdef HAS_PTHREAD
         tmp->lock = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;   /* Threading mutex Setup */
 #endif
@@ -128,7 +129,10 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetBaseSize( AIOContinuousBuf *buf  )
 {
     AIO_ASSERT_RET(NULL, num_channels > 0 );
 
-    AIOContinuousBuf *tmp = NewAIOContinuousBufRawSmart( DeviceIndex, num_channels, scancounts, sizeof(double), num_oversamples ); 
+    AIOContinuousBuf *tmp = NewAIOContinuousBufRawSmart( DeviceIndex, num_channels, scancounts, sizeof(double), num_oversamples );
+    /* AIOContinuousBuf *tmp = NewAIOContinuousBuf( DeviceIndex, num_channels,num_oversamples, scancounts ); */
+    /* Change the unit_size */
+    
     if ( tmp ) {
         AIOContinuousBufSetCallback( tmp, ConvertCountsToVoltsFunction );
         tmp->type = AIO_CONT_BUF_TYPE_VOLTS;
@@ -153,12 +157,11 @@ AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long DeviceIndex,
         
     tmp->size             = num_channels * num_scans * (1+num_oversamples) * unit_size;
     tmp->buffer           = (AIOBufferType *)malloc( tmp->size*unit_size );
-    tmp->bufunitsize      = unit_size;
+    tmp->unit_size      = unit_size;
     tmp->data_size        = 64*1024;
 
     tmp->fifo             = (AIOFifoTYPE *)NewAIOFifoCounts( num_channels * num_scans * unit_size  / sizeof(short));
     tmp->num_oversamples  = num_oversamples;
-    /* tmp->mask             = NewAIOChannelMask( num_channels ); */
 
     if ( num_channels > 32 ) {
         char *bitstr = (char *)malloc( num_channels +1 );
@@ -173,7 +176,6 @@ AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long DeviceIndex,
     tmp->testing        = AIOUSB_FALSE;
     tmp->num_scans      = num_scans;
     tmp->num_channels   = num_channels;
-    /* tmp->basesize       = unit_size; */
 
     tmp->exitcode       = 0;
 
@@ -441,7 +443,15 @@ AIORET_TYPE AIOContinuousBufGetRemainingWriteSize( AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBufGetUnitSize( AIOContinuousBuf *buf )
 {
     AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
-    return buf->bufunitsize;
+    return buf->unit_size;
+}
+
+ AIORET_TYPE AIOContinuousBufSetUnitSize( AIOContinuousBuf *buf , uint16_t new_unit_size)
+{
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER, buf );
+    buf->unit_size = new_unit_size;
+    AIORET_TYPE retval = _AIOContinuousBufResizeFifo( buf );
+    return retval;
 }
 
 AIORET_TYPE AIOContinuousBufReset( AIOContinuousBuf *buf )
@@ -1965,7 +1975,7 @@ AIORET_TYPE _AIOContinuousBufResizeFifo( AIOContinuousBuf *buf )
     AIO_ASSERT_AIOCONTBUF( buf );
     AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER_NUM_CHANNELS, buf->num_channels );
 
-    int tmpval = buf->num_channels * (1 + buf->num_oversamples ) * buf->base_size;
+    int tmpval = buf->num_channels * (1 + buf->num_oversamples ) * buf->base_size * buf->unit_size / sizeof(uint16_t);
 
     AIORET_TYPE retval = AIOFifoResize( (AIOFifo*)buf->fifo, tmpval );
     return retval;
@@ -2563,6 +2573,17 @@ TEST(AIOContinuousBuf,Deprecated_buffer_size)
     AIOContinuousBufPushN(buf , counts, 20 );
     EXPECT_EQ( AIOContinuousBufGetSize( buf ), AIOFifoGetSize( buf->fifo ));
     ASSERT_GE( AIOContinuousBufGetSize( buf ), 0 );
+}
+
+TEST(AIOContinuousBuf,ChangeUnitSize)
+{
+    AIOContinuousBuf *buf = NewAIOContinuousBuf(0,16,0,1024);
+    int before = AIOContinuousBufGetSize( buf );
+    AIOContinuousBufSetUnitSize( buf, sizeof(double) );
+    EXPECT_GT( AIOContinuousBufGetSize( buf ), before );
+
+
+    ASSERT_TRUE( buf );
 }
 
 
