@@ -189,28 +189,20 @@ AIORET_TYPE AIOContinuousBufInitADCConfigBlock( AIOContinuousBuf *buf, unsigned 
 {
     AIO_ASSERT_AIOCONTBUF( buf );
     AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex(  AIOContinuousBufGetDeviceIndex( buf ), (AIORESULT*)&retval );
+    ADCConfigBlock *config;
+    AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS );
 
-    AIOUSBDeviceSetTesting( AIODeviceTableGetDeviceAtIndex(  AIOContinuousBufGetDeviceIndex( buf ), (AIORESULT*)&retval ) , AIOContinuousBufGetTesting( buf ) );
+    AIOUSBDeviceSetTesting( dev , AIOContinuousBufGetTesting( buf ) );
+    config = AIOUSBDeviceGetADCConfigBlock( dev );
+    retval = ADCConfigBlockSetTesting( config, AIOContinuousBufGetTesting( buf ) );
+    AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS );
+
+    retval = ADCConfigBlockSetAIOUSBDevice( config, dev );
     AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS );
 
 
-    retval = ADCConfigBlockSetTesting( 
-                                      AIOUSBDeviceGetADCConfigBlock( AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ) , (AIORESULT*)&retval ) ),
-                                      AIOContinuousBufGetTesting( buf )
-                                       );
-    AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS );
-    
-
-    retval = ADCConfigBlockSetAIOUSBDevice( 
-                                           AIOUSBDeviceGetADCConfigBlock( AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ) , (AIORESULT*)&retval ) ),
-                                           AIODeviceTableGetDeviceAtIndex( 0, (AIORESULT*)&retval )
-                                            );
-    AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS );
-
-
-    ADCConfigBlockSetSize( AIOUSBDeviceGetADCConfigBlock( AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ) , (AIORESULT*)&retval ) ),
-                           size 
-                           );
+    retval = ADCConfigBlockSetSize( config,size );
     AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS );
 
     AIOContinuousBufInitConfiguration( buf ); /* Needed to enforce Testing mode */
@@ -314,9 +306,7 @@ AIORET_TYPE AIOContinuousBufSetVoltsBuffer( AIOContinuousBuf *buf )
     AIO_ASSERT_AIOCONTBUF( buf );
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     return retval;
-    
 }
-
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufSetStreamingBlockSize( AIOContinuousBuf *buf, unsigned blksize)
