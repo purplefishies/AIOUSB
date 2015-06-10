@@ -74,11 +74,26 @@ AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, unsig
         tmp->PopN  = AIOContinuousBufPopN;
         tmp->type = AIO_CONT_BUF_TYPE_COUNTS; /* Default type */
 
-        tmp->mask = NewAIOChannelMask( num_channels );
+#if 0
+    if ( num_channels > 32 ) {
+        char *bitstr = (char *)malloc( num_channels +1 );
+        memset(bitstr, 49, num_channels ); /* Set all to 1s */
+        bitstr[num_channels] = '\0';
+        AIOChannelMaskSetMaskFromStr( tmp->mask, bitstr );
+        free(bitstr);
+    } else {
+        AIOChannelMaskSetMaskFromInt( tmp->mask, (unsigned)-1 >> (BIT_LENGTH(unsigned)-num_channels) ); /**< Use all bits for each channel */
+    }
+#else
+    tmp->mask = NewAIOChannelMask( num_channels );
+#endif
+
 
     }
     return tmp;
 }
+
+
 
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetNumberOfChannels( AIOContinuousBuf * buf)
 {
@@ -125,13 +140,12 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetBaseSize( AIOContinuousBuf *buf  )
 }
 
 /*----------------------------------------------------------------------------*/
- AIOContinuousBuf *NewAIOContinuousBufForVolts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels, unsigned num_oversamples )
+AIOContinuousBuf *NewAIOContinuousBufForVolts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels, unsigned num_oversamples )
 {
     AIO_ASSERT_RET(NULL, num_channels > 0 );
 
-    AIOContinuousBuf *tmp = NewAIOContinuousBufRawSmart( DeviceIndex, num_channels, scancounts, sizeof(double), num_oversamples );
-    /* AIOContinuousBuf *tmp = NewAIOContinuousBuf( DeviceIndex, num_channels,num_oversamples, scancounts ); */
-    /* Change the unit_size */
+    AIOContinuousBuf *tmp = NewAIOContinuousBuf( DeviceIndex, num_channels,num_oversamples, scancounts );
+    AIOContinuousBufSetUnitSize( tmp, sizeof(double));
     
     if ( tmp ) {
         AIOContinuousBufSetCallback( tmp, ConvertCountsToVoltsFunction );
@@ -140,59 +154,6 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetBaseSize( AIOContinuousBuf *buf  )
         tmp->PopN  = AIOContinuousBufPopN;
         AIOFifoVoltsInitialize( (AIOFifoVolts*)tmp->fifo );
     }
-    return tmp;
-}
-
-/*----------------------------------------------------------------------------*/
-AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long DeviceIndex, 
-                                               unsigned num_channels,
-                                               unsigned num_scans,
-                                               unsigned unit_size,
-                                               unsigned num_oversamples
-                                               )
-{
-    AIO_ASSERT_RET(NULL, num_channels > 0 );
-    AIOContinuousBuf *tmp = NewAIOContinuousBuf( DeviceIndex, num_channels, num_oversamples, num_scans );
-    AIO_ERROR_VALID_DATA(NULL, tmp );
-        
-    tmp->size             = num_channels * num_scans * (1+num_oversamples) * unit_size;
-    tmp->buffer           = (AIOBufferType *)malloc( tmp->size*unit_size );
-    tmp->unit_size      = unit_size;
-    tmp->data_size        = 64*1024;
-
-    tmp->fifo             = (AIOFifoTYPE *)NewAIOFifoCounts( num_channels * num_scans * unit_size  / sizeof(short));
-    tmp->num_oversamples  = num_oversamples;
-
-    if ( num_channels > 32 ) {
-        char *bitstr = (char *)malloc( num_channels +1 );
-        memset(bitstr, 49, num_channels ); /* Set all to 1s */
-        bitstr[num_channels] = '\0';
-        AIOChannelMaskSetMaskFromStr( tmp->mask, bitstr );
-        free(bitstr);
-    } else {
-        AIOChannelMaskSetMaskFromInt( tmp->mask, (unsigned)-1 >> (BIT_LENGTH(unsigned)-num_channels) ); /**< Use all bits for each channel */
-    }
-
-    tmp->testing        = AIOUSB_FALSE;
-    tmp->num_scans      = num_scans;
-    tmp->num_channels   = num_channels;
-
-    tmp->exitcode       = 0;
-
-    tmp->DeviceIndex  = DeviceIndex;
-
-    /* for acquisition */
-    tmp->status       = NOT_STARTED;
-    tmp->worker       = cont_thread;
-    tmp->hz           = 100000; /**> Default value of 100khz  */
-    tmp->timeout      = 1000;   /**> Default Timeout of 1000us  */
-    tmp->extra        = 0;
-
-#ifdef HAS_PTHREAD
-    tmp->lock = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;   /* Threading mutex Setup */
-#endif
-    AIOContinuousBufSetCallback( tmp , RawCountsWorkFunction );
-   
     return tmp;
 }
 
