@@ -25,10 +25,15 @@ size_t delta( AIOFifo *fifo  )
     return ( fifo->write_pos < fifo->read_pos ? (fifo->read_pos - fifo->write_pos - 1 ) : ( (fifo->size - fifo->write_pos) + fifo->read_pos - 1 ));
 }
 
-AIORET_TYPE AIOFifoSizeRemaining( void *tmpfifo )
+AIORET_TYPE AIOFifoWriteSizeRemaining( void *tmpfifo )
 {
     AIOFifo *fifo = (AIOFifo*)tmpfifo;
     return fifo->delta((AIOFifo*)fifo);
+}
+
+AIORET_TYPE AIOFifoWriteSizeRemainingNumElements( void *tmpfifo )
+{
+    return AIOFifoWriteSizeRemaining(tmpfifo) / ((AIOFifo*)tmpfifo)->refsize;
 }
 
 AIORET_TYPE AIOFifoGetSize( void *tmpfifo )
@@ -55,6 +60,11 @@ AIORET_TYPE AIOFifoReadSize( void *tmpfifo )
 {
     AIOFifo *fifo = (AIOFifo*)tmpfifo;
     return rdelta( (AIOFifo*)fifo  );
+}
+
+AIORET_TYPE AIOFifoReadSizeNumElements( void *tmpfifo )
+{
+    return AIOFifoReadSize( tmpfifo ) / ((AIOFifo*)tmpfifo)->refsize;
 }
 
 AIORET_TYPE _AIOFifoResize( AIOFifo *fifo, size_t newsize )
@@ -511,7 +521,64 @@ TEST(AIOFifo, Resizing )
     DeleteAIOFifoCounts( counts );
 
 }
+TEST(AIOFifo, ReadSizeInElements)
+{    
+    AIOFifoCounts *counts = NewAIOFifoCounts( 1000 );
+    AIOFifoVolts *volts = NewAIOFifoVolts( 200 );
 
+    EXPECT_EQ( 1000, AIOFifoWriteSizeRemainingNumElements(counts) );
+    EXPECT_EQ( 200, AIOFifoWriteSizeRemainingNumElements(volts) );
+
+    for ( int i = 0; i < 100; i ++ ) 
+        counts->Push( counts, i );
+
+    EXPECT_EQ( 100, AIOFifoReadSizeNumElements( counts ) );
+    EXPECT_EQ( 1000-100, AIOFifoWriteSizeRemainingNumElements(counts)  );
+
+    for ( int i = 0; i < 33; i ++ ) 
+        volts->Push( volts, (double)i*3.14159 );
+
+    EXPECT_EQ( 33, AIOFifoReadSizeNumElements( volts ) );
+    EXPECT_EQ( 200-33, AIOFifoWriteSizeRemainingNumElements(volts)  );
+
+    AIOFifoReset( counts );
+    EXPECT_EQ( 1000, AIOFifoWriteSizeRemainingNumElements(counts));
+
+    DeleteAIOFifoCounts( counts );
+    DeleteAIOFifoVolts( volts );
+}
+
+/**
+ * @brief Simple test,  1000 element buffer. Write 800 in, verify that the first 300 are correct
+ * write in an additional 500 and varify that we are at the maximum for the buffer. Then
+ * read out the rest and verify that the values were correct.
+ */
+TEST(AIOFifo, ReadSizeInElementsWithLoop)
+{
+    AIOFifoCounts *counts = NewAIOFifoCounts( 1000 );
+    AIORET_TYPE retval = 0;
+    int i,j;
+    for ( i = 0,j=0; j < 800; j ++ , i ++ ) 
+        counts->Push( counts, i );
+    for ( j = 0; j < 300; j ++ ) {
+        retval = AIOEitherToInt( counts->Pop( counts ) );
+        ASSERT_EQ( j, retval );
+    }
+    for ( j = 0; j < 500; j ++ , i ++ ) {
+        retval = counts->Push( counts, i );
+        ASSERT_GE( retval, 0 );
+    }
+
+    ASSERT_EQ( 1000, AIOFifoReadSizeNumElements( counts ) );
+    ASSERT_EQ( 0, AIOFifoWriteSizeRemainingNumElements( counts ));
+
+    for ( j = 0; j < 1000; j ++ ) {
+        retval = AIOEitherToInt( counts->Pop( counts ) );
+        ASSERT_EQ( j+300, retval );
+    }
+
+    DeleteAIOFifoCounts( counts );
+}
 
 int main(int argc, char *argv[] )
 {

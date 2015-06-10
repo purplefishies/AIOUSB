@@ -60,7 +60,7 @@ int  AIOEitherGetLeft(AIOEither *retval );
 AIOUSB_BOOL AIOEitherHasError( AIOEither *retval );
 
 char *AIOEitherToString( AIOEither *retval, AIORET_TYPE *result );
-int AIOEitherToInt( AIOEither *retval, AIORET_TYPE *result );
+int AIOEitherToInt( AIOEither retval);
 short AIOEitherToShort( AIOEither *retval, AIORET_TYPE *result );
 unsigned AIOEitherToUnsigned( AIOEither *retval, AIORET_TYPE *result );
 double AIOEitherToDouble( AIOEither *retval, AIORET_TYPE *result );

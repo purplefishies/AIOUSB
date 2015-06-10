@@ -193,12 +193,21 @@ char *AIOEitherToString( AIOEither *retval, AIORET_TYPE *result )
     }                                                   \
     return (TYPE)AIO_ERROR_VALUE;
 
+/* #define AIO_EITHER_GET_VALUE( RETVAL, TYPE ) ({ if(RETVAL.left) { errno=RETVAL.left };  RETVAL.left ? (AIO_ERROR_VALUE) : *(TYPE *)&(RETVAL.right.number) })  */
+#define AIO_EITHER_GET_VALUE( RETVAL, TYPE ) ({                 \
+            int tmp;                                            \
+            if(RETVAL.left) {                                   \
+                errno=RETVAL.left;                              \
+                tmp=(TYPE)AIO_ERROR_VALUE;                      \
+            } else {                                            \
+                tmp=*(TYPE *)&(RETVAL.right.number);            \
+            };                                                  \
+            tmp;})
 
 
-int AIOEitherToInt( AIOEither *retval, AIORET_TYPE *result )
+int AIOEitherToInt( AIOEither retval )
 {
-    AIO_ASSERT_RET(0xffffffff,result );
-    AIO_EITHER_CHECK_VALUE( retval, int );
+    return AIO_EITHER_GET_VALUE( retval, int );
 }
 
 short AIOEitherToShort( AIOEither *retval, AIORET_TYPE *result )
@@ -354,15 +363,14 @@ TEST(AIOEither,CheckErrors )
     AIO_NUMBER retval;
     either.left = -1;
 
-    retval = AIOEitherToInt( &either, &result );
-    ASSERT_EQ( -1, result );
+    retval = AIOEitherToInt( either );
 
     ASSERT_EQ( (int)AIO_ERROR_VALUE, retval  );
 
     *(int *)&either.right  = 42;
     either.left = 0;
 
-    retval = AIOEitherToInt( &either, &result );
+    retval = AIOEitherToInt( either );
     ASSERT_EQ( 42, retval );
 
 }
@@ -376,21 +384,15 @@ TEST(AIOEither,CheckCompound)
     
     int value;
 
-    ASSERT_DEATH( { value = ({ 
-                AIORET_TYPE tmpresult = AIOUSB_SUCCESS;
-                int tmp = AIOEitherToInt( &either, &tmpresult );
-                AIO_ASSERT_EXIT( tmpresult == AIOUSB_SUCCESS );
-                printf("Result: %d\n", tmpresult );
-                2;});
-        }, "Assertion `tmpresult == AIOUSB_SUCCESS' failed");
-
+    int tmp = AIOEitherToInt( either );
+    ASSERT_EQ( AIO_ERROR_VALUE, tmp );
+    
     either.left = 0;
 
     value = ({ 
             AIORET_TYPE tmpresult = AIOUSB_SUCCESS;
-            int tmp = AIOEitherToInt( &either, &tmpresult );
+            int tmp = AIOEitherToInt( either );
             AIO_ASSERT_EXIT( tmpresult == AIOUSB_SUCCESS );
-            printf("Result: %d\n", tmpresult );
             2;});
 
     EXPECT_EQ( 2, value );
