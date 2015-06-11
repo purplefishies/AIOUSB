@@ -212,7 +212,6 @@ lib/%.o:lib/%.c
 	$(CC) $(CFLAGS)  -D_GNU_SOURCE $(OBJFILE_OPTS) $(INCPATH) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $(COPTS) $<  -o $@
 
 %:%.c.o		$(COMMON_C_DEPS)
-	@echo "Foo:  $(CLIBS)"
 	$(CC) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $< $(CLIBS) -o $@ $(LDFLAGS)
 
 

@@ -6,6 +6,9 @@
 #include "aiocommon.h"
 #include "AIOUSB_Log.h"
 
+
+struct opts AIO_OPTIONS = {100000, 16, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15, -1, -1, 0, 0, NULL };
+
 /*----------------------------------------------------------------------------*/
 struct channel_range *get_channel_range(char *optarg )
 {
@@ -86,12 +89,13 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
         {"reset"            , no_argument,       0,  'r'   },
         {"outfile"          , required_argument, 0,  'o'   },
         {"verbose"          , no_argument,       0,  'V'   },
-        {"block_size"       , required_argument, 0,  'B' },
+        {"block_size"       , required_argument, 0,  'B'   },
+        {"timing"           , no_argument      , 0,  'T'   },
         {0                  , 0,                 0,   0    }
     };
     while (1) { 
         struct channel_range *tmp;
-        c = getopt_long(argc, argv, "B:D:b:O:n:g:c:o:m:hR:Vi:", long_options, &option_index);
+        c = getopt_long(argc, argv, "B:D:b:O:n:g:c:o:m:hR:TVi:", long_options, &option_index);
         if( c == -1 )
             break;
         switch (c) {
@@ -116,7 +120,7 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
             options->outfile = strdup(optarg);
             break;
         case 'h':
-            print_usage(argc, argv, long_options );
+            print_aio_usage(argc, argv, long_options );
             exit(1);
             break;
         case 'i':
@@ -157,12 +161,12 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
             break;
         }
         if( error ) {
-            print_usage(argc, argv, long_options);
+            print_aio_usage(argc, argv, long_options);
             exit(1);
         }
         if( options->num_channels == 0 ) {
             fprintf(stderr,"Error: You must specify num_channels > 0: %d\n", options->num_channels );
-            print_usage(argc, argv, long_options);
+            print_aio_usage(argc, argv, long_options);
             exit(1);
         }
 
@@ -171,7 +175,7 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
     if ( options->number_ranges == 0 ) { 
         if ( options->start_channel && options->end_channel && options->num_channels ) {
             fprintf(stdout,"Error: you can only specify -start_channel & -end_channel OR  --start_channel & --numberchannels\n");
-            print_usage(argc, argv, long_options );
+            print_aio_usage(argc, argv, long_options );
             exit(1);
         } else if ( options->start_channel && options->num_channels ) {
             options->end_channel = options->start_channel + options->num_channels - 1;
@@ -199,7 +203,7 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
 }
 
 /*----------------------------------------------------------------------------*/
-void print_usage(int argc, char **argv,  struct option *options)
+void print_aio_usage(int argc, char **argv,  struct option *options)
 {
     fprintf(stderr,"%s - Options\n", argv[0] );
     for ( int i =0 ; options[i].name != NULL ; i ++ ) {

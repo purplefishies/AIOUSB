@@ -25,13 +25,17 @@ struct opts {
     int end_channel;
     int index;
     int block_size;
+    int with_timing;
+    int slow_acquire;
     struct channel_range **ranges;
 };
 
 
 struct channel_range *get_channel_range(char *optarg );
 void process_aio_cmd_line( struct opts *options, int argc, char *argv [] );
-void print_usage(int argc, char **argv,  struct option *options);
+void print_aio_usage(int argc, char **argv,  struct option *options);
+
+extern struct opts AIO_OPTIONS;
 
 
 #endif
