@@ -1,6 +1,8 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
+#include <getopt.h>
+
 struct channel_range {
   int start_channel;
   int end_channel;
@@ -29,7 +31,7 @@ struct opts {
 
 struct channel_range *get_channel_range(char *optarg );
 void process_aio_cmd_line( struct opts *options, int argc, char *argv [] );
-
+void print_usage(int argc, char **argv,  struct option *options);
 
 
 #endif

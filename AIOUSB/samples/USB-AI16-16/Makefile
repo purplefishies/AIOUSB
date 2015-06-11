@@ -21,6 +21,15 @@ override CXXFLAGS      += -I$${AIO_LIB_DIR} -I$${AIO_CLASSLIB_DIR} -Ilib -I/usr/
 
 override LDFLAGS       += -L$${AIO_LIB_DIR} -L$${AIO_CLASSLIB_DIR}
 
+ifeq ("$(OSTYPE)","Darwin") 
+CC_SHFLAGS := -dynamiclib
+SHLIB_CFLAGS	= $(CFLAGS) -fPIC
+else 
+CC_SHFLAGS :=  -fPIC -shared -Wl,-soname
+SHLIB_CFLAGS	= $(CFLAGS) -fPIC
+endif
+
+
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Regular C related Build
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -35,9 +44,9 @@ ifdef AIOUSBLIBDIR
 #       Dynamic Build Rule for aiousblib
 	AIOUSBLIB_BUILD		= $(LIBAIOUSB): $(ALL_AIOUSBLIBDIR_CFILES) ; cd $(AIOUSBLIBDIR) && $(MAKE) CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" $(DEBUG_ARGS)
 else
-	LIBAIOUSB 		:= -laiousbdbg			# use default library search path
-	LIBAIOUSBCPP 		:= -laiousbcppdbg		# "     "      "       "      "
-
+# use default library search path
+	LIBAIOUSB 		:= -laiousbdbg
+	LIBAIOUSBCPP 		:= -laiousbcppdbg
 	LIBAIOUSB_CDEP		:= $(wildcard $(AIO_LIB_DIR)/*.so )
 	CFLAGS			+= -I$(AIO_LIB_DIR) 
 endif
@@ -79,6 +88,7 @@ endif
 REVERSE_CAL_DEPS	:= reverse_cal_table.o lib/TestCaseSetup.o 
 COMMON_DEPS             := lib/TestCaseSetup.o
 
+COMMON_C_DEPS		:= $(patsubst lib/%.c,lib/%.o,$(wildcard lib/*.c))
 
 LIBRARY_DEPS		:= $(LIBAIOUSB_CDEP) $(LIBAIOUSB_CPPDEP)
 
@@ -87,7 +97,7 @@ INCPATH			:= -Ilib $(CFLAGS)
 LIBPATH			:= -Llib $(LDFLAGS)
 
 CPPLIBS			+= $(LIBCLASSAIOUSB) $(LIBAIOUSBCPP)  $(LIBUSB) -lm $(LIBS)
-CLIBS			+= $(LIBAIOUSB) $(LIBUSB) -lm $(LIBS)
+CLIBS			+= $(LIBAIOUSB) $(LIBUSB) -lm $(LIBS) $(COMMON_C_DEPS)
 
 TARGETS			:= $(wildcard *.cpp)
 CTARGETS		:= $(wildcard *.c)
@@ -114,7 +124,7 @@ all: $(FINAL_TARGETS)
 #
 # Debugging targets
 #
-test	:
+test:
 	@echo "JAVA FILES=$(JAVA_OBJECT_FILES)"
 	@echo "LIBRARY_DEPS=$(LIBRARY_DEPS)"
 	@echo "CLEAN TARGETS=$(ALL_CLEAN_TARGETS)"
@@ -123,12 +133,18 @@ test	:
 	@echo "AIOLIB=$(LIBCLASSAIOUSB)"
 	@echo "LIBRARY_DEPS=$(LIBRARY_DEPS)"
 	@echo "BUILD_DEPS=$(LIBAIOUSB_CPPDEP)"
-
+	@echo "COMMON_C_DEPS=$(COMMON_C_DEPS)"
+	@echo "AIOUSBLIBDIR=:$(AIOUSBLIBDIR):"
+	@echo "LIBPREFIX=:$(LIBPREFIX):"
+	@echo "CLIBS=$(CLIBS)"
 clean:
 	$(RM) $(ALL_CLEAN_TARGETS)
 	$(RM) *.csv
 	$(RM) *.class
 	$(RM) *.log
+	$(RM) lib/*.so
+	$(RM) lib/*.o
+
 #
 # This sets up the dependencies for our .a builds
 #
@@ -169,6 +185,11 @@ mostlyclean:
 lib/TestCaseSetup.o: lib/TestCaseSetup.cpp lib/TestCaseSetup.h  $(LIBRARY_DEPS)
 	$(CPP) $(DEBUGOPTS) $(CXXFLAGS) $(LIBPATH)  $(OBJFILE_OPTS) $(COMMONOPTS) $(CPPOPTS) $<  $(LIBAIOUSBCPP) $(LIBUSB) -o $@
 
+lib/%.o:lib/%.c 
+	$(CC) $(CFLAGS)  -D_GNU_SOURCE $(OBJFILE_OPTS) $(INCPATH) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $(COPTS) $<  -o $@
+
+# $(CC) $(DEBUGOPTS) $(SHLIB_CFLAGS) -c $< -o $(patsubst %.c,%.o,$<)
+# $(CC) $(CC_SHFLAGS),$@ -o $@ $(patsubst %.c,%.o,$<)	
 #
 # Smart Generic rules that can build any NEW C or C++ file that 
 # you add to this directory
@@ -187,10 +208,11 @@ lib/TestCaseSetup.o: lib/TestCaseSetup.cpp lib/TestCaseSetup.h  $(LIBRARY_DEPS)
 #
 # C Rules
 #
-%.c.o:%.c	$(LIBRARY_DEPS) $(COMMON_DEPS) 
+%.c.o:%.c	$(LIBRARY_DEPS) $(COMMON_C_DEPS) 
 	$(CC) $(CFLAGS)  -D_GNU_SOURCE $(OBJFILE_OPTS) $(INCPATH) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $(COPTS) $<  -o $@
 
-%:%.c.o		$(LIBRARY_DEPS)
+%:%.c.o		$(COMMON_C_DEPS)
+	@echo "Foo:  $(CLIBS)"
 	$(CC) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $< $(CLIBS) -o $@ $(LDFLAGS)
 
 

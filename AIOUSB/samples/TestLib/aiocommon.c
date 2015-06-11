@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
+#include <ctype.h>
 #include "aiocommon.h"
 #include "AIOUSB_Log.h"
 
@@ -194,5 +195,21 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
         options->start_channel = min;
         options->end_channel = max;
         options->num_channels = (max - min + 1 );
+    }
+}
+
+/*----------------------------------------------------------------------------*/
+void print_usage(int argc, char **argv,  struct option *options)
+{
+    fprintf(stderr,"%s - Options\n", argv[0] );
+    for ( int i =0 ; options[i].name != NULL ; i ++ ) {
+      fprintf(stderr,"\t-%c | --%s ", (char)options[i].val, options[i].name);
+      if( options[i].has_arg == optional_argument ) {
+        fprintf(stderr, " [ ARG ]\n");
+      } else if( options[i].has_arg == required_argument ) {
+        fprintf(stderr, " ARG\n");
+      } else {
+        fprintf(stderr,"\n");
+      }
     }
 }
