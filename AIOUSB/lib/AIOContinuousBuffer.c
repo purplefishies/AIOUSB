@@ -2025,19 +2025,6 @@ char *AIOContinuousBufToJSON( AIOContinuousBuf *buf )
 #include <iostream>
 using namespace AIOUSB;
 
-
-
-#ifndef TAP_TEST
-#define LOG(...) do {                           \
-    pthread_mutex_lock( &message_lock );        \
-    printf( __VA_ARGS__ );                      \
-    pthread_mutex_unlock(&message_lock);        \
-  } while ( 0 );
-#else
-#define LOG(...) do { } while (0); 
-#endif
-
-
 void fill_buffer( AIOBufferType *buffer, unsigned size )
 {
   for ( int i = 0 ; i < size; i ++ ) { 
