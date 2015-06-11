@@ -25,6 +25,7 @@
 #include "AIODeviceTable.h"
 #include "AIOFifo.h"
 #include "AIOCountsConverter.h"
+#include <ctype.h>
 
 #ifdef __cplusplus
 namespace AIOUSB {
@@ -529,14 +530,14 @@ AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf,
 }
 
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE AIOContinuousBufReadIntegerGetNumberOfScans( AIOContinuousBuf *buf )
+AIORET_TYPE AIOContinuousBufGetNumberOfScansToRead( AIOContinuousBuf *buf )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
     return buf->num_scans;
 }
 
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE AIOContinuousBufReadIntegerSetNumberOfScans( AIOContinuousBuf *buf, unsigned num_scans )
+AIORET_TYPE AIOContinuousBufSetNumberOfScansToRead( AIOContinuousBuf *buf, unsigned num_scans )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
     buf->num_scans = num_scans;
@@ -1781,12 +1782,13 @@ AIORET_TYPE AIOContinuousBufSetTimeout( AIOContinuousBuf *buf, unsigned timeout 
 {
     AIO_ASSERT_AIOCONTBUF( buf );
     AIOContinuousBufLock( buf );
+    buf->timeout = timeout;
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), (AIORESULT*)&retval );
-    AIO_ERROR_VALID_AIORET_TYPE( AIOUSB_ERROR_INVALID_DEVICE_SETTING, retval == AIOUSB_SUCCESS );
+    AIO_ERROR_VALID_DATA_W_CODE( retval, AIOContinuousBufUnlock(buf), retval == AIOUSB_SUCCESS );
 
     retval = AIOUSBDeviceSetTimeout( dev, timeout );
-    AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS );
+    AIO_ERROR_VALID_DATA_W_CODE( retval, AIOContinuousBufUnlock(buf), retval == AIOUSB_SUCCESS );
 
     buf->timeout = timeout;
 
@@ -1889,10 +1891,94 @@ AIORET_TYPE AIOContinuousBufGetDeviceIndex( AIOContinuousBuf *buf )
     return (AIORET_TYPE)buf->DeviceIndex;
 }
 
-AIOContinuousBuf *NewAIOContinuousBufFromJSON( const char *json_string )
+/*----------------------------------------------------------------------------*/
+cJSON *GetJSONValueOrDefault(cJSON *config,char const *key, EnumStringLookup *lookup,  size_t size )
 {
-    AIOContinuousBuf *tmp = NewAIOContinuousBuf( 0,0,0,0 );
-    return tmp;
+    static cJSON retval;
+    cJSON *tmp;
+    int found = 0;
+
+    if ( config && (tmp = cJSON_GetObjectItem(config, key ) ) ) {
+        char *foo = tmp->valuestring;
+
+        if ( !is_all_digits(foo) ) { 
+            for ( size_t j = 0; j < size ; j ++ ) {
+                if ( strcasecmp(foo, lookup[j].str ) == 0 )  {
+                    retval.valuestring = (char *)lookup[j].strvalue;
+                    retval.valueint = lookup[j].value;
+                    retval.valuedouble = (double)lookup[j].value;
+                    found = 1;
+                    break;
+                }
+            }
+        } else {
+            retval.valuestring = foo;
+            retval.valueint = atoi(foo);
+            retval.valuedouble = (double)atol(foo);
+            found = 1;
+        }
+    }
+    if (!found ) {
+        retval.valuestring = (char *)lookup[0].strvalue;
+        retval.valueint = lookup[0].value;
+        retval.valuedouble = (double)lookup[0].value;
+    }
+    return &retval;
+
+}
+
+EnumStringLookup TrueFalse[] = {
+    { AIOUSB_TRUE , (char *)"true"  , (char *)STRINGIFY(true)  },
+    { AIOUSB_FALSE, (char *)"false" , (char *)STRINGIFY(false)  },
+};
+
+typedef struct rangelookup {
+    int minvalue;
+    int maxvalue;
+} RangeValueLookup;
+
+RangeValueLookup BaseSizeRange[] = {
+    { 0 , 100000000 }
+};
+
+
+AIOContinuousBuf *NewAIOContinuousBufFromJSON( const char *str )
+{
+    AIOContinuousBuf *aiobuf = NewAIOContinuousBuf( 0,16,0,1024 );
+
+    cJSON *aiojson;
+    aiojson = cJSON_Parse(str);
+
+    AIO_ERROR_VALID_DATA_W_CODE( NULL, DeleteAIOContinuousBuf(aiobuf), aiojson );
+
+
+    cJSON *tmp;
+
+    tmp = GetJSONValueOrDefault( aiojson, "debug", TrueFalse, sizeof(TrueFalse)/sizeof(EnumStringLookup));
+    AIOContinuousBufSetDebug( aiobuf, tmp->valueint );
+
+    if ( ( tmp = cJSON_GetObjectItem(aiojson,"block_size" )) )
+        AIOContinuousBufSetStreamingBlockSize( aiobuf, cJSON_AsInteger(tmp) );
+    if ( ( tmp = cJSON_GetObjectItem(aiojson,"base_size" )) )
+        AIOContinuousBufSetBaseSize( aiobuf, cJSON_AsInteger(tmp) );  
+    if ( ( tmp = cJSON_GetObjectItem(aiojson,"hz" )) )
+        AIOContinuousBufSetClock( aiobuf, cJSON_AsInteger(tmp) );  
+    if ( ( tmp = cJSON_GetObjectItem(aiojson,"num_channels" )) )
+        AIOContinuousBufSetNumberOfChannels( aiobuf, cJSON_AsInteger(tmp));
+    if ( ( tmp = cJSON_GetObjectItem(aiojson,"num_oversamples" )) )
+        AIOContinuousBufSetOversample( aiobuf, cJSON_AsInteger(tmp));
+    if ( ( tmp = cJSON_GetObjectItem(aiojson,"num_scans" )) )
+        AIOContinuousBufSetNumberOfScansToRead( aiobuf, cJSON_AsInteger(tmp));
+    if ( ( tmp = cJSON_GetObjectItem(aiojson,"num_scans" )) )
+        AIOContinuousBufSetNumberOfScansToRead( aiobuf, cJSON_AsInteger(tmp));
+    if ( ( tmp = cJSON_GetObjectItem(aiojson,"timeout" )) )
+        AIOContinuousBufSetTimeout( aiobuf, cJSON_AsInteger(tmp) );
+    if ( ( tmp = cJSON_GetObjectItem(aiojson,"unit_size" )) )
+        AIOContinuousBufSetUnitSize( aiobuf, cJSON_AsInteger(tmp) );
+    if ( ( tmp = cJSON_GetObjectItem(aiojson,"DeviceIndex" )) )
+        AIOContinuousBufSetDeviceIndex( aiobuf, cJSON_AsInteger(tmp) );
+
+    return aiobuf;
 }
 
 char *AIOContinuousBufToJSON( AIOContinuousBuf *buf )
@@ -1900,7 +1986,7 @@ char *AIOContinuousBufToJSON( AIOContinuousBuf *buf )
     AIO_ASSERT_RET( NULL, buf );
     char *tmp;
     asprintf(&tmp,
-              "{DeviceIndex\":%d,\"base_size\":%d,\"block_size\":%d,\"debug\":%s,\"hz\":%d,\"num_channels\":%d,\"num_oversamples\":%d,\"num_scans\":%d,\"size\":%d,\"status\":%d,\"testing\":%s,\"timeout\":%d,\"type\":%d,\"unit_size\":%d}",
+              "{\"DeviceIndex\":%d,\"base_size\":%d,\"block_size\":%d,\"debug\":\"%s\",\"hz\":%d,\"num_channels\":%d,\"num_oversamples\":%d,\"num_scans\":%d,\"testing\":\"%s\",\"timeout\":%d,\"type\":%d,\"unit_size\":%d}",
               buf->DeviceIndex,
               buf->base_size,
               buf->block_size,
@@ -1909,8 +1995,6 @@ char *AIOContinuousBufToJSON( AIOContinuousBuf *buf )
               buf->num_channels,
               buf->num_oversamples,
               buf->num_scans,
-              buf->size,
-              buf->status,
              ( buf->testing == 1 ? "true" : "false" ),
               buf->timeout,
               buf->type,
@@ -1972,64 +2056,6 @@ void *newdoit(void *object )
   }
   pthread_exit((void*)&retval);
   return (void*)NULL;
-}
-
-/**
- * @param object 
- * @return 
- */
-void *doit( void *object )
-{
-    sched_yield();
-    AIOContinuousBuf *buf = (AIOContinuousBuf*)object;
-    AIOUSB_DEVEL("\tAddress is 0x%x\n", (int)(unsigned long)(AIOContinuousBuf *)buf );
-    unsigned  size  = 1000;
-    AIOBufferType *tmp = (AIOBufferType*)malloc(size*sizeof(AIOBufferType));
-    AIORET_TYPE retval;
-
-    while ( buf->status == RUNNING ) { 
-        fill_buffer( tmp, size );
-        AIOUSB_DEVEL("\tLooping spinning wheels\n"); 
-        retval = AIOContinuousBufWrite( buf, tmp, size, size , AIOCONTINUOUS_BUF_NORMAL );
-        AIOUSB_DEVEL("\tWriting buf , attempted write of size size=%d, wrote=%d\n", size, (int)retval );
-    }
-    AIOUSB_DEVEL("Stopping\n");
-    AIOUSB_DEVEL("Completed loop\n");
-    free(tmp);
-    pthread_exit((void*)&retval);
-    return NULL;
-}
-
-/**
- * @param object 
- * @return 
- */
-void *channel16_doit( void *object )
-{
-    sched_yield();
-    AIOContinuousBuf *buf = (AIOContinuousBuf*)object;
-    AIOUSB_DEVEL("\tAddress is 0x%x\n", (int)(unsigned long)(AIOContinuousBuf *)buf );
-    unsigned  size  = 16*64;
-    AIOBufferType *tmp = (AIOBufferType*)malloc(size*sizeof(AIOBufferType));
-    AIORET_TYPE retval;
-
-    while ( buf->status == RUNNING ) { 
-        fill_buffer( tmp, size );
-        AIOUSB_DEVEL("\tLooping spinning wheels\n"); 
-        retval = AIOContinuousBufWrite( buf, tmp, size ,size,  AIOCONTINUOUS_BUF_ALLORNONE );
-        usleep( rand()%100 );
-        if (  retval >= 0 && retval != size ) {
-            AIOUSB_ERROR("Error writing. Wrote bytes of size=%d but should have written=%d\n", (int)retval, size );
-            AIOUSB_ERROR("read_pos=%d, write_pos=%d\n", AIOFifoReadPosition(buf), AIOFifoWritePosition(buf));
-            _exit(2);
-        }
-        AIOUSB_DEVEL("\tWriting buf , attempted write of size size=%d, wrote=%d\n", size, (int)retval );
-    }
-    AIOUSB_DEVEL("Stopping\n");
-    AIOUSB_DEVEL("Completed loop\n");
-    free(tmp);
-    pthread_exit((void*)&retval);
-    return NULL;
 }
 
 AIORET_TYPE read_data( unsigned short *data , unsigned size) 
@@ -2451,13 +2477,42 @@ TEST(AIOContinuousBuf,ReadingIntegerSamples)
     ASSERT_EQ( 40, retval );
 
     retval = AIOContinuousBufPopN( buf, tobuf, 20 );
-    /* retval = AIOContinuousBufReadNSamples( buf, tobuf, 20 ); */
+
     ASSERT_EQ( 20*sizeof(uint16_t), retval );
     ASSERT_EQ( 20, AIOContinuousBufNumberSamplesAvailable( buf ) );
-    /* retval = AIOContinuousBufPushN(buf , counts, 40 ); */
+
 
     DeleteAIOContinuousBuf( buf );
 
+}
+
+TEST(AIOContiuousBuf,JSONFunctions)
+{
+    int numDevices = 0;
+    AIODeviceTableInit();    
+    AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_AIO16_16A );
+    AIOContinuousBuf *buf = NewAIOContinuousBuf(1,16,0,1024);
+    AIORET_TYPE retval ;
+    char *exp1 = (char *)"{\"DeviceIndex\":1,\"base_size\":1024,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2}";
+    char *exp2 = (char *)"{\"DeviceIndex\":1,\"base_size\":512,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2}";
+
+
+    ASSERT_STREQ( exp1, AIOContinuousBufToJSON( buf ));
+
+    retval = AIOContinuousBufSetBaseSize(buf, 512);
+    ASSERT_EQ( AIOUSB_SUCCESS, retval );
+
+    ASSERT_STREQ( exp2, AIOContinuousBufToJSON( buf ));
+    
+    retval = DeleteAIOContinuousBuf( buf );
+    ASSERT_EQ( AIOUSB_SUCCESS, retval );
+    
+    buf = NewAIOContinuousBufFromJSON( exp1 );
+    ASSERT_TRUE( buf );
+
+    ASSERT_STREQ( exp1, AIOContinuousBufToJSON(buf) );
+
+    
 }
 
 

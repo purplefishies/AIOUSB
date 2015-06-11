@@ -188,6 +188,8 @@ enum AIOUSB_BOOL_VAL {
 
 typedef enum AIOUSB_BOOL_VAL AIOUSB_BOOL;
 
+
+
 #endif
 
 typedef long double AIO_NUMBER;
@@ -670,6 +672,14 @@ typedef enum  {
   AD_CAL_MODE_BIP_GROUND  = 5,
   ADCalMode_end           = 8
 } ADCalMode;
+
+
+/* For JSON parsing */
+typedef struct lookup { 
+    int value;
+    char *str;
+    char *strvalue;
+} EnumStringLookup;
 
 
 /** 

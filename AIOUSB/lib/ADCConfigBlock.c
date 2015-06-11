@@ -819,7 +819,10 @@ AIORET_TYPE ADCConfigBlockSetTriggerReference( ADCConfigBlock *config, int val )
 AIOUSB_BOOL is_all_digits( char *str )
 {
     AIOUSB_BOOL found = AIOUSB_TRUE;
-    for(char *a = str; a < strlen(str)+str; a+=1)
+    if ( !str ) 
+        return AIOUSB_FALSE;
+
+    for(char *a = str; str && a < strlen(str)+str; a+=1)
         found &= ( isdigit(*a) != 0 );
     return found;
 }
@@ -839,6 +842,8 @@ cJSON *ADCConfigBlockGetJSONValueOrDefault( cJSON *config,
     if ( config && (tmp = cJSON_GetObjectItem(config, key ) ) ) {
         /* \"calibration\":\"Normal\" */
         char *foo = tmp->valuestring;
+        if( !foo && tmp->string )
+            foo = tmp->string;
 
         if ( !is_all_digits(foo) ) { 
             for ( size_t j = 0; j < size ; j ++ ) {

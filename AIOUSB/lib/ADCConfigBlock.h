@@ -33,12 +33,6 @@ typedef struct adc_config_block {
 
 typedef ADCConfigBlock ADConfigBlock;
 
-typedef struct lookup { 
-    int value;
-    char *str;
-    char *strvalue;
-} EnumStringLookup;
-
 #define STRINGIFY(x) #x
 
 
@@ -110,6 +104,8 @@ PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetDebug( const ADCConfigBlock *obj );
 char *ADCConfigBlockToJSON(ADCConfigBlock *config);
 ADCConfigBlock *NewADCConfigBlockFromJSON( char *str );
 AIORET_TYPE DeleteADCConfigBlock( ADCConfigBlock *config );
+
+PUBLIC_EXTERN AIOUSB_BOOL is_all_digits( char *str );
 
 
 #ifndef SWIG
