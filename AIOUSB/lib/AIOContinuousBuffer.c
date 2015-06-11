@@ -66,7 +66,7 @@ AIOContinuousBuf *NewAIOContinuousBuf( unsigned long deviceIndex, unsigned num_c
     AIOContinuousBuf *tmp = (AIOContinuousBuf *)calloc(1,sizeof(AIOContinuousBuf));
     if ( tmp ) { 
         tmp->DeviceIndex      = deviceIndex;
-        tmp->data_size        = 64*1024;
+        tmp->block_size        = 64*1024;
         tmp->hz               = 10000;
         tmp->timeout          = 1000;
         tmp->num_scans        = base_size;
@@ -315,9 +315,9 @@ AIORET_TYPE AIOContinuousBufSetStreamingBlockSize( AIOContinuousBuf *buf, unsign
     if (!buf )
         return -AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER;
     if ( blksize < 512 || blksize > 1024*64 ) { 
-        buf->data_size = 512;
+        buf->block_size = 512;
     } else {
-        buf->data_size = ( blksize / 512 ) * 512;
+        buf->block_size = ( blksize / 512 ) * 512;
     }
     return AIOUSB_SUCCESS;
 }
@@ -326,7 +326,7 @@ AIORET_TYPE AIOContinuousBufSetStreamingBlockSize( AIOContinuousBuf *buf, unsign
 AIORET_TYPE AIOContinuousBufGetStreamingBlockSize( AIOContinuousBuf *buf )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
-    return buf->data_size;
+    return buf->block_size;
 }
 
 
@@ -909,16 +909,16 @@ void *RawCountsWorkFunction( void *object )
     AIO_ERROR_VALID_DATA( &retval, retval == AIOUSB_SUCCESS );
 
 
-    unsigned char *data  = (unsigned char *)malloc( buf->data_size );
+    unsigned char *data  = (unsigned char *)malloc( buf->block_size );
 
     while ( buf->status == RUNNING  ) {
         int bytes;
-        int usbresult = aiocontbuf_get_data( buf, usb, 0x86, data, buf->data_size, &bytes, 3000 );
+        int usbresult = aiocontbuf_get_data( buf, usb, 0x86, data, buf->block_size, &bytes, 3000 );
 
         AIOUSB_DEVEL("libusb_bulk_transfer returned  %d as usbresult, bytes=%d\n", usbresult , (int)bytes);
 
         if (  bytes ) {
-            bytes = ( AIOContinuousBuf_BufSizeForCounts(buf) - buf->fifo->refsize - count < buf->data_size ? AIOContinuousBuf_BufSizeForCounts(buf) - buf->fifo->refsize - count : bytes );
+            bytes = ( AIOContinuousBuf_BufSizeForCounts(buf) - buf->fifo->refsize - count < buf->block_size ? AIOContinuousBuf_BufSizeForCounts(buf) - buf->fifo->refsize - count : bytes );
 
             int tmp = buf->fifo->PushN( buf->fifo, (uint16_t*)data, bytes / sizeof(unsigned short));
 
@@ -1002,7 +1002,7 @@ void *ConvertCountsToVoltsFunction( void *object )
     ranges = NewAIOGainRangeFromADCConfigBlock( AIOUSBDeviceGetADCConfigBlock( dev ) );
     AIO_ERROR_VALID_DATA_W_CODE( &retval, retval = AIOUSB_ERROR_INVALID_GAINCODE, ranges );
 
-    unsigned char *data   = (unsigned char *)malloc( buf->data_size );
+    unsigned char *data   = (unsigned char *)malloc( buf->block_size );
     AIO_ERROR_VALID_DATA_W_CODE( &retval, retval = AIOUSB_ERROR_NOT_ENOUGH_MEMORY, data );
 
     cc = NewAIOCountsConverterWithScanLimiter( (unsigned short*)data, num_scans, num_channels, ranges, num_oversamples , sizeof(unsigned short)  );
@@ -1015,7 +1015,7 @@ void *ConvertCountsToVoltsFunction( void *object )
    
     while ( buf->status == RUNNING  ) {
         int bytes;
-        int usbresult = aiocontbuf_get_data( buf, usb, 0x86, data, buf->data_size, &bytes, 3000 );
+        int usbresult = aiocontbuf_get_data( buf, usb, 0x86, data, buf->block_size, &bytes, 3000 );
         AIOUSB_DEVEL("libusb_bulk_transfer returned  %d as usbresult, bytes=%d\n", usbresult , (int)bytes);
 
         AIOUSB_DEVEL("Using counts=%d\n",bytes / 2 );
@@ -1951,6 +1951,40 @@ AIORET_TYPE AIOContinuousBufGetDeviceIndex( AIOContinuousBuf *buf )
     return (AIORET_TYPE)buf->DeviceIndex;
 }
 
+AIOContinuousBuf *NewAIOContinuousBufFromJSON( const char *json_string )
+{
+    AIOContinuousBuf *tmp = NewAIOContinuousBuf( 0,0,0,0 );
+    return tmp;
+}
+
+char *AIOContinuousBufToJSON( AIOContinuousBuf *buf )
+{
+    AIO_ASSERT_RET( NULL, buf );
+    char *tmp;
+    asprintf(&tmp,
+              "{DeviceIndex\":%d,\"base_size\":%d,\"block_size\":%d,\"debug\":%s,\"divisora\":%d,\"divisorb\":%d\"exitcode\":%d,\"extra\":%d,\"hz\":%d,\"num_channels\":%d,\"num_oversamples\":%d,\"num_scans\":%d,\"size\":%d,\"status\":%d,\"testing\":%s,\"timeout\":%d,\"type\":%d,\"unit_size\":%d}",
+              buf->DeviceIndex,
+              buf->base_size,
+              buf->block_size,
+             (buf->debug == 1 ? "true" : "false" ),
+              buf->divisora,
+              buf->divisorb,
+              buf->exitcode,
+              buf->extra, 
+              buf->hz,
+              buf->num_channels,
+              buf->num_oversamples,
+              buf->num_scans,
+              buf->size,
+              buf->status,
+             ( buf->testing == 1 ? "true" : "false" ),
+              buf->timeout,
+              buf->type,
+              buf->unit_size
+              );
+    return tmp;
+}
+
 
 #ifdef __cplusplus
 }
@@ -2218,9 +2252,9 @@ TEST_P(AIOContinuousBufThreeParamTest,BufferScanCounting )
     int num_channels  = GetParam().num_channels;
 
     int tobuf_size     = num_channels * num_scans * sizeof(unsigned short);
-    int use_data_size  = num_channels * num_scans * sizeof(unsigned short );
+    int use_block_size  = num_channels * num_scans * sizeof(unsigned short );
 
-    unsigned short *use_data  = (unsigned short *)calloc(1, use_data_size  );
+    unsigned short *use_data  = (unsigned short *)calloc(1, use_block_size  );
     unsigned short *tobuf     = (unsigned short *)calloc(1, tobuf_size );
 
     AIORET_TYPE retval;
@@ -2238,8 +2272,8 @@ TEST_P(AIOContinuousBufThreeParamTest,BufferScanCounting )
      * Aiocontbuf, then set the read position to match the write position, then write one more almost
      * buffer size of data. We should see that the new write position is 2*bytes read % size of the buffer
      */ 
-    retval = AIOContinuousBufWriteCounts( buf, use_data, use_data_size, use_data_size, AIOCONTINUOUS_BUF_ALLORNONE );
-    EXPECT_EQ( retval, use_data_size ) << "Number of bytes written should equal the full size of the buffer";
+    retval = AIOContinuousBufWriteCounts( buf, use_data, use_block_size, use_block_size, AIOCONTINUOUS_BUF_ALLORNONE );
+    EXPECT_EQ( retval, use_block_size ) << "Number of bytes written should equal the full size of the buffer";
 
     EXPECT_EQ( AIOContinuousBufGetRemainingSize(buf)/ sizeof(unsigned short), (1)*num_channels );
 

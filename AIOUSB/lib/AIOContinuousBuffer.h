@@ -62,7 +62,7 @@ typedef struct aio_continuous_buf {
     unsigned num_oversamples;
     unsigned num_channels;
     unsigned num_scans;
-    unsigned data_size;
+    unsigned block_size;
     unsigned counter_control;
     unsigned timeout;
     AIORET_TYPE exitcode;
@@ -227,6 +227,9 @@ PUBLIC_EXTERN AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf 
 
 AIORET_TYPE AIOContinuousBufCleanup( AIOContinuousBuf *buf );
 
+
+char *AIOContinuousBufToJSON( AIOContinuousBuf *buf );
+AIOContinuousBuf *NewAIOContinuousBufFromJSON( const char *json_string );
 
 
 #ifdef __aiousb_cplusplus
