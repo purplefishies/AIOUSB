@@ -743,7 +743,6 @@ AIORET_TYPE AIOContinuousBufSetChannelMask( AIOContinuousBuf *buf, AIOChannelMas
     AIO_ASSERT_AIOCONTBUF( buf );
     AIO_ASSERT(mask);
     buf->mask   = mask;
-    buf->extra  = 0;
     return 0;
 }
 
@@ -1962,15 +1961,11 @@ char *AIOContinuousBufToJSON( AIOContinuousBuf *buf )
     AIO_ASSERT_RET( NULL, buf );
     char *tmp;
     asprintf(&tmp,
-              "{DeviceIndex\":%d,\"base_size\":%d,\"block_size\":%d,\"debug\":%s,\"divisora\":%d,\"divisorb\":%d\"exitcode\":%d,\"extra\":%d,\"hz\":%d,\"num_channels\":%d,\"num_oversamples\":%d,\"num_scans\":%d,\"size\":%d,\"status\":%d,\"testing\":%s,\"timeout\":%d,\"type\":%d,\"unit_size\":%d}",
+              "{DeviceIndex\":%d,\"base_size\":%d,\"block_size\":%d,\"debug\":%s,\"hz\":%d,\"num_channels\":%d,\"num_oversamples\":%d,\"num_scans\":%d,\"size\":%d,\"status\":%d,\"testing\":%s,\"timeout\":%d,\"type\":%d,\"unit_size\":%d}",
               buf->DeviceIndex,
               buf->base_size,
               buf->block_size,
              (buf->debug == 1 ? "true" : "false" ),
-              buf->divisora,
-              buf->divisorb,
-              buf->exitcode,
-              buf->extra, 
               buf->hz,
               buf->num_channels,
               buf->num_oversamples,
@@ -2246,7 +2241,6 @@ INSTANTIATE_TEST_CASE_P(AllCombinations, AIOContinuousBufThreeParamTest, ::testi
  */
 TEST_P(AIOContinuousBufThreeParamTest,BufferScanCounting ) 
 {
-    unsigned extra = 0;
     int core_size = 256;
     int num_scans     = GetParam().num_scans;
     int num_channels  = GetParam().num_channels;

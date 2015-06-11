@@ -68,7 +68,6 @@ typedef struct aio_continuous_buf {
     AIORET_TYPE exitcode;
     AIOUSB_BOOL testing;
     AIOUSB_BOOL debug;
-    unsigned extra;                     /**< Keeps track of under writes */
     AIOChannelMask *mask;               /**< Used for keeping track of channels */
 
     volatile THREAD_STATUS status; /* Are we running, paused ..etc; */
