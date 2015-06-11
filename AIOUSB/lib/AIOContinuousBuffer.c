@@ -20,6 +20,7 @@
 #include "AIOBuf.h"
 #include "ADCConfigBlock.h"
 #include "AIOChannelMask.h"
+#include "AIOUSB_CTR.h"
 #include "AIOUSB_Core.h"
 #include "AIODeviceTable.h"
 #include "AIOFifo.h"
@@ -655,71 +656,7 @@ AIORET_TYPE AIOContinuousBufStart( AIOContinuousBuf *buf )
     return retval;
 }
 
-/*----------------------------------------------------------------------------*/
-/**
- * @brief Calculates the register values for buf->divisora, and buf->divisorb to create
- * an output clock that matches the value stored in buf->hz
- * @param buf AIOContinuousBuf object that we will be reading data into
- * @return Success(0) or failure( < 0 ) if we can't set the clocks
- */
-AIORET_TYPE CalculateClocks( AIOContinuousBuf *buf )
-{
-    AIO_ASSERT_AIOCONTBUF( buf );
-    int  hz = (int)buf->hz;
-    float l;
 
-    int divisora, divisorb, divisorab;
-    int min_err, err;
-
-    if (  hz == 0 ) {
-        return -AIOUSB_ERROR_INVALID_PARAMETER;
-    }
-    if (   hz * 4 >= ROOTCLOCK ) {
-        divisora = 2;
-        divisorb = 2;
-    } else { 
-        divisorab = ROOTCLOCK / hz;
-        l = sqrt( divisorab );
-        if ( l > 0xffff ) { 
-            divisora = 0xffff;
-            divisorb = 0xffff;
-            min_err  = abs((int)(round(((ROOTCLOCK / hz) - (int)(divisora * l)))));
-        } else  { 
-            divisora  = round( divisorab / l );
-            l         = round(sqrt( divisorab ));
-            divisorb  = l;
-
-            min_err = abs(((ROOTCLOCK / hz) - (int)(divisora * l)));
-      
-            for ( unsigned lv = l ; lv >= 2 ; lv -- ) {
-                unsigned olddivisora = (int)round((double)divisorab / lv);
-                if (  olddivisora > 0xffff ) { 
-                    AIOUSB_DEVEL( "Found value > 0xff..resetting" );
-                    break;
-                } else { 
-                    divisora = olddivisora;
-                }
-
-                err = abs((int)((ROOTCLOCK / hz) - (divisora * lv)));
-                if (  err <= 0  ) {
-                    min_err = 0;
-                    AIOUSB_DEVEL("Found zero error: %d\n", lv );
-                    divisorb = lv;
-                    break;
-                } 
-                if (  err < min_err  ) {
-                    AIOUSB_DEVEL( "Found new error: using lv=%d\n", (int)lv);
-                    divisorb = lv;
-                    min_err = err;
-                }
-                divisora = (int)round(divisorab / divisorb);
-            }
-        }
-    }
-    buf->divisora = divisora;
-    buf->divisorb = divisorb;
-    return AIOUSB_SUCCESS;
-}
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf )
@@ -1540,6 +1477,7 @@ AIORET_TYPE AIOContinuousBufCallbackStartCallbackAcquisition( AIOContinuousBuf *
 AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf )
 {
     AIORET_TYPE retval;
+    int divisora, divisorb;
     AIO_ASSERT_AIOCONTBUF( buf );
     AIO_ASSERT_AIORET_TYPE(AIOUSB_ERROR_INVALID_DEVICE, AIOContinuousBufGetDeviceIndex(buf) >= 0 );
 
@@ -1548,8 +1486,9 @@ AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf )
         goto out_AIOContinuousBufCallbackStart;
     if ( (retval = SetConfig(buf)) != AIOUSB_SUCCESS )
         goto out_AIOContinuousBufCallbackStart;
-    if ( (retval = CalculateClocks( buf ) ) != AIOUSB_SUCCESS )
-        goto out_AIOContinuousBufCallbackStart;
+    retval = CTR_CalculateCountersForClock( buf->hz , &divisora, &divisorb );
+    AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+
     if ( (retval = StartStreaming(buf)) != AIOUSB_SUCCESS )
         goto out_AIOContinuousBufCallbackStart;
 
@@ -1558,7 +1497,7 @@ AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf )
      */ 
     retval = AIOContinuousBufStart( buf ); /* Startup the thread that handles the data acquisition */
 
-    if ( ( retval = AIOContinuousBufLoadCounters( buf, buf->divisora, buf->divisorb )) != AIOUSB_SUCCESS)
+    if ( ( retval = AIOContinuousBufLoadCounters( buf, divisora, divisorb )) != AIOUSB_SUCCESS)
         goto out_AIOContinuousBufCallbackStart;
 
     if ( retval != AIOUSB_SUCCESS )

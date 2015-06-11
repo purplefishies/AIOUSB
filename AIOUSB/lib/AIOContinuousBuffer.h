@@ -49,14 +49,11 @@ typedef struct aio_continuous_buf {
 #endif
     AIOUSB_WorkFn work;
     int DeviceIndex;
-    /* AIOFifoCounts *fifo; */
     AIOFifoTYPE *fifo;
     AIOBufferType *buffer;
     unsigned char *countsbuf;
     unsigned unit_size;
     unsigned hz;
-    unsigned divisora;
-    unsigned divisorb;
     unsigned base_size;
     unsigned size;
     unsigned num_oversamples;

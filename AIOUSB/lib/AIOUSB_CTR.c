@@ -8,6 +8,7 @@
 
 #include "AIOUSB_CTR.h"
 #include "AIODeviceTable.h"
+#include "AIOUSB_Log.h"
 
 #include <math.h>
 
@@ -460,14 +461,80 @@ AIORET_TYPE CTR_8254ReadStatus(
     return result;
 }
 
+
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE CTR_StartOutputFreq(
-                                  unsigned long DeviceIndex,
-                                  unsigned long BlockIndex,
-                                  double *pHz
-                                  ) {
+/**
+ * @brief Calculates the register values for buf->divisora, and buf->divisorb to create
+ * an output clock that matches the value stored in buf->hz
+ * @param buf AIOContinuousBuf object that we will be reading data into
+ * @return Success(0) or failure( < 0 ) if we can't set the clocks
+ */
+AIORET_TYPE CTR_CalculateCountersForClock( int hz , int *diva, int *divb )
+{
+
+    AIO_ASSERT( diva );
+    AIO_ASSERT( divb );
+    float l;
+    int divisora, divisorb, divisorab;
+    int min_err, err;
+
+    if (  hz == 0 ) {
+        return -AIOUSB_ERROR_INVALID_PARAMETER;
+    }
+    if (   hz * 4 >= ROOTCLOCK ) {
+        divisora = 2;
+        divisorb = 2;
+    } else { 
+        divisorab = ROOTCLOCK / hz;
+        l = sqrt( divisorab );
+        if ( l > 0xffff ) { 
+            divisora = 0xffff;
+            divisorb = 0xffff;
+            min_err  = abs((int)(round(((ROOTCLOCK / hz) - (int)(divisora * l)))));
+        } else  { 
+            divisora  = round( divisorab / l );
+            l         = round(sqrt( divisorab ));
+            divisorb  = l;
+
+            min_err = abs(((ROOTCLOCK / hz) - (int)(divisora * l)));
+      
+            for ( unsigned lv = l ; lv >= 2 ; lv -- ) {
+                unsigned olddivisora = (int)round((double)divisorab / lv);
+                if (  olddivisora > 0xffff ) { 
+                    AIOUSB_DEVEL( "Found value > 0xff..resetting" );
+                    break;
+                } else { 
+                    divisora = olddivisora;
+                }
+
+                err = abs((int)((ROOTCLOCK / hz) - (divisora * lv)));
+                if (  err <= 0  ) {
+                    min_err = 0;
+                    AIOUSB_DEVEL("Found zero error: %d\n", lv );
+                    divisorb = lv;
+                    break;
+                } 
+                if (  err < min_err  ) {
+                    AIOUSB_DEVEL( "Found new error: using lv=%d\n", (int)lv);
+                    divisorb = lv;
+                    min_err = err;
+                }
+                divisora = (int)round(divisorab / divisorb);
+            }
+        }
+    }
+    *diva = divisora;
+    *divb = divisorb;
+    return AIOUSB_SUCCESS;
+}
+
+
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE CTR_StartOutputFreq(unsigned long DeviceIndex, unsigned long BlockIndex, double *pHz ) 
+{
+    AIO_ASSERT( pHz );
     AIORESULT result = AIOUSB_SUCCESS;
-    AIOUSBDevice * deviceDesc =AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    AIOUSBDevice * deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
     RETURN_IF_INVALID_INPUT( deviceDesc, result, _check_valid_counter_output_frequency( deviceDesc, BlockIndex, pHz ) );
 
     if (*pHz <= 0) {

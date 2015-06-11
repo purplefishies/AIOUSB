@@ -13,7 +13,7 @@ namespace AIOUSB {
 #endif
 
 
-
+PUBLIC_EXTERN AIORET_TYPE CTR_CalculateCountersForClock( int hz , int *diva, int *divb );
 PUBLIC_EXTERN AIORET_TYPE CTR_8254Mode( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned long Mode ); 
 PUBLIC_EXTERN AIORET_TYPE CTR_8254Load( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned short LoadValue ); 
 PUBLIC_EXTERN AIORET_TYPE CTR_8254ModeLoad( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned long Mode, unsigned short LoadValue ); 
