@@ -24,6 +24,7 @@
 #include "AIOUSB_DAC.h"
 #include "AIOUSB_CustomEEPROM.h"
 #include "USBDevice.h"
+#include "AIOUSB_Log.h"
 
 #ifdef __aiousb_cplusplus
 namespace AIOUSB

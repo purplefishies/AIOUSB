@@ -4,7 +4,7 @@
 #include <getopt.h>
 #include <ctype.h>
 #include "aiocommon.h"
-#include "AIOUSB_Log.h"
+#include "aiousb.h"
 
 
 struct opts AIO_OPTIONS = {100000, 16, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15, -1, -1, 0, 0, NULL };
@@ -74,10 +74,12 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
     int c;
     int error = 0;
     int option_index = 0;
-    
+    int query = 0;
+    AIODisplayType display_type = BASIC;
+
     static struct option long_options[] = {
         {"debug"            , required_argument, 0,  'D'   },
-        {"num_scans"        , required_argument, 0,  'b'   },
+        {"num_scans"        , required_argument, 0,  'N'   },
         {"num_channels"     , required_argument, 0,  'n'   },
         {"num_oversamples"  , required_argument, 0,  'O'   },
         {"gaincode"         , required_argument, 0,  'g'   },
@@ -87,15 +89,18 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
         {"maxcount"         , required_argument, 0,  'm'   },
         {"range"            , required_argument, 0,  'R'   },
         {"reset"            , no_argument,       0,  'r'   },
-        {"outfile"          , required_argument, 0,  'o'   },
+        {"outfile"          , required_argument, 0,  'f'   },
         {"verbose"          , no_argument,       0,  'V'   },
         {"block_size"       , required_argument, 0,  'B'   },
         {"timing"           , no_argument      , 0,  'T'   },
+        {"query"            , no_argument      , 0,  'q'   },
+        {"yaml"             , no_argument      , 0,  'Y'   },
+        {"json"             , no_argument      , 0,  'J'   },
         {0                  , 0,                 0,   0    }
     };
     while (1) { 
         struct channel_range *tmp;
-        c = getopt_long(argc, argv, "B:D:b:O:n:g:c:o:m:hR:TVi:", long_options, &option_index);
+        c = getopt_long(argc, argv, "B:D:JN:R:TVYb:O:c:g:hi:m:n:o:q", long_options, &option_index);
         if( c == -1 )
             break;
         switch (c) {
@@ -112,11 +117,20 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
         case 'B':
             options->block_size = atoi( optarg );
             break;
+        case 'Y':
+            display_type = YAML;
+            break;
+        case 'J':
+            display_type = JSON;
+            break;
+        case 'q':
+            query = 1;
+            break;
         case 'D':
             options->debug_level = (AIO_DEBUG_LEVEL)atoi(optarg);
             AIOUSB_DEBUG_LEVEL  = options->debug_level;
             break;
-        case 'o':
+        case 'f':
             options->outfile = strdup(optarg);
             break;
         case 'h':
@@ -148,6 +162,7 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
         case 'm':
             options->max_count = atoi(optarg);
             break;
+        case 'N':
         case 'b':
             options->num_scans = atoi(optarg);
             if( options->num_scans <= 0 || options->num_scans > 1e8 ) {
@@ -170,6 +185,11 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
             exit(1);
         }
 
+    }
+    if ( query ) {
+        AIOUSB_Init();
+        AIOUSB_ShowDevices( display_type );
+        exit(0);
     }
 
     if ( options->number_ranges == 0 ) { 
