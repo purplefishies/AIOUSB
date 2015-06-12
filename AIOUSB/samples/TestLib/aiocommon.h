@@ -14,7 +14,6 @@ struct opts {
     unsigned num_channels;
     unsigned num_oversamples;
     int gain_code;
-    unsigned max_count;
     int clock_rate;
     char *outfile;
     int reset;

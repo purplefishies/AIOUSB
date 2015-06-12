@@ -86,15 +86,6 @@ extern AIO_DEBUG_LEVEL AIOUSB_DEBUG_LEVEL;
  * if you don't wish to see these warning messages
  **/
 
-#ifndef TAP_TEST
-#define LOG(...) do {                           \
-    pthread_mutex_lock( &message_lock );        \
-    printf( __VA_ARGS__ );                      \
-    pthread_mutex_unlock(&message_lock);        \
-  } while ( 0 );
-#else
-#define LOG(...) do { } while (0); 
-#endif
 
 extern int LOG_LEVEL;
 extern pthread_t cont_thread;

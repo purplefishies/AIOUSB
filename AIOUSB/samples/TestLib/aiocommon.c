@@ -7,7 +7,7 @@
 #include "aiousb.h"
 
 
-struct opts AIO_OPTIONS = {100000, 16, 0, AD_GAIN_CODE_0_5V , 4000000 , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15, -1, -1, 0, 0, NULL };
+struct opts AIO_OPTIONS = {100000, 16, 0, AD_GAIN_CODE_0_5V , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15, -1, -1, 0, 0, NULL };
 
 /*----------------------------------------------------------------------------*/
 struct channel_range *get_channel_range(char *optarg )
@@ -86,7 +86,6 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
         {"clockrate"        , required_argument, 0,  'c'   },
         {"help"             , no_argument      , 0,  'h'   },
         {"index"            , required_argument, 0,  'i'   },
-        {"maxcount"         , required_argument, 0,  'm'   },
         {"range"            , required_argument, 0,  'R'   },
         {"reset"            , no_argument,       0,  'r'   },
         {"outfile"          , required_argument, 0,  'f'   },
@@ -158,9 +157,6 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
             break;
         case 'c':
             options->clock_rate = atoi(optarg);
-            break;
-        case 'm':
-            options->max_count = atoi(optarg);
             break;
         case 'N':
         case 'b':
