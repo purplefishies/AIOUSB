@@ -187,8 +187,10 @@ unsigned long GetDeviceBySerialNumber(uint64_t *pSerialNumber)
 }
 
 /*----------------------------------------------------------------------------*/
-AIORESULT FindDevices( int **where, int *length , int minProductID, int maxProductID  )
+AIORET_TYPE FindDevices( int **where, int *length , int minProductID, int maxProductID  )
 {
+    AIO_ASSERT( where );
+    AIO_ASSERT( length );
     unsigned long deviceMask = AIOUSB_GetAllDevices();
     static int indices[MAX_USB_DEVICES];
     int index = 0;
@@ -213,8 +215,12 @@ AIORESULT FindDevices( int **where, int *length , int minProductID, int maxProdu
 
 
 /*----------------------------------------------------------------------------*/
-AIORESULT AIOUSB_FindDevices( int **where, int *length , AIOUSB_BOOL (*is_ok_device)( AIOUSBDevice *dev )  )
+AIORET_TYPE AIOUSB_FindDevices( int **where, int *length , AIOUSB_BOOL (*is_ok_device)( AIOUSBDevice *dev )  )
 {
+    AIO_ASSERT( where );
+    AIO_ASSERT( length );
+    if ( !AIOUSB_IsInit() )
+        AIOUSB_Init();
     unsigned long deviceMask = AIOUSB_GetAllDevices();
     static int indices[MAX_USB_DEVICES];
     int index = 0;
