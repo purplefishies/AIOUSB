@@ -12,57 +12,57 @@ struct opts AIO_OPTIONS = {100000, 16, 0, AD_GAIN_CODE_0_5V , 10000 , "output.tx
 /*----------------------------------------------------------------------------*/
 struct channel_range *get_channel_range(char *optarg )
 {
-  int i = 0;
+    int i = 0;
   
-  typedef enum { 
-    BEGIN = 0,
-    SCHANNEL,
-    ECHANNEL,
-    GAIN,
-  } MODE;
-  int pos;
-  char buf[BUFSIZ];
-  struct channel_range *tmp = (struct channel_range *)malloc( sizeof(struct channel_range) );
-  if ( !tmp ) {
-    fprintf(stdout,"Unable to create a new channel range\n");
-    return NULL;
-  }
-  MODE mode = BEGIN;
-  for ( i = 0; i < strlen(optarg); i ++ ) {
-    if ( mode == BEGIN && isdigit(optarg[i] ) ) {
-      pos = i;
-      mode = SCHANNEL;
-    } else if ( mode == SCHANNEL && isdigit(optarg[i])  ) {
-      
-    } else if ( mode == SCHANNEL && optarg[i] == '-' ) {
-      mode = ECHANNEL;
-      strncpy(&buf[0], &optarg[pos], i - pos );
-      buf[i-pos] = 0;
-      tmp->start_channel = atoi(buf);
-      i ++ ;
-      pos = i;
-    } else if ( mode == SCHANNEL ) {
-      fprintf(stdout,"Unknown flag while parsing Start_channel: '%c'\n", optarg[i] );
-      free(tmp);
-      return NULL;
-    } else if ( mode == ECHANNEL && isdigit(optarg[i] ) ) {
-      
-    } else if ( mode == ECHANNEL && optarg[i] == '=' ) {
-      mode = GAIN;
-      strncpy(&buf[0], &optarg[pos], i - pos );
-      buf[i-pos] = 0;
-      tmp->end_channel = atoi(buf);
-      i ++;
-      strncpy(&buf[0], &optarg[i],strlen(optarg));
-      tmp->gaincode = atoi( buf );
-      break;
-    } else {
-      fprintf(stdout,"Unknown flag while parsing End_channel: '%c'\n", optarg[i] );
-      free(tmp);
-      return NULL;
+    typedef enum { 
+        BEGIN = 0,
+        SCHANNEL,
+        ECHANNEL,
+        GAIN,
+    } MODE;
+    int pos;
+    char buf[BUFSIZ];
+    struct channel_range *tmp = (struct channel_range *)malloc( sizeof(struct channel_range) );
+    if ( !tmp ) {
+        fprintf(stdout,"Unable to create a new channel range\n");
+        return NULL;
     }
-  }
-  return tmp;
+    MODE mode = BEGIN;
+    for ( i = 0; i < strlen(optarg); i ++ ) {
+        if ( mode == BEGIN && isdigit(optarg[i] ) ) {
+            pos = i;
+            mode = SCHANNEL;
+        } else if ( mode == SCHANNEL && isdigit(optarg[i])  ) {
+      
+        } else if ( mode == SCHANNEL && optarg[i] == '-' ) {
+            mode = ECHANNEL;
+            strncpy(&buf[0], &optarg[pos], i - pos );
+            buf[i-pos] = 0;
+            tmp->start_channel = atoi(buf);
+            i ++ ;
+            pos = i;
+        } else if ( mode == SCHANNEL ) {
+            fprintf(stdout,"Unknown flag while parsing Start_channel: '%c'\n", optarg[i] );
+            free(tmp);
+            return NULL;
+        } else if ( mode == ECHANNEL && isdigit(optarg[i] ) ) {
+      
+        } else if ( mode == ECHANNEL && optarg[i] == '=' ) {
+            mode = GAIN;
+            strncpy(&buf[0], &optarg[pos], i - pos );
+            buf[i-pos] = 0;
+            tmp->end_channel = atoi(buf);
+            i ++;
+            strncpy(&buf[0], &optarg[i],strlen(optarg));
+            tmp->gaincode = atoi( buf );
+            break;
+        } else {
+            fprintf(stdout,"Unknown flag while parsing End_channel: '%c'\n", optarg[i] );
+            free(tmp);
+            return NULL;
+        }
+    }
+    return tmp;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -106,7 +106,7 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
         case 'R':
             if( !( tmp = get_channel_range(optarg)) ) {
                 fprintf(stdout,"Incorrect channel range spec, should be '--range START-END=GAIN_CODE', not %s\n", optarg );
-                exit(0);
+                exit(1);
             }
 
             options->ranges = (struct channel_range **)realloc( options->ranges , (++options->number_ranges)*sizeof(struct channel_range*)  );
@@ -223,13 +223,13 @@ void print_aio_usage(int argc, char **argv,  struct option *options)
 {
     fprintf(stderr,"%s - Options\n", argv[0] );
     for ( int i =0 ; options[i].name != NULL ; i ++ ) {
-      fprintf(stderr,"\t-%c | --%s ", (char)options[i].val, options[i].name);
-      if( options[i].has_arg == optional_argument ) {
-        fprintf(stderr, " [ ARG ]\n");
-      } else if( options[i].has_arg == required_argument ) {
-        fprintf(stderr, " ARG\n");
-      } else {
-        fprintf(stderr,"\n");
-      }
+        fprintf(stderr,"\t-%c | --%s ", (char)options[i].val, options[i].name);
+        if( options[i].has_arg == optional_argument ) {
+            fprintf(stderr, " [ ARG ]\n");
+        } else if( options[i].has_arg == required_argument ) {
+            fprintf(stderr, " ARG\n");
+        } else {
+            fprintf(stderr,"\n");
+        }
     }
 }

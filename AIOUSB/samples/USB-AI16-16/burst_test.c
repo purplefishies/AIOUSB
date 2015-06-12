@@ -10,6 +10,7 @@
 #include <aiousb.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <math.h>
 #include <AIODataTypes.h>
@@ -55,7 +56,7 @@ main(int argc, char *argv[] )
     unsigned short *tmp = (unsigned short *)malloc(sizeof(unsigned short)*(options.num_scans+1)*options.num_channels);
     if( !tmp ) {
       fprintf(stderr,"Can't allocate memory for temporary buffer \n");
-      _exit(1);
+      exit(1);
     }
 
     AIOUSB_Init();
@@ -83,7 +84,7 @@ main(int argc, char *argv[] )
     buf = (AIOContinuousBuf *)NewAIOContinuousBufForCounts( options.index, options.num_scans, options.num_channels );
     if( !buf ) {
       fprintf(stderr,"Can't allocate memory for temporary buffer \n");
-      _exit(1);
+      exit(1);
     }
 
     AIOContinuousBufSetDeviceIndex( buf, options.index ); /* Assign the first matching device for this sample */
@@ -91,12 +92,12 @@ main(int argc, char *argv[] )
     if( options.reset ) {
         fprintf(stderr,"Resetting device at index %d\n",buf->DeviceIndex );
         AIOContinuousBufResetDevice( buf );
-        _exit(0);
+        exit(0);
     }
     FILE *fp = fopen(options.outfile,"w");
     if( !fp ) {
       fprintf(stderr,"Unable to open '%s' for writing\n", options.outfile );
-      _exit(1);
+      exit(1);
     }
 
     /**
@@ -129,13 +130,10 @@ main(int argc, char *argv[] )
     
     if ( retval < AIOUSB_SUCCESS ) {
         printf("Error setting up configuration\n");
-        _exit(1);
+        exit(1);
     }
   
-    if( options.block_size < 0 ) { 
-        options.block_size = 1024*64;
-    }
-
+    options.block_size = ( options.block_size < 0 ? 1024*64 : options.block_size );
     if ( options.clock_rate < 1000 ) { 
         AIOContinuousBufSetStreamingBlockSize( buf, 512 );
     } else  {
@@ -163,7 +161,6 @@ main(int argc, char *argv[] )
         clock_gettime( CLOCK_MONOTONIC_RAW, &bar );
 
 
-#if 1
     int scans_remaining;
     int read_count = 0;
     int scans_read = 0;
@@ -198,12 +195,10 @@ main(int argc, char *argv[] )
                 }
             }
         } else {
-            /* sleep(1); */
+            usleep(100);
         }
         
     }
-#endif
-
 
     fclose(fp);
     fprintf(stdout,"Test completed...exiting\n");
