@@ -23,7 +23,6 @@
 #define  _FILE_OFFSET_BITS 64  
 
 
-/* void process_cmd_line( struct opts *, int argc, char *argv[] ); */
 void process_with_single_buf( struct opts *opts, AIOContinuousBuf *buf , FILE *fp, unsigned short *tobuf, unsigned short tobufsize);
 void process_with_looping_buf( struct opts *opts, AIOContinuousBuf *buf , FILE *fp, unsigned short *tobuf, unsigned short tobufsize);
 
@@ -63,23 +62,7 @@ main(int argc, char *argv[] )
     AIOUSB_ListDevices();
 
     AIOUSB_FindDevices( &indices, &num_devices, find_ai_board );
-   
-    if ( num_devices <= 0 ) {
-        fprintf(stderr,"No devices were found\n");
-        exit(1);
-    } else {
-        if ( options.index < 0 ) 
-            options.index = indices[0];
-        fprintf(stderr,"Matching devices found at indices: ");
-        options.index = ( options.index < 0 ? indices[0] : options.index );
-        int i;
-        for (i = 0; i < num_devices - 1; i ++ ) { 
-            fprintf(stderr, "%d",indices[i] );
-            if ( num_devices > 2 )
-                fprintf(stderr,", "); 
-        }
-        fprintf(stderr, " and %d: Using index=%d \n",indices[i], options.index);
-    }
+    aio_list_devices( &options, indices, num_devices ); /* will exit if no devices found */
 
     buf = (AIOContinuousBuf *)NewAIOContinuousBufForCounts( options.index, options.num_scans, options.num_channels );
     if( !buf ) {

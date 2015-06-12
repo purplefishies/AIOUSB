@@ -33,6 +33,8 @@ struct opts {
 struct channel_range *get_channel_range(char *optarg );
 void process_aio_cmd_line( struct opts *options, int argc, char *argv [] );
 void print_aio_usage(int argc, char **argv,  struct option *options);
+void aio_list_devices(struct opts *options, int *indices, int num_devices );
+
 
 extern struct opts AIO_OPTIONS;
 

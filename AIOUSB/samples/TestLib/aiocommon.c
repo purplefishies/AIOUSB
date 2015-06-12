@@ -233,3 +233,26 @@ void print_aio_usage(int argc, char **argv,  struct option *options)
         }
     }
 }
+
+void aio_list_devices(struct opts *options, int *indices, int num_devices )
+{
+    if ( num_devices <= 0 ) {
+        fprintf(stderr,"No devices were found\n");
+        exit(1);
+    } else {
+        if ( options->index < 0 ) 
+            options->index = indices[0];
+        fprintf(stderr,"Matching devices found at indices: ");
+        options->index = ( options->index < 0 ? indices[0] : options->index );
+        int i;
+        for (i = 0; i < num_devices - 1; i ++ ) { 
+            fprintf(stderr, "%d",indices[i] );
+            if ( num_devices > 2 )
+                fprintf(stderr,", "); 
+        }
+        if ( num_devices > 1 ) 
+            fprintf(stderr," and ");
+
+        fprintf(stderr, "%d , Using index=%d \n",indices[i], options->index);
+    }
+}
