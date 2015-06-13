@@ -859,7 +859,7 @@ void *RawCountsWorkFunction( void *object )
         int reqsize = MIN( (unsigned)buf->block_size, (unsigned)AIOFifoWriteSizeRemaining(buf->fifo));
         int usbresult = aiocontbuf_get_data( buf, usb, 0x86, data, reqsize, &bytes, 3000 );
 
-        AIOUSB_DEVEL("libusb_bulk_transfer returned  %d as usbresult, bytes=%d\n", usbresult , (int)bytes);
+        AIOUSB_DEVEL("Requested: %d libusb_bulk_transfer  %d as usbresult, bytes=%d\n", reqsize, usbresult , (int)bytes);
 
         if (  bytes ) {
 

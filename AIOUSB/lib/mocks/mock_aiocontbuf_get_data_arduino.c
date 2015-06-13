@@ -51,6 +51,9 @@ AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf,
     for ( ; scan_count < number_scans; scan_count ++ ) { 
         for ( ; channel_count < AIOContinuousBufNumberChannels(buf); channel_count ++ ) {
             for ( ; os < AIOContinuousBufGetOversample(buf)+1 ; os ++ ) {
+                if ( *bytes >= (datasize) ) {
+                    goto end_aiocontbuf_get_data;
+                }
                 pos = (scan_count *(AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOversample(buf)+1))) + 
                     channel_count * ( AIOContinuousBufGetOversample(buf)+1 ) + os - initial;
 
