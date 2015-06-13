@@ -1,6 +1,7 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
+#include "aiousb.h"
 #include <getopt.h>
 
 struct channel_range {
@@ -26,6 +27,7 @@ struct opts {
     int block_size;
     int with_timing;
     int slow_acquire;
+    char *aiobuf_json;
     struct channel_range **ranges;
 };
 
@@ -33,7 +35,8 @@ struct opts {
 struct channel_range *get_channel_range(char *optarg );
 void process_aio_cmd_line( struct opts *options, int argc, char *argv [] );
 void print_aio_usage(int argc, char **argv,  struct option *options);
-void aio_list_devices(struct opts *options, int *indices, int num_devices );
+AIORET_TYPE aio_list_devices(struct opts *options, int *indices, int num_devices );
+AIORET_TYPE aio_override_aiobuf_settings( AIOContinuousBuf *buf, struct opts *options );
 
 
 extern struct opts AIO_OPTIONS;

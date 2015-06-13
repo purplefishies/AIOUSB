@@ -24,7 +24,6 @@ AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf,
 {
     AIORET_TYPE usbresult;
     uint16_t *counts = (uint16_t*)data;
-    /* int number_scans = datasize / ( AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOversample(buf)+1)*sizeof(uint16_t)); */
     int number_scans = buf->num_scans;
     *bytes = 0;
     int pos;

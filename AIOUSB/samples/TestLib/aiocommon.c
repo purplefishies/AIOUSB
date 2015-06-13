@@ -7,7 +7,10 @@
 #include "aiousb.h"
 
 
-struct opts AIO_OPTIONS = {100000, 16, 0, AD_GAIN_CODE_0_5V , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15, -1, -1, 0, 0, NULL };
+struct opts AIO_OPTIONS = {100000, 16, 0, AD_GAIN_CODE_0_5V , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15, -1, -1, 0, 0, 
+                           "{\"DeviceIndex\":1,\"base_size\":512,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2}",
+                           NULL
+};
 
 /*----------------------------------------------------------------------------*/
 struct channel_range *get_channel_range(char *optarg )
@@ -234,11 +237,12 @@ void print_aio_usage(int argc, char **argv,  struct option *options)
     }
 }
 
-void aio_list_devices(struct opts *options, int *indices, int num_devices )
+AIORET_TYPE aio_list_devices(struct opts *options, int *indices, int num_devices )
 {
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
     if ( num_devices <= 0 ) {
         fprintf(stderr,"No devices were found\n");
-        exit(1);
+        retval = AIOUSB_ERROR_DEVICE_NOT_FOUND;
     } else {
         if ( options->index < 0 ) 
             options->index = indices[0];
@@ -255,4 +259,65 @@ void aio_list_devices(struct opts *options, int *indices, int num_devices )
 
         fprintf(stderr, "%d , Using index=%d \n",indices[i], options->index);
     }
+    return retval;
+}
+
+
+AIORET_TYPE aio_override_aiobuf_settings( AIOContinuousBuf *buf, struct opts *options )
+{
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIO_ASSERT_AIOCONTBUF( buf );
+    AIO_ASSERT( options );
+    if ( options->index != AIOContinuousBufGetDeviceIndex( buf )) {
+        AIOContinuousBufSetDeviceIndex( buf, options->index );
+    }
+
+
+    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), (AIORESULT*)&retval );
+    AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+
+    ADCConfigBlock *config = AIOUSBDeviceGetADCConfigBlock( dev );
+
+
+    if ( options->index != AIOContinuousBufGetDeviceIndex( buf ) ) {
+        retval = AIOContinuousBufSetDeviceIndex( buf, options->index );
+    }
+
+    AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    
+    if ( options->num_oversamples != AIOContinuousBufGetOversample( buf ) ) {
+        retval = AIOContinuousBufSetOversample( buf, options->num_oversamples );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    }
+    
+    if ( options->start_channel != ADCConfigBlockGetStartChannel( config ) || 
+         options->end_channel  != ADCConfigBlockGetEndChannel( config ) ) { 
+        retval = AIOContinuousBufSetStartAndEndChannel( buf, options->start_channel, options->end_channel );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    }
+    if ( options->num_scans != AIOContinuousBufGetNumberScans( buf ) ){
+        retval = AIOContinuousBufSetNumberScans( buf, options->num_scans );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    }
+    if( !options->number_ranges ) {
+        retval = AIOContinuousBufSetAllGainCodeAndDiffMode( buf , options->gain_code , AIOUSB_FALSE );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    } else {
+        for ( int i = 0; i < options->number_ranges ; i ++ ) {
+            retval = AIOContinuousBufSetChannelRange( buf,
+                                                      options->ranges[i]->start_channel,
+                                                      options->ranges[i]->end_channel,
+                                                      options->ranges[i]->gaincode
+                                                      );
+            if ( retval != AIOUSB_SUCCESS ) {
+                fprintf(stderr,"Error setting ChannelRange: %d\n", retval );
+                return retval;
+            }
+        }
+    }
+
+    retval = AIOContinuousBufSaveConfig(buf);
+    AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+
+    return retval;
 }
