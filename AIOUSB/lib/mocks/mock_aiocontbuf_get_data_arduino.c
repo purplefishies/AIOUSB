@@ -95,7 +95,6 @@ AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf,
     }
  end_aiocontbuf_get_data:
     /* printf("Final value=%d\n",*bytes); */
-    /* usbresult = number_scans*AIOContinuousBufNumberChannels(buf)*( AIOContinuousBufGetOversample(buf)+1 )*sizeof(uint16_t); */
     usbresult = *bytes;
     return usbresult;
 }

@@ -133,7 +133,7 @@ AIORET_TYPE AIOContinuousBufGetNumberChannels( AIOContinuousBuf * buf)
 }
 
 /*----------------------------------------------------------------------------*/
- AIORET_TYPE AIOContinuousBufSetBaseSize( AIOContinuousBuf *buf , size_t newbase )
+AIORET_TYPE AIOContinuousBufSetBaseSize( AIOContinuousBuf *buf , size_t newbase )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
     AIORET_TYPE retval  = AIOUSB_SUCCESS;
@@ -149,6 +149,12 @@ AIORET_TYPE AIOContinuousBufGetBaseSize( AIOContinuousBuf *buf  )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
     return buf->base_size;
+}
+
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetBufferSize( AIOContinuousBuf *buf  )
+{
+    AIO_ASSERT_AIOCONTBUF( buf );
+    return AIOFifoGetSize( buf->fifo );
 }
 
 /*----------------------------------------------------------------------------*/
@@ -886,9 +892,7 @@ void *RawCountsWorkFunction( void *object )
              * 1. count >= number we are supposed to read
              * 2. we don't have enough space
              */
-            /* if (  count >= (unsigned)AIOContinuousBuf_BufSizeForCounts(buf) - AIOContinuousBufNumberChannels(buf) ) { */
             if ( count >= (unsigned)AIOContinuousBufGetNumberScans(buf)*AIOContinuousBufGetNumberChannels(buf)*AIOContinuousBufGetUnitSize(buf) ) {
-                printf("Blah!!!\n");
                 AIOContinuousBufLock(buf);
                 buf->status = TERMINATED;
                 AIOContinuousBufUnlock(buf);
@@ -900,7 +904,6 @@ void *RawCountsWorkFunction( void *object )
             if (  usbfail >= usbfail_count  ) {
                 AIOUSB_ERROR("Erroring out. too many usb failures: %d\n", usbfail_count );
                 retval = -(AIORET_TYPE)LIBUSB_RESULT_TO_AIOUSB_RESULT(usbresult);
-                printf("FOOASDASD!!!\n");
                 AIOContinuousBufLock(buf);
                 buf->status = TERMINATED;
                 AIOContinuousBufUnlock(buf);
@@ -908,10 +911,6 @@ void *RawCountsWorkFunction( void *object )
             } 
         }
     }
-
-    /* AIOContinuousBufLock(buf); */
-    /* buf->status = TERMINATED; */
-    /* AIOContinuousBufUnlock(buf); */
     AIOUSB_DEVEL("Stopping\n");
     AIOContinuousBufCleanup( buf );
     free(data);
@@ -1380,11 +1379,6 @@ int continuous_setup( USBDevice *usb , unsigned char *data, unsigned length )
     return usbval;
 }
 
-typedef  enum {
-    AIO_PER_OVERSAMPLE = 1,
-    AIO_PER_CHANNEL,
-    AIO_PER_SCANS
-} AIO_SCAN_TYPE;
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufNumberSamplesAvailable( AIOContinuousBuf *buf )
@@ -1451,7 +1445,7 @@ AIORET_TYPE AIOContinuousBufCallbackStartCallbackAcquisition( AIOContinuousBuf *
     }
     int pos = 0;
     int num_total_samples = AIOContinuousBufGetNumberChannels(buf)*(1+AIOContinuousBufGetOversample(buf))*AIOContinuousBufGetNumberScans(buf);
-    printf("Trying %d total bytes\n", num_total_samples );
+    AIOUSB_DEVEL("Trying %d total bytes\n", num_total_samples );
     while ( buf->status == RUNNING || num_total_samples > 0 ) {
 
         switch ( cmd->channel ) {
@@ -1462,7 +1456,7 @@ AIORET_TYPE AIOContinuousBufCallbackStartCallbackAcquisition( AIOContinuousBuf *
             num_samples_to_read = buf->num_oversamples;
             break;
         case AIO_PER_SCANS:
-            num_samples_to_read = buf->num_oversamples * buf->num_channels;
+            num_samples_to_read = (1+buf->num_oversamples) * buf->num_channels;
             break;
         default:
             num_samples_to_read = 1;
@@ -1481,7 +1475,7 @@ AIORET_TYPE AIOContinuousBufCallbackStartCallbackAcquisition( AIOContinuousBuf *
             callback(tobuf);
         } else {
             AIOUSB_ERROR("Full !\n");
-            sleep(1);
+            usleep(10);
         }
     }
 

@@ -25,6 +25,11 @@ typedef struct ushort_array {
     unsigned size;
 } Ushort_Array;
 
+typedef  enum {
+    AIO_PER_OVERSAMPLE = 1,
+    AIO_PER_CHANNEL,
+    AIO_PER_SCANS
+} AIO_SCAN_TYPE;
 
 
 #ifndef PUBLIC_EXTERN
