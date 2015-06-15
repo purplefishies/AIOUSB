@@ -27,6 +27,7 @@ struct opts {
     int block_size;
     int with_timing;
     int slow_acquire;
+    int buffer_size;
     char *aiobuf_json;
     struct channel_range **ranges;
 };

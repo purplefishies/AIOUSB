@@ -7,7 +7,7 @@
 #include "aiousb.h"
 
 
-struct opts AIO_OPTIONS = {100000, 16, 0, AD_GAIN_CODE_0_5V , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15, -1, -1, 0, 0, 
+struct opts AIO_OPTIONS = {100000, 16, 0, AD_GAIN_CODE_0_5V , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15, -1, -1, 0, 0,0, 
                            "{\"DeviceIndex\":1,\"base_size\":512,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2}",
                            NULL
 };
@@ -82,6 +82,7 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
 
     static struct option long_options[] = {
         {"debug"            , required_argument, 0,  'D'   },
+        {"buffer_size"      , required_argument, 0,  'S'   },
         {"num_scans"        , required_argument, 0,  'N'   },
         {"num_channels"     , required_argument, 0,  'n'   },
         {"num_oversamples"  , required_argument, 0,  'O'   },
@@ -102,7 +103,7 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
     };
     while (1) { 
         struct channel_range *tmp;
-        c = getopt_long(argc, argv, "B:D:JN:R:TVYb:O:c:g:hi:m:n:o:q", long_options, &option_index);
+        c = getopt_long(argc, argv, "B:D:JN:R:S:TVYb:O:c:g:hi:m:n:o:q", long_options, &option_index);
         if( c == -1 )
             break;
         switch (c) {
@@ -115,6 +116,9 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
             options->ranges = (struct channel_range **)realloc( options->ranges , (++options->number_ranges)*sizeof(struct channel_range*)  );
 
             options->ranges[options->number_ranges-1] = tmp;
+            break;
+        case 'S':
+            options->buffer_size = atoi( optarg );
             break;
         case 'B':
             options->block_size = atoi( optarg );
@@ -281,10 +285,19 @@ AIORET_TYPE aio_override_aiobuf_settings( AIOContinuousBuf *buf, struct opts *op
 
     if ( options->index != AIOContinuousBufGetDeviceIndex( buf ) ) {
         retval = AIOContinuousBufSetDeviceIndex( buf, options->index );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
     }
 
-    AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
-    
+    if ( options->buffer_size && options->buffer_size != AIOContinuousBufGetBufferSize(buf)) {
+        int newbase = options->buffer_size / ( AIOContinuousBufGetUnitSize(buf)*AIOContinuousBufGetNumberChannels(buf)*(1+AIOContinuousBufGetOversample(buf)));
+        if ( newbase <= 0 ) {
+            fprintf(stderr,"Error: new buffersize is too small\n");
+        } else {
+            retval = AIOContinuousBufSetBaseSize( buf, newbase );
+            AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+        }
+    }
+
     if ( options->num_oversamples != AIOContinuousBufGetOversample( buf ) ) {
         retval = AIOContinuousBufSetOversample( buf, options->num_oversamples );
         AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
