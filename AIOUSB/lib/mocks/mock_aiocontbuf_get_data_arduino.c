@@ -54,7 +54,7 @@ AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf,
 
     for ( ; scan_count < number_scans && *bytes < datasize ; scan_count ++ ) { 
         for ( ; channel_count < AIOContinuousBufNumberChannels(buf) && *bytes < datasize; channel_count ++ ) {
-
+            for ( ; os <= AIOContinuousBufGetOversample(buf) && *bytes < datasize ; os ++ ) { 
                 pos = (scan_count *(AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOversample(buf)+1))) + 
                     channel_count * ( AIOContinuousBufGetOversample(buf)+1 ) + os - initial;
 
@@ -89,9 +89,9 @@ AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf,
         arduino_counter ++;
         channel_count = 0;
     }
- end_aiocontbuf_get_data:
+
     usleep(usb_delay);
-    /* printf("Final value=%d\n",*bytes); */
+
     usbresult = *bytes;
     return usbresult;
 }
