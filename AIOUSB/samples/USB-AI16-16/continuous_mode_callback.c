@@ -89,7 +89,7 @@ main(int argc, char *argv[] )
     AIOCmd cmd = {.channel = AIO_PER_SCANS};
 
     AIOContinuousBufInitiateCallbackAcquisition(buf); /* Start the acquisition */
-#if 1
+#if __GNUC__
     AIOContinuousBufCallbackStartCallbackAcquisition( buf, &cmd, capture_data );
 #else
     AIOContinuousBufCallbackStartCallbackAcquisition( buf, &cmd, LAMBDA( AIORET_TYPE, (AIOContinuousBuf *buf), {

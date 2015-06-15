@@ -894,7 +894,7 @@ void *RawCountsWorkFunction( void *object )
         AIOUSB_DEVEL("Requested: %d libusb_bulk_transfer  %d as usbresult, bytes=%d\n", reqsize, usbresult , (int)bytes);
 
         if (  bytes ) {
-            bytes = MIN( (int)(AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf)) - count*2,(int)bytes );
+            bytes = MIN( ((int)AIOContinuousBufGetTotalSamplesExpected(buf)*(int)AIOContinuousBufGetUnitSize(buf)) - (int)(count*2),((int)bytes) );
 
             int tmp = AIOContinuousBufPushN( buf, data, bytes / sizeof(unsigned short));
             if ( tmp <= 0 ) { 
