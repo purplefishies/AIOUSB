@@ -11,10 +11,15 @@ namespace AIOUSB
 #endif
 
 #ifndef DONT_USE_COLOR
+/* #define GREEN "\033[0;32m" */
+/* #define RED "\033[0;31m" */
+/* #define MAGENTA "\031[0;35m" */
+/* #define CYAN "\033[0;36m" */
 #define GREEN "\033[0;32m"
-#define RED "\031[0;32m"
-#define MAGENTA "\031[0;35m"
-#define CYAN "\031[0;36m"
+#define RED "\033[0;31m"
+#define MAGENTA "\033[0;35m"
+#define CYAN "\033[0;36m"
+
 #else
 #define GREEN ""
 #define RED ""
@@ -31,11 +36,13 @@ namespace AIOUSB
 #define AIO_RESET_STR "\033[0m"
 
 #undef AIOUSB_LOG
+
 #define AIOUSB_LOG(fmt, ... ) do {                                      \
         pthread_mutex_lock( &message_lock );                            \
-    fprintf( (!outfile ? stdout : outfile ), fmt "\033[0m" ,  ##__VA_ARGS__ ); \
+    fprintf( (!outfile ? stdout : outfile ), fmt AIO_RESET_STR ,  ##__VA_ARGS__ ); \
     pthread_mutex_unlock(&message_lock);                                \
   } while ( 0 )
+
 
 #undef AIOUSB_DEVEL
 #undef AIOUSB_DEBUG
