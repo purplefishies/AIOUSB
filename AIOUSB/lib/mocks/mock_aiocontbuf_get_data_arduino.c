@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include "AIOTypes.h"
 #include "USBDevice.h"
+#include "AIOUSB_Log.h"
 #include "AIOUSB_Core.h"
 
 #include <dlfcn.h>
@@ -34,6 +35,10 @@ AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf,
     double scale_down = 1;
     int noisy_ground = 30;
     int noisy_signal = 10;
+    int usb_delay = 0;
+    if ( getenv("AIO_USB_DELAY") ) {
+        usb_delay = atoi(getenv("AIO_USB_DELAY"));
+    }
     if ( getenv("MOCK_SCALE_DOWN") ) { 
         scale_down = strtod(getenv("MOCK_SCALE_DOWN"),NULL);
     } 
@@ -44,20 +49,15 @@ AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf,
         noisy_signal = atoi(getenv("MOCK_NOISY_SIGNAL"));
     }
 
-
     int initial = (scan_count *(AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOversample(buf)+1))) + 
         channel_count * ( AIOContinuousBufGetOversample(buf)+1 ) + os;
 
-    for ( ; scan_count < number_scans; scan_count ++ ) { 
-        for ( ; channel_count < AIOContinuousBufNumberChannels(buf); channel_count ++ ) {
-            for ( ; os < AIOContinuousBufGetOversample(buf)+1 ; os ++ ) {
-                if ( *bytes >= (datasize) ) {
-                    goto end_aiocontbuf_get_data;
-                }
+    for ( ; scan_count < number_scans && *bytes < datasize ; scan_count ++ ) { 
+        for ( ; channel_count < AIOContinuousBufNumberChannels(buf) && *bytes < datasize; channel_count ++ ) {
+
                 pos = (scan_count *(AIOContinuousBufNumberChannels(buf)*(AIOContinuousBufGetOversample(buf)+1))) + 
                     channel_count * ( AIOContinuousBufGetOversample(buf)+1 ) + os - initial;
 
-                /* counts[pos] =  (uint16_t)(65535 / (AIOContinuousBufNumberChannels(buf)-1)) * channel_count; */
                 int tmpval;
                 if ( channel_count < 3 ) { 
                     if ( channel_count == 0 ) { 
@@ -83,10 +83,6 @@ AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf,
                 }
                 *bytes += 2;
 
-                if ( *bytes >= (datasize) ) { 
-                    os ++;
-                    goto end_aiocontbuf_get_data;
-                }
             }
             os = 0;
         }
@@ -94,6 +90,7 @@ AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf,
         channel_count = 0;
     }
  end_aiocontbuf_get_data:
+    usleep(usb_delay);
     /* printf("Final value=%d\n",*bytes); */
     usbresult = *bytes;
     return usbresult;
