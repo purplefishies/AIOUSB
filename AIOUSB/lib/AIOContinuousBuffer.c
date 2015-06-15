@@ -888,12 +888,13 @@ void *RawCountsWorkFunction( void *object )
 
     while ( buf->status == RUNNING  ) {
         int bytes;
-        int reqsize = (unsigned)buf->block_size;
+        int reqsize = buf->block_size;
         int usbresult = aiocontbuf_get_data( buf, usb, 0x86, data, reqsize, &bytes, 3000 );
 
         AIOUSB_DEVEL("Requested: %d libusb_bulk_transfer  %d as usbresult, bytes=%d\n", reqsize, usbresult , (int)bytes);
 
         if (  bytes ) {
+            bytes = MIN( (int)(AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf)) - count*2,(int)bytes );
 
             int tmp = AIOContinuousBufPushN( buf, data, bytes / sizeof(unsigned short));
             if ( tmp <= 0 ) { 
@@ -904,7 +905,7 @@ void *RawCountsWorkFunction( void *object )
             } else {
                 AIOUSB_DEVEL("Pushed %d, size: %d\n", bytes / 2 , AIOFifoWriteSizeRemainingNumElements(buf->fifo ) );
                 if (  tmp >= 0 ) {
-                    count += tmp;
+                    count += bytes / 2;
                 }                
             }
             buf->bytes_processed += bytes;
@@ -1429,6 +1430,10 @@ AIORET_TYPE AIOContinuousBufReadNSamples( AIOContinuousBuf *buf, void *tobuf, si
 AIORET_TYPE AIOContinuousBufInitiateCallbackAcquisition( AIOContinuousBuf *buf )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    retval = AIOContinuousBufInitConfiguration( buf );
+    AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+
     return AIOContinuousBufCallbackStart(buf);
 }
 
@@ -1453,7 +1458,7 @@ AIORET_TYPE AIOContinuousBufCallbackStartCallbackAcquisition( AIOContinuousBuf *
     int data_read;
     AIORET_TYPE retval = 0;
     int tmp_remaining;
-    int sleep_value = 2;
+    int sleep_value = 200;
 
     AIOUSB_DEVEL("Trying to consume %d bytes\n", (int)AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf) );
 
@@ -1471,14 +1476,14 @@ AIORET_TYPE AIOContinuousBufCallbackStartCallbackAcquisition( AIOContinuousBuf *
         num_samples_to_read = 1;
         break;
     } 
-
+    usleep(sleep_value);
     while ( buf->status == RUNNING || buf->bytes_processed < (unsigned)AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf) || AIOContinuousBufNumberSamplesAvailable(buf) >= (int)num_samples_to_read ) { 
         if ( ( tmp_remaining = AIOContinuousBufNumberSamplesAvailable(buf) ) >= (int)num_samples_to_read ) {
             data_read = callback( buf );
             retval += data_read;
         } else {
-            AIOUSB_ERROR("Buffer underflow error: %d samples available\n",AIOContinuousBufNumberSamplesAvailable(buf));
             usleep(sleep_value);
+            AIOUSB_DEBUG("Buffer underflow error: %d samples available\n",AIOContinuousBufNumberSamplesAvailable(buf));
         }
     }
 

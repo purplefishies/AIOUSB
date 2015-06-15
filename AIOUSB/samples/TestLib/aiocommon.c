@@ -329,6 +329,11 @@ AIORET_TYPE aio_override_aiobuf_settings( AIOContinuousBuf *buf, struct opts *op
         }
     }
 
+    if ( options->clock_rate ) { 
+        retval = AIOContinuousBufSetClock( buf , options->clock_rate );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    }
+
     retval = AIOContinuousBufSaveConfig(buf);
     AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
 
