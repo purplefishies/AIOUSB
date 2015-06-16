@@ -92,10 +92,13 @@ PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetDifferentialMode( ADConfigBlock *config, uns
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetCalMode( const ADConfigBlock *config ) ACCES_DEPRECATED("Please use ADCConfigBlockGetCalMode");
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetCalMode( ADConfigBlock *config, unsigned calMode ) ACCES_DEPRECATED("Please use ADCConfigBlockSetCalMode");
 
- PUBLIC_EXTERN AIORESULT AIOUSB_ADC_ExternalCal( unsigned long DeviceIndex, const double points[], int numPoints, unsigned short returnCalTable[], const char *saveFileName );
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetOversample(ADConfigBlock *config, unsigned overSample) ACCES_DEPRECATED("Please use ADCConfigBlockSetOversample");
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetOversample(ADConfigBlock *config ) ACCES_DEPRECATED("Please use ADCConfigBlockGetOversample");
+
+PUBLIC_EXTERN AIORESULT AIOUSB_ADC_ExternalCal( unsigned long DeviceIndex, const double points[], int numPoints, unsigned short returnCalTable[], const char *saveFileName );
 
 PUBLIC_EXTERN unsigned AIOUSB_GetTriggerMode( const ADConfigBlock *config ) ACCES_DEPRECATED("Please use ADCConfigBlockGetTriggerMode");
-PUBLIC_EXTERN void AIOUSB_SetTriggerMode( ADConfigBlock *config, unsigned triggerMode ) ACCES_DEPRECATED("Please use ADCConfigBlockGetTriggerMode");
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetTriggerMode( ADConfigBlock *config, unsigned triggerMode ) ACCES_DEPRECATED("Please use ADCConfigBlockGetTriggerMode");
 PUBLIC_EXTERN unsigned AIOUSB_GetStartChannel( const ADConfigBlock *config );
 PUBLIC_EXTERN unsigned AIOUSB_GetEndChannel( const ADConfigBlock *config );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetScanRange( ADConfigBlock *config, unsigned startChannel, unsigned endChannel );

@@ -1214,7 +1214,7 @@ AIORESULT ADC_SetOversample(
     if ( result != AIOUSB_SUCCESS) 
         goto out_ADC_SetOversample;
 
-    AIOUSB_SetOversample(&deviceDesc->cachedConfigBlock, Oversample);
+    ADCConfigBlockSetOversample(&deviceDesc->cachedConfigBlock, Oversample);
     result = WriteConfigBlock(DeviceIndex);
 
 out_ADC_SetOversample:
@@ -1236,7 +1236,7 @@ unsigned ADC_GetOversample( unsigned long DeviceIndex )
     
     ReadConfigBlock(DeviceIndex, AIOUSB_FALSE);
 
-    result = (unsigned long)AIOUSB_GetOversample(&deviceDesc->cachedConfigBlock );
+    result = (unsigned long)ADCConfigBlockGetOversample(&deviceDesc->cachedConfigBlock );
 
    return result;
 }
@@ -3055,7 +3055,7 @@ AIORET_TYPE AIOUSB_SetCalMode(ADConfigBlock *config, unsigned calMode)
  */
 unsigned AIOUSB_GetTriggerMode(const ADConfigBlock *config)
 {
-    assert(config != 0);
+    AIO_ASSERT( config );
     unsigned triggerMode = 0;                               // return reasonable value on error
     if (
         config != 0 &&
@@ -3067,20 +3067,22 @@ unsigned AIOUSB_GetTriggerMode(const ADConfigBlock *config)
     return triggerMode;
 }
 /*----------------------------------------------------------------------------*/
-void AIOUSB_SetTriggerMode(ADConfigBlock *config, unsigned triggerMode)
+AIORET_TYPE AIOUSB_SetTriggerMode(ADConfigBlock *config, unsigned triggerMode)
 {
-    assert(config != 0);
+    AIO_ASSERT(config);
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
     if ( config->device != 0      &&
         config->size   != 0      &&
         (triggerMode & ~AD_TRIGGER_VALID_MASK) == 0
         ) {
         config->registers[ AD_CONFIG_TRIG_COUNT ] = ( unsigned char )triggerMode;
     }
+    return retval;
 }
 /*----------------------------------------------------------------------------*/
 unsigned AIOUSB_GetStartChannel(const ADConfigBlock *config)
 {
-    assert(config != 0);
+    AIO_ASSERT(config != 0);
     unsigned startChannel = 0;                              // return reasonable value on error
     if (
         config != 0 &&
@@ -3098,7 +3100,7 @@ unsigned AIOUSB_GetStartChannel(const ADConfigBlock *config)
 /*----------------------------------------------------------------------------*/
 unsigned AIOUSB_GetEndChannel(const ADConfigBlock *config)
 {
-    assert(config != 0);
+    AIO_ASSERT(config);
     unsigned endChannel = 0;                                // return reasonable value on error
     if (
         config != 0 &&
@@ -3153,17 +3155,18 @@ AIORET_TYPE AIOUSB_SetScanRange(ADConfigBlock *config, unsigned startChannel, un
 }
 
 /*----------------------------------------------------------------------------*/
-unsigned AIOUSB_GetOversample(const ADConfigBlock *config)
+AIORET_TYPE AIOUSB_GetOversample(ADConfigBlock *config)
 {
-    assert(config != 0);
+    AIO_ASSERT(config);
     return config->registers[ AD_CONFIG_OVERSAMPLE ];
 }
 
 /*----------------------------------------------------------------------------*/
-void AIOUSB_SetOversample(ADConfigBlock *config, unsigned overSample)
+AIORET_TYPE AIOUSB_SetOversample(ADConfigBlock *config, unsigned overSample)
 {
-    assert(config != 0);
+    AIO_ASSERT( config );
     config->registers[ AD_CONFIG_OVERSAMPLE ] = ( unsigned char )overSample;
+    return AIOUSB_SUCCESS;
 }
 
 /*----------------------------------------------------------------------------*/

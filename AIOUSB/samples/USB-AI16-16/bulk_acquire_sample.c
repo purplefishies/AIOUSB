@@ -143,7 +143,7 @@ int main( int argc, char **argv ) {
     ADCConfigBlockSetCalMode( &configBlock, AD_CAL_MODE_NORMAL );
     ADCConfigBlockSetTriggerMode( &configBlock, 0 );
     AIOUSB_SetScanRange( &configBlock, 2, 13 );
-    AIOUSB_SetOversample( &configBlock, 0 );
+    ADCConfigBlockSetOversample( &configBlock, 0 );
     result = ADC_SetConfig( deviceIndex, configBlock.registers, &configBlock.size );
     if( result != AIOUSB_SUCCESS ) {
         printf( "Error '%s' setting A/D configuration\n" , AIOUSB_GetResultCodeAsString( result ) );

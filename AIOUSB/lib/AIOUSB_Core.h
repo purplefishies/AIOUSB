@@ -108,9 +108,6 @@ PUBLIC_EXTERN struct libusb_device_handle *AIOUSB_GetDeviceHandle( unsigned long
 PUBLIC_EXTERN struct libusb_device_handle *AIOUSB_GetUSBHandle(DeviceDescriptor *deviceDesc );
 
 
-PUBLIC_EXTERN unsigned AIOUSB_GetOversample( const ADConfigBlock *config );
-PUBLIC_EXTERN void AIOUSB_SetOversample( ADConfigBlock *config, unsigned overSample );
-
 
 PUBLIC_EXTERN int AIOUSB_BulkTransfer( struct libusb_device_handle *dev_handle, unsigned char endpoint, unsigned char *data, int length, int *transferred, unsigned int timeout ); 
 
