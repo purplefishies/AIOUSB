@@ -159,7 +159,6 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufNumberSamplesAvailable( AIOContinuousB
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetNumberSamplesPerScan( AIOContinuousBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetTotalSamplesExpected(  AIOContinuousBuf *buf );
 
-PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetRemainingWriteSize( AIOContinuousBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetUnitSize( AIOContinuousBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufReset( AIOContinuousBuf *buf );
 

@@ -151,7 +151,7 @@ AIORET_TYPE AIOContinuousBufGetBaseSize( AIOContinuousBuf *buf  )
     return buf->base_size;
 }
 
-PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetBufferSize( AIOContinuousBuf *buf  )
+AIORET_TYPE AIOContinuousBufGetBufferSize( AIOContinuousBuf *buf  )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
     return AIOFifoGetSize( buf->fifo );
@@ -274,6 +274,7 @@ AIORET_TYPE AIOContinuousBuf_SendPreConfig( AIOContinuousBuf *buf ) {
 }
 AIORET_TYPE AIOContinuousBufSendPreConfig( AIOContinuousBuf *buf )
 {
+    AIO_ASSERT_AIOCONTBUF( buf );
     AIORET_TYPE retval = AIOUSB_SUCCESS;
 
     unsigned wLength = 0x1, wIndex = 0x0, wValue = 0x0, bRequest = AUR_PROBE_CALFEATURE;
@@ -319,7 +320,6 @@ AIORET_TYPE DeleteAIOContinuousBuf( AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBufSetCountsBuffer( AIOContinuousBuf *buf )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
-    AIO_ASSERT_AIOCONTBUF( buf );
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     return retval;
 }
@@ -335,8 +335,8 @@ AIORET_TYPE AIOContinuousBufSetVoltsBuffer( AIOContinuousBuf *buf )
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufSetStreamingBlockSize( AIOContinuousBuf *buf, unsigned blksize)
 {
-    if (!buf )
-        return -AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER;
+    AIO_ASSERT_AIOCONTBUF( buf );
+
     if ( blksize < 512 || blksize > 1024*64 ) { 
         buf->block_size = 512;
     } else {
@@ -386,33 +386,6 @@ AIORET_TYPE AIOContinuousBuf_BufSizeForCounts( AIOContinuousBuf * buf)
 {
     AIO_ASSERT_AIOCONTBUF( buf );
     return AIOFifoGetSize( buf->fifo ) + AIOFifoGetRefSize(buf->fifo);
-}
-
-/*----------------------------------------------------------------------------*/
-/**
- * @internal This is an internal function, don't use it externally as it 
- * will confuse you.
- *
- */
-static unsigned write_size( AIOContinuousBuf *buf ) 
-{
-    unsigned retval = 0;
-    unsigned read, write;
-    read = (unsigned )AIOFifoReadPosition(buf->fifo);
-    write = (unsigned)AIOFifoWritePosition(buf->fifo);
-    if (  read > write ) {
-        retval =  read - write;
-    } else {
-        return AIOFifoGetSize(buf->fifo) - (AIOFifoWritePosition (buf) - AIOFifoReadPosition (buf));
-    }
-    return retval;
-}
-
-/*----------------------------------------------------------------------------*/
-AIORET_TYPE AIOContinuousBufGetRemainingWriteSize( AIOContinuousBuf *buf )
-{
-    AIO_ASSERT_AIOCONTBUF( buf );
-    return write_size(buf);
 }
 
 /*----------------------------------------------------------------------------*/
