@@ -222,7 +222,7 @@ unsigned long WriteConfigBlock(unsigned long DeviceIndex)
 
     configBlock = AIOUSB_GetConfigBlock( AIOUSB_GetDevice( DeviceIndex ));
     if (!configBlock ) {
-        result = AIOUSB_ERROR_INVALID_ADCONFIG_SETTING;
+        result = AIOUSB_ERROR_INVALID_ADCCONFIG_SETTING;
         goto out_WriteConfigBlock;
     }
 
@@ -579,38 +579,38 @@ PRIVATE unsigned long AIOUSB_ArrayCountsToVolts(
  * @param counts
  * @return
  */
-PRIVATE unsigned long AIOUSB_ArrayVoltsToCounts(
-                                                unsigned long DeviceIndex,
-                                                int startChannel,
-                                                int numChannels,
-                                                const double volts[],
-                                                unsigned short counts[]
-                                                )
+PRIVATE AIORET_TYPE AIOUSB_ArrayVoltsToCounts(
+                                              unsigned long DeviceIndex,
+                                              int startChannel,
+                                              int numChannels,
+                                              const double volts[],
+                                              unsigned short counts[]
+                                              )
 {
-    AIORESULT result = AIOUSB_SUCCESS;
-    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
+    AIO_ASSERT( volts );
+    AIO_ASSERT( counts );
+    AIO_ASSERT( startChannel >= 0 );
+    AIO_ASSERT( numChannels >= 0 );
 
-    if ( startChannel < 0 || numChannels < 0 || startChannel + numChannels > ( int )deviceDesc->ADCMUXChannels ||
-        volts == NULL || counts == NULL ) 
-        return AIOUSB_ERROR_INVALID_PARAMETER;
 
-    result = ReadConfigBlock(DeviceIndex, AIOUSB_FALSE);
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, (AIORESULT*)&retval );
+    AIO_ERROR_VALID_DATA( retval , retval == AIOUSB_SUCCESS );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_MUX_SETTING, (int)deviceDesc->ADCMUXChannels >= startChannel + numChannels );
 
-    if (result != AIOUSB_SUCCESS)
-        return result;
+
+    retval = ReadConfigBlock(DeviceIndex, AIOUSB_FALSE);
+    AIO_ERROR_VALID_DATA( retval , retval == AIOUSB_SUCCESS );
 
     int channel;
     for(channel = 0; channel < numChannels; channel++) {
         int gainCode = AIOUSB_GetGainCode(&deviceDesc->cachedConfigBlock, startChannel + channel);
-        assert(gainCode >= FIRST_ENUM(ADGainCode) &&
-               gainCode <= LAST_ENUM(ADGainCode));
+
+        AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_GAINCODE, VALID_ENUM( ADGainCode, gainCode )  );
         
-        const struct ADRange *const range = &adRanges[ gainCode ];
-        int rawCounts = round(
-                              ( double )AI_16_MAX_COUNTS
-                              * (volts[ channel ] - range->minVolts)
-                              / range->range
-                              );
+        struct ADRange * range = &adRanges[ gainCode ];
+        int rawCounts = round(( double )AI_16_MAX_COUNTS * (volts[ channel ] - range->minVolts)/ range->range );
+
         if (rawCounts < 0)
             rawCounts = 0;
         else if (rawCounts > AI_16_MAX_COUNTS)
@@ -618,7 +618,7 @@ PRIVATE unsigned long AIOUSB_ArrayVoltsToCounts(
         counts[ channel ] = ( unsigned short )rawCounts;
     }
 
-    return result;
+    return retval;
 }
 
 /*------------------------------------------------------------------------*/
@@ -956,17 +956,17 @@ unsigned long ADC_SetConfig(
      }
      
      if ( !adcblock_valid_channel_settings( &configBlock , deviceDesc->ADCMUXChannels )  ) {
-          result = AIOUSB_ERROR_INVALID_ADCONFIG_CHANNEL_SETTING;
+          result = AIOUSB_ERROR_INVALID_ADCCONFIG_CHANNEL_SETTING;
           goto out_ADC_SetConfig;
      }
 
      if ( configBlock.registers[ AD_CONFIG_CAL_MODE ] >= 8 ) { 
-          result = AIOUSB_ERROR_INVALID_ADCONFIG_CAL_SETTING;
+          result = AIOUSB_ERROR_INVALID_ADCCONFIG_CAL_SETTING;
           goto out_ADC_SetConfig;
      }
 
      if ( !adcblock_valid_trigger_settings( &configBlock ) )  {
-          result = AIOUSB_ERROR_INVALID_ADCONFIG_SETTING;
+          result = AIOUSB_ERROR_INVALID_ADCCONFIG_SETTING;
           goto out_ADC_SetConfig;  
      }
 
@@ -1024,22 +1024,22 @@ unsigned long ADC_CopyConfig(
      }
 
      if ( ! adcblock_valid_size( config ) ) {
-          result = AIOUSB_ERROR_INVALID_ADCONFIG_CHANNEL_SETTING;
+          result = AIOUSB_ERROR_INVALID_ADCCONFIG_CHANNEL_SETTING;
           goto out_ADC_CopyConfig;
      }
      
      if ( !adcblock_valid_channel_settings( config  , deviceDesc->ADCMUXChannels )  ) {
-          result = AIOUSB_ERROR_INVALID_ADCONFIG_CHANNEL_SETTING;
+          result = AIOUSB_ERROR_INVALID_ADCCONFIG_CHANNEL_SETTING;
           goto out_ADC_CopyConfig;
      }
 
      if ( !VALID_ENUM( ADCalMode , config->registers[ AD_CONFIG_CAL_MODE ] ) ) {
-          result = AIOUSB_ERROR_INVALID_ADCONFIG_CAL_SETTING;
+          result = AIOUSB_ERROR_INVALID_ADCCONFIG_CAL_SETTING;
           goto out_ADC_CopyConfig;
      }
 
      if ( !adcblock_valid_trigger_settings( config ) )  {
-          result = AIOUSB_ERROR_INVALID_ADCONFIG_SETTING;
+          result = AIOUSB_ERROR_INVALID_ADCCONFIG_SETTING;
           goto out_ADC_CopyConfig;  
      }
 
@@ -2912,8 +2912,8 @@ AIORET_TYPE AIOUSB_SetAllGainCodeAndDiffMode(ADConfigBlock *config, unsigned gai
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     AIO_ASSERT( config );
-    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCONFIG_SETTING, config->device );
-    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCONFIG_SETTING, config->size );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_SETTING, config->device );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_SETTING, config->size );
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_GAINCODE, gainCode <= FIRST_ENUM( ADGainCode) && gainCode <= LAST_ENUM(ADGainCode) );
 
     if (differentialMode)
