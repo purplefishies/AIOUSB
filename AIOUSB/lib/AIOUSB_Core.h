@@ -119,10 +119,6 @@ PUBLIC_EXTERN int AIOUSB_BulkTransfer( struct libusb_device_handle *dev_handle, 
 AIORESULT AIOUSB_InitConfigBlock(ADConfigBlock *config, unsigned long DeviceIndex, AIOUSB_BOOL defaults);
 
 
-PUBLIC_EXTERN AIORESULT AIOUSB_ArrayCountsToVolts( unsigned long DeviceIndex, int startChannel, int numChannels, const unsigned short counts[], double volts[] );
-
-PUBLIC_EXTERN AIORESULT AIOUSB_ArrayVoltsToCounts( unsigned long DeviceIndex, int startChannel, int numChannels, const double volts[], unsigned short counts[] ); 
-
 PUBLIC_EXTERN AIORESULT GenericVendorRead( unsigned long deviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, void *bufData , unsigned long *bytes_read );
 
 PUBLIC_EXTERN AIORESULT GenericVendorWrite( unsigned long DeviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, void *bufData, unsigned long *bytes_write );

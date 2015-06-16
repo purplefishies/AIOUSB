@@ -662,25 +662,6 @@ RETURN_AIOUSB_Validate_Device:
     return result;
 }
 
-/*------------------------------------------------------------------------*/
-/**
- * @param DeviceIndex
- * @param channel
- * @param volts
- * @return
- */
-unsigned short AIOUSB_VoltsToCounts(
-    unsigned long DeviceIndex,
-    unsigned channel,
-    double volts
-    )
-{
-    unsigned short counts;
-
-    if(AIOUSB_ArrayVoltsToCounts(DeviceIndex, channel, 1, &volts, &counts) != AIOUSB_SUCCESS)
-        counts = 0;
-    return counts;
-}
 
 /*------------------------------------------------------------------------*/
 /**
