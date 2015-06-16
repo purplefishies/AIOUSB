@@ -864,16 +864,14 @@ unsigned long ADC_GetConfig(
         goto out_ADC_GetConfig;
     }
 
-
     result = ReadConfigBlock(DeviceIndex, AIOUSB_TRUE);
-    if (result == AIOUSB_SUCCESS) {
-          assert(deviceDesc->cachedConfigBlock.size > 0 &&
-                 deviceDesc->cachedConfigBlock.size <= AD_MAX_CONFIG_REGISTERS);
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_SIZE, deviceDesc->cachedConfigBlock.size > 0 );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_SIZE, deviceDesc->cachedConfigBlock.size <= AD_MAX_CONFIG_REGISTERS );
 
-          memcpy(ConfigBuf, deviceDesc->cachedConfigBlock.registers, deviceDesc->cachedConfigBlock.size);
-          *ConfigBufSize = deviceDesc->cachedConfigBlock.size;
 
-      }
+    memcpy(ConfigBuf, deviceDesc->cachedConfigBlock.registers, deviceDesc->cachedConfigBlock.size);
+    *ConfigBufSize = deviceDesc->cachedConfigBlock.size;
 
 out_ADC_GetConfig:
     return result;
@@ -3005,29 +3003,30 @@ AIORET_TYPE AIOUSB_IsDifferentialMode(const ADConfigBlock *config, unsigned chan
  * @param channel
  * @param differentialMode
  */
-void AIOUSB_SetDifferentialMode(ADConfigBlock *config, unsigned channel, AIOUSB_BOOL differentialMode)
+AIORET_TYPE AIOUSB_SetDifferentialMode(ADConfigBlock *config, unsigned channel, AIOUSB_BOOL differentialMode)
 {
-    assert(config != 0);
-    if (
-        config != 0 &&
-        config->device != 0 &&
-        config->size != 0
-        ) {
-          const AIOUSBDevice *const deviceDesc = ( DeviceDescriptor* )config->device;
-          if (
-              channel < AD_MAX_CHANNELS &&
-              channel < deviceDesc->ADCMUXChannels
-              ) {
-                assert(deviceDesc->ADCChannelsPerGroup != 0);
-                const int reg = AD_CONFIG_GAIN_CODE + channel / deviceDesc->ADCChannelsPerGroup;
-                assert(reg < AD_NUM_GAIN_CODE_REGISTERS);
-                if (differentialMode)
-                    config->registers[ reg ] |= ( unsigned char )AD_DIFFERENTIAL_MODE;
-                else
-                    config->registers[ reg ] &= ~( unsigned char )AD_DIFFERENTIAL_MODE;
-            }
-      }
+    AIO_ASSERT( config );
+    AIO_ERROR_VALID_DATA(AIOUSB_ERROR_INVALID_ADCCONFIG_DEVICE, config->device );
+    AIO_ERROR_VALID_DATA(AIOUSB_ERROR_INVALID_ADCCONFIG_SIZE, config->size );
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    
+    AIOUSBDevice *deviceDesc = ( DeviceDescriptor* )config->device;
+
+    if ( channel < AD_MAX_CHANNELS && channel < deviceDesc->ADCMUXChannels ) {
+
+        AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_CHANNEL_SETTING, deviceDesc->ADCChannelsPerGroup != 0 );
+        int reg = AD_CONFIG_GAIN_CODE + channel / deviceDesc->ADCChannelsPerGroup;
+        AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING, reg < AD_NUM_GAIN_CODE_REGISTERS );
+
+        if (differentialMode)
+            config->registers[ reg ] |= ( unsigned char )AD_DIFFERENTIAL_MODE;
+        else
+            config->registers[ reg ] &= ~( unsigned char )AD_DIFFERENTIAL_MODE;
+    }
+    return retval; 
 }
+
+
 /*----------------------------------------------------------------------------*/
 unsigned AIOUSB_GetCalMode(const ADConfigBlock *config)
 {

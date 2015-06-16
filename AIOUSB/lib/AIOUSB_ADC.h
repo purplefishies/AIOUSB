@@ -86,7 +86,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetAllGainCodeAndDiffMode( ADConfigBlock *confi
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetGainCode( const ADConfigBlock *config, unsigned channel );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetGainCode( ADConfigBlock *config, unsigned channel, unsigned gainCode );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_IsDifferentialMode( const ADConfigBlock *config, unsigned channel );
-PUBLIC_EXTERN void AIOUSB_SetDifferentialMode( ADConfigBlock *config, unsigned channel, AIOUSB_BOOL differentialMode );
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetDifferentialMode( ADConfigBlock *config, unsigned channel, AIOUSB_BOOL differentialMode );
 PUBLIC_EXTERN unsigned AIOUSB_GetCalMode( const ADConfigBlock *config );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetCalMode( ADConfigBlock *config, unsigned calMode );
 
