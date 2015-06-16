@@ -94,8 +94,8 @@ PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetCalMode( ADConfigBlock *config, unsigned cal
 
  PUBLIC_EXTERN AIORESULT AIOUSB_ADC_ExternalCal( unsigned long DeviceIndex, const double points[], int numPoints, unsigned short returnCalTable[], const char *saveFileName );
 
-PUBLIC_EXTERN unsigned AIOUSB_GetTriggerMode( const ADConfigBlock *config );
-PUBLIC_EXTERN void AIOUSB_SetTriggerMode( ADConfigBlock *config, unsigned triggerMode );
+PUBLIC_EXTERN unsigned AIOUSB_GetTriggerMode( const ADConfigBlock *config ) ACCES_DEPRECATED("Please use ADCConfigBlockGetTriggerMode");
+PUBLIC_EXTERN void AIOUSB_SetTriggerMode( ADConfigBlock *config, unsigned triggerMode ) ACCES_DEPRECATED("Please use ADCConfigBlockGetTriggerMode");
 PUBLIC_EXTERN unsigned AIOUSB_GetStartChannel( const ADConfigBlock *config );
 PUBLIC_EXTERN unsigned AIOUSB_GetEndChannel( const ADConfigBlock *config );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetScanRange( ADConfigBlock *config, unsigned startChannel, unsigned endChannel );

@@ -1161,36 +1161,28 @@ out_adc_range1:
  * @return
  */
 unsigned long ADC_ADMode(
-    unsigned long DeviceIndex,
-    unsigned char TriggerMode,
-    unsigned char CalMode
-    )
+                         unsigned long DeviceIndex,
+                         unsigned char TriggerMode,
+                         unsigned char CalMode
+                         )
 {
     AIORESULT result = AIOUSB_SUCCESS;
-    if ( (TriggerMode & ~AD_TRIGGER_VALID_MASK) != 0 || 
-         (
-          CalMode != AD_CAL_MODE_NORMAL &&
-          CalMode != AD_CAL_MODE_GROUND &&
-          CalMode != AD_CAL_MODE_REFERENCE
-          )
-         )
-        return AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_TRIGGER_SETTING, (TriggerMode & ~AD_TRIGGER_VALID_MASK) == 0 );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_CAL_SETTING, VALID_ENUM(ADCalMode , CalMode ));
     
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
-    if ( result != AIOUSB_SUCCESS )
-        return result;
-    
-    if (deviceDesc->bADCStream == AIOUSB_FALSE)
-        return AIOUSB_ERROR_NOT_SUPPORTED;
+
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_SUPPORTED, deviceDesc->bADCStream == AIOUSB_TRUE );
 
     result = ReadConfigBlock(DeviceIndex, AIOUSB_FALSE);
-    if (result == AIOUSB_SUCCESS) {
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
         
-        ADCConfigBlockSetCalMode(&deviceDesc->cachedConfigBlock, (ADCalMode)CalMode);
-        AIOUSB_SetTriggerMode(&deviceDesc->cachedConfigBlock, TriggerMode);
+    ADCConfigBlockSetCalMode(&deviceDesc->cachedConfigBlock, (ADCalMode)CalMode);
+    ADCConfigBlockSetTriggerMode(&deviceDesc->cachedConfigBlock, TriggerMode);
+    
+    result = WriteConfigBlock(DeviceIndex);
 
-        result = WriteConfigBlock(DeviceIndex);
-    }
 
     return result;
 }
