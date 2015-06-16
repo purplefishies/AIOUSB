@@ -271,8 +271,8 @@ AIORESULT ADC_Acquire_Reference_Counts(
         return result;
 
     for(reading = 0; reading <= 1; reading++) {
-          AIOUSB_SetCalMode(&deviceDesc->cachedConfigBlock, (reading == 0) ? AD_CAL_MODE_GROUND : AD_CAL_MODE_REFERENCE);
 
+        ADCConfigBlockSetCalMode(&deviceDesc->cachedConfigBlock, (reading == 0) ? AD_CAL_MODE_GROUND : AD_CAL_MODE_REFERENCE );
           result = WriteConfigBlock(DeviceIndex);
 
           if (result == AIOUSB_SUCCESS) {
@@ -1094,8 +1094,7 @@ unsigned long ADC_RangeAll(
         
         for(channel = 0; channel < deviceDesc->ADCChannels; channel++) {
             AIOUSB_SetGainCode(&deviceDesc->cachedConfigBlock, channel, pGainCodes[ channel ]);
-            AIOUSB_SetDifferentialMode(&deviceDesc->cachedConfigBlock, channel,
-                                       (bSingleEnded == AIOUSB_FALSE) ? AIOUSB_TRUE : AIOUSB_FALSE);
+            ADCConfigBlockSetDifferentialMode( &deviceDesc->cachedConfigBlock, channel,(bSingleEnded == AIOUSB_FALSE) ? AIOUSB_TRUE : AIOUSB_FALSE);
         }
 
         result = WriteConfigBlock(DeviceIndex);
@@ -1143,7 +1142,7 @@ unsigned long ADC_Range1(unsigned long DeviceIndex,
     if (result == AIOUSB_SUCCESS) {
 
           AIOUSB_SetGainCode(&deviceDesc->cachedConfigBlock, ADChannel, GainCode);
-          AIOUSB_SetDifferentialMode(&deviceDesc->cachedConfigBlock, ADChannel,
+          ADCConfigBlockSetDifferentialMode(&deviceDesc->cachedConfigBlock, ADChannel,
                                      (bSingleEnded == AIOUSB_FALSE) ? AIOUSB_TRUE : AIOUSB_FALSE);
 
           result = WriteConfigBlock(DeviceIndex);
@@ -1187,7 +1186,7 @@ unsigned long ADC_ADMode(
     result = ReadConfigBlock(DeviceIndex, AIOUSB_FALSE);
     if (result == AIOUSB_SUCCESS) {
         
-        AIOUSB_SetCalMode(&deviceDesc->cachedConfigBlock, CalMode);
+        ADCConfigBlockSetCalMode(&deviceDesc->cachedConfigBlock, (ADCalMode)CalMode);
         AIOUSB_SetTriggerMode(&deviceDesc->cachedConfigBlock, TriggerMode);
 
         result = WriteConfigBlock(DeviceIndex);
@@ -3028,23 +3027,17 @@ AIORET_TYPE AIOUSB_SetDifferentialMode(ADConfigBlock *config, unsigned channel, 
 
 
 /*----------------------------------------------------------------------------*/
-unsigned AIOUSB_GetCalMode(const ADConfigBlock *config)
+AIORET_TYPE AIOUSB_GetCalMode(const ADConfigBlock *config)
 {
-    assert(config != 0);
-    unsigned calMode = AD_CAL_MODE_NORMAL;            // return reasonable value on error
-    if (
-        config != 0 &&
-        config->device != 0 &&
-        config->size != 0 &&
-        (
-            config->registers[ AD_CONFIG_CAL_MODE ] == AD_CAL_MODE_NORMAL ||
-            config->registers[ AD_CONFIG_CAL_MODE ] == AD_CAL_MODE_GROUND ||
-            config->registers[ AD_CONFIG_CAL_MODE ] == AD_CAL_MODE_REFERENCE
-        )
-        ) {
-          calMode = config->registers[ AD_CONFIG_CAL_MODE ];
-      }
-    return calMode;
+    AIO_ASSERT( config );
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_DEVICE , config->device );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_SIZE , config->size );
+    
+    retval = config->registers[ AD_CONFIG_CAL_MODE ];
+
+    return retval;
 }
 /*----------------------------------------------------------------------------*/
 /**
