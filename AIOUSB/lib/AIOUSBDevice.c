@@ -77,9 +77,7 @@ void DeleteAIOUSBDevice( AIOUSBDevice *dev)
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOUSBDeviceInitializeWithProductID( AIOUSBDevice *device , ProductIDS productID )
 {
-    assert(device);
-    if ( !device ) 
-        return -AIOUSB_ERROR_INVALID_DEVICE;
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_DEVICE, device );
 
     device->usb_device    = NULL;
     device->ProductID     = productID;
@@ -95,31 +93,26 @@ AIORET_TYPE AIOUSBDeviceInitializeWithProductID( AIOUSBDevice *device , ProductI
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOUSBDeviceSetTimeout( AIOUSBDevice *device, unsigned timeout )
 {
-    assert(device);
-    if (!device )
-        return -AIOUSB_ERROR_INVALID_DEVICE;
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_DEVICE, device );
+
     device->commTimeout = timeout;
     return AIOUSB_SUCCESS;
 }
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOUSBDeviceGetTimeout( AIOUSBDevice *device )
 {
-    assert(device);
-    if (!device )
-        return -AIOUSB_ERROR_INVALID_DEVICE;
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_DEVICE, device );
+
     return device->commTimeout;
 }
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOUSBDeviceCopyADCConfigBlock( AIOUSBDevice *dev, ADCConfigBlock *newone )
 {
-    assert( dev && newone );
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_DEVICE, dev );
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_DEVICE, newone );
+   
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    if ( !dev  ) 
-        return AIOUSB_ERROR_INVALID_DEVICE;
-
-    if ( !newone ) 
-        return AIOUSB_ERROR_INVALID_ADCCONFIG;
 
     retval = ADCConfigBlockCopy( AIOUSBDeviceGetADCConfigBlock( dev ), newone );
     return retval;
@@ -196,14 +189,11 @@ AIORET_TYPE AIOUSBDeviceSetTesting( AIOUSBDevice *dev, AIOUSB_BOOL testing )
 AIORET_TYPE AIOUSBDeviceGetStreamingBlockSize( AIOUSBDevice *dev )
 {
     AIORET_TYPE result = AIOUSB_SUCCESS;
-    assert( dev );
-    if (!dev )
-        return -AIOUSB_ERROR_INVALID_DEVICE_SETTING;
-    
-    if (dev->bADCStream || dev->bDIOStream)
-        result = dev->StreamingBlockSize;
-    else
-        result = -AIOUSB_ERROR_NOT_SUPPORTED;
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_DEVICE_SETTING, dev );
+
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_SUPPORTED, dev->bADCStream || dev->bDIOStream );
+
+    result = dev->StreamingBlockSize;
 
     return result;
 }

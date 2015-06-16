@@ -250,7 +250,7 @@ void TestCaseSetup::doBulkConfigBlock()
     ADCConfigBlockSetCalMode( &configBlock, AD_CAL_MODE_NORMAL );
     ADCConfigBlockSetTriggerMode( &configBlock, 0 );
     AIOUSB_SetScanRange( &configBlock, 2, 13 );
-    AIOUSB_SetOversample( &configBlock, 0 );
+    ADCConfigBlockSetOversample( &configBlock, 0 );
     int result = ADC_SetConfig( DeviceIndex, configBlock.registers, &configBlock.size );
     if( result != AIOUSB_SUCCESS  ) {
         std::stringstream er;

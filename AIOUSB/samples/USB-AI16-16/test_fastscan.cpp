@@ -47,7 +47,7 @@ int main( int argc, char **argv )
         tcs.doFastITScan( numsamples );
         tcs.doFastITScan( numsamples );
 
-        unsigned short *tmp = tcs.doGetBuffer();
+        tcs.doGetBuffer();
         tcs.doCleanupAfterBulk();
 
         std::cout << block_size << "," << over_sample << "," << clock_speed << "," << "Passed" << std::endl;

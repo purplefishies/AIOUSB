@@ -394,7 +394,7 @@ void goDoIt( TestCaseSetup &tcs  )
 
     /*                                  scans    *    bytes / sample        * 1 sample + 10 oversamples */
     const int BULK_BYTES = 100000 * NUM_CHANNELS * sizeof( unsigned short ) * 11;
-    const double CLOCK_SPEED = 100000;	// Hz
+
     unsigned short *const dataBuf = ( unsigned short * ) malloc( BULK_BYTES );
     if( dataBuf != 0 ) {
       double clockHz = 0;
