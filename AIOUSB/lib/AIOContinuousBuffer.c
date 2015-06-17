@@ -1421,7 +1421,7 @@ AIORET_TYPE AIOContinuousBufInitiateCallbackAcquisition( AIOContinuousBuf *buf )
  * @param callback 
  * @return >= 0 if successful, < 0 if failure
  */
-AIORET_TYPE AIOContinuousBufCallbackStartCallbackAcquisition( AIOContinuousBuf *buf, AIOCmd *cmd, AIORET_TYPE (*callback)( AIOContinuousBuf *buf) )
+AIORET_TYPE AIOContinuousBufCallbackStartCallbackWithAcquisitionFunction( AIOContinuousBuf *buf, AIOCmd *cmd, AIORET_TYPE (*callback)( AIOContinuousBuf *buf) )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
     AIO_ASSERT_RET(AIOUSB_ERROR_INVALID_AIOCMD, cmd );

@@ -90,9 +90,9 @@ main(int argc, char *argv[] )
 
     AIOContinuousBufInitiateCallbackAcquisition(buf); /* Start the acquisition */
 #if __GNUC__
-    AIOContinuousBufCallbackStartCallbackAcquisition( buf, &cmd, capture_data );
+    AIOContinuousBufCallbackStartCallbackWithAcquisitionFunction( buf, &cmd, capture_data );
 #else
-    AIOContinuousBufCallbackStartCallbackAcquisition( buf, &cmd, LAMBDA( AIORET_TYPE, (AIOContinuousBuf *buf), {
+    AIOContinuousBufCallbackStartCallbackWithAcquisitionFunction( buf, &cmd, LAMBDA( AIORET_TYPE, (AIOContinuousBuf *buf), {
                 unsigned short tobuf[1024];
                 int num_samples_to_read = AIOContinuousBufGetNumberChannels(buf)*(1+AIOContinuousBufGetOversample(buf));
                 int data_read = AIOContinuousBufPopN( buf, tobuf, num_samples_to_read );
