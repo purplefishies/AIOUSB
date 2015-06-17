@@ -219,16 +219,12 @@ USBDevice *AIOUSBDeviceGetUSBHandle( AIOUSBDevice *dev )
 AIORET_TYPE AIOUSBDeviceSetUSBHandle( AIOUSBDevice *dev, USBDevice *usb )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    assert(dev);
-    if ( !dev ) {
-        retval =  -AIOUSB_ERROR_INVALID_DEVICE;
-    } else if (!usb ) { 
-        retval = -AIOUSB_ERROR_INVALID_PARAMETER;
-    } else {
-        dev->usb_device = usb;
-    }
-    return retval;
+    AIO_ASSERT_RET(AIOUSB_ERROR_INVALID_DEVICE, dev );
+    AIO_ASSERT_RET(AIOUSB_ERROR_INVALID_USBDEVICE, usb );
 
+    dev->usb_device = usb;
+
+    return retval;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -251,9 +247,7 @@ USBDevice *AIOUSBDeviceGetUSBHandleFromDeviceIndex( unsigned long DeviceIndex, A
 AIORET_TYPE AIOUSBDeviceGetDiscardFirstSample( AIOUSBDevice *device )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    assert( device );
-    if ( !device )
-        return -AIOUSB_ERROR_INVALID_DEVICE;
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_DEVICE, device );
 
     retval = (AIORET_TYPE)device->discardFirstSample;
 
@@ -264,9 +258,7 @@ AIORET_TYPE AIOUSBDeviceGetDiscardFirstSample( AIOUSBDevice *device )
 AIORET_TYPE AIOUSBDeviceSetDiscardFirstSample( AIOUSBDevice *device , AIOUSB_BOOL discard )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    assert( device );
-    if ( !device )
-        return -AIOUSB_ERROR_INVALID_DEVICE;
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_DEVICE, device );
 
     device->discardFirstSample = discard;
 
