@@ -24,9 +24,8 @@ void DeleteAIOConfiguration(AIOConfiguration *config )
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOConfigurationInitialize( AIOConfiguration *config )
 {
-    assert(config);
-    if (!config) 
-        return -AIOUSB_ERROR_INVALID_AIOCONFIGURATION;
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOCONFIGURATION, config );
+
     config->timeout               = 1000;
     config->number_scans          = 0;
     config->discard_first_sample  = 0;
@@ -45,9 +44,8 @@ AIORET_TYPE AIOConfigurationInitialize( AIOConfiguration *config )
 
 AIORET_TYPE AIOArgumentInitialize( AIOArgument *arg )
 {
-    assert(arg);
-    if (!arg )
-        return -AIOUSB_ERROR_INVALID_AIOARGUMENT;
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOARGUMENT, arg );
+
     arg->threaded = AIOUSB_FALSE;
     arg->debug = AIOUSB_FALSE;
     arg->size = &arg->actual_size;
@@ -60,10 +58,8 @@ AIORET_TYPE AIOArgumentInitialize( AIOArgument *arg )
 AIORET_TYPE AIOConfigurationSetTimeout( AIOConfiguration *config, unsigned timeout )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    assert(config);
-    if ( !config )
-        return -AIOUSB_ERROR_INVALID_CONFIG;
-    
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_CONFIG, config );
+   
     switch ( config->type ) {
     case AIOCONTINUOUSBUF_CONFIG:
         retval = AIOContinuousBufSetTimeout( &config->setting.aiobuf, timeout );
@@ -80,10 +76,9 @@ AIORET_TYPE AIOConfigurationSetTimeout( AIOConfiguration *config, unsigned timeo
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOConfigurationSetDebug( AIOConfiguration *config, AIOUSB_BOOL debug )
 {
-    assert(config);
-    if ( !config )
-        return -AIOUSB_ERROR_INVALID_CONFIG;
-    
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_CONFIG, config );
+
     switch ( config->type ) {
     case AIOCONTINUOUSBUF_CONFIG:
         AIOContinuousBufSetDebug( &config->setting.aiobuf, debug );
