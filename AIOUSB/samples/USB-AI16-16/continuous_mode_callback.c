@@ -90,8 +90,6 @@ main(int argc, char *argv[] )
 
     AIOContinuousBufInitiateCallbackAcquisition(buf); /* Start the acquisition */
 #if __GNUC__
-    AIOContinuousBufCallbackStartCallbackWithAcquisitionFunction( buf, &cmd, capture_data );
-#else
     AIOContinuousBufCallbackStartCallbackWithAcquisitionFunction( buf, &cmd, LAMBDA( AIORET_TYPE, (AIOContinuousBuf *buf), {
                 unsigned short tobuf[1024];
                 int num_samples_to_read = AIOContinuousBufGetNumberChannels(buf)*(1+AIOContinuousBufGetOversample(buf));
@@ -104,6 +102,8 @@ main(int argc, char *argv[] )
                 return (AIORET_TYPE)data_read;
                 })
         );
+#else
+    AIOContinuousBufCallbackStartCallbackWithAcquisitionFunction( buf, &cmd, capture_data );
 #endif
 
     fclose(fp);

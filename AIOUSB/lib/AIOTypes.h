@@ -705,6 +705,17 @@ typedef struct  {
     unsigned ADCChannelsPerGroup;    /**< number of A/D channels in each config. group */
 } DeviceProperties;
 
+/**
+ * @brief Enums that govern how commands are performed and 
+ * operated
+ */ 
+CREATE_ENUM_W_START( AIOCommandCode, 0 ,
+                     GENERIC_DOSOMETHING_PLACEHOLDER,
+                     AIO_CONTINUE_RUNNING,
+                     AIO_TERMINATE_CALLBACK
+                     );
+
+
 
 #ifdef __aiousb_cplusplus
 }

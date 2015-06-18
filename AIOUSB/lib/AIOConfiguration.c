@@ -76,7 +76,6 @@ AIORET_TYPE AIOConfigurationSetTimeout( AIOConfiguration *config, unsigned timeo
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOConfigurationSetDebug( AIOConfiguration *config, AIOUSB_BOOL debug )
 {
-    AIORET_TYPE retval = AIOUSB_SUCCESS;
     AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_CONFIG, config );
 
     switch ( config->type ) {
