@@ -693,7 +693,7 @@ AIORET_TYPE AIOContinuousBuf_NumberChannels( AIOContinuousBuf *buf ) { return AI
 AIORET_TYPE AIOContinuousBufNumberChannels( AIOContinuousBuf *buf ) 
 {
     AIO_ASSERT_AIOCONTBUF( buf );
-    return AIOChannelMaskNumberSignals( buf->mask );
+    return buf->num_channels;
 }
 
 /*----------------------------------------------------------------------------*/

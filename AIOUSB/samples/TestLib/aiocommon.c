@@ -8,7 +8,7 @@
 
 
 struct opts AIO_OPTIONS = {100000, 16, 0, AD_GAIN_CODE_0_5V , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15, -1, -1, 0, 0,0, 
-                           "{\"DeviceIndex\":1,\"base_size\":512,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2}",
+                           "{\"DeviceIndex\":0,\"base_size\":512,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2}",
                            NULL
 };
 
@@ -326,6 +326,16 @@ AIORET_TYPE aio_override_aiobuf_settings( AIOContinuousBuf *buf, struct opts *op
                 fprintf(stderr,"Error setting ChannelRange: %d\n", retval );
                 return retval;
             }
+        }
+        /* also set the range for the buffer */
+        retval = AIOContinuousBufSetStartAndEndChannel( buf, options->start_channel, options->end_channel );
+        if ( retval != AIOUSB_SUCCESS ) {
+            fprintf(stderr,"Error trying to set StartCh=%d and EndCh=%d...%d\n", 
+                    options->start_channel, 
+                    options->end_channel,
+                    (int)retval
+                    );
+            return retval;
         }
     }
 
