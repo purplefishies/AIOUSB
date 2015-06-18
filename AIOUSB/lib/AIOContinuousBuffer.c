@@ -285,7 +285,8 @@ AIORET_TYPE AIOContinuousBufSendPreConfig( AIOContinuousBuf *buf )
 
     if (  !buf->testing ) {
         usbresult = usb->usb_control_transfer( usb,
-                                               USB_READ_FROM_DEVICE,
+                                               /* USB_READ_FROM_DEVICE, */
+                                               USB_WRITE_TO_DEVICE,
                                                bRequest,
                                                wValue,
                                                wIndex,
@@ -1400,11 +1401,14 @@ AIORET_TYPE AIOContinuousBufReadNSamples( AIOContinuousBuf *buf, void *tobuf, si
     return _AIOContinuousBufRead( buf, tobuf, n_to_read );
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufInitiateCallbackAcquisition( AIOContinuousBuf *buf )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    retval = AIOContinuousBufInitConfiguration( buf );
+
+    retval = AIOContinuousBufSaveConfig( buf );
+
     AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
 
     return AIOContinuousBufCallbackStart(buf);
@@ -1671,6 +1675,25 @@ AIORET_TYPE AIOContinuousBufGetTesting( AIOContinuousBuf *buf )
 }
 
 /*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOContinuousBufSetDefaultModeForCounterScan( AIOContinuousBuf *buf )
+{
+    AIO_ASSERT_AIOCONTBUF( buf );
+    AIOContinuousBufLock( buf );
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    ADCConfigBlock config = {0};
+    AIOUSBDevice *device = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), (AIORESULT*)&retval );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_DEVICE, retval == AIOUSB_SUCCESS );
+
+    retval = ADCConfigBlockInitForCounterScan( &config, device );
+    AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    retval = ADCConfigBlockCopy( AIOUSBDeviceGetADCConfigBlock( device ), &config );
+    AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+
+    AIOContinuousBufUnlock( buf );
+    return retval;
+}
+
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufSetDebug( AIOContinuousBuf *buf, AIOUSB_BOOL debug )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
@@ -1730,16 +1753,19 @@ AIORET_TYPE AIOContinuousBuf_SetStartAndEndChannel( AIOContinuousBuf *buf,
 AIORET_TYPE AIOContinuousBufSetStartAndEndChannel( AIOContinuousBuf *buf, unsigned startChannel, unsigned endChannel )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
-    AIORET_TYPE result = AIOUSB_SUCCESS;
-    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), (AIORESULT*)&result );
-    AIO_ERROR_VALID_AIORET_TYPE( result, result == AIOUSB_SUCCESS );
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), (AIORESULT*)&retval );
+    AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS );
 
+    
     if ( AIOContinuousBufNumberChannels( buf ) > 16 ) {
         deviceDesc->cachedConfigBlock.size = AD_MUX_CONFIG_REGISTERS;
     }
-    result = ADCConfigBlockSetScanRange( AIOUSBDeviceGetADCConfigBlock( deviceDesc ) , startChannel, endChannel );
+    retval= ADCConfigBlockSetScanRange( AIOUSBDeviceGetADCConfigBlock( deviceDesc ) , startChannel, endChannel );
+    AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    buf->num_channels = ( endChannel - startChannel + 1 );
 
-    return result;
+    return retval;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -1941,15 +1967,24 @@ RangeValueLookup BaseSizeRange[] = {
 AIOContinuousBuf *NewAIOContinuousBufFromJSON( const char *str )
 {
     AIOContinuousBuf *aiobuf = NewAIOContinuousBuf( 0,16,0,1024 );
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
 
     cJSON *aiojson;
     aiojson = cJSON_Parse(str);
 
     AIO_ERROR_VALID_DATA_W_CODE( NULL, DeleteAIOContinuousBuf(aiobuf), aiojson );
 
-
     cJSON *tmp;
 
+    if ( ( tmp = cJSON_GetObjectItem(aiojson,"DeviceIndex" )) )
+        AIOContinuousBufSetDeviceIndex( aiobuf, cJSON_AsInteger(tmp) );
+    if ( ( tmp = cJSON_GetObjectItem(aiojson,"adcconfig" )) ) {
+        printf("Not implemented yet...\n");
+        /* exit(1); */
+    } else {
+        retval = AIOContinuousBufSetDefaultModeForCounterScan( aiobuf );
+        AIO_ERROR_VALID_DATA( NULL, retval == AIOUSB_SUCCESS );
+    }
     tmp = GetJSONValueOrDefault( aiojson, "debug", TrueFalse, sizeof(TrueFalse)/sizeof(EnumStringLookup));
     AIOContinuousBufSetDebug( aiobuf, tmp->valueint );
 
@@ -1971,8 +2006,6 @@ AIOContinuousBuf *NewAIOContinuousBufFromJSON( const char *str )
         AIOContinuousBufSetTimeout( aiobuf, cJSON_AsInteger(tmp) );
     if ( ( tmp = cJSON_GetObjectItem(aiojson,"unit_size" )) )
         AIOContinuousBufSetUnitSize( aiobuf, cJSON_AsInteger(tmp) );
-    if ( ( tmp = cJSON_GetObjectItem(aiojson,"DeviceIndex" )) )
-        AIOContinuousBufSetDeviceIndex( aiobuf, cJSON_AsInteger(tmp) );
 
     return aiobuf;
 }
@@ -2473,7 +2506,9 @@ TEST(AIOContiuousBuf,JSONFunctions)
 {
     int numDevices = 0;
     AIODeviceTableInit();    
+    AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_DIO_48 );
     AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_AIO16_16A );
+
     AIOContinuousBuf *buf = NewAIOContinuousBuf(1,16,0,1024);
     AIORET_TYPE retval ;
     char *exp1 = (char *)"{\"DeviceIndex\":1,\"base_size\":1024,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2}";
@@ -2495,6 +2530,18 @@ TEST(AIOContiuousBuf,JSONFunctions)
 
     ASSERT_STREQ( exp1, AIOContinuousBufToJSON(buf) );
 
+    
+}
+
+TEST(AIOContinuousBuf, CatchChannelNumberChange) 
+{    
+    int numDevices = 0;
+    AIODeviceTableInit();    
+    AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_AIO16_16A );    
+    AIOContinuousBuf *buf = NewAIOContinuousBuf(0,16,0,1024);
+
+    AIOContinuousBufSetStartAndEndChannel(buf, 2,5 );
+    EXPECT_EQ( 4, AIOContinuousBufGetNumberChannels( buf ));
     
 }
 

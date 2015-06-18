@@ -132,7 +132,7 @@ unsigned long aiousbInit = 0;                    /* == AIOUSB_INIT_PATTERN if AI
 /*----------------------------------------------------------------------------*/
 AIOUSBDevice *_get_device( unsigned long index , AIORESULT *result )
 {
-    AIOUSBDevice *dev;
+    AIOUSBDevice *dev = NULL;
     if ( index > MAX_USB_DEVICES ) { 
         *result = AIOUSB_ERROR_INVALID_INDEX;
         return NULL;
