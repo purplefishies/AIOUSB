@@ -9,10 +9,11 @@ GREEN	:= $(shell tput setaf 2)
 RESET	:= $(shell tput sgr0 )
 RED	:= $(shell tput setaf 1 )
 
-CPPMOCK_SRC	:= mock_aiocontbuf_get_data_arduino.c
+CPPMOCK_SRC	:= mock_aiocontbuf_get_data_arduino.c mock_usb_xfers.c
+CPPLIBS	:= $(patsubst %.c,lib%_cpp.so,$(CPPMOCK_SRC))
 
 
-all:	$(MOCKS)
+all:	$(MOCKS) $(CPPLIBS)
 
 lib%.so:%.c
 	@cmake -E cmake_echo_color --green "Building $@"
