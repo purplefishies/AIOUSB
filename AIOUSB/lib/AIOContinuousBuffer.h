@@ -17,6 +17,7 @@
 #include "AIOFifo.h"
 #include "AIOUSB_Core.h"
 #include "AIOBuf.h"
+#include "AIOCmd.h"
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>

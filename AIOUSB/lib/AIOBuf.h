@@ -34,12 +34,6 @@ typedef struct aiobuf_iterator {
     void (*next)(struct aiobuf_iterator *);
 } AIOBufIterator;
 
-typedef struct aio_cmd {
-    int stop_scan;
-    int stop_scan_arg;
-    int channel;
-} AIOCmd;
-
 
 PUBLIC_EXTERN AIOBuf * NewAIOBuf( AIOBufType type , size_t size );
 PUBLIC_EXTERN AIORET_TYPE DeleteAIOBuf( AIOBuf *type );

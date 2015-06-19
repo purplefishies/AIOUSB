@@ -54,6 +54,7 @@ SET( tmp_aiousb_files
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOBuf.c" 
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOChannelMask.c" 
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOChannelRange.c" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOCmd.c" 
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOContinuousBuffer.c" 
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOCountsConverter.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/AIODeviceInfo.c"

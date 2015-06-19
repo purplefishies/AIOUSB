@@ -75,7 +75,7 @@ main(int argc, char *argv[] )
         exit(AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER);
 
     /* This fn allows us to merge the original JSON settings with 
-     * some explicity command line options
+     * some explicity set command line options
      */
     if ( (retval = aio_override_aiobuf_settings( buf, &options )) != AIOUSB_SUCCESS )
         exit(retval);
@@ -86,7 +86,7 @@ main(int argc, char *argv[] )
         exit(1);
     }
 
-    AIOCmd cmd = {.channel = AIO_PER_SCANS};
+    AIOCmd cmd = {.num_scans = 1 };
 
     AIOContinuousBufInitiateCallbackAcquisition(buf); /* Start the acquisition */
 #if __GNUC__

@@ -18,6 +18,7 @@ AIOUSB_DIO.o \
 AIOUSB_WDG.o \
 AIOUSB_Properties.o \
 AIOBuf.o \
+AIOCmd.o \
 AIOContinuousBuffer.o \
 AIOChannelMask.o \
 AIODeviceInfo.o \

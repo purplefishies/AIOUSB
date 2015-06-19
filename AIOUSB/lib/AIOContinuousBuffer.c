@@ -25,6 +25,7 @@
 #include "AIODeviceTable.h"
 #include "AIOFifo.h"
 #include "AIOCountsConverter.h"
+#include "AIOCmd.h"
 #include <ctype.h>
 
 #ifdef __cplusplus
@@ -1414,6 +1415,27 @@ AIORET_TYPE AIOContinuousBufInitiateCallbackAcquisition( AIOContinuousBuf *buf )
     return AIOContinuousBufCallbackStart(buf);
 }
 
+size_t number_to_read( AIOContinuousBuf *buf, AIOCmd *cmd ) 
+{
+    size_t retval = 0;
+    retval = (cmd->num_scans*(1+buf->num_oversamples))*(buf->num_channels)+
+        (cmd->num_channels*(1+buf->num_oversamples)) + 
+        (cmd->num_samples);
+
+    return retval;
+}
+
+/*----------------------------------------------------------------------------*/
+AIOUSB_BOOL continue_running( AIOContinuousBuf *buf, AIOCmd *cmd ) 
+{
+    AIOUSB_BOOL retval = AIOUSB_TRUE;
+
+    retval = buf->status == RUNNING || 
+             buf->bytes_processed < (unsigned)AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf) || 
+        AIOContinuousBufNumberSamplesAvailable(buf) >= (int)( number_to_read(buf, cmd));
+    return retval;
+}
+
 /*----------------------------------------------------------------------------*/
 /**
  * @brief Sets up a smart continuos mode acquisition allowing the user
@@ -1431,7 +1453,6 @@ AIORET_TYPE AIOContinuousBufCallbackStartCallbackWithAcquisitionFunction( AIOCon
     AIO_ASSERT_RET(AIOUSB_ERROR_INVALID_AIOCMD, cmd );
     AIO_ASSERT_RET(AIOUSB_ERROR_INVALID_CALLBACK, callback );
 
-    size_t num_samples_to_read;
     int data_read;
     AIORET_TYPE retval = 0;
     int tmp_remaining;
@@ -1439,23 +1460,8 @@ AIORET_TYPE AIOContinuousBufCallbackStartCallbackWithAcquisitionFunction( AIOCon
 
     AIOUSB_DEVEL("Trying to consume %d bytes\n", (int)AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf) );
 
-    switch ( cmd->channel ) {
-    case AIO_PER_OVERSAMPLE:
-        num_samples_to_read = 1;
-        break;
-    case AIO_PER_CHANNEL:
-        num_samples_to_read = buf->num_oversamples;
-        break;
-    case AIO_PER_SCANS:
-        num_samples_to_read = (1+buf->num_oversamples) * buf->num_channels;
-        break;
-    default:
-        num_samples_to_read = 1;
-        break;
-    } 
-    usleep(sleep_value);
-    while ( buf->status == RUNNING || buf->bytes_processed < (unsigned)AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf) || AIOContinuousBufNumberSamplesAvailable(buf) >= (int)num_samples_to_read ) { 
-        if ( ( tmp_remaining = AIOContinuousBufNumberSamplesAvailable(buf) ) >= (int)num_samples_to_read ) {
+    while ( continue_running( buf, cmd ) ) {
+        if ( ( tmp_remaining = AIOContinuousBufNumberSamplesAvailable(buf) ) >= (int)number_to_read(buf, cmd) ) {
             data_read = callback( buf );
             retval += data_read;
         } else {
@@ -1466,6 +1472,7 @@ AIORET_TYPE AIOContinuousBufCallbackStartCallbackWithAcquisitionFunction( AIOCon
 
     return retval;
 }
+
 
 /*----------------------------------------------------------------------------*/
 /**
