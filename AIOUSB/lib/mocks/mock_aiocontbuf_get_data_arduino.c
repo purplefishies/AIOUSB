@@ -14,7 +14,7 @@
 
 
 
-AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf, 
+AIORET_TYPE aiocontbuf_get_bulk_data( AIOContinuousBuf *buf, 
                                  USBDevice *usb, 
                                  unsigned char endpoint, 
                                  unsigned char *data,

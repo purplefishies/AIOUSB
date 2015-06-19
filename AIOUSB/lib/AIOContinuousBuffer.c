@@ -808,7 +808,7 @@ AIORET_TYPE AIOContinuousBufWriteCounts( AIOContinuousBuf *buf, unsigned short *
 }
 
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf, 
+AIORET_TYPE aiocontbuf_get_bulk_data( AIOContinuousBuf *buf, 
                                  USBDevice *usb, 
                                  unsigned char endpoint, 
                                  unsigned char *data,
@@ -864,7 +864,7 @@ void *RawCountsWorkFunction( void *object )
     while ( buf->status == RUNNING  ) {
         int bytes;
         int reqsize = buf->block_size;
-        int usbresult = aiocontbuf_get_data( buf, usb, 0x86, data, reqsize, &bytes, 3000 );
+        int usbresult = aiocontbuf_get_bulk_data( buf, usb, 0x86, data, reqsize, &bytes, 3000 );
 
         AIOUSB_DEVEL("Requested: %d libusb_bulk_transfer  %d as usbresult, bytes=%d\n", reqsize, usbresult , (int)bytes);
 
@@ -967,7 +967,7 @@ void *ConvertCountsToVoltsFunction( void *object )
    
     while ( buf->status == RUNNING  ) {
         int bytes;
-        int usbresult = aiocontbuf_get_data( buf, usb, 0x86, data, buf->block_size, &bytes, 3000 );
+        int usbresult = aiocontbuf_get_bulk_data( buf, usb, 0x86, data, buf->block_size, &bytes, 3000 );
         AIOUSB_DEVEL("libusb_bulk_transfer returned  %d as usbresult, bytes=%d\n", usbresult , (int)bytes);
 
         AIOUSB_DEVEL("Using counts=%d\n",bytes / 2 );

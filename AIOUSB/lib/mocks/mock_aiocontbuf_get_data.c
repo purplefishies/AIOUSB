@@ -13,7 +13,7 @@
 
 
 
-AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf, 
+AIORET_TYPE aiocontbuf_get_bulk_data( AIOContinuousBuf *buf, 
                                  USBDevice *usb, 
                                  unsigned char endpoint, 
                                  unsigned char *data,
@@ -47,14 +47,14 @@ AIORET_TYPE aiocontbuf_get_data( AIOContinuousBuf *buf,
 
                 if ( *bytes >= (datasize) ) { 
                     os ++;
-                    goto end_aiocontbuf_get_data;
+                    goto end_aiocontbuf_get_bulk_data;
                 }
             }
             os = 0;
         }
         channel_count = 0;
     }
- end_aiocontbuf_get_data:
+ end_aiocontbuf_get_bulk_data:
     /* printf("Final value=%d\n",*bytes); */
     /* usbresult = number_scans*AIOContinuousBufNumberChannels(buf)*( AIOContinuousBufGetOversample(buf)+1 )*sizeof(uint16_t); */
     usbresult = *bytes;
