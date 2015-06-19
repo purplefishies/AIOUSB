@@ -102,32 +102,6 @@ unsigned char *ADC_GetConfigRegisters( ADConfigBlock *config )
 }
 
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE ADC_WriteADConfigBlock( unsigned long DeviceIndex , ADConfigBlock *config )
-{
-    AIORESULT result = AIOUSB_SUCCESS;
-    AIORET_TYPE retval;
-
-    AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
-    if ( result  != AIOUSB_SUCCESS )
-        goto out_ADC_WriteADConfigBlock;
-
-    result = GenericVendorWrite( DeviceIndex , 
-                                 AUR_ADC_SET_CONFIG,
-                                 0,
-                                 0, 
-                                 ADC_GetConfigRegisters( config ),
-                                 ADC_GetConfigSize( config )
-                                 );
-
-    retval = ( result  == AIOUSB_SUCCESS ? AIOUSB_SUCCESS : - result );
-
-out_ADC_WriteADConfigBlock:
-
-    return retval;
-}
-
-
-/*----------------------------------------------------------------------------*/
 AIORET_TYPE ADC_ReadADConfigBlock( unsigned long DeviceIndex , ADConfigBlock *config )
 {
     AIORESULT result;
