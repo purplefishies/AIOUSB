@@ -719,31 +719,22 @@ unsigned long ADC_GetChannelV(
  * @param pBuf
  * @return
  */
-unsigned long ADC_GetScanV( unsigned long DeviceIndex, double *pBuf )
+AIORET_TYPE ADC_GetScanV( unsigned long DeviceIndex, double *pBuf )
 {
     AIO_ASSERT( pBuf );
-
-    AIORESULT result = AIOUSB_Validate(&DeviceIndex);
-    if ( result != AIOUSB_SUCCESS )
-        return result;
-
+    AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
-    if ( result != AIOUSB_SUCCESS ) 
-        return result;
-
-    if ( !deviceDesc->bADCStream ) 
-        return AIOUSB_ERROR_NOT_SUPPORTED;
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_SUPPORTED, deviceDesc->bADCStream );
 
     /**
      * get raw A/D counts
      */
-    unsigned short *counts = ( unsigned short* )malloc(deviceDesc->ADCMUXChannels * sizeof(unsigned short));
-    if ( !counts )
-        return AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+    unsigned short *counts = ( unsigned short* )calloc(1,deviceDesc->ADCMUXChannels * sizeof(unsigned short));
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_ENOUGH_MEMORY, counts );
 
     result = ADC_GetScan(DeviceIndex, counts);
-    if ( result <= AIOUSB_SUCCESS )
-        return result;
+    AIO_ERROR_VALID_DATA_W_CODE( result, free(counts),  result >= AIOUSB_SUCCESS );
     
     /**
      * Convert from A/D counts to volts; only
@@ -782,30 +773,16 @@ unsigned long ADC_GetScanV( unsigned long DeviceIndex, double *pBuf )
  * @param pBuf
  * @return
  */
-unsigned long ADC_GetScan( unsigned long DeviceIndex,unsigned short *pBuf )
+AIORET_TYPE ADC_GetScan( unsigned long DeviceIndex,unsigned short *pBuf )
 {
     unsigned startChannel;
-    AIORET_TYPE  result;
+    AIORET_TYPE result;
     AIOUSBDevice * deviceDesc;
-    if (pBuf == NULL) {
-        result =  AIOUSB_ERROR_INVALID_PARAMETER;
-        goto err_ADC_GetScan;
-    }
-
-    if ( (result = AIOUSB_Validate(&DeviceIndex)) != AIOUSB_SUCCESS ) {
-        goto err_ADC_GetScan;
-    }
-
-    deviceDesc = AIOUSB_GetDevice( DeviceIndex );
-
-    if ( !deviceDesc ) {
-        result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-        goto err_ADC_GetScan;
-    }
-    if (deviceDesc->bADCStream == AIOUSB_FALSE) {
-        result = AIOUSB_ERROR_NOT_SUPPORTED;
-        goto err_ADC_GetScan;
-    }
+    
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_PARAMETER, pBuf );
+    deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, (AIORESULT*)&result );
+    AIO_ERROR_VALID_DATA( result , result == AIOUSB_SUCCESS );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_SUPPORTED, deviceDesc->bADCStream == AIOUSB_TRUE );
 
     /**
      * pBuf[] is expected to contain entries for all the A/D channels,
@@ -817,8 +794,6 @@ unsigned long ADC_GetScan( unsigned long DeviceIndex,unsigned short *pBuf )
     startChannel = AIOUSB_GetStartChannel(&deviceDesc->cachedConfigBlock);
 
     result = AIOUSB_GetScan(DeviceIndex, pBuf + startChannel);
-    return (unsigned long)result;
- err_ADC_GetScan:
 
     return result;
 }

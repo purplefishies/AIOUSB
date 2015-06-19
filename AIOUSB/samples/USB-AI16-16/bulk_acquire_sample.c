@@ -202,7 +202,7 @@ int main( int argc, char **argv ) {
     ADC_ADMode( deviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_NORMAL );
     result = ADC_GetScanV( deviceIndex, volts );
 
-    if( result == AIOUSB_SUCCESS ) {
+    if( result >= AIOUSB_SUCCESS ) {
         printf( "Volts read:\n" );
         for( int channel = 0; channel < NUM_CHANNELS; channel++ )
             printf( "  Channel %2d = %f\n", channel, volts[ channel ] );

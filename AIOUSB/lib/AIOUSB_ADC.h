@@ -13,7 +13,7 @@ namespace AIOUSB
 
 
 #ifndef SWIG
-PUBLIC_EXTERN AIORESULT ADC_GetScanV( unsigned long DeviceIndex, double *pBuf );
+PUBLIC_EXTERN AIORET_TYPE ADC_GetScanV( unsigned long DeviceIndex, double *pBuf );
 PUBLIC_EXTERN AIORESULT ADC_RangeAll( unsigned long DeviceIndex, unsigned char *pGainCodes, unsigned long bSingleEnded );
 
 PUBLIC_EXTERN AIORESULT ADC_GetChannelV( unsigned long DeviceIndex, unsigned long ChannelIndex, double *pBuf );
@@ -28,7 +28,7 @@ PUBLIC_EXTERN AIORESULT ADC_SetAllGainCodeAndDiffMode( unsigned long DeviceIndex
 #endif
 
 
-PUBLIC_EXTERN AIORESULT ADC_GetScan( unsigned long DeviceIndex, unsigned short *pBuf );
+PUBLIC_EXTERN AIORET_TYPE ADC_GetScan( unsigned long DeviceIndex, unsigned short *pBuf );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short counts[] );
 
 
