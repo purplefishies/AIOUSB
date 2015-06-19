@@ -39,6 +39,10 @@ struct ADRange adRanges[ AD_NUM_GAIN_CODES ] = {
   { -1  , 2  }                  /* AD_GAIN_CODE_1V     */  
 };
 
+AIORET_TYPE adc_get_bulk_data( ADCConfigBlock *config,USBDevice *usb,  unsigned char endpoint, 
+                               unsigned char *data, int datasize,int *bytes, unsigned timeout  );
+
+
 // formerly public in the API
 static unsigned long ADC_GetImmediate(
     unsigned long DeviceIndex,
@@ -323,6 +327,8 @@ RETURN_AIOUSB_GetBulkAcquire:
                                 /* number of samples device can buffer */
 #define DEVICE_SAMPLE_BUFFER_SIZE 1024
 
+
+
 /*--------------------------------------------------------------------------*/
 /**
  * @brief Performs a scan and averages the voltage values.
@@ -474,13 +480,14 @@ PRIVATE AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short co
                                                  deviceDesc->commTimeout
                                                  );
     if (bytesTransferred == 0) {
-        libusbresult = usb->usb_bulk_transfer(usb,
-                                              LIBUSB_ENDPOINT_IN | USB_BULK_READ_ENDPOINT,
-                                              ( unsigned char* )sampleBuffer, 
-                                              numSamples * sizeof(unsigned short), 
-                                              (int*)&bytesTransferred,
-                                              deviceDesc->commTimeout
-                                              );
+        libusbresult = adc_get_bulk_data( &deviceDesc->cachedConfigBlock,
+                                         usb,
+                                         LIBUSB_ENDPOINT_IN | USB_BULK_READ_ENDPOINT,
+                                         ( unsigned char* )sampleBuffer, 
+                                         numSamples * sizeof(unsigned short), 
+                                         (int*)&bytesTransferred,
+                                         deviceDesc->commTimeout
+                                          );
 
         if (libusbresult != LIBUSB_SUCCESS) {
             result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbresult);
@@ -527,6 +534,30 @@ PRIVATE AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short co
     return result;
 }
 
+/*--------------------------------------------------------------------------*/
+AIORET_TYPE adc_get_bulk_data( ADCConfigBlock *config,
+                               USBDevice *usb, 
+                               unsigned char endpoint, 
+                               unsigned char *data,
+                               int datasize,
+                               int *bytes,
+                               unsigned timeout 
+                               )
+{
+    AIORET_TYPE usbresult;
+
+    usbresult = usb->usb_bulk_transfer( usb,
+                                        0x86,
+                                        data,
+                                        datasize,
+                                        bytes,
+                                        timeout
+                                        );
+
+    return usbresult;
+}
+
+/*--------------------------------------------------------------------------*/
 /**
  * @brief
  * @param DeviceIndex

@@ -107,9 +107,8 @@ AIORET_TYPE adc_get_bulk_data( ADCConfigBlock *config,
                                unsigned timeout 
                                )
 {
-    AIORET_TYPE usbresult;
+    AIORET_TYPE usbresult = AIOUSB_SUCCESS;
     uint16_t *counts = (uint16_t*)data;
-    int number_scans = 1;
     *bytes = 0;
     int pos;
 
@@ -136,7 +135,7 @@ AIORET_TYPE adc_get_bulk_data( ADCConfigBlock *config,
           channel ++ 
           ) {
         for ( int os = 0; os <= ADCConfigBlockGetOversample(config) ; os ++ ) { 
-            pos = channel + channel*(1+ADCConfigBlockGetOversample(config));
+            pos = os + channel*(1+ADCConfigBlockGetOversample(config));
             
             int tmpval;
             if ( channel < 3 ) { 
@@ -164,8 +163,9 @@ AIORET_TYPE adc_get_bulk_data( ADCConfigBlock *config,
             *bytes += 2;
         }
     }
+    arduino_counter ++;
 
-
+    return usbresult;
 }
 
 #ifdef __cplusplus
