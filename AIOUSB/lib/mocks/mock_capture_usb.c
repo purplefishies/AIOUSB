@@ -20,6 +20,10 @@
 
 #include <dlfcn.h>
 
+#ifdef __cplusplus
+namespace AIOUSB {
+#endif
+
 typedef enum {
     IN,
     OUT
@@ -115,6 +119,9 @@ int mock_usb_get_config( struct aiousb_device *usb, ADCConfigBlock *configBlock 
     return orig_usb_get_config( usb, configBlock );
 }
 
+typedef AIOEither (*init_device)( USBDevice *usb, LIBUSBArgs *args );
+
+
 /**
  * @brief Wraps the initial IntializeUSBDevice, and records mock
  * functions that will call the initial values.
@@ -129,7 +136,7 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
     int port,ok=1;
 
     if (!init_usb_device) 
-        init_usb_device = dlsym(RTLD_NEXT,"InitializeUSBDevice");
+        init_usb_device = (init_device)dlsym(RTLD_NEXT,"InitializeUSBDevice");
 
     printf("Wrapped the original !!\n");
     retval = init_usb_device( usb, args );
@@ -161,3 +168,6 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
 }
 
 
+#ifdef __cplusplus
+}
+#endif

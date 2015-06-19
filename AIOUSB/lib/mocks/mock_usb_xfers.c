@@ -23,6 +23,11 @@
 
 #include <dlfcn.h>
 
+#ifdef __cplusplus
+namespace AIOUSB {
+#endif
+
+
 typedef enum {
     IN,
     OUT
@@ -48,6 +53,8 @@ int mock_usb_reset_device( struct aiousb_device *usb );
 int mock_USBDevicePutADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock );
 int mock_USBDeviceFetchADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock );
 
+typedef AIORET_TYPE (*add_devices_fn)( libusb_device **deviceList , USBDevice **devs , int *size );
+
 AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , USBDevice **devs , int *size ) 
 {
 
@@ -59,7 +66,7 @@ AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , USBDevice **devs
     static int (*orig_AddAllACCESUSBDevices)( libusb_device **deviceList , USBDevice **devs , int *size ) = NULL;
 
     if (!orig_AddAllACCESUSBDevices)
-        orig_AddAllACCESUSBDevices = dlsym(RTLD_NEXT,"AddAllACCESUSBDevices");
+        orig_AddAllACCESUSBDevices = (add_devices_fn)dlsym(RTLD_NEXT,"AddAllACCESUSBDevices");
     
     tmp = getenv((const char *)"AIO_TEST_PRODUCTS");
     if ( tmp ) {
@@ -84,7 +91,7 @@ AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , USBDevice **devs
                         .bDeviceProtocol = 0,
                         .bMaxPacketSize0 = 64,
                         .idVendor = 5637,
-                        .idProduct = atoi(token),
+                        .idProduct = (uint16_t)atoi(token),
                         .bcdDevice = 0,
                         .iManufacturer = 1,
                         .iProduct = 2,
@@ -182,3 +189,8 @@ int mock_usb_reset_device( struct aiousb_device *usb )
     printf("Fake mock_usb_reset_device\n");
     return 0;
 }
+
+
+#ifdef __cplusplus
+}
+#endif
