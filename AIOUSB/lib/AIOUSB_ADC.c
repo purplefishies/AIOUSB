@@ -650,20 +650,19 @@ unsigned short AIOUSB_VoltsToCounts(
  * @param pBuf
  * @return
  */
-unsigned long ADC_GetChannelV(
-                              unsigned long DeviceIndex,
-                              unsigned long ChannelIndex,
-                              double *pBuf
-                              )
+AIORET_TYPE ADC_GetChannelV(
+                            unsigned long DeviceIndex,
+                            unsigned long ChannelIndex,
+                            double *pBuf
+                            )
 {
-    AIORESULT result = AIOUSB_SUCCESS;
-
-    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
-    if (deviceDesc->bADCStream == AIOUSB_FALSE)
-        return AIOUSB_ERROR_NOT_SUPPORTED;
-
-    if ( pBuf == NULL || ChannelIndex >= deviceDesc->ADCMUXChannels )
-        return AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ASSERT( pBuf );
+    AIORET_TYPE result = AIOUSB_SUCCESS;
+    unsigned short counts;
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, (AIORESULT*)&result );
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_SUPPORTED, deviceDesc->bADCStream == AIOUSB_FALSE );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_PARAMETER, ChannelIndex < deviceDesc->ADCMUXChannels );
 
     /**
      * there is no guarantee that ChannelIndex, passed by the user, is
@@ -686,17 +685,15 @@ unsigned long ADC_GetChannelV(
      */
 
     result = ReadConfigBlock(DeviceIndex, AIOUSB_FALSE);
-    if ( result != AIOUSB_SUCCESS ) {
-        return result;
-    }
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
 
-    ADConfigBlock origConfigBlock = deviceDesc->cachedConfigBlock;       // restore when done
+    ADConfigBlock origConfigBlock = deviceDesc->cachedConfigBlock;
     AIOUSB_SetScanRange(&deviceDesc->cachedConfigBlock, ChannelIndex, ChannelIndex);
 
     result = WriteConfigBlock(DeviceIndex);
-    unsigned short counts;
+
     result = AIOUSB_GetScan(DeviceIndex, &counts);
-    if (result == AIOUSB_SUCCESS) {
+    if (result >= AIOUSB_SUCCESS) {
         double volts;
         result = AIOUSB_ArrayCountsToVolts(DeviceIndex, ChannelIndex, 1, &counts, &volts);
         if (result == AIOUSB_SUCCESS)

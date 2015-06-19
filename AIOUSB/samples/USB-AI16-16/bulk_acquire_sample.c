@@ -213,7 +213,7 @@ int main( int argc, char **argv ) {
      * demonstrate reading a single channel in volts
      */
     result = ADC_GetChannelV( deviceIndex, CAL_CHANNEL, &volts[ CAL_CHANNEL ] );
-    if( result == AIOUSB_SUCCESS )
+    if( result >= AIOUSB_SUCCESS )
         printf( "Volts read from A/D channel %d = %f\n", CAL_CHANNEL, volts[ CAL_CHANNEL ] );
     else
         printf( "Error '%s' reading A/D channel %d\n", 
