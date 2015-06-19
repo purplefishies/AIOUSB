@@ -9,6 +9,8 @@ GREEN	:= $(shell tput setaf 2)
 RESET	:= $(shell tput sgr0 )
 RED	:= $(shell tput setaf 1 )
 
+CPPMOCK_SRC	:= mock_aiocontbuf_get_data_arduino.c
+
 
 all:	$(MOCKS)
 
@@ -16,6 +18,9 @@ lib%.so:%.c
 	@cmake -E cmake_echo_color --green "Building $@"
 	@$(CC) $(CFLAGS) -shared -Wl,-soname,$@ -shared -fPIC -o $@ $< -ldl
 
+lib%_cpp.so:%.c
+	@echo $(CXX) -I. -I../  -I/usr/include/libusb-1.0  -D__aiousb_cplusplus -g -c  -DNDEBUG -Wall -pthread -fPIC $< -o $(patsubst %.c,%.o,$<)
+	@echo $(CXX) -D_GNU_SOURCE -fPIC -I. -I${AIO_LIB_DIR} -I/usr/include/libusb-1.0 -g  -shared -Wl,-soname,$(patsubst %.c,lib%_cpp.so,$<) -o libmock_aiocontbuf_get_data_arduino.so mock_aiocontbuf_get_data_arduino.o
 
 
 clean:

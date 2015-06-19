@@ -12,7 +12,9 @@
 
 #include <dlfcn.h>
 
-
+#ifdef __cplusplus
+namespace AIOUSB {
+#endif
 
 AIORET_TYPE aiocontbuf_get_bulk_data( AIOContinuousBuf *buf, 
                                  USBDevice *usb, 
@@ -95,3 +97,77 @@ AIORET_TYPE aiocontbuf_get_bulk_data( AIOContinuousBuf *buf,
     usbresult = *bytes;
     return usbresult;
 }
+
+AIORET_TYPE adc_get_bulk_data( ADCConfigBlock *config,
+                               USBDevice *usb, 
+                               unsigned char endpoint, 
+                               unsigned char *data,
+                               int datasize,
+                               int *bytes,
+                               unsigned timeout 
+                               )
+{
+    AIORET_TYPE usbresult;
+    uint16_t *counts = (uint16_t*)data;
+    int number_scans = 1;
+    *bytes = 0;
+    int pos;
+
+    double scale_down = 1;
+    int noisy_ground = 30;
+    int noisy_signal = 10;
+    int usb_delay = 0;
+    static char arduino_counter = 0;
+    if ( getenv("AIO_USB_DELAY") ) {
+        usb_delay = atoi(getenv("AIO_USB_DELAY"));
+    }
+    if ( getenv("MOCK_SCALE_DOWN") ) { 
+        scale_down = strtod(getenv("MOCK_SCALE_DOWN"),NULL);
+    } 
+    if ( getenv("MOCK_NOISY_GROUND") )  {
+        noisy_ground = atoi(getenv("MOCK_NOISY_GROUND"));
+    }
+    if ( getenv("MOCK_NOISY_SIGNAL") )  {
+        noisy_signal = atoi(getenv("MOCK_NOISY_SIGNAL"));
+    }
+
+    for ( int channel = ADCConfigBlockGetStartChannel( config ); 
+          channel <= ADCConfigBlockGetEndChannel(config); 
+          channel ++ 
+          ) {
+        for ( int os = 0; os <= ADCConfigBlockGetOversample(config) ; os ++ ) { 
+            pos = channel + channel*(1+ADCConfigBlockGetOversample(config));
+            
+            int tmpval;
+            if ( channel < 3 ) { 
+                if ( channel == 0 ) { 
+                    /* 10110101  >> 4 */
+                    tmpval = ((arduino_counter) >> 4 ) & 1;
+                } else if ( channel == 1 ) { 
+                    tmpval = ((arduino_counter) >> 5 ) & 1;
+                } else {
+                    tmpval = ((arduino_counter) >> 6 ) & 1;
+                }
+                if ( tmpval == 1 ) { 
+                    tmpval = (int)((65535 - ( rand() % noisy_signal )) / scale_down);
+                } else {
+                    tmpval = (rand() % noisy_ground );
+                }
+            } else {
+                tmpval = rand() % noisy_ground;
+            }
+            counts[pos] = tmpval;
+            
+            if ( pos > 65536 /2 ) {
+                fprintf(stderr,"ERROR: pos=%d\n", pos );
+            }
+            *bytes += 2;
+        }
+    }
+
+
+}
+
+#ifdef __cplusplus
+}
+#endif
