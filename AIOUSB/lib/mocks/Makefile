@@ -9,7 +9,7 @@ GREEN	:= $(shell tput setaf 2)
 RESET	:= $(shell tput sgr0 )
 RED	:= $(shell tput setaf 1 )
 
-CPPMOCK_SRC	:= mock_aiocontbuf_get_data_arduino.c mock_usb_xfers.c
+CPPMOCK_SRC	:= mock_aiocontbuf_get_data_arduino.c mock_usb_xfers.c mock_capture_usb.c
 CPPLIBS	:= $(patsubst %.c,lib%_cpp.so,$(CPPMOCK_SRC))
 
 
