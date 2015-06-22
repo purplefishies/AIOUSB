@@ -50,13 +50,13 @@ typedef struct aio_ret_value  {
 #define AIO_ERROR_VALUE 0xffffffffffffffff
 
 
-void AIOEitherClear( AIOEither *retval );
+AIORET_TYPE AIOEitherClear( AIOEither *retval );
 
-void AIOEitherSetRight(AIOEither *retval, AIO_EITHER_TYPE val , void *tmp, ... );
-void AIOEitherGetRight(AIOEither *retval, void *tmp, ... );
+AIORET_TYPE AIOEitherSetRight(AIOEither *retval, AIO_EITHER_TYPE val , void *tmp, ... );
+AIORET_TYPE AIOEitherGetRight(AIOEither *retval, void *tmp, ... );
 
-void AIOEitherSetLeft(AIOEither *retval, int val );
-int  AIOEitherGetLeft(AIOEither *retval );
+AIORET_TYPE AIOEitherSetLeft(AIOEither *retval, int val );
+AIORET_TYPE AIOEitherGetLeft(AIOEither *retval );
 AIOUSB_BOOL AIOEitherHasError( AIOEither *retval );
 
 char *AIOEitherToString( AIOEither *retval, AIORET_TYPE *result );

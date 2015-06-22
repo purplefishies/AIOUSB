@@ -21,9 +21,9 @@ namespace AIOUSB
 
 #define LOOKUP(T) aioret_value_ ## T 
 
-void AIOEitherClear( AIOEither *retval )
+AIORET_TYPE AIOEitherClear( AIOEither *retval )
 {
-    assert(retval);
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOEITHER , retval );
     switch(retval->type) { 
     case aioeither_value_string:
         free(retval->right.object);
@@ -38,12 +38,12 @@ void AIOEitherClear( AIOEither *retval )
         free(retval->errmsg );
         retval->errmsg = 0;
     }
-
+    return AIOUSB_SUCCESS;
 }
     
-void AIOEitherSetRight(AIOEither *retval, AIO_EITHER_TYPE val , void *tmp, ... )
+AIORET_TYPE AIOEitherSetRight(AIOEither *retval, AIO_EITHER_TYPE val , void *tmp, ... )
 {
-    assert(retval);
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOEITHER , retval );
     va_list ap;
     switch(val) { 
     case aioeither_value_int:
@@ -103,11 +103,12 @@ void AIOEitherSetRight(AIOEither *retval, AIO_EITHER_TYPE val , void *tmp, ... )
     default:
         break;
     }
+    return AIOUSB_SUCCESS;
 }
 
-void AIOEitherGetRight(AIOEither *retval, void *tmp, ... )
+AIORET_TYPE AIOEitherGetRight(AIOEither *retval, void *tmp, ... )
 {
-    assert(retval);
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOEITHER , retval );
     va_list ap;
     switch(retval->type) { 
     case aioeither_value_int:
@@ -156,13 +157,14 @@ void AIOEitherGetRight(AIOEither *retval, void *tmp, ... )
     default:
         break;
     }
-
+    return AIOUSB_SUCCESS;
 }
 
-void AIOEitherSetLeft(AIOEither *retval, int val)
+AIORET_TYPE AIOEitherSetLeft(AIOEither *retval, int val)
 {
-    assert(retval);
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_AIOEITHER , retval );
     retval->left = val;
+    return AIOUSB_SUCCESS;
 }
 
 int AIOEitherGetLeft(AIOEither *retval)
