@@ -106,7 +106,7 @@ int mock_usb_put_config( struct aiousb_device *usb, ADCConfigBlock *configBlock 
 {
     printf("Wrapping put_config\n");
     int retval;
-    IO_DIRECTION direction = OUT;
+    /* IO_DIRECTION direction = OUT; */
 
     retval = orig_usb_put_config( usb, configBlock );
 
@@ -131,12 +131,24 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
 {
     AIOEither retval = {0};
     static AIOEither (*init_usb_device)(USBDevice *usb, LIBUSBArgs *args ) = NULL;
+    void *tmpthingy;
 
-    unsigned char *c;
-    int port,ok=1;
+    if (!init_usb_device)  {
+#ifdef __cplusplus        
+        tmpthingy = dlsym(RTLD_NEXT,"_ZN6AIOUSB19InitializeUSBDeviceEPNS_13aiousb_deviceEPNS_18aiousb_libusb_argsE");
+        init_usb_device = (init_device)tmpthingy;
+        if ( !init_usb_device ) {
+            fprintf(stderr,"ERROR!!! Can't mock function \n");
+            retval.left = AIOUSB_ERROR_INVALID_USBDEVICE;
+            return retval;
+        }
+#else
+        init_usb_device = dlsym(RTLD_NEXT,"InitializeUSBDevice"); 
+#endif
+    }
 
-    if (!init_usb_device) 
-        init_usb_device = (init_device)dlsym(RTLD_NEXT,"InitializeUSBDevice");
+        /* init_usb_device = (AIOEITHER (*)(USBDevice *usb, LIBUSBArgs*args))dlsym(RTLD_NEXT,"InitializeUSBDevice"); */
+        /* init_usb_device = (init_device)dlsym(RTLD_NEXT,"InitializeUSBDevice"); */
 
     printf("Wrapped the original !!\n");
     retval = init_usb_device( usb, args );
