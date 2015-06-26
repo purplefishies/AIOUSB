@@ -21,8 +21,6 @@
 #include <time.h>
 
 
-#define BAD_RESULT_AND_GOTO(x, y)  result = x; goto (y);
-
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
