@@ -168,6 +168,10 @@ AIORET_TYPE adc_get_bulk_data( ADCConfigBlock *config,
     return usbresult;
 }
 
+void CloseAllDevices(void) {
+    fprintf(stderr,"Closing devices\n");
+}
+
 #ifdef __cplusplus
 }
 #endif

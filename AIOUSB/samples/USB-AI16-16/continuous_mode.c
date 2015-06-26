@@ -202,6 +202,7 @@ main(int argc, char *argv[] )
 
     }
 
+    AIOUSB_Exit();
     fclose(fp);
     fprintf(stderr,"Test completed...exiting\n");
     retval = ( retval >= 0 ? 0 : - retval );

@@ -185,7 +185,7 @@ main(int argc, char *argv[] )
 
     fclose(fp);
     fprintf(stdout,"Test completed...exiting\n");
-
+    AIOUSB_Exit();
     return 0;
 }
 
