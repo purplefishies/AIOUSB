@@ -130,25 +130,21 @@ unsigned long DACMultiDirect( unsigned long DeviceIndex,
                              unsigned long DACDataCount
                              ) 
 {
-    if ( pDACData == NULL || DACDataCount > 10000 )
-        return AIOUSB_ERROR_INVALID_PARAMETER;
-
-    if (DACDataCount == 0)
-        return AIOUSB_SUCCESS;  // NOP
+    AIO_ASSERT( pDACData );
+    AIO_ASSERT( DACDataCount <= 10000  );
+    AIO_ERROR_VALID_DATA( AIOUSB_SUCCESS, DACDataCount == 0 ); /* NOOP */
 
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
-    if ( result != AIOUSB_SUCCESS )
-        return result;
 
-    if (deviceDesc->ImmDACs == 0)
-        return AIOUSB_ERROR_NOT_SUPPORTED;
-
-    if ( deviceDesc->bDACStream && ( deviceDesc->bDACOpen || deviceDesc->bDACClosing ))
-        return AIOUSB_ERROR_OPEN_FAILED;
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_SUPPORTED, deviceDesc->ImmDACs );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_OPEN_FAILED, 
+                          ((deviceDesc->bDACStream && (!(deviceDesc->bDACOpen || deviceDesc->bDACClosing ))) || 
+                           ((deviceDesc->bDACOpen || deviceDesc->bDACClosing) && !deviceDesc->bDACStream )));
+                          
     USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
-    if ( result != AIOUSB_SUCCESS )
-        return result;
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
 
     /**
      * determine highest channel number addressed in pDACData; no checking is
