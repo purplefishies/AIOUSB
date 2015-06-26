@@ -8,7 +8,6 @@
 
 #include "AIOUSB_Core.h"
 #include "AIODeviceTable.h"
-#include <assert.h>
 #include <math.h>
 #include <string.h>
 
@@ -151,7 +150,7 @@ unsigned long DACMultiDirect( unsigned long DeviceIndex,
     if ( result != AIOUSB_SUCCESS )
         return result;
 
-    /*
+    /**
      * determine highest channel number addressed in pDACData; no checking is
      * performed to ensure that the same channel is not set more than once
      */
@@ -172,40 +171,34 @@ unsigned long DACMultiDirect( unsigned long DeviceIndex,
     int configBytes = CONFIG_BLOCK_BYTES * numConfigBlocks;
     unsigned char *configBuffer = ( unsigned char* )malloc(configBytes);
 
-    /* assert(configBuffer != 0); */
-    if (!configBuffer ) {
-        result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
-    }
-    if (configBuffer != 0) {
-        /*
-         * sparsely populate DAC configuration blocks
-         */
-        memset(configBuffer, 0, configBytes);       // zero out channel masks and count values for unused channels
-        for(index = 0; index < ( int )DACDataCount; index++) {
-            channel = pDACData[ index * 2 ];         // channel/count pairs
-            int maskOffset = (channel / DACS_PER_BLOCK) * CONFIG_BLOCK_BYTES;
-            int countOffset
-              = maskOffset                                    // first byte of block
-              + 1                                                   // skip over mask byte
-              + (channel % DACS_PER_BLOCK) * sizeof(unsigned short);             // word within block
-            configBuffer[ maskOffset ] |= (1u << (channel % DACS_PER_BLOCK));
-            *( unsigned short* )&configBuffer[ countOffset ] = pDACData[ index * 2 + 1 ];
-        }
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_ENOUGH_MEMORY, configBuffer );
 
-        int bytesTransferred = usb->usb_control_transfer(usb,
-                                                         USB_WRITE_TO_DEVICE, 
-                                                         AUR_DAC_IMMEDIATE,
-                                                         0, 
-                                                         0, 
-                                                         configBuffer, 
-                                                         configBytes, 
-                                                         deviceDesc->commTimeout
-                                                         );
-        if (bytesTransferred != configBytes)
-            result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
-        
-        free(configBuffer);
+    /*sparsely populate DAC configuration blocks */
+    memset(configBuffer, 0, configBytes);       // zero out channel masks and count values for unused channels
+    for(index = 0; index < ( int )DACDataCount; index++) {
+        channel = pDACData[ index * 2 ];         // channel/count pairs
+        int maskOffset = (channel / DACS_PER_BLOCK) * CONFIG_BLOCK_BYTES;
+        int countOffset
+            = maskOffset                                    // first byte of block
+            + 1                                                   // skip over mask byte
+            + (channel % DACS_PER_BLOCK) * sizeof(unsigned short);             // word within block
+        configBuffer[ maskOffset ] |= (1u << (channel % DACS_PER_BLOCK));
+        *( unsigned short* )&configBuffer[ countOffset ] = pDACData[ index * 2 + 1 ];
     }
+
+    int bytesTransferred = usb->usb_control_transfer(usb,
+                                                     USB_WRITE_TO_DEVICE, 
+                                                     AUR_DAC_IMMEDIATE,
+                                                     0, 
+                                                     0, 
+                                                     configBuffer, 
+                                                     configBytes, 
+                                                     deviceDesc->commTimeout
+                                                     );
+    if (bytesTransferred != configBytes)
+        result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
+        
+    free(configBuffer);
 
     return result;
 }
