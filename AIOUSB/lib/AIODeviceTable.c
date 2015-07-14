@@ -672,6 +672,7 @@ AIORESULT  _Card_Specific_Settings(unsigned long DeviceIndex)
       case 0x8008:
       case 0x8009:
       case 0x800A:
+      case 0x8068:
           device->DIOBytes = 1;
           device->bGetName = AIOUSB_TRUE;
           device->bDIOStream = AIOUSB_TRUE;
