@@ -11,6 +11,10 @@ namespace AIOUSB
 {
 #endif
 
+#if defined(signals)
+    #undef signals
+#endif
+
 typedef char aio_channel_obj;
 typedef struct {
     int *signal_indices;
