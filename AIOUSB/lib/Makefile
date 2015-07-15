@@ -87,7 +87,7 @@ DEBUG_FLAGS	:= -g
 LIBS 		:= $(CLIB) $(CDBGLIB) $(CPPLIB) $(CPPDBGLIB)  $(SHCLIB) $(SHCDBGLIB) $(SHCPPLIB) $(SHCPPDBGLIB)
 override CFLAGS	+= -I. -I/usr/include/libusb-1.0 -std=gnu99
 TESTFLAGS	:= -g
-SHARED_LIBS	:=  -lusb-1.0 -pthread -lm
+override SHARED_LIBS	+=  -lusb-1.0 -pthread -lm
 override CXXFLAGS += -I. -I/usr/include/libusb-1.0 -D__aiousb_cplusplus
 
 .PHONY : all bist

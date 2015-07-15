@@ -51,12 +51,12 @@ static unsigned short OctaveDacFromFreq(double *Hz)
 {
     AIO_ASSERT( Hz );
     unsigned short octaveOffset = 0;
-    if(*Hz > 0) {
-          if(*Hz > 40000000.0)
+    if (*Hz > 0) {
+          if (*Hz > 40000000.0)
               *Hz = 40000000.0;
           int offset,
               octave = ( int )floor(3.322 * log10(*Hz / 1039));
-          if(octave < 0) {
+          if (octave < 0) {
                 octave = offset = 0;
             } else {
                 offset = ( int )round(2048.0 - (ldexp(2078, 10 + octave) / *Hz));
@@ -203,7 +203,7 @@ AIORESULT DIO_Configure(
                                                               device->commTimeout 
                                                               );
 
-    if(bytesTransferred != bufferSize)
+    if (bytesTransferred != bufferSize)
         result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
 
     free(configBuffer);
@@ -253,7 +253,7 @@ AIORESULT DIO_ConfigureEx(
                                                               device->commTimeout
                                                               );
 
-    if(bytesTransferred != bufferSize)
+    if (bytesTransferred != bufferSize)
         result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
     free(configBuffer);
 
@@ -309,7 +309,7 @@ AIORESULT DIO_WriteAll(
                        void *pData
                        ) 
 {
-    if( !pData )
+    if ( !pData )
         return AIOUSB_ERROR_INVALID_PARAMETER;
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *device = NULL;
@@ -338,7 +338,7 @@ AIORESULT DIO_WriteAll(
                                                               );
 
 
-    if(bytesTransferred != (signed)device->DIOBytes )
+    if (bytesTransferred != (signed)device->DIOBytes )
         result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
 
     return result;
@@ -382,7 +382,7 @@ AIORESULT DIO_Write8(
                                                               dioBytes,
                                                               device->commTimeout
                                                               );
-    if(bytesTransferred != dioBytes)
+    if (bytesTransferred != dioBytes)
         result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
     free(dataBuffer);
 
@@ -403,7 +403,7 @@ AIORESULT DIO_Write1(
         return result;
 
     unsigned byteIndex = BitIndex / BITS_PER_BYTE;
-    if(( bData != AIOUSB_FALSE && bData != AIOUSB_TRUE ) || byteIndex >= device->DIOBytes ) {
+    if (( bData != AIOUSB_FALSE && bData != AIOUSB_TRUE ) || byteIndex >= device->DIOBytes ) {
         return AIOUSB_ERROR_INVALID_PARAMETER;
     }
 
@@ -413,7 +413,7 @@ AIORESULT DIO_Write1(
         
     unsigned char value = device->LastDIOData[ byteIndex ];
     unsigned char bitMask = 1 << (BitIndex % BITS_PER_BYTE);
-    if(bData == AIOUSB_FALSE)
+    if (bData == AIOUSB_FALSE)
         value &= ~bitMask;
     else
         value |= bitMask;
@@ -447,7 +447,7 @@ AIORESULT DIO_ReadAll(
                                                       device->commTimeout
                                                       );
     
-    if( bytesTransferred != (int)device->DIOBytes )
+    if ( bytesTransferred != (int)device->DIOBytes )
         result = LIBUSB_RESULT_TO_AIOUSB_RESULT( bytesTransferred );
     
     return result;
@@ -487,7 +487,7 @@ AIORESULT DIO_ReadIntoDIOBuf(
                                                           device->commTimeout
                                                           );
 
-    if( bytesTransferred < 0 || bytesTransferred != (int)device->DIOBytes ) {
+    if ( bytesTransferred < 0 || bytesTransferred != (int)device->DIOBytes ) {
         result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
         goto cleanup_DIO_ReadAll;
     }
@@ -528,7 +528,7 @@ AIORESULT DIO_ReadAllToCharStr(
                                                               bytes_to_transfer,
                                                               device->commTimeout
                                                               );
-    if( bytesTransferred < 0 || bytesTransferred != (int)device->DIOBytes )
+    if ( bytesTransferred < 0 || bytesTransferred != (int)device->DIOBytes )
         result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
     
     return result;
@@ -577,9 +577,9 @@ AIORESULT DIO_Read1(
     
     AIO_ASSERT( bit );
 
-    if((result = DIO_Read8(DeviceIndex, BitIndex / BITS_PER_BYTE, &value )) >= AIOUSB_SUCCESS) {
+    if ((result = DIO_Read8(DeviceIndex, BitIndex / BITS_PER_BYTE, &value )) >= AIOUSB_SUCCESS) {
          unsigned char bitMask = 1 << (( int )BitIndex % BITS_PER_BYTE);
-        if((value & bitMask) != 0)
+        if ((value & bitMask) != 0)
           *bit = AIOUSB_TRUE;
         else
           *bit = AIOUSB_FALSE;
@@ -619,7 +619,7 @@ AIORESULT DIO_StreamOpen( unsigned long DeviceIndex,
                                                               0, 
                                                               device->commTimeout
                                                               );
-    if(bytesTransferred == 0) {
+    if (bytesTransferred == 0) {
         device->bDIOOpen = AIOUSB_TRUE;
         device->bDIORead = bIsRead ? AIOUSB_TRUE : AIOUSB_FALSE;
     } else {
@@ -659,12 +659,7 @@ AIORESULT DIO_StreamSetClocks(
     unsigned char configBlock[ CONFIG_BLOCK_SIZE ];
     int bytesTransferred;
     USBDevice *usb = AIOUSBDeviceGetUSBHandleFromDeviceIndex( DeviceIndex, &device, &result );
-    if ( result != AIOUSB_SUCCESS )
-        goto out_DIO_StreamSetClocks;
-    if (!usb ) {
-        result = AIOUSB_ERROR_USBDEVICE_NOT_FOUND;
-        goto out_DIO_StreamSetClocks;
-    }
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
 
     /**
      * @note  
@@ -680,13 +675,12 @@ AIORESULT DIO_StreamSetClocks(
      * @endverbatim
      */
 
-
     configBlock[ 0 ] = 0x03; /* disable read and write clocks by default */
 
-    if(*WriteClockHz > 0)
+    if (*WriteClockHz > 0)
         configBlock[ 0 ] &= ~0x01; /* enable write clock */
 
-    if(*ReadClockHz > 0)
+    if (*ReadClockHz > 0)
         configBlock[ 0 ] &= ~0x02; /* enable read clock */
 
     *( unsigned short* )&configBlock[ 1 ] = OctaveDacFromFreq(WriteClockHz);
@@ -700,13 +694,13 @@ AIORESULT DIO_StreamSetClocks(
                                                  CONFIG_BLOCK_SIZE, 
                                                  device->commTimeout
                                                  );
-    if(bytesTransferred != CONFIG_BLOCK_SIZE)
+    if (bytesTransferred != CONFIG_BLOCK_SIZE)
         result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
 
- out_DIO_StreamSetClocks:
-    AIOUSB_UnLock();
     return result;
 }
+
+#define GET_ENDPOINT( isread )  ( isread ? (LIBUSB_ENDPOINT_IN | USB_BULK_READ_ENDPOINT) : (LIBUSB_ENDPOINT_OUT | USB_BULK_WRITE_ENDPOINT) )
 
 /*----------------------------------------------------------------------------*/
 AIORESULT DIO_StreamFrame(
@@ -728,7 +722,6 @@ AIORESULT DIO_StreamFrame(
     AIO_ERROR_VALID_DATA(AIOUSB_ERROR_DEVICE_NOT_CONNECTED, deviceHandle ); 
     AIO_ERROR_VALID_DATA(result, result == AIOUSB_SUCCESS );
 
-    unsigned char endpoint = device->bDIORead ? (LIBUSB_ENDPOINT_IN | USB_BULK_READ_ENDPOINT) : (LIBUSB_ENDPOINT_OUT | USB_BULK_WRITE_ENDPOINT);
     int streamingBlockSize = ( int )device->StreamingBlockSize * sizeof(unsigned short);
 
     /**
@@ -737,17 +730,17 @@ AIORESULT DIO_StreamFrame(
     unsigned char *data = ( unsigned char* )pFrameData;
     int remaining = ( int )FramePoints * sizeof(unsigned short);
     int total = 0;
-    while(remaining > 0) {
+    while (remaining > 0) {
         int bytes;
         int libusbResult = deviceHandle->usb_bulk_transfer(deviceHandle, 
-                                                           endpoint, 
+                                                           GET_ENDPOINT( device->bDIORead ),
                                                            data,
                                                            (remaining < streamingBlockSize) ? remaining : streamingBlockSize,
                                                            &bytes, 
                                                            device->commTimeout
                                                            );
-        if(libusbResult == LIBUSB_SUCCESS) {
-            if(bytes > 0) {
+        if (libusbResult == LIBUSB_SUCCESS) {
+            if (bytes > 0) {
                 total += bytes;
                 data += bytes;
                 remaining -= bytes;
@@ -757,7 +750,7 @@ AIORESULT DIO_StreamFrame(
             break;
         }
     }
-    if(result == AIOUSB_SUCCESS)
+    if (result == AIOUSB_SUCCESS)
         *BytesTransferred = total;
 
     return result;
