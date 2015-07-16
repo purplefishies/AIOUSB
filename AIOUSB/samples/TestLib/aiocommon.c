@@ -9,6 +9,7 @@
 
 struct opts AIO_OPTIONS = {100000, 16, 0, AD_GAIN_CODE_0_5V , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15, -1, -1, 0, 0,0, 
                            "{\"DeviceIndex\":0,\"base_size\":512,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2}",
+                           "{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\",\"oversample\":\"0\",\"timeout\":\"1000\",\"clock_rate\":\"1000\"}",
                            NULL
 };
 
@@ -266,6 +267,47 @@ AIORET_TYPE aio_list_devices(struct opts *options, int *indices, int num_devices
     return retval;
 }
 
+AIORET_TYPE aio_override_adcconfig_settings( ADCConfigBlock *config, struct opts *options )
+{
+    AIORET_TYPE retval = AIOUSB_SUCCESS,retval2 = AIOUSB_SUCCESS;
+
+    
+    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( options->index , (AIORESULT*)&retval );
+    AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+
+    ADCConfigBlock *hwconfig = AIOUSBDeviceGetADCConfigBlock( dev );
+    memcpy(&config->mux_settings, &hwconfig->mux_settings, sizeof( hwconfig->mux_settings ) );
+    
+    if( !options->number_ranges ) {
+        retval = ADCConfigBlockSetAllGainCodeAndDiffMode( config , options->gain_code , AIOUSB_FALSE );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    } else {
+        for ( int i = 0; i < options->number_ranges ; i ++ ) {
+            retval = ADCConfigBlockSetChannelRange( config, 
+                                                    options->ranges[i]->start_channel,
+                                                    options->ranges[i]->end_channel,
+                                                    options->ranges[i]->gaincode 
+                                                    );                                          
+            if ( retval != AIOUSB_SUCCESS ) {
+                fprintf(stderr,"Error setting ChannelRange: %d\n", retval );
+                return retval;
+            }
+        }
+        /* also set the range for the buffer */
+        retval = ADCConfigBlockSetStartChannel( config, options->start_channel );
+        retval2 = ADCConfigBlockSetEndChannel( config, options->end_channel );
+        if ( retval != AIOUSB_SUCCESS || retval2 != AIOUSB_SUCCESS ) {
+            fprintf(stderr,"Error trying to set StartCh=%d and EndCh=%d...%d\n", 
+                    options->start_channel, 
+                    options->end_channel,
+                    (int)retval
+                    );
+            return retval;
+        }
+    }
+
+    return retval;
+}
 
 AIORET_TYPE aio_override_aiobuf_settings( AIOContinuousBuf *buf, struct opts *options )
 {

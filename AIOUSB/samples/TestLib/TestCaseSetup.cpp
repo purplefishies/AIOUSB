@@ -620,6 +620,8 @@ void TestCaseSetup::doCSVReadVoltages()
 
   while( counter < maxvalue ) {
       result = ADC_GetScanV( DeviceIndex, volts );
+      if ( result != AIOUSB_SUCCESS ) 
+          throw("Error performing ADC_GetScanV");
       gettimeofday( &delta, 0 );
       LOG("%lld,", (( (long long int)delta.tv_sec - (long long int)reftime.tv_sec)*1000000 ) + ( (long long int )delta.tv_usec - (long long int)reftime.tv_usec ));
       THROW_IF_ERROR( result, " performing A/D channel scan" );

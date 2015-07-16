@@ -346,10 +346,14 @@ AIORET_TYPE ADCConfigBlockSetGainCode(ADCConfigBlock *config, unsigned channel, 
 
     AIO_ASSERT( config );
     AIO_ASSERT( VALID_ENUM(ADGainCode,gainCode ) );
-    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_DEVICE_SETTING, config->mux_settings.ADCChannelsPerGroup );
-    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_CHANNEL_NUMBER, channel < AD_MAX_CHANNELS && channel < config->mux_settings.ADCMUXChannels );    
 
-    int reg = AD_CONFIG_GAIN_CODE + channel / config->mux_settings.ADCChannelsPerGroup;
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_CHANNEL_NUMBER, channel < AD_MAX_CHANNELS );
+    /* assume that a 0 setting for ADCChannelsPerGroup means uninitialized object ..so ignore it */
+    int divide_down = ( config->mux_settings.ADCChannelsPerGroup ? config->mux_settings.ADCChannelsPerGroup : 1 );
+    unsigned max_channels = ( config->mux_settings.ADCMUXChannels ? config->mux_settings.ADCMUXChannels : 16 );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_CHANNEL_NUMBER, channel < max_channels );
+
+    int reg = AD_CONFIG_GAIN_CODE + channel / divide_down;
     
     AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_ADCCONFIG_REGISTER_SETTING, reg <= AD_NUM_GAIN_CODE_REGISTERS );
 
@@ -372,6 +376,23 @@ AIORET_TYPE ADCConfigBlockSetEndChannel( ADCConfigBlock *config, unsigned char e
         config->registers[ AD_CONFIG_START_END ]         = (unsigned char)((LOW_BITS(endChannel)<< 4)  | LOW_BITS(config->registers[ AD_CONFIG_START_END ]      ));
     }
     return AIOUSB_SUCCESS;
+}
+
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE ADCConfigBlockSetChannelRange(ADCConfigBlock *config,unsigned startChannel, unsigned endChannel, unsigned gainCode )
+{
+    AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_ADCCONFIG, config );
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+
+    for ( unsigned i = startChannel; i <= endChannel ; i ++ ) {
+#ifdef __cplusplus
+        retval = ADCConfigBlockSetGainCode( config, i, static_cast<ADGainCode>(gainCode));
+#else
+        retval = ADCConfigBlockSetGainCode( config, i, gainCode);
+#endif
+        AIO_ERROR_VALID_DATA( retval, retval = AIOUSB_SUCCESS );
+    }
+    return retval;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -900,12 +921,12 @@ ADCConfigBlock *NewADCConfigBlockFromJSON( char *str )
 {
     ADCConfigBlock *adc = (ADCConfigBlock *)calloc(sizeof(ADCConfigBlock),1);
     adc->size = 20;
-    cJSON *json;
-    json = cJSON_Parse(str);
-
-    if (!json ) 
-        return NULL;
-    cJSON *adcconfig = cJSON_GetObjectItem(json,"adcconfig");
+    /* cJSON *json; */
+    /* json = cJSON_Parse(str); */
+    /* if (!json )  */
+    /*     return NULL; */
+    /* cJSON *adcconfig = cJSON_GetObjectItem(json,"adcconfig"); */
+    cJSON *adcconfig = cJSON_Parse( str );
 
     if (!adcconfig )
         return NULL;
@@ -1017,8 +1038,10 @@ ADCConfigBlock *NewADCConfigBlockFromJSON( char *str )
 
     ADCConfigBlockSetClockRate( adc, (ADCalMode)tmp->valueint );
 
-    if ( json ) 
-        cJSON_Delete(json);
+    if ( adcconfig ) 
+        cJSON_Delete( adcconfig );
+    /* if ( json )  */
+    /*     cJSON_Delete(json); */
     return adc;
 }
 

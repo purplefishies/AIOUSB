@@ -763,8 +763,8 @@ AIORESULT DIO_StreamFrame(
 
 /*****************************************************************************
  * Self-test 
- * @note This section is for stress testing the Continuous buffer in place
- * without using the USB features
+ * @note This section is for stress testing the DIO code without using the USB 
+ * features
  *
  ****************************************************************************/ 
 

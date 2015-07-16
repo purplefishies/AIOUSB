@@ -144,6 +144,9 @@ unsigned long ReadConfigBlock(unsigned long DeviceIndex,
         return result;
 
     configBlock = *(ADCConfigBlock*)AIOUSBDeviceGetADCConfigBlock( deviceDesc );
+    if ( !configBlock.device )
+        configBlock.device = deviceDesc;
+
     if (forceRead || deviceDesc->cachedConfigBlock.size == 0) {
         USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
         if ( result != AIOUSB_SUCCESS )
@@ -540,35 +543,30 @@ AIORET_TYPE adc_get_bulk_data( ADCConfigBlock *config,
  * @return
  */
 PRIVATE unsigned long AIOUSB_ArrayCountsToVolts(
-    unsigned long DeviceIndex,
-    int startChannel,
-    int numChannels,
-    const unsigned short counts[],
-    double volts[]
-     )
+                                                unsigned long DeviceIndex,
+                                                int startChannel,
+                                                int numChannels,
+                                                const unsigned short counts[],
+                                                double volts[]
+                                                )
 {
     AIORESULT result;
-    AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
-    if ( result  != AIOUSB_SUCCESS )
-        return result;
-    
-     if ( startChannel < 0 ||
-         numChannels < 0 ||
-         startChannel + numChannels > ( int )deviceDesc->ADCMUXChannels ||
-         counts == NULL ||
-         volts == NULL
-         ) {
-         return AIOUSB_ERROR_INVALID_PARAMETER;
-     }
+    AIO_ASSERT( volts );
+    AIO_ASSERT( counts );
+    AIO_ASSERT( startChannel >= 0 );
 
-     result = ReadConfigBlock(DeviceIndex, AIOUSB_FALSE);
-     if (result == AIOUSB_SUCCESS) {
-          for(int channel = 0; channel < numChannels; channel++) {
-               int gainCode = AIOUSB_GetGainCode(&deviceDesc->cachedConfigBlock, startChannel + channel);
-               const struct ADRange *const range = &adRanges[ gainCode ];
-               volts[ channel ] = ( (( double )counts[ channel ] / ( double )AI_16_MAX_COUNTS) * range->range ) + range->minVolts;
-          }
-     }
+    AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_PARAMETER, startChannel + numChannels <= ( int )deviceDesc->ADCMUXChannels );
+
+    result = ReadConfigBlock(DeviceIndex, AIOUSB_FALSE);
+    if (result == AIOUSB_SUCCESS) {
+        for(int channel = 0; channel < numChannels; channel++) {
+            int gainCode = ADCConfigBlockGetGainCode( &deviceDesc->cachedConfigBlock , startChannel + channel );
+            const struct ADRange *const range = &adRanges[ gainCode ];
+            volts[ channel ] = ( (( double )counts[ channel ] / ( double )AI_16_MAX_COUNTS) * range->range ) + range->minVolts;
+        }
+    }
 
      return result;
 }
@@ -746,8 +744,8 @@ AIORET_TYPE ADC_GetScanV( unsigned long DeviceIndex, double *pBuf )
      * out the channels in pBuf[] that aren't
      * going to be filled in with real readings
      */
-    unsigned startChannel  = AIOUSB_GetStartChannel(&deviceDesc->cachedConfigBlock);
-    unsigned endChannel    = AIOUSB_GetEndChannel(&deviceDesc->cachedConfigBlock);
+    unsigned startChannel  = ADCConfigBlockGetStartChannel( &deviceDesc->cachedConfigBlock );
+    unsigned endChannel    = ADCConfigBlockGetEndChannel( &deviceDesc->cachedConfigBlock );
 
     /**
      * zero out unused channels
@@ -790,27 +788,12 @@ AIORET_TYPE ADC_GetScan( unsigned long DeviceIndex,unsigned short *pBuf )
      * cleanliness, we zero out the channels in pBuf[] that aren't
      * going to be filled in with real readings
      */
-    memset(pBuf, 0, deviceDesc->ADCMUXChannels * sizeof(unsigned short));
+
     startChannel = AIOUSB_GetStartChannel(&deviceDesc->cachedConfigBlock);
 
     result = AIOUSB_GetScan(DeviceIndex, pBuf + startChannel);
 
     return result;
-}
-
-static AIOUSBDevice *ADC_CheckSupported_Lock( unsigned long DeviceIndex, unsigned long *result )
-{
-    AIOUSBDevice *deviceDesc =  AIODeviceTableGetDeviceAtIndex( DeviceIndex , result );
-    if ( *result  != AIOUSB_SUCCESS )
-        return (AIOUSBDevice*)NULL;
-
-    if (deviceDesc->ConfigBytes == 0) {
-        *result = AIOUSB_ERROR_NOT_SUPPORTED;
-        return (AIOUSBDevice*)NULL;
-    }
-    if ( deviceDesc == 0 && *result == AIOUSB_SUCCESS ) 
-        *result = AIOUSB_ERROR_OPEN_FAILED;
-    return deviceDesc;
 }
 
 /**
@@ -822,33 +805,27 @@ static AIOUSBDevice *ADC_CheckSupported_Lock( unsigned long DeviceIndex, unsigne
  * @return
  */
 unsigned long ADC_GetConfig(
-    unsigned long DeviceIndex,
-    unsigned char *ConfigBuf,
-    unsigned long *ConfigBufSize
-    )
+                            unsigned long DeviceIndex,
+                            unsigned char *ConfigBuf,
+                            unsigned long *ConfigBufSize
+                            )
 {
     AIORESULT result;
-    if ( ConfigBuf == NULL || ConfigBufSize == NULL ) 
-         return AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ASSERT( ConfigBuf );
+    AIO_ASSERT( ConfigBufSize );
 
-    AIOUSBDevice *deviceDesc = ADC_CheckSupported_Lock( DeviceIndex, &result );
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
 
-    if (*ConfigBufSize < deviceDesc->ConfigBytes) {
-        *ConfigBufSize = deviceDesc->ConfigBytes;
-        result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
-        goto out_ADC_GetConfig;
-    }
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_ENOUGH_MEMORY , *ConfigBufSize >= deviceDesc->ConfigBytes );
 
     result = ReadConfigBlock(DeviceIndex, AIOUSB_TRUE);
     AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_SIZE, deviceDesc->cachedConfigBlock.size > 0 );
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_SIZE, deviceDesc->cachedConfigBlock.size <= AD_MAX_CONFIG_REGISTERS );
 
-
     memcpy(ConfigBuf, deviceDesc->cachedConfigBlock.registers, deviceDesc->cachedConfigBlock.size);
     *ConfigBufSize = deviceDesc->cachedConfigBlock.size;
 
-out_ADC_GetConfig:
     return result;
 }
 

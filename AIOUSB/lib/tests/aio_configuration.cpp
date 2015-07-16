@@ -102,18 +102,6 @@ TEST(AIOCommandLine,MultipleJSONObjects )
     AIOArgument *args = aiousb_getoptions( argc, argv );
     EXPECT_EQ( *args->size, 2 );
 
-    for ( int i = 0; i < *args->size ; i ++ ) {
-        if ( i == 0 ) {
-            EXPECT_EQ( ADCConfigBlockGetOversample( &args[i].config.setting.adc ), 102 );
-            EXPECT_EQ( ADCConfigBlockGetEndChannel( &args[i].config.setting.adc ), 15 );
-            EXPECT_EQ( ADCConfigBlockGetStartChannel( &args[i].config.setting.adc ), 0 );
-        } else {
-            EXPECT_EQ( ADCConfigBlockGetOversample( &args[i].config.setting.adc ), 105 );
-            EXPECT_EQ( ADCConfigBlockGetEndChannel( &args[i].config.setting.adc ), 13 );
-            EXPECT_EQ( ADCConfigBlockGetStartChannel( &args[i].config.setting.adc ), 1 );
-        }
-    }
-
 }
 
 TEST(AIOCommandLine,DeviceObject )

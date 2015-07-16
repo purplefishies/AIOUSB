@@ -97,7 +97,7 @@ INCPATH			:= -Ilib $(CFLAGS)
 LIBPATH			:= -Llib $(LDFLAGS)
 
 CPPLIBS			+= $(LIBCLASSAIOUSB) $(LIBAIOUSBCPP)  $(LIBUSB) -lm $(LIBS)
-CLIBS			+= $(LIBAIOUSB) $(LIBUSB) -lm $(LIBS) $(COMMON_C_DEPS)
+CLIBS			+= $(COMMON_C_DEPS) $(LIBAIOUSB) $(LIBUSB) -lm $(LIBS) 
 
 TARGETS			:= $(wildcard *.cpp)
 CTARGETS		:= $(wildcard *.c)
