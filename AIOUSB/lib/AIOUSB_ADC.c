@@ -748,15 +748,6 @@ AIORET_TYPE ADC_GetScanV( unsigned long DeviceIndex, double *pBuf )
     unsigned endChannel    = ADCConfigBlockGetEndChannel( &deviceDesc->cachedConfigBlock );
 
     /**
-     * zero out unused channels
-     */
-    unsigned channel;
-    for(channel = 0; channel < deviceDesc->ADCMUXChannels; channel++) {
-        if ( channel < startChannel || channel > endChannel ) 
-            pBuf[ channel ] = 0.0;
-    }
-
-    /**
      * convert remaining channels to volts
      */
     result = AIOUSB_ArrayCountsToVolts(DeviceIndex, startChannel, endChannel - startChannel + 1,

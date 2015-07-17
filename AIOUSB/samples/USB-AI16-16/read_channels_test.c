@@ -77,7 +77,7 @@ int main( int argc, char **argv )
     
     for ( int i = 0, channel = 0; i < options.num_scans; i ++ , channel = 0) {
         ADC_GetScanV( options.index, volts );
-        for ( int j = ADCConfigBlockGetStartChannel( config ); j <= ADCConfigBlockGetEndChannel( config ); j ++ , channel ++) {
+        for ( int j = ADCConfigBlockGetStartChannel( config ); j < ADCConfigBlockGetEndChannel( config ) ; j ++ , channel ++) {
             printf("%.3f,", volts[channel] );
         }
         printf("%f\n", volts[channel] );

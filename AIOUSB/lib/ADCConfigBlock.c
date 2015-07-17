@@ -390,7 +390,7 @@ AIORET_TYPE ADCConfigBlockSetChannelRange(ADCConfigBlock *config,unsigned startC
 #else
         retval = ADCConfigBlockSetGainCode( config, i, gainCode);
 #endif
-        AIO_ERROR_VALID_DATA( retval, retval = AIOUSB_SUCCESS );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
     }
     return retval;
 }
@@ -1260,6 +1260,18 @@ TEST(ADCChannels, SomeFunctions ) {
 
 
 }
+
+TEST(ADCChannels, SetRangeGains ) {
+    ADCConfigBlock config = {0};
+
+    ADCConfigBlockSetChannelRange( &config, 0,3, 3 );    
+    
+    for ( int i = 0; i <=3 ; i ++ ) {
+        ASSERT_EQ( 3, config.registers[i] );
+    }
+
+}
+
 
 
 int main(int argc, char *argv[] )

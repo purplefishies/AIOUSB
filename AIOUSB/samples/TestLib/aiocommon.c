@@ -69,6 +69,8 @@ struct channel_range *get_channel_range(char *optarg )
     return tmp;
 }
 
+#define DUMP 0x1000
+
 /*----------------------------------------------------------------------------*/
 /**
  * @desc Simple command line parser sets up testing features
@@ -79,10 +81,13 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
     int error = 0;
     int option_index = 0;
     int query = 0;
+    int dump_adcconfig = 0;
     AIODisplayType display_type = BASIC;
 
     static struct option long_options[] = {
         {"debug"            , required_argument, 0,  'D'   },
+        {"dump"             , no_argument      , 0,   DUMP },
+        {"dumpadcconfig"    , no_argument      , 0,   DUMP },
         {"buffer_size"      , required_argument, 0,  'S'   },
         {"num_scans"        , required_argument, 0,  'N'   },
         {"num_channels"     , required_argument, 0,  'n'   },
@@ -136,6 +141,9 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
         case 'D':
             options->debug_level = (AIO_DEBUG_LEVEL)atoi(optarg);
             AIOUSB_DEBUG_LEVEL  = options->debug_level;
+            break;
+        case DUMP:
+            dump_adcconfig = 1;
             break;
         case 'f':
             options->outfile = strdup(optarg);
@@ -196,6 +204,21 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
         exit(0);
     }
 
+    if ( dump_adcconfig ) { 
+        if ( options->index == -1 ) { 
+            fprintf(stderr,"Error: Can't dump adcconfiguration without specifying index ( -i INDEX_NUM ) of the device\nexiting...\n");
+            exit(1);
+        } else {
+            AIOUSB_Init();
+            /* AIOUSB_ShowDevices( display_type ); */
+            ADCConfigBlock config;
+            ADCConfigBlockInitializeDefault( &config );
+            ADC_GetConfig( options->index, config.registers, &config.size );
+            printf("%s\n",ADCConfigBlockToJSON(&config));
+            exit(0);
+        }
+    } 
+
     if ( options->number_ranges == 0 ) { 
         if ( options->start_channel && options->end_channel && options->num_channels ) {
             fprintf(stdout,"Error: you can only specify -start_channel & -end_channel OR  --start_channel & --numberchannels\n");
@@ -231,7 +254,11 @@ void print_aio_usage(int argc, char **argv,  struct option *options)
 {
     fprintf(stderr,"%s - Options\n", argv[0] );
     for ( int i =0 ; options[i].name != NULL ; i ++ ) {
-        fprintf(stderr,"\t-%c | --%s ", (char)options[i].val, options[i].name);
+        if ( options[i].val < 255 ) { 
+            fprintf(stderr,"\t-%c | --%s ", (char)options[i].val, options[i].name);
+        } else {
+            fprintf(stderr,"\t     --%s ", options[i].name);
+        }
         if( options[i].has_arg == optional_argument ) {
             fprintf(stderr, " [ ARG ]\n");
         } else if( options[i].has_arg == required_argument ) {
