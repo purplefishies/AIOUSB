@@ -102,7 +102,7 @@ AIORESULT DIO_ConfigureWithDIOBuf(
                                   unsigned char bTristate,
                                   AIOChannelMask *mask,
                                   DIOBuf *buf
-                        ) 
+                                  )
 {
     AIOUSBDevice  *device = NULL;
     AIORESULT result;
@@ -309,8 +309,7 @@ AIORESULT DIO_WriteAll(
                        void *pData
                        ) 
 {
-    if ( !pData )
-        return AIOUSB_ERROR_INVALID_PARAMETER;
+    AIO_ASSERT( pData );
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *device = NULL;
     USBDevice *deviceHandle = _check_dio_get_device_handle( DeviceIndex, &device, &result );
@@ -456,26 +455,23 @@ AIORESULT DIO_ReadAll(
 
 /*----------------------------------------------------------------------------*/
 AIORESULT DIO_ReadIntoDIOBuf(
-                      unsigned long DeviceIndex,
-                      DIOBuf *buf
+                             unsigned long DeviceIndex,
+                             DIOBuf *buf
                       ) 
 {
+    AIO_ASSERT( buf );
 
-    if ( !buf )
-        return AIOUSB_ERROR_INVALID_PARAMETER;
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *device = NULL;
     int bytesTransferred;
     char *tmpbuf;
 
     USBDevice *deviceHandle = _check_dio_get_device_handle( DeviceIndex, &device,  &result );
-    if ( !deviceHandle )
-        return AIOUSB_ERROR_DEVICE_NOT_FOUND;
-  
+    AIO_ERROR_VALID_DATA(  result, result == AIOUSB_SUCCESS );
+
     tmpbuf = (char*)malloc( sizeof(char)*device->DIOBytes );
 
-    if ( !tmpbuf )
-        return AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_ENOUGH_MEMORY, tmpbuf );
     
     bytesTransferred = deviceHandle->usb_control_transfer(deviceHandle,
                                                           USB_READ_FROM_DEVICE, 
@@ -513,21 +509,18 @@ AIORESULT DIO_ReadAllToCharStr(
 {
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *device = NULL;
-    USBDevice *deviceHandle = _check_dio_get_device_handle( DeviceIndex, &device,  &result );
-    if ( !deviceHandle ) {
-        return result;
-    }
-    int bytes_to_transfer = MIN( size, device->DIOBytes );
+    USBDevice *usb = _check_dio_get_device_handle( DeviceIndex, &device,  &result );
+    AIO_ERROR_VALID_DATA( result , result == AIOUSB_SUCCESS );
 
-    int bytesTransferred = deviceHandle->usb_control_transfer(deviceHandle,
-                                                              USB_READ_FROM_DEVICE, 
-                                                              AUR_DIO_READ,
-                                                              0, 
-                                                              0, 
-                                                              (unsigned char *)buf,
-                                                              bytes_to_transfer,
-                                                              device->commTimeout
-                                                              );
+    int bytesTransferred = usb->usb_control_transfer(usb,
+                                                     USB_READ_FROM_DEVICE, 
+                                                     AUR_DIO_READ,
+                                                     0, 
+                                                     0, 
+                                                     (unsigned char *)buf,
+                                                     MIN( size, device->DIOBytes ),
+                                                     device->commTimeout
+                                                     );
     if ( bytesTransferred < 0 || bytesTransferred != (int)device->DIOBytes )
         result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
     

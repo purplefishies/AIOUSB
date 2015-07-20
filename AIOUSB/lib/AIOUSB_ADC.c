@@ -3115,7 +3115,6 @@ AIORET_TYPE AIOUSB_SetOversample(ADConfigBlock *config, unsigned overSample)
 /*----------------------------------------------------------------------------*/
 static int CompareVoltage(const void *p1, const void *p2)
 {
-    assert(p1 != 0 && p2 != 0);
     const double voltage1 = *( double* )p1, voltage2 = *( double* )p2;
     if (voltage1 < voltage2)
         return -1;
