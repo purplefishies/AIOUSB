@@ -174,8 +174,8 @@ enum {
 
 
 /**
- * other libraries often declare BOOL, TRUE and FALSE, and worse, they declare these
- * using #defines; so we sidestep that potential conflict by declaring the same types
+ * @brief other libraries often declare BOOL, TRUE and FALSE, and worse, they declare these
+ * using \#define; so we sidestep that potential conflict by declaring the same types
  * prefixed with AIOUSB_; it's ugly, but if people want to use the shorter names and
  * they are certain they won't conflict with anything else, they can define the
  * ENABLE_BOOL_TYPE macro

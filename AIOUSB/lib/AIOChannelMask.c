@@ -10,7 +10,7 @@ namespace AIOUSB {
 /*----------------------------------------------------------------------------*/
 /**
  * @brief Constructor AIOChannelMask bit mask object
- * @param num_channels The number of bits in our Bit Mask
+ * @param number_channels The number of bits in our Bit Mask
  */
 AIOChannelMask * NewAIOChannelMask( unsigned number_channels ) {
     AIOChannelMask *tmp = (AIOChannelMask *)malloc(sizeof(AIOChannelMask ));
@@ -43,7 +43,7 @@ AIOChannelMask * NewAIOChannelMask( unsigned number_channels ) {
 /*----------------------------------------------------------------------------*/
 /**
  * @brief Destructor for the AIOChannelMask object
- * @param mask , AIOChannelMask to delete
+ * @param mask AIOChannelMask to delete
  */
 void DeleteAIOChannelMask( AIOChannelMask *mask ) {
     if ( mask->strrep ) 
@@ -122,7 +122,7 @@ AIORET_TYPE AIOChannelMaskSetMaskAtIndex( AIOChannelMask *obj, char field, unsig
 }
 /*----------------------------------------------------------------------------*/
 /**
- * @bried Retrieves the mask at offset index, and saves it to tmp
+ * @brief Retrieves the mask at offset index, and saves it to tmp
  * @param obj The AIOChannelMask bit mask object
  * @param *tmp The object we save the BitMask to
  * @param index into the AIOChannelMask that we wish to retrieve the bitmask for
@@ -143,9 +143,10 @@ AIORET_TYPE AIOChannelMaskGetSize( AIOChannelMask *obj ) {
 }
 /*----------------------------------------------------------------------------*/
 /**
- * @brief Returns channels that are set to High ( not low )
- * @param channels
- **/
+ * @brief Returns channels that are set to High ( not low ) * 
+ * @param obj 
+ * @return 
+ */
 AIORET_TYPE AIOChannelMaskNumberChannels( AIOChannelMask *obj ) {
     return (AIORET_TYPE)obj->active_signals;
 }
@@ -219,7 +220,7 @@ AIOChannelMask *NewAIOChannelMaskFromChr( const char bits )
 /*----------------------------------------------------------------------------*/
 /**
  * @brief Returns a string representation for the AIOChannel Bit mask in question
- * @param mask AIOChannelMask to convert to string form
+ * @param obj AIOChannelMask to convert to string form
  */
 char *AIOChannelMaskToString( AIOChannelMask *obj ) {
      if( obj->strrep ) {

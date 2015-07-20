@@ -253,10 +253,9 @@ AIORET_TYPE ADCConfigBlockInit(ADCConfigBlock *config, AIOUSBDevice *deviceDesc,
 
 /*----------------------------------------------------------------------------*/
 /**
- * @brief 
  * @param config 
  * @param deviceDesc 
- * @param size 
+ * @return 
  */
 AIORET_TYPE ADCConfigBlockInitForCounterScan(ADCConfigBlock *config, AIOUSBDevice *deviceDesc  )
 {

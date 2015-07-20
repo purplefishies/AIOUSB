@@ -2,7 +2,6 @@
  * @file   DigitalIOSubsystem.cpp
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %h$
  * @brief class DigitalIOSubsystem implementation
  *
  */

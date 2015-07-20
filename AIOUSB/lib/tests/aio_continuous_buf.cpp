@@ -66,6 +66,7 @@ class ParamTest : public ::testing::TestWithParam<std::tuple<int,int,int,int>> {
  * @param num_scans_to_read     := 10*num_scans
  * @param lambda_write          := 4
  * @param lambda_read           := 3
+ * @endcond
  */
 TEST_P(ParamTest, WriteMultipleTimesSizeOfBuffer )
 {

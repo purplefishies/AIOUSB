@@ -2,7 +2,6 @@
  * @file   USBDeviceManager.hpp
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %h$
  * @brief class USBDeviceManager, OperationFailedException, IllegalArgumentException declarations
  */
 

@@ -2,7 +2,6 @@
  * @file   DIOStreamSubsystem.cpp
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %h$
  * @brief  class DIOStreamSubsystem implementation
  *
  */

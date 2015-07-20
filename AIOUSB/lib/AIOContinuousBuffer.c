@@ -495,10 +495,12 @@ AIORET_TYPE AIOContinuousBufGetDataAvailable( AIOContinuousBuf *buf )
 
 /*----------------------------------------------------------------------------*/
 /**
- * @brief will read in an integer number of scan counts if there is room.
+ * @brief will read in an integer number of scan counts if there is room. * 
  * @param buf 
- * @param tmp 
- * @param size The size of the tmp buffer
+ * @param read_buf 
+ * @param tmpbuffer_size 
+ * @param size  The size of the tmp buffer
+ * 
  * @return 
  */
 AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf, 
@@ -543,10 +545,12 @@ AIORET_TYPE AIOContinuousBufSetNumberOfScansToRead( AIOContinuousBuf *buf, unsig
 
 /*----------------------------------------------------------------------------*/
 /**
- * @brief will read in an integer number of scan counts if there is room.
+ * @brief will read in an integer number of scan counts if there is room. * 
  * @param buf 
- * @param tmp 
- * @param size The size of the tmp buffer
+ * @param read_buf 
+ * @param tmpbuffer_size 
+ * @param num_scans 
+ * 
  * @return 
  */
 AIORET_TYPE AIOContinuousBufReadIntegerNumberOfScans( AIOContinuousBuf *buf, 
@@ -619,10 +623,9 @@ AIORET_TYPE AIOContinuousBufSetClock( AIOContinuousBuf *buf, unsigned int hz )
 
 /*----------------------------------------------------------------------------*/
 /**
- * @brief Starts the thread that acquires data from USB bus.  
+ * @brief Starts the thread that acquires data from USB bus.   * 
  * @param buf 
- * @param work 
- * @return status code of start.
+ * @return  status code of start. 
  */
 AIORET_TYPE AIOContinuousBufStart( AIOContinuousBuf *buf )
 {
@@ -771,8 +774,9 @@ AIORET_TYPE _AIOContinuousBufRead( AIOContinuousBuf *buf , void *tobuf, size_t s
  * @brief Allows one to write into the AIOContinuousBuf buffer a given amount (size) of data.
  * @param buf 
  * @param writebuf 
+ * @param wrbufsize 
  * @param size 
- * @param flag
+ * @param flag 
  * @return Status of whether the write was successful , if so returning the number of bytes written
  *         or if there was insufficient space, it returns negative error code. If the number 
  *         is >= 0, then this corresponds to the number of bytes that were written into the buffer.
@@ -1547,9 +1551,12 @@ AIORET_TYPE AIOContinuousBufResetDevice( AIOContinuousBuf *buf)
 /*----------------------------------------------------------------------------*/
 /**
  * @brief Reads the current available amount of data from buf, into 
- *       the readbuf datastructure
+ *       the readbuf datastructure * 
  * @param buf 
  * @param readbuf 
+ * @param readbufsize 
+ * @param size 
+ * 
  * @return If number is positive, it is the number of bytes that have been read.
  */
 AIORET_TYPE AIOContinuousBufRead( AIOContinuousBuf *buf, AIOBufferType *readbuf , unsigned readbufsize, unsigned size)

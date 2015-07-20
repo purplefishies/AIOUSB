@@ -2,7 +2,6 @@
  * @file   USBDeviceManager.cpp
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %h$
  * @brief class USBDeviceManager implementation
  *
  */
@@ -390,16 +389,15 @@ USBDeviceArray USBDeviceManager::getDeviceByProductID( const IntArray &productID
  * @return An array of all the devices found. If no devices were found matching the specified
  * serial number, the array will be empty (i.e. contain zero items).
  */
-
 USBDeviceArray USBDeviceManager::getDeviceBySerialNumber( __uint64_t serialNumber ) const {
 	USBDeviceArray devices;
 	for( int index = 0; index < ( int ) deviceList.size(); index++ ) {
 		assert( deviceList.at( index ) != 0 );
 		if( deviceList.at( index )->getSerialNumber() == serialNumber )
 			devices.insert( devices.end(), deviceList.at( index ) );
-	}	// for( int index ...
+	}
 	return devices;
-}	// USBDeviceManager::getDeviceBySerialNumber()
+}
 
 
 

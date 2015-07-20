@@ -233,7 +233,7 @@ out_WriteConfigBlock:
  * @brief Performs a number of ADC_GetImmediate calls and then averages out the values
  *       to determine adequate values for the Ground and Reference values
  * @param DeviceIndex
- * @param grounCounts
+ * @param groundCounts
  * @param referenceCounts
  */
 AIORESULT ADC_Acquire_Reference_Counts(
@@ -787,13 +787,14 @@ AIORET_TYPE ADC_GetScan( unsigned long DeviceIndex,unsigned short *pBuf )
     return result;
 }
 
+/*----------------------------------------------------------------------------*/
 /**
  * @brief Copies the old Cached Config block registers into the pConfigBuf
- *       object.
- * @param DeviceIndex
- * @param pConfigBuf
- * @param ConfigBufSize
- * @return
+ *       object. * 
+ * @param DeviceIndex 
+ * @param ConfigBuf 
+ * @param ConfigBufSize 
+ * @return 
  */
 unsigned long ADC_GetConfig(
                             unsigned long DeviceIndex,
@@ -2303,11 +2304,12 @@ char * ADConfigBlockToYAML(ADConfigBlock *config)
 
     return strdup(tbuf);
 }
+
 /*----------------------------------------------------------------------------*/
 /**
- * @param DeviceIndex
- * @param pBuf
- * @return
+ * @param DeviceIndex 
+ * @param pData buffer we will write data into
+ * @return 
  */
 unsigned long ADC_GetFastITScanV(unsigned long DeviceIndex, double *pData)
 {

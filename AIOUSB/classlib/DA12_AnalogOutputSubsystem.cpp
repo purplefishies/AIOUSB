@@ -2,9 +2,7 @@
  * @file   DA12_AnalogOutputSubsystem.cpp
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %h$
  * @brief class DA12_AnalogOutputSubsystem implementation
- *
  */
 
 
