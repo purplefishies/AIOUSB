@@ -479,7 +479,6 @@ ADConfigBlock *AIOUSB_GetConfigBlock( DeviceDescriptor *dev)
 /**
  * @brief This function is deprecated.
  * @param DeviceIndex
- * @param BlockSize
  * @return 0 or greater if the blocksize is correct, negative number on
  *              error
  */

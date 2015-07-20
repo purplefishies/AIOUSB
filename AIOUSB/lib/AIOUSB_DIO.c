@@ -27,7 +27,7 @@ int TRISTATE_BYTES_SIZE(AIOUSBDevice *device)
 
 /*----------------------------------------------------------------------------*/
 /**
- * @desc Returns the number in Big-Endian format
+ * @brief Returns the number in Big-Endian format
  */
 unsigned short aiousb_htons(unsigned short octaveOffset)
 {

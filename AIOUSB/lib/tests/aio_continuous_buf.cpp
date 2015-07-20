@@ -55,6 +55,7 @@ TEST(AIOContinuousBuf,BasicReadAndWritingTest)
 class ParamTest : public ::testing::TestWithParam<std::tuple<int,int,int,int>> {};
 
 /**
+ * @cond TEST_DOCUMENTATION
  * @brief 
  * @todo Rely on Test fixture to set up the buffer
  * @todo Create tear down that deallocates all tmpbuffers for these

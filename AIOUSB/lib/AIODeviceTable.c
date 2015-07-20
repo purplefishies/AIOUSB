@@ -304,10 +304,7 @@ unsigned long QueryDeviceInfo( unsigned long DeviceIndex,
 {
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
-    if ( result != AIOUSB_SUCCESS ){
-
-        return result;
-    }
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
 
     if(pPID != NULL)
         *pPID = deviceDesc->ProductID;
@@ -318,10 +315,7 @@ unsigned long QueryDeviceInfo( unsigned long DeviceIndex,
     if(pCounters != NULL)
         *pCounters = deviceDesc->Counters;
 
-    if(
-        pNameSize != NULL &&
-        pName != NULL
-        ) {
+    if( pNameSize != NULL && pName != NULL ) {
         char *deviceName = GetSafeDeviceName(DeviceIndex);
           if(deviceName != 0) {
             /*
@@ -421,14 +415,13 @@ PRIVATE AIORET_TYPE ProductNameToID(const char *name)
     AIO_ASSERT( name );
     AIORET_TYPE retval = AIOUSB_SUCCESS;
 
-    /*
+    /**
      * productNameIndex[] represents an index into
      * productIDNameTable[], sorted by product name (see notes for
      * ProductIDToName())
      */
 
-    static ProductIDName *productNameIndex[ NUM_PROD_NAMES ];
-    /** index of product names in productIDNameTable[] */
+    static ProductIDName *productNameIndex[ NUM_PROD_NAMES ]; /**<index of product names in productIDNameTable[] */
 
     unsigned long INIT_PATTERN = 0x7e6b2017ul;
     /** random pattern */
@@ -479,6 +472,11 @@ AIORET_TYPE GetDevices(void)
 }
 
 /*----------------------------------------------------------------------------*/
+/**
+ * @param DeviceIndex 
+ * @param[out] result Error code if unable to find USB device 
+ * @return @c USBDevice *   A Usb handle that can be used for USB transactions
+ */
 USBDevice *AIODeviceTableGetUSBDeviceAtIndex( unsigned long DeviceIndex, AIORESULT *result )
 {
     AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( DeviceIndex , result );

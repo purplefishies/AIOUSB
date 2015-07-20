@@ -465,9 +465,11 @@ AIORET_TYPE CTR_8254ReadStatus(
 /*----------------------------------------------------------------------------*/
 /**
  * @brief Calculates the register values for buf->divisora, and buf->divisorb to create
- * an output clock that matches the value stored in buf->hz
- * @param buf AIOContinuousBuf object that we will be reading data into
- * @return Success(0) or failure( < 0 ) if we can't set the clocks
+ * an output clock that matches the value stored in buf->hz * 
+ * @param hz 
+ * @param [out] diva Divisor A to be calculated
+ * @param [out] divb Divisor B to be calculated
+ * @return >= 0 if succesful, - if failure
  */
 AIORET_TYPE CTR_CalculateCountersForClock( int hz , int *diva, int *divb )
 {
