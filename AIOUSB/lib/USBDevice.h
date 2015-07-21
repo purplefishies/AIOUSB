@@ -42,11 +42,8 @@ USBDevice * NewUSBDevice(libusb_device *dev, libusb_device_handle *handle );
 void DeleteUSBDevice( USBDevice *dev );
 USBDevice *CopyUSBDevice( USBDevice *usb );
 
-/* int InitializeUSBDevice( USBDevice *usb ); */
 AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args );
 
-
-int FindUSBDevices( USBDevice **devs, int *size );
 AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , USBDevice **devs , int *size );
 void DeleteUSBDevices( USBDevice *devs);
 

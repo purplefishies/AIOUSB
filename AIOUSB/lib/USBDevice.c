@@ -85,30 +85,10 @@ int USBDeviceClose( USBDevice *usb )
     return AIOUSB_SUCCESS;
 }
 
-
-/*----------------------------------------------------------------------------*/
-int FindUSBDevices( USBDevice **devs, int *size )
-{
-    int result = 0;
-
-    libusb_device **deviceList = 0;
-
-    AIO_ASSERT_VALID_DATA( -AIOUSB_ERROR_INVALID_DATA, devs );
-    AIO_ASSERT( size );
-
-    *size = 0;
-
-    AddAllACCESUSBDevices( deviceList, devs, size );
-
-    libusb_free_device_list(deviceList, AIOUSB_TRUE);
-
-    return result;
-}
-
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , USBDevice **devs , int *size )
 {
-    AIORET_TYPE result = AIOUSB_SUCCESS;
+    AIORET_TYPE result = AIOUSB_ERROR_DEVICE_NOT_FOUND;
     int numAccesDevices = 0;
     int numDevices = libusb_get_device_list(NULL, &deviceList);
     if (numDevices > 0) {
@@ -127,7 +107,7 @@ AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , USBDevice **devs
                     AIOEither usbretval = InitializeUSBDevice( &( *devs)[*size-1] , &args );
                     if ( AIOEitherHasError( &usbretval ) )
                         return -AIOUSB_ERROR_USB_INIT;
-                    result += 1;
+                    result = AIOUSB_SUCCESS;
                 }
             }
         }
@@ -379,22 +359,6 @@ int usb_reset_device( struct aiousb_device *usb )
 #include "gtest/gtest.h"
 #include "tap.h"
 using namespace AIOUSB;
-
-
-TEST(USBDevice,FindDevices ) 
-{
-    USBDevice *devs = NULL;
-    int size = 0;
-    libusb_init( NULL );        /* Required for FindUSBDevices */
-    FindUSBDevices( &devs, &size );
-    
-    EXPECT_GE( size, 0 );
-    
-    for ( int i = 0 ;i < size ; i ++ ) {
-        EXPECT_GE( USBDeviceGetIdProduct( &devs[i] ), 0 );
-    }
-
-}
 
 TEST(USBDevice,FailsCorrectly)
 {

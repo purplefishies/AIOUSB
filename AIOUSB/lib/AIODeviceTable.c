@@ -1364,8 +1364,9 @@ AIORET_TYPE AIODeviceTablePopulateTable(void)
     AIORET_TYPE result;
     USBDevice *usbdevices = NULL;
     int size = 0;
+    libusb_device **deviceList = 0;
 
-    result = FindUSBDevices( &usbdevices, &size );
+    result = AddAllACCESUSBDevices( deviceList, &usbdevices , &size );
 
     if ( result < AIOUSB_SUCCESS ) 
         return result;
@@ -1378,7 +1379,9 @@ AIORET_TYPE AIODeviceTablePopulateTable(void)
 
         device->usb_device = CopyUSBDevice( &usbdevices[i] );
     }
-    
+
+    libusb_free_device_list(deviceList, AIOUSB_TRUE);    
+
     return AIOUSB_SUCCESS;
 }
 
