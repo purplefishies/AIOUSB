@@ -63,12 +63,12 @@ sudo port install libusb cmake
 ##### Rasberry Pi
 
 ```bash
-sudo apt-get install libusb-1.0 cmake 
+sudo apt-get install libusb-1.0-0 libusb-1.0-0-dev  cmake 
 ```
 
 ##### Beagle Board
 ```bash
-sudo apt-get install libusb-1.0 cmake 
+sudo apt-get install libusb-1.0-0 libusb-1.0-0-dev cmake 
 ```
 
 -------------------------------------
