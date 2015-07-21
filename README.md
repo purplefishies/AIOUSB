@@ -8,12 +8,13 @@ This project contains USB drivers and APIs for ACCES I/O Product's line of USB b
 
 The entire set of drivers are rely on functionality provided by the [libusb-1.0](http://www.libusb.org/) library. Please see the [prequisites](#prereqs) section to find out about required software for building the driver.
 
-Currently, this project aims at providing 
-full support to the following platforms:
+Currently, this project provides full support to the following platforms:
 
 * Linux
 * Mac OS X 
 * Free / Net BSD
+* [Rasberry Pi](https://www.raspberrypi.org/) 
+* [Beagle Board](http://beagleboard.org/bone)
 * POSIX compliant operating systems that can successfully compile and use libusb.
 
 
@@ -59,11 +60,21 @@ brew install libusb  cmake
 sudo port install libusb cmake
 ```
 
+##### Rasberry Pi
+
+```bash
+sudo apt-get install libusb-1.0 cmake 
+```
+
+##### Beagle Board
+```bash
+sudo apt-get install libusb-1.0 cmake 
+```
 
 -------------------------------------
 
 
-##How to Build on UNIX systems
+##How to Build on *NIX systems
 -----------------------------
 Building ACCES I/O Products' Driver library amounts to compiling C source files to produce C and C++ based shared ( .so ) or static (.a) libraries.  The build process relies on either GNU make or Cmake.  The first method of building ( see [non-cmake users](#noncmake) is a little more involved but will give you the ability to build wrapper language packs.  Currently ,the simplified cmake system is easier to build and install the general libraries but we have been unable to use it to deploy the Swig based wrappers as we would have liked. 
 
