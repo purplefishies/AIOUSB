@@ -87,6 +87,7 @@ main(int argc, char *argv[] )
     }
 
     AIOCmd cmd = {.num_scans = 1 };
+    int modded_counter = 0, read_count = 0;
 
     AIOContinuousBufInitiateCallbackAcquisition(buf); /* Start the acquisition */
 #if __GNUC__
@@ -94,11 +95,20 @@ main(int argc, char *argv[] )
                 unsigned short tobuf[1024];
                 int num_samples_to_read = AIOContinuousBufGetNumberChannels(buf)*(1+AIOContinuousBufGetOversample(buf));
                 int data_read = AIOContinuousBufPopN( buf, tobuf, num_samples_to_read );
+                read_count += data_read;
+
+                if ( options.verbose && (modded_counter % options.rate_limit == 0 ) )
+                    fprintf(stdout,"Waiting : total=%u, readpos=%d, writepos=%d\n", read_count, 
+                            AIOContinuousBufGetReadPosition(buf), AIOContinuousBufGetWritePosition(buf));
+
+
                 for ( int i = 0; i < data_read / 2 ;i ++ ) { 
                     fprintf(fp,"%u,",tobuf[i] );
                 }
                 fprintf(fp,"\n");
                 fflush(fp);
+                modded_counter ++;
+
                 return (AIORET_TYPE)data_read;
                 })
         );

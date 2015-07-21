@@ -7,7 +7,7 @@
 #include "aiousb.h"
 
 
-struct opts AIO_OPTIONS = {100000, 16, 0, AD_GAIN_CODE_0_5V , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15, -1, -1, 0, 0,0, 
+struct opts AIO_OPTIONS = {100000, 16, 0, AD_GAIN_CODE_0_5V , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15, -1, -1, 0, 0,0,100, 
                            "{\"DeviceIndex\":0,\"base_size\":512,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2}",
                            "{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\",\"oversample\":\"0\",\"timeout\":\"1000\",\"clock_rate\":\"1000\"}",
                            NULL
@@ -71,6 +71,7 @@ struct channel_range *get_channel_range(char *optarg )
 
 #define DUMP 0x1000
 
+
 /*----------------------------------------------------------------------------*/
 /**
  * @desc Simple command line parser sets up testing features
@@ -103,13 +104,14 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
         {"block_size"       , required_argument, 0,  'B'   },
         {"timing"           , no_argument      , 0,  'T'   },
         {"query"            , no_argument      , 0,  'q'   },
+        {"ratelimit"        , required_argument, 0,  'L'   },
         {"yaml"             , no_argument      , 0,  'Y'   },
         {"json"             , no_argument      , 0,  'J'   },
         {0                  , 0,                 0,   0    }
     };
     while (1) { 
         struct channel_range *tmp;
-        c = getopt_long(argc, argv, "B:D:JN:R:S:TVYb:O:c:g:hi:m:n:o:q", long_options, &option_index);
+        c = getopt_long(argc, argv, "B:D:JL:N:R:S:TVYb:O:c:g:hi:m:n:o:q", long_options, &option_index);
         if( c == -1 )
             break;
         switch (c) {
@@ -134,6 +136,9 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
             break;
         case 'J':
             display_type = JSON;
+            break;
+        case 'L':
+            options->rate_limit = atoi(optarg);
             break;
         case 'q':
             query = 1;

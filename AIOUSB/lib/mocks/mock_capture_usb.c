@@ -81,7 +81,7 @@ int mock_usb_bulk_transfer( struct aiousb_device *dev_handle,
     printf("(%s)\n", ( direction == IN ? "in" : "out" ));
 
     retval = orig_usb_bulk_transfer( dev_handle, endpoint, data, length, actual_length, timeout );
-    fprintf(outfile,"%s,%s,%2.2x,%2.2x,%2.2x,", "bulk",(direction == IN ? "in" : "out" ), endpoint, length, *actual_length );
+    fprintf(outfile,"%s,%s,%#2.2x,%#2.2x,%#2.2x,", "bulk",(direction == IN ? "in" : "out" ), endpoint, length, *actual_length );
     for( int i = 0; i < *actual_length; i ++ ) {
         fprintf(outfile,"%2.2x ", (unsigned short)data[i] );
     }
