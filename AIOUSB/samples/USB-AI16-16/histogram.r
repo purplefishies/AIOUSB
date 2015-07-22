@@ -3,7 +3,7 @@
 RMS <- function(num) { sqrt(sum((num-ave(num))^2)/length(num)) }
 
 ## tmp <- hist(tmpdat$V1,freq=FALSE,breaks=5,xlim=c(range(tmpdat$V1)[1] - 200,range(tmpdat$V1)[2]+200),ylim=c(0,2000))
-AIOQual <- function( channel, tmpdata , hexvalues ) { 
+AIOQual <- function( channel, tmpdata , hexvalues , exactbreaks ) { 
   retval = paste("")
   stats <- fivenum(tmpdata)
   if( hexvalues ) {
@@ -11,7 +11,11 @@ AIOQual <- function( channel, tmpdata , hexvalues ) {
   } else {
     retval <- paste(retval, sprintf("Channel: %d\nMin:%f Max:%f\nSamples:%d\nAvg: %f\n",channel,stats[1],stats[5], length(tmpdata), as.integer(mean(tmpdata))),sep="")
   }
-  tmpstats <- hist(tmpdata,plot=FALSE)
+  if ( exactbreaks ) {
+      tmpstats <- hist(tmpdata,plot=FALSE,breaks=unique(tmpdata))
+  } else {
+      tmpstats <- hist(tmpdata,plot=FALSE)
+  }
   ## retval <- paste(retval, sprintf("Bins: %d RMS: %f\n", length(tmpstats$counts[tmpstats$counts > 0]),RMS(tmpdata)),sep="" )
   if( is.integer(stats[5]-stats[1] ) ) {
     retval <- paste(retval, sprintf("Bins: %d RMS: %f\n", stats[5]-stats[1],RMS(tmpdata)),sep="" )
@@ -31,8 +35,8 @@ AIOQual <- function( channel, tmpdata , hexvalues ) {
   retval 
 }
 
-if( length(argv) < 1 || length(argv) > 3 ) {
-  print("Error: Usage:  histogram.r CSVFILE.txt [ USE_HEXVALUES ] ")
+if( length(argv) < 1 || length(argv) > 4 ) {
+  print("Error: Usage:  histogram.r CSVFILE.txt [ USE_HEXVALUES ] [ EXACT_BREAKS ] ")
   quit(save="no")
 } else {
   tmpdat <- read.csv(argv[1],header=FALSE)
@@ -41,10 +45,17 @@ if( length(argv) < 1 || length(argv) > 3 ) {
   } else {
     hexdata <- TRUE 
   }
+
+  if( is.na(argv[3]) ) {
+    exactbreaks <- FALSE
+  } else {
+    exactbreaks <- TRUE 
+  }
+  
   retval = ""
   for ( i in 1:(dim(tmpdat)[2]-1) ) {
     ## printf("i=%d\n",i)
-    retval <- paste(retval, "\n\n",AIOQual( i, tmpdat[,i], hexdata ),sep="" )
+    retval <- paste(retval, "\n\n", AIOQual( i, tmpdat[,i], hexdata , exactbreaks ),sep="" )
   }
   print(cat(retval))
 }

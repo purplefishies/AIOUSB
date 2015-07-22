@@ -332,10 +332,10 @@ AIORET_TYPE AIOUSB_ShowDevices( AIODisplayType display_type )
 
     switch ( display_type ) {
     case BASIC:
-        printf("ACCES devices\n");
+        fprintf(stderr,"ACCES devices\n");
         break;
     case TERSE:
-        printf("AIODevices:\n");
+        fprintf(stderr,"AIODevices:\n");
         break;
     case JSON:
         printf("{\"devices\":[");
@@ -364,7 +364,7 @@ AIORET_TYPE AIOUSB_ShowDevices( AIODisplayType display_type )
                     /* Print heading before the first device found */
                     switch (display_type ) { 
                     case BASIC:
-                        printf(" found:\n");
+                        fprintf(stderr," found:\n");
                         break;
                     default:
                         break;
@@ -373,7 +373,7 @@ AIORET_TYPE AIOUSB_ShowDevices( AIODisplayType display_type )
                 }
                 switch ( display_type ) {
                 case BASIC:
-                    printf("  Device at index %d:\n  Product ID: %#.4lx\n  Product name: %s\n  Number of digital I/O bytes: %lu\n  Number of counters: %lu\n",
+                    fprintf(stderr,"  Device at index %d:\n  Product ID: %#.4lx\n  Product name: %s\n  Number of digital I/O bytes: %lu\n  Number of counters: %lu\n",
                            index,
                            productID,
                            name,
@@ -382,7 +382,7 @@ AIORET_TYPE AIOUSB_ShowDevices( AIODisplayType display_type )
                            );
                     break;
                 case TERSE:
-                    printf("index=%d,product_id=%#lx,product_name=%s,numIO=%lu,numCounters=%lu\n",index,productID,name,numDIOBytes,numCounters);
+                    fprintf(stderr,"index=%d,product_id=%#lx,product_name=%s,numIO=%lu,numCounters=%lu\n",index,productID,name,numDIOBytes,numCounters);
                     break;
                 case JSON:
                     if ( previous ) 

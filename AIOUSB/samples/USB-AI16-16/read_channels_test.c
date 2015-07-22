@@ -76,11 +76,23 @@ int main( int argc, char **argv )
     volts = (double*)malloc((ADCConfigBlockGetEndChannel( config )-ADCConfigBlockGetStartChannel( config )+1)*sizeof(double));
     
     for ( int i = 0, channel = 0; i < options.num_scans; i ++ , channel = 0) {
-        ADC_GetScanV( options.index, volts );
-        for ( int j = ADCConfigBlockGetStartChannel( config ); j < ADCConfigBlockGetEndChannel( config ) ; j ++ , channel ++) {
-            printf("%.3f,", volts[channel] );
+        if ( options.counts ) { /* --counts will write out the raw values */
+            ADC_GetScan( options.index, (unsigned short*)volts );
+            unsigned short *counts = (unsigned short *)volts;
+            for ( int j = ADCConfigBlockGetStartChannel( config ); j < ADCConfigBlockGetEndChannel( config ) ; j ++ , channel ++) {
+                printf("%u,", counts[channel] );
+            }
+            printf("%u\n", counts[channel] );
+
+
+        } else {
+            ADC_GetScanV( options.index, volts );
+            for ( int j = ADCConfigBlockGetStartChannel( config ); j < ADCConfigBlockGetEndChannel( config ) ; j ++ , channel ++) {
+                printf("%.3f,", volts[channel] );
+            }
+            printf("%f\n", volts[channel] );
         }
-        printf("%f\n", volts[channel] );
+
     }
 
     return result;

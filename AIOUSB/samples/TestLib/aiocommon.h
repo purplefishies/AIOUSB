@@ -29,6 +29,8 @@ struct opts {
     int slow_acquire;
     int buffer_size;
     int rate_limit;
+    int physical;
+    int counts;
     char *aiobuf_json;
     char *adcconfig_json;
     struct channel_range **ranges;
