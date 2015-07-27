@@ -588,7 +588,7 @@ AIOUSBDevice *_check_dio_stream( unsigned long DeviceIndex , AIORESULT *result )
 
     AIO_ERROR_VALID_DATA_W_CODE( NULL,*result = AIOUSB_ERROR_NOT_SUPPORTED , device->bDIOStream == AIOUSB_TRUE );
 
-    AIO_ERROR_VALID_DATA_W_CODE(NULL, *result = AIOUSB_ERROR_OPEN_FAILED,  !device->bDIOOpen );
+    AIO_ERROR_VALID_DATA_W_CODE(NULL, *result = AIOUSB_ERROR_OPEN_FAILED,  device->bDIOOpen == AIOUSB_TRUE );
 
     return device;
 }
