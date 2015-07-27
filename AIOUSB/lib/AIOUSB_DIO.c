@@ -818,7 +818,7 @@ TEST(DIO,CheckingInternalFunctions)
 
     
     device = _check_dio_stream( DeviceIndex, &result );
-    ASSERT_FALSE( device );
+    ASSERT_TRUE( device );
 
  }
 

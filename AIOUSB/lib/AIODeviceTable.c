@@ -667,10 +667,11 @@ AIORESULT  _Card_Specific_Settings(unsigned long DeviceIndex)
           device->bGetName = AIOUSB_TRUE;
           break;
 
+      case 0x8068:
+          device->bDACBoardRange = AIOUSB_TRUE;
       case 0x8008:
       case 0x8009:
       case 0x800A:
-      case 0x8068:
           device->DIOBytes = 1;
           device->bGetName = AIOUSB_TRUE;
           device->bDIOStream = AIOUSB_TRUE;
@@ -1161,6 +1162,7 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
       device->bDIOStream    = AIOUSB_TRUE;
       device->bClearFIFO    = AIOUSB_TRUE;
       device->bDACDIOClock  = AIOUSB_TRUE;
+      device->bDACBoardRange = AIOUSB_TRUE;
     } else if (
               productID >= USB_AO16_16A &&
               productID <= USB_AO12_4
