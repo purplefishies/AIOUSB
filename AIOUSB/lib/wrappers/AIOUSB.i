@@ -32,6 +32,7 @@
   #include "AIOTypes.h"
   #include "cJSON.h"
   #include "AIOUSB_DIO.h"
+  #include "AIOBuf.h"
   #include "DIOBuf.h"
   #include "libusb.h"
 %}
@@ -210,12 +211,6 @@
 
 #endif
 
-unsigned long ADC_RangeAll( unsigned long DeviceIndex, unsigned char *gainCodes ,unsigned long bSingleEnded );
-unsigned long ADC_GetScanV( unsigned long DeviceIndex, double *voltages );
-unsigned long ADC_GetChannelV(unsigned long DeviceIndex, unsigned long ChannelIndex, double *voltages );
-unsigned long CTR_StartOutputFreq( unsigned long DeviceIndex,  unsigned long BlockIndex, double *ctrClockHz );
-
-
 %include "AIOUSB_Core.h"
 %include "ADCConfigBlock.h"
 %include "AIOContinuousBuffer.h"
@@ -302,8 +297,8 @@ unsigned long CTR_StartOutputFreq( unsigned long DeviceIndex,  unsigned long Blo
   ~AIOBuf()  {
     DeleteAIOBuf$self);
   }
-
 }
+
 %extend diobuf_type {
 
   DIOBuf( int size ) {

@@ -12,26 +12,16 @@ namespace AIOUSB
 #endif
 
 
-#ifndef SWIG
+/* #ifndef SWIG */
 PUBLIC_EXTERN AIORET_TYPE ADC_GetScanV( unsigned long DeviceIndex, double *pBuf );
 PUBLIC_EXTERN AIORESULT ADC_RangeAll( unsigned long DeviceIndex, unsigned char *pGainCodes, unsigned long bSingleEnded );
-
 PUBLIC_EXTERN AIORET_TYPE ADC_GetChannelV( unsigned long DeviceIndex, unsigned long ChannelIndex, double *pBuf );
-
-
-#endif
+/* #endif */
     
 
-#ifndef SWIG
-PUBLIC_EXTERN AIORESULT ADC_SetAllGainCodeAndDiffMode( unsigned long DeviceIndex, unsigned gain, AIOUSB_BOOL differentialMode ) ACCES_DEPRECATED("Please use ADCConfigBlockSetAllGainCodeAndDiffMode instead");
-
-#endif
-
-
 PUBLIC_EXTERN AIORET_TYPE ADC_GetScan( unsigned long DeviceIndex, unsigned short *pBuf );
+
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short counts[] );
-
-
  
 PUBLIC_EXTERN AIORESULT ADC_GetConfig( unsigned long DeviceIndex, unsigned char *pConfigBuf, unsigned long *ConfigBufSize );
 
@@ -82,12 +72,18 @@ PUBLIC_EXTERN AIORESULT ADC_SetOversample( unsigned long DeviceIndex, unsigned c
 PUBLIC_EXTERN AIORESULT WriteConfigBlock(unsigned long DeviceIndex);
 PUBLIC_EXTERN AIORESULT ReadConfigBlock(unsigned long DeviceIndex,AIOUSB_BOOL forceRead  );
 
-/* DEPRECATED FUNCTIONS */
+
 
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetAllGainCodeAndDiffMode( ADConfigBlock *config, unsigned gainCode, AIOUSB_BOOL differentialMode );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetGainCode( const ADConfigBlock *config, unsigned channel );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetGainCode( ADConfigBlock *config, unsigned channel, unsigned gainCode );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_IsDifferentialMode( const ADConfigBlock *config, unsigned channel );
+
+PUBLIC_EXTERN AIORESULT AIOUSB_ADC_ExternalCal( unsigned long DeviceIndex, const double points[], int numPoints, unsigned short returnCalTable[], const char *saveFileName );
+
+/* DEPRECATED FUNCTIONS */
+#ifndef SWIG
+PUBLIC_EXTERN AIORESULT ADC_SetAllGainCodeAndDiffMode( unsigned long DeviceIndex, unsigned gain, AIOUSB_BOOL differentialMode ) ACCES_DEPRECATED("Please use ADCConfigBlockSetAllGainCodeAndDiffMode instead");
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetDifferentialMode( ADConfigBlock *config, unsigned channel, AIOUSB_BOOL differentialMode ) ACCES_DEPRECATED("Please use ADCConfigBlockSetDifferentialMode");
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetCalMode( const ADConfigBlock *config ) ACCES_DEPRECATED("Please use ADCConfigBlockGetCalMode");
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetCalMode( ADConfigBlock *config, unsigned calMode ) ACCES_DEPRECATED("Please use ADCConfigBlockSetCalMode");
@@ -95,10 +91,10 @@ PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetCalMode( ADConfigBlock *config, unsigned cal
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetOversample(ADConfigBlock *config, unsigned overSample) ACCES_DEPRECATED("Please use ADCConfigBlockSetOversample");
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetOversample(ADConfigBlock *config ) ACCES_DEPRECATED("Please use ADCConfigBlockGetOversample");
 
-PUBLIC_EXTERN AIORESULT AIOUSB_ADC_ExternalCal( unsigned long DeviceIndex, const double points[], int numPoints, unsigned short returnCalTable[], const char *saveFileName );
-
 PUBLIC_EXTERN unsigned AIOUSB_GetTriggerMode( const ADConfigBlock *config ) ACCES_DEPRECATED("Please use ADCConfigBlockGetTriggerMode");
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetTriggerMode( ADConfigBlock *config, unsigned triggerMode ) ACCES_DEPRECATED("Please use ADCConfigBlockSetTriggerMode");
+#endif
+
 PUBLIC_EXTERN unsigned AIOUSB_GetStartChannel( const ADConfigBlock *config );
 PUBLIC_EXTERN unsigned AIOUSB_GetEndChannel( const ADConfigBlock *config );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_SetScanRange( ADConfigBlock *config, unsigned startChannel, unsigned endChannel );

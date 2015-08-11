@@ -678,6 +678,9 @@ AIORESULT DIO_StreamSetClocks(
 
     *( unsigned short* )&configBlock[ 1 ] = OctaveDacFromFreq(WriteClockHz);
     *( unsigned short* )&configBlock[ 3 ] = OctaveDacFromFreq(ReadClockHz);
+    /* *( unsigned short* )&configBlock[ 1 ] =  */
+    /*     *( unsigned short* )&configBlock[ 3 ] =  */
+
     bytesTransferred = usb->usb_control_transfer(usb,
                                                  USB_WRITE_TO_DEVICE, 
                                                  AUR_DIO_SETCLOCKS,
@@ -732,6 +735,8 @@ AIORESULT DIO_StreamFrame(
                                                            &bytes, 
                                                            device->commTimeout
                                                            );
+        /* usleep( 800 ); */
+
         if (libusbResult == LIBUSB_SUCCESS) {
             if (bytes > 0) {
                 total += bytes;

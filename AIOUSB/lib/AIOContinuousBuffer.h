@@ -78,18 +78,12 @@ typedef struct aio_continuous_buf {
 #define ROOTCLOCK 10000000
 
 /*-----------------------------  Constructors  ------------------------------*/
- PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex, unsigned num_channels, unsigned num_oversamples, unsigned base_size );
-PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufWithoutConfig( unsigned long DeviceIndex, unsigned scancounts , unsigned num_channels , AIOUSB_BOOL counts );
-PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufLegacy( unsigned long DeviceIndex, unsigned scancounts , unsigned num_channels );
+PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex, unsigned num_channels, unsigned num_oversamples, unsigned base_size );
+
 
 
 PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels );
-PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufTesting( unsigned long DeviceIndex , unsigned scancounts , unsigned num_channels , AIOUSB_BOOL counts  );
 PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufForVolts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels, unsigned num_oversamples );
-
-
-PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBufRawSmart( unsigned long DeviceIndex, unsigned num_channels, unsigned num_scans,unsigned unit_size, unsigned num_oversamples );
-
 
 /*-----------------------------  Destructor   -------------------------------*/
 
@@ -107,8 +101,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetCallback(AIOContinuousBuf *buf , vo
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetStreamingBlockSize( AIOContinuousBuf *buf, unsigned sblksize);
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetStreamingBlockSize( AIOContinuousBuf *buf );
 
-PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetNumberOfChannels( AIOContinuousBuf * buf, unsigned num_channels ) ACCES_DEPRECATED("Please use AIOContinuousBufSetNumberChannels");
-PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetNumberOfChannels( AIOContinuousBuf * buf) ACCES_DEPRECATED("Please use AIOContinuousBufGetNumberChannels");
+
 
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetNumberChannels( AIOContinuousBuf * buf, unsigned num_channels );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetNumberChannels( AIOContinuousBuf * buf);
@@ -169,6 +162,9 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufPopN(AIOContinuousBuf *buf , void *tob
 
 /*-----------------------------  Deprecated / Refactored   -------------------------------*/
 #ifndef SWIG
+
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetNumberOfChannels( AIOContinuousBuf * buf, unsigned num_channels ) ACCES_DEPRECATED("Please use AIOContinuousBufSetNumberChannels");
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetNumberOfChannels( AIOContinuousBuf * buf) ACCES_DEPRECATED("Please use AIOContinuousBufGetNumberChannels");
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_InitConfiguration(  AIOContinuousBuf *buf ) ACCES_DEPRECATED("Please use AIOContinuousBufInitConfiguration");
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_SetCallback(AIOContinuousBuf *buf , void *(*work)(void *object ) ) ACCES_DEPRECATED("Please use AIOContinuousBufSetCallback");
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_SetTesting( AIOContinuousBuf *buf, AIOUSB_BOOL testing ) ACCES_DEPRECATED("Please use AIOContinuousBufSetTesting");
@@ -213,14 +209,8 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBu
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufReadCompleteScanCounts( AIOContinuousBuf *buf, unsigned short *read_buf, unsigned read_buf_size );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufReadIntegerNumberOfScans( AIOContinuousBuf *buf, unsigned short *read_buf, unsigned tmpbuffer_size, size_t num_scans );
 
-PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufReadIntegerGetNumberOfScans( AIOContinuousBuf *buf );
-PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufReadIntegerSetNumberOfScans( AIOContinuousBuf *buf, unsigned num_scans );
-
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetCountsBuffer( AIOContinuousBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetVoltsBuffer( AIOContinuousBuf *buf );
-
-
-
 
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufCountScansAvailable(AIOContinuousBuf *buf);
 
