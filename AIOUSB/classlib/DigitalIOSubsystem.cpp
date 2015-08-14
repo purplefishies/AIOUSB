@@ -262,7 +262,7 @@ DigitalIOSubsystem &DigitalIOSubsystem::getConfiguration( BoolArray *tristates, 
 bool DigitalIOSubsystem::read( int channel ) {
     if( channel < 0 || channel >= numChannels ) 
         throw IllegalArgumentException( "Invalid channel" );
-    int byteValue = 0;
+    unsigned char byteValue = 0;
     int result = DIO_Read1( getDeviceIndex(), channel , &byteValue );
     if( result < AIOUSB_SUCCESS )
         throw OperationFailedException( result );

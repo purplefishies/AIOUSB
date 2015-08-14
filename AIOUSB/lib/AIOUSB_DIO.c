@@ -531,7 +531,7 @@ AIORESULT DIO_ReadAllToCharStr(
 AIORESULT DIO_Read8(
                     unsigned long DeviceIndex,
                     unsigned long ByteIndex,
-                    int *pdat
+                    unsigned char *pdat
                     ) 
 {
     AIO_ASSERT( pdat );
@@ -562,11 +562,11 @@ AIORESULT DIO_Read8(
 AIORESULT DIO_Read1(
                     unsigned long DeviceIndex,
                     unsigned long BitIndex,
-                    int *bit
+                    unsigned char *bit
                     ) 
 {
     char result = AIOUSB_SUCCESS;
-    int value = 0;
+    unsigned char value = 0;
     
     AIO_ASSERT( bit );
 
@@ -836,7 +836,7 @@ TEST(DIO,CheckConfigureEx)
     void *pOutMask = NULL;
     void *pData = NULL ;
     void *pTristateMask = NULL;
-    int bitindex = 0;
+    unsigned char bitindex = 0;
 
     ASSERT_DEATH( {DIO_ConfigureEx(DeviceIndex, pOutMask,pData,pTristateMask); },"Assertion `pOutMask' failed"); 
     ASSERT_DEATH( {DIO_ConfigurationQuery(DeviceIndex, pOutMask, pTristateMask ); }, "Assertion `pOutMask' failed" );
