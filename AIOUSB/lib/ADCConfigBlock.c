@@ -1130,7 +1130,18 @@ TEST(ADCConfigBlock, JSONRepresentation)
     
 }
 
+TEST(ADCConfigBlock, SetAllGainCodes) 
+{
+    AIOUSBDevice dev;
+    AIOUSBDeviceInitializeWithProductID( &dev, USB_AIO16_16A );
+    ADConfigBlock configBlock;
+    ADCConfigBlockInitializeFromAIOUSBDevice( &configBlock, &dev );
+            
+    AIOUSB_SetAllGainCodeAndDiffMode( &configBlock, AD_GAIN_CODE_0_2V, AIOUSB_FALSE );
 
+    for ( int i = 0; i < 16 ; i ++ )
+        ASSERT_EQ( AD_GAIN_CODE_0_2V, configBlock.registers[0] );
+}
 
 TEST(ADCConfigBlock,CopyConfigs ) 
 {

@@ -2848,7 +2848,7 @@ AIORET_TYPE AIOUSB_SetAllGainCodeAndDiffMode(ADConfigBlock *config, unsigned gai
     AIO_ASSERT( config );
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_SETTING, config->device );
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_SETTING, config->size );
-    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_GAINCODE, gainCode <= FIRST_ENUM( ADGainCode) && gainCode <= LAST_ENUM(ADGainCode) );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_GAINCODE, gainCode >= FIRST_ENUM( ADGainCode) && gainCode <= LAST_ENUM(ADGainCode) );
 
     if (differentialMode)
         gainCode |= AD_DIFFERENTIAL_MODE;
