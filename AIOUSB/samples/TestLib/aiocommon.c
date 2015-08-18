@@ -7,7 +7,7 @@
 #include "aiousb.h"
 
 
-struct opts AIO_OPTIONS = {100000, 16, 0, AD_GAIN_CODE_0_5V , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15, -1, -1, 0, 0,0,100,0,0, 
+struct opts AIO_OPTIONS = {100000, 16, 0, AD_GAIN_CODE_0_5V , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15, -1, -1, 0, 0,0,100,0,0,0,
                            "{\"DeviceIndex\":0,\"base_size\":512,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2}",
                            "{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\",\"oversample\":\"0\",\"timeout\":\"1000\",\"clock_rate\":\"1000\"}",
                            NULL
@@ -95,6 +95,7 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
         {"num_oversamples"  , required_argument, 0,  'O'   },
         {"gaincode"         , required_argument, 0,  'g'   },
         {"clockrate"        , required_argument, 0,  'c'   },
+        {"calibration"      , required_argument, 0 , 'C'   },
         {"help"             , no_argument      , 0,  'h'   },
         {"index"            , required_argument, 0,  'i'   },
         {"range"            , required_argument, 0,  'R'   },
@@ -113,7 +114,7 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
     };
     while (1) { 
         struct channel_range *tmp;
-        c = getopt_long(argc, argv, "B:D:JL:N:R:S:TVYb:O:c:g:hi:m:n:o:q", long_options, &option_index);
+        c = getopt_long(argc, argv, "B:C:D:JL:N:R:S:TVYb:O:c:g:hi:m:n:o:q", long_options, &option_index);
         if( c == -1 )
             break;
         switch (c) {
@@ -132,6 +133,20 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
             break;
         case 'B':
             options->block_size = atoi( optarg );
+            break;
+        case 'C':
+            options->calibration = atoi( optarg );
+            if ( !VALID_ENUM( ADCalMode, options->calibration ) ) {
+                fprintf(stderr,"Error: calibration %d is not valid\n", options->calibration );
+                fprintf(stderr,"Acceptable values are %d,%d,%d and %d\n",
+                        AD_CAL_MODE_NORMAL,
+                        AD_CAL_MODE_GROUND,
+                        AD_CAL_MODE_REFERENCE,
+                        AD_CAL_MODE_BIP_GROUND
+                        );
+                fprintf(stderr, "Using default AD_CAL_MODE_NORMAL\n");
+                options->calibration = AD_CAL_MODE_NORMAL;
+            }
             break;
         case 'Y':
             display_type = YAML;

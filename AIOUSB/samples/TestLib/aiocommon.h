@@ -31,6 +31,7 @@ struct opts {
     int rate_limit;
     int physical;
     int counts;
+    int calibration;
     char *aiobuf_json;
     char *adcconfig_json;
     struct channel_range **ranges;
