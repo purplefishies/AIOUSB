@@ -419,7 +419,7 @@ PRIVATE AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short co
      */
     if ( configChanged )
         result = USBDevicePutADCConfigBlock( usb, &deviceDesc->cachedConfigBlock );
-
+    
 
     numSamples = numChannels * samplesPerChannel;
  
@@ -651,18 +651,15 @@ unsigned short AIOUSB_VoltsToCounts(
  * @param pBuf
  * @return
  */
-AIORET_TYPE ADC_GetChannelV(
-                            unsigned long DeviceIndex,
-                            unsigned long ChannelIndex,
-                            double *pBuf
-                            )
+AIORET_TYPE ADC_GetChannelV(unsigned long DeviceIndex, unsigned long ChannelIndex, double *singlevoltage )
 {
-    AIO_ASSERT( pBuf );
+    AIO_ASSERT( singlevoltage );
     AIORET_TYPE result = AIOUSB_SUCCESS;
     unsigned short counts;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, (AIORESULT*)&result );
+
     AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
-    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_SUPPORTED, deviceDesc->bADCStream == AIOUSB_FALSE );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_SUPPORTED, deviceDesc->bADCStream == AIOUSB_TRUE );
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_PARAMETER, ChannelIndex < deviceDesc->ADCMUXChannels );
 
     /**
@@ -694,13 +691,14 @@ AIORET_TYPE ADC_GetChannelV(
     result = WriteConfigBlock(DeviceIndex);
 
     result = AIOUSB_GetScan(DeviceIndex, &counts);
+
     if (result >= AIOUSB_SUCCESS) {
         double volts;
         result = AIOUSB_ArrayCountsToVolts(DeviceIndex, ChannelIndex, 1, &counts, &volts);
         if (result == AIOUSB_SUCCESS)
-            *pBuf = volts;
+            *singlevoltage = volts;
         else
-            *pBuf = 0.0;
+            *singlevoltage = 0.0;
     }
 
     deviceDesc->cachedConfigBlock = origConfigBlock;
@@ -1111,6 +1109,7 @@ unsigned long ADC_ADMode(
                          )
 {
     AIORESULT result = AIOUSB_SUCCESS;
+    ADCConfigBlock tmpblock = {0};
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_TRIGGER_SETTING, (TriggerMode & ~AD_TRIGGER_VALID_MASK) == 0 );
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_ADCCONFIG_CAL_SETTING, VALID_ENUM(ADCalMode , CalMode ));
     
@@ -1118,15 +1117,22 @@ unsigned long ADC_ADMode(
 
     AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_SUPPORTED, deviceDesc->bADCStream == AIOUSB_TRUE );
-
-    result = ReadConfigBlock(DeviceIndex, AIOUSB_FALSE);
-    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
-        
-    ADCConfigBlockSetCalMode(&deviceDesc->cachedConfigBlock, (ADCalMode)CalMode);
-    ADCConfigBlockSetTriggerMode(&deviceDesc->cachedConfigBlock, TriggerMode);
+    USBDevice *usb = AIOUSBDeviceGetUSBHandle( deviceDesc );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_INVALID_USBDEVICE, usb );
     
-    result = WriteConfigBlock(DeviceIndex);
+    tmpblock.timeout = deviceDesc->commTimeout;
 
+    ADCConfigBlockCopy( &tmpblock, &deviceDesc->cachedConfigBlock );
+    result = USBDeviceFetchADCConfigBlock( usb , &tmpblock );
+
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
+
+    ADCConfigBlockSetCalMode(&tmpblock, (ADCalMode)CalMode);
+    ADCConfigBlockSetTriggerMode(&tmpblock, TriggerMode);
+
+    ADCConfigBlockCopy( &deviceDesc->cachedConfigBlock, &tmpblock );
+
+    result = USBDevicePutADCConfigBlock( usb, &tmpblock );
 
     return result;
 }

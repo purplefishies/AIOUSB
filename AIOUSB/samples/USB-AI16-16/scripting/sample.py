@@ -20,7 +20,7 @@ class Device:
 MAX_NAME_SIZE = 20;
 
 deviceIndex = 0;
-deviceFound = AIOUSB.AIOUSB_FALSE
+deviceFound = AIOUSB_FALSE
 
 CAL_CHANNEL = 5
 MAX_CHANNELS = 128
@@ -35,21 +35,21 @@ AIOUSB library version %s, %s
 This program demonstrates controlling a USB-AI16-16A device on
 the USB bus. For simplicity, it uses the first such device found
 on the bus.
-""" % ( AIOUSB.AIOUSB_GetVersion(), AIOUSB.AIOUSB_GetVersionDate() )
+""" % ( AIOUSB_GetVersion(), AIOUSB_GetVersionDate() )
 
-result = AIOUSB.AIOUSB_Init()
-if result != AIOUSB.AIOUSB_SUCCESS:
+result = AIOUSB_Init()
+if result != AIOUSB_SUCCESS:
     print "Error running AIOUSB_Init()..."
     sys.exit(1)
 
-deviceMask = AIOUSB.GetDevices()
+deviceMask = GetDevices()
 if deviceMask == 0:
     print "No ACCES devices found on USB bus\n"
     sys.exit(1)
 
 number_devices = 1
 devices = []
-AIOUSB.AIOUSB_ListDevices()
+AIOUSB_ListDevices()
 index = 0
 
 while deviceMask > 0 and len(devices) < number_devices :
@@ -69,8 +69,6 @@ ACCES I/O Products USB device plugged into your computer"""
 
 deviceIndex = device.index
 
-
-
 AIOUSB_Reset( deviceIndex );
 print "Setting timeout"
 AIOUSB_SetCommTimeout( deviceIndex, 1000 );
@@ -79,41 +77,44 @@ AIOUSB_SetDiscardFirstSample( deviceIndex, AIOUSB_TRUE );
 
 serialNumber = 0
 
-serialNumber = AIOUSB.new_ulp()
-result = GetDeviceSerialNumber( deviceIndex, serialNumber );
-print "Serial number of device at index %d: %x" % ( deviceIndex, ulp_value( serialNumber ))
+[ndevice,result] = AIODeviceTableGetDeviceAtIndex( deviceIndex )
 
-result = 0
-ndevice,result = AIODeviceTableGetDeviceAtIndex( deviceIndex , result )
+if result < AIOUSB_SUCCESS:
+    print "Error: Can't get device\n"
+    exit(1)
+
 
 cb = AIOUSBDeviceGetADCConfigBlock( ndevice )
 
-
 AIOUSB_SetAllGainCodeAndDiffMode( cb, AD_GAIN_CODE_10V, AIOUSB_FALSE );
-AIOUSB_SetCalMode( cb, AD_CAL_MODE_NORMAL );
-AIOUSB_SetTriggerMode( cb, 0 );
-AIOUSB_SetScanRange( cb, 2, 13 );
-AIOUSB_SetOversample( cb, 0 );
+ADCConfigBlockSetCalMode( cb, AD_CAL_MODE_NORMAL );
+ADCConfigBlockSetTriggerMode( cb, 0 );
+ADCConfigBlockSetScanRange( cb, 2, 13 );
+ADCConfigBlockSetOversample( cb, 0 );
 
-ADC_WriteADConfigBlock( deviceIndex, cb )
 
+AIOUSBDeviceWriteADCConfig( ndevice, cb ); # Write the config block to the device
 
 print "A/D settings successfully configured"
 
-
+retval = 0
 retval = ADC_SetCal(deviceIndex, ":AUTO:")
-if result != AIOUSB_SUCCESS:
-    print "Error '%s' performing automatic A/D calibration" % ( AIOUSB_GetResultCodeAsString( result ) )
+
+if retval != AIOUSB_SUCCESS:
+    print "Error '%s' performing automatic A/D calibration" % ( AIOUSB_GetResultCodeAsString( retval ) )
     sys.exit(0)
 
 ADC_SetOversample( deviceIndex, 0 );
 ADC_SetScanLimits( deviceIndex, CAL_CHANNEL, CAL_CHANNEL );
 ADC_ADMode( deviceIndex, 0 , AD_CAL_MODE_GROUND );
 
+
+# A better API is coming soon, so you won't have to do
+# this to get Data
 counts = new_ushortarray( 16 )
 result = ADC_GetScan( deviceIndex, counts );
 
-if result != AIOUSB_SUCCESS:
+if retval < AIOUSB_SUCCESS:
     print "Error '%s' attempting to read ground counts\n" % ( AIOUSB_GetResultCodeAsString( result ) )
 else:
     print "Ground counts = %u (should be approx. 0)" % ( ushort_getitem( counts, CAL_CHANNEL) )
@@ -121,7 +122,7 @@ else:
 
 ADC_ADMode( deviceIndex, 0 , AD_CAL_MODE_REFERENCE ) # TriggerMode
 result = ADC_GetScan( deviceIndex, counts );
-if result != AIOUSB_SUCCESS:
+if result < AIOUSB_SUCCESS:
     print "Error '%s' attempting to read reference counts" % ( AIOUSB_GetResultCodeAsString( result ) )
 else:
     print "Reference counts = %u (should be approx. 65130)" % ( ushort_getitem( counts, CAL_CHANNEL) )
@@ -134,12 +135,13 @@ gainCodes = [0 for x in range(0,16)]
 for channel in range(0,len(gainCodes)):
     gainCodes[channel] = AD_GAIN_CODE_0_10V
 
-ADC_RangeAll( deviceIndex , gainCodes, AIOUSB_TRUE )
-ADC_SetOversample( deviceIndex, NUM_OVERSAMPLES )
-ADC_SetScanLimits( deviceIndex, 0, NUM_CHANNELS - 1 )
-ADC_ADMode( deviceIndex, 0 , AD_CAL_MODE_NORMAL )
 
-print "Volts read:"
+ADC_RangeAll( deviceIndex, gainCodes, AIOUSB_TRUE );
+
+
+ADC_SetOversample( deviceIndex, NUM_OVERSAMPLES );
+ADC_SetScanLimits( deviceIndex, 0, NUM_CHANNELS - 1 );
+ADC_ADMode( deviceIndex, 0 , AD_CAL_MODE_NORMAL );
 
 volts = [0.0 for x in range(0,16)]
 for i in range(0,1):
@@ -148,71 +150,10 @@ for i in range(0,1):
         print "  Channel %2d = %6.6f" % ( j, result[j] )
 
 
-# demonstrate reading a single channel in volts
-result = ADC_GetChannelV( deviceIndex, CAL_CHANNEL, volts[ CAL_CHANNEL ] );
-
-print "Result from A/D channel %d was %f " % (CAL_CHANNEL, result[0] )
-result = ADC_GetChannelV( deviceIndex, 0 , volts[ CAL_CHANNEL ] );
-print "Result from A/D channel %d was %f " % (  0 , result[0] )
-
-
-# 
-# demonstrate bulk acquire
-# 
-
-AIOUSB_Reset( deviceIndex );
-ADC_SetOversample( deviceIndex, NUM_OVERSAMPLES );
-ADC_SetScanLimits( deviceIndex, 0, NUM_CHANNELS - 1 );
-
-AIOUSB_SetStreamingBlockSize( deviceIndex, 64*1024 );
-
-
-print("Allocating %d Bytes" % ( BULK_BYTES ))
-databuf = new_ushortarray( BULK_BYTES )
+[result,voltage] = ADC_GetChannelV( deviceIndex, CAL_CHANNEL );
+print "Result from A/D channel %d was %s " % (CAL_CHANNEL, voltage )
 
 
 
-clockHz = 0;
-CTR_StartOutputFreq( deviceIndex, 0, clockHz );
-clockHz = 0;
-CTR_StartOutputFreq( deviceIndex, 0, clockHz );
-
-
-# 
-#  configure A/D for timer-triggered acquisition
-#
-ADC_ADMode( deviceIndex, AD_TRIGGER_SCAN | AD_TRIGGER_TIMER, AD_CAL_MODE_NORMAL );
-
-
-# 
-# start bulk acquire; ADC_BulkAcquire() will take care of starting
-# and stopping the counter; but we do have to tell it what clock
-# speed to use, which is why we call AIOUSB_SetMiscClock()
-# 
-print("Using Clock speed %d to acquire data" % ( CLOCK_SPEED ))
-AIOUSB_SetMiscClock( deviceIndex, CLOCK_SPEED );
-
-result = ADC_BulkAcquire( deviceIndex, BULK_BYTES, databuf );
-
-if result != AIOUSB_SUCCESS:
-    print( "Error '%s' attempting to start bulk acquire of %d bytes\n" % (AIOUSB_GetResultCodeAsString( result ), BULK_BYTES ))
-    sys.exit(1)
-else:
-    print( "Started bulk acquire of %d bytes" % ( BULK_BYTES ))
-
-bytesRemaining = new_ulp()
-ulp_assign( bytesRemaining, BULK_BYTES )
-
-for i in range(0,60):
-    time.sleep(1)
-    result = ADC_BulkPoll( deviceIndex, bytesRemaining )
-    if result != AIOUSB_SUCCESS:
-        print("Error '%s' polling bulk acquire progress" % AIOUSB_GetResultCodeAsString( result ) )
-    else:
-        print( "  %lu bytes remaining" % ( ulp_value( bytesRemaining ) ))
-        if ulp_value(bytesRemaining) == 0:
-            break
-
-sys.exit(0)
 
 

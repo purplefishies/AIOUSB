@@ -358,6 +358,9 @@ AIORET_TYPE AIOUSB_ShowDevices( AIODisplayType display_type )
             unsigned long numCounters;
 
             unsigned long result = QueryDeviceInfo(index, &productID, &nameSize, name, &numDIOBytes, &numCounters);
+            /* Get the serial number */
+            uint64_t serNum = 0; 
+            GetDeviceSerialNumber( index, &serNum );
             if (result == AIOUSB_SUCCESS) {
                 name[ nameSize ] = '\0';
                 if (!found) {
@@ -373,31 +376,33 @@ AIORET_TYPE AIOUSB_ShowDevices( AIODisplayType display_type )
                 }
                 switch ( display_type ) {
                 case BASIC:
-                    fprintf(stderr,"  Device at index %d:\n  Product ID: %#.4lx\n  Product name: %s\n  Number of digital I/O bytes: %lu\n  Number of counters: %lu\n",
-                           index,
-                           productID,
-                           name,
-                           numDIOBytes,
-                           numCounters
+                    fprintf(stderr,"  Device at index %d:\n  Product ID: %#.4lx\n  Product name: %s\n  Number of digital I/O bytes: %lu\n  Number of counters: %lu\n  SerialNumber: %lu\n",
+                            index,
+                            productID,
+                            name,
+                            numDIOBytes,
+                            numCounters,
+                            serNum
                            );
                     break;
                 case TERSE:
-                    fprintf(stderr,"index=%d,product_id=%#lx,product_name=%s,numIO=%lu,numCounters=%lu\n",index,productID,name,numDIOBytes,numCounters);
+                    fprintf(stderr,"index=%d,product_id=%#lx,product_name=%s,numIO=%lu,numCounters=%lu,serailNumber=%lu\n",index,productID,name,numDIOBytes,numCounters, serNum);
                     break;
                 case JSON:
                     if ( previous ) 
                         printf(",");
-                    printf("{\"%s\":\"%d\",\"%s\":\"%#lx\",\"%s\":\"%s\",\"%s\":%lu,\"%s\":%lu}",
-                           "index", index, "product_id",productID,"product_name",name,"numIO",numDIOBytes,"numCounters",numCounters );
+                    printf("{\"%s\":\"%d\",\"%s\":\"%#lx\",\"%s\":\"%s\",\"%s\":%lu,\"%s\":%lu,\"%s\":%lu}",
+                           "index", index, "product_id",productID,"product_name",name,"numIO",numDIOBytes,"numCounters",numCounters,"serial_number",serNum);
                     previous = 1;
                     break;
                 case YAML:
-                    printf("  - index: %d\n    numCounters: %lu\n    numIO: %lu\n    product_id: %#lx\n    product_name: %s\n",
+                    printf("  - index: %d\n    numCounters: %lu\n    numIO: %lu\n    product_id: %#lx\n    product_name: %s\n    serial_number: %lu\n",
                            index,
                            numCounters,
                            numDIOBytes,
                            productID,
-                           name
+                           name,
+                           serNum
                            );
                            
                     break;

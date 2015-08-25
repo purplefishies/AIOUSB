@@ -19,7 +19,7 @@ dynmake bulk_acquire_sample
 dynmake continuous_mode_callback                                                                            
 
 
-run_cmd "./burst_test -V --num_scans 20000 --range 0-5=2 -c 20000 -D 31"
+run_cmd "./burst_test -V --num_scans 20000 --range 0-5=2 -N 20000 -D 31"
 result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(max(tmp$V1) > 60000) { "ok" } else { "not ok" } )')
 if [ $result == "not ok" ] ; then
     echo "ERROR: max value not ok"
@@ -31,7 +31,7 @@ if [ $result == "not ok" ] ; then
     exit 1
 fi
 
-run_cmd "./continuous_mode  -V --num_scans 100000 --range 0-4=0 -c 20000 -D 31"
+run_cmd "./continuous_mode  -V --num_scans 100000 --range 0-4=0 -N 20000 -D 31"
 result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(max(tmp$V1) > 4.6) { "ok" } else { "not ok" } )')
 if [ $result == "not ok" ] ; then
     echo "ERROR: max value not ok"
@@ -49,7 +49,7 @@ if [ "$?" != "0" ] ; then
     exit 1
 fi
 
-run_cmd "read_channels_test -c 1000 > output.txt"
+run_cmd "./read_channels_test -N 1000 > output.txt"
 perl -i -ne 'if ( s/^(\d+.*)$/$1/g ) { print; }' output.txt
 result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(max(tmp$V2) > 4.6) { "ok" } else { "not ok" } )')
 if [ $result == "not ok" ] ; then

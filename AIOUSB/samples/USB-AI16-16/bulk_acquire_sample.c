@@ -171,11 +171,11 @@ int main( int argc, char **argv ) {
         ADC_SetScanLimits( deviceIndex, CAL_CHANNEL, CAL_CHANNEL );
         ADC_ADMode( deviceIndex, 0 /* TriggerMode */, AD_CAL_MODE_GROUND );
         result = ADC_GetScan( deviceIndex, counts );
-        if( result == AIOUSB_SUCCESS )
-            printf( "Ground counts = %u (should be approx. 0)\n", counts[ CAL_CHANNEL ] );
-        else
+        if( result < AIOUSB_SUCCESS )
             printf( "Error '%s' attempting to read ground counts\n", 
                     AIOUSB_GetResultCodeAsString( result ) );
+        else
+            printf( "Ground counts = %u (should be approx. 0)\n", counts[ CAL_CHANNEL ] );
 
 
         /*
@@ -183,10 +183,10 @@ int main( int argc, char **argv ) {
          */
         ADC_ADMode( deviceIndex, 0 , AD_CAL_MODE_REFERENCE ); /* TriggerMode */
         result = ADC_GetScan( deviceIndex, counts );
-        if( result == AIOUSB_SUCCESS )
-            printf( "Reference counts = %u (should be approx. 65130)\n", counts[ CAL_CHANNEL ] );
-        else
+        if( result < AIOUSB_SUCCESS )
             printf( "Error '%s' attempting to read reference counts\n", AIOUSB_GetResultCodeAsString( result ) );
+        else
+            printf( "Reference counts = %u (should be approx. 65130)\n", counts[ CAL_CHANNEL ] );
         
     }
 

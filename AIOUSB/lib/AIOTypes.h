@@ -675,6 +675,7 @@ typedef enum  {
   AD_CAL_MODE_GROUND      = 1, /* measure ground */
   AD_CAL_MODE_REFERENCE   = 3, /* measure reference */
   AD_CAL_MODE_BIP_GROUND  = 5,
+  AD_CAL_MODE_HIGH_REF    = 7,
   ADCalMode_end           = 8
 } ADCalMode;
 

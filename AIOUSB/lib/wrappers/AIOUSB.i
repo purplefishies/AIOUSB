@@ -4,6 +4,9 @@
 %include "carrays.i"
 
 %pointer_functions( unsigned long,  ulp );
+%pointer_functions( long long, ullp );
+%pointer_functions( uint64_t, ui64p );
+%pointer_functions( double,  udp );
 %pointer_functions( int,  ip );
 %pointer_functions( unsigned short, usp );
 %pointer_functions( double , dp );
@@ -26,7 +29,6 @@
   #include "AIOUSBDevice.h"
   #include "AIODeviceInfo.h"
   #include "AIOUSB_Properties.h"
-  // #include "AIOUSB_ADC.h"
   #include "AIOUSB_DAC.h"
   #include "AIOUSB_CTR.h"
   #include "AIOTypes.h"
@@ -48,8 +50,12 @@
 %newobject NewAIOBuf;
 %delobject AIOBuf::DeleteAIOBuf;
 
+AIORET_TYPE ADC_GetChannelV( unsigned long DeviceIndex, unsigned long ChannelIndex, double *OUTPUT);
+AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *OUTPUT );
+
+
 #if defined(SWIGPYTHON)
-%typemap(in) unsigned char *gainCodes {
+%typemap(in) unsigned char *pGainCodes {
     int i;
     static unsigned char temp[16];
 
@@ -73,15 +79,19 @@
     $1 = temp;
 }
 
-//
-// 
 %typemap(in)  double *voltages
 {
     double temp[256];
     $1 = temp;
 }
 
-%typemap(argout) (unsigned long DeviceIndex, double *voltages)  {
+%typemap(in)  double *pBuf
+{
+    double temp[256];
+    $1 = temp;
+}
+
+%typemap(argout) (unsigned long DeviceIndex, double *pBuf)  {
     int i;
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( $1, &result );
@@ -89,6 +99,7 @@
         PyErr_SetString(PyExc_ValueError,"Invalid DeviceIndex");
         return NULL;
     }
+
     int tmpsize = deviceDesc->ADCMUXChannels;
     $result = PyList_New(tmpsize);
     for (i = 0; i < tmpsize; i++) {
@@ -97,10 +108,10 @@
     }
 }
 
-%typemap(argout) (unsigned long DeviceIndex, unsigned long ChannelIndex, double *voltages )
+%typemap(argout) (unsigned long DeviceIndex, unsigned long ChannelIndex, double *pBuf )
 {
-    // printf("debugging");
-    if ( result != AIOUSB_SUCCESS ) {
+
+    if ( result < AIOUSB_SUCCESS ) {
         PyErr_SetString(PyExc_ValueError,"Invalid DeviceIndex");
         return NULL;
     }
@@ -141,7 +152,7 @@
     argvi++;
 }
 
-%typemap(in) unsigned char *gainCodes {
+%typemap(in) unsigned char *pGainCodes {
     AV *tempav;
     I32 len;
     int i;
@@ -254,13 +265,6 @@
           printf("[%d] = %g\n", i, x[i]);
        }
     }
-
-    // Ushort_Array new_Ushort_Array(int nelements) {
-    //     Ushort_Array tmp;
-    //     tmp._ary = (unsigned short *)calloc(nelements,sizeof(unsigned short));
-    //     tmp.size = nelements;
-    //     return tmp;
-    // }
 
 %}
 
