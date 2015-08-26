@@ -123,6 +123,7 @@ AIORET_TYPE AIOUSBDeviceSetDiscardFirstSample( AIOUSBDevice *device , AIOUSB_BOO
 AIORET_TYPE AIOUSBDeviceSetTimeout( AIOUSBDevice *device, unsigned timeout );
 AIORET_TYPE AIOUSBDeviceGetTimeout( AIOUSBDevice *device );
 
+AIORET_TYPE AIOUSBDeviceWriteADCConfig( AIOUSBDevice *device, ADCConfigBlock *config );
 
 #ifdef __aiousb_cplusplus
 }

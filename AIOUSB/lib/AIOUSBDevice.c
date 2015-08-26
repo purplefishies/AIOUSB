@@ -165,6 +165,19 @@ ADCConfigBlock * AIOUSBDeviceGetADCConfigBlock( AIOUSBDevice *dev )
     return _get_config( dev );
 }
 
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOUSBDeviceWriteADCConfig( AIOUSBDevice *device, ADCConfigBlock *config )
+{
+    AIORET_TYPE  retval = AIOUSB_SUCCESS;
+    AIO_ASSERT( device );
+    AIO_ASSERT( config );
+
+    retval = ADC_SetConfig( device->deviceIndex, config->registers, &config->size );
+    AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    return retval;
+}
+
+
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOUSBDeviceSetTesting( AIOUSBDevice *dev, AIOUSB_BOOL testing )

@@ -29,6 +29,12 @@ typedef struct aiousb_device {
     libusb_device_handle *deviceHandle;
     struct libusb_device_descriptor deviceDesc;
     AIOUSB_BOOL debug;
+    int usblp_attached;
+    int iface;
+    int verbose;
+    int conf;
+    int origconf;
+    int altset;
 } USBDevice;
 
 typedef struct aiousb_libusb_args {

@@ -31,7 +31,7 @@ if [ $result == "not ok" ] ; then
     exit 1
 fi
 
-run_cmd "./continuous_mode  -V --num_scans 100000 --range 0-4=0 -N 20000 -D 31"
+run_cmd "./continuous_mode  -V  --range 0-4=0 -N 20000 -D 31"
 result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(max(tmp$V1) > 4.6) { "ok" } else { "not ok" } )')
 if [ $result == "not ok" ] ; then
     echo "ERROR: max value not ok"
@@ -43,7 +43,7 @@ if [ $result == "not ok" ] ; then
     exit 1
 fi
 
-run_cmd bulk_acquire_sample
+run_cmd "bulk_acquire_sample | tee output.txt"
 if [ "$?" != "0" ] ; then
     echo "Bulk acquire error"
     exit 1

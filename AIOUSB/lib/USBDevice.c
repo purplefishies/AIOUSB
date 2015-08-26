@@ -23,32 +23,115 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
     AIO_ASSERT_AIOEITHER(-AIOUSB_ERROR_INVALID_USBDEVICE,"Invalid usb object", usb );
     AIO_ASSERT_AIOEITHER(-AIOUSB_ERROR_INVALID_PARAMETER,"Invalid args", args ); 
 
+    struct libusb_device_descriptor devdesc;
+    struct libusb_config_descriptor *confptr = NULL;
+
+    int errcode;
+    int verbose = usb->verbose; 
+    int current, number1, number2;
+
+
+
+
     usb->device                = args->dev;
     usb->deviceHandle          = args->handle;
     usb->deviceDesc            = *args->deviceDesc;
 
-    int libusbResult = libusb_open(  usb->device, &usb->deviceHandle );
-    
-    if( libusbResult == LIBUSB_SUCCESS && usb->deviceHandle != NULL ) {
-        int kernelActive = libusb_kernel_driver_active( usb->deviceHandle, 0 );
-        if ( kernelActive == 1 ) {
-            libusbResult = libusb_claim_interface( usb->deviceHandle, 0 );
-            libusbResult = libusb_attach_kernel_driver( usb->deviceHandle, 0 );
-        }
+    errcode = libusb_open(  usb->device, &usb->deviceHandle );
 
-        usb->debug = AIOUSB_FALSE;
-        usb->usb_control_transfer  = usb_control_transfer;
-        usb->usb_bulk_transfer     = usb_bulk_transfer;
-        usb->usb_request           = usb_request;
-        usb->usb_reset_device      = usb_reset_device;
-        usb->usb_put_config        = USBDevicePutADCConfigBlock;
-        usb->usb_get_config        = USBDeviceFetchADCConfigBlock;
-
-    } else {
-        retval.left = -libusbResult;
-        asprintf(&retval.errmsg,"Error with libusb_open: %d\n", libusbResult );
+    if ((errcode = libusb_get_device_descriptor( usb->device, &devdesc)) < 0) {
+        asprintf(&retval.errmsg,"ERROR: Failed to get device descriptor, code: %d\n", errcode);
+        goto error;
     }
 
+    errcode = libusb_kernel_driver_active(usb->deviceHandle, usb->iface);
+    if (errcode == 0) {
+        usb->usblp_attached = 0;
+    } else if (errcode == 1) {
+        usb->usblp_attached = 1;
+        if ((errcode = libusb_detach_kernel_driver(usb->deviceHandle, usb->iface)) < 0) {
+            asprintf(&retval.errmsg,"ERROR: Failed to detach \"usblp\" module from %04x:%04x\n", devdesc.idVendor, devdesc.idProduct);
+            goto error;
+        }
+    } else {
+        usb->usblp_attached = 0;
+        
+        if (errcode != LIBUSB_ERROR_NOT_SUPPORTED) {
+            asprintf(&retval.errmsg,"ERROR: Failed to check whether %04x:%04x has the \"usblp\" ""kernel module attached\n", devdesc.idVendor, devdesc.idProduct);
+          goto error;
+        }
+    }
+
+    if (libusb_control_transfer(usb->deviceHandle,
+                                LIBUSB_REQUEST_TYPE_STANDARD | LIBUSB_ENDPOINT_IN |
+                                LIBUSB_RECIPIENT_DEVICE,
+                                8, /* GET_CONFIGURATION */
+                                0, 0, (unsigned char *)&current, 1, 5000) < 0) {
+        current = 0;			/* Assume not configured */
+
+    }
+    usb->origconf = current;
+
+    if ((errcode = libusb_get_config_descriptor(usb->device, usb->conf, &confptr)) < 0) {
+        asprintf(&retval.errmsg,"ERROR: Failed to get config descriptor for %04x:%04x\n", devdesc.idVendor, devdesc.idProduct);
+        goto error;
+    }
+    number1 = confptr->bConfigurationValue;
+    
+    if (number1 != current) {
+         if (verbose)
+             fprintf(stderr, "DEBUG: Switching USB device configuration: %d -> %d\n",current, number1);
+        if ((errcode = libusb_set_configuration(usb->deviceHandle, number1)) < 0) {
+            if (errcode != LIBUSB_ERROR_BUSY) {
+                asprintf(&retval.errmsg,"ERROR: Failed to set configuration %d for %04x:%04x\n",number1, devdesc.idVendor, devdesc.idProduct);
+                goto error;
+            }
+        }
+    }
+
+    number1 = confptr->interface[usb->iface].altsetting[usb->altset].bInterfaceNumber;
+
+    while ((errcode = libusb_claim_interface(usb->deviceHandle, number1)) < 0) {
+            if (errcode != LIBUSB_ERROR_BUSY) {
+                asprintf(&retval.errmsg,"ERROR: Failed to claim interface %d for %04x:%04x: %s\n",number1, devdesc.idVendor, devdesc.idProduct, strerror(errno));
+                goto error;
+            }
+    }
+
+    if (confptr->interface[usb->iface].num_altsetting > 1) {
+        number1 = confptr->interface[usb->iface].
+            altsetting[usb->altset].bInterfaceNumber;
+        number2 = confptr->interface[usb->iface].
+            altsetting[usb->altset].bAlternateSetting;
+      
+        while ((errcode = libusb_set_interface_alt_setting(usb->deviceHandle, number1, number2)) < 0) {
+            if (errcode != LIBUSB_ERROR_BUSY) {
+                asprintf(&retval.errmsg,"ERROR: Failed to set alternate interface %d for %04x:%04x: " "%s\n",
+                         number2, devdesc.idVendor, devdesc.idProduct, strerror(errno));
+                goto error;
+            }
+        }
+    }
+
+    libusb_free_config_descriptor(confptr);
+
+    if (verbose)
+        fputs("STATE: -connecting-to-device\n", stderr);
+    
+    usb->debug = AIOUSB_FALSE;
+    usb->usb_control_transfer  = usb_control_transfer;
+    usb->usb_bulk_transfer     = usb_bulk_transfer;
+    usb->usb_request           = usb_request;
+    usb->usb_reset_device      = usb_reset_device;
+    usb->usb_put_config        = USBDevicePutADCConfigBlock;
+    usb->usb_get_config        = USBDeviceFetchADCConfigBlock;
+
+    return retval;
+ error:
+
+    libusb_close(usb->deviceHandle);
+    usb->device = NULL;
+    retval.left = -errcode;
     return retval;
 }
 
@@ -105,6 +188,7 @@ AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , USBDevice **devs
                     ) {
                     *size += 1;
                     *devs = (USBDevice*)realloc( *devs, (*size )*(sizeof(USBDevice)));
+                    memset(&(*devs)[*size-1],0,sizeof(USBDevice));
                     LIBUSBArgs args = { libusb_ref_device(usb_device), NULL, &libusbDeviceDesc };
                     AIOEither usbretval = InitializeUSBDevice( &( *devs)[*size-1] , &args );
                     if ( AIOEitherHasError( &usbretval ) )
