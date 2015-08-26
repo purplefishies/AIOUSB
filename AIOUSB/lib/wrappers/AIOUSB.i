@@ -91,7 +91,7 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *O
     $1 = temp;
 }
 
-%typemap(argout) (unsigned long DeviceIndex, double *pBuf)  {
+%typemap(argout) (unsigned long DeviceIndex, double *voltages)  {
     int i;
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( $1, &result );

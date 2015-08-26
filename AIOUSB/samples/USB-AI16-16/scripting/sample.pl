@@ -73,25 +73,31 @@ print "Setting timeout\n";
 AIOUSB::AIOUSB_SetCommTimeout( $deviceIndex, 1000 );
 AIOUSB::AIOUSB_SetDiscardFirstSample( $deviceIndex, $AIOUSB::AIOUSB_TRUE );
 
-$serialNumber = AIOUSB::new_ulp();
-$result = AIOUSB::GetDeviceSerialNumber( $deviceIndex, $serialNumber );
-print sprintf "Serial number of device at index %d: %x\n" , $deviceIndex, AIOUSB::ulp_value( $serialNumber );
+# $serialNumber = AIOUSB::new_ulp();
+# $result = AIOUSB::GetDeviceSerialNumber( $deviceIndex, $serialNumber );
+# print sprintf "Serial number of device at index %d: %x\n" , $deviceIndex, AIOUSB::ulp_value( $serialNumber );
 
 $result = 0;
-($ndevice,$result) = AIOUSB::AIODeviceTableGetDeviceAtIndex( $deviceIndex , $result );
+($ndevice,$result) = AIOUSB::AIODeviceTableGetDeviceAtIndex( $deviceIndex );
 $cb = AIOUSB::AIOUSBDeviceGetADCConfigBlock( $ndevice );
 print "";
 
 
 AIOUSB::AIOUSB_SetAllGainCodeAndDiffMode( $cb, $AIOUSB::AD_GAIN_CODE_10V, $AIOUSB::AIOUSB_FALSE );
-AIOUSB::AIOUSB_SetCalMode( $cb, $AIOUSB::AD_CAL_MODE_NORMAL );
-AIOUSB::AIOUSB_SetTriggerMode( $cb, 0 );
-AIOUSB::AIOUSB_SetScanRange( $cb, 2, 13 );
-AIOUSB::AIOUSB_SetOversample( $cb, 0 );
+AIOUSB::ADCConfigBlockSetCalMode( $cb, $AIOUSB::AD_CAL_MODE_NORMAL );
+AIOUSB::ADCConfigBlockSetTriggerMode( $cb, 0 );
+AIOUSB::ADCConfigBlockSetScanRange( $cb, 2, 13 );
+AIOUSB::ADCConfigBlockSetOversample( $cb, 0 );
 
-AIOUSB::ADC_WriteADConfigBlock( $deviceIndex, $cb );
+
+
+AIOUSB::AIOUSBDeviceWriteADCConfig( $ndevice, $cb );
 
 print "A/D settings successfully configured\n";
+
+
+
+
 
 
 
@@ -108,20 +114,24 @@ AIOUSB::ADC_ADMode( $deviceIndex, 0 , $AIOUSB::AD_CAL_MODE_GROUND );
 $counts = AIOUSB::new_ushortarray( 16 );
 $result = AIOUSB::ADC_GetScan( $deviceIndex, $counts );
 
-if( $result != $AIOUSB::AIOUSB_SUCCESS ) {
+if( $result < $AIOUSB::AIOUSB_SUCCESS ) {
     print sprintf "Error '%s' attempting to read ground counts\n" , AIOUSB::AIOUSB_GetResultCodeAsString( $result );
 } else {
     print sprintf "Ground counts = %u (should be approx. 0)\n" , AIOUSB::ushort_getitem( $counts, $CAL_CHANNEL) ;
 }
 
 
+
+
 AIOUSB::ADC_ADMode( $deviceIndex, 0 , $AIOUSB::AD_CAL_MODE_REFERENCE ); # TriggerMode
 $result = AIOUSB::ADC_GetScan( $deviceIndex, $counts );
-if( result != AIOUSB_SUCCESS ) { 
+if( result < AIOUSB_SUCCESS ) { 
     print sprintf "Error '%s' attempting to read reference counts\n" , AIOUSB_GetResultCodeAsString( result );
 } else {
     print sprintf "Reference counts = %u (should be approx. 65130)\n", AIOUSB::ushort_getitem( $counts, $CAL_CHANNEL );
 }
+
+
 
 $gainCodes = [ map { 0 } 1..16 ];
 
@@ -140,8 +150,10 @@ AIOUSB::ADC_SetScanLimits( $deviceIndex, 0, $NUM_CHANNELS - 1 );
 AIOUSB::ADC_ADMode( $deviceIndex, 0 , $AD_CAL_MODE_NORMAL );
 
 
-print "Volts read:";
 
+print "Volts read:\n";
+
+if ( 1 ) { 
 $volts = [map { 0 } 1..16 ];
 for( $i = 0; $i < 1 ; $i ++ ) {
     $result = AIOUSB::ADC_GetScanV( $deviceIndex, $volts );
@@ -150,73 +162,23 @@ for( $i = 0; $i < 1 ; $i ++ ) {
     }
 }
 
+
+}
+
 # demonstrate reading a single channel in volts
-($result, $exitcode) = AIOUSB::ADC_GetChannelV( $deviceIndex, $CAL_CHANNEL, $volts->[ 0 ] );
+($exitcode, $result) = AIOUSB::ADC_GetChannelV( $deviceIndex, $CAL_CHANNEL );
 
-print sprintf("Result from A/D channel %d was %f\n" , $CAL_CHANNEL, $result->[0] );
+print sprintf("Result from A/D channel %d was %f\n" , $CAL_CHANNEL, $result );
 
-($result, $exitcode) = AIOUSB::ADC_GetChannelV( $deviceIndex, 1 , $volts->[ 0 ] );
+($exitcode, $result)  = AIOUSB::ADC_GetChannelV( $deviceIndex, 1 );
 
-print sprintf("Result from A/D channel %d was %f\n", 1, $result->[0] );
-
-
-
+print sprintf("Result from A/D channel %d was %f\n", 1, $result );
 
 
 AIOUSB::AIOUSB_Reset( $deviceIndex );
-AIOUSB::ADC_SetOversample( $deviceIndex, $NUM_OVERSAMPLES );
-AIOUSB::ADC_SetScanLimits( $deviceIndex, 0, $NUM_CHANNELS - 1 );
-AIOUSB::AIOUSB_SetStreamingBlockSize($deviceIndex, 64*1024 );
+AIOUSB::AIOUSB_Exit();
 
-
-print sprintf("Allocating %d Bytes\n", ( $BULK_BYTES ));
-$databuf = AIOUSB::new_ushortarray( $BULK_BYTES );
-
-
-$clockHz = 0;
-AIOUSB::CTR_StartOutputFreq( $deviceIndex, 0, $clockHz );
-
-
-# 
-#  configure A/D for timer-triggered acquisition
-#
-AIOUSB::ADC_ADMode( $deviceIndex, $AIOUSB::AD_TRIGGER_SCAN | $AIOUSB::AD_TRIGGER_TIMER, $AIOUSB::AD_CAL_MODE_NORMAL );
-
-
- 
-# start bulk acquire; ADC_BulkAcquire() will take care of starting
-# and stopping the counter; but we do have to tell it what clock
-# speed to use, which is why we call AIOUSB_SetMiscClock()
-# 
-print sprintf("Using Clock speed %d to acquire data\n" , $CLOCK_SPEED );
-$result = AIOUSB::AIOUSB_SetMiscClock( $deviceIndex, $CLOCK_SPEED );
-
-#print "Index is $deviceIndex\n";
-
-$result = AIOUSB::ADC_BulkAcquire( $deviceIndex, $BULK_BYTES, $databuf );
-
-if( $result != AIOUSB::AIOUSB_SUCCESS ) { 
-    print sprintf( "Error '%s' attempting to start bulk acquire of %d bytes\n" , AIOUSB::AIOUSB_GetResultCodeAsString( $result ), $BULK_BYTES );
-    exit(1);
-} else {
-    print sprintf( "Started bulk acquire of %d bytes\n", BULK_BYTES );
-}
-
-$bytesRemaining = AIOUSB::new_ulp();
-AIOUSB::ulp_assign( $bytesRemaining, $BULK_BYTES );
-
-for( $i = 0 ; $i < 60 ; $i ++ ) {
-    sleep(1);
-    $result = AIOUSB::ADC_BulkPoll( $deviceIndex, $bytesRemaining );
-    if( $result != $AIOUSB::AIOUSB_SUCCESS ) {
-        print sprintf("Error '%s' polling bulk acquire progress\n" , AIOUSB::AIOUSB_GetResultCodeAsString( $result ));
-    } else {
-        print sprintf( "  %lu bytes remaining\n" , AIOUSB::ulp_value( $bytesRemaining ) );
-        last if( AIOUSB::ulp_value($bytesRemaining) == 0 );
-    }
-}
+exit 1;
 
 __END__
 
-
-__END__

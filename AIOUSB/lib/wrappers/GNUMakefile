@@ -13,6 +13,8 @@ RUBY		:= ruby
 
 MKDIR		:= mkdir
 
+override CFLAGS     += -I. -I/usr/include/libusb-1.0 -std=gnu99
+
 LIBDIR		:= $(shell printenv AIOUSB_ROOT)/lib
 CLASSLIBDIR	:= $(shell printenv AIOUSB_ROOT)/classlib
 
@@ -243,7 +245,7 @@ $(JAVA_DIR):
 java: 	$(JAVA_DIR)
 	@if [ ! -f $(JAVA_BUILT) ] ; then \
 		$(SWIG) $(SWIG_IGNORE_WARNINGS) -I../../ -java -package AIOUSB -outdir $(JAVA_DIR) AIOUSB.i 2>&1; \
-		$(CC)  -fPIC -shared  -o libAIOUSB.so ./AIOUSB_wrap.c -I../.. -I$${JAVA_HOME}/include -L$${AIO_LIB_DIR} -L$${AIO_CLASSLIB_DIR} -laiousbdbg -lusb-1.0 -lpthread -lrt -ldl -lm -lc  2>&1 ; \
+		$(CC)  -fPIC -shared  -o libAIOUSB.so ./AIOUSB_wrap.c ${CFLAGS} -I../.. -I$${JAVA_HOME}/include -L$${AIO_LIB_DIR} -L$${AIO_CLASSLIB_DIR} -laiousbdbg -lusb-1.0 -lpthread -lrt -ldl -lm -lc  2>&1 ; \
 		javac $(JAVA_DIR)/*.java; \
 		cd tests && javac -classpath "$$(pwd):$$(pwd)/./:$$(pwd)/../" test.java 2>&1; \
 		if [ ! -d /tmp/scala-devel ] ; then mkdir /tmp/scala-devel; chmod 777 /tmp/scala-devel; fi \
