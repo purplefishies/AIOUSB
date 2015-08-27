@@ -104,10 +104,10 @@ if retval != AIOUSB_SUCCESS:
     print "Error '%s' performing automatic A/D calibration" % ( AIOUSB_GetResultCodeAsString( retval ) )
     sys.exit(0)
 
-ADC_SetOversample( deviceIndex, 0 );
-ADC_SetScanLimits( deviceIndex, CAL_CHANNEL, CAL_CHANNEL );
-ADC_ADMode( deviceIndex, 0 , AD_CAL_MODE_GROUND );
-
+ADCConfigBlockSetScanRange( cb, CAL_CHANNEL, CAL_CHANNEL )
+ADCConfigBlockSetTriggerMode( cb , 0 )
+ADCConfigBlockSetCalMode( cb , AD_CAL_MODE_GROUND )
+AIOUSBDeviceWriteADCConfig( ndevice, cb )
 
 # A better API is coming soon, so you won't have to do
 # this to get Data
