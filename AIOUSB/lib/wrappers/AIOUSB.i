@@ -2,16 +2,19 @@
 %module AIOUSB
 %include "cpointer.i"
 %include "carrays.i"
+#if defined(SWIGJAVA)
+%include "enums.swg"
+#endif
 
 %pointer_functions( unsigned long,  ulp );
 %pointer_functions( long long, ullp );
-%pointer_functions( uint64_t, ui64p );
 %pointer_functions( double,  udp );
 %pointer_functions( int,  ip );
 %pointer_functions( unsigned short, usp );
 %pointer_functions( double , dp );
 %pointer_functions( char , cp );
 %array_functions( char , cstring );
+
 
 %include typemaps.i
 %apply unsigned long *INOUT { unsigned long *result };
@@ -45,6 +48,7 @@
         System.loadLibrary("AIOUSB");
     }
 %}
+
 
 %newobject CreateSmartBuffer;
 %newobject NewAIOBuf;

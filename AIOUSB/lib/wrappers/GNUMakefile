@@ -258,7 +258,7 @@ java_test:	$(JAVA_BUILT) $(TEST_DIR)
 
 
 scala_test:	$(JAVA_BUILD) $(TEST_DIR)
-	@LD_LIBRARY_PATH="$${AIO_LIB_DIR}:$${AIO_CLASSLIB_DIR}:$$(pwd)" CLASSPATH=$$(pwd) scala -e 'import AIOUSB._;  AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices()'
+	@LD_LIBRARY_PATH="$${AIO_LIB_DIR}:$${AIO_CLASSLIB_DIR}:$$(pwd)" CLASSPATH=$$(pwd) scala -cp "$${AIO_LIB_DIR}/wrappers/java/*:" -e 'import AIOUSB._;  AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices()'
 
 $(JAVA_BUILT): java
 
