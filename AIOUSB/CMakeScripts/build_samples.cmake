@@ -4,7 +4,7 @@ macro ( build_sample_c_file project c_file )
   STRING(REGEX REPLACE "\\.c$" "" binary_name ${tmp_c_file})
   ADD_EXECUTABLE( "${project}_${binary_name}" ${c_file} )
   SET_TARGET_PROPERTIES( "${project}_${binary_name}" PROPERTIES OUTPUT_NAME  ${binary_name} ) 
-  TARGET_LINK_LIBRARIES( "${project}_${binary_name}" aiousb aiousbcpp aiocommon rt ${LIBUSB_1_LIBRARIES} )
+  TARGET_LINK_LIBRARIES( "${project}_${binary_name}" aiousb aiousbcpp aiocommon ${LIBUSB_1_LIBRARIES} )
   INSTALL(TARGETS "${project}_${binary_name}" DESTINATION "share/accesio/${project}/" ) 
 endmacro ( build_sample_c_file) 
 
