@@ -40,6 +40,7 @@
   #include "AIOBuf.h"
   #include "DIOBuf.h"
   #include "libusb.h"
+  #include <pthread.h>
 %}
 
 /* Needed to allow inclusion into Scala */
