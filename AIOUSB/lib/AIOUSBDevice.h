@@ -8,6 +8,7 @@
 #include <string.h>
 #include <semaphore.h>
 #include <libusb.h>
+#include <pthread.h>
 
 #ifdef __aiousb_cplusplus
 namespace AIOUSB

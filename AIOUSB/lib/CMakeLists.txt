@@ -168,7 +168,7 @@ find_package( GTestTap )
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Built in tests
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-if( GTESTTAP_FOUND )
+if( GTESTTAP_FOUND AND NOT DISABLE_TESTING )
 
   set(GTEST_FILES ADCConfigBlock.c AIOChannelMask.c AIOChannelRange.c AIOContinuousBuffer.c AIODeviceInfo.c AIODeviceTable.c AIOUSBDevice.c AIOUSB_Core.c DIOBuf.c USBDevice.c AIOFifo.c AIOEither.c AIOCountsConverter.c )
   foreach( gtest ${GTEST_FILES} ) 
@@ -189,7 +189,7 @@ if( GTESTTAP_FOUND )
     # MESSAGE(STATUS "MY_LIBRARIES=  ${MY_LIBRARIES}" )
     build_gtest_test_file( aiousblibs ${gtest_file} ${MY_FLAGS} "${MY_LIBRARIES}" )
   endforeach( gtest_file )
-endif( GTESTTAP_FOUND )
+endif( GTESTTAP_FOUND AND NOT DISABLE_TESTING )
 
 if( BUILD_MATLAB AND BUILD_AIOUSB_SHARED ) 
   MESSAGE(STATUS "Building Matlab")
