@@ -344,7 +344,7 @@ AIORET_TYPE aio_override_adcconfig_settings( ADCConfigBlock *config, struct opts
                                                     options->ranges[i]->gaincode 
                                                     );                                          
             if ( retval != AIOUSB_SUCCESS ) {
-                fprintf(stderr,"Error setting ChannelRange: %d\n", retval );
+                fprintf(stderr,"Error setting ChannelRange: %d\n", (int)retval );
                 return retval;
             }
         }
@@ -420,7 +420,7 @@ AIORET_TYPE aio_override_aiobuf_settings( AIOContinuousBuf *buf, struct opts *op
                                                       options->ranges[i]->gaincode
                                                       );
             if ( retval != AIOUSB_SUCCESS ) {
-                fprintf(stderr,"Error setting ChannelRange: %d\n", retval );
+                fprintf(stderr,"Error setting ChannelRange: %d\n", (int)retval );
                 return retval;
             }
         }

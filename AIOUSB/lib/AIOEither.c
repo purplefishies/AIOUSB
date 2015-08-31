@@ -167,7 +167,7 @@ AIORET_TYPE AIOEitherSetLeft(AIOEither *retval, int val)
     return AIOUSB_SUCCESS;
 }
 
-int AIOEitherGetLeft(AIOEither *retval)
+AIORET_TYPE AIOEitherGetLeft(AIOEither *retval)
 {
     return retval->left;
 }

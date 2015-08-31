@@ -112,7 +112,7 @@ GTAGS_FILES	:= GPATH GRTAGS GSYMS GTAGS
 
 all_cscope: $(LIBS) cscope
 
-test:	$(CPPTEST_FILES)
+test:	$(CPPTEST_FILES) 
 	for i in $(CPPTEST_FILES); \
 		do ./$$i 2>/dev/null >/dev/null; \
 		if [ "$$?" != "0" ] ; then echo "$$i had an error"; exit 1; fi \
@@ -218,10 +218,10 @@ pywrapper:
 %_c_test: %.c $(SHCDBGLIB) $(SHCPPDBGLIB)
 	$(CC) $(TESTFLAGS) $(CFLAGS) $(SELF_TEST_FLAGS) $< -o $@ -L. $(SELF_TEST_LIBS)
 
-%_cpp_test: %.c %.h $(SHCDBGLIB) $(SHCPPDBGLIB)
+%_cpp_test: %.c %.h $(SHCDBGLIB) $(SHCPPDBGLIB) $(SHCLIB) $(SHCPPLIB) 
 	$(CXX) $(TESTFLAGS) $(SELF_TEST_CXX_FLAGS) $(subst _cpp_test,.c,$<) -o $@ -L. $(SELF_TEST_CXX_LIBS) $(LDFLAGS)
 
-tests/%_cpp_test: tests/%.cpp $(SHCDBGLIB) $(SHCPPDBGLIB)
+tests/%_cpp_test: tests/%.cpp $(SHCDBGLIB) $(SHCPPDBGLIB) $(SHCLIB) $(SHCPPLIB) 
 	$(CXX) $(TESTFLAGS) $(CXXFLAGS) $(SELF_TEST_CXX_FLAGS) $< -o $@ -L. $(SELF_TEST_CXX_LIBS)
 
 mostlyclean:

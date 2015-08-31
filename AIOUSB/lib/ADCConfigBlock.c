@@ -732,12 +732,12 @@ char *ADCConfigBlockToYAML(ADCConfigBlock *config)
 
     sprintf( &tmpbuf[strlen(tmpbuf)], "     %s: %s\n", EDGE_STRING, get_edge_mode( config->registers[AD_REGISTER_TRIG_COUNT] ) );
     sprintf( &tmpbuf[strlen(tmpbuf)], "     %s: %s\n", REFCHANNEL_STRING, get_scan_mode(config->registers[AD_REGISTER_TRIG_COUNT] ));
-    sprintf( &tmpbuf[strlen(tmpbuf)], "  %s: %d\n", STARTCHANNEL_STRING, ADCConfigBlockGetStartChannel( config ));
-    sprintf( &tmpbuf[strlen(tmpbuf)], "  %s: %d\n", ENDCHANNEL_STRING, ADCConfigBlockGetEndChannel( config ));
-    sprintf( &tmpbuf[strlen(tmpbuf)], "  %s: %d\n", OVERSAMPLE_STRING, ADCConfigBlockGetOversample( config ));
-    sprintf( &tmpbuf[strlen(tmpbuf)], "  %s: %d\n", TIMEOUT_STRING, ADCConfigBlockGetTimeout( config ));
+    sprintf( &tmpbuf[strlen(tmpbuf)], "  %s: %ld\n", STARTCHANNEL_STRING, ADCConfigBlockGetStartChannel( config ));
+    sprintf( &tmpbuf[strlen(tmpbuf)], "  %s: %ld\n", ENDCHANNEL_STRING, ADCConfigBlockGetEndChannel( config ));
+    sprintf( &tmpbuf[strlen(tmpbuf)], "  %s: %ld\n", OVERSAMPLE_STRING, ADCConfigBlockGetOversample( config ));
+    sprintf( &tmpbuf[strlen(tmpbuf)], "  %s: %ld\n", TIMEOUT_STRING, ADCConfigBlockGetTimeout( config ));
 
-    sprintf( &tmpbuf[strlen(tmpbuf)], "  %s: %d\n", CLOCKRATE_STRING, ADCConfigBlockGetClockRate( config ));
+    sprintf( &tmpbuf[strlen(tmpbuf)], "  %s: %ld\n", CLOCKRATE_STRING, ADCConfigBlockGetClockRate( config ));
 
     return strdup(tmpbuf);
 }
@@ -815,11 +815,11 @@ char *ADCConfigBlockToJSON(ADCConfigBlock *config)
     sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%s\",", EDGE_STRING, get_edge_mode( config->registers[AD_REGISTER_TRIG_COUNT] ) );
     sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%s\"" , REFCHANNEL_STRING, get_scan_mode(config->registers[AD_REGISTER_TRIG_COUNT] ));
     sprintf( &tmpbuf[strlen(tmpbuf)], "},");
-    sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%d\",", STARTCHANNEL_STRING, ADCConfigBlockGetStartChannel( config ));
-    sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%d\",", ENDCHANNEL_STRING, ADCConfigBlockGetEndChannel( config ));
-    sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%d\",", OVERSAMPLE_STRING, ADCConfigBlockGetOversample( config ));
-    sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%d\",", TIMEOUT_STRING, ADCConfigBlockGetTimeout( config ));
-    sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%d\"" , CLOCKRATE_STRING, ADCConfigBlockGetClockRate( config ));
+    sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%ld\",", STARTCHANNEL_STRING, ADCConfigBlockGetStartChannel( config ));
+    sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%ld\",", ENDCHANNEL_STRING, ADCConfigBlockGetEndChannel( config ));
+    sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%ld\",", OVERSAMPLE_STRING, ADCConfigBlockGetOversample( config ));
+    sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%ld\",", TIMEOUT_STRING, ADCConfigBlockGetTimeout( config ));
+    sprintf( &tmpbuf[strlen(tmpbuf)], "\"%s\":\"%ld\"" , CLOCKRATE_STRING, ADCConfigBlockGetClockRate( config ));
 
     strcat(tmpbuf,"}}");
 

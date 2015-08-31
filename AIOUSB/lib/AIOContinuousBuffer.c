@@ -877,7 +877,7 @@ void *RawCountsWorkFunction( void *object )
 
             int tmp = AIOContinuousBufPushN( buf, data, bytes / sizeof(unsigned short));
             if ( tmp <= 0 ) { 
-                AIOUSB_ERROR("Buffer overflow error: tried to add %d with size=%d available\n",
+                AIOUSB_ERROR("Buffer overflow error: tried to add %d with size=%ld available\n",
                              bytes / 2, AIOFifoWriteSizeRemainingNumElements(buf->fifo ) );
 
                 count += bytes / 2;
@@ -1279,111 +1279,6 @@ AIORET_TYPE AIOContinuousBufPreSetup( AIOContinuousBuf * buf )
 
     return retval;
 }
-
-/*----------------------------------------------------------------------------*/
-int continuous_setup( USBDevice *usb , unsigned char *data, unsigned length )
-{
-    unsigned bmRequestType, wValue = 0x0, wIndex = 0x0, bRequest = 0xba, wLength = 0x01;
-    unsigned tmp[] = {0xC0, 0xBA, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00};
-    memcpy(data,tmp, 8);
-    int usbval = usb->usb_control_transfer( usb,
-                                            0xC0,
-                                            bRequest,
-                                            wValue,
-                                            wIndex,
-                                            &data[0],
-                                            wLength,
-                                            1000
-                                            );
-    wValue = 0;
-    wIndex = 0;
-    wLength = 0x14;
-    memset(data,(unsigned char)1,16);
-    data[16] = 0;
-    data[17] = 0x15;
-    data[18] = 0xf0;
-    data[19] = 0;
-    /* 40 21 00 74 00 00 00 00 */
-    bmRequestType = 0x40;
-    bRequest = 0x21;
-    wValue = 0x7400;
-    wIndex =0;
-    wLength = 0;
-    usb->usb_control_transfer( usb,
-                               bmRequestType,
-                               bRequest,
-                               wValue,
-                               wIndex,
-                               &data[0],
-                               wLength,
-                               1000
-                               );
-    /* 40 21 00 B6 00 00 00 00 */
-    wValue = 0xB600;
-    usb->usb_control_transfer( usb,
-                               bmRequestType,
-                               bRequest,
-                               wValue,
-                               wIndex,
-                               &data[0],
-                               wLength,
-                               1000
-                               );
-    /*Config */
-
-
-    /* 40 23 00 74 25 00 00 00 */
-    wValue = 0x7400;
-    bRequest = 0x23;
-    wIndex = 0x64;
-    usb->usb_control_transfer( usb,
-                               bmRequestType,
-                               bRequest,
-                               wValue,
-                               wIndex,
-                               &data[0],
-                               wLength,
-                               1000
-                               );
-
-
-    /* 40 23 00 B6 64 00 00 00 */
-    wValue = 0xb600;
-    bRequest = 0x23;
-    wIndex = 0x64;
-    usb->usb_control_transfer( usb,
-                               bmRequestType,
-                               bRequest,
-                               wValue,
-                               wIndex,
-                               &data[0],
-                               wLength,
-                               1000
-                               );
-
-
-
-    /* 40 BC 00 00 00 00 04 00 */
-    data[0] = 0x07;
-    data[1] = 0x0;
-    data[2] = 0x0;
-    data[3] = 0x01;
-    wValue = 0x0;
-    wIndex = 0x0;
-    wLength = 4;
-    bRequest = 0xBC;
-    usb->usb_control_transfer( usb,
-                               bmRequestType,
-                               bRequest,
-                               wValue,
-                               wIndex,
-                               &data[0],
-                               wLength,
-                               1000
-                               );
-    return usbval;
-}
-
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufNumberSamplesAvailable( AIOContinuousBuf *buf )

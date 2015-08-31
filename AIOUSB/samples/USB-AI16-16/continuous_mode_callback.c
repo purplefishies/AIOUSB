@@ -99,7 +99,7 @@ main(int argc, char *argv[] )
 
                 if ( options.verbose && (modded_counter % options.rate_limit == 0 ) )
                     fprintf(stdout,"Waiting : total=%u, readpos=%d, writepos=%d\n", read_count, 
-                            AIOContinuousBufGetReadPosition(buf), AIOContinuousBufGetWritePosition(buf));
+                            (int)AIOContinuousBufGetReadPosition(buf), (int)AIOContinuousBufGetWritePosition(buf));
 
 
                 for ( int i = 0; i < data_read / 2 ;i ++ ) { 

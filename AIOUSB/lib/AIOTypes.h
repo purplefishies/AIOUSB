@@ -16,7 +16,7 @@
 #include <errno.h>
 
 
-typedef int AIORET_TYPE;        /* New return type is signed, negative indicates error */
+typedef long AIORET_TYPE;        /* New return type is signed, negative indicates error */
 typedef unsigned long AIORESULT;
 
 typedef unsigned short * COUNTS;
