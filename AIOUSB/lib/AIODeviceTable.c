@@ -1330,6 +1330,10 @@ unsigned long AIODeviceTableClearDevices(void)
     return AIOUSB_SUCCESS;
 }
 
+unsigned long ClearDevices( void ) { 
+    AIODeviceTableClearDevices();
+}
+
 /*----------------------------------------------------------------------------*/
 
 
