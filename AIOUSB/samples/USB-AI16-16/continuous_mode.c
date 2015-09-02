@@ -125,7 +125,7 @@ main(int argc, char *argv[] )
                                                       options.ranges[i]->gaincode
                                                       );
             if ( retval != AIOUSB_SUCCESS ) {
-                fprintf(stderr,"Error setting ChannelRange: %d\n", retval );
+                fprintf(stderr,"Error setting ChannelRange: %d\n", (int)retval );
                 exit(1);
             }
         }
@@ -181,7 +181,7 @@ main(int argc, char *argv[] )
 
                 if ( options.verbose )
                     fprintf(stdout,"Waiting : total=%u, readpos=%d, writepos=%d\n", read_count, 
-                            AIOContinuousBufGetReadPosition(buf), AIOContinuousBufGetWritePosition(buf));
+                            (int)AIOContinuousBufGetReadPosition(buf), (int)AIOContinuousBufGetWritePosition(buf));
 
                 scans_read = AIOContinuousBufReadIntegerScanCounts( buf, (uint16_t*)tobuf, tobufsize, AIOContinuousBufNumberChannels(buf)*scans_remaining );
 
