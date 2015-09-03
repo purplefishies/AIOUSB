@@ -657,6 +657,20 @@ AIORET_TYPE AIOContinuousBufStart( AIOContinuousBuf *buf )
     return retval;
 }
 
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOContinuousBufStopAcquisition( AIOContinuousBuf *buf )
+{
+    AIO_ASSERT_AIOCONTBUF( buf );
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    retval = AIOContinuousBufLock( buf );    
+    AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    
+    buf->status = TERMINATED;
+    buf->bytes_processed = (unsigned)AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf);
+
+    AIOContinuousBufUnlock( buf );    
+    return retval;
+}
 
 
 /*----------------------------------------------------------------------------*/
@@ -1483,8 +1497,10 @@ AIORET_TYPE AIOContinuousBufLock( AIOContinuousBuf *buf )
 #ifdef HAS_PTHREAD
     retval = pthread_mutex_lock( &buf->lock );
     if ( retval != 0 ) {
-        retval = -retval;
+        retval = -AIOUSB_ERROR_INVALID_MUTEX;
     }
+#else
+    retval  = AIOUSB_SUCCESS;
 #endif
     return retval;
 }
@@ -1499,6 +1515,8 @@ AIORET_TYPE AIOContinuousBufUnlock( AIOContinuousBuf *buf )
         retval = -retval; 
         AIOUSB_ERROR("Unable to unlock mutex");
     }
+#else
+    retval = AIOUSB_SUCCESS;
 #endif
     return retval;
 }

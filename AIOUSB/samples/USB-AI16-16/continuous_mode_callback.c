@@ -9,6 +9,7 @@
 #include "AIOUSB_Log.h"
 #include "aiocommon.h"
 #include <getopt.h>
+#include <signal.h>
 
 struct channel_range *get_channel_range( char *optarg );
 void process_cmd_line( struct opts *, int argc, char *argv[] );
@@ -38,15 +39,31 @@ AIORET_TYPE capture_data( AIOContinuousBuf *buf ) {
 }
 
 
+
+
 int 
 main(int argc, char *argv[] ) 
 {
     struct opts options = AIO_OPTIONS;
     AIOContinuousBuf *buf = 0;
-    
+    struct sigaction sa;
+
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     int *indices;
     int num_devices;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    
+    /* Custom handler , catches INTR ( control-C ) and gracefully exits */
+    sa.sa_handler = LAMBDA( void , (int sig) , { 
+            printf("Forced exit, and will do so gracefully\n");
+            AIOContinuousBufStopAcquisition(buf);
+    });
+
+    if (sigaction(SIGINT, &sa, NULL) == -1) {
+        fprintf(stderr, "Error with sigaction: \n");
+        exit(1);
+    }
 
     process_aio_cmd_line( &options, argc, argv );
 

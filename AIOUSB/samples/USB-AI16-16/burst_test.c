@@ -164,7 +164,7 @@ main(int argc, char *argv[] )
 
                 if ( options.verbose )
                     fprintf(stdout,"Waiting : total=%u, readpos=%d, writepos=%d, scans_read=%d\n", read_count, 
-                            AIOContinuousBufGetReadPosition(buf), AIOContinuousBufGetWritePosition(buf), scans_read);
+                            (int)AIOContinuousBufGetReadPosition(buf), (int)AIOContinuousBufGetWritePosition(buf), scans_read);
 
                 for( int scan_count = 0; scan_count < scans_read ; scan_count ++ ) { 
                     if( options.with_timing )
