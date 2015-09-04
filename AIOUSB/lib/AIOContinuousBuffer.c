@@ -369,9 +369,10 @@ AIORET_TYPE AIOContinuousBufSetCallback(AIOContinuousBuf *buf , void *(*work)(vo
 }
 
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE AIOContinuousBufSetNumberScans( AIOContinuousBuf *buf , unsigned long num_scans )
+AIORET_TYPE AIOContinuousBufSetNumberScans( AIOContinuousBuf *buf , int64_t num_scans )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
+    AIO_ASSERT_VALID_DATA( AIOUSB_ERROR_INVALID_PARAMETER, num_scans >= 0 );
     buf->num_scans = num_scans;
     return  AIOUSB_SUCCESS;
 }
@@ -510,7 +511,7 @@ AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf,
                                                    )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    int num_scans;
+    int64_t num_scans;
     AIO_ASSERT_AIOCONTBUF( buf );
     AIO_ASSERT( read_buf );
     AIO_ERROR_VALID_AIORET_TYPE( AIOUSB_ERROR_NOT_ENOUGH_MEMORY, size >= (unsigned)AIOContinuousBufNumberChannels(buf) );
@@ -536,7 +537,7 @@ AIORET_TYPE AIOContinuousBufGetNumberOfScansToRead( AIOContinuousBuf *buf )
 }
 
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE AIOContinuousBufSetNumberOfScansToRead( AIOContinuousBuf *buf, unsigned num_scans )
+AIORET_TYPE AIOContinuousBufSetNumberOfScansToRead( AIOContinuousBuf *buf, int64_t num_scans )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
     buf->num_scans = num_scans;
@@ -556,7 +557,7 @@ AIORET_TYPE AIOContinuousBufSetNumberOfScansToRead( AIOContinuousBuf *buf, unsig
 AIORET_TYPE AIOContinuousBufReadIntegerNumberOfScans( AIOContinuousBuf *buf, 
                                                       unsigned short *read_buf , 
                                                       unsigned tmpbuffer_size, 
-                                                      size_t num_scans
+                                                      int64_t num_scans
                                                       )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
@@ -878,10 +879,10 @@ void *RawCountsWorkFunction( void *object )
     AIO_ERROR_VALID_DATA( &retval, retval == AIOUSB_SUCCESS );
 
     unsigned char *data  = (unsigned char *)malloc( buf->block_size );
+    int64_t bytes_remaining = 0;
 
     while ( buf->status == RUNNING  ) {
         int bytes;
-        unsigned long bytes_remaining;
 
         int reqsize = buf->block_size;
         int usbresult = aiocontbuf_get_bulk_data( buf, usb, 0x86, data, reqsize, &bytes, 3000 );
@@ -889,12 +890,12 @@ void *RawCountsWorkFunction( void *object )
         AIOUSB_DEVEL("Requested: %d libusb_bulk_transfer  %d as usbresult, bytes=%d\n", reqsize, usbresult , (int)bytes);
 
         if (  bytes ) {
-            /* bytes = MIN( ((int)AIOContinuousBufGetTotalSamplesExpected(buf)*(int)AIOContinuousBufGetUnitSize(buf)) - (int)(count*2),((int)bytes) ); */
-            bytes_remaining = MIN( AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf) - count*2, (unsigned long)bytes );
+
+            bytes_remaining = MIN( (int64_t)(AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf) - count*2), (int64_t)bytes );
 
             int tmp = AIOContinuousBufPushN( buf, data, bytes_remaining / sizeof(unsigned short));
             if ( tmp <= 0 ) { 
-                AIOUSB_ERROR("Buffer overflow error: tried to add %lu with size=%ld available\n",
+                AIOUSB_ERROR("Buffer overflow error: tried to add %ld with size=%ld available\n",
                              bytes_remaining / 2, AIOFifoWriteSizeRemainingNumElements(buf->fifo ) );
 
                 count += bytes_remaining / 2;
@@ -914,7 +915,7 @@ void *RawCountsWorkFunction( void *object )
              * 1. count >= number we are supposed to read
              * 2. we don't have enough space
              */
-            if ( buf->bytes_processed >= (unsigned long)(AIOContinuousBufGetTotalSamplesExpected( buf )*AIOContinuousBufGetUnitSize(buf)) ) {
+            if ( buf->bytes_processed >= (int64_t)(AIOContinuousBufGetTotalSamplesExpected( buf )*AIOContinuousBufGetUnitSize(buf)) ) {
                 AIOContinuousBufLock(buf);
                 buf->status = TERMINATED;
                 AIOContinuousBufUnlock(buf);
@@ -1347,7 +1348,7 @@ AIOUSB_BOOL continue_running( AIOContinuousBuf *buf, AIOCmd *cmd )
     AIOUSB_BOOL retval = AIOUSB_TRUE;
 
     retval = buf->status == RUNNING || 
-        buf->bytes_processed < (unsigned long )(AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf)) || 
+        buf->bytes_processed < (int64_t )(AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf)) || 
         (unsigned long)AIOContinuousBufNumberSamplesAvailable(buf) >= (unsigned long)number_to_read(buf, cmd);
     return retval;
 }
