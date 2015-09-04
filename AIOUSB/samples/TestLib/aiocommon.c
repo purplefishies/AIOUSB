@@ -204,8 +204,8 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
             break;
         case 'N':
         case 'b':
-            options->num_scans = atoi(optarg);
-            if( options->num_scans <= 0 || options->num_scans > 1e8 ) {
+            options->num_scans = atol(optarg);
+            if( options->num_scans <= 0 ) {
                 fprintf(stderr,"Warning: Buffer Size outside acceptable range (1,1e8), setting to 10000\n");
                 options->num_scans = 10000;
             }

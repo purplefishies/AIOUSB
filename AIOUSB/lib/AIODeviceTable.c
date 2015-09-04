@@ -1331,7 +1331,7 @@ unsigned long AIODeviceTableClearDevices(void)
 }
 
 unsigned long ClearDevices( void ) { 
-    AIODeviceTableClearDevices();
+    return AIODeviceTableClearDevices();
 }
 
 /*----------------------------------------------------------------------------*/

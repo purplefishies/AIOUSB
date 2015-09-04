@@ -11,7 +11,7 @@ struct channel_range {
 };
 
 struct opts {
-    unsigned num_scans;
+    unsigned long num_scans;
     unsigned num_channels;
     unsigned num_oversamples;
     int gain_code;

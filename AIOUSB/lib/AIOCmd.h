@@ -14,7 +14,7 @@ typedef struct aio_cmd {
     int stop_scan;
     int stop_scan_arg;
     int channel;
-    unsigned num_scans;
+    unsigned long num_scans;
     unsigned num_channels;
     unsigned num_samples;
 } AIOCmd;

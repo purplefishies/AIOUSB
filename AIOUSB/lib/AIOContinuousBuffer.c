@@ -369,7 +369,7 @@ AIORET_TYPE AIOContinuousBufSetCallback(AIOContinuousBuf *buf , void *(*work)(vo
 }
 
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE AIOContinuousBufSetNumberScans( AIOContinuousBuf *buf , unsigned num_scans )
+AIORET_TYPE AIOContinuousBufSetNumberScans( AIOContinuousBuf *buf , unsigned long num_scans )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
     buf->num_scans = num_scans;
@@ -666,7 +666,7 @@ AIORET_TYPE AIOContinuousBufStopAcquisition( AIOContinuousBuf *buf )
     AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
     
     buf->status = TERMINATED;
-    buf->bytes_processed = (unsigned)AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf);
+    buf->bytes_processed = AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf);
 
     AIOContinuousBufUnlock( buf );    
     return retval;
@@ -873,7 +873,7 @@ void *RawCountsWorkFunction( void *object )
     AIOContinuousBuf *buf = (AIOContinuousBuf*)object;
     AIO_ASSERT_RET( NULL, object );
     int usbfail = 0, usbfail_count = 5;
-    unsigned count = 0;
+    unsigned long count = 0;
     USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( AIOContinuousBufGetDeviceIndex( buf ), (AIORESULT*)&retval );
     AIO_ERROR_VALID_DATA( &retval, retval == AIOUSB_SUCCESS );
 
@@ -881,29 +881,32 @@ void *RawCountsWorkFunction( void *object )
 
     while ( buf->status == RUNNING  ) {
         int bytes;
+        unsigned long bytes_remaining;
+
         int reqsize = buf->block_size;
         int usbresult = aiocontbuf_get_bulk_data( buf, usb, 0x86, data, reqsize, &bytes, 3000 );
 
         AIOUSB_DEVEL("Requested: %d libusb_bulk_transfer  %d as usbresult, bytes=%d\n", reqsize, usbresult , (int)bytes);
 
         if (  bytes ) {
-            bytes = MIN( ((int)AIOContinuousBufGetTotalSamplesExpected(buf)*(int)AIOContinuousBufGetUnitSize(buf)) - (int)(count*2),((int)bytes) );
+            /* bytes = MIN( ((int)AIOContinuousBufGetTotalSamplesExpected(buf)*(int)AIOContinuousBufGetUnitSize(buf)) - (int)(count*2),((int)bytes) ); */
+            bytes_remaining = MIN( AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf) - count*2, (unsigned long)bytes );
 
-            int tmp = AIOContinuousBufPushN( buf, data, bytes / sizeof(unsigned short));
+            int tmp = AIOContinuousBufPushN( buf, data, bytes_remaining / sizeof(unsigned short));
             if ( tmp <= 0 ) { 
-                AIOUSB_ERROR("Buffer overflow error: tried to add %d with size=%ld available\n",
-                             bytes / 2, AIOFifoWriteSizeRemainingNumElements(buf->fifo ) );
+                AIOUSB_ERROR("Buffer overflow error: tried to add %lu with size=%ld available\n",
+                             bytes_remaining / 2, AIOFifoWriteSizeRemainingNumElements(buf->fifo ) );
 
-                count += bytes / 2;
+                count += bytes_remaining / 2;
             } else {
-                AIOUSB_DEVEL("Pushed %d, size: %d\n", bytes / 2 , AIOFifoWriteSizeRemainingNumElements(buf->fifo ) );
+                AIOUSB_DEVEL("Pushed %d, size: %d\n", bytes_remaining / 2 , AIOFifoWriteSizeRemainingNumElements(buf->fifo ) );
                 if (  tmp >= 0 ) {
-                    count += bytes / 2;
+                    count += bytes_remaining / 2;
                 }                
             }
-            buf->bytes_processed += bytes;
+            buf->bytes_processed += bytes_remaining;
 
-            AIOUSB_DEVEL("Tmpcount=%d,count=%d,Bytes=%d, Write=%d,Read=%d,max=%d\n", tmp,count,bytes,AIOFifoWritePosition(buf->fifo) , AIOFifoReadPosition(buf->fifo), AIOFifoGetSize(buf->fifo));
+            AIOUSB_DEVEL("Tmpcount=%d,count=%d,Bytes=%lu, Write=%d,Read=%d,max=%d\n", tmp,count,bytes_remaining,AIOFifoWritePosition(buf->fifo) , AIOFifoReadPosition(buf->fifo), AIOFifoGetSize(buf->fifo));
 
             /**
              * Modification, allow the count to keep going... stop 
@@ -911,7 +914,7 @@ void *RawCountsWorkFunction( void *object )
              * 1. count >= number we are supposed to read
              * 2. we don't have enough space
              */
-            if ( buf->bytes_processed >= (unsigned)AIOContinuousBufGetTotalSamplesExpected( buf )*AIOContinuousBufGetUnitSize(buf) ) {
+            if ( buf->bytes_processed >= (unsigned long)(AIOContinuousBufGetTotalSamplesExpected( buf )*AIOContinuousBufGetUnitSize(buf)) ) {
                 AIOContinuousBufLock(buf);
                 buf->status = TERMINATED;
                 AIOContinuousBufUnlock(buf);
@@ -1328,9 +1331,9 @@ AIORET_TYPE AIOContinuousBufInitiateCallbackAcquisition( AIOContinuousBuf *buf )
     return AIOContinuousBufCallbackStart(buf);
 }
 
-size_t number_to_read( AIOContinuousBuf *buf, AIOCmd *cmd ) 
+unsigned long number_to_read( AIOContinuousBuf *buf, AIOCmd *cmd ) 
 {
-    size_t retval = 0;
+    unsigned long retval = 0;
     retval = (cmd->num_scans*(1+buf->num_oversamples))*(buf->num_channels)+
         (cmd->num_channels*(1+buf->num_oversamples)) + 
         (cmd->num_samples);
@@ -1344,8 +1347,8 @@ AIOUSB_BOOL continue_running( AIOContinuousBuf *buf, AIOCmd *cmd )
     AIOUSB_BOOL retval = AIOUSB_TRUE;
 
     retval = buf->status == RUNNING || 
-             buf->bytes_processed < (unsigned)AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf) || 
-        AIOContinuousBufNumberSamplesAvailable(buf) >= (int)( number_to_read(buf, cmd));
+        buf->bytes_processed < (unsigned long )(AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf)) || 
+        (unsigned long)AIOContinuousBufNumberSamplesAvailable(buf) >= (unsigned long)number_to_read(buf, cmd);
     return retval;
 }
 
@@ -1368,13 +1371,13 @@ AIORET_TYPE AIOContinuousBufCallbackStartCallbackWithAcquisitionFunction( AIOCon
 
     int data_read;
     AIORET_TYPE retval = 0;
-    int tmp_remaining;
+    unsigned long tmp_remaining;
     int sleep_value = 200;
 
     AIOUSB_DEVEL("Trying to consume %d bytes\n", (int)AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf) );
 
     while ( continue_running( buf, cmd ) ) {
-        if ( ( tmp_remaining = AIOContinuousBufNumberSamplesAvailable(buf) ) >= (int)number_to_read(buf, cmd) ) {
+        if ( ( tmp_remaining = AIOContinuousBufNumberSamplesAvailable(buf) ) >= number_to_read(buf, cmd) ) {
             data_read = callback( buf );
             retval += data_read;
         } else {
@@ -1942,7 +1945,7 @@ char *AIOContinuousBufToJSON( AIOContinuousBuf *buf )
     AIO_ASSERT_RET( NULL, buf );
     char *tmp;
     asprintf(&tmp,
-              "{\"DeviceIndex\":%d,\"base_size\":%d,\"block_size\":%d,\"debug\":\"%s\",\"hz\":%d,\"num_channels\":%d,\"num_oversamples\":%d,\"num_scans\":%d,\"testing\":\"%s\",\"timeout\":%d,\"type\":%d,\"unit_size\":%d}",
+              "{\"DeviceIndex\":%d,\"base_size\":%d,\"block_size\":%d,\"debug\":\"%s\",\"hz\":%d,\"num_channels\":%d,\"num_oversamples\":%d,\"num_scans\":%lu,\"testing\":\"%s\",\"timeout\":%d,\"type\":%d,\"unit_size\":%d}",
               buf->DeviceIndex,
               buf->base_size,
               buf->block_size,
@@ -1958,6 +1961,37 @@ char *AIOContinuousBufToJSON( AIOContinuousBuf *buf )
               );
     return tmp;
 }
+
+char *AIOContinuousBufToFullJSON( AIOContinuousBuf *buf )
+{
+    AIO_ASSERT_RET( NULL, buf );
+    char *tmp;
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex(  AIOContinuousBufGetDeviceIndex( buf ), (AIORESULT*)&retval );
+    ADCConfigBlock config = {0};
+    if ( dev ) {
+        ADCConfigBlockCopy( &config, AIOUSBDeviceGetADCConfigBlock( dev ) );
+    } 
+
+    asprintf(&tmp,
+              "{\"DeviceIndex\":%d,\"base_size\":%d,\"block_size\":%d,\"debug\":\"%s\",\"hz\":%d,\"num_channels\":%d,\"num_oversamples\":%d,\"num_scans\":%lu,\"testing\":\"%s\",\"timeout\":%d,\"type\":%d,\"unit_size\":%d,\"adcconfig\":%s}",
+              buf->DeviceIndex,
+              buf->base_size,
+              buf->block_size,
+             (buf->debug == 1 ? "true" : "false" ),
+              buf->hz,
+              buf->num_channels,
+              buf->num_oversamples,
+              buf->num_scans,
+             ( buf->testing == 1 ? "true" : "false" ),
+              buf->timeout,
+              buf->type,
+              buf->unit_size,
+             ADCConfigBlockToJSON( &config ) 
+              );
+    return tmp;
+}
+
 
 
 #ifdef __cplusplus
