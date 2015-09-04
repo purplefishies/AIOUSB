@@ -380,29 +380,29 @@ AIORET_TYPE AIOUSB_ShowDevices( AIODisplayType display_type )
                             index,
                             productID,
                             name,
-                            numDIOBytes,
-                            numCounters,
-                            serNum
+                            (unsigned long)numDIOBytes,
+                            (unsigned long)numCounters,
+                            (unsigned long)serNum
                            );
                     break;
                 case TERSE:
-                    fprintf(stderr,"index=%d,product_id=%#lx,product_name=%s,numIO=%lu,numCounters=%lu,serailNumber=%lu\n",index,productID,name,numDIOBytes,numCounters, serNum);
+                    fprintf(stderr,"index=%d,product_id=%#lx,product_name=%s,numIO=%lu,numCounters=%lu,serailNumber=%lu\n",index,productID,name,(unsigned long)numDIOBytes,(unsigned long)numCounters, (unsigned long)serNum);
                     break;
                 case JSON:
                     if ( previous ) 
                         printf(",");
                     printf("{\"%s\":\"%d\",\"%s\":\"%#lx\",\"%s\":\"%s\",\"%s\":%lu,\"%s\":%lu,\"%s\":%lu}",
-                           "index", index, "product_id",productID,"product_name",name,"numIO",numDIOBytes,"numCounters",numCounters,"serial_number",serNum);
+                           "index", index, "product_id",productID,"product_name",name,"numIO",(unsigned long )numDIOBytes,"numCounters",(unsigned long)numCounters,"serial_number",(unsigned long)serNum);
                     previous = 1;
                     break;
                 case YAML:
                     printf("  - index: %d\n    numCounters: %lu\n    numIO: %lu\n    product_id: %#lx\n    product_name: %s\n    serial_number: %lu\n",
                            index,
-                           numCounters,
-                           numDIOBytes,
-                           productID,
+                           (unsigned long)numCounters,
+                           (unsigned long)numDIOBytes,
+                           (unsigned long)productID,
                            name,
-                           serNum
+                           (unsigned long)serNum
                            );
                            
                     break;

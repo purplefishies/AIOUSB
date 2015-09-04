@@ -896,7 +896,7 @@ void *RawCountsWorkFunction( void *object )
             int tmp = AIOContinuousBufPushN( buf, data, bytes_remaining / sizeof(unsigned short));
             if ( tmp <= 0 ) { 
                 AIOUSB_ERROR("Buffer overflow error: tried to add %ld with size=%ld available\n",
-                             bytes_remaining / 2, AIOFifoWriteSizeRemainingNumElements(buf->fifo ) );
+                             (long)bytes_remaining / 2, (long)AIOFifoWriteSizeRemainingNumElements(buf->fifo ) );
 
                 count += bytes_remaining / 2;
             } else {
@@ -1954,7 +1954,7 @@ char *AIOContinuousBufToJSON( AIOContinuousBuf *buf )
               buf->hz,
               buf->num_channels,
               buf->num_oversamples,
-              buf->num_scans,
+             (unsigned long)buf->num_scans,
              ( buf->testing == 1 ? "true" : "false" ),
               buf->timeout,
               buf->type,
@@ -1983,7 +1983,7 @@ char *AIOContinuousBufToFullJSON( AIOContinuousBuf *buf )
               buf->hz,
               buf->num_channels,
               buf->num_oversamples,
-              buf->num_scans,
+             (unsigned long)buf->num_scans,
              ( buf->testing == 1 ? "true" : "false" ),
               buf->timeout,
               buf->type,
