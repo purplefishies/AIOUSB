@@ -3,6 +3,7 @@
 
 #include "aiousb.h"
 #include <getopt.h>
+#include <stdint.h>
 
 struct channel_range {
   int start_channel;
@@ -11,7 +12,7 @@ struct channel_range {
 };
 
 struct opts {
-    unsigned long num_scans;
+    int64_t num_scans;
     unsigned num_channels;
     unsigned num_oversamples;
     int gain_code;
