@@ -864,7 +864,11 @@ AIORET_TYPE AIOContinuousBufGetNumberSamplesPerScan( AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBufGetTotalSamplesExpected(  AIOContinuousBuf *buf )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
-    return AIOContinuousBufGetNumberSamplesPerScan(buf)*AIOContinuousBufGetNumberScans(buf);
+    int64_t tmp = AIOContinuousBufGetNumberSamplesPerScan(buf)*AIOContinuousBufGetNumberScans(buf);
+    if ( tmp < 0 ) {
+        tmp = INT64_MAX / AIOContinuousBufGetNumberSamplesPerScan(buf);
+    }
+    return tmp;
 }
 
 /*----------------------------------------------------------------------------*/
