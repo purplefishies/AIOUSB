@@ -99,32 +99,27 @@ typedef struct aio_usb_driver {
 
 typedef AIOUSBDevice DeviceDescriptor;
 
-
-char *AIOUSBDeviceToJSON( AIOUSBDevice *device );
-AIOUSBDevice *NewAIOUSBDeviceFromJSON( char *str );
-AIOUSBDevice *NewAIOUSBDeviceFromJSON( char *str );
-
-AIORET_TYPE AIOUSBDeviceInitializeWithProductID( AIOUSBDevice *device , ProductIDS productID );
-USBDevice *AIOUSBDeviceGetUSBHandle( AIOUSBDevice *dev );
-USBDevice *AIOUSBDeviceGetUSBHandleFromDeviceIndex( unsigned long DeviceIndex, AIOUSBDevice **dev, AIORESULT *res );
-
-AIORET_TYPE AIOUSBDeviceSetUSBHandle( AIOUSBDevice *dev, USBDevice *usb );
-
-AIORET_TYPE AIOUSBDeviceSetADCConfigBlock( AIOUSBDevice *dev, ADCConfigBlock *conf );
-ADCConfigBlock * AIOUSBDeviceGetADCConfigBlock( AIOUSBDevice *dev );
-AIORET_TYPE AIOUSBDeviceCopyADCConfigBlock( AIOUSBDevice *dev, ADCConfigBlock *newone );
-
-
-AIORET_TYPE AIOUSBDeviceSetTesting( AIOUSBDevice *dev, AIOUSB_BOOL testing );
-AIORET_TYPE AIOUSBDeviceSize();
-AIORET_TYPE AIOUSBDeviceGetTesting( AIOUSBDevice *dev  );
-AIORET_TYPE AIOUSBDeviceGetStreamingBlockSize( AIOUSBDevice *deviceDesc );
-AIORET_TYPE AIOUSBDeviceGetDiscardFirstSample( AIOUSBDevice *device );
-AIORET_TYPE AIOUSBDeviceSetDiscardFirstSample( AIOUSBDevice *device , AIOUSB_BOOL discard );
-AIORET_TYPE AIOUSBDeviceSetTimeout( AIOUSBDevice *device, unsigned timeout );
-AIORET_TYPE AIOUSBDeviceGetTimeout( AIOUSBDevice *device );
-
-AIORET_TYPE AIOUSBDeviceWriteADCConfig( AIOUSBDevice *device, ADCConfigBlock *config );
+/* BEGIN AIOUSB_API */
+PUBLIC_EXTERN char *AIOUSBDeviceToJSON( AIOUSBDevice *device );
+PUBLIC_EXTERN AIOUSBDevice *NewAIOUSBDeviceFromJSON( char *str );
+PUBLIC_EXTERN AIOUSBDevice *NewAIOUSBDeviceFromJSON( char *str );
+PUBLIC_EXTERN AIORET_TYPE AIOUSBDeviceInitializeWithProductID( AIOUSBDevice *device , ProductIDS productID );
+PUBLIC_EXTERN USBDevice *AIOUSBDeviceGetUSBHandle( AIOUSBDevice *dev );
+PUBLIC_EXTERN USBDevice *AIOUSBDeviceGetUSBHandleFromDeviceIndex( unsigned long DeviceIndex, AIOUSBDevice **dev, AIORESULT *res );
+PUBLIC_EXTERN AIORET_TYPE AIOUSBDeviceSetUSBHandle( AIOUSBDevice *dev, USBDevice *usb );
+PUBLIC_EXTERN AIORET_TYPE AIOUSBDeviceSetADCConfigBlock( AIOUSBDevice *dev, ADCConfigBlock *conf );
+PUBLIC_EXTERN ADCConfigBlock * AIOUSBDeviceGetADCConfigBlock( AIOUSBDevice *dev );
+PUBLIC_EXTERN AIORET_TYPE AIOUSBDeviceCopyADCConfigBlock( AIOUSBDevice *dev, ADCConfigBlock *newone );
+PUBLIC_EXTERN AIORET_TYPE AIOUSBDeviceSetTesting( AIOUSBDevice *dev, AIOUSB_BOOL testing );
+PUBLIC_EXTERN AIORET_TYPE AIOUSBDeviceSize();
+PUBLIC_EXTERN AIORET_TYPE AIOUSBDeviceGetTesting( AIOUSBDevice *dev  );
+PUBLIC_EXTERN AIORET_TYPE AIOUSBDeviceGetStreamingBlockSize( AIOUSBDevice *deviceDesc );
+PUBLIC_EXTERN AIORET_TYPE AIOUSBDeviceGetDiscardFirstSample( AIOUSBDevice *device );
+PUBLIC_EXTERN AIORET_TYPE AIOUSBDeviceSetDiscardFirstSample( AIOUSBDevice *device , AIOUSB_BOOL discard );
+PUBLIC_EXTERN AIORET_TYPE AIOUSBDeviceSetTimeout( AIOUSBDevice *device, unsigned timeout );
+PUBLIC_EXTERN AIORET_TYPE AIOUSBDeviceGetTimeout( AIOUSBDevice *device );
+PUBLIC_EXTERN AIORET_TYPE AIOUSBDeviceWriteADCConfig( AIOUSBDevice *device, ADCConfigBlock *config );
+/* END AIOUSB_API */
 
 #ifdef __aiousb_cplusplus
 }

@@ -35,6 +35,7 @@ typedef ADCConfigBlock ADConfigBlock;
 
 #define STRINGIFY(x) #x
 
+/* BEGIN AIOUSB_API */
 
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockInit( ADCConfigBlock *, AIOUSBDevice *deviceDesc, unsigned int );
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockInitForCounterScan(ADCConfigBlock *config, AIOUSBDevice *deviceDesc  );
@@ -81,16 +82,11 @@ PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetTriggerMode(ADCConfigBlock *config, u
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetDifferentialMode(ADCConfigBlock *config, unsigned channel, AIOUSB_BOOL differentialMode);
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetRangeSingle(ADCConfigBlock *config, unsigned long channel, unsigned char gainCode);
 
-
-
-
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockCopy( ADCConfigBlock *to, ADCConfigBlock *from );
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetDevice( ADCConfigBlock *obj, AIOUSBDevice *dev );
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetAIOUSBDevice( ADCConfigBlock *obj, AIOUSBDevice *dev );
 PUBLIC_EXTERN AIOUSBDevice *ADCConfigBlockGetAIOUSBDevice( ADCConfigBlock *obj, AIORET_TYPE *res );
-/* PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockInitialize( ADCConfigBlock *config , AIOUSBDevice *dev); */
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockInitializeFromAIOUSBDevice( ADCConfigBlock *config , AIOUSBDevice *dev);
-
 
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetTesting( ADCConfigBlock *obj, AIOUSB_BOOL testing );
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetTesting( const ADCConfigBlock *obj );
@@ -103,9 +99,9 @@ PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetDebug( const ADCConfigBlock *obj );
 
 
 /* JSON API */
-char *ADCConfigBlockToJSON(ADCConfigBlock *config);
-ADCConfigBlock *NewADCConfigBlockFromJSON( char *str );
-AIORET_TYPE DeleteADCConfigBlock( ADCConfigBlock *config );
+PUBLIC_EXTERN char *ADCConfigBlockToJSON(ADCConfigBlock *config);
+PUBLIC_EXTERN ADCConfigBlock *NewADCConfigBlockFromJSON( char *str );
+PUBLIC_EXTERN AIORET_TYPE DeleteADCConfigBlock( ADCConfigBlock *config );
 
 PUBLIC_EXTERN AIOUSB_BOOL is_all_digits( char *str );
 
@@ -119,6 +115,8 @@ PUBLIC_EXTERN AIORET_TYPE _adccblock_valid_trigger_setting(ADCConfigBlock *confi
 PUBLIC_EXTERN AIORET_TYPE _adcblock_valid_channel_settings(AIORET_TYPE in, ADCConfigBlock *config , int ADCMUXChannels );
 
 #endif
+
+/* END AIOUSB_API */
 
 
 #ifdef __aiousb_cplusplus

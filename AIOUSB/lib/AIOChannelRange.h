@@ -40,12 +40,16 @@ typedef struct aio_channel_range {
     ADGainCode gain;
 } AIOChannelRange;
 
-AIOChannelRange *NewAIOChannelRangeFromStr( const char *str );
-void DeleteAIOChannelRange( AIOChannelRange *range );
-char *AIOChannelRangeToStr( AIOChannelRange *range );
-AIORET_TYPE AIOChannelRangeGetStart( AIOChannelRange *range );
-AIORET_TYPE AIOChannelRangeGetEnd( AIOChannelRange *range );
-AIORET_TYPE AIOChannelRangeGetGain( AIOChannelRange *range );
+/* BEGIN AIOUSB_API */
+
+PUBLIC_EXTERN AIOChannelRange *NewAIOChannelRangeFromStr( const char *str );
+PUBLIC_EXTERN void DeleteAIOChannelRange( AIOChannelRange *range );
+PUBLIC_EXTERN char *AIOChannelRangeToStr( AIOChannelRange *range );
+PUBLIC_EXTERN AIORET_TYPE AIOChannelRangeGetStart( AIOChannelRange *range );
+PUBLIC_EXTERN AIORET_TYPE AIOChannelRangeGetEnd( AIOChannelRange *range );
+PUBLIC_EXTERN AIORET_TYPE AIOChannelRangeGetGain( AIOChannelRange *range );
+
+/* END AIOUSB_API */
 
 #ifdef __aiousb_cplusplus
 }

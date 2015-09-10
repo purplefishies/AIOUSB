@@ -46,6 +46,7 @@ typedef struct aio_counts_converter {
 } AIOCountsConverter;
 
 
+/* BEGIN AIOUSB_API */
 PUBLIC_EXTERN AIOCountsConverter *NewAIOCountsConverterWithBuffer( void *buf, unsigned num_channels, AIOGainRange *ranges, unsigned num_oversamples,unsigned unit_size  );
 PUBLIC_EXTERN AIOCountsConverter *NewAIOCountsConverter( unsigned num_channels, AIOGainRange *ranges, unsigned num_oversamples,unsigned unit_size  );
 PUBLIC_EXTERN AIOCountsConverter *NewAIOCountsConverterFromAIOContinuousBuf( void *buf);
@@ -61,7 +62,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc,
 
 PUBLIC_EXTERN AIOGainRange* NewAIOGainRangeFromADCConfigBlock( ADCConfigBlock *adc );
 PUBLIC_EXTERN void  DeleteAIOGainRange( AIOGainRange* );
-
+/* END AIOUSB_API */
 #ifdef __aiousb_cplusplus
 }
 #endif

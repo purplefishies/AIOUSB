@@ -12,6 +12,7 @@ namespace AIOUSB
 #endif
 
 
+/* BEGIN AIOUSB_API */
 /* #ifndef SWIG */
 PUBLIC_EXTERN AIORET_TYPE ADC_GetScanV( unsigned long DeviceIndex, double *voltages );
 PUBLIC_EXTERN AIORESULT ADC_RangeAll( unsigned long DeviceIndex, unsigned char *pGainCodes, unsigned long bSingleEnded );
@@ -122,7 +123,7 @@ PUBLIC_EXTERN void AIOUSB_SetRegister( ADConfigBlock *cb, unsigned int Register,
 
 PUBLIC_EXTERN unsigned char AIOUSB_GetRegister( ADConfigBlock *cb, unsigned int Register );
 
-
+/* END AIOUSB_API */
 
 
 #ifdef __aiousb_cplusplus

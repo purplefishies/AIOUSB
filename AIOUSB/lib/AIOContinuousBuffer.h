@@ -77,6 +77,7 @@ typedef struct aio_continuous_buf {
 
 #define ROOTCLOCK 10000000
 
+/* BEGIN AIOUSB_API */
 /*-----------------------------  Constructors  ------------------------------*/
 PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex, unsigned num_channels, unsigned num_oversamples, unsigned base_size );
 
@@ -230,6 +231,8 @@ AIORET_TYPE AIOContinuousBufCleanup( AIOContinuousBuf *buf );
 
 char *AIOContinuousBufToJSON( AIOContinuousBuf *buf );
 AIOContinuousBuf *NewAIOContinuousBufFromJSON( const char *json_string );
+
+/* END AIOUSB_API */
 
 
 #ifdef __aiousb_cplusplus

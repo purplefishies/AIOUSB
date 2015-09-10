@@ -235,6 +235,9 @@ distclean:
 gtags:	
 	gtags
 
+libaiousb.h:
+	perl -I./filepp $$(which filepp)  -I. -I${PWD}/filepp -m Between.pm filepp/libaiousb.h.pre > $@
+
 matlab: 
 	@if [ -z "$$MATLAB_BIN_DIR" ] ; then echo "You must set MATLAB_BIN_DIR to the path to matlab binary"; exit 1; fi
 	@export CPATH=/usr/include/libusb-1.0 && \

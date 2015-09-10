@@ -27,13 +27,14 @@ typedef struct AIODeviceInfo {
     unsigned long Counters;
 } AIODeviceInfo;
 
+/* BEGIN AIOUSB_API */
 PUBLIC_EXTERN AIODeviceInfo *NewAIODeviceInfo();
 PUBLIC_EXTERN void DeleteAIODeviceInfo( AIODeviceInfo *di );
 PUBLIC_EXTERN const char *AIODeviceInfoGetName( AIODeviceInfo *di );
 PUBLIC_EXTERN AIORET_TYPE AIODeviceInfoGetCounters( AIODeviceInfo *di ); 
 PUBLIC_EXTERN AIORET_TYPE AIODeviceInfoGetDIOBytes( AIODeviceInfo *di );
 PUBLIC_EXTERN AIODeviceInfo *AIODeviceInfoGet( unsigned long DeviceIndex );
-
+/* END AIOUSB_API */
 
 #ifdef __aiousb_cplusplus
 }

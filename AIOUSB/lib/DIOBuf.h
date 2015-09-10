@@ -28,6 +28,7 @@ typedef struct diobuf_type {
     int _strbuf_size;              /**> Size of display string */
 } DIOBuf;
 
+/* BEGIN AIOUSB_API */
 PUBLIC_EXTERN DIOBuf *NewDIOBuf ( unsigned size );
 PUBLIC_EXTERN void DeleteDIOBuf ( DIOBuf  *buf );
 PUBLIC_EXTERN DIOBuf *NewDIOBufFromChar( const char *ary , int size_array );
@@ -44,7 +45,7 @@ PUBLIC_EXTERN int DIOBufSetIndex( DIOBuf *buf, unsigned index, unsigned value );
 PUBLIC_EXTERN int DIOBufGetIndex( DIOBuf *buf, unsigned index );
 PUBLIC_EXTERN AIORET_TYPE DIOBufGetByteAtIndex( DIOBuf *buf, unsigned index, char *value);
 PUBLIC_EXTERN AIORET_TYPE DIOBufSetByteAtIndex( DIOBuf *buf, unsigned index, char  value );
-
+/* END AIOUSB_API */
 
 #ifdef __aiousb_cplusplus
 }

@@ -59,7 +59,7 @@ extern struct ADRange adRanges[ AD_NUM_GAIN_CODES ];
 extern unsigned long AIOUSB_INIT_PATTERN;
 extern unsigned long aiousbInit ;
 
-
+/* BEGIN AIOUSB_API */
 PUBLIC_EXTERN unsigned long ADC_ResetDevice( unsigned long DeviceIndex  );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetDeviceSerialNumber( unsigned long DeviceIndex );
 
@@ -112,6 +112,7 @@ PUBLIC_EXTERN AIORESULT GenericVendorRead( unsigned long deviceIndex, unsigned c
 PUBLIC_EXTERN AIORESULT GenericVendorWrite( unsigned long DeviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, void *bufData, unsigned long *bytes_write );
 PUBLIC_EXTERN AIORESULT AIOUSB_Validate_Device( unsigned long DeviceIndex );
 
+/* END AIOUSB_API */
 
 #if 0
 /*

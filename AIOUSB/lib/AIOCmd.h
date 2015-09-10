@@ -19,10 +19,11 @@ typedef struct aio_cmd {
     unsigned num_samples;
 } AIOCmd;
 
-AIOCmd *NewAIOCmdFromJSON( const char *str );
-AIOCmd *NewAIOCmd();
-AIORET_TYPE DeleteAIOCmd( AIOCmd *cmd );
-
+/* BEGIN AIOUSB_API */
+PUBLIC_EXTERN AIOCmd *NewAIOCmdFromJSON( const char *str );
+PUBLIC_EXTERN AIOCmd *NewAIOCmd();
+PUBLIC_EXTERN AIORET_TYPE DeleteAIOCmd( AIOCmd *cmd );
+/* END AIOUSB_API */
 
 #ifdef __aiousb_cplusplus
 }

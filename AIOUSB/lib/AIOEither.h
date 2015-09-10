@@ -49,24 +49,21 @@ typedef struct aio_ret_value  {
 
 #define AIO_ERROR_VALUE 0xffffffffffffffff
 
-
-AIORET_TYPE AIOEitherClear( AIOEither *retval );
-
-AIORET_TYPE AIOEitherSetRight(AIOEither *retval, AIO_EITHER_TYPE val , void *tmp, ... );
-AIORET_TYPE AIOEitherGetRight(AIOEither *retval, void *tmp, ... );
-
-AIORET_TYPE AIOEitherSetLeft(AIOEither *retval, int val );
-AIORET_TYPE AIOEitherGetLeft(AIOEither *retval );
-AIOUSB_BOOL AIOEitherHasError( AIOEither *retval );
-
-char *AIOEitherToString( AIOEither *retval, AIORET_TYPE *result );
-int AIOEitherToInt( AIOEither retval);
-short AIOEitherToShort( AIOEither *retval, AIORET_TYPE *result );
-unsigned AIOEitherToUnsigned( AIOEither *retval, AIORET_TYPE *result );
-double AIOEitherToDouble( AIOEither *retval, AIORET_TYPE *result );
-AIO_NUMBER AIOEitherToAIONumber( AIOEither *retval, AIORET_TYPE *result );
-AIORET_TYPE AIOEitherToAIORetType( AIOEither either );
-
+/* BEGIN AIOUSB_API */
+PUBLIC_EXTERN AIORET_TYPE AIOEitherClear( AIOEither *retval );
+PUBLIC_EXTERN AIORET_TYPE AIOEitherSetRight(AIOEither *retval, AIO_EITHER_TYPE val , void *tmp, ... );
+PUBLIC_EXTERN AIORET_TYPE AIOEitherGetRight(AIOEither *retval, void *tmp, ... );
+PUBLIC_EXTERN AIORET_TYPE AIOEitherSetLeft(AIOEither *retval, int val );
+PUBLIC_EXTERN AIORET_TYPE AIOEitherGetLeft(AIOEither *retval );
+PUBLIC_EXTERN AIOUSB_BOOL AIOEitherHasError( AIOEither *retval );
+PUBLIC_EXTERN char *AIOEitherToString( AIOEither *retval, AIORET_TYPE *result );
+PUBLIC_EXTERN int AIOEitherToInt( AIOEither retval);
+PUBLIC_EXTERN short AIOEitherToShort( AIOEither *retval, AIORET_TYPE *result );
+PUBLIC_EXTERN unsigned AIOEitherToUnsigned( AIOEither *retval, AIORET_TYPE *result );
+PUBLIC_EXTERN double AIOEitherToDouble( AIOEither *retval, AIORET_TYPE *result );
+PUBLIC_EXTERN AIO_NUMBER AIOEitherToAIONumber( AIOEither *retval, AIORET_TYPE *result );
+PUBLIC_EXTERN AIORET_TYPE AIOEitherToAIORetType( AIOEither either );
+/* END AIOUSB_API */
 
 
 

@@ -27,6 +27,7 @@ typedef enum {
     YAML  = 3
 } AIODisplayType;
 
+/* BEGIN AIOUSB_API */
 PUBLIC_EXTERN AIORESULT AIOUSB_GetDeviceByProductID(int minProductID,int maxProductID,int maxDevices, int *deviceList );
 PUBLIC_EXTERN AIORESULT GetDeviceBySerialNumber(uint64_t *pSerialNumber);
 PUBLIC_EXTERN AIORESULT GetDeviceSerialNumber(unsigned long DeviceIndex, uint64_t *pSerialNumber );
@@ -39,10 +40,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOUSB_ListDevices();
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_ShowDevices( AIODisplayType display_type );
 
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_FindDevices( int **where, int *length , AIOUSB_BOOL (*is_ok_device)( AIOUSBDevice *dev )  );
-
-
-
-
+/* END AIOUSB_API */
 
 #ifdef __aiousb_cplusplus       /* Required for header file inclusion and SWIG */
 }

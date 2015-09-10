@@ -20,7 +20,7 @@ namespace AIOUSB
 {
 #endif
 
-
+/* BEGIN AIOUSB_API */
 PUBLIC_EXTERN AIORESULT DIO_ConfigureWithDIOBuf( unsigned long DeviceIndex, unsigned char bTristate, AIOChannelMask *mask, DIOBuf *buf ); 
 PUBLIC_EXTERN unsigned long DIO_Configure( unsigned long DeviceIndex, unsigned char bTristate, void *pOutMask, void *pData ); 
 PUBLIC_EXTERN unsigned long DIO_ConfigureEx( unsigned long DeviceIndex, void *pOutMask, void *pData, void *pTristateMask ); 
@@ -41,8 +41,10 @@ PUBLIC_EXTERN unsigned long DIO_StreamOpen( unsigned long DeviceIndex, unsigned 
 PUBLIC_EXTERN unsigned long DIO_StreamClose( unsigned long DeviceIndex ); 
 PUBLIC_EXTERN unsigned long DIO_StreamSetClocks( unsigned long DeviceIndex, double *ReadClockHz, double *WriteClockHz ); 
 PUBLIC_EXTERN unsigned long DIO_StreamFrame( unsigned long DeviceIndex, unsigned long FramePoints, unsigned short *pFrameData, unsigned long *BytesTransferred );
+/* END AIOUSB_API */
+
 #ifdef __aiousb_cplusplus
-} // namespace
+}
 #endif
 
 #endif

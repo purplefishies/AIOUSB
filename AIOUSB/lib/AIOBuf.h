@@ -34,6 +34,7 @@ typedef struct aiobuf_iterator {
     void (*next)(struct aiobuf_iterator *);
 } AIOBufIterator;
 
+/* BEGIN AIOUSB_API */
 
 PUBLIC_EXTERN AIOBuf * NewAIOBuf( AIOBufType type , size_t size );
 PUBLIC_EXTERN AIORET_TYPE DeleteAIOBuf( AIOBuf *type );
@@ -47,6 +48,7 @@ PUBLIC_EXTERN AIOEither AIOBufIteratorGetValue( AIOBufIterator *biter );
 PUBLIC_EXTERN AIOUSB_BOOL AIOBufIteratorIsValid( AIOBufIterator *biter );
 PUBLIC_EXTERN void AIOBufIteratorNext( AIOBufIterator *biter );
 
+/* END AIOUSB_API */
 
 #ifdef __aiousb_cplusplus
 }

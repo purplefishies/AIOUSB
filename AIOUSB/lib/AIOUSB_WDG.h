@@ -20,15 +20,13 @@ typedef struct {
   unsigned long timeout;
 } AIOWDGConfig ;
 
-
+/* BEGIN AIOUSB_API */
 AIOWDGConfig *NewWDGConfig(void);
 void DeleteWDGConfig( AIOWDGConfig *obj);
 AIORET_TYPE WDG_SetConfig( unsigned long DeviceIndex, AIOWDGConfig *obj );
 AIORET_TYPE WDG_GetStatus( unsigned long DeviceIndex, AIOWDGConfig *obj );
 AIORET_TYPE WDG_Pet( unsigned long DeviceIndex, AIOWDGConfig *obj );
-
-
-
+/* END AIOUSB_API */
 
 #ifdef __aiousb_cplusplus
 }

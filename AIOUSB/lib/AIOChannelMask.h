@@ -28,6 +28,7 @@ typedef struct {
     char *strrepsmall;
 } AIOChannelMask;
 
+/* BEGIN AIOUSB_API */
 
 PUBLIC_EXTERN AIOChannelMask *NewAIOChannelMask( unsigned size );
 PUBLIC_EXTERN void  DeleteAIOChannelMask( AIOChannelMask *mask );
@@ -48,6 +49,8 @@ PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskNextIndex( AIOChannelMask *mask , int *p
 PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskSetMaskFromInt( AIOChannelMask *mask, unsigned field );
 PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskSetMaskAtIndex( AIOChannelMask *mask, char field, unsigned index  );
 PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskSetMaskFromStr( AIOChannelMask *mask, const char *bitfields );
+
+/* END AIOUSB_API */
 
 #define BIT_LENGTH(x) ( sizeof(x) * 8 )
 
