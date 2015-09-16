@@ -692,13 +692,17 @@ PUBLIC_EXTERN unsigned long DACOutputFrameRaw(unsigned long DeviceIndex,unsigned
 PUBLIC_EXTERN unsigned long DACOutputStart(unsigned long DeviceIndex );
 PUBLIC_EXTERN unsigned long DACOutputSetInterlock(unsigned long DeviceIndex,unsigned long bInterlock );
 
+/* #include "AIOUSB_CustomEEPROM.h" */
+
+PUBLIC_EXTERN unsigned long CustomEEPROMWrite( unsigned long DeviceIndex, unsigned long StartAddress, unsigned long DataSize, void *Data ); 
+PUBLIC_EXTERN unsigned long CustomEEPROMRead( unsigned long DeviceIndex, unsigned long StartAddress, unsigned long *DataSize, void *Data );
+
 
 /* AIOCmd.h */
 /* AIOCommandLine.h */
 /* AIOConfiguration.h */
 /* AIOTypes.h */
 /* AIOUSB_CustomEEPROM.h */
-/* AIOUSB_DAC.h */
 /* AIOUSBDevice.h */
 /* AIOUSB_Log.h */
 /* AIOUSB_Properties.h */
