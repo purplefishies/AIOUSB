@@ -478,9 +478,23 @@ PUBLIC_EXTERN AIORET_TYPE AIOChannelRangeGetEnd( AIOChannelRange *range );
 PUBLIC_EXTERN AIORET_TYPE AIOChannelRangeGetGain( AIOChannelRange *range );
 
 
+/* #include "AIOBuf.h" */
 
-/* AIOBuf.h */
-/* AIOChannelRange.h */
+
+PUBLIC_EXTERN AIOBuf * NewAIOBuf( AIOBufType type , size_t size );
+PUBLIC_EXTERN AIORET_TYPE DeleteAIOBuf( AIOBuf *type );
+PUBLIC_EXTERN AIORET_TYPE AIOBufGetSize( AIOBuf *buf );
+PUBLIC_EXTERN AIOBufType AIOBufGetType( AIOBuf *buf );
+PUBLIC_EXTERN void *AIOBufGetRaw( AIOBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOBufRead( AIOBuf *buf, void *tobuf, size_t size_tobuf );
+PUBLIC_EXTERN AIORET_TYPE AIOBufWrite( AIOBuf *buf, void *frombuf, size_t size_frombuf );
+PUBLIC_EXTERN AIOBufIterator AIOBufGetIterator( AIOBuf *buf );
+PUBLIC_EXTERN AIOEither AIOBufIteratorGetValue( AIOBufIterator *biter );
+PUBLIC_EXTERN AIOUSB_BOOL AIOBufIteratorIsValid( AIOBufIterator *biter );
+PUBLIC_EXTERN void AIOBufIteratorNext( AIOBufIterator *biter );
+
+
+
 /* AIOCmd.h */
 /* AIOCommandLine.h */
 /* AIOConfiguration.h */

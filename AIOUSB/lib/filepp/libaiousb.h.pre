@@ -10,9 +10,8 @@
 #pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,ADCConfigBlock.h
 #pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIOChannelMask.h
 #pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIOChannelRange.h
+#pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIOBuf.h
 
-/* AIOBuf.h */
-/* AIOChannelRange.h */
 /* AIOCmd.h */
 /* AIOCommandLine.h */
 /* AIOConfiguration.h */

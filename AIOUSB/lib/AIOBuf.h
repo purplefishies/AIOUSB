@@ -12,6 +12,8 @@ namespace AIOUSB
 {
 #endif
 
+
+
 typedef enum {
     AIO_ERROR_BUF = -1,
     AIO_DEFAULT_BUF = 1,
