@@ -5,5 +5,6 @@
 #pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIOUSB_Core.h
 #pragma filepp verbatim "filepp/tmp.h","asas"
 #pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIOContinuousBuffer.h
+#pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIODeviceTable.h
 
 #pragma filepp verbatim "filepp/footer.h"

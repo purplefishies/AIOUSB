@@ -283,9 +283,8 @@ char *AIOContinuousBufToJSON( AIOContinuousBuf *buf );
 AIOContinuousBuf *NewAIOContinuousBufFromJSON( const char *json_string );
 
 
-
-
 /* #include "AIODeviceTable.h" */
+
 PUBLIC_EXTERN AIORESULT AIODeviceTableAddDeviceToDeviceTable( int *numAccesDevices, unsigned long productID ) ;
 PUBLIC_EXTERN AIORESULT AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( int *numAccesDevices, unsigned long productID , USBDevice *usb_dev );
 PUBLIC_EXTERN AIORET_TYPE AIODeviceTablePopulateTable(void);
@@ -312,6 +311,8 @@ PUBLIC_EXTERN void CloseAllDevices(void);
 PUBLIC_EXTERN AIORESULT AIOUSB_GetAllDevices();
 
 PUBLIC_EXTERN unsigned long AIOUSB_INIT_PATTERN;
+
+
 
 /* #include "AIOUSB_CTR.h" */
 
