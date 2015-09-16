@@ -590,13 +590,27 @@ PUBLIC_EXTERN AIORET_TYPE AIOFifoResize( AIOFifo *fifo, size_t newsize );
 PUBLIC_EXTERN AIORET_TYPE AIOFifoReadPosition( void *nfifo );
 PUBLIC_EXTERN AIORET_TYPE AIOFifoWritePosition( void *nfifo );
 
+/* #include "AIOEither.h" */
+
+PUBLIC_EXTERN AIORET_TYPE AIOEitherClear( AIOEither *retval );
+PUBLIC_EXTERN AIORET_TYPE AIOEitherSetRight(AIOEither *retval, AIO_EITHER_TYPE val , void *tmp, ... );
+PUBLIC_EXTERN AIORET_TYPE AIOEitherGetRight(AIOEither *retval, void *tmp, ... );
+PUBLIC_EXTERN AIORET_TYPE AIOEitherSetLeft(AIOEither *retval, int val );
+PUBLIC_EXTERN AIORET_TYPE AIOEitherGetLeft(AIOEither *retval );
+PUBLIC_EXTERN AIOUSB_BOOL AIOEitherHasError( AIOEither *retval );
+PUBLIC_EXTERN char *AIOEitherToString( AIOEither *retval, AIORET_TYPE *result );
+PUBLIC_EXTERN int AIOEitherToInt( AIOEither retval);
+PUBLIC_EXTERN short AIOEitherToShort( AIOEither *retval, AIORET_TYPE *result );
+PUBLIC_EXTERN unsigned AIOEitherToUnsigned( AIOEither *retval, AIORET_TYPE *result );
+PUBLIC_EXTERN double AIOEitherToDouble( AIOEither *retval, AIORET_TYPE *result );
+PUBLIC_EXTERN AIO_NUMBER AIOEitherToAIONumber( AIOEither *retval, AIORET_TYPE *result );
+PUBLIC_EXTERN AIORET_TYPE AIOEitherToAIORetType( AIOEither either );
+
 
 /* AIOCmd.h */
 /* AIOCommandLine.h */
 /* AIOConfiguration.h */
-/* AIODeviceInfo.h */
 /* AIOEither.h */
-/* AIOFifo.h */
 /* AIOTypes.h */
 /* AIOUSB_ADC.h */
 /* AIOUSB_CustomEEPROM.h */
