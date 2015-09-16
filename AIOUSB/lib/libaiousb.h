@@ -25,16 +25,20 @@ PUBLIC_EXTERN void DeleteDIOBuf ( DIOBuf  *buf );
 PUBLIC_EXTERN DIOBuf *NewDIOBufFromChar( const char *ary , int size_array );
 PUBLIC_EXTERN DIOBuf *NewDIOBufFromBinStr( const char *ary );
 PUBLIC_EXTERN DIOBuf *DIOBufReplaceString( DIOBuf *buf, char *ary, int size_array );
+PUBLIC_EXTERN DIOBuf *DIOBufReplaceBinString( DIOBuf *buf, char *bitstr );
 PUBLIC_EXTERN char *DIOBufToHex( DIOBuf *buf );
 PUBLIC_EXTERN char *DIOBufToBinary( DIOBuf *buf );
 PUBLIC_EXTERN DIOBuf  *DIOBufResize( DIOBuf  *buf , unsigned size );
 PUBLIC_EXTERN unsigned DIOBufSize( DIOBuf  *buf );
+PUBLIC_EXTERN unsigned DIOBufByteSize( DIOBuf *buf );
 PUBLIC_EXTERN char *DIOBufToString( DIOBuf  *buf );
 PUBLIC_EXTERN int DIOBufSetIndex( DIOBuf *buf, unsigned index, unsigned value );
 PUBLIC_EXTERN int DIOBufGetIndex( DIOBuf *buf, unsigned index );
-
+PUBLIC_EXTERN AIORET_TYPE DIOBufGetByteAtIndex( DIOBuf *buf, unsigned index, char *value);
+PUBLIC_EXTERN AIORET_TYPE DIOBufSetByteAtIndex( DIOBuf *buf, unsigned index, char  value );
 
 /* #include "AIOUSB_DIO.h" */
+
 PUBLIC_EXTERN AIORESULT DIO_ConfigureWithDIOBuf( unsigned long DeviceIndex, unsigned char bTristate, AIOChannelMask *mask, DIOBuf *buf ); 
 PUBLIC_EXTERN unsigned long DIO_Configure( unsigned long DeviceIndex, unsigned char bTristate, void *pOutMask, void *pData ); 
 PUBLIC_EXTERN unsigned long DIO_ConfigureEx( unsigned long DeviceIndex, void *pOutMask, void *pData, void *pTristateMask ); 
@@ -56,14 +60,8 @@ PUBLIC_EXTERN unsigned long DIO_StreamClose( unsigned long DeviceIndex );
 PUBLIC_EXTERN unsigned long DIO_StreamSetClocks( unsigned long DeviceIndex, double *ReadClockHz, double *WriteClockHz ); 
 PUBLIC_EXTERN unsigned long DIO_StreamFrame( unsigned long DeviceIndex, unsigned long FramePoints, unsigned short *pFrameData, unsigned long *BytesTransferred );
 
+/* #include "AIOUSB_Core.h" */
 
-
-/* #include "AIOUSB_USB.h" */
-/* #include "AIOUSB_WDG.h" */
-/* #include "aiousb.h" */
-
-
-/* AIOUSB_Core */
 PUBLIC_EXTERN unsigned long ADC_ResetDevice( unsigned long DeviceIndex  );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetDeviceSerialNumber( unsigned long DeviceIndex );
 
@@ -116,6 +114,7 @@ PUBLIC_EXTERN AIORESULT GenericVendorRead( unsigned long deviceIndex, unsigned c
 PUBLIC_EXTERN AIORESULT GenericVendorWrite( unsigned long DeviceIndex, unsigned char Request, unsigned short Value, unsigned short Index, void *bufData, unsigned long *bytes_write );
 PUBLIC_EXTERN AIORESULT AIOUSB_Validate_Device( unsigned long DeviceIndex );
 
+
 /* AIOUSB_ADC_ExternalCal */
 
 PUBLIC_EXTERN AIORESULT  AIOUSB_ADC_ExternalCal( unsigned long DeviceIndex, const double points[], int numPoints, unsigned short returnCalTable[], const char *saveFileName );
@@ -127,7 +126,9 @@ PUBLIC_EXTERN AIORESULT  AIOUSB_ADC_ExternalCal( unsigned long DeviceIndex, cons
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_ListDevices();
 
 /* AIOContinuousBuf */
+/* #include "AIOContinuousBuffer.h" */
 
+/*-----------------------------  Constructors  ------------------------------*/
 PUBLIC_EXTERN AIOContinuousBuf *NewAIOContinuousBuf( unsigned long DeviceIndex, unsigned num_channels, unsigned num_oversamples, unsigned base_size );
 
 
@@ -210,6 +211,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufPopN(AIOContinuousBuf *buf , void *tob
 
 
 /*-----------------------------  Deprecated / Refactored   -------------------------------*/
+#ifndef SWIG
 
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetNumberOfChannels( AIOContinuousBuf * buf, unsigned num_channels ) ACCES_DEPRECATED("Please use AIOContinuousBufSetNumberChannels");
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetNumberOfChannels( AIOContinuousBuf * buf) ACCES_DEPRECATED("Please use AIOContinuousBufGetNumberChannels");
@@ -234,6 +236,54 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_SetChannelMask( AIOContinuousBuf *buf
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_SetDeviceIndex( AIOContinuousBuf *buf , unsigned long DeviceIndex ) ACCES_DEPRECATED("Please use AIOContinuousBufSetDeviceIndex");
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_NumberWriteScansInCounts(AIOContinuousBuf *buf ) ACCES_DEPRECATED("Please use AIOContinuousBufNumberWriteScansInCounts");
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_ResetDevice( AIOContinuousBuf *buf)  ACCES_DEPRECATED("Please use AIOContinuousBufResetDevice");
+#endif
+/*---------------------------  Done Deprecated  -----------------------------*/
+
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufLock( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufUnlock( AIOContinuousBuf *buf );
+
+
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufCallbackStartCallbackWithAcquisitionFunction( AIOContinuousBuf *buf, AIOCmd *cmd, AIORET_TYPE (*callback)( AIOContinuousBuf *buf) );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufStopAcquisition( AIOContinuousBuf *buf );
+
+
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufInitiateCallbackAcquisition( AIOContinuousBuf *buf );
+
+
+
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetReadPosition( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetWritePosition( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetRemainingSize( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetStatus( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetExitCode( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf, unsigned short *tmp , unsigned tmpsize, unsigned size );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufReadCompleteScanCounts( AIOContinuousBuf *buf, unsigned short *read_buf, unsigned read_buf_size );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufReadIntegerNumberOfScans( AIOContinuousBuf *buf, unsigned short *read_buf, unsigned tmpbuffer_size, int64_t num_scans );
+
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetCountsBuffer( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetVoltsBuffer( AIOContinuousBuf *buf );
+
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufCountScansAvailable(AIOContinuousBuf *buf);
+
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetClock( AIOContinuousBuf *buf, unsigned int hz );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufEnd( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSimpleSetupConfig( AIOContinuousBuf *buf, ADGainCode gainCode );
+
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufRead( AIOContinuousBuf *buf, AIOBufferType *readbuf , unsigned readbufsize, unsigned size);
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufWrite( AIOContinuousBuf *buf, AIOBufferType *writebuf, unsigned wrbufsize, unsigned size, AIOContinuousBufMode flag );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufWriteCounts( AIOContinuousBuf *buf, unsigned short *data, unsigned datasize, unsigned size , AIOContinuousBufMode flag );
+
+PUBLIC_EXTERN AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf );
+
+AIORET_TYPE AIOContinuousBufCleanup( AIOContinuousBuf *buf );
+
+
+char *AIOContinuousBufToJSON( AIOContinuousBuf *buf );
+AIOContinuousBuf *NewAIOContinuousBufFromJSON( const char *json_string );
+
+
+
 
 /* #include "AIODeviceTable.h" */
 PUBLIC_EXTERN AIORESULT AIODeviceTableAddDeviceToDeviceTable( int *numAccesDevices, unsigned long productID ) ;
