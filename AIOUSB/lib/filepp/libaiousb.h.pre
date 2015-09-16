@@ -19,12 +19,12 @@
 #pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIOUSB_DAC.h
 #pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIOUSB_CustomEEPROM.h
 #pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIOUSBDevice.h
+#pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIOUSB_Properties.h
 
 /* AIOCmd.h */
 /* AIOCommandLine.h */
 /* AIOConfiguration.h */
 /* AIOTypes.h */
-/* AIOUSBDevice.h */
 /* AIOUSB_Log.h */
 /* AIOUSB_Properties.h */
 /* AIOUSB_USB.h */

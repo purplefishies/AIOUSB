@@ -719,12 +719,26 @@ PUBLIC_EXTERN AIORET_TYPE AIOUSBDeviceSetTimeout( AIOUSBDevice *device, unsigned
 PUBLIC_EXTERN AIORET_TYPE AIOUSBDeviceGetTimeout( AIOUSBDevice *device );
 PUBLIC_EXTERN AIORET_TYPE AIOUSBDeviceWriteADCConfig( AIOUSBDevice *device, ADCConfigBlock *config );
 
+/* #include "AIOUSB_Properties.h" */
+
+PUBLIC_EXTERN AIORESULT AIOUSB_GetDeviceByProductID(int minProductID,int maxProductID,int maxDevices, int *deviceList );
+PUBLIC_EXTERN AIORESULT GetDeviceBySerialNumber(uint64_t *pSerialNumber);
+PUBLIC_EXTERN AIORESULT GetDeviceSerialNumber(unsigned long DeviceIndex, uint64_t *pSerialNumber );
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetDeviceSerialNumber( unsigned long DeviceIndex );
+
+PUBLIC_EXTERN AIORET_TYPE FindDevices( int **indices, int *length , int minProductID, int maxProductID  );
+PUBLIC_EXTERN AIORESULT AIOUSB_GetDeviceProperties(unsigned long DeviceIndex, DeviceProperties *properties );
+PUBLIC_EXTERN const char *AIOUSB_GetResultCodeAsString(unsigned long result_value);
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_ListDevices();
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_ShowDevices( AIODisplayType display_type );
+
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_FindDevices( int **where, int *length , AIOUSB_BOOL (*is_ok_device)( AIOUSBDevice *dev )  );
+
 
 /* AIOCmd.h */
 /* AIOCommandLine.h */
 /* AIOConfiguration.h */
 /* AIOTypes.h */
-/* AIOUSBDevice.h */
 /* AIOUSB_Log.h */
 /* AIOUSB_Properties.h */
 /* AIOUSB_USB.h */
