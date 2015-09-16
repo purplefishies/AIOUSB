@@ -18,6 +18,7 @@ typedef int64_t AIORET_TYPE;
 #include <mex.h>  
 
 
+
 /* #include "DIOBuf.h" */
 
 PUBLIC_EXTERN DIOBuf *NewDIOBuf ( unsigned size );
@@ -115,17 +116,6 @@ PUBLIC_EXTERN AIORESULT GenericVendorWrite( unsigned long DeviceIndex, unsigned 
 PUBLIC_EXTERN AIORESULT AIOUSB_Validate_Device( unsigned long DeviceIndex );
 
 
-/* AIOUSB_ADC_ExternalCal */
-
-PUBLIC_EXTERN AIORESULT  AIOUSB_ADC_ExternalCal( unsigned long DeviceIndex, const double points[], int numPoints, unsigned short returnCalTable[], const char *saveFileName );
-
-
-
-/* AIOUSB_ListDevices */
-
-PUBLIC_EXTERN AIORET_TYPE AIOUSB_ListDevices();
-
-/* AIOContinuousBuf */
 /* #include "AIOContinuousBuffer.h" */
 
 /*-----------------------------  Constructors  ------------------------------*/
@@ -782,15 +772,6 @@ PUBLIC_EXTERN int usb_reset_device( struct aiousb_device *usb );
 PUBLIC_EXTERN libusb_device_handle *get_usb_device( USBDevice *dev );
 PUBLIC_EXTERN libusb_device_handle *USBDeviceGetUSBDeviceHandle( USBDevice *usb );
 
-
-/* AIOCmd.h */
-/* AIOCommandLine.h */
-/* AIOConfiguration.h */
-/* AIOTypes.h */
-/* AIOUSB_Log.h */
-/* AIOUSB_USB.h */
-/* cJSON.h */
-/* USBDevice.h */
 
 
 
