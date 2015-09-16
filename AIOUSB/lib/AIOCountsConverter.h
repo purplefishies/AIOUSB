@@ -22,6 +22,7 @@ namespace AIOUSB
 {
 #endif
 
+/* BEGIN AIOUSB_API */
 typedef struct {
     double min;
     double max;
@@ -46,7 +47,7 @@ typedef struct aio_counts_converter {
 } AIOCountsConverter;
 
 
-/* BEGIN AIOUSB_API */
+
 PUBLIC_EXTERN AIOCountsConverter *NewAIOCountsConverterWithBuffer( void *buf, unsigned num_channels, AIOGainRange *ranges, unsigned num_oversamples,unsigned unit_size  );
 PUBLIC_EXTERN AIOCountsConverter *NewAIOCountsConverter( unsigned num_channels, AIOGainRange *ranges, unsigned num_oversamples,unsigned unit_size  );
 PUBLIC_EXTERN AIOCountsConverter *NewAIOCountsConverterFromAIOContinuousBuf( void *buf);
