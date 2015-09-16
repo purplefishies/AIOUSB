@@ -6,5 +6,32 @@
 #pragma filepp verbatim "filepp/tmp.h","asas"
 #pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIOContinuousBuffer.h
 #pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIODeviceTable.h
+#pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIOUSB_CTR.h
+#pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,ADCConfigBlock.h
+#pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIOChannelMask.h
+
+/* AIOBuf.h */
+/* AIOChannelMask.h */
+/* AIOChannelRange.h */
+/* AIOCmd.h */
+/* AIOCommandLine.h */
+/* AIOConfiguration.h */
+/* AIOCountsConverter.h */
+/* AIODataTypes.h */
+/* AIODeviceInfo.h */
+/* AIOEither.h */
+/* AIOFifo.h */
+/* AIOTypes.h */
+/* AIOUSB_ADC.h */
+/* AIOUSB_CustomEEPROM.h */
+/* AIOUSB_DAC.h */
+/* AIOUSBDevice.h */
+/* AIOUSB_Log.h */
+/* AIOUSB_Properties.h */
+/* AIOUSB_USB.h */
+/* AIOUSB_WDG.h */
+/* cJSON.h */
+/* USBDevice.h */
+
 
 #pragma filepp verbatim "filepp/footer.h"

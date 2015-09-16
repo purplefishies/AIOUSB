@@ -312,60 +312,155 @@ PUBLIC_EXTERN AIORESULT AIOUSB_GetAllDevices();
 
 PUBLIC_EXTERN unsigned long AIOUSB_INIT_PATTERN;
 
-
-
 /* #include "AIOUSB_CTR.h" */
 
-PUBLIC_EXTERN AIORET_TYPE CTR_8254Mode(
-                                         unsigned long DeviceIndex,
-                                         unsigned long BlockIndex,
-                                         unsigned long CounterIndex,
-                                         unsigned long Mode );
+PUBLIC_EXTERN AIORET_TYPE CTR_CalculateCountersForClock( int hz , int *diva, int *divb );
+PUBLIC_EXTERN AIORET_TYPE CTR_8254Mode( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned long Mode ); 
+PUBLIC_EXTERN AIORET_TYPE CTR_8254Load( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned short LoadValue ); 
+PUBLIC_EXTERN AIORET_TYPE CTR_8254ModeLoad( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned long Mode, unsigned short LoadValue ); 
+PUBLIC_EXTERN AIORET_TYPE CTR_8254ReadModeLoad( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned long Mode, unsigned short LoadValue, unsigned short *pReadValue ); 
+PUBLIC_EXTERN AIORET_TYPE CTR_8254Read( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned short *pReadValue ); 
+PUBLIC_EXTERN AIORET_TYPE CTR_8254ReadAll( unsigned long DeviceIndex, unsigned short *pData ); 
+PUBLIC_EXTERN AIORET_TYPE CTR_8254ReadStatus( unsigned long DeviceIndex, unsigned long BlockIndex, unsigned long CounterIndex, unsigned short *pReadValue, unsigned char *pStatus ); 
+#ifndef SWIG
 
-PUBLIC_EXTERN AIORET_TYPE CTR_8254Load(
-                                         unsigned long DeviceIndex,
-                                         unsigned long BlockIndex,
-                                         unsigned long CounterIndex,
-                                         unsigned short LoadValue );
+PUBLIC_EXTERN AIORET_TYPE CTR_StartOutputFreq( unsigned long DeviceIndex, unsigned long BlockIndex, double *pHz ); 
+#endif
 
-PUBLIC_EXTERN AIORET_TYPE CTR_8254ModeLoad(
-                                             unsigned long DeviceIndex,
-                                             unsigned long BlockIndex,
-                                             unsigned long CounterIndex,
-                                             unsigned long Mode,
-                                             unsigned short LoadValue );
+PUBLIC_EXTERN AIORET_TYPE CTR_8254SelectGate( unsigned long DeviceIndex, unsigned long GateIndex ); 
+PUBLIC_EXTERN AIORET_TYPE CTR_8254ReadLatched( unsigned long DeviceIndex, unsigned short *pData ); 
 
-PUBLIC_EXTERN AIORET_TYPE CTR_8254ReadModeLoad(
-                                                 unsigned long DeviceIndex,
-                                                 unsigned long BlockIndex,
-                                                 unsigned long CounterIndex,
-                                                 unsigned long Mode,
-                                                 unsigned short LoadValue,
-                                                 unsigned short *pReadValue );
+/* #include "ADCConfigBlock.h" */
 
-PUBLIC_EXTERN AIORET_TYPE CTR_8254Read( unsigned long DeviceIndex,
-                                        unsigned long BlockIndex,
-                                        unsigned long CounterIndex,
-                                        unsigned short *pReadValue );
 
-PUBLIC_EXTERN AIORET_TYPE CTR_8254ReadAll( unsigned long DeviceIndex,
-                                           unsigned short *pData );
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockInit( ADCConfigBlock *, AIOUSBDevice *deviceDesc, unsigned int );
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockInitForCounterScan(ADCConfigBlock *config, AIOUSBDevice *deviceDesc  );
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockInitializeDefault( ADCConfigBlock *config );
+PUBLIC_EXTERN void ADC_VerifyAndCorrectConfigBlock( ADCConfigBlock *configBlock , AIOUSBDevice *deviceDesc  );
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetAllGainCodeAndDiffMode(ADCConfigBlock *config, unsigned gainCode, AIOUSB_BOOL differentialMode);
 
-PUBLIC_EXTERN AIORET_TYPE CTR_8254ReadStatus( unsigned long DeviceIndex,
-                                              unsigned long BlockIndex,
-                                              unsigned long CounterIndex,
-                                              unsigned short *pReadValue,
-                                              unsigned char *pStatus );
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetRegister( ADCConfigBlock *config, unsigned reg, unsigned char value );
 
-PUBLIC_EXTERN AIORET_TYPE CTR_StartOutputFreq( unsigned long DeviceIndex,
-                                               unsigned long BlockIndex,
-                                               double *pHz );
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetGainCode( const  ADCConfigBlock *config, unsigned channel );
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetGainCode(ADCConfigBlock *config, unsigned channel, unsigned char gainCode);
 
-PUBLIC_EXTERN AIORET_TYPE CTR_8254SelectGate( unsigned long DeviceIndex,
-                                              unsigned long GateIndex );
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetClockRate( ADCConfigBlock *config, int clock_rate);
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetClockRate( ADCConfigBlock *config );
 
-PUBLIC_EXTERN AIORET_TYPE CTR_8254ReadLatched( unsigned long DeviceIndex,
-                                               unsigned short *pData );
+
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetScanRange(ADCConfigBlock *config, unsigned startChannel, unsigned endChannel);
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetStartChannel( ADCConfigBlock *config, unsigned char startChannel  );
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetEndChannel( ADCConfigBlock *config, unsigned char endChannel  );
+#define HIGH_BITS(reg)   ( reg & 0xF0 )
+#define LOW_BITS(reg)    ( reg & 0x0F )
+
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetChannelRange(ADCConfigBlock *config,unsigned startChannel, unsigned endChannel, unsigned gainCode );
+
+
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetCalMode(ADCConfigBlock *config, ADCalMode calMode);
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetCalMode(const ADCConfigBlock *config);
+
+PUBLIC_EXTERN char *ADCConfigBlockToYAML(ADCConfigBlock *config);
+
+
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetStartChannel(const ADCConfigBlock *config);
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetEndChannel(const ADCConfigBlock *config);
+
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetOversample( const ADCConfigBlock *config );
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetOversample( ADCConfigBlock *config, unsigned overSample );
+
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetTimeout( const ADCConfigBlock *config );
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetTimeout( ADCConfigBlock *config, unsigned timeout );
+
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetTriggerMode(const ADCConfigBlock *config);
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetTriggerMode(ADCConfigBlock *config, unsigned triggerMode);
+
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetDifferentialMode(ADCConfigBlock *config, unsigned channel, AIOUSB_BOOL differentialMode);
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetRangeSingle(ADCConfigBlock *config, unsigned long channel, unsigned char gainCode);
+
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockCopy( ADCConfigBlock *to, ADCConfigBlock *from );
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetDevice( ADCConfigBlock *obj, AIOUSBDevice *dev );
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetAIOUSBDevice( ADCConfigBlock *obj, AIOUSBDevice *dev );
+PUBLIC_EXTERN AIOUSBDevice *ADCConfigBlockGetAIOUSBDevice( ADCConfigBlock *obj, AIORET_TYPE *res );
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockInitializeFromAIOUSBDevice( ADCConfigBlock *config , AIOUSBDevice *dev);
+
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetTesting( ADCConfigBlock *obj, AIOUSB_BOOL testing );
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetTesting( const ADCConfigBlock *obj );
+
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetSize( ADCConfigBlock *obj, unsigned size );
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetSize( const ADCConfigBlock *obj );
+
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetDebug( ADCConfigBlock *obj, AIOUSB_BOOL debug );
+PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetDebug( const ADCConfigBlock *obj );
+
+
+/* JSON API */
+PUBLIC_EXTERN char *ADCConfigBlockToJSON(ADCConfigBlock *config);
+PUBLIC_EXTERN ADCConfigBlock *NewADCConfigBlockFromJSON( char *str );
+PUBLIC_EXTERN AIORET_TYPE DeleteADCConfigBlock( ADCConfigBlock *config );
+
+PUBLIC_EXTERN AIOUSB_BOOL is_all_digits( char *str );
+
+
+#ifndef SWIG
+PUBLIC_EXTERN AIORET_TYPE _adccblock_valid_channel_settings(AIORET_TYPE in, ADCConfigBlock *config , int ADCMUXChannels );
+PUBLIC_EXTERN AIORET_TYPE _adccblock_valid_size(AIORET_TYPE in, ADCConfigBlock *config );
+PUBLIC_EXTERN AIORET_TYPE _adccblock_valid_cal_setting( AIORET_TYPE in, ADCConfigBlock *config );
+PUBLIC_EXTERN AIORET_TYPE _adccblock_valid_end_channel( AIORET_TYPE in, ADCConfigBlock *config );
+PUBLIC_EXTERN AIORET_TYPE _adccblock_valid_trigger_setting(ADCConfigBlock *config );
+PUBLIC_EXTERN AIORET_TYPE _adcblock_valid_channel_settings(AIORET_TYPE in, ADCConfigBlock *config , int ADCMUXChannels );
+
+#endif
+
+
+/* #include "AIOChannelMask.h" */
+
+
+PUBLIC_EXTERN AIOChannelMask *NewAIOChannelMask( unsigned size );
+PUBLIC_EXTERN void  DeleteAIOChannelMask( AIOChannelMask *mask );
+PUBLIC_EXTERN AIOChannelMask *NewAIOChannelMaskFromStr( const char *bitfields );
+PUBLIC_EXTERN AIOChannelMask *NewAIOChannelMaskFromChr( const char bits );
+
+
+PUBLIC_EXTERN char *AIOChannelMaskToString( AIOChannelMask *mask );
+PUBLIC_EXTERN char *AIOChannelMaskToStringAtIndex( AIOChannelMask *obj, unsigned index );
+PUBLIC_EXTERN char *AIOChannelMaskGetMask( AIOChannelMask *mask );
+PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskGetMaskAtIndex( AIOChannelMask *mask, char *val, unsigned index );
+PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskNumberChannels( AIOChannelMask *mask );
+PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskNumberSignals( AIOChannelMask *mask );
+PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskGetSize( AIOChannelMask *mask );
+PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskIndices( AIOChannelMask *mask , int *pos);
+PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskNextIndex( AIOChannelMask *mask , int *pos );
+
+PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskSetMaskFromInt( AIOChannelMask *mask, unsigned field );
+PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskSetMaskAtIndex( AIOChannelMask *mask, char field, unsigned index  );
+PUBLIC_EXTERN AIORET_TYPE AIOChannelMaskSetMaskFromStr( AIOChannelMask *mask, const char *bitfields );
+
+
+
+/* AIOBuf.h */
+/* AIOChannelMask.h */
+/* AIOChannelRange.h */
+/* AIOCmd.h */
+/* AIOCommandLine.h */
+/* AIOConfiguration.h */
+/* AIOCountsConverter.h */
+/* AIODataTypes.h */
+/* AIODeviceInfo.h */
+/* AIOEither.h */
+/* AIOFifo.h */
+/* AIOTypes.h */
+/* AIOUSB_ADC.h */
+/* AIOUSB_CustomEEPROM.h */
+/* AIOUSB_DAC.h */
+/* AIOUSBDevice.h */
+/* AIOUSB_Log.h */
+/* AIOUSB_Properties.h */
+/* AIOUSB_USB.h */
+/* AIOUSB_WDG.h */
+/* cJSON.h */
+/* USBDevice.h */
+
 
 
 
