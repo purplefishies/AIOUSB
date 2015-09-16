@@ -751,6 +751,37 @@ AIORET_TYPE WDG_SetConfig( unsigned long DeviceIndex, AIOWDGConfig *obj );
 AIORET_TYPE WDG_GetStatus( unsigned long DeviceIndex, AIOWDGConfig *obj );
 AIORET_TYPE WDG_Pet( unsigned long DeviceIndex, AIOWDGConfig *obj );
 
+/* #include "USBDevice.h" */
+
+PUBLIC_EXTERN USBDevice * NewUSBDevice(libusb_device *dev, libusb_device_handle *handle );
+PUBLIC_EXTERN void DeleteUSBDevice( USBDevice *dev );
+PUBLIC_EXTERN USBDevice *CopyUSBDevice( USBDevice *usb );
+PUBLIC_EXTERN AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args );
+PUBLIC_EXTERN AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , USBDevice **devs , int *size );
+PUBLIC_EXTERN void DeleteUSBDevices( USBDevice *devs);
+PUBLIC_EXTERN int USBDeviceClose( USBDevice *dev );
+
+PUBLIC_EXTERN USBDevice *AIODeviceTableGetUSBDevice( unsigned long DeviceIndex , AIORESULT *res );
+PUBLIC_EXTERN int USBDeviceReadADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock );
+PUBLIC_EXTERN int USBDeviceGetIdProduct( USBDevice *device );
+PUBLIC_EXTERN int USBDeviceFetchADCConfigBlock( USBDevice *device, ADCConfigBlock *config );
+PUBLIC_EXTERN int USBDevicePutADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock );
+
+PUBLIC_EXTERN int usb_control_transfer(struct aiousb_device *dev_handle,
+                         uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
+                                 unsigned char *data, uint16_t wLength, unsigned int timeout);
+PUBLIC_EXTERN int usb_bulk_transfer(struct aiousb_device *dev_handle,
+                              unsigned char endpoint, unsigned char *data, int length,
+                              int *actual_length, unsigned int timeout);
+PUBLIC_EXTERN int usb_request(struct aiousb_device *dev_handle,
+                        uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
+                        unsigned char *data, uint16_t wLength, unsigned int timeout);
+PUBLIC_EXTERN int usb_reset_device( struct aiousb_device *usb );
+
+ 
+PUBLIC_EXTERN libusb_device_handle *get_usb_device( USBDevice *dev );
+PUBLIC_EXTERN libusb_device_handle *USBDeviceGetUSBDeviceHandle( USBDevice *usb );
+
 
 /* AIOCmd.h */
 /* AIOCommandLine.h */
@@ -758,7 +789,6 @@ AIORET_TYPE WDG_Pet( unsigned long DeviceIndex, AIOWDGConfig *obj );
 /* AIOTypes.h */
 /* AIOUSB_Log.h */
 /* AIOUSB_USB.h */
-/* AIOUSB_WDG.h */
 /* cJSON.h */
 /* USBDevice.h */
 
