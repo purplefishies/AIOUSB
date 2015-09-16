@@ -566,6 +566,29 @@ PUBLIC_EXTERN AIORESULT AIOUSB_GetAllDevices();
 
 PUBLIC_EXTERN unsigned long AIOUSB_INIT_PATTERN;
 
+/* #include "AIOFifo.h" */
+
+PUBLIC_EXTERN AIOFifo *NewAIOFifo( unsigned int size , unsigned int refsize );
+PUBLIC_EXTERN void DeleteAIOFifo( AIOFifo *fifo );
+PUBLIC_EXTERN void AIOFifoReset( void *fifo );
+PUBLIC_EXTERN AIORET_TYPE AIOFifoRead( AIOFifo *fifo, void *tobuf , unsigned maxsize );
+PUBLIC_EXTERN AIORET_TYPE AIOFifoWrite( AIOFifo *fifo, void *frombuf , unsigned maxsize );
+PUBLIC_EXTERN AIORET_TYPE AIOFifoWriteAllOrNone( AIOFifo *fifo, void *frombuf , unsigned maxsize );
+PUBLIC_EXTERN AIORET_TYPE AIOFifoReadAllOrNone( AIOFifo *fifo, void *tobuf , unsigned maxsize );
+PUBLIC_EXTERN AIORET_TYPE AIOFifoGetRefSize( void *fifo );
+PUBLIC_EXTERN AIOFifoTYPE *NewAIOFifoTYPE( unsigned int size );
+PUBLIC_EXTERN AIORET_TYPE Push( AIOFifoTYPE *fifo, TYPE a );
+PUBLIC_EXTERN AIORET_TYPE PushN( AIOFifoTYPE *fifo, INPUT_TYPE *a, unsigned N );
+PUBLIC_EXTERN AIORET_TYPE PopN( AIOFifoTYPE *fifo, INPUT_TYPE *a, unsigned N );
+PUBLIC_EXTERN AIORET_TYPE AIOFifoWriteSizeRemaining( void *fifo );
+PUBLIC_EXTERN AIORET_TYPE AIOFifoWriteSizeRemainingNumElements( void *fifo );
+PUBLIC_EXTERN AIORET_TYPE AIOFifoReadSize( void *tmpfifo );
+PUBLIC_EXTERN AIORET_TYPE AIOFifoReadSizeNumElements( void *tmpfifo );
+PUBLIC_EXTERN AIORET_TYPE AIOFifoGetSize( void *fifo );
+PUBLIC_EXTERN AIORET_TYPE AIOFifoGetSizeNumElements( void *tmpfifo );
+PUBLIC_EXTERN AIORET_TYPE AIOFifoResize( AIOFifo *fifo, size_t newsize );
+PUBLIC_EXTERN AIORET_TYPE AIOFifoReadPosition( void *nfifo );
+PUBLIC_EXTERN AIORET_TYPE AIOFifoWritePosition( void *nfifo );
 
 
 /* AIOCmd.h */
