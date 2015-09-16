@@ -235,7 +235,7 @@ distclean:
 gtags:	
 	gtags
 
-libaiousb.h: filepp/libaiousb.h.pre
+libaiousb.h: filepp/libaiousb.h.pre filepp/header.h filepp/footer.h 
 	perl -I./filepp $$(which filepp)  -I. -I${PWD}/filepp -m Between.pm filepp/libaiousb.h.pre > $@
 
 matlab: 

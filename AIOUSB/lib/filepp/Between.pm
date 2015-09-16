@@ -10,7 +10,7 @@ sub between
     # print "args were %args\n";
     $cmd = "between.pl " . join(" ",map { "$_ $args{$_}" } keys %args);
     $,="\n";
-    print "\/* #include \"$args{-f}\" */\n";
+    print "\/* #include \"$args{-f}\" */\n\n";
     # print "Keys: ",keys %args,"\n";
     # print "$cmd\n";
     system($cmd);
