@@ -734,13 +734,29 @@ PUBLIC_EXTERN AIORET_TYPE AIOUSB_ShowDevices( AIODisplayType display_type );
 
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_FindDevices( int **where, int *length , AIOUSB_BOOL (*is_ok_device)( AIOUSBDevice *dev )  );
 
+/* #include "AIOUSB_WDG.h" */
+
+
+typedef struct {
+  int bufsize;
+  unsigned long L;
+  unsigned char *wdgbuf;
+  unsigned long timeout;
+} AIOWDGConfig ;
+
+
+AIOWDGConfig *NewWDGConfig(void);
+void DeleteWDGConfig( AIOWDGConfig *obj);
+AIORET_TYPE WDG_SetConfig( unsigned long DeviceIndex, AIOWDGConfig *obj );
+AIORET_TYPE WDG_GetStatus( unsigned long DeviceIndex, AIOWDGConfig *obj );
+AIORET_TYPE WDG_Pet( unsigned long DeviceIndex, AIOWDGConfig *obj );
+
 
 /* AIOCmd.h */
 /* AIOCommandLine.h */
 /* AIOConfiguration.h */
 /* AIOTypes.h */
 /* AIOUSB_Log.h */
-/* AIOUSB_Properties.h */
 /* AIOUSB_USB.h */
 /* AIOUSB_WDG.h */
 /* cJSON.h */

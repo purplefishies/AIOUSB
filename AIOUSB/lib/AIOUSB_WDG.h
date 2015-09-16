@@ -8,10 +8,14 @@ namespace AIOUSB
 {
 #endif
 
+
+
 CREATE_ENUM_W_START( WDGVals, 0x00,
                      AIOUSB_WDG_READ_VALUE,
                      AIOUSB_WDG_READ_INDEX = 0x0041
                      )
+
+/* BEGIN AIOUSB_API */
 
 typedef struct {
   int bufsize;
@@ -20,7 +24,7 @@ typedef struct {
   unsigned long timeout;
 } AIOWDGConfig ;
 
-/* BEGIN AIOUSB_API */
+
 AIOWDGConfig *NewWDGConfig(void);
 void DeleteWDGConfig( AIOWDGConfig *obj);
 AIORET_TYPE WDG_SetConfig( unsigned long DeviceIndex, AIOWDGConfig *obj );
