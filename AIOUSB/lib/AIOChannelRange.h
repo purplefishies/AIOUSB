@@ -12,6 +12,8 @@ namespace AIOUSB
 {
 #endif
 
+/* BEGIN AIOUSB_API */
+
 struct ad_gain_pairs {
     ADGainCode gain;
     const char *name;
@@ -40,7 +42,7 @@ typedef struct aio_channel_range {
     ADGainCode gain;
 } AIOChannelRange;
 
-/* BEGIN AIOUSB_API */
+
 
 PUBLIC_EXTERN AIOChannelRange *NewAIOChannelRangeFromStr( const char *str );
 PUBLIC_EXTERN void DeleteAIOChannelRange( AIOChannelRange *range );
