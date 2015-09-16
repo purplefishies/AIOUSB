@@ -71,8 +71,12 @@ const char *lookup_voltage_range( ADGainCode code  )
 char *AIOChannelRangeToStr( AIOChannelRange *range )
 {
     char *tmp;
-    asprintf(&tmp, "%d-%d=%sV", range->start,range->end, lookup_voltage_range( range->gain ) );
-    return tmp;
+    int retcode;
+    retcode = asprintf(&tmp, "%d-%d=%sV", range->start,range->end, lookup_voltage_range( range->gain ) );
+    if ( retcode < 0 ) 
+        return NULL;
+    else
+        return tmp;
 }
 
 /*----------------------------------------------------------------------------*/

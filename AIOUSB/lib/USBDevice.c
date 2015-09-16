@@ -29,9 +29,7 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
     int errcode;
     int verbose = usb->verbose; 
     int current, number1, number2;
-
-
-
+    int retcode;
 
     usb->device                = args->dev;
     usb->deviceHandle          = args->handle;
@@ -40,7 +38,7 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
     errcode = libusb_open(  usb->device, &usb->deviceHandle );
 
     if ((errcode = libusb_get_device_descriptor( usb->device, &devdesc)) < 0) {
-        asprintf(&retval.errmsg,"ERROR: Failed to get device descriptor, code: %d\n", errcode);
+        retcode = asprintf(&retval.errmsg,"ERROR: Failed to get device descriptor, code: %d\n", errcode);
         goto error;
     }
 
@@ -50,14 +48,14 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
     } else if (errcode == 1) {
         usb->usblp_attached = 1;
         if ((errcode = libusb_detach_kernel_driver(usb->deviceHandle, usb->iface)) < 0) {
-            asprintf(&retval.errmsg,"ERROR: Failed to detach \"usblp\" module from %04x:%04x\n", devdesc.idVendor, devdesc.idProduct);
+            retcode = asprintf(&retval.errmsg,"ERROR: Failed to detach \"usblp\" module from %04x:%04x\n", devdesc.idVendor, devdesc.idProduct);
             goto error;
         }
     } else {
         usb->usblp_attached = 0;
         
         if (errcode != LIBUSB_ERROR_NOT_SUPPORTED) {
-            asprintf(&retval.errmsg,"ERROR: Failed to check whether %04x:%04x has the \"usblp\" ""kernel module attached\n", devdesc.idVendor, devdesc.idProduct);
+            retcode = asprintf(&retval.errmsg,"ERROR: Failed to check whether %04x:%04x has the \"usblp\" ""kernel module attached\n", devdesc.idVendor, devdesc.idProduct);
           goto error;
         }
     }
@@ -73,7 +71,7 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
     usb->origconf = current;
 
     if ((errcode = libusb_get_config_descriptor(usb->device, usb->conf, &confptr)) < 0) {
-        asprintf(&retval.errmsg,"ERROR: Failed to get config descriptor for %04x:%04x\n", devdesc.idVendor, devdesc.idProduct);
+        retcode = asprintf(&retval.errmsg,"ERROR: Failed to get config descriptor for %04x:%04x\n", devdesc.idVendor, devdesc.idProduct);
         goto error;
     }
     number1 = confptr->bConfigurationValue;
@@ -83,7 +81,7 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
              fprintf(stderr, "DEBUG: Switching USB device configuration: %d -> %d\n",current, number1);
         if ((errcode = libusb_set_configuration(usb->deviceHandle, number1)) < 0) {
             if (errcode != LIBUSB_ERROR_BUSY) {
-                asprintf(&retval.errmsg,"ERROR: Failed to set configuration %d for %04x:%04x\n",number1, devdesc.idVendor, devdesc.idProduct);
+                retcode = asprintf(&retval.errmsg,"ERROR: Failed to set configuration %d for %04x:%04x\n",number1, devdesc.idVendor, devdesc.idProduct);
                 goto error;
             }
         }
@@ -93,7 +91,7 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
 
     while ((errcode = libusb_claim_interface(usb->deviceHandle, number1)) < 0) {
             if (errcode != LIBUSB_ERROR_BUSY) {
-                asprintf(&retval.errmsg,"ERROR: Failed to claim interface %d for %04x:%04x: %s\n",number1, devdesc.idVendor, devdesc.idProduct, strerror(errno));
+                retcode = asprintf(&retval.errmsg,"ERROR: Failed to claim interface %d for %04x:%04x: %s\n",number1, devdesc.idVendor, devdesc.idProduct, strerror(errno));
                 goto error;
             }
     }
@@ -106,7 +104,7 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
       
         while ((errcode = libusb_set_interface_alt_setting(usb->deviceHandle, number1, number2)) < 0) {
             if (errcode != LIBUSB_ERROR_BUSY) {
-                asprintf(&retval.errmsg,"ERROR: Failed to set alternate interface %d for %04x:%04x: " "%s\n",
+                retcode = asprintf(&retval.errmsg,"ERROR: Failed to set alternate interface %d for %04x:%04x: " "%s\n",
                          number2, devdesc.idVendor, devdesc.idProduct, strerror(errno));
                 goto error;
             }
@@ -128,10 +126,14 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
 
     return retval;
  error:
-
+    
     libusb_close(usb->deviceHandle);
     usb->device = NULL;
-    retval.left = -errcode;
+    if ( retcode < 0 ) { 
+        retval.left = -AIOUSB_ERROR_INVALID_AIOEITHER_ALLOCATION;
+    } else {
+        retval.left = -errcode;
+    }
     return retval;
 }
 

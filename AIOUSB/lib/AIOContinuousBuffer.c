@@ -1949,7 +1949,8 @@ char *AIOContinuousBufToJSON( AIOContinuousBuf *buf )
 {
     AIO_ASSERT_RET( NULL, buf );
     char *tmp;
-    asprintf(&tmp,
+    int retcode;
+    retcode = asprintf(&tmp,
               "{\"DeviceIndex\":%d,\"base_size\":%d,\"block_size\":%d,\"debug\":\"%s\",\"hz\":%d,\"num_channels\":%d,\"num_oversamples\":%d,\"num_scans\":%lu,\"testing\":\"%s\",\"timeout\":%d,\"type\":%d,\"unit_size\":%d}",
               buf->DeviceIndex,
               buf->base_size,
@@ -1964,12 +1965,16 @@ char *AIOContinuousBufToJSON( AIOContinuousBuf *buf )
               buf->type,
               buf->unit_size
               );
-    return tmp;
+    if ( retcode < 0 )
+        return NULL;
+    else 
+        return tmp;
 }
 
 char *AIOContinuousBufToFullJSON( AIOContinuousBuf *buf )
 {
     AIO_ASSERT_RET( NULL, buf );
+    int retcode;
     char *tmp;
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex(  AIOContinuousBufGetDeviceIndex( buf ), (AIORESULT*)&retval );
@@ -1977,8 +1982,7 @@ char *AIOContinuousBufToFullJSON( AIOContinuousBuf *buf )
     if ( dev ) {
         ADCConfigBlockCopy( &config, AIOUSBDeviceGetADCConfigBlock( dev ) );
     } 
-
-    asprintf(&tmp,
+    retcode = asprintf(&tmp,
               "{\"DeviceIndex\":%d,\"base_size\":%d,\"block_size\":%d,\"debug\":\"%s\",\"hz\":%d,\"num_channels\":%d,\"num_oversamples\":%d,\"num_scans\":%lu,\"testing\":\"%s\",\"timeout\":%d,\"type\":%d,\"unit_size\":%d,\"adcconfig\":%s}",
               buf->DeviceIndex,
               buf->base_size,
@@ -1994,7 +1998,10 @@ char *AIOContinuousBufToFullJSON( AIOContinuousBuf *buf )
               buf->unit_size,
              ADCConfigBlockToJSON( &config ) 
               );
-    return tmp;
+    if ( retcode < 0 ) 
+        return NULL;
+    else
+        return tmp;
 }
 
 
