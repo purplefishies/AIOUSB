@@ -102,6 +102,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetCallback(AIOContinuousBuf *buf , vo
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetStreamingBlockSize( AIOContinuousBuf *buf, unsigned sblksize);
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetStreamingBlockSize( AIOContinuousBuf *buf );
 
+PUBLIC_EXTERN ADCConfigBlock *AIOContinuousBufGetADCConfigBlock( AIOContinuousBuf *buf );
 
 
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetNumberChannels( AIOContinuousBuf * buf, unsigned num_channels );
@@ -230,6 +231,7 @@ AIORET_TYPE AIOContinuousBufCleanup( AIOContinuousBuf *buf );
 
 
 char *AIOContinuousBufToJSON( AIOContinuousBuf *buf );
+
 AIOContinuousBuf *NewAIOContinuousBufFromJSON( const char *json_string );
 
 /* END AIOUSB_API */

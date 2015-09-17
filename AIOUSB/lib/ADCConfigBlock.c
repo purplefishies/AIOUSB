@@ -920,18 +920,17 @@ ADCConfigBlock *NewADCConfigBlockFromJSON( char *str )
 {
     ADCConfigBlock *adc = (ADCConfigBlock *)calloc(sizeof(ADCConfigBlock),1);
     adc->size = 20;
-    /* cJSON *json; */
-    /* json = cJSON_Parse(str); */
-    /* if (!json )  */
-    /*     return NULL; */
-    /* cJSON *adcconfig = cJSON_GetObjectItem(json,"adcconfig"); */
-    cJSON *adcconfig = cJSON_Parse( str );
 
+    cJSON *adcconfig = cJSON_Parse( str );
+    cJSON *tmpconfig = NULL;
     if (!adcconfig )
         return NULL;
+    if ( adcconfig && (tmpconfig = cJSON_GetObjectItem(adcconfig,"adcconfig") ) )
+        adcconfig  = tmpconfig;
+    else 
+        return NULL;
+
     cJSON *tmp;
-    /* FIRST handle the mux settings if need be */
-    /* mux_settings\":{\"adc_channels_per_group\":\"4\",\"adc_mux_channels\":\"0\"},\"start_channel\":\"0\",\"oversample\":\"201\"}}"; */
 
     if ( (tmp = cJSON_GetObjectItem(adcconfig,"mux_settings") ) ) {
         int found = 0;
@@ -1128,6 +1127,16 @@ TEST(ADCConfigBlock, JSONRepresentation)
     EXPECT_STREQ("{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\",\"oversample\":\"102\",\"timeout\":\"1000\",\"clock_rate\":\"1000\"}}", 
                  ADCConfigBlockToJSON( &config ) );
     
+}
+
+TEST( ADCConfigBlock, PreserveEdges )
+{
+    char *exp = (char*)"{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"0\",\"oversample\":\"0\",\"timeout\":\"5000\",\"clock_rate\":\"0\"}}";
+    ADCConfigBlock *configBlock = NewADCConfigBlockFromJSON( exp );
+    
+    EXPECT_STREQ( ADCConfigBlockToJSON( configBlock ), exp );
+
+
 }
 
 TEST(ADCConfigBlock, SetAllGainCodes) 

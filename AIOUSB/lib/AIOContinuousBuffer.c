@@ -26,6 +26,7 @@
 #include "AIOFifo.h"
 #include "AIOCountsConverter.h"
 #include "AIOCmd.h"
+#include "cJSON.h"
 #include <ctype.h>
 
 #ifdef __cplusplus
@@ -354,6 +355,16 @@ AIORET_TYPE AIOContinuousBufGetStreamingBlockSize( AIOContinuousBuf *buf )
     return buf->block_size;
 }
 
+/*----------------------------------------------------------------------------*/
+ADCConfigBlock *AIOContinuousBufGetADCConfigBlock( AIOContinuousBuf *buf )
+{
+    AIO_ASSERT_RET( NULL, buf );
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), (AIORESULT*)&retval );
+    AIO_ERROR_VALID_DATA( NULL, retval >= AIOUSB_SUCCESS );
+
+    return AIOUSBDeviceGetADCConfigBlock( deviceDesc );
+}
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBuf_SetCallback(AIOContinuousBuf *buf , void *(*work)(void *object ) ) { return AIOContinuousBufSetCallback( buf, work );}
@@ -1914,8 +1925,16 @@ AIOContinuousBuf *NewAIOContinuousBufFromJSON( const char *str )
     if ( ( tmp = cJSON_GetObjectItem(aiojson,"DeviceIndex" )) )
         AIOContinuousBufSetDeviceIndex( aiobuf, cJSON_AsInteger(tmp) );
     if ( ( tmp = cJSON_GetObjectItem(aiojson,"adcconfig" )) ) {
-        printf("Not implemented yet...\n");
-        /* exit(1); */
+        char *ttmp = cJSON_PrintUnformatted( tmp );
+        ADCConfigBlock *tmpblock = NewADCConfigBlockFromJSON( ttmp );
+        if ( !tmpblock ) {
+            fprintf(stderr,"Error parsing ADCConfigblock: %s\n", ttmp );
+        } else {
+            ADCConfigBlockCopy( AIOContinuousBufGetADCConfigBlock( aiobuf ), tmpblock );
+            DeleteADCConfigBlock( tmpblock );
+        }
+        free(ttmp);
+      
     } else {
         retval = AIOContinuousBufSetDefaultModeForCounterScan( aiobuf );
         AIO_ERROR_VALID_DATA( NULL, retval == AIOUSB_SUCCESS );
@@ -1945,33 +1964,33 @@ AIOContinuousBuf *NewAIOContinuousBufFromJSON( const char *str )
     return aiobuf;
 }
 
-char *AIOContinuousBufToJSON( AIOContinuousBuf *buf )
-{
-    AIO_ASSERT_RET( NULL, buf );
-    char *tmp;
-    int retcode;
-    retcode = asprintf(&tmp,
-              "{\"DeviceIndex\":%d,\"base_size\":%d,\"block_size\":%d,\"debug\":\"%s\",\"hz\":%d,\"num_channels\":%d,\"num_oversamples\":%d,\"num_scans\":%lu,\"testing\":\"%s\",\"timeout\":%d,\"type\":%d,\"unit_size\":%d}",
-              buf->DeviceIndex,
-              buf->base_size,
-              buf->block_size,
-             (buf->debug == 1 ? "true" : "false" ),
-              buf->hz,
-              buf->num_channels,
-              buf->num_oversamples,
-             (unsigned long)buf->num_scans,
-             ( buf->testing == 1 ? "true" : "false" ),
-              buf->timeout,
-              buf->type,
-              buf->unit_size
-              );
-    if ( retcode < 0 )
-        return NULL;
-    else 
-        return tmp;
-}
+/* char *AIOContinuousBufToJSON( AIOContinuousBuf *buf ) */
+/* { */
+/*     AIO_ASSERT_RET( NULL, buf ); */
+/*     char *tmp; */
+/*     int retcode; */
+/*     retcode = asprintf(&tmp, */
+/*               "{\"DeviceIndex\":%d,\"base_size\":%d,\"block_size\":%d,\"debug\":\"%s\",\"hz\":%d,\"num_channels\":%d,\"num_oversamples\":%d,\"num_scans\":%lu,\"testing\":\"%s\",\"timeout\":%d,\"type\":%d,\"unit_size\":%d}", */
+/*               buf->DeviceIndex, */
+/*               buf->base_size, */
+/*               buf->block_size, */
+/*              (buf->debug == 1 ? "true" : "false" ), */
+/*               buf->hz, */
+/*               buf->num_channels, */
+/*               buf->num_oversamples, */
+/*              (unsigned long)buf->num_scans, */
+/*              ( buf->testing == 1 ? "true" : "false" ), */
+/*               buf->timeout, */
+/*               buf->type, */
+/*               buf->unit_size */
+/*               ); */
+/*     if ( retcode < 0 ) */
+/*         return NULL; */
+/*     else  */
+/*         return tmp; */
+/* } */
 
-char *AIOContinuousBufToFullJSON( AIOContinuousBuf *buf )
+char *AIOContinuousBufToJSON( AIOContinuousBuf *buf )
 {
     AIO_ASSERT_RET( NULL, buf );
     int retcode;
@@ -2484,8 +2503,8 @@ TEST(AIOContiuousBuf,JSONFunctions)
 
     AIOContinuousBuf *buf = NewAIOContinuousBuf(1,16,0,1024);
     AIORET_TYPE retval ;
-    char *exp1 = (char *)"{\"DeviceIndex\":1,\"base_size\":1024,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2}";
-    char *exp2 = (char *)"{\"DeviceIndex\":1,\"base_size\":512,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2}";
+    char *exp1 = (char *)"{\"DeviceIndex\":1,\"base_size\":1024,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2,\"adcconfig\":{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"0\",\"oversample\":\"0\",\"timeout\":\"5000\",\"clock_rate\":\"0\"}}}";
+    char *exp2 = (char *)"{\"DeviceIndex\":1,\"base_size\":512,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2,\"adcconfig\":{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"0\",\"oversample\":\"0\",\"timeout\":\"5000\",\"clock_rate\":\"0\"}}}";
 
 
     ASSERT_STREQ( exp1, AIOContinuousBufToJSON( buf ));
