@@ -385,16 +385,6 @@ AIORET_TYPE aio_override_aiobuf_settings( AIOContinuousBuf *buf, struct opts *op
         AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
     }
 
-    if ( options->buffer_size && options->buffer_size != AIOContinuousBufGetBufferSize(buf)) {
-        int newbase = options->buffer_size / ( AIOContinuousBufGetUnitSize(buf)*AIOContinuousBufGetNumberChannels(buf)*(1+AIOContinuousBufGetOversample(buf)));
-        if ( newbase <= 0 ) {
-            fprintf(stderr,"Error: new buffersize is too small\n");
-        } else {
-            retval = AIOContinuousBufSetBaseSize( buf, newbase );
-            AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
-        }
-    }
-
     if ( options->num_oversamples != AIOContinuousBufGetOversample( buf ) ) {
         retval = AIOContinuousBufSetOversample( buf, options->num_oversamples );
         AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
@@ -409,6 +399,17 @@ AIORET_TYPE aio_override_aiobuf_settings( AIOContinuousBuf *buf, struct opts *op
         retval = AIOContinuousBufSetNumberScans( buf, options->num_scans );
         AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
     }
+
+    if ( options->buffer_size && options->buffer_size != AIOContinuousBufGetBufferSize(buf)) {
+        int newbase = options->buffer_size / ( AIOContinuousBufGetUnitSize(buf)*AIOContinuousBufGetNumberChannels(buf)*(1+AIOContinuousBufGetOversample(buf)));
+        if ( newbase <= 0 ) {
+            fprintf(stderr,"Error: new buffersize is too small\n");
+        } else {
+            retval = AIOContinuousBufSetBaseSize( buf, newbase );
+            AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+        }
+    }
+
     if( !options->number_ranges ) {
         retval = AIOContinuousBufSetAllGainCodeAndDiffMode( buf , options->gain_code , AIOUSB_FALSE );
         AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
