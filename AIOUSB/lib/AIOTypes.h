@@ -78,8 +78,9 @@ namespace AIOUSB {
 
 
 
-CREATE_ENUM_W_START( THREAD_STATUS, 0 , 
-                     NOT_STARTED, 
+CREATE_ENUM_W_START( THREAD_STATUS , -1 , 
+                     INVALID_OBJECT,
+                     NOT_STARTED,
                      RUNNING, 
                      TERMINATED, 
                      JOINED 

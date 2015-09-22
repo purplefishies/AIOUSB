@@ -474,6 +474,12 @@ AIORET_TYPE AIOContinuousBufGetExitCode( AIOContinuousBuf *buf )
     return buf->exitcode;
 }
 
+THREAD_STATUS AIOContinuousBufGetRunStatus( AIOContinuousBuf *buf )
+{
+    AIO_ERROR_VALID_DATA( INVALID_OBJECT, buf );
+    return buf->status;
+}
+
 /*----------------------------------------------------------------------------*/
 /**
  * @brief returns the number of Scans accross all channels that still 
@@ -2523,6 +2529,13 @@ TEST(AIOContiuousBuf,JSONFunctions)
     ASSERT_STREQ( exp1, AIOContinuousBufToJSON(buf) );
 
     
+}
+
+TEST(AIOContinuousBuf, ThreadStatus )
+{
+    AIOContinuousBuf *buf = 0;
+    EXPECT_EQ( AIOContinuousBufGetRunStatus( buf ), INVALID_OBJECT );
+
 }
 
 TEST(AIOContinuousBuf, CatchChannelNumberChange) 
