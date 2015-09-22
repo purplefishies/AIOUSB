@@ -925,10 +925,8 @@ ADCConfigBlock *NewADCConfigBlockFromJSON( char *str )
     cJSON *tmpconfig = NULL;
     if (!adcconfig )
         return NULL;
-    if ( adcconfig && (tmpconfig = cJSON_GetObjectItem(adcconfig,"adcconfig") ) )
+    if ( adcconfig && ((tmpconfig = cJSON_GetObjectItem(adcconfig,"adcconfig") ) != 0 ) )
         adcconfig  = tmpconfig;
-    else 
-        return NULL;
 
     cJSON *tmp;
 

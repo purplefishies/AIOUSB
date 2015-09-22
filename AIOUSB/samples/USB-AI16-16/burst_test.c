@@ -147,7 +147,7 @@ main(int argc, char *argv[] )
     int scans_remaining;
     int read_count = 0;
     int scans_read = 0;
-    while ( buf->status == RUNNING || read_count < options.num_scans ) {
+    while ( AIOContinuousBufGetRunStatus(buf) == RUNNING || read_count < options.num_scans ) {
 
         if ( (scans_remaining = AIOContinuousBufCountScansAvailable(buf) ) > 0 ) { 
 
