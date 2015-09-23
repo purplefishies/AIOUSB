@@ -288,7 +288,7 @@ AIORET_TYPE AIOUSBDeviceSetDiscardFirstSample( AIOUSBDevice *device , AIOUSB_BOO
 #include <unistd.h>
 #include <stdio.h>
 #include "gtest/gtest.h"
-#include "tap.h"
+
 using namespace AIOUSB;
 
 /**

@@ -770,7 +770,7 @@ AIORESULT DIO_StreamFrame(
 
 #include "AIOUSBDevice.h"
 #include "gtest/gtest.h"
-#include "tap.h"
+
 #include <iostream>
 using namespace AIOUSB;
 

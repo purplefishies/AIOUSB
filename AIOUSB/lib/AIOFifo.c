@@ -301,7 +301,7 @@ TEMPLATE_AIOFIFO_API( Volts, double );
 
 #include "AIOUSBDevice.h"
 #include "gtest/gtest.h"
-#include "tap.h"
+
 #include <iostream>
 #include <math.h>
 using namespace AIOUSB;

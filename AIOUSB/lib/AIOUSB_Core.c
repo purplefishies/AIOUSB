@@ -826,7 +826,7 @@ unsigned long GenericVendorRead(
 
 #include <math.h>
 #include "gtest/gtest.h"
-#include "tap.h"
+
 #include "AIOUSB_Core.h"
 #include "AIODeviceTable.h"
 

@@ -445,7 +445,7 @@ int usb_reset_device( struct aiousb_device *usb )
  */ 
 
 #include "gtest/gtest.h"
-#include "tap.h"
+
 using namespace AIOUSB;
 
 TEST(USBDevice,FailsCorrectly)

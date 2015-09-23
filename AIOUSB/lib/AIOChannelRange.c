@@ -110,7 +110,7 @@ AIORET_TYPE AIOChannelRangeGetGain( AIOChannelRange *range )
 
 #ifdef SELF_TEST
 #include "gtest/gtest.h"
-#include "tap.h"
+
 using namespace AIOUSB;
 
 TEST(AIOChannelRange, Lookup ) 

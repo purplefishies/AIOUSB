@@ -229,7 +229,7 @@ AIORET_TYPE DIOBufSetByteAtIndex( DIOBuf *buf, unsigned index, char  value ) {
 #include <math.h>
 
 #include "gtest/gtest.h"
-#include "tap.h"
+
 
 using namespace AIOUSB;
 

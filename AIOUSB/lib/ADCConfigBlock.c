@@ -1064,7 +1064,6 @@ AIORET_TYPE ADCConfigBlockGetClockRate( ADCConfigBlock *config )
 #ifdef SELF_TEST
 
 #include "gtest/gtest.h"
-#include "tap.h"
 #include "AIOUSBDevice.h"
 using namespace AIOUSB;
 

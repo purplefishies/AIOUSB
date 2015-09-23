@@ -1479,7 +1479,7 @@ AIORET_TYPE AIOUSB_Reset( unsigned long DeviceIndex )
 
 #ifdef SELF_TEST
 #include "gtest/gtest.h"
-#include "tap.h"
+
 #include <stdlib.h>
 
 using namespace AIOUSB;

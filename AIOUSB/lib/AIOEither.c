@@ -251,7 +251,7 @@ AIORET_TYPE AIOEitherToAIORetType( AIOEither either )
 #include "AIOUSBDevice.h"
 #include "AIOEither.h"
 #include "gtest/gtest.h"
-#include "tap.h"
+
 #include <iostream>
 using namespace AIOUSB;
 

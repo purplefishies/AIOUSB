@@ -305,7 +305,7 @@ char *AIOChannelMaskGetMask( AIOChannelMask *obj ) {
  */ 
 
 #include "gtest/gtest.h"
-#include "tap.h"
+
 using namespace AIOUSB;
 
 

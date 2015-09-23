@@ -85,7 +85,7 @@ AIODeviceInfo *AIODeviceInfoGet( unsigned long DeviceIndex )
 
 #include <math.h>
 #include "gtest/gtest.h"
-#include "tap.h"
+
 #include "AIODeviceTable.h"
 #include "AIODeviceInfo.h"
 #include "AIOUSB_Core.h"
