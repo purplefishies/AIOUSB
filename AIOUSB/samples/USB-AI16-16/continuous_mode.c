@@ -163,7 +163,7 @@ main(int argc, char *argv[] )
      *    performs the acquistion, while you go about 
      *    doing other things.
      */ 
-    AIOContinuousBufCallbackStart( buf );
+    AIOContinuousBufInitiateCallbackAcquisition(buf);
 
     int scans_remaining;
     int scans_read = 0;

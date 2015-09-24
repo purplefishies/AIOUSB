@@ -134,7 +134,8 @@ main(int argc, char *argv[] )
      *    performs the acquistion, while you go about 
      *    doing other things.
      */ 
-    AIOContinuousBufCallbackStart( buf );
+
+    AIOContinuousBufInitiateCallbackAcquisition(buf);
 
     /**
      * in this example we read bytes in blocks of our core num_channels parameter. 
