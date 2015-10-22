@@ -651,7 +651,9 @@ const char *get_cal_mode( int code )
     }
 }
 
-/*----------------------------------------------------------------------------*/
+/**
+ * @cond INTERNAL_DOCUMENTATION
+ *----------------------------------------------------------------------------*/
 const char *get_trigger_mode( int code )
 {
     if (code & AD_TRIGGER_TIMER) {
@@ -697,6 +699,7 @@ const char *get_scan_mode(int code)
 #define OVERSAMPLE_STRING "oversample"
 #define CLOCKRATE_STRING "clock_rate"
 #define TIMEOUT_STRING "timeout"
+/** @endcond */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -759,7 +762,7 @@ char *ADCConfigBlockToYAML(ADCConfigBlock *config)
     return strdup(tmpbuf);
 }
 
-
+/** @cond INTERNAL_DOCUMENTATION */
 /*---------------------  Default settings for JSON read  ---------------------*/
 EnumStringLookup Gains[] = {
     { AD_GAIN_CODE_0_10V , (char *)"0-10V" , (char *)STRINGIFY(AD_GAIN_CODE_0_10V)  }, /* Default value */
@@ -807,6 +810,7 @@ EnumStringLookup EndChannel[] = {
 EnumStringLookup Oversample[] = {
     { 0, (char *)"0", (char *)"0" }
 };
+/** @endcond INTERNAL_DOCUMENTATION */
 
 
 /*-----------------------  End settings for JSON read  -----------------------*/

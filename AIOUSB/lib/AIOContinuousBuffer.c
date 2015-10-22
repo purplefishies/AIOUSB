@@ -276,6 +276,7 @@ AIORET_TYPE AIOContinuousBufInitConfiguration(  AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBuf_SendPreConfig( AIOContinuousBuf *buf ) {
     return AIOContinuousBufSendPreConfig( buf );
 }
+
 AIORET_TYPE AIOContinuousBufSendPreConfig( AIOContinuousBuf *buf )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
@@ -369,7 +370,9 @@ ADCConfigBlock *AIOContinuousBufGetADCConfigBlock( AIOContinuousBuf *buf )
 }
 
 /*----------------------------------------------------------------------------*/
+
 AIORET_TYPE AIOContinuousBuf_SetCallback(AIOContinuousBuf *buf , void *(*work)(void *object ) ) { return AIOContinuousBufSetCallback( buf, work );}
+
 AIORET_TYPE AIOContinuousBufSetCallback(AIOContinuousBuf *buf , void *(*work)(void *object ) )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
@@ -398,6 +401,7 @@ AIORET_TYPE AIOContinuousBufGetNumberScans( AIOContinuousBuf *buf )
 }
 
 /*----------------------------------------------------------------------------*/
+
 AIORET_TYPE AIOContinuousBuf_BufSizeForCounts( AIOContinuousBuf * buf) 
 {
     AIO_ASSERT_AIOCONTBUF( buf );
@@ -405,6 +409,7 @@ AIORET_TYPE AIOContinuousBuf_BufSizeForCounts( AIOContinuousBuf * buf)
 }
 
 /*----------------------------------------------------------------------------*/
+
 AIORET_TYPE AIOContinuousBufGetUnitSize( AIOContinuousBuf *buf )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
@@ -748,14 +753,11 @@ AIORET_TYPE AIOContinuousBufStopAcquisition( AIOContinuousBuf *buf )
 }
 
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf )
-{
-    AIO_ASSERT_AIOCONTBUF( buf );
-    AIORET_TYPE retval = pthread_create( &(buf->worker), NULL , callback, (void *)buf  );
-
-    return retval;
-}
-
+/**
+ * @cond INTERNAL_DOCUMENTATION
+ * @deprecated 
+ */
+AIORET_TYPE AIOContinuousBuf_SetChannelMask( AIOContinuousBuf *buf, AIOChannelMask *mask ) { return AIOContinuousBufSetChannelMask( buf, mask ); } /** @endcond */
 /*----------------------------------------------------------------------------*/
 /**
  * @brief Sets the channel mask
@@ -763,7 +765,6 @@ AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf )
  * @param mask 
  * @return 
  */
-AIORET_TYPE AIOContinuousBuf_SetChannelMask( AIOContinuousBuf *buf, AIOChannelMask *mask ) { return AIOContinuousBufSetChannelMask( buf, mask ); }
 AIORET_TYPE AIOContinuousBufSetChannelMask( AIOContinuousBuf *buf, AIOChannelMask *mask )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
@@ -772,7 +773,9 @@ AIORET_TYPE AIOContinuousBufSetChannelMask( AIOContinuousBuf *buf, AIOChannelMas
     return 0;
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBuf_NumberSignals( AIOContinuousBuf *buf ) { return AIOContinuousBufNumberSignals( buf ); }
+
 AIORET_TYPE AIOContinuousBufNumberSignals( AIOContinuousBuf *buf )
 {
 
@@ -781,7 +784,9 @@ AIORET_TYPE AIOContinuousBufNumberSignals( AIOContinuousBuf *buf )
 }
 
 /*----------------------------------------------------------------------------*/
+
 AIORET_TYPE AIOContinuousBuf_NumberChannels( AIOContinuousBuf *buf ) { return AIOContinuousBufNumberChannels(buf); }
+
 AIORET_TYPE AIOContinuousBufNumberChannels( AIOContinuousBuf *buf ) 
 {
     AIO_ASSERT_AIOCONTBUF( buf );
@@ -790,6 +795,7 @@ AIORET_TYPE AIOContinuousBufNumberChannels( AIOContinuousBuf *buf )
 
 /*----------------------------------------------------------------------------*/
 /**
+ * @cond INTERNAL_DOCUMENTATION
  * @brief A simple copy of one ushort buffer to one of AIOBufferType and converts
  *       counts to voltages
  * @param buf 
@@ -828,7 +834,7 @@ AIORET_TYPE AIOContinuousBuf_SmartCountsToVolts( AIOContinuousBuf *buf,
     }
 
     return retval;
-}
+} /** @endcond */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -900,6 +906,7 @@ AIORET_TYPE AIOContinuousBufWriteCounts( AIOContinuousBuf *buf, unsigned short *
 }
 
 /*----------------------------------------------------------------------------*/
+/** @cond INTERNAL_DOCUMENTATION */
 AIORET_TYPE aiocontbuf_get_bulk_data( AIOContinuousBuf *buf, 
                                  USBDevice *usb, 
                                  unsigned char endpoint, 
@@ -925,6 +932,7 @@ unsigned round_down( unsigned n, unsigned multiple)
 {
     return ((n - multiple) / multiple) * multiple;
 }
+/** @endcond */
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBufGetNumberSamplesPerScan( AIOContinuousBuf *buf )
@@ -1255,7 +1263,16 @@ AIORET_TYPE AIOContinuousBufLoadCounters( AIOContinuousBuf *buf, unsigned counte
 }
 
 /*----------------------------------------------------------------------------*/
-int continuous_end( USBDevice *usb , unsigned char *data, unsigned length )
+/**
+ * @internal
+ * @brief Stops the acquisition from running
+ * @param usb 
+ * @param data 
+ * @param length 
+ * @return 0 always
+ * @todo Fix this function to return something meaningful if you continue using it
+ */
+static int continuous_end( USBDevice *usb , unsigned char *data, unsigned length )
 {
     int retval = 0;
     unsigned bmRequestType, wValue = 0x0, wIndex = 0x0, bRequest = 0xba, wLength = 0x01;
@@ -1519,11 +1536,13 @@ AIORET_TYPE AIOContinuousBufCallbackStart( AIOContinuousBuf *buf )
     return retval;
 }
 
+/** @cond INTERNAL_DOCUMENTATION */
 AIORET_TYPE AIOContinuousBuf_ResetDevice(AIOContinuousBuf *buf ) 
 {
     AIO_ASSERT_AIOCONTBUF( buf );
     return AIOContinuousBufResetDevice( buf );
 }
+/** @endcond */
 
 AIORET_TYPE AIOContinuousBufResetDevice( AIOContinuousBuf *buf) 
 {

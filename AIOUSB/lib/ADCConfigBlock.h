@@ -33,9 +33,9 @@ typedef struct adc_config_block {
 
 typedef ADCConfigBlock ADConfigBlock;
 
-#define STRINGIFY(x) #x
 
-/* BEGIN AIOUSB_API */
+
+
 
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockInit( ADCConfigBlock *, AIOUSBDevice *deviceDesc, unsigned int );
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockInitForCounterScan(ADCConfigBlock *config, AIOUSBDevice *deviceDesc  );
@@ -55,8 +55,12 @@ PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetClockRate( ADCConfigBlock *config );
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetScanRange(ADCConfigBlock *config, unsigned startChannel, unsigned endChannel);
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetStartChannel( ADCConfigBlock *config, unsigned char startChannel  );
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetEndChannel( ADCConfigBlock *config, unsigned char endChannel  );
+
+/** @cond INTERNAL_DOCUMENTATION */
+#define STRINGIFY(x) #x
 #define HIGH_BITS(reg)   ( reg & 0xF0 )
 #define LOW_BITS(reg)    ( reg & 0x0F )
+/** @endcond INTERNAL_DOCUMENTATION */
 
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetChannelRange(ADCConfigBlock *config,unsigned startChannel, unsigned endChannel, unsigned gainCode );
 
