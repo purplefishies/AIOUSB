@@ -131,6 +131,9 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
         case 'S':
             options->buffer_size = atoi( optarg );
             break;
+        case 'T':
+            options->with_timing = 1;
+            break;
         case 'B':
             options->block_size = atoi( optarg );
             break;
