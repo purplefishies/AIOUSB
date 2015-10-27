@@ -17,14 +17,7 @@ AIORET_TYPE ADCConfigBlockCopy( ADCConfigBlock *to, ADCConfigBlock *from )
     AIORET_TYPE result = AIOUSB_SUCCESS;
     AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_PARAMETER, from->size >= AD_CONFIG_REGISTERS );
     
-    to->device   = from->device;
-    to->size     = from->size ;
-    to->testing  = from->testing;
-    to->timeout  = from->timeout;
-
-    memcpy( &to->mux_settings, &from->mux_settings, sizeof(ADCMuxSettings));
-
-    memcpy( to->registers, from->registers, AD_MAX_CONFIG_REGISTERS +1 );
+    memcpy( to, from, sizeof(ADCConfigBlock));
 
     return result;
 }
@@ -1287,6 +1280,28 @@ TEST(ADCChannels, SetRangeGains ) {
     }
 
 }
+
+TEST(ADCChannels, CorrectlyCopyConfig ) {
+    int retval;
+    ADCConfigBlock from = {0 , 20 ,{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,16,0,0}, 5000, {0,0,false},20000,true,true};
+    ADCConfigBlock to = {0};
+
+    ADCConfigBlockSetOversample( &from, 13 );
+
+    retval = ADCConfigBlockCopy( &to, &from );
+    ASSERT_GE( retval, 0 );
+    
+    ASSERT_EQ(ADCConfigBlockGetStartChannel( &to ),0);
+    ASSERT_EQ(ADCConfigBlockGetEndChannel( &to ),1);
+
+
+
+    ASSERT_EQ( ADCConfigBlockGetClockRate( &to ), 20000 );
+
+    ASSERT_EQ( ADCConfigBlockGetOversample( &to ), 13 );
+
+}
+
 
 
 
