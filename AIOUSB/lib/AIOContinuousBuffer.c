@@ -1970,32 +1970,6 @@ AIOContinuousBuf *NewAIOContinuousBufFromJSON( const char *str )
     return aiobuf;
 }
 
-/* char *AIOContinuousBufToJSON( AIOContinuousBuf *buf ) */
-/* { */
-/*     AIO_ASSERT_RET( NULL, buf ); */
-/*     char *tmp; */
-/*     int retcode; */
-/*     retcode = asprintf(&tmp, */
-/*               "{\"DeviceIndex\":%d,\"base_size\":%d,\"block_size\":%d,\"debug\":\"%s\",\"hz\":%d,\"num_channels\":%d,\"num_oversamples\":%d,\"num_scans\":%lu,\"testing\":\"%s\",\"timeout\":%d,\"type\":%d,\"unit_size\":%d}", */
-/*               buf->DeviceIndex, */
-/*               buf->base_size, */
-/*               buf->block_size, */
-/*              (buf->debug == 1 ? "true" : "false" ), */
-/*               buf->hz, */
-/*               buf->num_channels, */
-/*               buf->num_oversamples, */
-/*              (unsigned long)buf->num_scans, */
-/*              ( buf->testing == 1 ? "true" : "false" ), */
-/*               buf->timeout, */
-/*               buf->type, */
-/*               buf->unit_size */
-/*               ); */
-/*     if ( retcode < 0 ) */
-/*         return NULL; */
-/*     else  */
-/*         return tmp; */
-/* } */
-
 char *AIOContinuousBufToJSON( AIOContinuousBuf *buf )
 {
     AIO_ASSERT_RET( NULL, buf );

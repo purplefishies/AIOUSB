@@ -572,6 +572,23 @@ AIORET_TYPE ADCConfigBlockSetDifferentialMode(ADCConfigBlock *config, unsigned c
 }
 
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief Sets the Timer reference 
+ *
+ */
+AIORET_TYPE ADCConfigBlockSetReference( ADCConfigBlock *config, int ref )
+{
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config && config->size );
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+
+    /* bits 0 and 4 of ref should be preserved */
+    config->registers[AD_REGISTER_TRIG_COUNT] = (( config->registers[AD_REGISTER_TRIG_COUNT] & ~0x11 ) | 
+                                                 ( ref & 0x11 ));
+    
+    return retval;
+}
+
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE _assist_trigger_select( ADCConfigBlock *config, AIOUSB_BOOL val , int setting )
 {
     AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_ADCCONFIG, config && config->size);
@@ -579,6 +596,7 @@ AIORET_TYPE _assist_trigger_select( ADCConfigBlock *config, AIOUSB_BOOL val , in
     config->registers[AD_REGISTER_TRIG_COUNT] = (config->registers[AD_REGISTER_TRIG_COUNT] & ~setting) | ( val ? setting : 0 );
     return AIOUSB_SUCCESS;
 }
+
 
 /*------------------------------------------------------------------------------*/
 AIORET_TYPE ADCConfigBlockSetTriggerEdge( ADCConfigBlock *config, AIOUSB_BOOL val )
@@ -630,13 +648,13 @@ const char *get_cal_mode( int code )
 /*----------------------------------------------------------------------------*/
 const char *get_trigger_mode( int code )
 {
-   if (code & AD_TRIGGER_CTR0_EXT) {
-       return "external";
-   } else if (code & AD_TRIGGER_TIMER) {
-       return "counter";
-   } else {
-       return "sw";
-   }
+    if (code & AD_TRIGGER_TIMER) {
+        return "counter";
+    } else if (code & AD_TRIGGER_CTR0_EXT) {
+        return "external";
+    } else {
+        return "sw";
+    }
 }
 
 /*----------------------------------------------------------------------------*/
@@ -757,6 +775,7 @@ EnumStringLookup Calibrations[] = {
 
 EnumStringLookup ReferenceModes[] = {
     {AD_TRIGGER_TIMER   , (char *)"counter"  , (char *)STRINGIFY(AD_TRIGGER_TIMER    ) }, /* Default */
+    {AD_TRIGGER_TIMER   , (char *)"timer"    , (char *)STRINGIFY(AD_TRIGGER_TIMER    ) }, /* Default */
     {AD_TRIGGER_CTR0_EXT, (char *)"external" , (char *)STRINGIFY(AD_TRIGGER_CTR0_EXT ) },
     {0                  , (char *)"sw"       , (char *)STRINGIFY(0                   ) },
 };
@@ -994,6 +1013,8 @@ ADCConfigBlock *NewADCConfigBlockFromJSON( char *str )
                                                 sizeof(ReferenceModes)/sizeof(EnumStringLookup)
                                                 );
 
+    ADCConfigBlockSetReference( adc, tmp->valueint );
+
     tmp =  ADCConfigBlockGetJSONValueOrDefault( adcconfig, 
                                                "start_channel", 
                                                 StartChannel, 
@@ -1129,6 +1150,45 @@ TEST( ADCConfigBlock, PreserveEdges )
 
 
 }
+
+TEST( ADCConfigBlock, PreserveReference )
+{
+    char *exp = (char*)"{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"external\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"0\",\"oversample\":\"0\",\"timeout\":\"5000\",\"clock_rate\":\"0\"}}";
+    char *exp2 = (char*)"{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"0\",\"oversample\":\"0\",\"timeout\":\"5000\",\"clock_rate\":\"0\"}}";
+    char *exp3 = (char*)"{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"counter\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"0\",\"oversample\":\"0\",\"timeout\":\"5000\",\"clock_rate\":\"0\"}}";
+    ADCConfigBlock *configBlock = NewADCConfigBlockFromJSON( exp );
+    char *tmp;
+
+    EXPECT_STREQ( (tmp=ADCConfigBlockToJSON( configBlock )), exp );
+    DeleteADCConfigBlock(configBlock);
+    free(tmp);
+
+    configBlock = NewADCConfigBlockFromJSON( exp2 );
+    EXPECT_STREQ( (tmp=ADCConfigBlockToJSON( configBlock )), exp2 );
+    free(tmp);
+    DeleteADCConfigBlock(configBlock);
+
+    configBlock = NewADCConfigBlockFromJSON( exp3 );
+    EXPECT_STREQ( (tmp=ADCConfigBlockToJSON( configBlock )), exp3 );
+    free(tmp);
+    DeleteADCConfigBlock(configBlock);
+
+}
+
+TEST( ADCConfigBlock, ReferenceToJSON )
+{
+    ADCConfigBlock configBlock = {0,20,{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0x15,0x15,0x0},1000, {0x1,0x10,0x1},0,0,0,0};
+    char *tmp = ADCConfigBlockToJSON( &configBlock );
+    char *mode = strstr(strstr(strstr(tmp,"reference"),":"),"\"");
+    char hold[20];
+    mode ++;
+    int sz = strstr(mode,"\"") - mode;
+    memcpy(hold,mode,sz);
+    hold[sz] = 0;
+    
+    ASSERT_STREQ( hold, "counter" );
+}
+
 
 TEST(ADCConfigBlock, SetAllGainCodes) 
 {
