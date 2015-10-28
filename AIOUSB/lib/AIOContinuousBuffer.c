@@ -640,6 +640,13 @@ AIORET_TYPE AIOContinuousBufSetClock( AIOContinuousBuf *buf, unsigned int hz )
 }
 
 /*----------------------------------------------------------------------------*/
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetClock( AIOContinuousBuf *buf )
+{
+    AIO_ASSERT_AIOCONTBUF( buf );
+    return buf->hz;
+}
+
+/*----------------------------------------------------------------------------*/
 /**
  * @brief Starts the thread that acquires data from USB bus.   * 
  * @param buf 

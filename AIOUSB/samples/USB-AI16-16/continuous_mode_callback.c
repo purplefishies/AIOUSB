@@ -88,8 +88,13 @@ main(int argc, char *argv[] )
     if( (retval = aio_list_devices( &options, indices, num_devices ) != AIOUSB_SUCCESS )) 
         exit(retval);
 
-    if ( (buf = NewAIOContinuousBufFromJSON( options.aiobuf_json )) == NULL )
+    if ( options.aiobuf_json ) { 
+        if ( (buf = NewAIOContinuousBufFromJSON( options.aiobuf_json )) == NULL )
+            exit(AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER);
+    } else if ( (buf = NewAIOContinuousBufFromJSON( options.default_aiobuf_json )) == NULL ) {
         exit(AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER);
+    }
+
 
     /* This fn allows us to merge the original JSON settings with 
      * some explicity set command line options

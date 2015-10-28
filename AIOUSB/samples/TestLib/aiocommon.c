@@ -7,8 +7,36 @@
 #include "aiousb.h"
 
 
-struct opts AIO_OPTIONS = {100000, 16, 0, AD_GAIN_CODE_0_5V , 10000 , "output.txt", 0, AIODEFAULT_LOG_LEVEL, 0, 0, 0,15, -1, -1, 0, 0,0,100,0,0,0,
-                           "{\"DeviceIndex\":0,\"base_size\":512,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2}",
+struct opts AIO_OPTIONS = {
+                           -1,                            /* int64_t num_scans; */
+                           10000,                         /* int64_t default_num_scans; */
+                           -1,                            /* unsigned num_channels; */      
+                           16,                            /* unsigned default_num_channels; */      
+                           -1,                            /* unsigned num_oversamples; */   
+                           0,                             /* unsigned default_num_oversamples; */   
+                           AD_GAIN_CODE_0_5V ,            /* int gain_code; */              
+                           -1,                            /* int clock_rate; */             
+                           10000,                         /* int default_clock_rate;  */
+                           "output.txt",                  /* char *outfile; */              
+                           0,                             /* int reset; */                  
+                           AIODEFAULT_LOG_LEVEL,          /* int debug_level; */            
+                           0,                             /* int number_ranges; */          
+                           0,                             /* int verbose; */                
+                           -1,                            /* int start_channel; */          
+                           0,                             /* int default_start_channel; */          
+                           -1,                            /* int end_channel; */            
+                           15,                            /* int default_end_channel; */            
+                           -1,                            /* int index; */                  
+                           -1,                            /* int block_size; */             
+                           0,                             /* int with_timing; */            
+                           0,                             /* int slow_acquire; */           
+                           2048,                          /* int buffer_size; */            
+                           100,                           /* int rate_limit; */             
+                           0,                             /* int physical; */               
+                           0,                             /* int counts; */                 
+                           0,                             /* int calibration; */            
+                           NULL,
+                           "{\"DeviceIndex\":0,\"base_size\":2048,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2}",
                            "{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\",\"oversample\":\"0\",\"timeout\":\"1000\",\"clock_rate\":\"1000\"}",
                            NULL
 };
@@ -69,8 +97,9 @@ struct channel_range *get_channel_range(char *optarg )
     return tmp;
 }
 
-#define DUMP 0x1000
-#define CNTS 0x1001
+#define DUMP  0x1000
+#define CNTS  0x1001
+#define JCONF 0x1002
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -110,6 +139,7 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
         {"counts"           , no_argument      , 0,   CNTS },         
         {"yaml"             , no_argument      , 0,  'Y'   },
         {"json"             , no_argument      , 0,  'J'   },
+        {"jsonconfig"       , required_argument, 0,  JCONF },
         {0                  , 0,                 0,   0    }
     };
     while (1) { 
@@ -175,6 +205,9 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
             break;
         case CNTS:
             options->counts = 1;
+            break;
+        case JCONF:
+            options->aiobuf_json = strdup( optarg );
             break;
         case 'f':
             options->outfile = strdup(optarg);
@@ -251,15 +284,17 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
     } 
 
     if ( options->number_ranges == 0 ) { 
-        if ( options->start_channel && options->end_channel && options->num_channels ) {
+        if ( options->start_channel >= 0 && options->end_channel >=0  && options->num_channels ) {
             fprintf(stdout,"Error: you can only specify -start_channel & -end_channel OR  --start_channel & --numberchannels\n");
             print_aio_usage(argc, argv, long_options );
             exit(1);
-        } else if ( options->start_channel && options->num_channels ) {
+        } else if ( options->start_channel >= 0 && options->num_channels >= 0 ) {
             options->end_channel = options->start_channel + options->num_channels - 1;
-        } else if ( options->num_channels ) {
+        } else if ( options->num_channels > 0 ) {
             options->start_channel = 0;
             options->end_channel = options->num_channels - 1;
+        } else if ( options->num_channels < 0 && options->start_channel < 0 && options->end_channel < 0 ) {
+            
         } else {
             options->num_channels = options->end_channel - options->start_channel  + 1;
         }
@@ -388,22 +423,35 @@ AIORET_TYPE aio_override_aiobuf_settings( AIOContinuousBuf *buf, struct opts *op
         AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
     }
 
-    if ( options->num_oversamples != AIOContinuousBufGetOversample( buf ) ) {
+    if ( options->num_oversamples >= 0 ) { 
         retval = AIOContinuousBufSetOversample( buf, options->num_oversamples );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    } else if ( AIOContinuousBufGetOversample( buf ) < 0 || AIOContinuousBufGetOversample( buf ) > 255 ) {
+        retval = AIOContinuousBufSetOversample( buf, options->default_num_oversamples );
         AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
     }
     
-    if ( options->start_channel != ADCConfigBlockGetStartChannel( config ) || 
-         options->end_channel  != ADCConfigBlockGetEndChannel( config ) ) { 
-        retval = AIOContinuousBufSetStartAndEndChannel( buf, options->start_channel, options->end_channel );
+
+    if ( options->start_channel > 0 || options->end_channel > 0 ) { 
+        int tmpstart = ( options->start_channel > 0 ? options->start_channel : ADCConfigBlockGetStartChannel( config ));
+        int tmpend   = ( options->end_channel > 0 ? options->end_channel : ADCConfigBlockGetEndChannel( config ));
+            
+        retval = AIOContinuousBufSetStartAndEndChannel( buf, tmpstart, tmpend );
         AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
-    }
-    if ( options->num_scans != AIOContinuousBufGetNumberScans( buf ) ){
-        retval = AIOContinuousBufSetNumberScans( buf, options->num_scans );
-        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    } else if ( ADCConfigBlockGetStartChannel(config) < 0 || ADCConfigBlockGetEndChannel(config)  > 15 ) { 
+        fprintf(stderr,"Using StartChannel=%d, and EndChannel=%d\n", options->default_start_channel, options->default_end_channel  );
+        retval = AIOContinuousBufSetStartAndEndChannel( buf, options->default_start_channel, options->default_end_channel );
     }
 
-    if ( options->buffer_size && options->buffer_size != AIOContinuousBufGetBufferSize(buf)) {
+    /* if ( options->num_scans != AIOContinuousBufGetNumberScans( buf ) ){ */
+    if ( options->num_scans > 0 ) { 
+        retval = AIOContinuousBufSetNumberScans( buf, options->num_scans );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    } else if ( AIOContinuousBufGetNumberScans( buf ) == 0 ) { 
+        retval = AIOContinuousBufSetNumberScans( buf, options->default_num_scans );
+    }
+
+    if ( options->buffer_size && options->buffer_size > AIOContinuousBufGetBufferSize(buf) / ( AIOContinuousBufGetNumberChannels(buf)*2 )) { 
         int newbase = options->buffer_size / ( AIOContinuousBufGetUnitSize(buf)*AIOContinuousBufGetNumberChannels(buf)*(1+AIOContinuousBufGetOversample(buf)));
         if ( newbase <= 0 ) {
             fprintf(stderr,"Error: new buffersize is too small\n");
@@ -413,10 +461,7 @@ AIORET_TYPE aio_override_aiobuf_settings( AIOContinuousBuf *buf, struct opts *op
         }
     }
 
-    if( !options->number_ranges ) {
-        retval = AIOContinuousBufSetAllGainCodeAndDiffMode( buf , options->gain_code , AIOUSB_FALSE );
-        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
-    } else {
+    if( options->number_ranges ) {
         for ( int i = 0; i < options->number_ranges ; i ++ ) {
             retval = AIOContinuousBufSetChannelRange( buf,
                                                       options->ranges[i]->start_channel,
@@ -440,9 +485,11 @@ AIORET_TYPE aio_override_aiobuf_settings( AIOContinuousBuf *buf, struct opts *op
         }
     }
 
-    if ( options->clock_rate ) { 
+    if ( options->clock_rate > 0 ) { 
         retval = AIOContinuousBufSetClock( buf , options->clock_rate );
         AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    } else if ( AIOContinuousBufGetClock( buf ) == 0 ) { 
+        AIOContinuousBufSetClock( buf , options->default_clock_rate );
     }
 
     retval = AIOContinuousBufSaveConfig(buf);

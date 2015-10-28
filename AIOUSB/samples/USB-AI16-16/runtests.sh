@@ -5,6 +5,7 @@ function dynmake() {
 }
 
 function run_cmd () { 
+    echo "Running '$1'"
     eval $1
     if [ "$?" != "0" ] ; then
         echo "Error running '${1}'"
@@ -19,19 +20,20 @@ dynmake bulk_acquire_sample
 dynmake continuous_mode_callback                                                                            
 
 
-run_cmd "./burst_test -V --num_scans 20000 --range 0-5=2 -N 20000 -D 31"
-result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(max(tmp$V1) > 60000) { "ok" } else { "not ok" } )')
-if [ $result == "not ok" ] ; then
-    echo "ERROR: max value not ok"
-    exit 1
-fi
-result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(min(tmp$V1) < 200) { "ok" } else { "not ok" } )')
-if [ $result == "not ok" ] ; then
-    echo "ERROR: min value not ok"
+run_cmd "./burst_test -V --num_scans 20000 --range 0-5=2 -N 20000 -D 31 --clockrate 4000"
+result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(max(tmp$V2) > 60000) { "ok" } else { "not ok" } )')
+if [[ $result == "not ok" ]] ; then
+    echo "ERROR: max value not ok at 1"
     exit 1
 fi
 
-run_cmd "./continuous_mode  -V  --range 0-4=0 -N 20000 -D 31"
+result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(min(tmp$V1) < 200) { "ok" } else { "not ok" } )')
+if [[ $result == "not ok" ]] ; then
+    echo "ERROR: min value not ok at 2"
+    exit 1
+fi
+
+run_cmd "./continuous_mode  -V  --range 0-4=0 -N 20000 -D 31 --clockrate 4000"
 result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(max(tmp$V1) > 4.6) { "ok" } else { "not ok" } )')
 if [ $result == "not ok" ] ; then
     echo "ERROR: max value not ok"
@@ -71,7 +73,7 @@ if [ $result == "not ok" ] ; then
 fi
 
 result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(min(tmp$V2) < 0.3) { "ok" } else { "not ok" } )')
-if [ $result == "not ok" ] ; then
+if [[ $result == "not ok" ]] ; then
     echo "ERROR: min value not ok"
     exit 1
 fi

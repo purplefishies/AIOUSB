@@ -65,8 +65,9 @@ main(int argc, char *argv[] )
         }
         fprintf(stderr, " and %d: Using index=%d \n",indices[i], options.index);
     }
+    options.num_oversamples = ( options.num_oversamples < 256 && options.num_oversamples >= 0 ? options.num_oversamples : 0 );
 
-    buf = NewAIOContinuousBufForVolts( options.index, options.num_scans , options.num_channels , options.num_oversamples );
+    buf = NewAIOContinuousBufForVolts( options.index, options.num_scans , options.num_channels ,  options.num_oversamples );
 
     /**
      * 1. Each buf should have a device index associated with it, so 
@@ -112,7 +113,7 @@ main(int argc, char *argv[] )
     AIOContinuousBufInitConfiguration( buf );
 
 
-    AIOContinuousBufSetOversample( buf, options.num_oversamples );
+    AIOContinuousBufSetOversample( buf, ( options.num_oversamples < 256 ? options.num_oversamples : options.default_num_oversamples ) );
     AIOContinuousBufSetStartAndEndChannel( buf, options.start_channel, options.end_channel );
 
     if( !options.number_ranges ) { 
