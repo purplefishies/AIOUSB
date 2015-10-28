@@ -104,7 +104,7 @@ AIORET_TYPE ADCConfigBlockInitializeFromAIOUSBDevice( ADCConfigBlock *config , A
     config->mux_settings.ADCMUXChannels       = dev->ADCMUXChannels;
     config->mux_settings.ADCChannelsPerGroup  = dev->ADCChannelsPerGroup;
     config->mux_settings.defined              = AIOUSB_TRUE;
-    config->clock_rate    = 1000;
+    config->clock_rate    = ( config->clock_rate <= 0 || config->clock_rate > 1000000 ? 1000 : config->clock_rate );
 
     memset(config->registers,0, AD_CONFIG_REGISTERS );
 
@@ -1108,6 +1108,7 @@ TEST(ADCConfigBlock, JSONRepresentation)
     ADCConfigBlockSetOversample( &config, 201 );
     /* Set external triggered */
     ADCConfigBlockSetScanRange( &config, 0, 15 );
+
 
     EXPECT_STREQ("{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"0-2V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"+-5V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\",\"oversample\":\"201\",\"timeout\":\"1000\",\"clock_rate\":\"1000\"}}", 
                  ADCConfigBlockToJSON( &config ) );

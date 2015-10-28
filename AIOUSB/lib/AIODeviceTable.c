@@ -1505,7 +1505,12 @@ TEST(AIOUSB_Core,MockObjects) {
 TEST(AIODeviceTable, AddingDeviceSetsInit )
 {
     int numDevices = 0;
+    int stclock_rate = deviceTable[0].cachedConfigBlock.clock_rate;
+    AIODeviceTableInit();
+    ASSERT_EQ(  deviceTable[0].cachedConfigBlock.clock_rate, stclock_rate );    
+
     AIODeviceTableAddDeviceToDeviceTable( &numDevices , USB_AIO16_16A );
+    ASSERT_EQ(  deviceTable[0].cachedConfigBlock.clock_rate, stclock_rate );    
     EXPECT_EQ( AIOUSB_IsInit(), AIOUSB_TRUE );
 
 }

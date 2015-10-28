@@ -2503,14 +2503,22 @@ TEST(AIOContinuousBuf,ReadingIntegerSamples)
 TEST(AIOContiuousBuf,JSONFunctions)
 {
     int numDevices = 0;
+    int stclock_rate = deviceTable[0].cachedConfigBlock.clock_rate;
     AIODeviceTableInit();    
+    ASSERT_EQ(  deviceTable[0].cachedConfigBlock.clock_rate, stclock_rate );
+    /* Should not affect the  */
     AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_DIO_48 );
+    ASSERT_EQ(  deviceTable[0].cachedConfigBlock.clock_rate, stclock_rate );
+
     AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_AIO16_16A );
 
     AIOContinuousBuf *buf = NewAIOContinuousBuf(1,16,0,1024);
     AIORET_TYPE retval ;
-    char *exp1 = (char *)"{\"DeviceIndex\":1,\"base_size\":1024,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2,\"adcconfig\":{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"0\",\"oversample\":\"0\",\"timeout\":\"5000\",\"clock_rate\":\"0\"}}}";
-    char *exp2 = (char *)"{\"DeviceIndex\":1,\"base_size\":512,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2,\"adcconfig\":{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"0\",\"oversample\":\"0\",\"timeout\":\"5000\",\"clock_rate\":\"0\"}}}";
+    char *exp1 = (char *)"{\"DeviceIndex\":1,\"base_size\":1024,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2,\"adcconfig\":{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"0\",\"oversample\":\"0\",\"timeout\":\"5000\",\"clock_rate\":\"1000\"}}}";
+    char *exp2 = (char *)"{\"DeviceIndex\":1,\"base_size\":512,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2,\"adcconfig\":{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"0\",\"oversample\":\"0\",\"timeout\":\"5000\",\"clock_rate\":\"1000\"}}}";
+    char *exp3 = (char *)"{\"DeviceIndex\":1,\"base_size\":512,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2,\"adcconfig\":{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"0\",\"oversample\":\"0\",\"timeout\":\"5000\",\"clock_rate\":\"0\"}}}";
+
+
 
 
     ASSERT_STREQ( exp1, AIOContinuousBufToJSON( buf ));
@@ -2527,6 +2535,9 @@ TEST(AIOContiuousBuf,JSONFunctions)
     ASSERT_TRUE( buf );
 
     ASSERT_STREQ( exp1, AIOContinuousBufToJSON(buf) );
+
+    buf = NewAIOContinuousBufFromJSON( exp3 );
+    ASSERT_EQ( ADCConfigBlockGetClockRate( AIOContinuousBufGetADCConfigBlock( buf )), 0 );
 
     
 }
