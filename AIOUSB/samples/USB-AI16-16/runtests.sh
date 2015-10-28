@@ -65,9 +65,9 @@ if [ $result == "not ok" ] ; then
     exit 1
 fi
 
-run_cmd "./continuous_mode_callback -V -N 16301 --range 0-3=2 -D 31 -S 200000"
+run_cmd "./continuous_mode_callback -V -N 16301 --range 0-3=2 -D 31 -S 200000 --clockrate 4000"
 result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(max(tmp$V2) > 4.6) { "ok" } else { "not ok" } )')
-if [ $result == "not ok" ] ; then
+if [[ $result == "not ok" ]] ; then
     echo "ERROR: max value not ok"
     exit 1
 fi
