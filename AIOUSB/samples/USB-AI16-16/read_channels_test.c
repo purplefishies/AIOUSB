@@ -32,7 +32,7 @@ int main( int argc, char **argv )
     AIOUSBDevice *dev;
     USBDevice *usb;
     double *volts;
-    struct timespec starttime , curtime ;
+    struct timespec starttime , curtime, prevtime ;
     process_aio_cmd_line( &options, argc, argv );
 
     result = AIOUSB_Init();
@@ -76,21 +76,22 @@ int main( int argc, char **argv )
 
     volts = (double*)malloc((ADCConfigBlockGetEndChannel( config )-ADCConfigBlockGetStartChannel( config )+1)*sizeof(double));
     
-    if ( options.with_timing ) 
+    if ( options.with_timing ) {
         clock_gettime( CLOCK_MONOTONIC_RAW, &starttime );
+        memcpy(&prevtime,&starttime,sizeof(starttime));
+    }
 
     for ( int i = 0, channel = 0; i < options.num_scans; i ++ , channel = 0) {
         if ( options.counts ) { /* --counts will write out the raw values */
             if ( options.with_timing )
-                clock_gettime( CLOCK_MONOTONIC_RAW, &curtime );
+                clock_gettime( CLOCK_MONOTONIC_RAW, &prevtime );
             ADC_GetScan( options.index, (unsigned short*)volts );
             if ( options.with_timing ) 
-                clock_gettime( CLOCK_MONOTONIC_RAW, &starttime );
-
+                clock_gettime( CLOCK_MONOTONIC_RAW, &curtime );
 
             unsigned short *counts = (unsigned short *)volts;
             if( options.with_timing )
-                fprintf(stdout,"%d,%d,", (int)starttime.tv_sec, (int)(( starttime.tv_sec - curtime.tv_sec )*1e9 + (starttime.tv_nsec - curtime.tv_nsec )));
+                fprintf(stdout,"%ld,%ld,%ld", curtime.tv_sec, (( prevtime.tv_sec - starttime.tv_sec )*1000000000 + (prevtime.tv_nsec - starttime.tv_nsec )), (curtime.tv_sec-prevtime.tv_sec)*1000000000 + ( curtime.tv_nsec - prevtime.tv_nsec) );
 
 
 
@@ -102,13 +103,14 @@ int main( int argc, char **argv )
 
         } else {
             if ( options.with_timing )
-                clock_gettime( CLOCK_MONOTONIC_RAW, &curtime );
+                clock_gettime( CLOCK_MONOTONIC_RAW, &prevtime );
             ADC_GetScanV( options.index, volts );
             if ( options.with_timing ) 
-                clock_gettime( CLOCK_MONOTONIC_RAW, &starttime );
+                clock_gettime( CLOCK_MONOTONIC_RAW, &curtime );
 
             if( options.with_timing )
-                fprintf(stdout,"%d,%d,", (int)starttime.tv_sec, (int)(( starttime.tv_sec - curtime.tv_sec )*1e9 + (starttime.tv_nsec - curtime.tv_nsec )));
+                fprintf(stdout,"%ld,%ld,%ld", curtime.tv_sec, (( prevtime.tv_sec - starttime.tv_sec )*1000000000 + (prevtime.tv_nsec - starttime.tv_nsec )), (curtime.tv_sec-prevtime.tv_sec)*1000000000+ ( curtime.tv_nsec - prevtime.tv_nsec) );
+
             for ( int j = ADCConfigBlockGetStartChannel( config ); j < ADCConfigBlockGetEndChannel( config ) ; j ++ , channel ++) {
                 printf("%.3f,", volts[channel] );
             }
