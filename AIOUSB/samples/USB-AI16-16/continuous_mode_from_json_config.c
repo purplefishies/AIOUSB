@@ -47,7 +47,7 @@ main(int argc, char *argv[] )
     struct opts options = AIO_OPTIONS;
     AIOContinuousBuf *buf = 0;
     struct sigaction sa;
-
+    fflush(stdout);
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     int *indices;
     int num_devices;

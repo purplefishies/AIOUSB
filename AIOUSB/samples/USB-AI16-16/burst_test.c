@@ -42,7 +42,7 @@ main(int argc, char *argv[] )
 {
     struct opts options = AIO_OPTIONS;
     AIOContinuousBuf *buf = 0;
-    struct timespec foo , bar;
+    struct timespec starttime , curtime, prevtime;
 
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     int *indices;
@@ -142,7 +142,7 @@ main(int argc, char *argv[] )
      * the channel order
      */
     if ( options.with_timing ) 
-        clock_gettime( CLOCK_MONOTONIC_RAW, &bar );
+        clock_gettime( CLOCK_MONOTONIC_RAW, &starttime );
 
 
     int scans_remaining;
@@ -154,12 +154,12 @@ main(int argc, char *argv[] )
 
             if ( scans_remaining ) { 
                 if ( options.with_timing )
-                    clock_gettime( CLOCK_MONOTONIC_RAW, &foo );
+                    clock_gettime( CLOCK_MONOTONIC_RAW, &prevtime );
 
                 scans_read = AIOContinuousBufReadIntegerScanCounts( buf, tobuf, tobufsize, AIOContinuousBufNumberChannels(buf)*AIOContinuousBufCountScansAvailable(buf) );
 
                 if ( options.with_timing )
-                    clock_gettime( CLOCK_MONOTONIC_RAW, &bar );
+                    clock_gettime( CLOCK_MONOTONIC_RAW, &curtime );
 
                 read_count += scans_read;
 
@@ -169,7 +169,9 @@ main(int argc, char *argv[] )
 
                 for( int scan_count = 0; scan_count < scans_read ; scan_count ++ ) { 
                     if( options.with_timing )
-                        fprintf(fp ,"%d,%d,", (int)bar.tv_sec, (int)(( bar.tv_sec - foo.tv_sec )*1e9 + (bar.tv_nsec - foo.tv_nsec )));
+                        fprintf(fp,"%ld,%ld,%ld,", curtime.tv_sec, (( prevtime.tv_sec - starttime.tv_sec )*1000000000 + (prevtime.tv_nsec - starttime.tv_nsec )), (curtime.tv_sec-prevtime.tv_sec)*1000000000 + ( curtime.tv_nsec - prevtime.tv_nsec) );
+
+
                     for( int ch = 0 ; ch < AIOContinuousBufNumberChannels(buf); ch ++ ) {
                         fprintf(fp,"%u,",tobuf[scan_count*AIOContinuousBufNumberChannels(buf)+ch] );
                         if( (ch+1) % AIOContinuousBufNumberChannels(buf) == 0 ) {
@@ -195,3 +197,4 @@ void process_with_single_buf( struct opts *opts, AIOContinuousBuf *buf , FILE *f
 
 }
 
+/* fprintf(fp ,"%d,%d,", (int)curtime.tv_sec, (int)(( curtime.tv_sec - starttime.tv_sec )*1e9 + (curtime.tv_nsec - starttime.tv_nsec ))); */

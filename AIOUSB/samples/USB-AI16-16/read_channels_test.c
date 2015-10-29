@@ -91,7 +91,7 @@ int main( int argc, char **argv )
 
             unsigned short *counts = (unsigned short *)volts;
             if( options.with_timing )
-                fprintf(stdout,"%ld,%ld,%ld", curtime.tv_sec, (( prevtime.tv_sec - starttime.tv_sec )*1000000000 + (prevtime.tv_nsec - starttime.tv_nsec )), (curtime.tv_sec-prevtime.tv_sec)*1000000000 + ( curtime.tv_nsec - prevtime.tv_nsec) );
+                fprintf(stdout,"%ld,%ld,%ld,", curtime.tv_sec, (( prevtime.tv_sec - starttime.tv_sec )*1000000000 + (prevtime.tv_nsec - starttime.tv_nsec )), (curtime.tv_sec-prevtime.tv_sec)*1000000000 + ( curtime.tv_nsec - prevtime.tv_nsec) );
 
 
 
@@ -109,7 +109,7 @@ int main( int argc, char **argv )
                 clock_gettime( CLOCK_MONOTONIC_RAW, &curtime );
 
             if( options.with_timing )
-                fprintf(stdout,"%ld,%ld,%ld", curtime.tv_sec, (( prevtime.tv_sec - starttime.tv_sec )*1000000000 + (prevtime.tv_nsec - starttime.tv_nsec )), (curtime.tv_sec-prevtime.tv_sec)*1000000000+ ( curtime.tv_nsec - prevtime.tv_nsec) );
+                fprintf(stdout,"%ld,%ld,%ld,", curtime.tv_sec, (( prevtime.tv_sec - starttime.tv_sec )*1000000000 + (prevtime.tv_nsec - starttime.tv_nsec )), (curtime.tv_sec-prevtime.tv_sec)*1000000000+ ( curtime.tv_nsec - prevtime.tv_nsec) );
 
             for ( int j = ADCConfigBlockGetStartChannel( config ); j < ADCConfigBlockGetEndChannel( config ) ; j ++ , channel ++) {
                 printf("%.3f,", volts[channel] );
