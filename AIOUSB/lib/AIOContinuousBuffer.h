@@ -60,6 +60,8 @@ typedef struct aio_continuous_buf {
     unsigned num_oversamples;
     unsigned num_channels;
     int64_t num_scans;
+    int64_t scans_read;
+    AIOUSB_BOOL start_scanning;
     unsigned block_size;
     int64_t bytes_processed;
     unsigned counter_control;
@@ -209,6 +211,9 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetRemainingSize( AIOContinuousBuf *bu
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetStatus( AIOContinuousBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetExitCode( AIOContinuousBuf *buf );
 PUBLIC_EXTERN THREAD_STATUS AIOContinuousBufGetRunStatus( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufPending( AIOContinuousBuf *buf );
+
+
 
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf, unsigned short *tmp , unsigned tmpsize, unsigned size );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufReadCompleteScanCounts( AIOContinuousBuf *buf, unsigned short *read_buf, unsigned read_buf_size );

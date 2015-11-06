@@ -74,16 +74,15 @@ namespace AIOUSB {
     [] header -> return_type function_body
 #endif
 
-    /* LAMBDA( AIOUSB_BOOL, ( AIOUSBDevice *dev ), {  } ); */
-
-
 
 CREATE_ENUM_W_START( THREAD_STATUS , -1 , 
-                     INVALID_OBJECT,
-                     NOT_STARTED,
-                     RUNNING, 
-                     TERMINATED, 
-                     JOINED 
+                     INVALID_OBJECT = -2,
+                     NOT_STARTED = 0,
+                     RUNNING = 1, 
+                     WITH_DATA = 2,
+                     TERMINATED = 4,
+                     RUNNING_OR_WITH_DATA = RUNNING | WITH_DATA,
+                     JOINED = 8
                      );
 
 CREATE_ENUM_W_START( AIOContinuousBufMode, 0 ,
@@ -432,6 +431,7 @@ CREATE_ENUM_W_START( ResultCode, 0,
                      AIOUSB_ERROR_OPEN_FAILED,
                      AIOUSB_ERROR_BAD_TOKEN_TYPE,
                      AIOUSB_ERROR_TIMEOUT,
+                     AIOUSB_ERROR_DIVIDE_BY_ZERO,
                      AIOUSB_ERROR_HANDLE_EOF,
                      AIOUSB_ERROR_DEVICE_NOT_FOUND,
                      AIOUSB_ERROR_USBDEVICE_NOT_FOUND,

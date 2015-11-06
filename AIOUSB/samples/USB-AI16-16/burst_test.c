@@ -49,14 +49,8 @@ main(int argc, char *argv[] )
     int num_devices;
     process_aio_cmd_line( &options, argc, argv );
 
-    int tobufsize = (options.num_scans+1)*options.num_channels*20;
+    int tobufsize = (options.default_num_scans+1)*options.default_num_channels*20;
     uint16_t *tobuf = (uint16_t *)malloc(sizeof(uint16_t)*tobufsize);
-
-    unsigned short *tmp = (unsigned short *)malloc(sizeof(unsigned short)*(options.num_scans+1)*options.num_channels);
-    if( !tmp ) {
-      fprintf(stderr,"Can't allocate memory for temporary buffer \n");
-      exit(1);
-    }
 
     AIOUSB_Init();
     AIOUSB_ListDevices();
