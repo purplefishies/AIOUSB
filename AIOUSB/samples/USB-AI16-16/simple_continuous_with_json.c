@@ -114,14 +114,13 @@ main(int argc, char *argv[] )
                         fprintf( fp, "%u,", tmp );
                     }
                     fprintf( fp, "\n");
-                }
-                if ( options.verbose && ( (buf->scans_read - prevscans) >  options.rate_limit  ) ) { 
-                    fprintf(stdout,"Waiting : total=%ld, readpos=%d, writepos=%d\n", buf->scans_read, 
-                            (int)AIOContinuousBufGetReadPosition(buf), (int)AIOContinuousBufGetWritePosition(buf));
-                    prevscans = buf->scans_read;
+                    if ( options.verbose && ( (buf->scans_read - prevscans) >  options.rate_limit  ) ) { 
+                        fprintf(stdout,"Waiting : total=%ld, readpos=%d, writepos=%d\n", buf->scans_read, 
+                                (int)AIOContinuousBufGetReadPosition(buf), (int)AIOContinuousBufGetWritePosition(buf));
+                        prevscans = buf->scans_read;
+                    }
                 }
 
-                /* printf( "read %d\n", scans_read ); */
             } else {
                 fprintf(stderr,"Error reading scans : %d\n", scans_read );
             }
