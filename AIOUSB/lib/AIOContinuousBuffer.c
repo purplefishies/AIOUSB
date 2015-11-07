@@ -500,7 +500,7 @@ AIORET_TYPE AIOContinuousBufCountScansAvailable(AIOContinuousBuf *buf)
 {
     AIO_ASSERT_AIOCONTBUF( buf );
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    retval = (AIORET_TYPE)buf->fifo->rdelta( (AIOFifo*)buf->fifo ) / ( buf->fifo->refsize * AIOContinuousBufNumberChannels(buf) );
+    retval = (AIORET_TYPE)buf->fifo->rdelta( (AIOFifo*)buf->fifo ) / ( buf->fifo->refsize * AIOContinuousBufNumberChannels(buf) * ( 1+AIOContinuousBufGetOversample(buf)));
     return retval;
 }
 
@@ -2557,6 +2557,17 @@ TEST(AIOContinuousBuf,PendingStatus )
     AIOContinuousBuf *buf = NewAIOContinuousBuf(0,16,0,1024);
 
     ASSERT_FALSE( AIOContinuousBufPending( buf ) ) << "Shouldn't be pending at the start";
+
+}
+
+TEST(AIOContinuousBuf,CorrectCountScansAvailable)
+{
+    AIOContinuousBuf *buf = NewAIOContinuousBuf(0,2,6,1600000);
+    
+    buf->fifo->write_pos =  280000;
+    buf->fifo->read_pos = 256256;
+    
+    ASSERT_EQ( 848,  AIOContinuousBufCountScansAvailable(buf));
 
 }
 
