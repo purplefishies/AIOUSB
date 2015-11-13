@@ -123,6 +123,7 @@ main(int argc, char *argv[] )
     AIOContinuousBufCallbackStart(buf); /* Start the acquisition */
 
     if ( getenv("PRE_SLEEP") ) { 
+        printf("Sleeping\n");
         usleep(atoi(getenv("PRE_SLEEP")));
     }
 
@@ -159,7 +160,9 @@ main(int argc, char *argv[] )
             }
         }
     }
-
+    if ( AIOContinuousBufGetStatus(buf) != TERMINATED ) { 
+        fprintf(stderr,"Status was %d\n", (int)AIOContinuousBufGetStatus(buf));
+    }
     AIOUSB_Exit();
     fclose(fp);
     fprintf(stderr,"Test completed...exiting\n");

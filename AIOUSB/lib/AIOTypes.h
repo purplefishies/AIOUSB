@@ -82,7 +82,8 @@ CREATE_ENUM_W_START( THREAD_STATUS , -1 ,
                      WITH_DATA = 2,
                      TERMINATED = 4,
                      RUNNING_OR_WITH_DATA = RUNNING | WITH_DATA,
-                     JOINED = 8
+                     JOINED = 8,
+                     TERMINATED_OVERRUN = 16
                      );
 
 CREATE_ENUM_W_START( AIOContinuousBufMode, 0 ,

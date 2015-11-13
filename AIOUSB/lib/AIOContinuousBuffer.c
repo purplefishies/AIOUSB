@@ -658,7 +658,7 @@ AIORET_TYPE  AIOContinuousBufForceTerminateAcqusition( AIOContinuousBuf *buf )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     AIO_ASSERT_AIOCONTBUF( buf );
-    buf->status = TERMINATED;
+    buf->status = TERMINATED_OVERRUN;
     buf->start_scanning = 0;
     return retval;
 }
