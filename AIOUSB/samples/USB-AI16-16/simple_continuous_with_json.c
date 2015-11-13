@@ -1,3 +1,15 @@
+/**
+ * @file   simple_continuous_with_json.c
+ * @author Jimi Damon <james.damon@accesio.com>
+ * @date   Thu Nov 12 10:54:48 2015
+ * @brief  Sample that demonstrates data ac
+ *
+ * 
+ *
+ * 
+ * 
+ */
+
 #include <stdio.h>
 #include <aiousb.h>
 #include <stdio.h>
@@ -80,6 +92,18 @@ main(int argc, char *argv[] )
     if( (retval = aio_list_devices( &options, indices, num_devices ) != AIOUSB_SUCCESS )) 
         exit(retval);
 
+    /**
+     *
+     * @brief Start with the NewAIOContinousBufFromJSON( "{'aiocontin
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     */
+
     if ( options.aiobuf_json ) { 
         if ( (buf = NewAIOContinuousBufFromJSON( options.aiobuf_json )) == NULL )
             exit(AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER);
@@ -94,12 +118,21 @@ main(int argc, char *argv[] )
     uint16_t *tobuf = (uint16_t *)malloc(sizeof(uint16_t)*tobufsize);
     int64_t prevscans = 0;
 
-    printf("Output: %s\n", AIOContinuousBufToJSON( buf ));
+    fprintf(stderr,"Output: %s\n", AIOContinuousBufToJSON( buf ));
 
     AIOContinuousBufCallbackStart(buf); /* Start the acquisition */
 
+    if ( getenv("PRE_SLEEP") ) { 
+        usleep(atoi(getenv("PRE_SLEEP")));
+    }
+
     while ( AIOContinuousBufPending(buf) ) { 
         int scans_available;
+
+        if ( getenv("LOOP_SLEEP") ) { 
+            usleep(atoi(getenv("LOOP_SLEEP")));
+        }
+
         if ( ( scans_available = AIOContinuousBufCountScansAvailable(buf)) > 0 ) {
 
             int scans_read = AIOContinuousBufReadIntegerNumberOfScans( buf, tobuf, tobufsize, scans_available  );

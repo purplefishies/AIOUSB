@@ -654,6 +654,15 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetClock( AIOContinuousBuf *buf )
     return buf->hz;
 }
 
+AIORET_TYPE  AIOContinuousBufForceTerminateAcqusition( AIOContinuousBuf *buf )
+{
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIO_ASSERT_AIOCONTBUF( buf );
+    buf->status = TERMINATED;
+    buf->start_scanning = 0;
+    return retval;
+}
+
 /*----------------------------------------------------------------------------*/
 /**
  * @brief Starts the thread that acquires data from USB bus.   * 
@@ -681,7 +690,7 @@ AIORET_TYPE AIOContinuousBufStart( AIOContinuousBuf *buf )
     retval = pthread_create( &(buf->worker), NULL, buf->callback, (void *)buf );
 #endif
     if (  retval != 0 ) {
-        buf->status = TERMINATED;
+        AIOContinuousBufForceTerminateAcqusition( buf );
         AIOUSB_ERROR("Unable to create thread for Continuous acquisition");
         return -1;
     }
@@ -698,14 +707,14 @@ AIORET_TYPE AIOContinuousBufStopAcquisition( AIOContinuousBuf *buf )
     retval = AIOContinuousBufLock( buf );    
     AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
     
-    buf->status = TERMINATED;
+    AIOContinuousBufForceTerminateAcqusition( buf );
+
     buf->scans_read= buf->num_scans;
     buf->bytes_processed = AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf);
 
     AIOContinuousBufUnlock( buf );    
     return retval;
 }
-
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf )
@@ -928,7 +937,6 @@ void *RawCountsWorkFunction( void *object )
         AIOUSB_DEVEL("Requested: %d libusb_bulk_transfer  %d as usbresult, bytes=%d\n", reqsize, usbresult , (int)bytes);
 
         if (  bytes ) {
-
             bytes_remaining = MIN( (int64_t)(AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf) - count*2), (int64_t)bytes );
 
             int tmp = AIOContinuousBufPushN( buf, data, bytes_remaining / sizeof(unsigned short));
@@ -937,6 +945,7 @@ void *RawCountsWorkFunction( void *object )
                              (long)bytes_remaining / 2, (long)AIOFifoWriteSizeRemainingNumElements(buf->fifo ) );
 
                 count += bytes_remaining / 2;
+                AIOContinuousBufForceTerminateAcqusition(buf);
             } else {
                 AIOUSB_DEVEL("Pushed %d, size: %d\n", bytes_remaining / 2 , AIOFifoWriteSizeRemainingNumElements(buf->fifo ) );
                 if (  tmp >= 0 ) {
@@ -1041,6 +1050,9 @@ void *ConvertCountsToVoltsFunction( void *object )
 
             if (  retval >= 0 ) {
                 count += retval;
+            } else {
+                AIOContinuousBufForceTerminateAcqusition(buf);
+                break;
             }
 
             AIOUSB_DEVEL("Pushed %d, size: %d\n", bytes / 2 , buf->fifo->size );
@@ -1289,6 +1301,7 @@ AIORET_TYPE AIOContinuousBufCleanup( AIOContinuousBuf *buf )
     AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS );
     
     retval = (AIORET_TYPE)continuous_end( usb, data, 4 );
+    ResetCounters( buf );
     return retval;
 }
 
