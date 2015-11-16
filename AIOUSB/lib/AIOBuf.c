@@ -194,10 +194,9 @@ AIOEither AIOBufIteratorGetValue( AIOBufIterator *biter )
         }
         break;
     case AIO_DEFAULT_BUF:
-
         {
             uint8_t tmp;
-            memcpy(&tmp, biter->loc, sizeof(uint64_t));
+            memcpy(&tmp, biter->loc, sizeof(uint8_t));
             AIOEitherSetRight( &retval, aioeither_value_uint8_t, &tmp );
         }
         break;
