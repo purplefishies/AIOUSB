@@ -35,6 +35,7 @@ struct opts AIO_OPTIONS = {
                            0,                             /* int physical; */               
                            0,                             /* int counts; */                 
                            0,                             /* int calibration; */            
+                           2,                             /* int repeat */
                            NULL,
                            "{\"DeviceIndex\":0,\"base_size\":2048,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2}",
                            "{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\",\"oversample\":\"0\",\"timeout\":\"1000\",\"clock_rate\":\"1000\"}",
@@ -97,10 +98,10 @@ struct channel_range *get_channel_range(char *optarg )
     return tmp;
 }
 
-#define DUMP  0x1000
-#define CNTS  0x1001
-#define JCONF 0x1002
-
+#define DUMP   0x1000
+#define CNTS   0x1001
+#define JCONF  0x1002
+#define REPEAT 0x1003
 /*----------------------------------------------------------------------------*/
 /**
  * @desc Simple command line parser sets up testing features
@@ -128,6 +129,7 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
         {"help"             , no_argument      , 0,  'h'   },
         {"index"            , required_argument, 0,  'i'   },
         {"range"            , required_argument, 0,  'R'   },
+        {"repeat"           , required_argument, 0,  REPEAT},
         {"reset"            , no_argument,       0,  'r'   },
         {"outfile"          , required_argument, 0,  'f'   },
         {"verbose"          , no_argument,       0,  'V'   },
@@ -208,6 +210,9 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
             break;
         case JCONF:
             options->aiobuf_json = strdup( optarg );
+            break;
+        case REPEAT:
+            options->repeat = atoi(optarg);
             break;
         case 'f':
             options->outfile = strdup(optarg);

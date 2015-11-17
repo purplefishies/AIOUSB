@@ -11,22 +11,6 @@ struct channel_range {
   int gaincode;
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct opts {
     int64_t num_scans;
     int64_t default_num_scans;
@@ -55,6 +39,7 @@ struct opts {
     int physical;
     int counts;
     int calibration;            
+    int repeat;
     char *aiobuf_json;
     char *default_aiobuf_json;
     char *adcconfig_json;

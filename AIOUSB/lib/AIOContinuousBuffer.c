@@ -36,6 +36,8 @@ namespace AIOUSB {
 void *ConvertCountsToVoltsFunction( void *object );
 void *RawCountsWorkFunction( void *object );
 AIORET_TYPE _AIOContinuousBufResizeFifo( AIOContinuousBuf *buf );
+AIORET_TYPE  AIOContinuousBufForceTerminateAcqusitionOverrun( AIOContinuousBuf *buf );
+AIORET_TYPE  AIOContinuousBufForceTerminateAcqusition( AIOContinuousBuf *buf );
 
 /*-----------------------------  Constructors  -----------------------------*/
 AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels )
@@ -420,8 +422,17 @@ AIORET_TYPE AIOContinuousBufGetUnitSize( AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBufReset( AIOContinuousBuf *buf )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
+    /**
+     * @todo Fix this to use condition variable
+     */
+    while ( AIOContinuousBufGetStatus(buf) != TERMINATED && AIOContinuousBufGetStatus(buf) == TERMINATING ) {
+        usleep(100);
+    }
     AIOContinuousBufLock( buf );
     AIOFifoReset( buf->fifo );
+    buf->start_scanning = AIOUSB_FALSE;
+    buf->scans_read     = 0;
+    buf->bytes_processed = 0;
     AIOContinuousBufUnlock( buf );
     return AIOUSB_SUCCESS;
 }
@@ -658,10 +669,21 @@ AIORET_TYPE  AIOContinuousBufForceTerminateAcqusition( AIOContinuousBuf *buf )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     AIO_ASSERT_AIOCONTBUF( buf );
+    buf->status = TERMINATING;
+    buf->start_scanning = 0;
+    return retval;
+}
+
+AIORET_TYPE  AIOContinuousBufForceTerminateAcqusitionOverrun( AIOContinuousBuf *buf )
+{
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIO_ASSERT_AIOCONTBUF( buf );
     buf->status = TERMINATED_OVERRUN;
     buf->start_scanning = 0;
     return retval;
 }
+
+
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -945,7 +967,7 @@ void *RawCountsWorkFunction( void *object )
                              (long)bytes_remaining / 2, (long)AIOFifoWriteSizeRemainingNumElements(buf->fifo ) );
 
                 count += bytes_remaining / 2;
-                AIOContinuousBufForceTerminateAcqusition(buf);
+                AIOContinuousBufForceTerminateAcqusitionOverrun(buf);
             } else {
                 AIOUSB_DEVEL("Pushed %d, size: %d\n", bytes_remaining / 2 , AIOFifoWriteSizeRemainingNumElements(buf->fifo ) );
                 if (  tmp >= 0 ) {
@@ -1051,7 +1073,7 @@ void *ConvertCountsToVoltsFunction( void *object )
             if (  retval >= 0 ) {
                 count += retval;
             } else {
-                AIOContinuousBufForceTerminateAcqusition(buf);
+                AIOContinuousBufForceTerminateAcqusitionOverrun(buf);
                 break;
             }
 
@@ -1612,7 +1634,7 @@ AIORET_TYPE AIOContinuousBufEnd( AIOContinuousBuf *buf )
     AIOUSB_DEVEL("\tWaiting for thread to terminate\n");
     AIOUSB_DEVEL("Set flag to FINISH\n");
     AIOContinuousBufUnlock( buf );
-
+    AIOContinuousBufReset(buf);
 
 #ifdef HAS_PTHREAD
     ret = pthread_join( buf->worker , &ptr );
