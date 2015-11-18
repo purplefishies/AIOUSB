@@ -54,9 +54,12 @@ main(int argc, char *argv[] )
 
     AIOUSB_Init();
     AIOUSB_ListDevices();
-
     AIOUSB_FindDevices( &indices, &num_devices, find_ai_board );
     aio_list_devices( &options, indices, num_devices ); /* will exit if no devices found */
+
+    if ( ( retval = aio_supply_default_command_line_settings(&options)) != AIOUSB_SUCCESS )
+        exit(retval);
+
 
     buf = (AIOContinuousBuf *)NewAIOContinuousBufForCounts( options.index, options.num_scans, options.num_channels );
     if( !buf ) {
@@ -142,7 +145,7 @@ main(int argc, char *argv[] )
     int scans_remaining;
     int read_count = 0;
     int scans_read = 0;
-    while ( AIOContinuousBufGetRunStatus(buf) == RUNNING || read_count < options.num_scans ) {
+    while ( AIOContinuousBufPending(buf) ) {
 
         if ( (scans_remaining = AIOContinuousBufCountScansAvailable(buf) ) > 0 ) { 
 
@@ -158,7 +161,7 @@ main(int argc, char *argv[] )
                 read_count += scans_read;
 
                 if ( options.verbose )
-                    fprintf(stdout,"Waiting : total=%u, readpos=%d, writepos=%d, scans_read=%d\n", read_count, 
+                    fprintf(stdout,"Waiting : total=%d, readpos=%d, writepos=%d, scans_read=%d\n", (int)AIOContinuousBufGetScansRead(buf), 
                             (int)AIOContinuousBufGetReadPosition(buf), (int)AIOContinuousBufGetWritePosition(buf), scans_read);
 
                 for( int scan_count = 0; scan_count < scans_read ; scan_count ++ ) { 

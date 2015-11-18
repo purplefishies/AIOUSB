@@ -124,7 +124,7 @@ main(int argc, char *argv[] )
     for ( int i = 0; i < options.repeat ; i ++ ) { 
         AIOContinuousBufCallbackStart(buf);
         if ( getenv("PRE_SLEEP") ) { 
-            printf("Sleeping\n");
+            printf("Sleeping for %d us \n", atoi(getenv("PRE_SLEEP")));
             usleep(atoi(getenv("PRE_SLEEP")));
         }
         run_acquisition( buf , &options );
@@ -171,7 +171,7 @@ void run_acquisition(AIOContinuousBuf *buf, struct opts *options )
                     }
                     fprintf( fp, "\n");
                     if ( options->verbose && ( (buf->scans_read - prevscans) >  options->rate_limit  ) ) { 
-                        fprintf(stdout,"Waiting : total=%ld, readpos=%d, writepos=%d\n", buf->scans_read, 
+                        fprintf(stdout,"Waiting : total=%ld, readpos=%d, writepos=%d\n", (long int)AIOContinuousBufGetScansRead(buf), 
                                 (int)AIOContinuousBufGetReadPosition(buf), (int)AIOContinuousBufGetWritePosition(buf));
                         prevscans = buf->scans_read;
                     }
@@ -179,6 +179,13 @@ void run_acquisition(AIOContinuousBuf *buf, struct opts *options )
 
             } else {
                 fprintf(stderr,"Error reading scans : %d\n", scans_read );
+            }
+        }
+
+        if ( getenv("STOP_EARLY") ) {
+            int val = atoi(getenv("STOP_EARLY"));
+            if ( val > 0 && AIOContinuousBufGetScansRead(buf) > val ) { 
+                AIOContinuousBufEnd(buf);
             }
         }
     }

@@ -21,7 +21,7 @@ dynmake continuous_mode_callback
 
 
 run_cmd "./burst_test -V --num_scans 20000 --range 0-5=2 -N 20000 -D 31 --clockrate 4000"
-result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(max(tmp$V2) > 60000) { "ok" } else { "not ok" } )')
+result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(max(tmp$V2) > 56000) { "ok" } else { "not ok" } )')
 if [[ $result == "not ok" ]] ; then
     echo "ERROR: max value not ok at 1"
     exit 1
@@ -34,13 +34,13 @@ if [[ $result == "not ok" ]] ; then
 fi
 
 run_cmd "./continuous_mode  -V  --range 0-4=0 -N 20000 -D 31 --clockrate 4000"
-result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(max(tmp$V1) > 4.6) { "ok" } else { "not ok" } )')
-if [ $result == "not ok" ] ; then
+result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(max(tmp$V1) > 4.4) { "ok" } else { "not ok" } )')
+if [ "$result" == "not ok" ] ; then
     echo "ERROR: max value not ok"
     exit 1
 fi
 result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(min(tmp$V1) < 0.3) { "ok" } else { "not ok" } )')
-if [ $result == "not ok" ] ; then
+if [ "${result}" == "not ok" ] ; then
     echo "ERROR: min value not ok"
     exit 1
 fi
@@ -53,27 +53,27 @@ fi
 
 run_cmd "./read_channels_test -N 1000 > output.txt"
 perl -i -ne 'if ( s/^(\d+.*)$/$1/g ) { print; }' output.txt
-result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(max(tmp$V2) > 4.6) { "ok" } else { "not ok" } )')
-if [ $result == "not ok" ] ; then
+result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(max(tmp$V2) > 4.4) { "ok" } else { "not ok" } )')
+if [ "${result}" == "not ok" ] ; then
     echo "ERROR: max value not ok"
     exit 1
 fi
 
 result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(min(tmp$V2) < 0.3) { "ok" } else { "not ok" } )')
-if [ $result == "not ok" ] ; then
+if [ "${result}" == "not ok" ] ; then
     echo "ERROR: min value not ok"
     exit 1
 fi
 
 run_cmd "./continuous_mode_callback -V -N 16301 --range 0-3=2 -D 31 -S 200000 --clockrate 4000"
-result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(max(tmp$V2) > 4.6) { "ok" } else { "not ok" } )')
-if [[ $result == "not ok" ]] ; then
+result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(max(tmp$V2) > 4.4) { "ok" } else { "not ok" } )')
+if [[ "${result}" == "not ok" ]] ; then
     echo "ERROR: max value not ok"
     exit 1
 fi
 
 result=$(r -e 'tmp<-read.csv("output.txt",header=F); cat(if(min(tmp$V2) < 0.3) { "ok" } else { "not ok" } )')
-if [[ $result == "not ok" ]] ; then
+if [[ "${result}" == "not ok" ]] ; then
     echo "ERROR: min value not ok"
     exit 1
 fi

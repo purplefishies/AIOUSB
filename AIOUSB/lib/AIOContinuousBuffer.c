@@ -482,9 +482,18 @@ AIORET_TYPE AIOContinuousBufGetStatus( AIOContinuousBuf *buf )
 AIORET_TYPE AIOContinuousBufPending( AIOContinuousBuf *buf )
 {
     AIO_ASSERT_AIOCONTBUF( buf );
-    return (AIORET_TYPE)( buf->status & RUNNING_OR_WITH_DATA  ||  
+    AIORET_TYPE retval;
+    retval = (AIORET_TYPE)(buf->status & RUNNING_OR_WITH_DATA  ||  
                           (buf->start_scanning == AIOUSB_TRUE && buf->scans_read < buf->num_scans)
                           );
+    return retval;
+}
+
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOContinuousBufGetScansRead( AIOContinuousBuf *buf )
+{
+    AIO_ASSERT_AIOCONTBUF( buf );
+    return (AIORET_TYPE)( buf->scans_read );
 }
 
 /*----------------------------------------------------------------------------*/
@@ -557,11 +566,11 @@ AIORET_TYPE AIOContinuousBufReadIntegerScanCounts( AIOContinuousBuf *buf,
 
     AIOContinuousBufLock( buf );    
     num_scans = AIOContinuousBufCountScansAvailable( buf );
-    /* AIOContinuousBufUnlock( buf ); */
 
     retval += buf->fifo->PopN( buf->fifo, read_buf, num_scans*AIOContinuousBufNumberChannels(buf) );
     retval /= AIOContinuousBufNumberChannels(buf);
     retval /= buf->fifo->refsize;
+    buf->scans_read += retval;
     AIOContinuousBufUnlock( buf );
 
 
@@ -731,7 +740,7 @@ AIORET_TYPE AIOContinuousBufStopAcquisition( AIOContinuousBuf *buf )
     
     AIOContinuousBufForceTerminateAcqusition( buf );
 
-    buf->scans_read= buf->num_scans;
+    buf->scans_read = buf->num_scans;
     buf->bytes_processed = AIOContinuousBufGetTotalSamplesExpected(buf)*AIOContinuousBufGetUnitSize(buf);
 
     AIOContinuousBufUnlock( buf );    
@@ -1640,7 +1649,7 @@ AIORET_TYPE AIOContinuousBufEnd( AIOContinuousBuf *buf )
     ret = pthread_join( buf->worker , &ptr );
 #endif
     if ( ret != 0 ) {
-        AIOUSB_ERROR("Error joining threads");
+        AIOUSB_ERROR("Error joining threads: %d\n", (int)ret );
     }
     buf->status = JOINED;
     return ret;

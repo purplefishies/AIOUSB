@@ -53,7 +53,7 @@ void print_aio_usage(int argc, char **argv,  struct option *options);
 AIORET_TYPE aio_list_devices(struct opts *options, int *indices, int num_devices );
 AIORET_TYPE aio_override_aiobuf_settings( AIOContinuousBuf *buf, struct opts *options );
 AIORET_TYPE aio_override_adcconfig_settings( ADCConfigBlock *config, struct opts *options );
-
+AIORET_TYPE aio_supply_default_command_line_settings(struct opts *options );
 
 extern struct opts AIO_OPTIONS;
 

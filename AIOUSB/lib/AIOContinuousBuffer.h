@@ -212,6 +212,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetStatus( AIOContinuousBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetExitCode( AIOContinuousBuf *buf );
 PUBLIC_EXTERN THREAD_STATUS AIOContinuousBufGetRunStatus( AIOContinuousBuf *buf );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufPending( AIOContinuousBuf *buf );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetScansRead( AIOContinuousBuf *buf );
 
 
 

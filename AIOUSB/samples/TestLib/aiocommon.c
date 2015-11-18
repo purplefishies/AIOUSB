@@ -407,6 +407,44 @@ AIORET_TYPE aio_override_adcconfig_settings( ADCConfigBlock *config, struct opts
     return retval;
 }
 
+AIORET_TYPE aio_supply_default_command_line_settings(struct opts *options )
+{
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    if ( options->index < 0 )
+        options->index = 0;
+
+    if ( options->num_oversamples < 0 || options->num_oversamples > 255)
+        options->num_oversamples = options->default_num_oversamples;
+
+
+    if ( (options->start_channel > 0 && options->start_channel < 16) || (options->end_channel > 0 && options->end_channel < 16 )) { 
+        if ( options->start_channel < options->end_channel ) { 
+            int mn = MIN(options->start_channel,options->end_channel);
+            int mx = MAX(options->start_channel,options->end_channel);
+            options->start_channel = mn;
+            options->end_channel = mx;
+        }
+    } else {
+        options->start_channel = 0;
+        options->end_channel = 15;
+    }
+    options->num_channels = ( options->end_channel - options->start_channel + 1 );
+
+    if ( options->num_scans < 0 )
+        options->num_scans = options->default_num_scans;
+
+    if ( options->buffer_size && options->buffer_size < (options->num_channels )*(1+options->num_oversamples)*2 ) { 
+        int newbase = (options->num_channels )*(1+options->num_oversamples)*2;
+        options->buffer_size = newbase;
+    }
+
+    if ( options->clock_rate < 0 ) { 
+        options->clock_rate = options->default_clock_rate;
+    }
+
+    return retval;
+}
+
 AIORET_TYPE aio_override_aiobuf_settings( AIOContinuousBuf *buf, struct opts *options )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;

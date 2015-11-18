@@ -49,23 +49,10 @@ main(int argc, char *argv[] )
 #else
     AIOUSB_FindDevices( &indices, &num_devices, fnd );
 #endif
+    aio_list_devices( &options, indices, num_devices );
 
-    
-    if ( num_devices <= 0 ) {
-        fprintf(stderr,"No devices were found\n");
-        exit(1);
-    } else {
-        fprintf(stderr,"Matching devices found at indices: ");
-        options.index = ( options.index < 0 ? indices[0] : options.index );
-        int i;
-        for (i = 0; i < num_devices - 1; i ++ ) { 
-            fprintf(stderr, "%d",indices[i] );
-            if ( num_devices > 2 )
-                fprintf(stderr,", "); 
-        }
-        fprintf(stderr, " and %d: Using index=%d \n",indices[i], options.index);
-    }
-    options.num_oversamples = ( options.num_oversamples < 256 && options.num_oversamples >= 0 ? options.num_oversamples : 0 );
+    if ( ( retval = aio_supply_default_command_line_settings(&options)) != AIOUSB_SUCCESS )
+        exit(retval);
 
     buf = NewAIOContinuousBufForVolts( options.index, options.num_scans , options.num_channels ,  options.num_oversamples );
 
@@ -89,7 +76,7 @@ main(int argc, char *argv[] )
         fprintf(stderr,"Unable to open '%s' for writing\n", options.outfile );
         exit(1);
     }
-  
+ 
 
     /**
      * 2. Setup the Config object for Acquisition, either the more complicated 
@@ -111,7 +98,6 @@ main(int argc, char *argv[] )
 
     /**< New simpler interface */
     AIOContinuousBufInitConfiguration( buf );
-
 
     AIOContinuousBufSetOversample( buf, ( options.num_oversamples < 256 ? options.num_oversamples : options.default_num_oversamples ) );
     AIOContinuousBufSetStartAndEndChannel( buf, options.start_channel, options.end_channel );
@@ -168,7 +154,7 @@ main(int argc, char *argv[] )
 
     int scans_remaining;
     int scans_read = 0;
-    int tobufsize =  options.num_channels*(options.num_oversamples+1)*options.num_scans*sizeof(double);
+    int tobufsize =  options.default_num_channels*(options.default_num_oversamples+1)*options.num_scans*sizeof(double);
 
     double *tobuf = (double*)malloc( tobufsize );
 
