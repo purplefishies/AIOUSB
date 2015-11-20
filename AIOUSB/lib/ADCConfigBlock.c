@@ -582,8 +582,14 @@ AIORET_TYPE ADCConfigBlockSetReference( ADCConfigBlock *config, int ref )
     AIORET_TYPE retval = AIOUSB_SUCCESS;
 
     /* bits 0 and 4 of ref should be preserved */
-    config->registers[AD_REGISTER_TRIG_COUNT] = (( config->registers[AD_REGISTER_TRIG_COUNT] & ~0x11 ) | 
-                                                 ( ref & 0x11 ));
+    if ( ref & AD_TRIGGER_EXTERNAL ) { 
+        config->registers[AD_REGISTER_TRIG_COUNT] = ( AD_TRIGGER_EXTERNAL | 
+                                                      (config->registers[AD_REGISTER_TRIG_COUNT] & 0xFE
+                                                       ));
+    } else { 
+        config->registers[AD_REGISTER_TRIG_COUNT] = (( config->registers[AD_REGISTER_TRIG_COUNT] & ~0x11 ) | 
+                                                     ( ref & 0x11 ));
+    }
     
     return retval;
 }
@@ -650,7 +656,7 @@ const char *get_trigger_mode( int code )
 {
     if (code & AD_TRIGGER_TIMER) {
         return "counter";
-    } else if (code & AD_TRIGGER_CTR0_EXT) {
+    } else if (code & AD_TRIGGER_EXTERNAL) {
         return "external";
     } else {
         return "sw";
@@ -776,7 +782,7 @@ EnumStringLookup Calibrations[] = {
 EnumStringLookup ReferenceModes[] = {
     {AD_TRIGGER_TIMER   , (char *)"counter"  , (char *)STRINGIFY(AD_TRIGGER_TIMER    ) }, /* Default */
     {AD_TRIGGER_TIMER   , (char *)"timer"    , (char *)STRINGIFY(AD_TRIGGER_TIMER    ) }, /* Default */
-    {AD_TRIGGER_CTR0_EXT, (char *)"external" , (char *)STRINGIFY(AD_TRIGGER_CTR0_EXT ) },
+    {AD_TRIGGER_EXTERNAL, (char *)"external" , (char *)STRINGIFY(AD_TRIGGER_CTR0_EXT ) },
     {0                  , (char *)"sw"       , (char *)STRINGIFY(0                   ) },
 };
 
