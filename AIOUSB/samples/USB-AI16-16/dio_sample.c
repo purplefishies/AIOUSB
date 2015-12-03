@@ -74,7 +74,7 @@ int main( int argc, char **argv )
 
     result = DIO_ReadAll( options.index, &tmp );     /* Verify that all the values are initially 0 */
     if ( result != AIOUSB_SUCCESS ) {
-        fprintf(stderr,"Error performing DIO_ReadAll(): %d\n", result );
+        fprintf(stderr,"Error performing DIO_ReadAll(): %d\n", (int)result );
         exit(1);
     }
     if ( tmp != 0 )  {
@@ -86,7 +86,7 @@ int main( int argc, char **argv )
     for ( int i = 0 ; i < dev->DIOBytes*8 ; i ++ ) { 
         result = DIO_Write1(options.index,i, (i % 2 == 0 ? AIOUSB_FALSE : AIOUSB_TRUE ));
         if ( result != AIOUSB_SUCCESS ) {
-            fprintf(stderr,"Error running on index %d , retval=%d\n", i, result );
+            fprintf(stderr,"Error running on index %d , retval=%d\n", i, (int)result );
             exit(1);
         }
     }
@@ -95,7 +95,7 @@ int main( int argc, char **argv )
 
     result = DIO_ReadAll( options.index, &tmp );
     if ( result != AIOUSB_SUCCESS ) {
-        fprintf(stderr,"Error performing DIO_ReadAll(): %d\n", result );
+        fprintf(stderr,"Error performing DIO_ReadAll(): %d\n", (int)result );
     } else if ( tmp != 0xaaaa ) {
         fprintf(stderr,"Values expected from DIO_ReadAll() %#x != %#x\n", 0xaaaa, tmp );
     } else {

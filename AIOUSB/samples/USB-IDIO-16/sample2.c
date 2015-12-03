@@ -128,7 +128,7 @@ int main(int argc, char *argv[] )
    }
 
    DIOBuf *buf= NewDIOBuf(0);
-   int cdat;
+   unsigned char cdat;
    DIO_ReadIntoDIOBuf( deviceIndex, buf );
    printf("Binary was: %s\n", DIOBufToString( buf ) );
    printf("Hex was: %s\n", DIOBufToHex( buf ) );
@@ -141,7 +141,7 @@ int main(int argc, char *argv[] )
    DIO_Read8( deviceIndex, 3, &cdat   );
    printf("Single data was : hex:%x, int:%d\n", (int)cdat, (int)cdat );
 
-   int val=0;
+   unsigned char val=0;
    for ( int i = 7 ; i >= 0 ; i-- ) {
        DIO_Read1(deviceIndex,i, &val);
        printf("%d", val );
