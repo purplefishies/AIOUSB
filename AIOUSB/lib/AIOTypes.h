@@ -10,6 +10,7 @@
 #ifndef _AIOTYPES_H
 #define _AIOTYPES_H
 #define HAS_PTHREAD 1
+#define __STDC_LIMIT_MACROS
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
