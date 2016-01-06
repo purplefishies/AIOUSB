@@ -41,7 +41,7 @@ typedef void *(*AIOUSB_WorkFn)( void *obj );
  } AIO_CONT_BUF_TYPE;
 
 
-typedef struct aio_continuous_buf {
+typedef struct AIOContinuousBuf {
     void *(*callback)(void *object);
 #ifdef HAS_PTHREAD
     pthread_t worker;
@@ -73,8 +73,8 @@ typedef struct aio_continuous_buf {
 
     volatile THREAD_STATUS status; /* Are we running, paused ..etc; */
     AIO_CONT_BUF_TYPE type;
-    AIORET_TYPE (*PushN)( struct aio_continuous_buf *buf, void *frombuf, unsigned int N );
-    AIORET_TYPE (*PopN)( struct aio_continuous_buf *buf, void *frombuf, unsigned int N );
+    AIORET_TYPE (*PushN)( struct AIOContinuousBuf *buf, void *frombuf, unsigned int N );
+    AIORET_TYPE (*PopN)( struct AIOContinuousBuf *buf, void *frombuf, unsigned int N );
 } AIOContinuousBuf;
 
 #define ROOTCLOCK 10000000

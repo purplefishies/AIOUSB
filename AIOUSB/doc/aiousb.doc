@@ -1,9 +1,9 @@
-/*! \page aiousb AIOUSB
+/*! \page aiousblib AIOUSB C libary
 
-\addindex installation
+\addindex AIOUSB
 \tableofcontents
 
-\section aiousb_stuff Stuff
+\section aiousb_overview Overview
 
 The AIOUSB C language library implements the core functionality of the entire suite of libraries, supporting the capabilities of all of ACCES' USB products. (The only deficiency is that the D/A streaming functions in the USB-DA12-8A product are not currently implemented, although they will be eventually.) This library is written in C and compiled for both C (gcc) and C++ (g++) and may be used as-is with C and C++ programs. This library utilizes libusb (preferred version 1.0.6) for all USB communications.
 Installing
@@ -15,7 +15,7 @@ cp -p lib/aiousb.h /usr/local/include/aiousb
 cp -p lib/libaiousb*.a /usr/local/lib
 export CPATH=/usr/local/include/libusb-1.0/:/usr/local/include/aiousb
 
-\section doing_ther Other stuff
+\section aiousb_other_stuff Other stuff
 
 You can, of course, place the AIOUSB files (aiousb.h, libaiousb*.a) elsewhere, such as in the local directory of the application program that will use AIOUSB. The above steps are suggested in order to conform to the usual Linux conventions and make the AIOUSB files available to all users and all application programs.
 
@@ -31,8 +31,7 @@ Complete documentation for the AIOUSB C library may be found in AIOUSB API Refer
 Compiling Programs
 
 Assuming you have installed the AIOUSB C library according to the above instructions, compiling a program to use it is as simple as:
-\section compile_sample Compiling sample
-
+\section aiousb_compile_sample Compiling sample
 
 g++ -pthread -fPIC sample.cpp -laiousbcpp -lusb-1.0 -o sample (C++)
 

@@ -1,22 +1,40 @@
-/*
- * $RCSfile: extcal.cpp,v $
- * $Revision: 1.18 $
- * $Date: 2009/12/25 19:17:26 $
- * jEdit:tabSize=4:indentSize=4:collapseFolds=1:
+/**
+ * @file   extcal.cpp
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @author Jimi Damon <jdamon@accesio.com>
+ * @version $Format: %h$
+ * 
+ * @page aiousb AIOUSB
  *
- * program to externally calibrate USB-AI16-16
+ * @section csamples_usb_ai16_16 USB-AIO16-16 
+ * @subsection sample_usb_ai16_16 Extcal
+ *
+ * @par Extcal
+ * Extcal.cpp is simple program that demonstrates using
+ * the AIOUSB C library and C++ Classlib to perform an
+ * external calibration of an ACCES I/O model USB-AI16-16A analog
+ * input board. The program is not intended to be a comprehensive
+ * demonstration and is limited to demonstrating the following
+ * features of the AIOUSB API:
+ * 
+ * - Initializing and shutting down the API – USBDeviceManager::open(), USBDeviceManager::close()
+ * - Finding devices on the USB bus – USBDeviceManager::getDeviceByProductID()
+ * - Configuring the board – USBDevice::setCommTimeout(), AnalogInputSubsystem::setCalMode(), AnalogInputSubsystem::setDiscardFirstSample(), AnalogInputSubsystem::setTriggerMode(), AnalogInputSubsystem::setGainCodeAndDiffMode(), AnalogInputSubsystem::setOversample()
+ * - Installing a default calibration table – AnalogInputSubsystem::calibrate(bool,...)
+ * - Reading the analog inputs in counts – AnalogInputSubsystem::read()
+ * - Generating an external calibration table – AnalogInputSubsystem::calibrate(double[],...)
+ *
+ * For Building see @ref building
+ * 
  */
 
-
-// {{{ build instructions
 /*
  * g++ extcal.cpp -lclassaiousb -laiousbcpp -lusb-1.0 -o extcal
  *   or
  * g++ -ggdb extcal.cpp -lclassaiousbdbg -laiousbcppdbg -lusb-1.0 -o extcal
  */
-// }}}
 
-// {{{ includes
 #include <iostream>
 #include <iterator>
 #include <iomanip>
@@ -27,30 +45,30 @@
 #include <AIOUSB_Core.h>
 #include <USBDeviceManager.hpp>
 #include <USB_AI16_Family.hpp>
-// }}}
+
 
 using namespace AIOUSB;
 using namespace std;
 
 int main( int argc, char *argv[] ) {
-/*API*/	USBDeviceManager deviceManager;
+       	USBDeviceManager deviceManager;
 	try {
 		const int CAL_CHANNEL = 0;
-/*API*/	deviceManager.open();
+       	deviceManager.open();
 		cout <<
 			"USB-AI16-16 sample program version 1.18, 25 December 2009\n"
-/*API*/		"  AIOUSB C++ class library version " << deviceManager.VERSION_NUMBER << ", " << deviceManager.VERSION_DATE << "\n"
-/*API*/		"  AIOUSB library version " << deviceManager.getAIOUSBVersion() << ", " << deviceManager.getAIOUSBVersionDate() << "\n"
+       		"  AIOUSB C++ class library version " << deviceManager.VERSION_NUMBER << ", " << deviceManager.VERSION_DATE << "\n"
+       		"  AIOUSB library version " << deviceManager.getAIOUSBVersion() << ", " << deviceManager.getAIOUSBVersionDate() << "\n"
 			"\n"
 			"  This program demonstrates external calibration of a USB-AI16-16 device\n"
 			"  on the USB bus. For simplicity, it uses the first such device found on\n"
 			"  the bus and supports these product IDs: ";
-/*API*/	const StringArray supportedProductNames = USB_AI16_Family::getSupportedProductNames();
+       	const StringArray supportedProductNames = USB_AI16_Family::getSupportedProductNames();
 		for( int index = 0; index < ( int ) supportedProductNames.size(); index++ ) {
 			if( index > 0 )
 				cout << ", ";
 			cout << supportedProductNames.at( index );
-		}	// for( int index ...
+		}
 		cout <<
 			".\n\n"
 			"  This external calibration procedure allows you to inject a sequence of\n"
@@ -73,26 +91,28 @@ int main( int argc, char *argv[] ) {
 			"     the calibration table will be saved to a file in a format that can be\n"
 			"     subsequently loaded into the A/D.\n"
 			"\n";
-/*API*/	deviceManager.printDevices();
-/*API*/	USBDeviceArray devices = deviceManager.getDeviceByProductID( USB_AI16_Family::getSupportedProductIDs() );
+       	deviceManager.printDevices();
+       	USBDeviceArray devices = deviceManager.getDeviceByProductID( USB_AI16_Family::getSupportedProductIDs() );
 		if( devices.size() > 0 ) {
 			USB_AI16_Family &device = *( USB_AI16_Family * ) devices.at( 0 );	// get first device found
 			try {
 				/*
-				 * set up A/D in proper mode for calibrating, including a default calibration table
+				 * set up A/D in proper mode for
+				 * calibrating, including a default
+				 * calibration table
 				 */
 				cout << "Calibrating A/D, may take a few seconds ... " << flush;
-/*API*/			device.reset()
-/*API*/				.setCommTimeout( 1000 );
-/*API*/			device.adc()
-/*API*/				.setCalMode( AnalogInputSubsystem::CAL_MODE_NORMAL )
-/*API*/				.setDiscardFirstSample( true )
-/*API*/				.setTriggerMode( AnalogInputSubsystem::TRIG_MODE_SCAN )
-/*API*/				.setRangeAndDiffMode( AnalogInputSubsystem::RANGE_0_10V, false )
-/*API*/				.setOverSample( 100 )
-/*API*/				.calibrate( false, false, "" );
+       			device.reset()
+       				.setCommTimeout( 1000 );
+       			device.adc()
+       				.setCalMode( AnalogInputSubsystem::CAL_MODE_NORMAL )
+       				.setDiscardFirstSample( true )
+       				.setTriggerMode( AnalogInputSubsystem::TRIG_MODE_SCAN )
+       				.setRangeAndDiffMode( AnalogInputSubsystem::RANGE_0_10V, false )
+       				.setOverSample( 100 )
+       				.calibrate( false, false, "" );
 				cout << "successful" << endl;
-				DoubleArray points;				// voltage-count pairs
+				DoubleArray points;
 				while( true ) {
 					std::string commandLine;
 					unsigned short counts;
@@ -102,53 +122,53 @@ int main( int argc, char *argv[] ) {
 						<< "  (enter nothing to finish and calibrate A/D): ";
 					getline( cin, commandLine );
 					if( commandLine.empty() )
-						break;					// from while()
+						break;
 					points.insert( points.end(), strtod( commandLine.c_str(), 0 ) );
 #if defined( SIMULATE_AD )
 					cout << "  Enter A/D counts: ";
 					getline( cin, commandLine );
 					if( commandLine.empty() )
-						break;					// from while()
+						break;
 					counts = strtol( commandLine.c_str(), 0, 0 );
 					points.insert( points.end(), counts );
 #else
 					try {
-/*API*/					counts = device.adc().readCounts( CAL_CHANNEL );
+       					counts = device.adc().readCounts( CAL_CHANNEL );
 						cout << "  Read " << counts << " A/D counts ("
-/*API*/						<< device.adc().countsToVolts( CAL_CHANNEL, counts )
+       						<< device.adc().countsToVolts( CAL_CHANNEL, counts )
 							<< " volts), accept (y/n)? ";
 						getline( cin, commandLine );
 						if( commandLine.compare( "y" ) == 0 )
 							points.insert( points.end(), counts );
 					} catch( exception &ex ) {
 						cerr << "Error \'" << ex.what() << "\' occurred while reading A/D input" << endl;
-					}	// catch( ...
+					}
 #endif
-				}	// while( true )
+				}
 				if( points.size() >= 4 ) {
 					try {
 						char fileName[ 100 ];
-/*API*/					sprintf( fileName, "ADC-Ext-Cal-Table-%llx", ( long long ) device.getSerialNumber() );
-/*API*/					device.adc().calibrate( points, false, fileName );
+       					sprintf( fileName, "ADC-Ext-Cal-Table-%llx", ( long long ) device.getSerialNumber() );
+       					device.adc().calibrate( points, false, fileName );
 						cout << "External calibration of A/D successful, table saved in " << fileName << endl;
 					} catch( exception &ex ) {
 						cerr << "Error \'" << ex.what() << "\' occurred while externally calibrating A/D."
 							<< " This usually occurs because the input voltages or measured counts are not unique and ascending." << endl;
-					}	// catch( ...
+					}
 				} else
 					cerr << "Error: you must provide at least two points" << endl;
 			} catch( exception &ex ) {
 				cerr << "Error \'" << ex.what() << "\' occurred while configuring device" << endl;
-			}	// catch( ...
+			}
 		} else
 			cout << "No USB-AI16-16 devices found on USB bus" << endl;
-/*API*/	deviceManager.close();
+       	deviceManager.close();
 	} catch( exception &ex ) {
 		cerr << "Error \'" << ex.what() << "\' occurred while initializing device manager" << endl;
-/*API*/	if( deviceManager.isOpen() )
-/*API*/		deviceManager.close();
-	}	// catch( ...
-}	// main()
+       	if( deviceManager.isOpen() )
+       		deviceManager.close();
+	}
+}
 
 
 /* end of file */

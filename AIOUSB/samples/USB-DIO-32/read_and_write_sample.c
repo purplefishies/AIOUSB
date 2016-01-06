@@ -1,9 +1,7 @@
 /**
- * @file   sample2.c
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %h$
- *
+ * @version $Format: %h$
  * @brief  
  * @see Compilation 
  * @see CmakeCompilation

@@ -2,7 +2,7 @@
  * @file   burst_test.c
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %h$
+ * @version $Format: %h$
  * @brief  
  */
 

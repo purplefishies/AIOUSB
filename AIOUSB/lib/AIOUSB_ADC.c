@@ -642,16 +642,14 @@ unsigned short AIOUSB_VoltsToCounts(
     return counts;
 }
 
-
-
 /*----------------------------------------------------------------------------*/
-/**
- * @param DeviceIndex
- * @param ChannelIndex
- * @param pBuf
- * @return
- */
-AIORET_TYPE ADC_GetChannelV(unsigned long DeviceIndex, unsigned long ChannelIndex, double *singlevoltage )
+/** 
+ * @param DeviceIndex 
+ * @param ChannelIndex 
+ * @param singlevoltage 
+ * 
+ * @return 
+ */AIORET_TYPE ADC_GetChannelV(unsigned long DeviceIndex, unsigned long ChannelIndex, double *singlevoltage )
 {
     AIO_ASSERT( singlevoltage );
     AIORET_TYPE result = AIOUSB_SUCCESS;

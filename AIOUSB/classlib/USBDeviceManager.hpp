@@ -20,11 +20,10 @@
 namespace AIOUSB {
 
 /**
- * Class USBDeviceManager manages all the USB devices on the bus. It scans the bus and builds
+ * @brief Class USBDeviceManager manages all the USB devices on the bus. It scans the bus and builds
  * a list of all the devices found. It also initializes and terminates use of the underlying
  * AIOUSB module.
  */
-
 class USBDeviceManager {
 
 

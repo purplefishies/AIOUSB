@@ -19,7 +19,7 @@ function [n,bins,diffvals] = matlab_usb_idio_speed_test( num_repetitions );
 % $Date $Format: %ad$$
 % $Author $Format: %an <%ae>$$
 % $Release $Format: %h$$
-% @desc Sample program to run the USB-DIO-16 from within Matlab
+% @brief Sample program to run the USB-DIO-16 from within Matlab
 % @note This sample Triggers the relay switches. Note that the
 % output is inverted such that if you write a '1' to a bit location
 % then any LED connected to that pin will switch OFF, not ON

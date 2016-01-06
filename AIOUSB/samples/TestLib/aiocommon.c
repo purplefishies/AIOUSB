@@ -104,7 +104,7 @@ struct channel_range *get_channel_range(char *optarg )
 #define REPEAT 0x1003
 /*----------------------------------------------------------------------------*/
 /**
- * @desc Simple command line parser sets up testing features
+ * @brief Simple command line parser sets up testing features
  */
 void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )  
 {

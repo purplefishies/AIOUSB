@@ -294,7 +294,16 @@ static int CompareProductNames(const void *p1, const void *p2)
 }
 
 /*----------------------------------------------------------------------------*/
-unsigned long QueryDeviceInfo( unsigned long DeviceIndex,
+/** 
+ * @brief Identifying devices on the USB bus
+ * @param DeviceIndex 
+ * @param pPID 
+ * @param pNameSize 
+ * @param pName 
+ * @param pDIOBytes 
+ * @param pCounters 
+ * @return 
+ */unsigned long QueryDeviceInfo( unsigned long DeviceIndex,
                                unsigned long *pPID,
                                unsigned long *pNameSize,
                                char *pName,
@@ -450,10 +459,19 @@ PRIVATE AIORET_TYPE ProductNameToID(const char *name)
 }
 
 /*----------------------------------------------------------------------------*/
+/**
+ * @note Will call AIOUSB_Init() in case the AIOUSB API has not been initialized
+ * with the AIOUSB_Init() function. This is a convenience function.
+ * @return if < 0 Error else SUCCESS
+ */
 AIORET_TYPE GetDevices(void) 
 {
     unsigned long deviceMask = 0;
     int index;
+    if ( !AIOUSB_IsInit() ) { 
+        AIOUSB_Init();
+    } 
+
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_INIT, AIOUSB_IsInit() );
     /**
      * @note
@@ -472,10 +490,10 @@ AIORET_TYPE GetDevices(void)
 }
 
 /*----------------------------------------------------------------------------*/
-/**
- * @param DeviceIndex 
+/** 
+ * @param DeviceIndex Device index we are probing
  * @param[out] result Error code if unable to find USB device 
- * @return @c USBDevice *   A Usb handle that can be used for USB transactions
+ * @return USBDevice * A Usb handle that can be used for USB transactions
  */
 USBDevice *AIODeviceTableGetUSBDeviceAtIndex( unsigned long DeviceIndex, AIORESULT *result )
 {

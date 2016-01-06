@@ -1,23 +1,20 @@
 /**
- * @file  read_and_write_sample.c 
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %h$
- *
+ * @version $Format: %h$
  * @brief  
  * @see Compilation 
  * @see CmakeCompilation
  */
 
 #include "AIOTypes.h"
+#include "AIOChannelMask.h"
+#include "aiousb.h"
+#include "aiocommon.h"
 #include <aiousb.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-
-#include "AIOChannelMask.h"
-#include "aiousb.h"
-
 
 typedef enum { 
     SUCCESS = 0,
@@ -53,15 +50,25 @@ typedef struct {
     int index;
 }  DeviceInfo;
 
+AIOUSB_BOOL fnd( AIOUSBDevice *dev ) { 
+    if ( dev->ProductID >= USB_AI16_16A && dev->ProductID <= USB_AI12_128E ) { 
+        return AIOUSB_TRUE;
+    } else if ( dev->ProductID == USB_DIO_96) {
+        return AIOUSB_TRUE;
+    } else {
+        return AIOUSB_FALSE;
+    }
+}
 
 int main( int argc, char **argv ) {
 
     int index = 0;
-    int devicesFound = 0;
     unsigned port;
     int deviceIndex;
     EXIT_CODE exit_code = SUCCESS;
-
+    struct opts options = AIO_OPTIONS;
+    int *indices = NULL, num_devices = 0;
+    AIORET_TYPE retval;
     DeviceInfo DEVICES[ DEVICES_REQUIRED ];
 
     DeviceInfo *device;
@@ -77,61 +84,40 @@ int main( int argc, char **argv ) {
         exit_code = USB_ERROR;
     }
 
-    unsigned long deviceMask = GetDevices(); /**< @ref GetDevices */
-    if( deviceMask == 0 ) {
+    long deviceMask = GetDevices(); /**< @ref GetDevices */
+    if( deviceMask < 0 ) {
         printf( "No ACCES devices found on USB bus\n" );
         exit_code = USB_ERROR;
         goto exit_sample;
     }
 
+    process_aio_cmd_line( &options, argc, argv );
+
     AIOUSB_ListDevices();
+    AIOUSB_FindDevices( &indices, &num_devices, fnd );
 
-    while( deviceMask != 0 && devicesFound < DEVICES_REQUIRED ) {
-        if( ( deviceMask & 1 ) != 0 ) {
-            // found a device, but is it the correct type?
-            device = &DEVICES[ devicesFound ];
-            device->nameSize = MAX_NAME_SIZE;
-            result = QueryDeviceInfo( index, &device->productID,
-                                      &device->nameSize,
-                                      device->name,
-                                      &device->numDIOBytes,
-                                      &device->numCounters
-                                      );
-            if( result == AIOUSB_SUCCESS ) {
-                if( device->productID == USB_DIO_96 ) { // found a USB-DIO-96
-                    device->index = index;
-                    devicesFound++;
-                }
-            } else
-              printf( "Error '%s' querying device at index %d\n",
-                      AIOUSB_GetResultCodeAsString( result ),
-                      index
-                      );
-        }
-        index++;
-        deviceMask >>= 1;
-    }
+    if( (retval = aio_list_devices( &options, indices, num_devices ) != AIOUSB_SUCCESS ))
+        exit(retval);
 
 
-   
-    for( index = 0; index < devicesFound; index++ ) {
-        /* device = &deviceTable[ devicesFound ]; */
+    for ( index = 0; index < num_devices ; index ++ ) {
+        device = &deviceTable[ indices[index] ];
         device->nameSize = MAX_NAME_SIZE;
-        deviceIndex = index;
-        result = QueryDeviceInfo( index, &device->productID,
+        device->index = indices[index];
+        result = QueryDeviceInfo( deviceIndex, &device->productID,
                                   &device->nameSize,
                                   device->name,
                                   &device->numDIOBytes,
                                   &device->numCounters
                                   );
 
-        device = &DEVICES[ index ];
+        device = &DEVICES[ indices[index] ];
         memset(device->writeBuffer,0,sizeof(device->writeBuffer) );
         memset(device->readBuffer,0,sizeof(device->readBuffer) );
 
         result = GetDeviceSerialNumber( device->index, &device->serialNumber );
         if( result == AIOUSB_SUCCESS )
-            printf( "Serial number of device at index %d: %llx\n", device->index, ( long long ) device->serialNumber );
+            printf( "Serial number of device at index %d: %lld\n", device->index, ( long long ) device->serialNumber );
         else
             printf( "Error '%s' getting serial number of device at index %d\n", AIOUSB_GetResultCodeAsString( result ), device->index );
     }
@@ -146,9 +132,9 @@ int main( int argc, char **argv ) {
   
     device->outputMask[0] = (unsigned char )0xff;
 
-    char *cdat = (char *)calloc(1,device->numDIOBytes );
-    int retval;
-    DIO_Read8( deviceIndex, 0, (int*)cdat );
+    unsigned char *cdat = (unsigned char *)calloc(1,device->numDIOBytes );
+
+    DIO_Read8( deviceIndex, 0, cdat );
     char *outmask = (char *)calloc(1, device->numDIOBytes);
     char *trimask = (char *)calloc(1, 2);
     char *pdata   = (char *)calloc(1, device->numDIOBytes);
@@ -158,7 +144,7 @@ int main( int argc, char **argv ) {
 
 
     retval = DIO_Configure(deviceIndex, AIOUSB_FALSE, outmask, pdata );
-    if ( retval != 0 ) {
+    if ( retval < 0 ) {
         fprintf(stderr,"Erroring running DIO_Configure, got %d\n", retval );
         exit(1);
     }
@@ -188,10 +174,10 @@ int main( int argc, char **argv ) {
 
 exit_sample:
     AIOUSB_Exit();
-    free(cdat);
-    free(outmask );
-    free(trimask );
-    free(pdata   );
+    free( cdat);
+    free( outmask );
+    free( trimask );
+    free( pdata   );
 
     return ( int ) exit_code;
 } 

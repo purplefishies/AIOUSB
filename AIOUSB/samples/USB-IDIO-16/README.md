@@ -1,5 +1,8 @@
-Examples in this directory
+\page aiousb AIOUSB
 
+\section csamples_idio16 IDIO16
+
+\subsection examples Examples in this directory
 
 Standard C/C++ files
 
@@ -11,9 +14,7 @@ make sample AIOUSBLIBDIR=${AIO_LIB_DIR} AIOUSBCLASSLIBDIR=${AIO_CLASSLIB_DIR} DE
 
 ./sample
 
-
-
-Matlab example
+\subsection matlab_example Matlab example
 
 * Run
 

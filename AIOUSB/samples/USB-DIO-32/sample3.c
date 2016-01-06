@@ -2,7 +2,7 @@
  * @file   AIOUSB_Core.h
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %h$
+ * @version $Format: %h$
  * @ingroup samples
  * @brief  
  *
@@ -28,10 +28,6 @@
  * Once libusb is installed properly, it should be possible to compile the sample program
  * using the simple command:
  *
- * @ref make_C_sample
- *
- *
- * @ref 
  *
  *     make
  *

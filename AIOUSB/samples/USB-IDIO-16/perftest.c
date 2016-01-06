@@ -2,7 +2,7 @@
  *  $Date $Format: %ad$$
  *  $Author $Format: %an <%ae>$$
  *  $Release $Format: %h$$
- *  @desc Sample program to run the USB-IDIO-16 
+ *  @brief Sample program to run the USB-IDIO-16 
  */
 #include "aiousb.h"
 #include <stdio.h>

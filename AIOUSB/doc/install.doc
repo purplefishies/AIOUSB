@@ -9,7 +9,7 @@
 \addindex installation
 \tableofcontents
 
-\section install_src_unix Compiling from source on UNIX
+\section install_src_unix Compiling from source on Linux/MacOSX 
 
 Assuming you’re starting from the root directory of the distribution,
 installing AIOUSB consists of performing these few simple steps
@@ -116,7 +116,7 @@ cmake -L
     
 </ol>
 
-\section install_bin_unix    Installing the binaries on UNIX
+\section install_bin_unix Installing the binaries on UNIX
 
 After the compilation of the source code do a <code>make install</code>
 to install AIOUSB. If you downloaded the binary distribution for UNIX,
@@ -147,6 +147,9 @@ If you have a RPM or DEP package, then please follow the
 standard installation procedure that is required for these packages. 
 
 \section install_src_windows Compiling from source on Windows
+
+
+See the link at [Foo](@ref Prerequisites)
 
 TBD
 

@@ -1,4 +1,4 @@
-#!/usr/bin/r
+#!/usr/bin/env r
 
 RMS <- function(num) { sqrt(sum((num-ave(num))^2)/length(num)) }
 

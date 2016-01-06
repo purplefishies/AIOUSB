@@ -172,7 +172,7 @@ void TestCaseSetup::doDACDirect(int channel, unsigned short value )
 
 
 /** 
- * @desc Exception handler
+ * @brief Exception handler
  * 
  * @param result 
  * @param linnum 
@@ -240,7 +240,7 @@ TestCaseSetup::doFastITScan( int numgets )
 
 
 /** 
- * @desc Uploads a bulk configuration block
+ * @brief Uploads a bulk configuration block
  * 
  */
 void TestCaseSetup::doBulkConfigBlock()
@@ -260,7 +260,7 @@ void TestCaseSetup::doBulkConfigBlock()
 }
 
 /** 
- * @desc Demonstrate bulk acquire
+ * @brief Demonstrate bulk acquire
  * 
  */
 void TestCaseSetup::doBulkAcquire(void)
@@ -274,7 +274,7 @@ void TestCaseSetup::doBulkAcquire(void)
 
 
 /** 
- * @desc writes the bytes to a file in question. Will be binary
+ * @brief writes the bytes to a file in question. Will be binary
  *       unless the user specifies CSV as an argument
  **/
 void TestCaseSetup::writeBuffer( char *filename ) {
@@ -314,11 +314,10 @@ void TestCaseSetup::writeBuffer( char *filename ) {
 }
 
 /** 
- * @desc Demonstrate bulk acquire
- * 
- * @param block_size 
- * @param over_sample 
- * @param clock_speed 
+ * @brief Demonstrate bulk acquire
+ * @param blck_size 
+ * @param ovr_sampl 
+ * @param clk_speed 
  */
 void TestCaseSetup::doBulkAcquire(unsigned int blck_size, unsigned int ovr_sampl, unsigned int clk_speed )
 {
@@ -458,7 +457,7 @@ unsigned long TestCaseSetup::TEST_ADC_BulkPoll( unsigned long DeviceIndex,
 
 
 //
-// @desc verify that A/D ground calibration is correct 
+// @brief verify that A/D ground calibration is correct 
 // 
 void TestCaseSetup::doVerifyGroundCalibration(void)
 {
@@ -526,7 +525,7 @@ void TestCaseSetup::doGenericVendorWrite(unsigned char Request, unsigned short V
 
 
 /** 
- * @desc Sets up the :auto: calibration mode
+ * @brief Sets up the :auto: calibration mode
  * 
  */
 void TestCaseSetup::doSetAutoCalibration(void)
@@ -558,7 +557,7 @@ void TestCaseSetup::doTestSetAutoCalibration(void)
 
 
 /** 
- * @desc Verify that A/D reference calibration is correct
+ * @brief Verify that A/D reference calibration is correct
  * 
  */
 void TestCaseSetup::doVerifyReferenceCalibration(void)
@@ -578,7 +577,7 @@ void TestCaseSetup::doVerifyReferenceCalibration(void)
 }
 
 /** 
- *  @desc DEMONSTRATE SCANNING CHANNELS AND MEASURING VOLTAGES 
+ *  @brief DEMONSTRATE SCANNING CHANNELS AND MEASURING VOLTAGES 
  * 
  */
 void TestCaseSetup::doDemonstrateReadVoltages() 
@@ -603,7 +602,7 @@ void TestCaseSetup::doDemonstrateReadVoltages()
 }
 
 /** 
- * @desc Simple version that just outputs data to csv file
+ * @brief Simple version that just outputs data to csv file
  * 
  */
 void TestCaseSetup::doCSVReadVoltages()
@@ -676,7 +675,7 @@ void TestCaseSetup::setMaxCount( int val )
 
 
 /** 
- * @desc Performs an immediate read of voltages
+ * @brief Performs an immediate read of voltages
  * 
  */
 void TestCaseSetup::doPreReadImmediateVoltages()
@@ -696,7 +695,7 @@ void TestCaseSetup::doPreReadImmediateVoltages()
 }
 
 /** 
- * @desc demonstrate reading a single channel in volts
+ * @brief demonstrate reading a single channel in volts
  * 
  */
 void TestCaseSetup::doScanSingleChannel()
@@ -708,7 +707,7 @@ void TestCaseSetup::doScanSingleChannel()
 }
 
 /** 
- * @desc sets up the voltage parameters for runs
+ * @brief sets up the voltage parameters for runs
  * 
  */
 void TestCaseSetup::setupVoltageParameters(void)

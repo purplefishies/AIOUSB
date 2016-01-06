@@ -2,11 +2,11 @@
  * @file   AIOContinuousBuffer.c
  * @author  $Format: %an <%ae>$
  * @date   $Format: %ad$
- * @release $Format: %h$
+ * @version $Format: %h$
  * @brief AIOUSB sample program 
  * @todo Make the number of channels in the ContinuousBuffer match the number of channels in the
  *       config object
- * @desc
+ * @brief
  * All the API functions that DO NOT begin "AIOUSB_" are standard API functions, largely
  * documented in http://accesio.com/MANUALS/USB%20Software%20Reference.pdf. The functions
  * that DO begin with "AIOUSB_" are "extended" API functions added to the Linux
