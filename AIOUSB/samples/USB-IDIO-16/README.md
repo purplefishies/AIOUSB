@@ -1,4 +1,4 @@
-\page aiousb AIOUSB
+\page conlysamples C/C++ Samples
 
 \section csamples_idio16 IDIO16
 

@@ -1,15 +1,32 @@
+/**
+ * @file   continuous_mode_from_json_config.c
+ * @author $Format: %an <%ae>$
+ * @date   $Format: %ad$
+ * @version $Format: %h$
+ * 
+ * @page sample_usb_ai16_16_continuous_mode_from_json_config continuous_mode_from_json_config.c
+ *
+ * @par 
+ *
+ * This C sample is simple program that demonstrates using
+ * the AIOUSB C library's Continuous mode acquisition API but makes it much easier than
+ * other samples. The end user just has to make use of a standard JSON configuration object
+ * that can stand in for the multiple calls to the AIOUSB API that are used to configure 
+ * the board for acquisition. 
+ *
+ */
+#ifndef DOXYGEN_IGNORED
 #include <stdio.h>
 #include <aiousb.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <math.h>
 #include <ctype.h>
-#include <AIODataTypes.h>
-#include "AIOCountsConverter.h"
-#include "AIOUSB_Log.h"
-#include "aiocommon.h"
 #include <getopt.h>
 #include <signal.h>
+#endif
+#include "aiocommon.h"
+#include <aiousb.h>
 
 struct channel_range *get_channel_range( char *optarg );
 void process_cmd_line( struct opts *, int argc, char *argv[] );

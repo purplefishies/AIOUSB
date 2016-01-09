@@ -1,0 +1,18 @@
+/*! @page usb_ai16_16 USB-AI16-16
+
+These are the samples of the USB-AI16-16 
+
+
+@subpage sample_usb_ai16_16_extcal External calibration sample
+
+@subpage sample_usb_ai16_16_continuous_mode Continuous Mode Samples
+
+@subpage sample_usb_ai16_16_continuous_mode_from_json_config Continuous Mode sample usng a JSON config file
+
+@subpage burst_test burst_test.c
+
+@subpage bulk_acquire_test bulk_acquire_test.c
+
+
+
+*/

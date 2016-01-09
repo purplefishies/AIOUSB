@@ -3,7 +3,13 @@
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
  * @version $Format: %h$
- * @brief  
+ * 
+ * @page burst_test burst_test.c
+ *
+ * @par BurstTest
+ *
+ * continuous_mode.cpp is simple program that demonstrates using
+ * the AIOUSB C library's Continuous mode acquisition API.
  */
 
 #include <stdio.h>

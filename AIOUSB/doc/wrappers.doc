@@ -1,0 +1,14 @@
+/*! \page wrappers Wrappers
+
+\addindex wrappers
+\tableofcontents
+
+\section wrappers_overview Overview
+
+Somet stuff
+
+\section wrappers_other_stuff More stuff
+
+Assuming you have installed the AIOUSB C library according to the above instructions, compiling a program to use it is as simple as:
+
+*/

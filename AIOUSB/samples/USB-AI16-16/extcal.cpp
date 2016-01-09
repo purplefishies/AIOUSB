@@ -5,10 +5,7 @@
  * @author Jimi Damon <jdamon@accesio.com>
  * @version $Format: %h$
  * 
- * @page aiousb AIOUSB
- *
- * @section csamples_usb_ai16_16 USB-AIO16-16 
- * @subsection sample_usb_ai16_16 Extcal
+ * @page sample_usb_ai16_16_extcal extcal.c
  *
  * @par Extcal
  * Extcal.cpp is simple program that demonstrates using
@@ -25,7 +22,7 @@
  * - Reading the analog inputs in counts – AnalogInputSubsystem::read()
  * - Generating an external calibration table – AnalogInputSubsystem::calibrate(double[],...)
  *
- * For Building see @ref building
+ * @todo Setup BUILDING Tag
  * 
  */
 

@@ -1,9 +1,19 @@
-/*
+/**
  * @file   AIOUSB_Core.c
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
  * @version $Format: %h$
- * AIOUSB library sample program
+ * 
+ * 
+ * @page bulk_acquire_test bulk_aquire_test.c
+
+ * @par BulkAcquireSample
+ * This is a sample that runs a high speed bulk acquisition on a USB-AI board.
+ *
+ * - Do something first
+ * - Do another thing
+ * - Do a last thing
+ *
  */
 
 #include <aiousb.h>
