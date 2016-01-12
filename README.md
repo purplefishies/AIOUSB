@@ -27,13 +27,12 @@ The functionality in this driver depends on the following installed packages.
 1. [libusb-1.0](http://www.libusb.org/)
 2. [cmake]( http://www.cmake.org/cmake/resources/software.html )
 3. [swig](http://swig.org/)
-
-
+4. (Optionally for python bindings )[python-dev](http://python.org)
 
 
 #### Ubuntu / Debian
 ```bash
-sudo apt-get install libusb-1.0 libusb-1.0-0-dev cmake swig
+sudo apt-get install libusb-1.0 libusb-1.0-0-dev cmake swig python-dev
 ```
 
 #### Fedora / Red Hat
@@ -64,11 +63,13 @@ sudo port install libusb cmake
 
 ```bash
 sudo apt-get install libusb-1.0-0 libusb-1.0-0-dev  cmake 
+sudo apt-get install python-dev # If you want Python bindings
 ```
 
 ##### Beagle Board
 ```bash
 sudo apt-get install libusb-1.0-0 libusb-1.0-0-dev cmake 
+sudo apt-get install python-dev # If you want Python bindings
 ```
 
 -------------------------------------
