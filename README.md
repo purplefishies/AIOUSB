@@ -91,7 +91,7 @@ sudo apt-get install python-dev # If you want Python bindings
 Building ACCES I/O Products' Driver library amounts to compiling C source files to produce C and C++ based shared ( .so ) or static (.a) libraries.  The build process relies on either GNU make or Cmake.  The first method of building ( see [non-cmake users](#NonCmakeBuild) is a little more involved but will give you the ability to build wrapper language packs.  Currently ,the simplified cmake system is easier to build and install the general libraries but we have been unable to use it to deploy the Swig based wrappers as we would have liked. 
 
 
-## <a name="NonCmakeBuild"></a>Build with Make
+## <a id="NonCmakeBuild"></a>Build with Make
 
 You will need to do the following
 
@@ -104,7 +104,7 @@ cd samples/USB_SAMPLE_OF_CHOICE
 make sample AIOUSBLIBDIR=${AIO_LIB_DIR} AIOUSBCLASSLIBDIR=${AIO_CLASSLIB_DIR} DEBUG=1
 ~~~
 
-## <a name="CMakeBuild"></a>Build with CMake
+## Build with CMake {#CMakeBuild}
 
 ~~~bash
 cd AIOUSB
@@ -163,7 +163,7 @@ wrapper language support for the following languages:
 
 ## How to build Wrapper languages
 
-### CMake
+### CMake {#cmake_build}
 
 This is the easiest way to build the wrapper languages. Perform the following
 
