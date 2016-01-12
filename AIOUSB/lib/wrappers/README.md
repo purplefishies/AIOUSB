@@ -1,3 +1,5 @@
+\page wrapper_build Building Wrappers
+
 This directory contains the wrapper scripts for a number of scripting
 languages. Before trying to build any of these you MUST first source
 the file in ../.. . The instructions are for the Bash shell and should
@@ -21,8 +23,6 @@ wrapper scripts by default and install them, just run
 sudo make -f GNUMakefile all
 
 This will build each language and install them.
-
-
 
 
 4. 

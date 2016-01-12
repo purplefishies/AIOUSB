@@ -11,8 +11,8 @@ The entire set of drivers are rely on functionality provided by the [libusb-1.0]
 
 Currently, this project provides full support to the following platforms:
 
-* Linux (  )
-* Mac OS X (  ) 
+* Linux 
+* Mac OS X
 * Free / Net BSD
 * [Rasberry Pi](https://www.raspberrypi.org/) 
 * [Beagle Board](http://beagleboard.org/bone)
@@ -28,18 +28,14 @@ The functionality in this driver depends on the following installed packages.
 1. [libusb-1.0](http://www.libusb.org/)
 2. [cmake]( http://www.cmake.org/cmake/resources/software.html )
 3. [swig](http://swig.org/)
-4. (Optionally for python bindings )[python-dev](http://python.org)
+4. (Optionally for python bindings ) [python-dev](http://python.org)
 
 #### Ubuntu / Debian
-<<<<<<< HEAD
-```bash
-sudo apt-get install libusb-1.0 libusb-1.0-0-dev cmake swig python-dev
-```
-=======
+
 ~~~bash
-sudo apt-get install libusb-1.0 libusb-1.0-0-dev cmake swig
+sudo apt-get install libusb-1.0 libusb-1.0-0-dev cmake swig python-dev
 ~~~
->>>>>>> IBT: Fixes for doxygen documentation
+
 
 #### Fedora / Red Hat
 ~~~bash
@@ -69,22 +65,16 @@ sudo port install libusb cmake
 
 ~~~bash
 sudo apt-get install libusb-1.0-0 libusb-1.0-0-dev  cmake 
-<<<<<<< HEAD
 sudo apt-get install python-dev # If you want Python bindings
-```
-=======
 ~~~
->>>>>>> IBT: Fixes for doxygen documentation
+
 
 ##### Beagle Board
 ~~~bash
 sudo apt-get install libusb-1.0-0 libusb-1.0-0-dev cmake 
-<<<<<<< HEAD
 sudo apt-get install python-dev # If you want Python bindings
-```
-=======
 ~~~
->>>>>>> IBT: Fixes for doxygen documentation
+
 
 # <a name="UnixBuild"></a>Building on Linux/ MacOS / BSD / *NIX systems
 
