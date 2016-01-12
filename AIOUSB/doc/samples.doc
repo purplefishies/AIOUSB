@@ -5,15 +5,12 @@
 
 \section conlysamples_overview Overview
 
-Somet stuff
-
-\section conlysamples_other_stuff More stuff
-
 Assuming you have installed the AIOUSB C library according to the above instructions, compiling a program to use it is as simple as:
 
-\section conlysamples_compile_sample Compiling sample
+\section conlysamples_compile_sample C and C++ samples for USB based acquisition cards
 
-\subpage usb_ai16_16
+\subpage usb_ai16_16 samples
 
+\subpage usb_idio_16_8 samples
 
 */

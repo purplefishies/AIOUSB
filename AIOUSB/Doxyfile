@@ -581,7 +581,7 @@ WARN_LOGFILE           =
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ../README.md doc/index.doc doc/install.doc doc/aiousb.doc doc/classlib.doc doc/java.doc doc/samples.doc doc/wrappers.doc doc/libusb.doc classlib/ lib/ samples/
+INPUT                  = ../README.md doc/index.doc doc/install.doc doc/aiousb.doc doc/classlib.doc doc/java.doc doc/samples.doc doc/wrappers.doc Firmware/README.doc doc/libusb.doc classlib/ lib/ Firmware/ samples/
 
 
 USE_MDFILE_AS_MAINPAGE = ../README.md
@@ -795,7 +795,7 @@ GENERATE_HTML          = YES
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be
 # put in front of it. If left blank `html' will be used as the default path.
 
-HTML_OUTPUT            =
+HTML_OUTPUT            = ../html
 
 # The HTML_FILE_EXTENSION tag can be used to specify the file extension for
 # each generated HTML page (for example: .htm,.php,.asp). If it is left blank
@@ -1116,7 +1116,7 @@ GENERATE_LATEX         = YES
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be
 # put in front of it. If left blank `latex' will be used as the default path.
 
-LATEX_OUTPUT           =
+LATEX_OUTPUT           = ../latex
 
 # The LATEX_CMD_NAME tag can be used to specify the LaTeX command name to be
 # invoked. If left blank `latex' will be used as the default command name.
@@ -1244,7 +1244,7 @@ GENERATE_MAN           = YES
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be
 # put in front of it. If left blank `man' will be used as the default path.
 
-MAN_OUTPUT             =
+MAN_OUTPUT             = ../man
 
 # The MAN_EXTENSION tag determines the extension that is added to
 # the generated man pages (default is the subroutine's section .3)

@@ -31,12 +31,8 @@ Complete documentation for the AIOUSB C library may be found in AIOUSB API Refer
 Compiling Programs
 
 Assuming you have installed the AIOUSB C library according to the above instructions, compiling a program to use it is as simple as:
+
 \section aiousb_compile_sample Compiling sample
 
-g++ -pthread -fPIC sample.cpp -laiousbcpp -lusb-1.0 -o sample (C++)
-
-or
-
-gcc -std=gnu99 -D_GNU_SOURCE -pthread -fPIC sample.c -laiousb -lusb-1.0 -lm -o sample (C)
-
+Please see [ compiling for Linux / Mac](#compile_src_unix) or [ compiling for Windows ](#install_src_windows).
 */
