@@ -25,8 +25,20 @@ ifeq ("$(OSTYPE)","Darwin")
 CC_SHFLAGS := -dynamiclib
 SHLIB_CFLAGS	= $(CFLAGS) -fPIC
 else 
+ifeq ("$(OSTYPE)","Linux") 
 CC_SHFLAGS :=  -fPIC -shared -Wl,-soname
 SHLIB_CFLAGS	= $(CFLAGS) -fPIC
+GLIBC_VERSION	:=$(shell ldd --version | head -1 | perl -pne 's/^.*?(\d+\.\d+)\s*$$/$$1/;')
+ifeq ($(shell /bin/echo -ne ${GLIBC_VERSION} | perl -ne 'print ($$_ < 2.17 ? 0 : 1 ); '),0)
+RTLIB=-lrt
+else 
+RTLIB=
+endif
+override LIBS += ${RTLIB}
+else 
+CC_SHFLAGS :=  -fPIC -shared -Wl,-soname
+SHLIB_CFLAGS	= $(CFLAGS) -fPIC
+endif
 endif
 
 
@@ -137,6 +149,8 @@ test:
 	@echo "AIOUSBLIBDIR=:$(AIOUSBLIBDIR):"
 	@echo "LIBPREFIX=:$(LIBPREFIX):"
 	@echo "CLIBS=$(CLIBS)"
+	@echo "GLIBC_VERSION=${GLIBC_VERSION}"
+	@echo "RTLIB=${RTLIB}"
 clean:
 	$(RM) $(ALL_CLEAN_TARGETS)
 	$(RM) *.csv
