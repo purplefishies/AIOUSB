@@ -15,4 +15,6 @@ Assuming you have installed the AIOUSB C library according to the above instruct
 
 \subpage usb_dio_32 samples
 
+\subpage usb_ao16_16 samples
+
 */
