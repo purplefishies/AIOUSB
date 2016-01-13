@@ -64,6 +64,15 @@ find_package(SWIG )
 find_package(Doxygen)
 find_package(Perl)
 
+if( UNIX OR APPLE OR LINUX )
+  find_package(glibc REQUIRED)
+  if( GLIBC_VERSION LESS 2.17 ) 
+    MESSAGE(STATUS "$GLIBC_VERSION is less than 2.17, using rt")
+    SET(CORELIBS ${CORELIBS} rt )
+  else() 
+  endif( GLIBC_VERSION LESS 2.17 ) 
+endif(UNIX OR APPLE OR LINUX ) 
+
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Linux / Mac Build 
 # 1. Put this into an included file
@@ -94,7 +103,7 @@ if(  UNIX OR APPLE )
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC" )	
       endif(USE_GCC AND NOT CYGWIN )
 
-      SET(CORELIBS usb-1.0)
+      SET(CORELIBS ${CORELIBS} usb-1.0 )
 
     endif(USE_GCC OR USE_CLANG)
   else("$ENV{CFLAGS}" STREQUAL "")
