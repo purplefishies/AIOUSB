@@ -10,10 +10,12 @@ Installing
 
 Assuming you’re starting from the root directory of the distribution, installing AIOUSB consists of performing these few simple steps (logged in as 'root', of course).
 
+@code{.sh}
 mkdir /usr/local/include/aiousb
 cp -p lib/aiousb.h /usr/local/include/aiousb
 cp -p lib/libaiousb*.a /usr/local/lib
 export CPATH=/usr/local/include/libusb-1.0/:/usr/local/include/aiousb
+@endcode
 
 \section aiousb_other_stuff Other stuff
 

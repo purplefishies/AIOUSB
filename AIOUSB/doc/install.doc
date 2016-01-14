@@ -11,10 +11,9 @@
 There are two ways that you can build your software on Linux/MacOS X : one way involves
 using the CMake tool and the other relies solely on GNU make. 
 
-<ul>
-<li> [ CMake Build ](#CMakeBuild )
-<li> [ Non-CMake Build ]( http://www.accesio.com )
-</ul>
+- \ref CMakeBuild 
+- \ref NonCmakeBuild
+
 
 
 \section install_src_windows Compiling from source on Windows
