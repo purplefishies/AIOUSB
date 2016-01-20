@@ -2,7 +2,7 @@
  *  @file iiro_sample.c
  *  @date $Format: %ad$$
  *  @author $Format: %an <%ae>$
- *  @release $Format: %h$
+ *  @version $Format: %h$
  *  @brief Sample program to demonstrate the behavior of the 
  *         USB-IIRO-8 or USB-IIRO-16 cards
  */
