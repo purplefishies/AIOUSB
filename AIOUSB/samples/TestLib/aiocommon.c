@@ -265,8 +265,8 @@ void process_aio_cmd_line( struct opts *options, int argc, char *argv [] )
             print_aio_usage(argc, argv, long_options);
             exit(1);
         }
-
     }
+
     if ( query ) {
         AIOUSB_Init();
         AIOUSB_ShowDevices( display_type );
@@ -343,6 +343,7 @@ void print_aio_usage(int argc, char **argv,  struct option *options)
 AIORET_TYPE aio_list_devices(struct opts *options, int *indices, int num_devices )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIOUSB_ListDevices();
     if ( num_devices <= 0 ) {
         fprintf(stderr,"No devices were found\n");
         retval = AIOUSB_ERROR_DEVICE_NOT_FOUND;
@@ -375,6 +376,14 @@ AIORET_TYPE aio_override_adcconfig_settings( ADCConfigBlock *config, struct opts
 
     ADCConfigBlock *hwconfig = AIOUSBDeviceGetADCConfigBlock( dev );
     memcpy(&config->mux_settings, &hwconfig->mux_settings, sizeof( hwconfig->mux_settings ) );
+
+    if ( options->num_oversamples < 0 ) { 
+        retval = ADCConfigBlockSetOversample( config, options->default_num_oversamples );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    } else {
+        retval = ADCConfigBlockSetOversample( config, options->num_oversamples );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    }
     
     if( !options->number_ranges ) {
         retval = ADCConfigBlockSetAllGainCodeAndDiffMode( config , options->gain_code , AIOUSB_FALSE );
@@ -403,6 +412,8 @@ AIORET_TYPE aio_override_adcconfig_settings( ADCConfigBlock *config, struct opts
             return retval;
         }
     }
+    
+
 
     return retval;
 }
