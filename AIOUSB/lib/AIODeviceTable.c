@@ -331,7 +331,7 @@ static int CompareProductNames(const void *p1, const void *p2)
              * got a device name, so return it; pName[] is a character array, not a
              * null-terminated string, so don't append null terminator
              */
-                int length = strlen(deviceName);
+                int length = strlen(deviceName) + 1;
                 if(length > ( int )*pNameSize)
                     length = ( int )*pNameSize;
                 else
@@ -351,8 +351,7 @@ static int CompareProductNames(const void *p1, const void *p2)
  */
 PRIVATE char *ProductIDToName(unsigned int productID) 
 {
-
-    char *tmpstr = strdup("UNKNOWN");
+    char tmpstr[] = "UNKNOWN";
     char *name = tmpstr;
 
 
@@ -1261,6 +1260,26 @@ AIORESULT AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( int *numAccesDevice
 }
 
 /*----------------------------------------------------------------------------*/
+
+/**
+ * @param numDevices 
+ * @return 
+ * @brief cleans up the AIODeviceTable and frees any memory associated with it.
+ */
+AIORET_TYPE ClearAIODeviceTable( int numDevices ) 
+{
+    AIORESULT result = AIOUSB_SUCCESS;
+    for ( int i = 0; i < numDevices ; i ++ ) {
+        AIOUSBDevice *device = &deviceTable[i];
+        if ( device->LastDIOData )
+            free(device->LastDIOData );
+    }
+
+    return result;
+}
+
+
+/*----------------------------------------------------------------------------*/
 AIORESULT AIODeviceTableSetDeviceID( int index, AIOUSBDevice *dev )
 {
     AIORESULT result = AIOUSB_SUCCESS;
@@ -1502,6 +1521,14 @@ AIORET_TYPE AIOUSB_Reset( unsigned long DeviceIndex )
 
 using namespace AIOUSB;
 
+TEST(AIODeviceTable,Cleanup) {
+    int numDevices = 0;
+    AIODeviceTableInit();    
+    AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_AIO16_16A );
+    ClearAIODeviceTable( numDevices );
+
+}
+
 TEST(AIOUSB_Core,MockObjects) {
     int numDevices = 0;
     AIODeviceTableInit();    
@@ -1517,22 +1544,22 @@ TEST(AIOUSB_Core,MockObjects) {
     EXPECT_TRUE( AIOUSBDeviceGetADCConfigBlock( (AIOUSBDevice *)&deviceTable[0] ) );
     
     EXPECT_EQ( (AIOUSBDevice *)&deviceTable[0], ADCConfigBlockGetAIOUSBDevice( AIOUSBDeviceGetADCConfigBlock( (AIOUSBDevice *)&deviceTable[0] ), NULL ));
-
+    ClearAIODeviceTable( numDevices );
 }
 
 TEST(AIODeviceTable, AddingDeviceSetsInit )
 {
     int numDevices = 0;
-    int stclock_rate = deviceTable[0].cachedConfigBlock.clock_rate;
+    int stclock_rate = 1000;
     AIODeviceTableInit();
-    ASSERT_EQ(  deviceTable[0].cachedConfigBlock.clock_rate, stclock_rate );    
 
     AIODeviceTableAddDeviceToDeviceTable( &numDevices , USB_AIO16_16A );
-    ASSERT_EQ(  deviceTable[0].cachedConfigBlock.clock_rate, stclock_rate );    
-    EXPECT_EQ( AIOUSB_IsInit(), AIOUSB_TRUE );
+    ASSERT_EQ( deviceTable[0].cachedConfigBlock.clock_rate, stclock_rate );    
+    ASSERT_EQ( AIOUSB_IsInit(), AIOUSB_TRUE );
+
+    ClearAIODeviceTable( numDevices );
 
 }
-
 
 /* #define DEVICE_POPULATOR_INTERFACE(T)                                         \ */
 /*     AIORET_TYPE (*get_device_ids)( T *self , int **product_ids, int *size );  \ */
@@ -1576,77 +1603,36 @@ AIORET_TYPE test_get_device_ids( AIODevicePopulator *self )
     }
 }
 
-class DeviceTableSetup : public ::testing::Test 
-{
- protected:
-    virtual void SetUp() {
-        numDevices = 0;
-        tp = (TestPopulator *)calloc(sizeof(TestPopulator),1);
-        tp->get_device_ids = test_get_device_ids;
-        char *tmp = getenv("AIODEVICETABLE_PRODUCT_IDS" );
-        if ( !tmp) {
-            setenv("AIODEVICETABLE_PRODUCT_IDS","USB-AIO16-16A,USB-DIO-32" , 1 );
-        }
-
-        /* NewPopulateTable((AIODevicePopulator *)tp ); */
-        AIODeviceTableInit();
-        
-        tp->get_device_ids( (AIODevicePopulator*)tp  );
-        for ( int i = 0; i < MIN( tp->size, MAX_USB_DEVICES ) ; ) {
-            AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &i , tp->products[i] , NULL );
-        }
-
-    }
-  
-    virtual void TearDown() { 
-        free(tp);
-        AIOUSB_Cleanup();
-    }
-    int numDevices;
-    TestPopulator *tp;
-};
-
-TEST_F(DeviceTableSetup, InitAndDummyPopulateTest )
-{
-    AIOUSB_BOOL tmp;
-    
-    /* EXPECT_NE( NewPopulateTable(NULL), AIOUSB_SUCCESS ); */
-    tmp = AIOUSB_IsInit();
-
-    EXPECT_EQ( tmp, true );
-    EXPECT_GE( tp->size, 1 ) << ::testing::PrintToString( tp->size );
-
-    for ( int i = 0; i <  MIN(tp->size, MAX_USB_DEVICES ) ; i ++ ) {
-        EXPECT_EQ( tp->products[i],  ((AIOUSBDevice *)&deviceTable[i])->ProductID  );
-    }
-}
-
 TEST(AIODeviceTable, InitAddsConfigToDevicePointer )
 {
-    int numAccesDevices = 0;
+    int numDevices = 0;
     AIOUSB_BOOL tmp;
     AIORESULT result;
+    AIODeviceTableInit();    
+    result = AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numDevices, USB_AI16_16E, NULL );
+    EXPECT_EQ( result, AIOUSB_SUCCESS );
+    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( numDevices - 1 , &result );
+    EXPECT_EQ( result, AIOUSB_SUCCESS );
+    EXPECT_TRUE( dev );
 
-    result = AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numAccesDevices, USB_AI16_16E, NULL );
-    EXPECT_EQ( result, AIOUSB_SUCCESS );
-    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( numAccesDevices - 1 , &result );
-    EXPECT_EQ( result, AIOUSB_SUCCESS );
-    EXPECT_TRUE(dev);
+    ClearAIODeviceTable( numDevices );
+
 }
 
 
 TEST(AIODeviceTable, SetsUpDefaults )
 {
-    int numAccesDevices = 0;
+    int numDevices = 0;
     AIOUSB_BOOL tmp;
     AIORESULT retval;
 
-    retval = AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numAccesDevices, USB_AI16_16E, NULL );
+    retval = AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numDevices, USB_AI16_16E, NULL );
     EXPECT_EQ( retval, AIOUSB_SUCCESS );
-    AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numAccesDevices, USB_DIO_32, NULL );
+    AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numDevices, USB_DIO_32, NULL );
     EXPECT_EQ( retval, AIOUSB_SUCCESS );
 
     EXPECT_EQ( ((AIOUSBDevice *)&deviceTable[1])->DIOBytes, 4  );
+    ClearAIODeviceTable( numDevices );
 }
 
 
