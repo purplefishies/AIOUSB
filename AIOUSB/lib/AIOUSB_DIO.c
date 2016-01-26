@@ -544,13 +544,12 @@ AIORESULT DIO_Read8(
 
     AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
  
-    readBuffer = NewDIOBuf( device->DIOBytes );
+    readBuffer = NewDIOBuf( device->DIOBytes * BITS_PER_BYTE );
 
     AIO_ERROR_VALID_DATA(AIOUSB_ERROR_NOT_ENOUGH_MEMORY, readBuffer );
 
     if ( (result = DIO_ReadAll(DeviceIndex, readBuffer->_buffer)) == AIOUSB_SUCCESS ) {
-        char *tmp = DIOBufToBinary( readBuffer ); 
-        *pdat = (int)tmp[ByteIndex];
+        *pdat = (int)readBuffer->_buffer[ByteIndex];
     }
 
     DeleteDIOBuf( readBuffer );

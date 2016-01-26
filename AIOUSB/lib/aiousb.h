@@ -14,6 +14,7 @@
 #include <assert.h>
 #include "AIOTypes.h"
 #include "AIODeviceInfo.h"
+#include "AIODeviceQuery.h"
 #include "AIODeviceTable.h"
 #include "AIOUSBDevice.h"
 #include "ADCConfigBlock.h"

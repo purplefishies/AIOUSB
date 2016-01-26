@@ -360,13 +360,7 @@ int main( int argc , char *argv[] )
 {
     testing::InitGoogleTest(&argc, argv);
     testing::TestEventListeners & listeners = testing::UnitTest::GetInstance()->listeners();
-#ifdef GTEST_TAP_PRINT_TO_STDOUT
-  delete listeners.Release(listeners.default_result_printer());
-#endif
-    
-    DIOBuf *buf = NewDIOBuf( 100 );
-    DeleteDIOBuf( buf );
-  
+
     return RUN_ALL_TESTS();  
 
 }

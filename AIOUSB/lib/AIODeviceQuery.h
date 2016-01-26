@@ -9,8 +9,8 @@
  * 
  */
 
-#ifndef _AIO_CONTINUOUS_BUFFER_H
-#define _AIO_CONTINUOUS_BUFFER_H
+#ifndef _AIO_DEVICE_QUERY_H
+#define _AIO_DEVICE_QUERY_H
 
 #include "AIOTypes.h"
 #include <stdio.h>
