@@ -204,6 +204,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufPopN(AIOContinuousBuf *buf , void *tob
 /*-----------------------------  Deprecated / Refactored   -------------------------------*/
 #ifndef SWIG
 
+/** @cond INTERNAL_DOCUMENTATION */
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufSetNumberOfChannels( AIOContinuousBuf * buf, unsigned num_channels ) ACCES_DEPRECATED("Please use AIOContinuousBufSetNumberChannels");
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufGetNumberOfChannels( AIOContinuousBuf * buf) ACCES_DEPRECATED("Please use AIOContinuousBufGetNumberChannels");
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_InitConfiguration(  AIOContinuousBuf *buf ) ACCES_DEPRECATED("Please use AIOContinuousBufInitConfiguration");
@@ -227,6 +228,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_SetChannelMask( AIOContinuousBuf *buf
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_SetDeviceIndex( AIOContinuousBuf *buf , unsigned long DeviceIndex ) ACCES_DEPRECATED("Please use AIOContinuousBufSetDeviceIndex");
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_NumberWriteScansInCounts(AIOContinuousBuf *buf ) ACCES_DEPRECATED("Please use AIOContinuousBufNumberWriteScansInCounts");
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBuf_ResetDevice( AIOContinuousBuf *buf)  ACCES_DEPRECATED("Please use AIOContinuousBufResetDevice");
+/** @endcond */
 #endif
 /*---------------------------  Done Deprecated  -----------------------------*/
 
@@ -272,8 +274,6 @@ PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufRead( AIOContinuousBuf *buf, AIOBuffer
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufWrite( AIOContinuousBuf *buf, AIOBufferType *writebuf, unsigned wrbufsize, unsigned size, AIOContinuousBufMode flag );
 PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufWriteCounts( AIOContinuousBuf *buf, unsigned short *data, unsigned datasize, unsigned size , AIOContinuousBufMode flag );
 
-PUBLIC_EXTERN AIORET_TYPE Launch( AIOUSB_WorkFn callback, AIOContinuousBuf *buf );
-
 AIORET_TYPE AIOContinuousBufCleanup( AIOContinuousBuf *buf );
 
 
@@ -281,35 +281,6 @@ char *AIOContinuousBufToJSON( AIOContinuousBuf *buf );
 
 AIOContinuousBuf *NewAIOContinuousBufFromJSON( const char *json_string );
 
-
-/* #include "AIODeviceTable.h" */
-
-PUBLIC_EXTERN AIORESULT AIODeviceTableAddDeviceToDeviceTable( int *numAccesDevices, unsigned long productID ) ;
-PUBLIC_EXTERN AIORESULT AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( int *numAccesDevices, unsigned long productID , USBDevice *usb_dev );
-PUBLIC_EXTERN AIORET_TYPE AIODeviceTablePopulateTable(void);
-PUBLIC_EXTERN AIORET_TYPE AIODeviceTablePopulateTableTest(unsigned long *products, int length );
-PUBLIC_EXTERN AIORESULT AIODeviceTableClearDevices( void );
-PUBLIC_EXTERN AIORESULT ClearDevices( void );
-PUBLIC_EXTERN AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *res );
-PUBLIC_EXTERN USBDevice *AIODeviceTableGetUSBDeviceAtIndex( unsigned long DeviceIndex, AIORESULT *res );
-void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID );
-
-PUBLIC_EXTERN unsigned long QueryDeviceInfo( unsigned long DeviceIndex, unsigned long *pPID, unsigned long *pNameSize, char *pName, unsigned long *pDIOBytes, unsigned long *pCounters );
-PUBLIC_EXTERN AIORET_TYPE GetDevices(void);
-PUBLIC_EXTERN char *GetSafeDeviceName( unsigned long DeviceIndex );
-PUBLIC_EXTERN char *ProductIDToName( unsigned int productID );
-PUBLIC_EXTERN AIORET_TYPE ProductNameToID(const char *name);
-PUBLIC_EXTERN AIORET_TYPE AIOUSB_Init(void);
-PUBLIC_EXTERN AIORET_TYPE AIOUSB_EnsureOpen(unsigned long DeviceIndex);
-PUBLIC_EXTERN AIOUSB_BOOL AIOUSB_IsInit();
-PUBLIC_EXTERN AIORET_TYPE AIOUSB_Exit();
-PUBLIC_EXTERN AIORET_TYPE AIOUSB_Reset( unsigned long DeviceIndex );
-PUBLIC_EXTERN void AIODeviceTableInit(void);
-
-PUBLIC_EXTERN void CloseAllDevices(void);
-PUBLIC_EXTERN AIORESULT AIOUSB_GetAllDevices();
-
-PUBLIC_EXTERN unsigned long AIOUSB_INIT_PATTERN;
 
 /* #include "AIOUSB_CTR.h" */
 
@@ -350,8 +321,12 @@ PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetClockRate( ADCConfigBlock *config );
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetScanRange(ADCConfigBlock *config, unsigned startChannel, unsigned endChannel);
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetStartChannel( ADCConfigBlock *config, unsigned char startChannel  );
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetEndChannel( ADCConfigBlock *config, unsigned char endChannel  );
+
+/** @cond INTERNAL_DOCUMENTATION */
+#define STRINGIFY(x) #x
 #define HIGH_BITS(reg)   ( reg & 0xF0 )
 #define LOW_BITS(reg)    ( reg & 0x0F )
+/** @endcond INTERNAL_DOCUMENTATION */
 
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetChannelRange(ADCConfigBlock *config,unsigned startChannel, unsigned endChannel, unsigned gainCode );
 
@@ -539,6 +514,18 @@ PUBLIC_EXTERN AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc,
 PUBLIC_EXTERN AIOGainRange* NewAIOGainRangeFromADCConfigBlock( ADCConfigBlock *adc );
 PUBLIC_EXTERN void  DeleteAIOGainRange( AIOGainRange* );
 
+/* #include "AIODeviceQuery.h" */
+
+
+PUBLIC_EXTERN AIODeviceQuery *NewAIODeviceQuery( unsigned long DeviceIndex );
+PUBLIC_EXTERN AIORET_TYPE DeleteAIODeviceQuery( AIODeviceQuery *devq );
+PUBLIC_EXTERN AIORET_TYPE AIODeviceQueryGetProductID( AIODeviceQuery *devq );
+PUBLIC_EXTERN AIORET_TYPE AIODeviceQueryNameSize( AIODeviceQuery *devq );
+PUBLIC_EXTERN char * AIODeviceQueryGetName( AIODeviceQuery *devq );
+PUBLIC_EXTERN AIORET_TYPE AIODeviceQueryGetNumDIOBytes( AIODeviceQuery *devq );
+PUBLIC_EXTERN AIORET_TYPE AIODeviceQueryGetNumCounters( AIODeviceQuery *devq );
+
+
 /* #include "AIODeviceTable.h" */
 
 PUBLIC_EXTERN AIORESULT AIODeviceTableAddDeviceToDeviceTable( int *numAccesDevices, unsigned long productID ) ;
@@ -547,8 +534,8 @@ PUBLIC_EXTERN AIORET_TYPE AIODeviceTablePopulateTable(void);
 PUBLIC_EXTERN AIORET_TYPE AIODeviceTablePopulateTableTest(unsigned long *products, int length );
 PUBLIC_EXTERN AIORESULT AIODeviceTableClearDevices( void );
 PUBLIC_EXTERN AIORESULT ClearDevices( void );
-PUBLIC_EXTERN AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *res );
-PUBLIC_EXTERN USBDevice *AIODeviceTableGetUSBDeviceAtIndex( unsigned long DeviceIndex, AIORESULT *res );
+PUBLIC_EXTERN AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *result );
+PUBLIC_EXTERN USBDevice *AIODeviceTableGetUSBDeviceAtIndex( unsigned long DeviceIndex, AIORESULT *result );
 void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID );
 
 PUBLIC_EXTERN unsigned long QueryDeviceInfo( unsigned long DeviceIndex, unsigned long *pPID, unsigned long *pNameSize, char *pName, unsigned long *pDIOBytes, unsigned long *pCounters );

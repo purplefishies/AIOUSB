@@ -25,7 +25,7 @@ AIOUSB_BOOL find_ai_board( AIOUSBDevice *dev ) {
 int main( int argc, char **argv ) 
 {
     struct opts options = AIO_OPTIONS;
-    AIORET_TYPE result = AIOUSB_SUCCESS;
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
     int *indices;
     int num_devices;
     ADCConfigBlock *config;
@@ -35,10 +35,10 @@ int main( int argc, char **argv )
     struct timespec starttime , curtime, prevtime ;
     process_aio_cmd_line( &options, argc, argv );
 
-    result = AIOUSB_Init();
-    if ( result != AIOUSB_SUCCESS ) {
-        fprintf(stderr,"Error calling AIOUSB_Init(): %d\n", (int)result );
-        exit(result );
+    retval = AIOUSB_Init();
+    if ( retval != AIOUSB_SUCCESS ) {
+        fprintf(stderr,"Error calling AIOUSB_Init(): %d\n", (int)retval );
+        exit(retval );
     }
 
     AIOUSB_ListDevices();
@@ -47,30 +47,38 @@ int main( int argc, char **argv )
 
     AIOUSB_FindDevices( &indices, &num_devices, find_ai_board );
     
-    if( (result = aio_list_devices( &options, indices, num_devices ) != AIOUSB_SUCCESS )) 
-        exit(result);
+    if( (retval = aio_list_devices( &options, indices, num_devices ) != AIOUSB_SUCCESS )) 
+        exit(retval);
 
     if ( (config = NewADCConfigBlockFromJSON( options.adcconfig_json )) == NULL )
         exit(AIOUSB_ERROR_INVALID_ADCCONFIG);
 
-    if ( (result = aio_override_adcconfig_settings( config, &options )) != AIOUSB_SUCCESS )
-        exit(result);
+    if ( (retval = aio_override_adcconfig_settings( config, &options )) != AIOUSB_SUCCESS )
+        exit(retval);
 
 
     /* Save the config for the device index  in question */
-    dev = AIODeviceTableGetDeviceAtIndex( options.index , (AIORESULT*)&result );
-    if ( result != AIOUSB_SUCCESS ) {
+    dev = AIODeviceTableGetDeviceAtIndex( options.index , (AIORESULT*)&retval );
+    if ( retval != AIOUSB_SUCCESS ) {
         fprintf(stderr,"Error getting device at index %d\n", options.index );
-        exit(result);
+        exit(retval);
     }
 
     usb = AIOUSBDeviceGetUSBHandle( dev );
 
+#if 1
+    retval = ADC_SetCal(options.index, ":AUTO:");
+    if ( retval < AIOUSB_SUCCESS ) {
+        fprintf(stderr,"Error setting calibration %d\n", (int)retval);
+        exit(retval);
+    }
+#endif
+
     /* Copy the modified config settings back to the 
      * device ave config to the device 
      */
-    result = ADCConfigBlockCopy( AIOUSBDeviceGetADCConfigBlock( dev ), config );
-    result = USBDevicePutADCConfigBlock( usb, config );
+    retval = ADCConfigBlockCopy( AIOUSBDeviceGetADCConfigBlock( dev ), config );
+    retval = USBDevicePutADCConfigBlock( usb, config );
     /* or do this     
      * ADC_SetConfig( options.index, config->registers, &config->size ); */
 

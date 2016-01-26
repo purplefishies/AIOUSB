@@ -34,8 +34,7 @@ typedef struct adc_config_block {
 typedef ADCConfigBlock ADConfigBlock;
 
 
-
-
+/* BEGIN AIOUSB_API */
 
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockInit( ADCConfigBlock *, AIOUSBDevice *deviceDesc, unsigned int );
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockInitForCounterScan(ADCConfigBlock *config, AIOUSBDevice *deviceDesc  );

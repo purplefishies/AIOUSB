@@ -22,6 +22,7 @@ AIOCmd.o \
 AIOContinuousBuffer.o \
 AIOChannelMask.o \
 AIODeviceInfo.o \
+AIODeviceQuery.o \
 AIODeviceTable.o \
 AIOEither.o \
 AIOUSBDevice.o \

@@ -33,7 +33,7 @@ QueryDeviceInfo(0, productId,new_ulp(),"",new_ulp(), new_ulp());
 
 if ulp_value( productId ) == 32792
     stopval = 15;
-elseif ulp_value( productId ) == 32796
+elseif ulp_value( productId ) == 0x8012
     stopval = 7;
 else
     tmp = sprintf('Card with board id "0x%x" is not supported by this sample', ulp_value( productId ) );
