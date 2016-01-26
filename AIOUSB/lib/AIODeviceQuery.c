@@ -18,8 +18,10 @@ namespace AIOUSB {
 
 /*------------------------------------------------------------------------*/
 /**
+ * @brief Constructor of a AIODeviceQuery, and using the DeviceIndex , queries
+ * the device at that index.
  * @param DeviceIndex 
- * @return 
+ * @return AIODeviceQuery * object
  */
 AIODeviceQuery *NewAIODeviceQuery( unsigned long DeviceIndex )
 {
@@ -43,6 +45,7 @@ AIODeviceQuery *NewAIODeviceQuery( unsigned long DeviceIndex )
 
 /*------------------------------------------------------------------------*/
 /**
+ * @brief Destructor for AIODeviceQuery *
  * @param devq AIODeviceQuery *
  * @return >= 0, success, otherwise error
  */
@@ -58,6 +61,7 @@ AIORET_TYPE DeleteAIODeviceQuery( AIODeviceQuery *devq )
 
 /*------------------------------------------------------------------------*/
 /**
+ * @brief Returns the Product ID of the device in question
  * @param devq AIODeviceQuery *
  * @return >= 0, the product ID in question, otherwise error
  */
@@ -69,6 +73,7 @@ AIORET_TYPE AIODeviceQueryGetProductID( AIODeviceQuery *devq )
 
 /*------------------------------------------------------------------------*/
 /**
+ * @brief Returns the strlenght of the Device name of the device in question
  * @param devq AIODeviceQuery *
  * @return >= 0, the name length in question, otherwise error
  */
@@ -81,6 +86,7 @@ AIORET_TYPE AIODeviceQueryNameSize( AIODeviceQuery *devq )
 
 /*------------------------------------------------------------------------*/
 /**
+ * @brief Returns the name of the Device at the index in question
  * @param devq AIODeviceQuery *
  * @return != 0 the name of the card, otherwise an error
  */
@@ -92,6 +98,7 @@ char * AIODeviceQueryGetName( AIODeviceQuery *devq )
 
 /*------------------------------------------------------------------------*/
 /**
+ * @brief Returns number of Digital bytes for the device in question
  * @param devq AIODeviceQuery *
  * @return >= 0 the number of dio bytes of the card, otherwise an error
  */
@@ -101,6 +108,7 @@ AIORET_TYPE AIODeviceQueryGetNumDIOBytes( AIODeviceQuery *devq )
     return devq->numDIOBytes;
 }
 /**
+ * @brief Returns number of Counters for the device in question
  * @param devq AIODeviceQuery *
  * @return != 0 the name of the card, otherwise an error
  */

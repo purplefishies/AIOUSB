@@ -27,11 +27,11 @@ namespace AIOUSB
 #endif
 
 typedef struct AIODeviceQuery {
-    unsigned long productID;
-    unsigned long nameSize;
-    char *name;
-    unsigned long numDIOBytes;
-    unsigned long numCounters;
+    unsigned long productID;    /**< Product ID for the device  */
+    unsigned long nameSize;     /**< Name length for the device */
+    char *name;                 /**< Name of the device */
+    unsigned long numDIOBytes;  /**< Number of digital bytes */
+    unsigned long numCounters;  /**< Number of counters */
 } AIODeviceQuery;
 
 /* BEGIN AIOUSB_API */
