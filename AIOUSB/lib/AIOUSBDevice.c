@@ -296,24 +296,33 @@ using namespace AIOUSB;
  */
 TEST(Initialization,AddingDeviceSetsInit )
 {
-    AIOUSBDevice dev;
-    AIOUSBDeviceInitializeWithProductID( &dev , USB_AIO16_16A );
+    AIOUSBDevice *dev;
+    int numDevices = 0;
+    AIORESULT result;
+    AIODeviceTableInit();
+    AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numDevices, USB_AIO16_16A, NULL );    
+    /* AIOUSBDeviceInitializeWithProductID( &dev , USB_AIO16_16A ); */
+    dev = AIODeviceTableGetDeviceAtIndex( numDevices - 1 , &result );
+    ASSERT_TRUE( dev );
+    EXPECT_EQ( dev->ProductID, USB_AIO16_16A );
+    EXPECT_EQ( dev->isInit, AIOUSB_TRUE );
 
-    EXPECT_EQ( dev.ProductID, USB_AIO16_16A );
-
-    EXPECT_EQ( dev.isInit, AIOUSB_TRUE );
+    ClearAIODeviceTable( numDevices );
 }
 
 
 TEST(Initialization, SetDifferentConfigBlocks ) 
 {
-    AIOUSBDevice *dev = NewAIOUSBDevice(0) ;
+    AIOUSBDevice *dev;
     AIORET_TYPE result;
-    EXPECT_TRUE( dev );
+    int numDevices = 0;
+
     ADCConfigBlock *readconf = NULL;
     ADCConfigBlock *conf = (ADCConfigBlock*)calloc(sizeof(ADCConfigBlock),1);
 
-    AIOUSBDeviceInitializeWithProductID( dev , USB_AIO16_16A );
+    AIODeviceTableInit();
+    AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numDevices, USB_AIO16_16A, NULL );    
+    dev = AIODeviceTableGetDeviceAtIndex( numDevices - 1, (AIORESULT*)&result );
 
     EXPECT_TRUE(conf);
     ADCConfigBlockInitializeFromAIOUSBDevice( conf, dev );
@@ -338,21 +347,28 @@ TEST(Initialization, SetDifferentConfigBlocks )
         EXPECT_EQ( conf->registers[i], readconf->registers[i] );
 
     free(conf);
-    DeleteAIOUSBDevice( dev );
+   
+    ClearAIODeviceTable( numDevices );
 }
-
 
 TEST(TestingFeatures, PropogateTesting ) 
 {
-    AIOUSBDevice *dev = NewAIOUSBDevice(0) ;
-    ADCConfigBlock conf;
-    ADCConfigBlockInitializeFromAIOUSBDevice( &conf , dev );
+    AIOUSBDevice *dev;
+    ADCConfigBlock conf = {0};
+    int numDevices = 0;
+    AIORESULT result;
+
+    AIODeviceTableInit();
+    AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numDevices, USB_AIO16_16A, NULL );    
+    dev = AIODeviceTableGetDeviceAtIndex( numDevices - 1, &result );
+    /* ADCConfigBlockInitializeFromAIOUSBDevice( &conf , dev ); */
     
     AIOUSBDeviceSetADCConfigBlock( dev, &conf );
     
     AIOUSBDeviceSetTesting( dev, AIOUSB_TRUE );
     
     EXPECT_NE( ADCConfigBlockGetTesting(AIOUSBDeviceGetADCConfigBlock(dev)), ADCConfigBlockGetTesting( &conf ));
+    ClearAIODeviceTable( numDevices );
 }
 
 

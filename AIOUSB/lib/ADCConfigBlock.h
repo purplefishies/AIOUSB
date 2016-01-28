@@ -3,6 +3,7 @@
 
 #include "AIOTypes.h"
 #include "AIOEither.h"
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -11,7 +12,7 @@ namespace AIOUSB
 {
 #endif
 
-typedef struct aio_usb_driver AIOUSBDevice ;
+typedef struct AIOUSBDevice AIOUSBDevice;
 
 typedef struct mux_settings {
     unsigned long ADCChannelsPerGroup;

@@ -15,7 +15,7 @@ namespace AIOUSB
 {
 #endif
 
-typedef struct aio_usb_driver {
+typedef struct AIOUSBDevice {
     USBDevice *usb_device;
     AIOUSB_BOOL bOpen;
     int deviceIndex;
