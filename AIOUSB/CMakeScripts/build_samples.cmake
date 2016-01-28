@@ -50,11 +50,15 @@ macro ( build_gtest_cpp_file project c_file  cflags link_libraries )
   STRING(REGEX REPLACE "\\.c$" "" file_name ${c_file})
   SET(tmp_gtest_file "${file_name}_gtest.cpp" )
   ADD_CUSTOM_COMMAND( OUTPUT ${tmp_gtest_file} COMMAND ${CMAKE_COMMAND} -E copy_if_different ${c_file} ${tmp_gtest_file} )
-  # MESSAGE(STATUS "Adding GTEST file ${tmp_gtest_file}" )
+  #MESSAGE(STATUS "Adding GTEST file ${tmp_gtest_file}" )
   ADD_EXECUTABLE( "${project}_${binary_name}" ${tmp_gtest_file} )
 
   ADD_TEST( NAME ${binary_name} COMMAND ${binary_name} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
-
+  if( MEMORY_PROFILING ) 
+    MESSAGE(STATUS "Creating Memcheck command for ${binary_name}")
+    add_test(memcheck_${binary_name} ${CTEST_MEMORYCHECK_COMMAND} ${MEMCHECK_OPTIONS} ./${binary_name} )
+  endif( MEMORY_PROFILING )
+  
   SET_SOURCE_FILES_PROPERTIES( ${tmp_gtest_file}  PROPERTIES LANGUAGE CXX)
   SET_TARGET_PROPERTIES( "${project}_${binary_name}" PROPERTIES OUTPUT_NAME  ${binary_name} ) 
   SET_TARGET_PROPERTIES( "${project}_${binary_name}" PROPERTIES COMPILE_FLAGS ${cflags} ) 
