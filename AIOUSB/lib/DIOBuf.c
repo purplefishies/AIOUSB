@@ -292,6 +292,7 @@ TEST(DIOBuf, Hex_Output ) {
     buf =  NewDIOBufFromBinStr("00000000000000000000000011111111" );
     char *tmp = DIOBufToHex( buf );
     EXPECT_STREQ( tmp, "0x000000ff" );
+    DeleteDIOBuf( buf );
 }
 
 TEST(DIOBuf, Indexing_is_correct ) {
