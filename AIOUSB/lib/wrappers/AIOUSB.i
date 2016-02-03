@@ -17,13 +17,19 @@
 
 
 %include typemaps.i
+
+
 %apply unsigned long *INOUT { unsigned long *result };
+%apply long long { int64_t };
+
 %{
   extern unsigned long ADC_BulkPoll( unsigned long DeviceIndex, unsigned long *INOUT );
 %}
 
 
+
 %{
+  #include "AIOTypes.h"
   #include "AIOUSB_Core.h"
   #include "ADCConfigBlock.h"
   #include "AIOContinuousBuffer.h"
@@ -34,13 +40,13 @@
   #include "AIOUSB_Properties.h"
   #include "AIOUSB_DAC.h"
   #include "AIOUSB_CTR.h"
-  #include "AIOTypes.h"
   #include "cJSON.h"
   #include "AIOUSB_DIO.h"
   #include "AIOBuf.h"
   #include "DIOBuf.h"
   #include "libusb.h"
   #include <pthread.h>
+
 %}
 
 /* Needed to allow inclusion into Scala */
@@ -227,6 +233,7 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *O
 
 #endif
 
+%include "AIOTypes.h"
 %include "AIOUSB_Core.h"
 %include "ADCConfigBlock.h"
 %include "AIOContinuousBuffer.h"
@@ -240,13 +247,14 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *O
 %include "AIODeviceInfo.h"
 %include "AIOUSB_DIO.h"
 %include "cJSON.h"
-%include "AIOTypes.h"
 %include "DIOBuf.h"
 
 %array_functions(unsigned short, counts )
 %array_functions(double, volts )
 
 %inline %{
+
+
     /* For handling counts */
     unsigned short *new_ushortarray(int size) {
         return (unsigned short *)malloc(size*sizeof(unsigned short));
