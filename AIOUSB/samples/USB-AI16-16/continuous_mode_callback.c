@@ -102,11 +102,20 @@ main(int argc, char *argv[] )
     if ( (retval = aio_override_aiobuf_settings( buf, &options )) != AIOUSB_SUCCESS )
         exit(retval);
 
+    retval = ADC_SetCal(options.index, ":AUTO:");
+    if ( retval < AIOUSB_SUCCESS ) {
+        fprintf(stderr,"Error setting calibration %d\n", (int)retval);
+        exit(retval);
+    }
+
     fp = fopen(options.outfile,"w");
     if( !fp ) {
         fprintf(stderr,"Unable to open '%s' for writing\n", options.outfile );
         exit(1);
     }
+
+
+
 
     AIOCmd cmd = {.num_scans = 1 };
     int modded_counter = 0, read_count = 0;

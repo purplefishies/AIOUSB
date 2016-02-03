@@ -549,7 +549,7 @@ AIORESULT DIO_Read8(
     AIO_ERROR_VALID_DATA(AIOUSB_ERROR_NOT_ENOUGH_MEMORY, readBuffer );
 
     if ( (result = DIO_ReadAll(DeviceIndex, readBuffer->_buffer)) == AIOUSB_SUCCESS ) {
-        *pdat = (int)readBuffer->_buffer[ByteIndex];
+        *pdat = (unsigned char)readBuffer->_buffer[ByteIndex];
     }
 
     DeleteDIOBuf( readBuffer );
