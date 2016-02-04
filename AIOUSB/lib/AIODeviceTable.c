@@ -494,14 +494,14 @@ AIORET_TYPE GetDevices(void)
  * @param[out] result Error code if unable to find USB device 
  * @return USBDevice * A Usb handle that can be used for USB transactions
  */
-USBDevice *AIODeviceTableGetUSBDeviceAtIndex( unsigned long DeviceIndex, AIORESULT *result )
+USBDevice *AIODeviceTableGetUSBDeviceAtIndex( unsigned long DeviceIndex, AIORESULT *res )
 {
-    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( DeviceIndex , result );
-    AIO_ERROR_VALID_DATA_W_CODE( NULL, *result = -AIOUSB_ERROR_DEVICE_NOT_FOUND, dev );
-    AIO_ERROR_VALID_DATA( NULL, *result == AIOUSB_SUCCESS );
+    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( DeviceIndex , res );
+    AIO_ERROR_VALID_DATA_W_CODE( NULL, *res = -AIOUSB_ERROR_DEVICE_NOT_FOUND, dev );
+    AIO_ERROR_VALID_DATA( NULL, *res == AIOUSB_SUCCESS );
 
     USBDevice *usb = AIOUSBDeviceGetUSBHandle( dev );
-    AIO_ERROR_VALID_DATA_W_CODE( NULL, *result = -AIOUSB_ERROR_INVALID_USBDEVICE, usb );
+    AIO_ERROR_VALID_DATA_W_CODE( NULL, *res = -AIOUSB_ERROR_INVALID_USBDEVICE, usb );
 
     return usb;
 }
