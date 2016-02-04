@@ -8,7 +8,7 @@
 
 This project contains USB drivers and APIs for ACCES I/O Product's line of USB based data acquisition modules. This driver represents a large API collection for communicating with one or more of ACCES I/O Product's line of USB based data acquisition products. All of the core functionality that exists and is supported by the Windows software is implemented in this library for non-Windows based operating systems.  This code base compiles using either GCC and Clang compilers to both shared and static libraries that be can used in applications that need to perform highspeed USB data acquisition.
 
-The entire set of drivers are rely on functionality provided by the [libusb-1.0](http://www.libusb.org/) library. Please see the [prequisites](#Prerequisites) section to find out about required software for building the driver.
+The entire set of drivers are rely on functionality provided by the [libusb-1.0](http://libusb.info/) library. Please see the [prequisites](#Prerequisites) section to find out about required software for building the driver.
 
 Currently, this project provides full support to the following platforms:
 
@@ -26,7 +26,7 @@ Currently, this project provides full support to the following platforms:
 ## Prerequisites  {#Prerequisites}
 The functionality in this driver depends on the following installed packages.
 
-1. [libusb-1.0](http://www.libusb.org/)
+1. [libusb-1.0](http://www.libusb.info/)
 2. [cmake]( http://www.cmake.org/cmake/resources/software.html )
 3. [swig](http://swig.org/)
 4. (Optionally for python bindings ) [python-dev](http://python.org)
