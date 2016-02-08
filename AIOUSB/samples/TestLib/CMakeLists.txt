@@ -19,7 +19,7 @@ ADD_LIBRARY( TestCaseSetup SHARED ${CMAKE_CURRENT_SOURCE_DIR}/TestCaseSetup.cpp 
 TARGET_link_libraries( TestCaseSetup  aiousb aiousbcpp )
 
 ADD_LIBRARY( aiocommon SHARED ${CMAKE_CURRENT_SOURCE_DIR}/aiocommon.c )
-TARGET_LINK_LIBRARIES( aiocommon )
+TARGET_LINK_LIBRARIES( aiocommon aiousb )
 
 
 SET( AIOUSB_TESTCASELIB_DIR ${CMAKE_CURRENT_SOURCE_DIR} )
