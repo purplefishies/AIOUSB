@@ -84,19 +84,24 @@ int main( int argc, char **argv )
 
     volts = (double*)malloc((ADCConfigBlockGetEndChannel( config )-ADCConfigBlockGetStartChannel( config )+1)*sizeof(double));
     
+#ifdef UNIX
     if ( options.with_timing ) {
         clock_gettime( CLOCK_MONOTONIC_RAW, &starttime );
         memcpy(&prevtime,&starttime,sizeof(starttime));
     }
+#endif
 
     for ( int i = 0, channel = 0; i < options.num_scans; i ++ , channel = 0) {
         if ( options.counts ) { /* --counts will write out the raw values */
+#ifdef UNIX
             if ( options.with_timing )
                 clock_gettime( CLOCK_MONOTONIC_RAW, &prevtime );
+#endif
             ADC_GetScan( options.index, (unsigned short*)volts );
+#ifdef UNIX
             if ( options.with_timing ) 
                 clock_gettime( CLOCK_MONOTONIC_RAW, &curtime );
-
+#endif
             unsigned short *counts = (unsigned short *)volts;
             if( options.with_timing )
                 fprintf(stdout,"%ld,%ld,%ld,", curtime.tv_sec, (( prevtime.tv_sec - starttime.tv_sec )*1000000000 + (prevtime.tv_nsec - starttime.tv_nsec )), (curtime.tv_sec-prevtime.tv_sec)*1000000000 + ( curtime.tv_nsec - prevtime.tv_nsec) );
@@ -110,12 +115,15 @@ int main( int argc, char **argv )
 
 
         } else {
+#ifdef UNIX
             if ( options.with_timing )
                 clock_gettime( CLOCK_MONOTONIC_RAW, &prevtime );
+#endif
             ADC_GetScanV( options.index, volts );
+#ifdef UNIX
             if ( options.with_timing ) 
                 clock_gettime( CLOCK_MONOTONIC_RAW, &curtime );
-
+#endif
             if( options.with_timing )
                 fprintf(stdout,"%ld,%ld,%ld,", curtime.tv_sec, (( prevtime.tv_sec - starttime.tv_sec )*1000000000 + (prevtime.tv_nsec - starttime.tv_nsec )), (curtime.tv_sec-prevtime.tv_sec)*1000000000+ ( curtime.tv_nsec - prevtime.tv_nsec) );
 

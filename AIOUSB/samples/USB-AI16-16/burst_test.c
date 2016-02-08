@@ -144,9 +144,10 @@ main(int argc, char *argv[] )
      * in this example we read bytes in blocks of our core num_channels parameter. 
      * the channel order
      */
+#ifdef UNIX
     if ( options.with_timing ) 
         clock_gettime( CLOCK_MONOTONIC_RAW, &starttime );
-
+#endif
 
     int scans_remaining;
     int read_count = 0;
@@ -156,14 +157,17 @@ main(int argc, char *argv[] )
         if ( (scans_remaining = AIOContinuousBufCountScansAvailable(buf) ) > 0 ) { 
 
             if ( scans_remaining ) { 
+
+#ifdef UNIX
                 if ( options.with_timing )
                     clock_gettime( CLOCK_MONOTONIC_RAW, &prevtime );
-
+#endif
                 scans_read = AIOContinuousBufReadIntegerScanCounts( buf, tobuf, tobufsize, AIOContinuousBufNumberChannels(buf)*AIOContinuousBufCountScansAvailable(buf) );
 
+#ifdef UNIX
                 if ( options.with_timing )
                     clock_gettime( CLOCK_MONOTONIC_RAW, &curtime );
-
+#endif
                 read_count += scans_read;
 
                 if ( options.verbose )
