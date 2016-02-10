@@ -91,6 +91,11 @@ TESTFLAGS	:= -g
 override SHARED_LIBS	+=  -lusb-1.0 -pthread -lm
 override CXXFLAGS += -I. -I/usr/include/libusb-1.0 -D__aiousb_cplusplus
 
+ifeq ("$(OSTYPE)","CYGWIN")
+override CFLAGS		+= -Wno-char-subscripts 
+override CXXFLAGS	+= -Wno-char-subscripts 
+endif
+
 .PHONY : all bist
 
 all : $(LIBS)
@@ -101,6 +106,7 @@ bist:
 	@echo $(CC_SHFLAGS)
 	@echo $(CYGWINTYPE)
 	@echo $(SHCPPLIB)
+	@echo "CFLAGS=$(CFLAGS)"
 	@echo "COBJS=$(COBJS) $(CEXTRAOBJS)"
 	@echo "CDBGOBJS=$(CDBGOBJS)"
 	@echo "CPPOBJS=$(CPPOBJS)"
