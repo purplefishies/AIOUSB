@@ -1094,7 +1094,7 @@ using namespace AIOUSB;
 
 TEST(ADCConfigBlock, YAMLRepresentation)
 {
-    ADCConfigBlock config;
+    ADCConfigBlock config = {0};
     AIOUSBDevice dev;
     AIOUSBDeviceInitializeWithProductID( &dev, USB_AIO16_16A );
 
