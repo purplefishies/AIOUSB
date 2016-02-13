@@ -15,7 +15,9 @@ namespace AIOUSB
 {
 #endif
 
-typedef struct AIOUSBDevice {
+
+
+struct AIOUSBDevice {
     USBDevice *usb_device;
     AIOUSB_BOOL bOpen;
     int deviceIndex;
@@ -95,7 +97,12 @@ typedef struct AIOUSBDevice {
     int ADBuf_size;
     AIOUSB_BOOL testing;
     AIOUSB_BOOL valid;
-} AIOUSBDevice;
+};
+
+#ifndef _AIOUSBDEVICE_STRUCT
+#define _AIOUSBDEVICE_STRUCT
+typedef struct AIOUSBDevice AIOUSBDevice;
+#endif 
 
 typedef AIOUSBDevice DeviceDescriptor;
 

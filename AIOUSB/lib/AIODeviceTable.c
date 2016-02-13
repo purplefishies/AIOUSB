@@ -491,7 +491,7 @@ AIORET_TYPE GetDevices(void)
 /*----------------------------------------------------------------------------*/
 /** 
  * @param DeviceIndex Device index we are probing
- * @param[out] result Error code if unable to find USB device 
+ * @param[out] res Error code if unable to find USB device 
  * @return USBDevice * A Usb handle that can be used for USB transactions
  */
 USBDevice *AIODeviceTableGetUSBDeviceAtIndex( unsigned long DeviceIndex, AIORESULT *res )

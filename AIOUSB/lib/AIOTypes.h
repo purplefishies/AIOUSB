@@ -54,10 +54,20 @@ typedef  enum {
 
 #define VALID_PRODUCT(product) ( VALID_ENUM(  ProductIDS, product ) )
 
+
+#define GCC_VERSION (__GNUC__ * 10000 \
+                     + __GNUC_MINOR__ * 100     \
+                     + __GNUC_PATCHLEVEL__)
 #ifdef SWIG
 #define ACCES_DEPRECATED(FOO) ()
 #else
+
+#if GCC_VERSION > 40500
 #define ACCES_DEPRECATED(FOO)   __attribute__ ((deprecated(FOO)))
+#else
+#define ACCES_DEPRECATED(FOO)   __attribute__ ((deprecated))
+#endif
+
 #endif
 
 #ifdef __aiousb_cplusplus

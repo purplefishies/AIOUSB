@@ -12,7 +12,11 @@ namespace AIOUSB
 {
 #endif
 
+struct AIOUSBDevice;
+#ifndef _AIOUSBDEVICE_STRUCT
+#define _AIOUSBDEVICE_STRUCT
 typedef struct AIOUSBDevice AIOUSBDevice;
+#endif
 
 typedef struct mux_settings {
     unsigned long ADCChannelsPerGroup;
@@ -20,7 +24,7 @@ typedef struct mux_settings {
     AIOUSB_BOOL defined;
 } ADCMuxSettings;
 
-typedef struct adc_config_block {
+typedef struct ADCConfigBlock {
     AIOUSBDevice *device; /**< Pointer to the device Descriptor */
     unsigned long size;
     unsigned char registers[ AD_MAX_CONFIG_REGISTERS +1];
