@@ -66,7 +66,7 @@ int main( int argc, char **argv )
 
     usb = AIOUSBDeviceGetUSBHandle( dev );
 
-#if 1
+#if 0 
     retval = ADC_SetCal(options.index, ":AUTO:");
     if ( retval < AIOUSB_SUCCESS ) {
         fprintf(stderr,"Error setting calibration %d\n", (int)retval);

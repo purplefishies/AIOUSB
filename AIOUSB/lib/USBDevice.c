@@ -334,7 +334,7 @@ int USBDevicePutADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock )
 }
 
 /*----------------------------------------------------------------------------*/
-int usb_control_transfer(struct aiousb_device *dev_handle,
+int usb_control_transfer(USBDevice *dev_handle,
                          uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
                          unsigned char *data, uint16_t wLength, unsigned int timeout)
 {
@@ -417,7 +417,7 @@ int usb_bulk_transfer( USBDevice *usb,
 }
 
 /*----------------------------------------------------------------------------*/
-int usb_request(struct aiousb_device *dev_handle,
+int usb_request(USBDevice *dev_handle,
                         uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
                         unsigned char *data, uint16_t wLength, unsigned int timeout)
 {
@@ -425,7 +425,7 @@ int usb_request(struct aiousb_device *dev_handle,
 }
 
 /*----------------------------------------------------------------------------*/
-int usb_reset_device( struct aiousb_device *usb )
+int usb_reset_device( USBDevice *usb )
 {
     AIO_ASSERT_USB( usb );
 

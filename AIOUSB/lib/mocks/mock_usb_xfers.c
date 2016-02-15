@@ -37,7 +37,7 @@ IO_DIRECTION direction;
 ADCConfigBlock *KEEP = NULL;
 
 
-int mock_usb_control_transfer(struct aiousb_device *dev_handle,
+int mock_usb_control_transfer(USBDevice *dev_handle,
                               uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
                               unsigned char *data, uint16_t wLength, unsigned int timeout);
 
@@ -49,7 +49,7 @@ int mock_usb_bulk_transfer( USBDevice *usb,
                             unsigned int timeout
                             );
 
-int mock_usb_reset_device( struct aiousb_device *usb );
+int mock_usb_reset_device( USBDevice *usb );
 int mock_USBDevicePutADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock );
 int mock_USBDeviceFetchADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock );
 
@@ -63,10 +63,11 @@ AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , USBDevice **devs
     char delim[] = ",";
     char *pos;
 
-    static int (*orig_AddAllACCESUSBDevices)( libusb_device **deviceList , USBDevice **devs , int *size ) = NULL;
+    static AIORET_TYPE (*orig_AddAllACCESUSBDevices)( libusb_device **deviceList , USBDevice **devs , int *size ) = NULL;
 
     if (!orig_AddAllACCESUSBDevices)
         orig_AddAllACCESUSBDevices = (add_devices_fn)dlsym(RTLD_NEXT,"AddAllACCESUSBDevices");
+
     
     tmp = getenv((const char *)"AIO_TEST_PRODUCTS");
     if ( tmp ) {
@@ -83,20 +84,20 @@ AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , USBDevice **devs
                     usb->usb_get_config        = mock_USBDeviceFetchADCConfigBlock;  
                     usb->usb_reset_device      = mock_usb_reset_device;
                     struct libusb_device_descriptor tmp = {
-                        .bLength = 18,
-                        .bDescriptorType = 1,
-                        .bcdUSB = 512,
-                        .bDeviceClass = 0,
-                        .bDeviceSubClass = 0,
-                        .bDeviceProtocol = 0,
-                        .bMaxPacketSize0 = 64,
-                        .idVendor = 5637,
-                        .idProduct = (uint16_t)atoi(token),
-                        .bcdDevice = 0,
-                        .iManufacturer = 1,
-                        .iProduct = 2,
-                        .iSerialNumber = 0,
-                        .bNumConfigurations = 1
+                        bLength: 18,
+                        bDescriptorType: 1,
+                        bcdUSB: 512,
+                        bDeviceClass: 0,
+                        bDeviceSubClass: 0,
+                        bDeviceProtocol: 0,
+                        bMaxPacketSize0: 64,
+                        idVendor: 5637,
+                        idProduct: (uint16_t)atoi(token),
+                        bcdDevice: 0,
+                        iManufacturer: 1,
+                        iProduct: 2,
+                        iSerialNumber: 0,
+                        bNumConfigurations: 1
                     };
                     memcpy( &usb->deviceDesc , &tmp, sizeof(struct libusb_device_descriptor)); 
 
@@ -111,12 +112,12 @@ AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , USBDevice **devs
 }
 
 
-int mock_usb_control_transfer(struct aiousb_device *dev_handle,
+int mock_usb_control_transfer(USBDevice *dev_handle,
                               uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
                               unsigned char *data, uint16_t wLength, unsigned int timeout)
 {
 
-    libusb_device_handle *handle = get_usb_device( dev_handle );
+    /* libusb_device_handle *handle = get_usb_device( dev_handle ); */
     printf("Mock control ");
 
     if ( request_type ==  USB_WRITE_TO_DEVICE ) {
@@ -155,8 +156,8 @@ int mock_usb_bulk_transfer( USBDevice *usb,
                             unsigned int timeout
                             )
 {
-    int libusbResult = LIBUSB_SUCCESS;
-    int total = 0;
+    /* int libusbResult = LIBUSB_SUCCESS; */
+    /* int total = 0; */
     printf("Fake mock_usb_bulk_transfer\n");
     AIO_ASSERT_USB( usb );
     AIO_ASSERT( data );
@@ -184,7 +185,7 @@ int mock_USBDeviceFetchADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlo
 
     return 0;
 }
-int mock_usb_reset_device( struct aiousb_device *usb )
+int mock_usb_reset_device( USBDevice *usb )
 {    
     printf("Fake mock_usb_reset_device\n");
     return 0;

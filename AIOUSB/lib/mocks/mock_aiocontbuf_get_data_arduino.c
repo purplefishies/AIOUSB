@@ -115,11 +115,11 @@ AIORET_TYPE adc_get_bulk_data( ADCConfigBlock *config,
     double scale_down = 1;
     int noisy_ground = 30;
     int noisy_signal = 10;
-    int usb_delay = 0;
+    /* int usb_delay = 0; */
     static char arduino_counter = 0;
-    if ( getenv("AIO_USB_DELAY") ) {
-        usb_delay = atoi(getenv("AIO_USB_DELAY"));
-    }
+    /* if ( getenv("AIO_USB_DELAY") ) { */
+    /*     usb_delay = atoi(getenv("AIO_USB_DELAY")); */
+    /* } */
     if ( getenv("MOCK_SCALE_DOWN") ) { 
         scale_down = strtod(getenv("MOCK_SCALE_DOWN"),NULL);
     } 

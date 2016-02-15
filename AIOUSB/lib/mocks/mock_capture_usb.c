@@ -30,21 +30,21 @@ typedef enum {
 } IO_DIRECTION;
 
 
-int (*orig_usb_control_transfer)( struct aiousb_device *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout );
+int (*orig_usb_control_transfer)( USBDevice *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout );
 
-int (*orig_usb_bulk_transfer)( struct aiousb_device *dev_handle,
+int (*orig_usb_bulk_transfer)( USBDevice *dev_handle,
                   unsigned char endpoint, unsigned char *data, int length,
                   int *actual_length, unsigned int timeout );
 
-int (*orig_usb_request)( struct aiousb_device *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout );
-int (*orig_usb_reset_device)(struct aiousb_device *usbdev );
-int (*orig_usb_put_config)( struct aiousb_device *usb, ADCConfigBlock *configBlock );
-int (*orig_usb_get_config)( struct aiousb_device *usb, ADCConfigBlock *configBlock );
+int (*orig_usb_request)( USBDevice *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout );
+int (*orig_usb_reset_device)(USBDevice *usbdev );
+int (*orig_usb_put_config)( USBDevice *usb, ADCConfigBlock *configBlock );
+int (*orig_usb_get_config)( USBDevice *usb, ADCConfigBlock *configBlock );
 
 FILE *outfile;
 
 
-int mock_usb_control_transfer( struct aiousb_device *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout )
+int mock_usb_control_transfer( USBDevice *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout )
 {
     printf("Wrapping control\n");
     IO_DIRECTION direction;
@@ -64,7 +64,7 @@ int mock_usb_control_transfer( struct aiousb_device *usbdev, uint8_t request_typ
     return retval;
 }
 
-int mock_usb_bulk_transfer( struct aiousb_device *dev_handle,
+int mock_usb_bulk_transfer( USBDevice *dev_handle,
                             unsigned char endpoint, unsigned char *data, int length,
                             int *actual_length, unsigned int timeout )
 {
@@ -90,19 +90,19 @@ int mock_usb_bulk_transfer( struct aiousb_device *dev_handle,
     return retval;
 }
 
-int mock_usb_request( struct aiousb_device *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout )
+int mock_usb_request( USBDevice *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout )
 {
     printf("wrapping usb_request\n");
     return orig_usb_request( usbdev, request_type, bRequest, wValue, wIndex, data, wLength, timeout );
 }
 
-int mock_usb_reset_device(struct aiousb_device *usbdev )
+int mock_usb_reset_device(USBDevice *usbdev )
 {
     printf("Wrapping reset_device\n");
     return orig_usb_reset_device( usbdev );
 }
  
-int mock_usb_put_config( struct aiousb_device *usb, ADCConfigBlock *configBlock )
+int mock_usb_put_config( USBDevice *usb, ADCConfigBlock *configBlock )
 {
     printf("Wrapping put_config\n");
     int retval;
@@ -113,7 +113,7 @@ int mock_usb_put_config( struct aiousb_device *usb, ADCConfigBlock *configBlock 
     return retval;
 }
 
-int mock_usb_get_config( struct aiousb_device *usb, ADCConfigBlock *configBlock )
+int mock_usb_get_config( USBDevice *usb, ADCConfigBlock *configBlock )
 {
     printf("Wrapping get_config\n");
     return orig_usb_get_config( usb, configBlock );

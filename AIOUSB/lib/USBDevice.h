@@ -11,18 +11,20 @@
 namespace AIOUSB {
 #endif
 
-typedef struct aiousb_device { 
+typedef struct USBDevice USBDevice;
 
-    int (*usb_control_transfer)( struct aiousb_device *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout );
+struct USBDevice { 
 
-    int (*usb_bulk_transfer)( struct aiousb_device *dev_handle,
+    int (*usb_control_transfer)( USBDevice *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout );
+
+    int (*usb_bulk_transfer)( USBDevice *dev_handle,
                       unsigned char endpoint, unsigned char *data, int length,
                       int *actual_length, unsigned int timeout );
 
-    int (*usb_request)( struct aiousb_device *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout );
-    int (*usb_reset_device)(struct aiousb_device *usbdev );
-    int (*usb_put_config)( struct aiousb_device *usb, ADCConfigBlock *configBlock );
-    int (*usb_get_config)( struct aiousb_device *usb, ADCConfigBlock *configBlock );
+    int (*usb_request)( USBDevice *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout );
+    int (*usb_reset_device)(USBDevice *usbdev );
+    int (*usb_put_config)( USBDevice *usb, ADCConfigBlock *configBlock );
+    int (*usb_get_config)( USBDevice *usb, ADCConfigBlock *configBlock );
 
     uint8_t timeout;
     libusb_device *device;
@@ -35,7 +37,7 @@ typedef struct aiousb_device {
     int conf;
     int origconf;
     int altset;
-} USBDevice;
+};
 
 typedef struct aiousb_libusb_args {
     struct libusb_device *dev;
@@ -57,16 +59,16 @@ PUBLIC_EXTERN int USBDeviceGetIdProduct( USBDevice *device );
 PUBLIC_EXTERN int USBDeviceFetchADCConfigBlock( USBDevice *device, ADCConfigBlock *config );
 PUBLIC_EXTERN int USBDevicePutADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock );
 
-PUBLIC_EXTERN int usb_control_transfer(struct aiousb_device *dev_handle,
+PUBLIC_EXTERN int usb_control_transfer(USBDevice *dev_handle,
                          uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
                                  unsigned char *data, uint16_t wLength, unsigned int timeout);
-PUBLIC_EXTERN int usb_bulk_transfer(struct aiousb_device *dev_handle,
+PUBLIC_EXTERN int usb_bulk_transfer(USBDevice *dev_handle,
                               unsigned char endpoint, unsigned char *data, int length,
                               int *actual_length, unsigned int timeout);
-PUBLIC_EXTERN int usb_request(struct aiousb_device *dev_handle,
+PUBLIC_EXTERN int usb_request(USBDevice *dev_handle,
                         uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
                         unsigned char *data, uint16_t wLength, unsigned int timeout);
-PUBLIC_EXTERN int usb_reset_device( struct aiousb_device *usb );
+PUBLIC_EXTERN int usb_reset_device( USBDevice *usb );
 
  
 PUBLIC_EXTERN libusb_device_handle *get_usb_device( USBDevice *dev );

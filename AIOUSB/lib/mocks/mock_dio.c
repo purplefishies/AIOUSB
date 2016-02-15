@@ -84,7 +84,7 @@ void save_results( char *prefix,
 }
 
 /*----------------------------------------------------------------------------*/
-int mock_usb_control_transfer(struct aiousb_device *dev_handle,
+int mock_usb_control_transfer(USBDevice *dev_handle,
                          uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
                          unsigned char *data, uint16_t wLength, unsigned int timeout)
 {
@@ -98,7 +98,7 @@ int mock_usb_control_transfer(struct aiousb_device *dev_handle,
 }
 
 /*----------------------------------------------------------------------------*/
-int mock_usb_bulk_transfer(struct aiousb_device *dev_handle,
+int mock_usb_bulk_transfer(USBDevice *dev_handle,
                       unsigned char endpoint, unsigned char *data, int length,
                       int *actual_length, unsigned int timeout
                       )
