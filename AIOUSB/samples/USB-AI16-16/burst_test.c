@@ -86,6 +86,14 @@ main(int argc, char *argv[] )
       exit(1);
     }
 
+#if 1
+    retval = ADC_SetCal(options.index, ":AUTO:");
+    if ( retval < AIOUSB_SUCCESS ) {
+        fprintf(stderr,"Error setting calibration %d\n", (int)retval);
+        exit(retval);
+    }
+#endif
+
     /**
      * 2. Setup the Config object for Acquisition, either the more complicated 
      *    part in comments (BELOW) or using a simple interface.
