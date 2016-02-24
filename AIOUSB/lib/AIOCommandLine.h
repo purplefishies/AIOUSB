@@ -8,7 +8,9 @@
 #include "AIOUSB_Core.h"
 #include "AIODeviceTable.h"
 #include "AIOUSB_Properties.h"
-#include "getopt.h"
+#include <getopt.h>
+#include <ctype.h>
+
 
 #ifdef __aiousb_cplusplus
 namespace AIOUSB
@@ -16,6 +18,54 @@ namespace AIOUSB
 #endif
 
 AIOArgument *NewAIOArgument();
+
+#define DUMP   0x1000
+#define CNTS   0x1001
+#define JCONF  0x1002
+#define REPEAT 0x1003
+
+typedef struct AIOChannelRange {
+    int start_channel;
+    int end_channel;
+    int gaincode;
+} AIOChannelRange;
+
+
+typedef struct AIOCommandLineOptions {
+    int64_t num_scans;
+    int64_t default_num_scans;
+    int num_channels;
+    int default_num_channels;
+    int num_oversamples;
+    int default_num_oversamples;
+    int gain_code;
+    int clock_rate;
+    int default_clock_rate;
+    char *outfile;
+    int reset;
+    int debug_level;
+    int number_ranges;
+    int verbose;
+    int start_channel;
+    int default_start_channel;
+    int end_channel;
+    int default_end_channel;
+    int index;
+    int block_size;
+    int with_timing;
+    int slow_acquire;
+    int buffer_size;
+    int rate_limit;
+    int physical;
+    int counts;
+    int calibration;            
+    int repeat;
+    char *aiobuf_json;
+    char *default_aiobuf_json;
+    char *adcconfig_json;
+    AIOChannelRange **ranges;
+ } AIOCommandLineOptions;
+
 
 typedef enum {
     INDEX_NUM = 0,
@@ -28,8 +78,13 @@ typedef enum {
     FILE_OPT,
     CHANNEL_OPT
 } DeviceEnum;
- 
-PUBLIC_EXTERN AIOArgument *aiousb_getoptions( int argc, char **argv);
+
+/* BEGIN AIOUSB_API */
+PUBLIC_EXTERN void AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv);
+PUBLIC_EXTERN AIOChannelRange *AIOGetChannelRange(char *optarg );
+PUBLIC_EXTERN void AIOPrintUsage(int argc, char **argv,  struct option  *options);
+/* END AIOUSB_API */
+
 
 #ifdef __aiousb_cplusplus
 }
