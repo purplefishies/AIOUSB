@@ -773,7 +773,7 @@ PUBLIC_EXTERN libusb_device_handle *USBDeviceGetUSBDeviceHandle( USBDevice *usb 
 
 /* #include "AIOCommandLine.h" */
 
-PUBLIC_EXTERN void AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv);
+PUBLIC_EXTERN AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv);
 PUBLIC_EXTERN AIOChannelRange *AIOGetChannelRange(char *optarg );
 PUBLIC_EXTERN void AIOPrintUsage(int argc, char **argv,  struct option  *options);
 

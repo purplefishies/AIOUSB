@@ -41,9 +41,9 @@ AIOCommandLineOptions AIO_DEFAULT_CMDLINE_OPTIONS = {
 
 
 
-void AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv)
+AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv)
 {
-        int c;
+    int c;
     int error = 0;
     int option_index = 0;
     int query = 0;
@@ -88,7 +88,7 @@ void AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv)
         case 'R':
             if( !( tmp = AIOGetChannelRange(optarg)) ) {
                 fprintf(stdout,"Incorrect channel range spec, should be '--range START-END=GAIN_CODE', not %s\n", optarg );
-                exit(1);
+                return -AIOUSB_ERROR_AIOCOMMANDLINE_INVALID_CHANNEL_RANGE;
             }
 
             options->ranges = (AIOChannelRange **)realloc( options->ranges , (++options->number_ranges)*sizeof(AIOChannelRange *)  );
@@ -154,7 +154,7 @@ void AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv)
             break;
         case 'h':
             AIOPrintUsage(argc, argv, long_options );
-            exit(1);
+            return -AIOUSB_ERROR_AIOCOMMANDLINE_HELP;
             break;
         case 'i':
             options->index = atoi(optarg);
@@ -193,25 +193,25 @@ void AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv)
         }
         if( error ) {
             AIOPrintUsage(argc, argv, long_options);
-            exit(1);
+            return -AIOUSB_ERROR_INVALID_LIBUSB_DEVICE_HANDLE;
         }
         if( options->num_channels == 0 ) {
             fprintf(stderr,"Error: You must specify num_channels > 0: %d\n", options->num_channels );
             AIOPrintUsage(argc, argv, long_options);
-            exit(1);
+            return -AIOUSB_ERROR_AIOCOMMANDLINE_INVALID_NUM_CHANNELS;
         }
     }
 
     if ( query ) {
         AIOUSB_Init();
         AIOUSB_ShowDevices( display_type );
-        exit(0);
+        return AIOUSB_SUCCESS;
     }
 
     if ( dump_adcconfig ) { 
         if ( options->index == -1 ) { 
             fprintf(stderr,"Error: Can't dump adcconfiguration without specifying index ( -i INDEX_NUM ) of the device\nexiting...\n");
-            exit(1);
+            return -AIOUSB_ERROR_AIOCOMMANDLINE_INVALID_INDEX_NUM;
         } else {
             AIOUSB_Init();
             /* AIOUSB_ShowDevices( display_type ); */
@@ -219,7 +219,7 @@ void AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv)
             ADCConfigBlockInitializeDefault( &config );
             ADC_GetConfig( options->index, config.registers, &config.size );
             printf("%s\n",ADCConfigBlockToJSON(&config));
-            exit(0);
+            return AIOUSB_SUCCESS;
         }
     } 
 
@@ -227,7 +227,8 @@ void AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv)
         if ( options->start_channel >= 0 && options->end_channel >=0  && options->num_channels ) {
             fprintf(stdout,"Error: you can only specify -start_channel & -end_channel OR  --start_channel & --numberchannels\n");
             AIOPrintUsage(argc, argv, long_options );
-            exit(1);
+            return -AIOUSB_ERROR_AIOCOMMANDLINE_INVALID_START_END_CHANNEL;
+
         } else if ( options->start_channel >= 0 && options->num_channels >= 0 ) {
             options->end_channel = options->start_channel + options->num_channels - 1;
         } else if ( options->num_channels > 0 ) {
@@ -253,6 +254,8 @@ void AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv)
         options->end_channel = max;
         options->num_channels = (max - min + 1 );
     }
+
+    return AIOUSB_SUCCESS;
 }
 
 /*----------------------------------------------------------------------------*/

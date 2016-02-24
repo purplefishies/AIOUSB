@@ -78,7 +78,7 @@ typedef enum {
 } DeviceEnum;
 
 /* BEGIN AIOUSB_API */
-PUBLIC_EXTERN void AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv);
+PUBLIC_EXTERN AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv);
 PUBLIC_EXTERN AIOChannelRange *AIOGetChannelRange(char *optarg );
 PUBLIC_EXTERN void AIOPrintUsage(int argc, char **argv,  struct option  *options);
 /* END AIOUSB_API */
