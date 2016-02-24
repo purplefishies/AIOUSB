@@ -20,11 +20,6 @@ typedef enum {
     AIOCONTINUOUSBUF_CONFIG = 1
 } ConfigurationType;
 
-typedef union  aio_setting {
-    ADCConfigBlock adc;
-    AIOContinuousBuf aiobuf;
-} AIOSetting;
-
 typedef enum {
     AD_SCAN_GETSCAN = 0,
     AD_SCAN_GETSCANV,
@@ -55,7 +50,6 @@ typedef struct configuration {
     char *output_file;
     FILE *file_handle;
     char *file_name;
-    AIOSetting setting;
     AIORET_TYPE (*configure)( struct configuration *);
     AIORET_TYPE (*run)( struct configuration *);
 } AIOConfiguration;

@@ -34,7 +34,6 @@ AIORET_TYPE AIOConfigurationInitialize( AIOConfiguration *config )
     config->output_file           = NULL;
     config->file_handle           = stdout;
     config->file_name             = NULL;
-    memset(&config->setting,0,sizeof(AIOSetting));
     config->configure             = NULL;
     config->run                   = NULL;
     config->type                  = NO_CONFIG;
@@ -60,16 +59,6 @@ AIORET_TYPE AIOConfigurationSetTimeout( AIOConfiguration *config, unsigned timeo
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_CONFIG, config );
    
-    switch ( config->type ) {
-    case AIOCONTINUOUSBUF_CONFIG:
-        retval = AIOContinuousBufSetTimeout( &config->setting.aiobuf, timeout );
-        break;
-    case ADCCONIGBLOCK_CONFIG:
-    default:
-        retval = ADCConfigBlockSetTimeout( &config->setting.adc , timeout );
-        break;
-    }
-    config->timeout = timeout;
     return retval;
 }
 
@@ -78,16 +67,6 @@ AIORET_TYPE AIOConfigurationSetDebug( AIOConfiguration *config, AIOUSB_BOOL debu
 {
     AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_CONFIG, config );
 
-    switch ( config->type ) {
-    case AIOCONTINUOUSBUF_CONFIG:
-        AIOContinuousBufSetDebug( &config->setting.aiobuf, debug );
-        break;
-    case ADCCONIGBLOCK_CONFIG:
-        ADCConfigBlockSetDebug( &config->setting.adc , debug );
-    default:
-        break;
-    }
-    config->debug = debug;
     return AIOUSB_SUCCESS;
 }
 

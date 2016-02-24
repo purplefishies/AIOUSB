@@ -17,8 +17,6 @@ namespace AIOUSB
 {
 #endif
 
-AIOArgument *NewAIOArgument();
-
 #define DUMP   0x1000
 #define CNTS   0x1001
 #define JCONF  0x1002

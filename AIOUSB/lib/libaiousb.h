@@ -535,7 +535,7 @@ PUBLIC_EXTERN AIORET_TYPE AIODeviceTablePopulateTableTest(unsigned long *product
 PUBLIC_EXTERN AIORESULT AIODeviceTableClearDevices( void );
 PUBLIC_EXTERN AIORESULT ClearDevices( void );
 PUBLIC_EXTERN AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *result );
-PUBLIC_EXTERN USBDevice *AIODeviceTableGetUSBDeviceAtIndex( unsigned long DeviceIndex, AIORESULT *result );
+PUBLIC_EXTERN USBDevice *AIODeviceTableGetUSBDeviceAtIndex( unsigned long DeviceIndex, AIORESULT *res );
 void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID );
 
 PUBLIC_EXTERN unsigned long QueryDeviceInfo( unsigned long DeviceIndex, unsigned long *pPID, unsigned long *pNameSize, char *pName, unsigned long *pDIOBytes, unsigned long *pCounters );
@@ -549,6 +549,7 @@ PUBLIC_EXTERN AIOUSB_BOOL AIOUSB_IsInit();
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_Exit();
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_Reset( unsigned long DeviceIndex );
 PUBLIC_EXTERN void AIODeviceTableInit(void);
+PUBLIC_EXTERN AIORET_TYPE ClearAIODeviceTable( int numDevices );
 
 PUBLIC_EXTERN void CloseAllDevices(void);
 PUBLIC_EXTERN AIORESULT AIOUSB_GetAllDevices();
@@ -755,20 +756,26 @@ PUBLIC_EXTERN int USBDeviceGetIdProduct( USBDevice *device );
 PUBLIC_EXTERN int USBDeviceFetchADCConfigBlock( USBDevice *device, ADCConfigBlock *config );
 PUBLIC_EXTERN int USBDevicePutADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock );
 
-PUBLIC_EXTERN int usb_control_transfer(struct aiousb_device *dev_handle,
+PUBLIC_EXTERN int usb_control_transfer(USBDevice *dev_handle,
                          uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
                                  unsigned char *data, uint16_t wLength, unsigned int timeout);
-PUBLIC_EXTERN int usb_bulk_transfer(struct aiousb_device *dev_handle,
+PUBLIC_EXTERN int usb_bulk_transfer(USBDevice *dev_handle,
                               unsigned char endpoint, unsigned char *data, int length,
                               int *actual_length, unsigned int timeout);
-PUBLIC_EXTERN int usb_request(struct aiousb_device *dev_handle,
+PUBLIC_EXTERN int usb_request(USBDevice *dev_handle,
                         uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
                         unsigned char *data, uint16_t wLength, unsigned int timeout);
-PUBLIC_EXTERN int usb_reset_device( struct aiousb_device *usb );
+PUBLIC_EXTERN int usb_reset_device( USBDevice *usb );
 
  
 PUBLIC_EXTERN libusb_device_handle *get_usb_device( USBDevice *dev );
 PUBLIC_EXTERN libusb_device_handle *USBDeviceGetUSBDeviceHandle( USBDevice *usb );
+
+/* #include "AIOCommandLine.h" */
+
+PUBLIC_EXTERN void AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv);
+PUBLIC_EXTERN AIOChannelRange *AIOGetChannelRange(char *optarg );
+PUBLIC_EXTERN void AIOPrintUsage(int argc, char **argv,  struct option  *options);
 
 
 
