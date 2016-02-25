@@ -33,7 +33,6 @@ PUBLIC_EXTERN AIORESULT GetDeviceBySerialNumber(uint64_t *pSerialNumber);
 PUBLIC_EXTERN AIORESULT GetDeviceSerialNumber(unsigned long DeviceIndex, uint64_t *pSerialNumber );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetDeviceSerialNumber( unsigned long DeviceIndex );
 
-PUBLIC_EXTERN AIORET_TYPE FindDevices( int **indices, int *length , int minProductID, int maxProductID  );
 PUBLIC_EXTERN AIORESULT AIOUSB_GetDeviceProperties(unsigned long DeviceIndex, DeviceProperties *properties );
 PUBLIC_EXTERN const char *AIOUSB_GetResultCodeAsString(unsigned long result_value);
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_ListDevices();

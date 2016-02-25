@@ -187,40 +187,21 @@ unsigned long GetDeviceBySerialNumber(uint64_t *pSerialNumber)
 }
 
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE FindDevices( int **where, int *length , int minProductID, int maxProductID  )
-{
-    AIO_ASSERT( where );
-    AIO_ASSERT( length );
-    unsigned long deviceMask = AIOUSB_GetAllDevices();
-    static int indices[MAX_USB_DEVICES];
-    int index = 0;
-    AIORESULT retval = AIOUSB_ERROR_DEVICE_NOT_FOUND;
-    *length = 0;
-
-    while ( deviceMask  ) {
-        if ( deviceMask & 1 ) {
-            if ( deviceTable[index].ProductID >= (unsigned)minProductID && 
-                 deviceTable[index].ProductID <= (unsigned)maxProductID ) {
-                indices[(*length)++] = index;
-                retval = AIOUSB_SUCCESS;
-            }
-        }
-        index++;
-        deviceMask >>= 1;
-    }
-    if ( retval == AIOUSB_SUCCESS )
-        *where = indices;
-    return retval;
-}
-
-
-/*----------------------------------------------------------------------------*/
+/**
+ * @brief Friendly function that can be called first. It 
+ * @param where 
+ * @param length 
+ * @param is_ok_device 
+ * 
+ * @return 
+ */
 AIORET_TYPE AIOUSB_FindDevices( int **where, int *length , AIOUSB_BOOL (*is_ok_device)( AIOUSBDevice *dev )  )
 {
     AIO_ASSERT( where );
     AIO_ASSERT( length );
     if ( !AIOUSB_IsInit() )
         AIOUSB_Init();
+
     unsigned long deviceMask = AIOUSB_GetAllDevices();
     static int indices[MAX_USB_DEVICES];
     int index = 0;
@@ -430,6 +411,8 @@ AIORET_TYPE AIOUSB_ShowDevices( AIODisplayType display_type )
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE  AIOUSB_ListDevices() 
 {
+    if ( !AIOUSB_IsInit() )
+        AIOUSB_Init();
     AIORET_TYPE found = AIOUSB_SUCCESS;
     found = AIOUSB_ShowDevices( BASIC );
     if ( found < AIOUSB_SUCCESS )

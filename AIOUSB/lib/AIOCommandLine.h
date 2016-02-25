@@ -84,6 +84,8 @@ PUBLIC_EXTERN void AIOPrintUsage(int argc, char **argv,  struct option  *options
 /* END AIOUSB_API */
 
 
+extern AIOCommandLineOptions AIO_DEFAULT_CMDLINE_OPTIONS;
+
 #ifdef __aiousb_cplusplus
 }
 #endif
