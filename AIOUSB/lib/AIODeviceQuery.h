@@ -32,17 +32,22 @@ typedef struct AIODeviceQuery {
     char *name;                 /**< Name of the device */
     unsigned long numDIOBytes;  /**< Number of digital bytes */
     unsigned long numCounters;  /**< Number of counters */
+    unsigned long index;        /**< Index this is associated with */
 } AIODeviceQuery;
 
 /* BEGIN AIOUSB_API */
 
 PUBLIC_EXTERN AIODeviceQuery *NewAIODeviceQuery( unsigned long DeviceIndex );
 PUBLIC_EXTERN AIORET_TYPE DeleteAIODeviceQuery( AIODeviceQuery *devq );
+PUBLIC_EXTERN char *AIODeviceQueryToStr( AIODeviceQuery *devq );
+PUBLIC_EXTERN char *AIODeviceQueryToRepr( AIODeviceQuery *devq );
 PUBLIC_EXTERN AIORET_TYPE AIODeviceQueryGetProductID( AIODeviceQuery *devq );
 PUBLIC_EXTERN AIORET_TYPE AIODeviceQueryNameSize( AIODeviceQuery *devq );
 PUBLIC_EXTERN char * AIODeviceQueryGetName( AIODeviceQuery *devq );
 PUBLIC_EXTERN AIORET_TYPE AIODeviceQueryGetNumDIOBytes( AIODeviceQuery *devq );
 PUBLIC_EXTERN AIORET_TYPE AIODeviceQueryGetNumCounters( AIODeviceQuery *devq );
+PUBLIC_EXTERN AIORET_TYPE AIODeviceQueryGetIndex( AIODeviceQuery *devq );
+
 
 /* END AIOUSB_API */
 

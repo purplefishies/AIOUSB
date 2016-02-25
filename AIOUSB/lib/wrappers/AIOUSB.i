@@ -35,6 +35,7 @@
   #include "AIOContinuousBuffer.h"
   #include "AIOChannelMask.h"
   #include "AIODeviceTable.h"    
+  #include "AIODeviceQuery.h"
   #include "AIOUSBDevice.h"
   #include "AIODeviceInfo.h"
   #include "AIOUSB_Properties.h"
@@ -49,6 +50,25 @@
 
 %}
 
+%include "AIOTypes.h"
+%include "AIOUSB_Core.h"
+%include "ADCConfigBlock.h"
+%include "AIOContinuousBuffer.h"
+%include "AIOUSB_Properties.h"
+%include "AIOChannelMask.h"
+%include "AIODeviceTable.h"    
+%include "AIODeviceQuery.h"
+%include "AIOUSB_ADC.h"
+%include "AIOUSB_DAC.h"
+%include "AIOUSB_CTR.h"
+%include "AIOUSBDevice.h"
+%include "AIODeviceInfo.h"
+%include "AIOUSB_DIO.h"
+%include "cJSON.h"
+%include "DIOBuf.h"
+
+
+
 /* Needed to allow inclusion into Scala */
 %pragma(java) modulecode=%{
     static {
@@ -59,6 +79,7 @@
 
 %newobject CreateSmartBuffer;
 %newobject NewAIOBuf;
+%newobject NewAIODeviceQuery;
 %delobject AIOBuf::DeleteAIOBuf;
 
 AIORET_TYPE ADC_GetChannelV( unsigned long DeviceIndex, unsigned long ChannelIndex, double *OUTPUT);
@@ -233,21 +254,6 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *O
 
 #endif
 
-%include "AIOTypes.h"
-%include "AIOUSB_Core.h"
-%include "ADCConfigBlock.h"
-%include "AIOContinuousBuffer.h"
-%include "AIOUSB_Properties.h"
-%include "AIOChannelMask.h"
-%include "AIODeviceTable.h"    
-%include "AIOUSB_ADC.h"
-%include "AIOUSB_DAC.h"
-%include "AIOUSB_CTR.h"
-%include "AIOUSBDevice.h"
-%include "AIODeviceInfo.h"
-%include "AIOUSB_DIO.h"
-%include "cJSON.h"
-%include "DIOBuf.h"
 
 %array_functions(unsigned short, counts )
 %array_functions(double, volts )
@@ -293,18 +299,38 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *O
     const char *__str__() {
         return AIOChannelMaskToString( $self );
     }
-
  }
+
+%extend AIODeviceQuery { 
+
+    AIODeviceQuery( unsigned long DeviceIndex ) {
+        return (AIODeviceQuery*)NewAIODeviceQuery( DeviceIndex );
+    }
+
+    ~AIODeviceQuery() { 
+        DeleteAIODeviceQuery( $self );
+    }
+
+    char *__str__() { 
+        return AIODeviceQueryToStr( $self );
+    }    
+
+    char *__repr__() { 
+        return AIODeviceQueryToRepr( $self );
+    }    
+
+}
 
 %extend AIOContinuousBuf {
 
-  AIOContinuousBuf( unsigned long deviceIndex, unsigned numScans, unsigned numChannels ) {
-    return (AIOContinuousBuf *)NewAIOContinuousBufForCounts( deviceIndex, numScans, numChannels );
-  }
+    AIOContinuousBuf( unsigned long deviceIndex, unsigned numScans, unsigned numChannels ) {
+        return (AIOContinuousBuf *)NewAIOContinuousBufForCounts( deviceIndex, numScans, numChannels );
+    }
 
-  ~AIOContinuousBuf() {
-    DeleteAIOContinuousBuf($self);
-  }
+    ~AIOContinuousBuf() {
+        DeleteAIOContinuousBuf($self);
+    }
+
 }
 
 %extend AIOBuf {

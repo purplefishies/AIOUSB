@@ -39,7 +39,7 @@ AIODeviceQuery *NewAIODeviceQuery( unsigned long DeviceIndex )
         return NULL;
     }
     nq->name = strdup( name );
-    
+    nq->index = DeviceIndex;
     return nq;
 }
 
@@ -56,7 +56,48 @@ AIORET_TYPE DeleteAIODeviceQuery( AIODeviceQuery *devq )
         free(devq->name);
     
     free(devq);
+    /* printf("Deleting AIODeviceQuery\n"); for testing destrouctor*/
     return AIOUSB_SUCCESS;
+}
+
+/*------------------------------------------------------------------------*/
+/**
+ * @brief Converts the AIODeviceQuery into a string representation
+ * @param devq AIODeviceQuery *
+ * @return String representing the Device query, NULL if not defined
+ */
+char *AIODeviceQueryToStr( AIODeviceQuery *devq )
+{
+    static char tmp[96];
+    AIO_ASSERT_RET( NULL, devq );
+
+    snprintf( tmp,sizeof(tmp),"ProductID: %#x\nProductName: %s\nProductNumCounters: %d\nProductNumDIOBytes: %d\n",
+              (int)AIODeviceQueryGetProductID( devq ),
+              AIODeviceQueryGetName( devq ),
+              (int)AIODeviceQueryGetNumCounters( devq ),
+              (int)AIODeviceQueryGetNumDIOBytes( devq )
+              );
+
+    return tmp;
+}
+
+/*------------------------------------------------------------------------*/
+/**
+ * @brief Repr version of this product
+ * @param devq AIODeviceQuery *
+ * @return String representing the Device query, NULL if not defined
+ */
+char *AIODeviceQueryToRepr( AIODeviceQuery *devq )
+{
+    static char tmp[34];
+    AIO_ASSERT_RET( NULL, devq );
+
+    snprintf( tmp,sizeof(tmp),"[ Index: %d, ProductID: %#x ]",
+              (int)AIODeviceQueryGetIndex( devq ),
+              (int)AIODeviceQueryGetProductID( devq )
+              );
+
+    return tmp;
 }
 
 /*------------------------------------------------------------------------*/
@@ -69,6 +110,18 @@ AIORET_TYPE AIODeviceQueryGetProductID( AIODeviceQuery *devq )
 {
     AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_AIODEVICE_QUERY, devq );
     return devq->productID;
+}
+
+/*------------------------------------------------------------------------*/
+/**
+ * @brief Returns the Index associated with the AIODeviceQuery
+ * @param devq AIODeviceQuery *
+ * @return >= 0 index , otherwise error
+ */ 
+AIORET_TYPE AIODeviceQueryGetIndex( AIODeviceQuery *devq )
+{
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_AIODEVICE_QUERY, devq );
+    return devq->index;
 }
 
 /*------------------------------------------------------------------------*/
@@ -163,8 +216,27 @@ TEST(AIODeviceQuery, VerifyQuery) {
     ASSERT_STREQ( AIODeviceQueryGetName(ndev), "USB-DIO-48");
 
     DeleteAIODeviceQuery( ndev );
-
+    ClearAIODeviceTable( numDevices );
+    
 }
+
+TEST(AIODeviceQuery,StringRepresentation)
+{
+    int numDevices = 0;
+    AIODeviceTableInit();    
+    AIODeviceTableAddDeviceToDeviceTable( &numDevices, USB_AIO16_16A );
+
+    AIODeviceQuery *ndev = NewAIODeviceQuery( 0 );
+
+    char *tmpstr = AIODeviceQueryToStr( ndev );
+    ASSERT_TRUE( tmpstr );
+    
+    /* Cleanup */
+
+    DeleteAIODeviceQuery( ndev );
+    ClearAIODeviceTable( numDevices );
+}
+
 
 
 int 
