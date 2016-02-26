@@ -61,7 +61,7 @@ PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetStartChannel( ADCConfigBlock *config,
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetEndChannel( ADCConfigBlock *config, unsigned char endChannel  );
 
 /** @cond INTERNAL_DOCUMENTATION */
-#define STRINGIFY(x) #x
+#define AIO_STRINGIFY(x) #x
 #define HIGH_BITS(reg)   ( reg & 0xF0 )
 #define LOW_BITS(reg)    ( reg & 0x0F )
 /** @endcond INTERNAL_DOCUMENTATION */

@@ -323,7 +323,7 @@ PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetStartChannel( ADCConfigBlock *config,
 PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockSetEndChannel( ADCConfigBlock *config, unsigned char endChannel  );
 
 /** @cond INTERNAL_DOCUMENTATION */
-#define STRINGIFY(x) #x
+#define AIO_STRINGIFY(x) #x
 #define HIGH_BITS(reg)   ( reg & 0xF0 )
 #define LOW_BITS(reg)    ( reg & 0x0F )
 /** @endcond INTERNAL_DOCUMENTATION */
@@ -519,11 +519,15 @@ PUBLIC_EXTERN void  DeleteAIOGainRange( AIOGainRange* );
 
 PUBLIC_EXTERN AIODeviceQuery *NewAIODeviceQuery( unsigned long DeviceIndex );
 PUBLIC_EXTERN AIORET_TYPE DeleteAIODeviceQuery( AIODeviceQuery *devq );
+PUBLIC_EXTERN char *AIODeviceQueryToStr( AIODeviceQuery *devq );
+PUBLIC_EXTERN char *AIODeviceQueryToRepr( AIODeviceQuery *devq );
 PUBLIC_EXTERN AIORET_TYPE AIODeviceQueryGetProductID( AIODeviceQuery *devq );
 PUBLIC_EXTERN AIORET_TYPE AIODeviceQueryNameSize( AIODeviceQuery *devq );
 PUBLIC_EXTERN char * AIODeviceQueryGetName( AIODeviceQuery *devq );
 PUBLIC_EXTERN AIORET_TYPE AIODeviceQueryGetNumDIOBytes( AIODeviceQuery *devq );
 PUBLIC_EXTERN AIORET_TYPE AIODeviceQueryGetNumCounters( AIODeviceQuery *devq );
+PUBLIC_EXTERN AIORET_TYPE AIODeviceQueryGetIndex( AIODeviceQuery *devq );
+
 
 
 /* #include "AIODeviceTable.h" */
@@ -716,7 +720,6 @@ PUBLIC_EXTERN AIORESULT GetDeviceBySerialNumber(uint64_t *pSerialNumber);
 PUBLIC_EXTERN AIORESULT GetDeviceSerialNumber(unsigned long DeviceIndex, uint64_t *pSerialNumber );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetDeviceSerialNumber( unsigned long DeviceIndex );
 
-PUBLIC_EXTERN AIORET_TYPE FindDevices( int **indices, int *length , int minProductID, int maxProductID  );
 PUBLIC_EXTERN AIORESULT AIOUSB_GetDeviceProperties(unsigned long DeviceIndex, DeviceProperties *properties );
 PUBLIC_EXTERN const char *AIOUSB_GetResultCodeAsString(unsigned long result_value);
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_ListDevices();

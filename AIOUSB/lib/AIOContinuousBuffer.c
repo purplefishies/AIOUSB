@@ -1982,8 +1982,8 @@ cJSON *GetJSONValueOrDefault(cJSON *config,char const *key, EnumStringLookup *lo
 }
 
 EnumStringLookup TrueFalse[] = {
-    { AIOUSB_TRUE , (char *)"true"  , (char *)STRINGIFY(true)  },
-    { AIOUSB_FALSE, (char *)"false" , (char *)STRINGIFY(false)  },
+    { AIOUSB_TRUE , (char *)"true"  , (char *)AIO_STRINGIFY(true)  },
+    { AIOUSB_FALSE, (char *)"false" , (char *)AIO_STRINGIFY(false)  },
 };
 
 typedef struct rangelookup {

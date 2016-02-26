@@ -765,28 +765,28 @@ char *ADCConfigBlockToYAML(ADCConfigBlock *config)
 /** @cond INTERNAL_DOCUMENTATION */
 /*---------------------  Default settings for JSON read  ---------------------*/
 EnumStringLookup Gains[] = {
-    { AD_GAIN_CODE_0_10V , (char *)"0-10V" , (char *)STRINGIFY(AD_GAIN_CODE_0_10V)  }, /* Default value */
-    { AD_GAIN_CODE_10V   , (char *)"+-10V" , (char *)STRINGIFY(AD_GAIN_CODE_10V  )  },
-    { AD_GAIN_CODE_0_5V  , (char *)"0-5V"  , (char *)STRINGIFY(AD_GAIN_CODE_0_5V )  },
-    { AD_GAIN_CODE_5V    , (char *)"+-5V"  , (char *)STRINGIFY(AD_GAIN_CODE_5V   )  },
-    { AD_GAIN_CODE_0_2V  , (char *)"0-2V"  , (char *)STRINGIFY(AD_GAIN_CODE_0_2V )  },
-    { AD_GAIN_CODE_2V    , (char *)"+-2V"  , (char *)STRINGIFY(AD_GAIN_CODE_2V   )  },
-    { AD_GAIN_CODE_0_1V  , (char *)"0-1V"  , (char *)STRINGIFY(AD_GAIN_CODE_0_1V )  },
-    { AD_GAIN_CODE_1V    , (char *)"+-1V"  , (char *)STRINGIFY(AD_GAIN_CODE_1V   )  },
+    { AD_GAIN_CODE_0_10V , (char *)"0-10V" , (char *)AIO_STRINGIFY(AD_GAIN_CODE_0_10V)  }, /* Default value */
+    { AD_GAIN_CODE_10V   , (char *)"+-10V" , (char *)AIO_STRINGIFY(AD_GAIN_CODE_10V  )  },
+    { AD_GAIN_CODE_0_5V  , (char *)"0-5V"  , (char *)AIO_STRINGIFY(AD_GAIN_CODE_0_5V )  },
+    { AD_GAIN_CODE_5V    , (char *)"+-5V"  , (char *)AIO_STRINGIFY(AD_GAIN_CODE_5V   )  },
+    { AD_GAIN_CODE_0_2V  , (char *)"0-2V"  , (char *)AIO_STRINGIFY(AD_GAIN_CODE_0_2V )  },
+    { AD_GAIN_CODE_2V    , (char *)"+-2V"  , (char *)AIO_STRINGIFY(AD_GAIN_CODE_2V   )  },
+    { AD_GAIN_CODE_0_1V  , (char *)"0-1V"  , (char *)AIO_STRINGIFY(AD_GAIN_CODE_0_1V )  },
+    { AD_GAIN_CODE_1V    , (char *)"+-1V"  , (char *)AIO_STRINGIFY(AD_GAIN_CODE_1V   )  },
 };
 
 EnumStringLookup Calibrations[] = {
-    {AD_CAL_MODE_NORMAL     , (char *)"Normal"        ,  (char *)STRINGIFY(AD_CAL_MODE_NORMAL    )  }, /* Default */
-    {AD_CAL_MODE_GROUND     , (char *)"Ground"        ,  (char *)STRINGIFY(AD_CAL_MODE_GROUND    )  },
-    {AD_CAL_MODE_REFERENCE  , (char *)"Reference"     ,  (char *)STRINGIFY(AD_CAL_MODE_REFERENCE )  },
-    {AD_CAL_MODE_BIP_GROUND , (char *)"BIP Reference" ,  (char *)STRINGIFY(AD_CAL_MODE_BIP_GROUND)  }
+    {AD_CAL_MODE_NORMAL     , (char *)"Normal"        ,  (char *)AIO_STRINGIFY(AD_CAL_MODE_NORMAL    )  }, /* Default */
+    {AD_CAL_MODE_GROUND     , (char *)"Ground"        ,  (char *)AIO_STRINGIFY(AD_CAL_MODE_GROUND    )  },
+    {AD_CAL_MODE_REFERENCE  , (char *)"Reference"     ,  (char *)AIO_STRINGIFY(AD_CAL_MODE_REFERENCE )  },
+    {AD_CAL_MODE_BIP_GROUND , (char *)"BIP Reference" ,  (char *)AIO_STRINGIFY(AD_CAL_MODE_BIP_GROUND)  }
 };
 
 EnumStringLookup ReferenceModes[] = {
-    {AD_TRIGGER_TIMER   , (char *)"counter"  , (char *)STRINGIFY(AD_TRIGGER_TIMER    ) }, /* Default */
-    {AD_TRIGGER_TIMER   , (char *)"timer"    , (char *)STRINGIFY(AD_TRIGGER_TIMER    ) }, /* Default */
-    {AD_TRIGGER_EXTERNAL, (char *)"external" , (char *)STRINGIFY(AD_TRIGGER_CTR0_EXT ) },
-    {0                  , (char *)"sw"       , (char *)STRINGIFY(0                   ) },
+    {AD_TRIGGER_TIMER   , (char *)"counter"  , (char *)AIO_STRINGIFY(AD_TRIGGER_TIMER    ) }, /* Default */
+    {AD_TRIGGER_TIMER   , (char *)"timer"    , (char *)AIO_STRINGIFY(AD_TRIGGER_TIMER    ) }, /* Default */
+    {AD_TRIGGER_EXTERNAL, (char *)"external" , (char *)AIO_STRINGIFY(AD_TRIGGER_CTR0_EXT ) },
+    {0                  , (char *)"sw"       , (char *)AIO_STRINGIFY(0                   ) },
 };
 
 EnumStringLookup Edges[] = {
