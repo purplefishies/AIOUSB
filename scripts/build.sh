@@ -16,6 +16,5 @@ build_cmd make
 build_cd $AIO_CLASSLIB_DIR
 build_cmd make 
 build_cd $AIOUSB_ROOT
-build_cmd doxygen 
-build_cd $AIO_START_DIR
+
 
