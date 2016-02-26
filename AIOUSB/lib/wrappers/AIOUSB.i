@@ -342,7 +342,7 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *O
   }
 }
 
-%extend diobuf_type {
+%extend DIOBuf {
 
   DIOBuf( int size ) {
     return (DIOBuf *)NewDIOBuf( size );
@@ -360,15 +360,19 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *O
     DeleteDIOBuf( $self );
   }
   
-  int get(unsigned index) { 
+  int get(int index) { 
     return DIOBufGetIndex( $self, index );
   }
 
-  int set(unsigned index, int value ) {
+  int set(int index, int value ) {
     return DIOBufSetIndex( $self, index , value );
   }
 
   char *hex() {
+    return DIOBufToHex($self);
+  }
+
+  char *to_hex() {
     return DIOBufToHex($self);
   }
 
@@ -383,6 +387,12 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *O
   const char *__str__() {
     return DIOBufToString( $self );
   }
+  
+  const char *__repr__() { 
+    return DIOBufToString( $self );
+  }
+ 
+
 }
 #ifdef __cplusplus
    %extend DIOBuf {
@@ -405,11 +415,33 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *O
 
 
 #if defined(SWIGPYTHON) | defined(SWIGLUA) 
+
+%exception DIOBuf::__getitem__ { 
+    $action 
+    if ( result < 0 ) {
+          PyErr_SetString(PyExc_IndexError,"Index out of range");
+          return NULL;
+    }
+}
+
+%exception DIOBuf::__setitem__ { 
+    $action 
+    if ( result < 0 ) { 
+        if( result == -AIOUSB_ERROR_INVALID_INDEX ) {
+          PyErr_SetString(PyExc_IndexError,"Index out of range");
+          return NULL;
+        } else if ( result == -AIOUSB_ERROR_INVALID_PARAMETER ) { 
+          PyErr_SetString(PyExc_TypeError,"Invalid value");
+          return NULL;
+        }
+    }
+}
+
 %extend DIOBuf {
-  int __getitem__( unsigned index ) {
+  int __getitem__( int index ) {
     return DIOBufGetIndex( $self, index );
   }
-  int __setitem__(unsigned index, int value ) {
+  int __setitem__(int index, int value ) {
     return DIOBufSetIndex( $self, index, value );
   }
  }

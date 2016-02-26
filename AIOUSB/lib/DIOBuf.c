@@ -128,10 +128,12 @@ DIOBuf *DIOBufResize( DIOBuf *buf , unsigned newsize )
 unsigned  DIOBufSize( DIOBuf *buf ) {
   return buf->_size;
 }
+
 /*----------------------------------------------------------------------------*/
 unsigned DIOBufByteSize( DIOBuf *buf ) {
   return buf->_size / BITS_PER_BYTE;
 }
+
 /*----------------------------------------------------------------------------*/
 char *DIOBufToString( DIOBuf *buf ) {
   unsigned i;
@@ -162,6 +164,7 @@ char *DIOBufToHex( DIOBuf *buf ) {
     free(tmp);
     return buf->_strbuf;
 }
+
 /*----------------------------------------------------------------------------*/
 char *DIOBufToBinary( DIOBuf *buf ) {
     int i, j;
@@ -172,23 +175,24 @@ char *DIOBufToBinary( DIOBuf *buf ) {
     buf->_strbuf[ DIOBufSize(buf) / BITS_PER_BYTE ] = '\0';
     return buf->_strbuf;
 }
-/*----------------------------------------------------------------------------*/
-int DIOBufSetIndex( DIOBuf *buf, unsigned index, unsigned value )
-{
 
-    if ( index > buf->_size - 1 ) {
-        return -AIOUSB_ERROR_INVALID_INDEX;
-    } 
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE DIOBufSetIndex( DIOBuf *buf, int index, unsigned value )
+{
+    AIO_ASSERT_RET( -AIOUSB_ERROR_INVALID_INDEX, index < (int)buf->_size && index >= 0 );
+    AIO_ASSERT_RET( -AIOUSB_ERROR_INVALID_PARAMETER, value == 0 || value == 1 );
+
     buf->_buffer[buf->_size - 1 - index] = ( value == AIOUSB_TRUE ? 1 : AIOUSB_FALSE );
     return 0;
 }
+
 /*----------------------------------------------------------------------------*/
-int DIOBufGetIndex( DIOBuf *buf, unsigned index ) {
-    if ( index >= buf->_size ) 
-        return -1;
+AIORET_TYPE DIOBufGetIndex( DIOBuf *buf, int index ) {
+    AIO_ASSERT_RET( -AIOUSB_ERROR_INVALID_INDEX, index < (int)buf->_size && index >= 0 );
   
     return buf->_buffer[buf->_size - 1 - index ];
 }
+
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE DIOBufGetByteAtIndex( DIOBuf *buf, unsigned index , char *value ) {
     AIORET_TYPE retval = AIOUSB_SUCCESS;

@@ -19,9 +19,9 @@ namespace AIOUSB {
 #define PUBLIC_EXTERN extern
 #endif
 
-/* typedef AIOChannelMask DIOBuf; */
+
 typedef unsigned char DIOBufferType ;
-typedef struct diobuf_type {
+typedef struct DIOBuf {
     unsigned _size;
     unsigned char *_buffer;        /**> Actual elements  */
     char *_strbuf;                 /**> Display string   */
@@ -41,8 +41,8 @@ PUBLIC_EXTERN DIOBuf  *DIOBufResize( DIOBuf  *buf , unsigned size );
 PUBLIC_EXTERN unsigned DIOBufSize( DIOBuf  *buf );
 PUBLIC_EXTERN unsigned DIOBufByteSize( DIOBuf *buf );
 PUBLIC_EXTERN char *DIOBufToString( DIOBuf  *buf );
-PUBLIC_EXTERN int DIOBufSetIndex( DIOBuf *buf, unsigned index, unsigned value );
-PUBLIC_EXTERN int DIOBufGetIndex( DIOBuf *buf, unsigned index );
+PUBLIC_EXTERN AIORET_TYPE DIOBufSetIndex( DIOBuf *buf, int index, unsigned value );
+PUBLIC_EXTERN AIORET_TYPE DIOBufGetIndex( DIOBuf *buf, int index );
 PUBLIC_EXTERN AIORET_TYPE DIOBufGetByteAtIndex( DIOBuf *buf, unsigned index, char *value);
 PUBLIC_EXTERN AIORET_TYPE DIOBufSetByteAtIndex( DIOBuf *buf, unsigned index, char  value );
 /* END AIOUSB_API */
