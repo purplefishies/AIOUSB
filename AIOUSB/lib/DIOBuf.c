@@ -279,6 +279,12 @@ TEST(DIOBuf, Binary_Output ) {
     DeleteDIOBuf( buf );
 }
 
+TEST(DIOBuf, Binary_Output2 ) {
+    DIOBuf *buf = NewDIOBufFromBinStr("0000000001100011");
+    EXPECT_STREQ( DIOBufToBinary(buf), "\000c" );
+    DeleteDIOBuf( buf );
+}
+
 TEST(DIOBuf, Resize_Test ) {
     DIOBuf *buf = NewDIOBuf(0);
     DIOBufResize(buf, 10 ); 

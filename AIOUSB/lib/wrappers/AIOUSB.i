@@ -414,7 +414,23 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *O
 #endif
 
 
+
 #if defined(SWIGPYTHON) | defined(SWIGLUA) 
+
+
+/* Special conversion so that binary string with multiple zeros aren't truncated */
+ 
+%extend DIOBuf {
+    
+    %typemap(out) char * {
+         $result = PyString_FromStringAndSize( $1, DIOBufByteSize( arg1 ) );
+    }
+
+    char *to_bin() {
+        return DIOBufToBinary($self);
+    }
+}
+
 
 %exception DIOBuf::__getitem__ { 
     $action 
