@@ -429,7 +429,8 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *O
     char *to_bin() {
         return DIOBufToBinary($self);
     }
-    %typemap(out) char *;
+
+    %typemap(out) char *; /* Remove this for other char * returning methods */
 }
 
 
