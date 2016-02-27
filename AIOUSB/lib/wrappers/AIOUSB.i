@@ -423,12 +423,13 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *O
 %extend DIOBuf {
     
     %typemap(out) char * {
-         $result = PyString_FromStringAndSize( $1, DIOBufByteSize( arg1 ) );
+         $result = PyString_FromStringAndSize( $1, MAX(strlen($1),DIOBufByteSize( arg1 )) );
     }
 
     char *to_bin() {
         return DIOBufToBinary($self);
     }
+    %typemap(out) char *;
 }
 
 
