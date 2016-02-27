@@ -16,7 +16,7 @@ namespace AIOUSB {
 
 int _determine_strbuf_size( unsigned size )
 {
-    return size + strlen("0x") + 1;
+    return (((size / BITS_PER_BYTE)+1)*BITS_PER_BYTE) + strlen("0x") + 1;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -168,11 +168,11 @@ char *DIOBufToHex( DIOBuf *buf ) {
 /*----------------------------------------------------------------------------*/
 char *DIOBufToBinary( DIOBuf *buf ) {
     int i, j;
-    memset(buf->_strbuf, 0, DIOBufSize(buf) / BITS_PER_BYTE);
+    memset(buf->_strbuf, 0, buf->_strbuf_size );
     for ( i = 0, j = 0 ; i < (int)DIOBufSize(buf) ; i ++ , j = ( (j+1) % 8 )) { 
         buf->_strbuf[i / BITS_PER_BYTE] |= buf->_buffer[i] << ( 7 - (j % BITS_PER_BYTE) );
     }
-    buf->_strbuf[ DIOBufSize(buf) / BITS_PER_BYTE ] = '\0';
+    buf->_strbuf[ ((i/ BITS_PER_BYTE)+1)*BITS_PER_BYTE ] = '\0';
     return buf->_strbuf;
 }
 
@@ -264,6 +264,12 @@ TEST(DIOBuf, CharStr_Constructor ) {
     EXPECT_STREQ( DIOBufToString(buf), "01010100011001010111001101110100" );
     DIOBufReplaceString( buf, (char *)"FooBar", 6);
     EXPECT_STREQ( DIOBufToString(buf), "010001100110111101101111010000100110000101110010" );
+    DeleteDIOBuf( buf );
+}
+
+TEST(DIOBuf, CharStrIncomplete ) {
+    DIOBuf *buf = NewDIOBufFromBinStr("0100011001101111011011110100001001100001011100");
+    EXPECT_STREQ( DIOBufToBinary(buf), "FooBap" );
     DeleteDIOBuf( buf );
 }
 
