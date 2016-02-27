@@ -146,17 +146,17 @@ char *DIOBufToString( DIOBuf *buf ) {
 
 /*----------------------------------------------------------------------------*/
 char *DIOBufToHex( DIOBuf *buf ) {
-    /* @bug , needs to preallocate space */
+
     char *tmp = (char *)malloc( DIOBufSize(buf) / BITS_PER_BYTE );
     int size = DIOBufSize(buf) / BITS_PER_BYTE;
 
     memset( buf->_strbuf, 0, buf->_strbuf_size );
     memcpy( tmp, DIOBufToBinary( buf ), size );
-    /* memset(buf->_strbuf, 0, (DIOBufSize(buf) / BITS_PER_BYTE) ); */
+
 
     strcpy(&buf->_strbuf[0], "0x" );
     int j = strlen(buf->_strbuf);
-    /* for ( int i = 0 ; i < (int)strlen(tmp) ; i ++ , j = strlen(buf->_strbuf)) { */
+
     for ( int i = 0 ; i <  size ; i ++ , j = strlen(buf->_strbuf)) {
         sprintf(&buf->_strbuf[j], "%.2x", (unsigned char)tmp[i] );
     }
