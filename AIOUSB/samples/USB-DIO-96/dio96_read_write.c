@@ -122,13 +122,13 @@ int main( int argc, char **argv ) {
      * @endverbatim
      */ 
 
-    Data[3]  = (unsigned char)~(0x24);          /**< Data[3] is the start of Group 1, Port A */
-    Data[4]  = (unsigned char)~(0xaa);          /**< Group 1 Port B */
-    Data[5]  = (unsigned char)~(0xf0);          /**< Group 1 Port C */
+    Data[3]  = (unsigned char)(0xdb);          /**< Data[3] is the start of Group 1, Port A */
+    Data[4]  = (unsigned char)(0x55);          /**< Group 1 Port B */
+    Data[5]  = (unsigned char)(0x0f);          /**< Group 1 Port C */
 
-    Data[9]  = (unsigned char)~(0x0f);
-    Data[10] = (unsigned char)~(0x3c);
-    Data[11] = (unsigned char)~(0xc3);
+    Data[9]  = (unsigned char)(0xf0);
+    Data[10] = (unsigned char)(0xc3);
+    Data[11] = (unsigned char)(0x3c);
 
     DIO_Configure( options.index, 0 , &mask, Data );
 

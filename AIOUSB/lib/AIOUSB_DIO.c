@@ -119,7 +119,7 @@ AIORESULT DIO_ConfigureWithDIOBuf(
     AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
 
     AIO_ERROR_VALID_DATA(-AIOUSB_ERROR_NOT_ENOUGH_MEMORY, device->LastDIOData != 0 );
-    char *tmp = DIOBufToInvertedBinary(buf);
+    char *tmp = DIOBufToBinary(buf);
     memcpy(device->LastDIOData, tmp, DIOBufByteSize( buf ) );
 
     bufferSize = device->DIOBytes + MASK_BYTES_SIZE(device);
@@ -129,9 +129,8 @@ AIORESULT DIO_ConfigureWithDIOBuf(
 
     dest = configBuffer;
 
-    /* memcpy( dest, DIOBufToBinary(buf), device->DIOBytes ); */
     memcpy( dest, tmp, device->DIOBytes );
-    free(tmp);
+
 
     dest += device->DIOBytes;
 
