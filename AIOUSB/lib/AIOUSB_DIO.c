@@ -119,8 +119,9 @@ AIORESULT DIO_ConfigureWithDIOBuf(
     AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
 
     AIO_ERROR_VALID_DATA(-AIOUSB_ERROR_NOT_ENOUGH_MEMORY, device->LastDIOData != 0 );
+    char *tmp = DIOBufToInvertedBinary(buf);
+    memcpy(device->LastDIOData, tmp, DIOBufByteSize( buf ) );
 
-    memcpy(device->LastDIOData, DIOBufToBinary(buf), DIOBufByteSize( buf ) );
     bufferSize = device->DIOBytes + MASK_BYTES_SIZE(device);
 
     configBuffer = ( char* )malloc( bufferSize );
@@ -128,7 +129,10 @@ AIORESULT DIO_ConfigureWithDIOBuf(
 
     dest = configBuffer;
 
-    memcpy( dest, DIOBufToBinary(buf), device->DIOBytes );
+    /* memcpy( dest, DIOBufToBinary(buf), device->DIOBytes ); */
+    memcpy( dest, tmp, device->DIOBytes );
+    free(tmp);
+
     dest += device->DIOBytes;
 
     for( int i = 0; i < MASK_BYTES_SIZE( device ) ; i ++ ) {
@@ -452,22 +456,37 @@ AIORESULT DIO_ReadAll(
     return result;
 }
 
+/*----------------------------------------------------------------------------*/
+/**
+ * @deprecated You should use the function DIO_ReadAllToDIOBuf instead
+ * @param DeviceIndex 
+ * @param buf 
+ * @return 
+ */
+AIORET_TYPE DIO_ReadIntoDIOBuf(
+                                unsigned long DeviceIndex,
+                                DIOBuf *buf
+                               ) 
+{
+    return DIO_ReadAllToDIOBuf( DeviceIndex, buf );
+}
+
 
 /*----------------------------------------------------------------------------*/
-AIORESULT DIO_ReadIntoDIOBuf(
-                             unsigned long DeviceIndex,
-                             DIOBuf *buf
-                      ) 
+AIORET_TYPE DIO_ReadAllToDIOBuf(
+                                unsigned long DeviceIndex,
+                                DIOBuf *buf
+                               ) 
 {
     AIO_ASSERT( buf );
 
-    AIORESULT result = AIOUSB_SUCCESS;
+    AIORET_TYPE result = AIOUSB_SUCCESS;
     AIOUSBDevice *device = NULL;
     int bytesTransferred;
     char *tmpbuf;
 
-    USBDevice *deviceHandle = _check_dio_get_device_handle( DeviceIndex, &device,  &result );
-    AIO_ERROR_VALID_DATA(  result, result == AIOUSB_SUCCESS );
+    USBDevice *deviceHandle = _check_dio_get_device_handle( DeviceIndex, &device,  (AIORESULT*)&result );
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_DEVICE , result == AIOUSB_SUCCESS );
 
     tmpbuf = (char*)malloc( sizeof(char)*device->DIOBytes );
 

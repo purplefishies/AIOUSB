@@ -37,6 +37,7 @@ PUBLIC_EXTERN DIOBuf *DIOBufReplaceString( DIOBuf *buf, char *ary, int size_arra
 PUBLIC_EXTERN DIOBuf *DIOBufReplaceBinString( DIOBuf *buf, char *bitstr );
 PUBLIC_EXTERN char *DIOBufToHex( DIOBuf *buf );
 PUBLIC_EXTERN char *DIOBufToBinary( DIOBuf *buf );
+PUBLIC_EXTERN char *DIOBufToInvertedBinary( DIOBuf *buf );
 PUBLIC_EXTERN DIOBuf  *DIOBufResize( DIOBuf  *buf , unsigned size );
 PUBLIC_EXTERN unsigned DIOBufSize( DIOBuf  *buf );
 PUBLIC_EXTERN unsigned DIOBufByteSize( DIOBuf *buf );

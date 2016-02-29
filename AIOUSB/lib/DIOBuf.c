@@ -177,6 +177,20 @@ char *DIOBufToBinary( DIOBuf *buf ) {
 }
 
 /*----------------------------------------------------------------------------*/
+char *DIOBufToInvertedBinary( DIOBuf *buf ) {
+    int i;
+    char *orig = DIOBufToBinary(buf);
+    int size = DIOBufSize(buf);
+    int size_to_alloc = ((size / BITS_PER_BYTE)+1);
+    char *tmp  = (char *)malloc( size_to_alloc );
+    memcpy(tmp, orig, size_to_alloc ) ;
+    for ( i = 0; i < size_to_alloc - 1; i ++ ) { 
+        tmp[i] = ~tmp[i];
+    }
+    return tmp;
+}
+
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE DIOBufSetIndex( DIOBuf *buf, int index, unsigned value )
 {
     AIO_ASSERT_RET( -AIOUSB_ERROR_INVALID_INDEX, index < (int)buf->_size && index >= 0 );
@@ -288,6 +302,14 @@ TEST(DIOBuf, Binary_Output ) {
 TEST(DIOBuf, Binary_Output2 ) {
     DIOBuf *buf = NewDIOBufFromBinStr("0000000001100011");
     EXPECT_STREQ( DIOBufToBinary(buf), "\000c" );
+    DeleteDIOBuf( buf );
+}
+
+TEST(DIOBuf, Inverted_Binary ) { 
+    DIOBuf *buf = NewDIOBufFromBinStr("0000000001100011");
+    char *tmp = DIOBufToInvertedBinary(buf);
+    EXPECT_STREQ( tmp, "\xFF\x9C" );
+    free(tmp);
     DeleteDIOBuf( buf );
 }
 

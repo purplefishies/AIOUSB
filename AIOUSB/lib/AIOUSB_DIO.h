@@ -23,6 +23,7 @@ namespace AIOUSB
 /* BEGIN AIOUSB_API */
 PUBLIC_EXTERN AIORESULT DIO_ConfigureWithDIOBuf( unsigned long DeviceIndex, unsigned char bTristate, AIOChannelMask *mask, DIOBuf *buf ); 
 PUBLIC_EXTERN unsigned long DIO_Configure( unsigned long DeviceIndex, unsigned char bTristate, void *pOutMask, void *pData ); 
+
 PUBLIC_EXTERN unsigned long DIO_ConfigureEx( unsigned long DeviceIndex, void *pOutMask, void *pData, void *pTristateMask ); 
 PUBLIC_EXTERN unsigned long DIO_ConfigurationQuery( unsigned long DeviceIndex, void *pOutMask, void *pTristateMask ); 
 PUBLIC_EXTERN unsigned long DIO_WriteAll( unsigned long DeviceIndex, void *pData ); 
@@ -30,7 +31,11 @@ PUBLIC_EXTERN unsigned long DIO_Write8( unsigned long DeviceIndex, unsigned long
 
 PUBLIC_EXTERN unsigned long DIO_Write1( unsigned long DeviceIndex, unsigned long BitIndex, unsigned char bData ); 
 
-PUBLIC_EXTERN AIORESULT DIO_ReadIntoDIOBuf( unsigned long DeviceIndex, DIOBuf *buf ); 
+
+PUBLIC_EXTERN AIORET_TYPE DIO_ReadAllToDIOBuf( unsigned long DeviceIndex, DIOBuf *buf );
+#ifndef SWIG
+PUBLIC_EXTERN AIORET_TYPE DIO_ReadIntoDIOBuf( unsigned long DeviceIndex, DIOBuf *buf ) ACCES_DEPRECATED("Please use DIO_ReadAllToDIOBuf");
+#endif
 PUBLIC_EXTERN AIORESULT DIO_ReadAll( unsigned long DeviceIndex, void *buf );
 
 

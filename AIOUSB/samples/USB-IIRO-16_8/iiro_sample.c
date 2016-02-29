@@ -146,7 +146,7 @@ int main(int argc, char *argv[] )
    DIO_Read8( options.index, 3, &cdat   );
    printf("Single data was : hex:%x, int:%d\n", (int)cdat, (int)cdat );
 
-   DIO_ReadIntoDIOBuf( options.index, buf );
+   DIO_ReadAllToDIOBuf( options.index, buf );
    printf("Binary was: %s\n", DIOBufToString( buf ) );
    printf("Hex was: %s\n", DIOBufToHex( buf ) );
 
