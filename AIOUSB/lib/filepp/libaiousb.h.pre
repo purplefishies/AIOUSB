@@ -11,6 +11,7 @@
 #pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIOChannelRange.h
 #pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIOBuf.h
 #pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIOCountsConverter.h
+#pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIODeviceInfo.h
 #pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIODeviceQuery.h
 #pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIODeviceTable.h
 #pragma filepp between -s,"BEGIN AIOUSB_API",-e,"END AIOUSB_API",-f,AIOFifo.h

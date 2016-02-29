@@ -514,6 +514,16 @@ PUBLIC_EXTERN AIORET_TYPE AIOCountsConverterConvertFifo( AIOCountsConverter *cc,
 PUBLIC_EXTERN AIOGainRange* NewAIOGainRangeFromADCConfigBlock( ADCConfigBlock *adc );
 PUBLIC_EXTERN void  DeleteAIOGainRange( AIOGainRange* );
 
+/* #include "AIODeviceInfo.h" */
+
+PUBLIC_EXTERN AIODeviceInfo *NewAIODeviceInfo();
+PUBLIC_EXTERN void DeleteAIODeviceInfo( AIODeviceInfo *di );
+PUBLIC_EXTERN const char *AIODeviceInfoGetName( AIODeviceInfo *di );
+PUBLIC_EXTERN AIODeviceInfo *AIODeviceInfoGet( unsigned long DeviceIndex );
+PUBLIC_EXTERN AIORET_TYPE AIODeviceInfoGetCounters( AIODeviceInfo *di ); 
+PUBLIC_EXTERN AIORET_TYPE AIODeviceInfoGetDIOBytes( AIODeviceInfo *di );
+PUBLIC_EXTERN AIODeviceInfo *AIODeviceInfoGet( unsigned long DeviceIndex );
+
 /* #include "AIODeviceQuery.h" */
 
 
