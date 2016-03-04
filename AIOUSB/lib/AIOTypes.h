@@ -709,6 +709,8 @@ typedef struct lookup {
 } EnumStringLookup;
 
 
+#define ROOTCLOCK 10000000
+
 /** 
  * @brief Allows us to keep track of streaming (bulk) acquires
  * without making the user keep track of the memory management

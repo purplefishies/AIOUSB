@@ -1,7 +1,4 @@
-#include "AIOTypes.h"
-#include "DIOBuf.h"
-#include "AIOChannelMask.h"
-#include "AIOUSB_DIO.h"
+#include "aiousb.h"
 
 #include "gtest/gtest.h"
 

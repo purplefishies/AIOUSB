@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <math.h>
-#include <AIODataTypes.h>
+
 #include "AIOUSB_Log.h"
 #include "aiocommon.h"
 #include <getopt.h>

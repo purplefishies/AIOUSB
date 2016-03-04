@@ -10,7 +10,6 @@ typedef int64_t AIORET_TYPE;
 #include "AIOUSB_Core.h"
 #include "AIOChannelMask.h"
 #include "AIOContinuousBuffer.h"
-#include "AIODataTypes.h"
 #include "AIOTypes.h"
 
 /* #include <pthread.h> */

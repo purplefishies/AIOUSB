@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <ctype.h>
-#include <AIODataTypes.h>
+
 #include "AIOCountsConverter.h"
 #include "AIOUSB_Log.h"
 #include "aiocommon.h"

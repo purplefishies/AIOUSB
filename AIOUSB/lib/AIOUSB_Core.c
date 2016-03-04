@@ -9,6 +9,7 @@
 #include "ADCConfigBlock.h"
 #include "AIOUSB_Core.h"
 #include "AIODeviceTable.h"
+#include "AIOUSB_ADC.h"
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>

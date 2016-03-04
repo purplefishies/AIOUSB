@@ -8,6 +8,7 @@
 #include "AIOUSB_Core.h"
 #include "AIODeviceTable.h"
 #include "AIOUSB_Properties.h"
+#include "AIOUSB_Log.h"
 #include <getopt.h>
 #include <ctype.h>
 

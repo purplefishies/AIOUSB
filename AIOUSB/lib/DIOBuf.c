@@ -20,6 +20,11 @@ int _determine_strbuf_size( unsigned size )
 }
 
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief Constructor for 
+ * @param size Preallocates the buffer to size 
+ * @return DIOBuf * or Null if failure
+ */
 DIOBuf *NewDIOBuf( unsigned size ) {
     DIOBuf *tmp = (DIOBuf *)malloc( sizeof(DIOBuf) );
     if( ! tmp ) 

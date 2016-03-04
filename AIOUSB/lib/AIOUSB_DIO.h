@@ -10,7 +10,6 @@
 #include "AIOUSB_Core.h"
 #include "DIOBuf.h"
 #include "AIOChannelMask.h"
-#include "AIODataTypes.h"
 #include <assert.h>
 #include <math.h>
 #include <string.h>

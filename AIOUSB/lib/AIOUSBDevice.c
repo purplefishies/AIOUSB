@@ -1,5 +1,6 @@
 #include "AIOUSBDevice.h"
 #include "AIODeviceTable.h"
+#include "AIOUSB_ADC.h"
 #include "AIOUSB_Core.h"
 
 

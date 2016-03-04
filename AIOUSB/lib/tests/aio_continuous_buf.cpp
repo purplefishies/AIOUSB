@@ -5,11 +5,11 @@
  *
  ****************************************************************************/ 
 
-#include "AIOContinuousBuffer.h"
-#include "AIOUSBDevice.h"
+#include "aiousb.h"
 #include "gtest/gtest.h"
 #include "tap.h"
 #include <iostream>
+
 using namespace AIOUSB;
 
 
@@ -173,9 +173,6 @@ int main(int argc, char *argv[] )
 
   testing::InitGoogleTest(&argc, argv);
   testing::TestEventListeners & listeners = testing::UnitTest::GetInstance()->listeners();
-#ifdef GTEST_TAP_PRINT_TO_STDOUT
-  delete listeners.Release(listeners.default_result_printer());
-#endif
 
   return RUN_ALL_TESTS();  
 

@@ -38,6 +38,7 @@ USBDevice.o
 
 HEADERS		:= $(wildcard *.h)
 TESTOBJS	:= $(wildcard $(PWD)/tests/*_test)
+TEST_EXTRA_CXXFLAGS	:= -std=c++0x 
 
 TESTFILES	:= $(shell grep  -lP "\bmain\b" *.c)
 CPPTEST_FILES 	:= $(patsubst %.c,%_cpp_test,$(TESTFILES))
@@ -229,7 +230,7 @@ pywrapper:
 	$(CXX) $(TESTFLAGS) $(SELF_TEST_CXX_FLAGS) $(subst _cpp_test,.c,$<) -o $@ -L. $(SELF_TEST_CXX_LIBS) $(LDFLAGS)
 
 tests/%_cpp_test: tests/%.cpp $(SHCDBGLIB) $(SHCPPDBGLIB) $(SHCLIB) $(SHCPPLIB) 
-	$(CXX) $(TESTFLAGS) $(CXXFLAGS) $(SELF_TEST_CXX_FLAGS) $< -o $@ -L. $(SELF_TEST_CXX_LIBS)
+	$(CXX) $(TESTFLAGS) $(CXXFLAGS) $(TEST_EXTRA_CXXFLAGS) $(SELF_TEST_CXX_FLAGS) $< -o $@ -L. $(SELF_TEST_CXX_LIBS)
 
 mostlyclean:
 	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS)

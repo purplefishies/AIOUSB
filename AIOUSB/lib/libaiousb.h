@@ -10,7 +10,6 @@ typedef int64_t AIORET_TYPE;
 #include "AIOUSB_Core.h"
 #include "AIOChannelMask.h"
 #include "AIOContinuousBuffer.h"
-#include "AIODataTypes.h"
 #include "AIOTypes.h"
 
 /* #include <pthread.h> */
@@ -21,6 +20,7 @@ typedef int64_t AIORET_TYPE;
 
 /* #include "DIOBuf.h" */
 
+
 PUBLIC_EXTERN DIOBuf *NewDIOBuf ( unsigned size );
 PUBLIC_EXTERN void DeleteDIOBuf ( DIOBuf  *buf );
 PUBLIC_EXTERN DIOBuf *NewDIOBufFromChar( const char *ary , int size_array );
@@ -29,6 +29,7 @@ PUBLIC_EXTERN DIOBuf *DIOBufReplaceString( DIOBuf *buf, char *ary, int size_arra
 PUBLIC_EXTERN DIOBuf *DIOBufReplaceBinString( DIOBuf *buf, char *bitstr );
 PUBLIC_EXTERN char *DIOBufToHex( DIOBuf *buf );
 PUBLIC_EXTERN char *DIOBufToBinary( DIOBuf *buf );
+PUBLIC_EXTERN char *DIOBufToInvertedBinary( DIOBuf *buf );
 PUBLIC_EXTERN DIOBuf  *DIOBufResize( DIOBuf  *buf , unsigned size );
 PUBLIC_EXTERN unsigned DIOBufSize( DIOBuf  *buf );
 PUBLIC_EXTERN unsigned DIOBufByteSize( DIOBuf *buf );
@@ -38,10 +39,12 @@ PUBLIC_EXTERN AIORET_TYPE DIOBufGetIndex( DIOBuf *buf, int index );
 PUBLIC_EXTERN AIORET_TYPE DIOBufGetByteAtIndex( DIOBuf *buf, unsigned index, char *value);
 PUBLIC_EXTERN AIORET_TYPE DIOBufSetByteAtIndex( DIOBuf *buf, unsigned index, char  value );
 
+
 /* #include "AIOUSB_DIO.h" */
 
 PUBLIC_EXTERN AIORESULT DIO_ConfigureWithDIOBuf( unsigned long DeviceIndex, unsigned char bTristate, AIOChannelMask *mask, DIOBuf *buf ); 
 PUBLIC_EXTERN unsigned long DIO_Configure( unsigned long DeviceIndex, unsigned char bTristate, void *pOutMask, void *pData ); 
+
 PUBLIC_EXTERN unsigned long DIO_ConfigureEx( unsigned long DeviceIndex, void *pOutMask, void *pData, void *pTristateMask ); 
 PUBLIC_EXTERN unsigned long DIO_ConfigurationQuery( unsigned long DeviceIndex, void *pOutMask, void *pTristateMask ); 
 PUBLIC_EXTERN unsigned long DIO_WriteAll( unsigned long DeviceIndex, void *pData ); 
@@ -49,7 +52,11 @@ PUBLIC_EXTERN unsigned long DIO_Write8( unsigned long DeviceIndex, unsigned long
 
 PUBLIC_EXTERN unsigned long DIO_Write1( unsigned long DeviceIndex, unsigned long BitIndex, unsigned char bData ); 
 
-PUBLIC_EXTERN AIORESULT DIO_ReadIntoDIOBuf( unsigned long DeviceIndex, DIOBuf *buf ); 
+
+PUBLIC_EXTERN AIORET_TYPE DIO_ReadAllToDIOBuf( unsigned long DeviceIndex, DIOBuf *buf );
+#ifndef SWIG
+PUBLIC_EXTERN AIORET_TYPE DIO_ReadIntoDIOBuf( unsigned long DeviceIndex, DIOBuf *buf ) ACCES_DEPRECATED("Please use DIO_ReadAllToDIOBuf");
+#endif
 PUBLIC_EXTERN AIORESULT DIO_ReadAll( unsigned long DeviceIndex, void *buf );
 
 

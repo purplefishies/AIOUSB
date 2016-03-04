@@ -1,5 +1,6 @@
 #include "ADCConfigBlock.h"
 #include "AIOUSBDevice.h"
+#include "AIOUSB_ADC.h"
 #include "AIOUSB_Core.h"
 #include "cJSON.h"
 #include <ctype.h>
