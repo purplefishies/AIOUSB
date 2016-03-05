@@ -3,7 +3,11 @@
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
  * @version $Format: %h$
- * @brief  Buffers for DIO elements
+ * @brief  A smart buffer for handling Bit values and performing Bit arithmatic. This 
+ *         alleviates the need to perform bitwise operations on unsigned chars or other
+ *         primitive data types in programming languages.
+ *
+ *
  *
  */
 
@@ -21,7 +25,9 @@ int _determine_strbuf_size( unsigned size )
 
 /*----------------------------------------------------------------------------*/
 /**
- * @brief Constructor for 
+ * @brief Constructor for creating a new DIOBuf object. The parameter represents
+ *        the number of *bits* that you want to have in your in your buffer. 
+ *        Typical values would be multiples of 8 
  * @param size Preallocates the buffer to size 
  * @return DIOBuf * or Null if failure
  */
@@ -53,7 +59,18 @@ void _copy_to_buf( DIOBuf *tmp, const char *ary, int size_array ) {
         tmp->buffer[ i ] = (( ary[curindex] >> (( 8-1 ) - (i%8)) ) & 1 ? 1 : 0 );
     }
 }
+
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief Constructor for creating a new DIOBuf object but it accepts an array
+ *        of bytes with size_array providing the length , or total number of 
+ *        bytes in the input *Ary*.
+ * @param ary 
+ * @param size_array 
+ * @return DIOBuf if successful or NULL if there was an error.  Will set errno
+ *         to the reason in question but it will almost always be due to
+ *         memory allocation problems.
+ */
 DIOBuf *NewDIOBufFromChar( const char *ary, int size_array ) {
     int tot_bit_size = size_array*8;
     DIOBuf *tmp = NewDIOBuf( tot_bit_size );
