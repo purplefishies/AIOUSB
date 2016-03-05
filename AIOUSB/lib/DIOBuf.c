@@ -29,28 +29,28 @@ DIOBuf *NewDIOBuf( unsigned size ) {
     DIOBuf *tmp = (DIOBuf *)malloc( sizeof(DIOBuf) );
     if( ! tmp ) 
         return tmp;
-    tmp->_buffer = (DIOBufferType *)calloc(size, sizeof(DIOBufferType));
-    if ( !tmp->_buffer ) {
+    tmp->buffer = (DIOBufferType *)calloc(size, sizeof(DIOBufferType));
+    if ( !tmp->buffer ) {
         free( tmp );
         return NULL;
     }
-    tmp->_strbuf_size = _determine_strbuf_size( size );
-    tmp->_strbuf = (char *)malloc(sizeof(char) * tmp->_strbuf_size );
-    if ( !tmp->_strbuf ) {
-        free(tmp->_buffer);
+    tmp->strbuf_size = _determine_strbuf_size( size );
+    tmp->strbuf = (char *)malloc(sizeof(char) * tmp->strbuf_size );
+    if ( !tmp->strbuf ) {
+        free(tmp->buffer);
         free(tmp);
         return NULL;
     }
-    tmp->_size = size;
+    tmp->size = size;
     return tmp;
 }
 /*----------------------------------------------------------------------------*/
 void _copy_to_buf( DIOBuf *tmp, const char *ary, int size_array ) {
-    int tot_bit_size = tmp->_size;
+    int tot_bit_size = tmp->size;
     int i; 
     for ( i = 0 ; i < tot_bit_size ; i ++ ) { 
         int curindex = i / 8;
-        tmp->_buffer[ i ] = (( ary[curindex] >> (( 8-1 ) - (i%8)) ) & 1 ? 1 : 0 );
+        tmp->buffer[ i ] = (( ary[curindex] >> (( 8-1 ) - (i%8)) ) & 1 ? 1 : 0 );
     }
 }
 /*----------------------------------------------------------------------------*/
@@ -102,51 +102,51 @@ DIOBuf *DIOBufReplaceBinString( DIOBuf *buf, char *bitstr )
 /*----------------------------------------------------------------------------*/
 void DeleteDIOBuf( DIOBuf *buf ) 
 {
-    buf->_size = 0;
-    free( buf->_buffer );
-    free( buf->_strbuf );
+    buf->size = 0;
+    free( buf->buffer );
+    free( buf->strbuf );
     free( buf );
 }
 /*----------------------------------------------------------------------------*/
 DIOBuf *DIOBufResize( DIOBuf *buf , unsigned newsize ) 
 {
-    buf->_buffer = (unsigned char *)realloc( buf->_buffer, newsize*sizeof(unsigned char));
-    if ( !buf->_buffer ) {
-        buf->_size = 0;
-        buf->_strbuf_size = _determine_strbuf_size( newsize );
-        buf->_strbuf = (char *)realloc( buf->_strbuf, buf->_strbuf_size * sizeof(char) );
-        buf->_strbuf[0] = '\0';
+    buf->buffer = (unsigned char *)realloc( buf->buffer, newsize*sizeof(unsigned char));
+    if ( !buf->buffer ) {
+        buf->size = 0;
+        buf->strbuf_size = _determine_strbuf_size( newsize );
+        buf->strbuf = (char *)realloc( buf->strbuf, buf->strbuf_size * sizeof(char) );
+        buf->strbuf[0] = '\0';
         return NULL;
     }
-    if( newsize > buf->_size )
-        memset( &buf->_buffer[buf->_size], 0, ( newsize - buf->_size ));
+    if( newsize > buf->size )
+        memset( &buf->buffer[buf->size], 0, ( newsize - buf->size ));
 
-    buf->_strbuf_size = _determine_strbuf_size( newsize );
-    buf->_strbuf = (char *)realloc( buf->_strbuf, buf->_strbuf_size * sizeof(char));
+    buf->strbuf_size = _determine_strbuf_size( newsize );
+    buf->strbuf = (char *)realloc( buf->strbuf, buf->strbuf_size * sizeof(char));
 
-    if ( !buf->_strbuf )
+    if ( !buf->strbuf )
         return NULL;
-    buf->_size = newsize;
+    buf->size = newsize;
     return buf;
 }
 /*----------------------------------------------------------------------------*/
 unsigned  DIOBufSize( DIOBuf *buf ) {
-  return buf->_size;
+  return buf->size;
 }
 
 /*----------------------------------------------------------------------------*/
 unsigned DIOBufByteSize( DIOBuf *buf ) {
-  return buf->_size / BITS_PER_BYTE;
+  return buf->size / BITS_PER_BYTE;
 }
 
 /*----------------------------------------------------------------------------*/
 char *DIOBufToString( DIOBuf *buf ) {
   unsigned i;
-  memset(buf->_strbuf,0, buf->_strbuf_size );
-  for( i = 0; i < buf->_size ; i ++ )
-      buf->_strbuf[i] = ( buf->_buffer[i] == 0 ? '0' : '1' );
-  buf->_strbuf[buf->_size] = '\0';
-  return buf->_strbuf;
+  memset(buf->strbuf,0, buf->strbuf_size );
+  for( i = 0; i < buf->size ; i ++ )
+      buf->strbuf[i] = ( buf->buffer[i] == 0 ? '0' : '1' );
+  buf->strbuf[buf->size] = '\0';
+  return buf->strbuf;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -155,30 +155,30 @@ char *DIOBufToHex( DIOBuf *buf ) {
     char *tmp = (char *)malloc( DIOBufSize(buf) / BITS_PER_BYTE );
     int size = DIOBufSize(buf) / BITS_PER_BYTE;
 
-    memset( buf->_strbuf, 0, buf->_strbuf_size );
+    memset( buf->strbuf, 0, buf->strbuf_size );
     memcpy( tmp, DIOBufToBinary( buf ), size );
 
 
-    strcpy(&buf->_strbuf[0], "0x" );
-    int j = strlen(buf->_strbuf);
+    strcpy(&buf->strbuf[0], "0x" );
+    int j = strlen(buf->strbuf);
 
-    for ( int i = 0 ; i <  size ; i ++ , j = strlen(buf->_strbuf)) {
-        sprintf(&buf->_strbuf[j], "%.2x", (unsigned char)tmp[i] );
+    for ( int i = 0 ; i <  size ; i ++ , j = strlen(buf->strbuf)) {
+        sprintf(&buf->strbuf[j], "%.2x", (unsigned char)tmp[i] );
     }
-    buf->_strbuf[j] = 0;
+    buf->strbuf[j] = 0;
     free(tmp);
-    return buf->_strbuf;
+    return buf->strbuf;
 }
 
 /*----------------------------------------------------------------------------*/
 char *DIOBufToBinary( DIOBuf *buf ) {
     int i, j;
-    memset(buf->_strbuf, 0, buf->_strbuf_size );
+    memset(buf->strbuf, 0, buf->strbuf_size );
     for ( i = 0, j = 0 ; i < (int)DIOBufSize(buf) ; i ++ , j = ( (j+1) % 8 )) { 
-        buf->_strbuf[i / BITS_PER_BYTE] |= buf->_buffer[i] << ( 7 - (j % BITS_PER_BYTE) );
+        buf->strbuf[i / BITS_PER_BYTE] |= buf->buffer[i] << ( 7 - (j % BITS_PER_BYTE) );
     }
-    buf->_strbuf[ ((i/ BITS_PER_BYTE)+1)*BITS_PER_BYTE ] = '\0';
-    return buf->_strbuf;
+    buf->strbuf[ ((i/ BITS_PER_BYTE)+1)*BITS_PER_BYTE ] = '\0';
+    return buf->strbuf;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -198,24 +198,24 @@ char *DIOBufToInvertedBinary( DIOBuf *buf ) {
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE DIOBufSetIndex( DIOBuf *buf, int index, unsigned value )
 {
-    AIO_ASSERT_RET( -AIOUSB_ERROR_INVALID_INDEX, index < (int)buf->_size && index >= 0 );
+    AIO_ASSERT_RET( -AIOUSB_ERROR_INVALID_INDEX, index < (int)buf->size && index >= 0 );
     AIO_ASSERT_RET( -AIOUSB_ERROR_INVALID_PARAMETER, value == 0 || value == 1 );
 
-    buf->_buffer[buf->_size - 1 - index] = ( value == AIOUSB_TRUE ? 1 : AIOUSB_FALSE );
+    buf->buffer[buf->size - 1 - index] = ( value == AIOUSB_TRUE ? 1 : AIOUSB_FALSE );
     return 0;
 }
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE DIOBufGetIndex( DIOBuf *buf, int index ) {
-    AIO_ASSERT_RET( -AIOUSB_ERROR_INVALID_INDEX, index < (int)buf->_size && index >= 0 );
+    AIO_ASSERT_RET( -AIOUSB_ERROR_INVALID_INDEX, index < (int)buf->size && index >= 0 );
   
-    return buf->_buffer[buf->_size - 1 - index ];
+    return buf->buffer[buf->size - 1 - index ];
 }
 
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE DIOBufGetByteAtIndex( DIOBuf *buf, unsigned index , char *value ) {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    if ( index >= buf->_size / BITS_PER_BYTE )   
+    if ( index >= buf->size / BITS_PER_BYTE )   
         return -AIOUSB_ERROR_INVALID_INDEX;
     *value = 0;
     int actindex = index * BITS_PER_BYTE;
@@ -228,7 +228,7 @@ AIORET_TYPE DIOBufGetByteAtIndex( DIOBuf *buf, unsigned index , char *value ) {
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE DIOBufSetByteAtIndex( DIOBuf *buf, unsigned index, char  value ) {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    if ( index >= buf->_size / BITS_PER_BYTE )   
+    if ( index >= buf->size / BITS_PER_BYTE )   
         return -AIOUSB_ERROR_INVALID_INDEX;
     int actindex = index * BITS_PER_BYTE;
     for ( int i = actindex ; i < actindex + BITS_PER_BYTE ; i ++ ) {

@@ -16,10 +16,11 @@ namespace AIOUSB {
 #endif
 
 typedef struct {
-    unsigned _size;
-    unsigned char *_buffer;
-    char *_strbuf;
-    int _strbuf_size;
+    unsigned size;              /**< Size of the buffer */
+    unsigned char *buffer;      /**< Raw buffer data  */
+    char *strbuf;               /**< String representation in terms of 1's and 0's */
+    int strbuf_size;            /**< Strlen of the 1's and 0's version including some padding
+                                   room */
 } DIOBuf;
 
 
