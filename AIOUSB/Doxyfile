@@ -628,10 +628,10 @@ EXCLUDE_SYMLINKS       = NO
 # against the file with absolute path, so to exclude all test directories
 # for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       = */lib/tests/*.cpp
-EXCLUDE_PATTERNS       += */*_wrap.c 
-EXCLUDE_PATTERNS       += */lib/filepp/*
-EXCLUDE_PATTERNS       += */lib/libaiousb.h
+EXCLUDE_PATTERNS       = */lib/tests/*.cpp \
+                         */*_wrap.c \
+                         */lib/filepp/* \
+                         */lib/libaiousb.h \
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the

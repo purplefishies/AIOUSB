@@ -1374,20 +1374,6 @@ unsigned long ClearDevices( void ) {
 /*----------------------------------------------------------------------------*/
 
 
-#define DEVICE_POPULATOR_INTERFACE(T)                                   \
-    AIORET_TYPE (*get_device_ids)( T *self );                           \
-    unsigned long *products;                                            \
-    int size;
-    
-typedef struct device_populator {
-    DEVICE_POPULATOR_INTERFACE(struct device_populator );
-    libusb_device *usb_device;
-    libusb_device **deviceList;
-    int numDevices;
-    int numAccesDevices;
-} AIODevicePopulator;
-
-
 /*----------------------------------------------------------------------------*/
 /**
  * @brief populate device table with ACCES devices found on USB bus
@@ -1560,6 +1546,21 @@ TEST(AIODeviceTable, AddingDeviceSetsInit )
     ClearAIODeviceTable( numDevices );
 
 }
+
+
+#define DEVICE_POPULATOR_INTERFACE(T)                                   \
+    AIORET_TYPE (*get_device_ids)( T *self );                           \
+    unsigned long *products;                                            \
+    int size;
+#ifndef SWIG    
+typedef struct device_populator {
+    DEVICE_POPULATOR_INTERFACE(struct device_populator );
+    libusb_device *usb_device;
+    libusb_device **deviceList;
+    int numDevices;
+    int numAccesDevices;
+} AIODevicePopulator;
+#endif
 
 /* #define DEVICE_POPULATOR_INTERFACE(T)                                         \ */
 /*     AIORET_TYPE (*get_device_ids)( T *self , int **product_ids, int *size );  \ */
