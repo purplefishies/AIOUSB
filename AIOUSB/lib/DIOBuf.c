@@ -101,9 +101,12 @@ DIOBuf *NewDIOBufFromBinStr( const char *ary ) {
 
 /*----------------------------------------------------------------------------*/
 /**
- * @brief Replaces the content of the buffer buf with the new array , of size size
- * @param ary String that contains 1's and 0's. I.E: "11110000"
- * @return DIOBuf if successful or NULL if there was an error.
+ * @brief Replaces the content of the buffer buf with the new array , of size size * 
+ * @param buf DIOBuf buffer one wishes to replace the content of
+ * @param ary Array of raw bytes values that will replace the original
+ * @param size_array The size, in bytes, of the *ary* that will be copied in
+ * @return DIOBuf if successful or NULL if there was an error and _errno_ will be
+ *         set to the error in question
  */
 DIOBuf *DIOBufReplaceString( DIOBuf *buf, char *ary, int size_array ) 
 { 
@@ -167,7 +170,15 @@ unsigned DIOBufByteSize( DIOBuf *buf ) {
 }
 
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief Converts the DIOBuf buf into a string of 1's and 0's representing the 
+ *        buf's value in binary.
+ * @param buf DIOBuf one wished to print in string format
+ * @return A string containing 1's and 0's if successful, NULL if failure and 
+ *         errno is set.
+ */
 char *DIOBufToString( DIOBuf *buf ) {
+    
   unsigned i;
   memset(buf->strbuf,0, buf->strbuf_size );
   for( i = 0; i < buf->size ; i ++ )
@@ -180,13 +191,13 @@ char *DIOBufToString( DIOBuf *buf ) {
 /**
  * @brief Creates a hex string representation of the DIOBuf buffer. This is useful
  *        for log message which require a more terse representation.
- * @param buf 
+ * @param buf DIOBuf one wishes to convert to Hex
  * @return A Hex string , prefixed with "0x", that represents the hexidecimal 
  *         representation of the DIOBuf buffer's contents. NULL indicates 
  *         a failure and it sets the errno to the cause of the error.
  */
 char *DIOBufToHex( DIOBuf *buf ) {
-
+    AIO_ASSERT_RET( NULL, buf );
     char *tmp = (char *)malloc( DIOBufSize(buf) / BITS_PER_BYTE );
     int size = DIOBufSize(buf) / BITS_PER_BYTE;
 
@@ -207,6 +218,7 @@ char *DIOBufToHex( DIOBuf *buf ) {
 
 /*----------------------------------------------------------------------------*/
 char *DIOBufToBinary( DIOBuf *buf ) {
+    AIO_ASSERT_RET( NULL, buf );
     int i, j;
     memset(buf->strbuf, 0, buf->strbuf_size );
     for ( i = 0, j = 0 ; i < (int)DIOBufSize(buf) ; i ++ , j = ( (j+1) % 8 )) { 
