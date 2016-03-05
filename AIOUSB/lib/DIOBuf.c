@@ -80,9 +80,12 @@ DIOBuf *NewDIOBufFromChar( const char *ary, int size_array ) {
     _copy_to_buf( tmp, ary , size_array );
     return tmp;
 }
+
 /*----------------------------------------------------------------------------*/
 /**
  * @brief Constructor from a string argument like "101011011";
+ * @param ary String that contains 1's and 0's. I.E: "11110000"
+ * @return DIOBuf if successful or NULL if there was an error.
  */
 DIOBuf *NewDIOBufFromBinStr( const char *ary ) {
     int tot_bit_size = strlen(ary);
@@ -95,7 +98,13 @@ DIOBuf *NewDIOBufFromBinStr( const char *ary ) {
     }
     return tmp;
 }
+
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief Replaces the content of the buffer buf with the new array , of size size
+ * @param ary String that contains 1's and 0's. I.E: "11110000"
+ * @return DIOBuf if successful or NULL if there was an error.
+ */
 DIOBuf *DIOBufReplaceString( DIOBuf *buf, char *ary, int size_array ) 
 { 
     if ( buf  )
@@ -103,6 +112,7 @@ DIOBuf *DIOBufReplaceString( DIOBuf *buf, char *ary, int size_array )
             _copy_to_buf( buf, ary, size_array );
     return buf;
 }
+
 /*----------------------------------------------------------------------------*/
 DIOBuf *DIOBufReplaceBinString( DIOBuf *buf, char *bitstr ) 
 { 
@@ -167,6 +177,14 @@ char *DIOBufToString( DIOBuf *buf ) {
 }
 
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief Creates a hex string representation of the DIOBuf buffer. This is useful
+ *        for log message which require a more terse representation.
+ * @param buf 
+ * @return A Hex string , prefixed with "0x", that represents the hexidecimal 
+ *         representation of the DIOBuf buffer's contents. NULL indicates 
+ *         a failure and it sets the errno to the cause of the error.
+ */
 char *DIOBufToHex( DIOBuf *buf ) {
 
     char *tmp = (char *)malloc( DIOBufSize(buf) / BITS_PER_BYTE );
@@ -199,6 +217,14 @@ char *DIOBufToBinary( DIOBuf *buf ) {
 }
 
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief Creates an inverted binary version of the original DIOBuf. This is
+ *        in contrast to just inverting the string of 1s to become 0s and 
+ *        vice versea. This is useful in 
+ * @param buf DIOBuf to invert
+ * @return A binary string that represents the inverted value. NULL indicates 
+ *         a failure and it sets the errno
+ */
 char *DIOBufToInvertedBinary( DIOBuf *buf ) {
     int i;
     char *orig = DIOBufToBinary(buf);
@@ -213,6 +239,15 @@ char *DIOBufToInvertedBinary( DIOBuf *buf ) {
 }
 
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief Sets the value of the DIOBuf buffer at index  to the value specified. 
+ *        The value is required to be either a '0' or a '1', otherwise an error
+ *        will be generated for this result.
+ * @param buf 
+ * @param index 
+ * @param value A boolean value of either 0 or 1
+ * @return success if  >= AIOUSB_SUCCESS , < 0 otherwise
+ */
 AIORET_TYPE DIOBufSetIndex( DIOBuf *buf, int index, unsigned value )
 {
     AIO_ASSERT_RET( -AIOUSB_ERROR_INVALID_INDEX, index < (int)buf->size && index >= 0 );
@@ -223,6 +258,12 @@ AIORET_TYPE DIOBufSetIndex( DIOBuf *buf, int index, unsigned value )
 }
 
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief Returns the bit value at the index specified.
+ * @param buf DIOBuf we wish to inspect
+ * @param index Index of the bit we wish to examine
+ * @return 0 or 1 if successful, < 0 indicated a failure
+ */
 AIORET_TYPE DIOBufGetIndex( DIOBuf *buf, int index ) {
     AIO_ASSERT_RET( -AIOUSB_ERROR_INVALID_INDEX, index < (int)buf->size && index >= 0 );
   
