@@ -481,11 +481,17 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *O
 
  }
 #elif defined(SWIGJAVA)
-%extend AIOChannelMask {
-  char *toFoo() {
-      return AIOChannelMaskToString( $self );
+  %extend AIOChannelMask {
+      char *toFoo() {
+          return AIOChannelMaskToString( $self );
+      }
   }
-}
+
+  %extend DIOBuf {
+      const char *toString() {
+          return DIOBufToString( $self );
+      }
+  } 
 
 #elif defined(SWIGRUBY)
 %extend DIOBuf {

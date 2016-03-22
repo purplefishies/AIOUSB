@@ -188,7 +188,7 @@ ruby_atest:
 php:
 	@if [ ! -f $(PHP_BUILT) ] ; then \
 		$(SWIG) $(SWIG_IGNORE_WARNINGS) -I../..// -php AIOUSB.i 2>&1 ; \
-		$(CC) -I. -I../../  $$(php-config --includes) -fpic -c AIOUSB_wrap.c 2>&1 ; \
+		$(CC) -I. -I$$AIO_LIB_DIR -I../../  $$(php-config --includes) -fpic -c AIOUSB_wrap.c 2>&1 ; \
 		$(CC) -fPIC -shared -Wl,-soname,AIOUSB.so AIOUSB_wrap.o -o AIOUSB.so -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -lusb-1.0 -laiousb 2>&1;\
 		fi
 	@touch $(PHP_BUILT);
