@@ -11,6 +11,11 @@ typedef int64_t AIORET_TYPE;
 #include "AIOChannelMask.h"
 #include "AIOContinuousBuffer.h"
 #include "AIOTypes.h"
+#include "DIOBuf.h"
+#include "AIODeviceInfo.h"
+#include "AIODeviceQuery.h"
+#include "AIOCommandLine.h"
+#include "AIOUSB_Properties.h"
 
 /* #include <pthread.h> */
 

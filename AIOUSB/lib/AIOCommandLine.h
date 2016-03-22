@@ -23,11 +23,11 @@ namespace AIOUSB
 #define JCONF  0x1002
 #define REPEAT 0x1003
 
-typedef struct AIOChannelRange {
+typedef struct AIOChannelRangeTmp {
     int start_channel;
     int end_channel;
     int gaincode;
-} AIOChannelRange;
+} AIOChannelRangeTmp;
 
 
 typedef struct AIOCommandLineOptions {
@@ -62,7 +62,7 @@ typedef struct AIOCommandLineOptions {
     char *aiobuf_json;
     char *default_aiobuf_json;
     char *adcconfig_json;
-    AIOChannelRange **ranges;
+    AIOChannelRangeTmp **ranges;
  } AIOCommandLineOptions;
 
 
@@ -80,7 +80,7 @@ typedef enum {
 
 /* BEGIN AIOUSB_API */
 PUBLIC_EXTERN AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv);
-PUBLIC_EXTERN AIOChannelRange *AIOGetChannelRange(char *optarg );
+PUBLIC_EXTERN AIOChannelRangeTmp *AIOGetChannelRange(char *optarg );
 PUBLIC_EXTERN void AIOPrintUsage(int argc, char **argv,  struct option  *options);
 /* END AIOUSB_API */
 

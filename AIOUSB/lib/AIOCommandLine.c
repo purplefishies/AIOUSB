@@ -80,7 +80,7 @@ AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **
         {0                  , 0,                 0,   0    }
     };
     while (1) { 
-        AIOChannelRange *tmp;
+        AIOChannelRangeTmp *tmp;
         c = getopt_long(argc, argv, "B:C:D:JL:N:R:S:TVYb:O:c:g:hi:m:n:o:q", long_options, &option_index);
         if( c == -1 )
             break;
@@ -91,7 +91,7 @@ AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **
                 return -AIOUSB_ERROR_AIOCOMMANDLINE_INVALID_CHANNEL_RANGE;
             }
 
-            options->ranges = (AIOChannelRange **)realloc( options->ranges , (++options->number_ranges)*sizeof(AIOChannelRange *)  );
+            options->ranges = (AIOChannelRangeTmp **)realloc( options->ranges , (++options->number_ranges)*sizeof(AIOChannelRangeTmp *)  );
 
             options->ranges[options->number_ranges-1] = tmp;
             break;
@@ -278,7 +278,7 @@ void AIOPrintUsage(int argc, char **argv,  struct option *options)
     }
 }
 
-AIOChannelRange *AIOGetChannelRange(char *optarg )
+AIOChannelRangeTmp *AIOGetChannelRange(char *optarg )
 {
     int i = 0;
   
@@ -290,7 +290,7 @@ AIOChannelRange *AIOGetChannelRange(char *optarg )
     } MODE;
     int pos;
     char buf[BUFSIZ];
-    AIOChannelRange *tmp = (AIOChannelRange *)malloc( sizeof(AIOChannelRange) );
+    AIOChannelRangeTmp *tmp = (AIOChannelRangeTmp *)malloc( sizeof(AIOChannelRangeTmp) );
     if ( !tmp ) {
         fprintf(stdout,"Unable to create a new channel range\n");
         return NULL;

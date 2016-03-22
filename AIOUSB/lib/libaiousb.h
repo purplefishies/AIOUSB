@@ -11,6 +11,11 @@ typedef int64_t AIORET_TYPE;
 #include "AIOChannelMask.h"
 #include "AIOContinuousBuffer.h"
 #include "AIOTypes.h"
+#include "DIOBuf.h"
+#include "AIODeviceInfo.h"
+#include "AIODeviceQuery.h"
+#include "AIOCommandLine.h"
+#include "AIOUSB_Properties.h"
 
 /* #include <pthread.h> */
 
@@ -792,7 +797,7 @@ PUBLIC_EXTERN libusb_device_handle *USBDeviceGetUSBDeviceHandle( USBDevice *usb 
 /* #include "AIOCommandLine.h" */
 
 PUBLIC_EXTERN AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv);
-PUBLIC_EXTERN AIOChannelRange *AIOGetChannelRange(char *optarg );
+PUBLIC_EXTERN AIOChannelRangeTmp *AIOGetChannelRange(char *optarg );
 PUBLIC_EXTERN void AIOPrintUsage(int argc, char **argv,  struct option  *options);
 
 
