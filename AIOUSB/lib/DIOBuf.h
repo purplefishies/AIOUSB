@@ -15,6 +15,22 @@
 namespace AIOUSB {
 #endif
 
+/**
+ * @brief DIOBuf: A Smart structure for maintaining bit strings and
+ * for providing functionality to make it easy to operate on said bit
+ * strings. The functionality provided by this structure makes it easy
+ * for a user to work with a compact binary string data type. There
+ * are methods to work with DIOBuf that will convert this structure to
+ * a character string of 1's and 0's, to a hexadecimal representation
+ * and to raw bytes that can be used in the transmission across a
+ * number of media. This later functionality would be useful in case
+ * you are working with a network server that would need to write an
+ * incoming byte stream to a digital buffer.
+ *
+ * @todo Provide Binary operators such as AND, OR, And Not between two
+ * different DIOBuf's
+ */
+
 typedef struct {
     unsigned size;              /**< Size of the buffer */
     unsigned char *buffer;      /**< Raw buffer data  */
