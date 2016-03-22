@@ -108,46 +108,6 @@ for i in range(0,12):
 
     print "Group %d Port %c:  Value: %s" % ( i / 3, port, "FOO" )
 
-               # show_byte(DataRead[i])
 sys.exit(0)
 
 
-#tmpbuf = list("00000000000000000000000000000000")
-# for i in range(len(tmpbuf)):
-#     if i >= 1:
-#         tmpbuf[i] = "0"
-#     tmpbuf[i] = '1'
-#     DIOBufReplaceBinString(device.writeBuffer, "".join(tmpbuf) )
-#     result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer )    
-#     time.sleep(1/10.0)
-# ONLY Port D
-#AIOChannelMaskSetMaskFromStr(device.outputMask, "1000" );
-#result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer );
-#time.sleep(1/10.0)
-# ONLY Port C
-#AIOChannelMaskSetMaskFromStr(device.outputMask, "0100" );
-#result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer );
-#time.sleep(1/10.0);
-# ONLY Port B
-#AIOChannelMaskSetMaskFromStr(device.outputMask, "0010" );
-#result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer );
-#time.sleep(1/10.0);
-# ONLY Port A
-#AIOChannelMaskSetMaskFromStr(device.outputMask, "0001" );
-#result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer );
-#time.sleep(1/10.0);
-# All Channels
-#AIOChannelMaskSetMaskFromStr(device.outputMask, "1111" );
-#result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer );
-
-# AIOUSB_SetCommTimeout( device.index, 1000 )
-# AIOChannelMaskSetMaskFromStr( device.outputMask, "1111" )
-# print "Mask was %s " % ( AIOChannelMaskToString( device.outputMask ))
-
-# for port in range(0x20):
-#     print "Using value %d" % (port)
-#     DIOBufSetIndex( device.writeBuffer, port, 1 );
-#     print DIOBufToString( device.writeBuffer )
-#     result = DIO_Configure( device.index, AIOUSB_FALSE, device.outputMask , device.writeBuffer )
-#     #print "Result was %d" % (result)
-#     time.sleep(1/10.0)

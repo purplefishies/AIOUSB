@@ -29,9 +29,9 @@ typedef unsigned char DIOBufferType ;
 /* BEGIN AIOUSB_API */
 
 PUBLIC_EXTERN DIOBuf *NewDIOBuf ( unsigned size );
-PUBLIC_EXTERN void DeleteDIOBuf ( DIOBuf  *buf );
 PUBLIC_EXTERN DIOBuf *NewDIOBufFromChar( const char *ary , int size_array );
 PUBLIC_EXTERN DIOBuf *NewDIOBufFromBinStr( const char *ary );
+PUBLIC_EXTERN void DeleteDIOBuf ( DIOBuf  *buf );
 PUBLIC_EXTERN DIOBuf *DIOBufReplaceString( DIOBuf *buf, char *ary, int size_array );
 PUBLIC_EXTERN DIOBuf *DIOBufReplaceBinString( DIOBuf *buf, char *bitstr );
 PUBLIC_EXTERN char *DIOBufToHex( DIOBuf *buf );

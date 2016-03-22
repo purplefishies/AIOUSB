@@ -21,6 +21,10 @@ override CXXFLAGS      += -I$${AIO_LIB_DIR} -I$${AIO_CLASSLIB_DIR} -Ilib -I/usr/
 
 override LDFLAGS       += -L$${AIO_LIB_DIR} -L$${AIO_CLASSLIB_DIR}
 
+PYTHON_VERSION	:= $(shell python -V 2>&1 | perl -ne 's/^Python\s+(\d+\.\d+)\..*$$/$$1/g;print;')
+SYSNAME		:= $(shell uname -s | perl -pne 'tr/A-Z/a-z/;' )
+ARCHNAME	:= $(shell uname -p )
+
 ifeq ("$(OSTYPE)","Darwin") 
 CC_SHFLAGS := -dynamiclib
 SHLIB_CFLAGS	= $(CFLAGS) -fPIC
@@ -151,6 +155,9 @@ test:
 	@echo "CLIBS=$(CLIBS)"
 	@echo "GLIBC_VERSION=${GLIBC_VERSION}"
 	@echo "RTLIB=${RTLIB}"
+	@echo "PYTHON_VERSION=${PYTHON_VERSION}"
+	@echo "SYSNAME=${SYSNAME}"
+
 clean:
 	$(RM) $(ALL_CLEAN_TARGETS)
 	$(RM) *.csv
@@ -229,3 +236,8 @@ lib/%.o:lib/%.c
 	$(CC) $(DEBUGOPTS) $(LIBPATH) $(COMMONOPTS) $< $(CLIBS) -o $@ $(LDFLAGS)
 
 
+#
+# Python rules
+#
+python_%:%.py
+	 PYTHONPATH="$$AIO_LIB_DIR/wrappers/python/build/lib.$(SYSNAME)-$(ARCHNAME)-$(PYTHON_VERSION)" python $< 

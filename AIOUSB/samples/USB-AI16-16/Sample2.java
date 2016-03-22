@@ -6,7 +6,7 @@ public class Sample2 {
     public static void main( String [] args ) {
         Boolean keepgoing = true;
         int read_count = 0;
-        int retval;
+        long retval;
         int numscans = 24000;
         int max_count = 4000000;
         int tobufsize = 32768;
@@ -20,12 +20,12 @@ public class Sample2 {
             AIOUSB.AIOUSB_ListDevices();
 
             AIOContinuousBuf buf = new AIOContinuousBuf(0 , numscans+1, 16 );
-            AIOUSB.AIOContinuousBuf_SetDeviceIndex( buf, 0 );
-            AIOUSB.AIOContinuousBuf_InitConfiguration( buf );
-            AIOUSB.AIOContinuousBuf_SetOverSample( buf, 0 );
-            AIOUSB.AIOContinuousBuf_SetStartAndEndChannel( buf, 16, 31 );
-            AIOUSB.AIOContinuousBuf_SetAllGainCodeAndDiffMode( buf , ADGainCode.AD_GAIN_CODE_0_2V, AIOUSB_BOOL_VAL.AIOUSB_TRUE );
-            AIOUSB.AIOContinuousBuf_SaveConfig(buf);
+            AIOUSB.AIOContinuousBufSetDeviceIndex( buf, 0 );
+            AIOUSB.AIOContinuousBufInitConfiguration( buf );
+            AIOUSB.AIOContinuousBufSetOverSample( buf, 0 );
+            AIOUSB.AIOContinuousBufSetStartAndEndChannel( buf, 16, 31 );
+            AIOUSB.AIOContinuousBufSetAllGainCodeAndDiffMode( buf , ADGainCode.AD_GAIN_CODE_0_2V, AIOUSB_BOOL_VAL.AIOUSB_TRUE );
+            AIOUSB.AIOContinuousBufSaveConfig(buf);
             AIOUSB.AIOContinuousBufSetClock( buf, 10000 );
             AIOUSB.AIOContinuousBufCallbackStart( buf );
             // Thread.sleep(10000);
@@ -39,7 +39,7 @@ public class Sample2 {
                                     );
 
                 Thread.sleep(1000);
-                if( read_count > max_count || AIOUSB.AIOContinuousBufGetStatus( buf ) != THREAD_STATUS.RUNNING ) {
+                if( read_count > max_count || AIOUSB.AIOContinuousBufGetStatus( buf ) != THREAD_STATUS.RUNNING.swigValue() ) {
                     System.err.println(String.format("Exit reason: read_count=%d, max=%d,but_status=%s",
                                                      read_count, 
                                                      max_count, 
@@ -59,7 +59,7 @@ public class Sample2 {
                 System.err.println( String.format("Read=%d,Write=%d,size=%d,Avail=%d",
                                                   AIOUSB.AIOContinuousBufGetReadPosition(buf),
                                                   AIOUSB.AIOContinuousBufGetWritePosition(buf),
-                                                  AIOUSB.AIOContinuousBufGetSize( buf ),
+                                                  AIOUSB.AIOContinuousBufGetBufferSize( buf ),
                                                   (int)AIOUSB.AIOContinuousBufCountScansAvailable(buf))
                                     );
                 retval = (int)AIOUSB.AIOContinuousBufReadIntegerScanCounts( buf, tobuf ,(long)tobufsize, (long)tobufsize );
@@ -69,9 +69,9 @@ public class Sample2 {
                     keepgoing = false;
                 } else {
                     read_count += retval;
-                    for( int i = 0, ch = 0 ; i < retval; i ++, ch = ((ch+1) % (int)AIOUSB.AIOContinuousBuf_NumberChannels(buf)) ) {
+                    for( int i = 0, ch = 0 ; i < retval; i ++, ch = ((ch+1) % (int)AIOUSB.AIOContinuousBufNumberChannels(buf)) ) {
                         outw.write( String.format("%d,", AIOUSB.ushort_getitem( tobuf, i ) ));
-                        if( ((i+1) % (int)AIOUSB.AIOContinuousBuf_NumberChannels(buf)) == 0 ) {
+                        if( ((i+1) % (int)AIOUSB.AIOContinuousBufNumberChannels(buf)) == 0 ) {
                             outw.write("\n");
                         }
                     }

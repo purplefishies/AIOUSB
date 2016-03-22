@@ -5,6 +5,7 @@
 #include <libusb.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include "aiousb.h"
 #include "AIOTypes.h"
 #include "USBDevice.h"
 #include "AIOUSB_Log.h"
