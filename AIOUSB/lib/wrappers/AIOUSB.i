@@ -6,6 +6,8 @@
 %include "enums.swg"
 #endif
 
+%feature("autodoc", "1");
+
 %pointer_functions( unsigned long,  ulp );
 %pointer_functions( long long, ullp );
 %pointer_functions( double,  udp );
@@ -425,6 +427,8 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *O
     %typemap(out) char * {
          $result = PyString_FromStringAndSize( $1, MAX(strlen($1),DIOBufByteSize( arg1 )) );
     }
+
+
 
     char *to_bin() {
         return DIOBufToBinary($self);
