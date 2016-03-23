@@ -16,16 +16,21 @@ namespace AIOUSB {
 #endif
 
 /**
- * @brief DIOBuf: A Smart structure for maintaining bit strings and
- * for providing functionality to make it easy to operate on said bit
- * strings. The functionality provided by this structure makes it easy
- * for a user to work with a compact binary string data type. There
- * are methods to work with DIOBuf that will convert this structure to
- * a character string of 1's and 0's, to a hexadecimal representation
- * and to raw bytes that can be used in the transmission across a
- * number of media. This later functionality would be useful in case
- * you are working with a network server that would need to write an
- * incoming byte stream to a digital buffer.
+ * @brief DIOBuf: A Smart structure for maintaining bit vectors and
+ * for providing human-readable functionality to make it easy to
+ * operate on said bit vectors. The functionality provided by this
+ * structure makes it easy for a user to work with a binary
+ * string data type convert it between raw bytes and hexidecimal
+ * representations as well as use it for generating 
+ * digital intput, output and tristate bits with the corresponding
+ * [ACCES I/O Products](http://accesio.com/) USB Digital input and output boards.
+ * 
+ * There are methods to work with DIOBuf that will convert this
+ * structure to a character string of 1's and 0's, to a hexadecimal
+ * representation and to raw bytes that can be used in the
+ * transmission across a number of media. This later functionality
+ * would be useful in case you are working with a network server that
+ * would need to write an incoming byte stream to a digital buffer.
  *
  * @todo Provide Binary operators such as AND, OR, And Not between two
  * different DIOBuf's
