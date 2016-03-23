@@ -40,19 +40,19 @@ AIORET_TYPE AIOFifoWrite( AIOFifo *fifo, void *frombuf , unsigned maxsize );
     volatile unsigned int read_pos;                                                  \
     volatile unsigned int write_pos;                                                 \
     AIO_EITHER_TYPE kind;                                                            \
-    AIORET_TYPE (*Read)( struct aio_fifo *fifo, void *tobuf, unsigned maxsize );     \
-    AIORET_TYPE (*Write)( struct aio_fifo *fifo, void *tobuf, unsigned maxsize );    \
+    AIORET_TYPE (*Read)( struct AIOFifo *fifo, void *tobuf, unsigned maxsize );     \
+    AIORET_TYPE (*Write)( struct AIOFifo *fifo, void *tobuf, unsigned maxsize );    \
     void (*Reset)( void *fifo );                                                     \
-    size_t (*delta)( struct aio_fifo *fifo  );                                       \
-    size_t (*rdelta)( struct aio_fifo *fifo  );                                      \
-    size_t (*_calculate_size_write)( struct aio_fifo *fifo, unsigned maxsize );      \
-    size_t (*_calculate_size_read)( struct aio_fifo *fifo, unsigned maxsize );
+    size_t (*delta)( struct AIOFifo *fifo  );                                       \
+    size_t (*rdelta)( struct AIOFifo *fifo  );                                      \
+    size_t (*_calculate_size_write)( struct AIOFifo *fifo, unsigned maxsize );      \
+    size_t (*_calculate_size_read)( struct AIOFifo *fifo, unsigned maxsize );
 
     /* void (*Reset)( struct aio_fifo *fifo );                                          \ */
 
-typedef struct aio_fifo { 
-    AIO_FIFO_INTERFACE;
-    LOCKING_MECHANISM;
+typedef struct AIOFifo { 
+    AIO_FIFO_INTERFACE;         /**< The Main FIFO part    */
+    LOCKING_MECHANISM;          /**< The locking mechanism */
 } AIOFifo;
 
 
