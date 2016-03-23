@@ -10,7 +10,7 @@
 namespace AIOUSB {
 #endif
 
-typedef struct aio_cmd {
+typedef struct AIOCmd {
     int stop_scan;
     int stop_scan_arg;
     int channel;
