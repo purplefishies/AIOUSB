@@ -3,12 +3,70 @@
  * @author $Format: %an <%ae>$
  * @date   $Format: %ad$
  * @version $Format: %h$
- * 
- * @tableofcontents
  * @page sample_usb_ai16_16_burst_test burst_test.c
+ * @tableofcontents
+ * @section sample_usb_ai16_16_burst_test_overview Overview
  *
- * @brief burst_test.c is simple program that demonstrates using the
- * AIOUSB C library's Continuous mode acquisition API.
+ * burst_test.c is simple program that performs a high speed
+ * continuous acquisition using the AIOUSB C library's Continuous mode
+ * acquisition API.  It allows one to setup a simple AIOContinuousBuf,
+ * specify the clock rate for the acquisition ( ) , specify the number
+ * of channels that the user would like to acquire , start the
+ * acquisition and then write to the file called "output.txt".
+ * 
+ * The output file, _output.txt_, is just a Command Separated Value
+ * (csv) file that can be analyzed using Excel , R or Matlab to
+ * examine the waveforms generated.
+ * 
+ * @section sample_usb_ai16_16_burst_test_desc Parts of the sample
+ * 
+ * @subsection sample_usb_ai16_16_burst_test_cmdline Command line parsing
+ *
+ * This is just the introductory code that handles command line
+ * parsing for most of the Linux and Mac based AIOUSB samples.  There
+ * is a standard set of parameters that you can examine if you run 
+ * @verbatim
+shell> ./burst_test --help 
+./burst_test - Options
+        -D | --debug  ARG
+             --dump
+             --dumpadcconfig
+        -S | --buffer_size  ARG
+        -N | --num_scans  ARG
+        -n | --num_channels  ARG
+        -O | --num_oversamples  ARG
+        -g | --gaincode  ARG
+        -c | --clockrate  ARG
+        -C | --calibration  ARG
+        -h | --help
+        -i | --index  ARG
+        -R | --range  ARG
+             --repeat  ARG
+        -r | --reset
+        -f | --outfile  ARG
+        -V | --verbose
+        -B | --block_size  ARG
+        -T | --timing
+        -q | --query
+        -L | --ratelimit  ARG
+        -p | --physical
+             --counts
+        -Y | --yaml
+        -J | --json
+             --jsonconfig  ARG
+@endverbatim
+ *
+ * @todo Document the Command line Parsing helper library
+ *
+ * @subsection sample_usb_ai16_16_burst_test_init Initializing the AIOContinuousBuf  
+ * See the entry at \ref set_index "setting a device index" to find out about this feature
+ *
+ * @subsection sample_usb_ai16_16_burst_test_aiobufsetup Configuring the AIOContinuousBuf
+ *
+ * 
+ * - @subpage set_index "Setup the AIOContinuousBuf index"
+ * - @subpage initialize_aiocontinuousbuf  "more stuff"
+ *
  */
 
 #include <stdio.h>
@@ -73,10 +131,10 @@ main(int argc, char *argv[] )
     }
 
     /**
-     * @page sample_usb_ai16_16_burst_test
-     * @section burst_test_set_index Setting an Index
-     * Associates the AIOContinuousBuf with a particular index
+     * @page setting_device_index Setting a device index in an AIOContinuousBuf 
+     * @section set_index Setting an Index
      *
+     * @par Associates the AIOContinuousBuf with a particular index
      */
 
     AIOContinuousBufSetDeviceIndex( buf, options.index ); /* Assign the first matching device for this sample */
@@ -92,16 +150,16 @@ main(int argc, char *argv[] )
       exit(1);
     }
 
-#if 1
     retval = ADC_SetCal(options.index, ":AUTO:");
     if ( retval < AIOUSB_SUCCESS ) {
         fprintf(stderr,"Error setting calibration %d\n", (int)retval);
         exit(retval);
     }
-#endif
+
 
     /**
-     * @section burst_test_init
+     * @page initialize_aiocontinuousbuf
+     * @section burst_test_init Initialization of the AIOContinuousBuf
      * 2. Setup the Config object for Acquisition, either the more complicated 
      *    part in comments (BELOW) or using a simple interface.
      */
