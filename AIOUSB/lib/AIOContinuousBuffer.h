@@ -41,6 +41,27 @@ typedef void *(*AIOUSB_WorkFn)( void *obj );
  } AIO_CONT_BUF_TYPE;
 
 
+ /**
+  * @brief AIOContinuousBuf provides a buffer that is used with the AIOUSB
+  * highspeed data acquisition API.  It is designed to provide an ease of
+  * use with getting these acquisitions running with as little fuss as
+  * possible. They key flow for using this buffer is the following:
+  * 
+  * - Create a new AIOContinuousBuf of a certain size that is large
+  * enough to handle the running clock rate * number_of_oversamples * 
+  *
+  * - Assign a device index to the AIOContinuousBuf
+  * 
+  * - Start am acquisition by calling
+  *       AIOContinuousBufInitiateCallbackAcquisition;
+  * 
+  * - Process the input data using either a simple while loop @ref sample_usb_ai16_16_burst_test
+  *   
+  *   or using the callback function as in 
+  * 
+  * 
+  */
+
 typedef struct AIOContinuousBuf {
     void *(*callback)(void *object);
 #ifdef HAS_PTHREAD

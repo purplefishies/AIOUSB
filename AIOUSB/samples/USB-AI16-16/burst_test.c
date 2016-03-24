@@ -4,12 +4,11 @@
  * @date   $Format: %ad$
  * @version $Format: %h$
  * 
- * @page burst_test burst_test.c
+ * @tableofcontents
+ * @page sample_usb_ai16_16_burst_test burst_test.c
  *
- * @par BurstTest
- *
- * continuous_mode.cpp is simple program that demonstrates using
- * the AIOUSB C library's Continuous mode acquisition API.
+ * @brief burst_test.c is simple program that demonstrates using the
+ * AIOUSB C library's Continuous mode acquisition API.
  */
 
 #include <stdio.h>
@@ -73,6 +72,13 @@ main(int argc, char *argv[] )
       exit(1);
     }
 
+    /**
+     * @page sample_usb_ai16_16_burst_test
+     * @section burst_test_set_index Setting an Index
+     * Associates the AIOContinuousBuf with a particular index
+     *
+     */
+
     AIOContinuousBufSetDeviceIndex( buf, options.index ); /* Assign the first matching device for this sample */
 
     if( options.reset ) {
@@ -95,6 +101,7 @@ main(int argc, char *argv[] )
 #endif
 
     /**
+     * @section burst_test_init
      * 2. Setup the Config object for Acquisition, either the more complicated 
      *    part in comments (BELOW) or using a simple interface.
      */

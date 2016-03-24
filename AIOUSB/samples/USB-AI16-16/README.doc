@@ -9,7 +9,7 @@ These are the samples of the [USB-AI](http://accesio.com/?p=../usb/usb-aio16-16a
 
 @subpage sample_usb_ai16_16_continuous_mode_from_json_config Continuous Mode sample usng a JSON config file
 
-@subpage burst_test Example of a quick continuous mode sample that sets up an AIOContinuousBuf buffer and then
+@subpage sample_usb_ai16_16_burst_test Example of a quick continuous mode sample that sets up an AIOContinuousBuf buffer and then
 proceeds to read data from it.
 
 @subpage bulk_acquire_test Sample the demonstrates the older and unfortunately , less reliable Bulk Acquire API. This API has been effectively replaced by the continuous mode samples.
