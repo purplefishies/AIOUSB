@@ -55,7 +55,7 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeScripts)
 set(C_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-set(CPP_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/classlib)
+set(CPP_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deprecated/classlib)
 set(SWIG_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/wrappers )
 
 # Threads are required in both Win and Unix 
@@ -126,8 +126,8 @@ endif( UNIX OR APPLE)
 
 add_subdirectory(lib)
 include_directories(lib)
-add_subdirectory(classlib)
-include_directories(classlib)
+add_subdirectory(deprecated/classlib)
+include_directories(deprecated/classlib)
 
 
 if ( SWIG_FOUND ) 

@@ -581,7 +581,7 @@ WARN_LOGFILE           =
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ../README.md doc/index.doc doc/install.doc doc/aiousb.doc classlib/README.doc doc/java.doc doc/samples.doc doc/wrappers.doc doc/firmware.doc doc/libusb.doc classlib/ lib/ Firmware/ samples/
+INPUT                  = ../README.md doc/index.doc doc/install.doc doc/aiousb.doc deprecated/classlib/README.doc doc/java.doc doc/samples.doc doc/wrappers.doc doc/firmware.doc doc/libusb.doc deprecated/classlib/ lib/ Firmware/ samples/
 
 
 USE_MDFILE_AS_MAINPAGE = ../README.md

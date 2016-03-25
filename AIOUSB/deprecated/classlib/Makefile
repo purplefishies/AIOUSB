@@ -34,7 +34,7 @@ ifneq ("$(OSTYPE)","CYGWIN")
 COMMONOPT	+= -fPIC 
 endif
 
-override CXXFLAGS += -fPIC -I/usr/include/libusb-1.0 -I. -I../lib -D__aiousb_cplusplus
+override CXXFLAGS += -fPIC -I/usr/include/libusb-1.0 -I. -I$${AIO_LIB_DIR} -D__aiousb_cplusplus
 
 ifdef DEBUG
         DEBUGOPTS       += -ggdb $(DEBUG)
