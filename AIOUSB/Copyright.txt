@@ -1,7 +1,7 @@
 /*
  *    ACCES I/O USB drivers
  *
- *      (c) Copyright 1998-2014 Jimi Damon<jdamon@accesio.com>,
+ *      (c) Copyright 1998-2016 Jimi Damon<jdamon@accesio.com>,
  *                                              All Rights Reserved.
  *                                               
  *    This source code is free software; you can redistribute it
