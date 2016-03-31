@@ -332,9 +332,9 @@ AnalogInputSubsystem &AnalogInputSubsystem::setDiscardFirstSample( bool discard 
  * of more than zero will result in a timeout error because the device will not send more than one sample. In order to
  * protect users from accidentally falling into this trap, the <i>read*()</i> functions automatically and temporarily
  * correct the scan parameters, restoring them when they complete.
- * @param calMode the calibration mode. May be one of:<br>
- * <i>AnalogInputSubsystem::CAL_MODE_NORMAL<br>
- * AnalogInputSubsystem::CAL_MODE_GROUND<br>
+ * @param calMode the calibration mode. May be one of:
+ * <i>AnalogInputSubsystem::CAL_MODE_NORMAL
+ * AnalogInputSubsystem::CAL_MODE_GROUND
  * AnalogInputSubsystem::CAL_MODE_REFERENCE</i>
  * @return This subsystem, useful for chaining together multiple operations.
  * @throws IllegalArgumentException
@@ -357,11 +357,11 @@ AnalogInputSubsystem &AnalogInputSubsystem::setCalMode( int calMode ) {
 
 /**
  * Sets the trigger mode.
- * @param triggerMode a bitwise OR of these flags:<br>
- * <i>AnalogInputSubsystem::TRIG_MODE_CTR0_EXT<br>
- * AnalogInputSubsystem::TRIG_MODE_FALLING_EDGE<br>
- * AnalogInputSubsystem::TRIG_MODE_SCAN<br>
- * AnalogInputSubsystem::TRIG_MODE_EXTERNAL<br>
+ * @param triggerMode a bitwise OR of these flags:
+ * <i>AnalogInputSubsystem::TRIG_MODE_CTR0_EXT
+ * AnalogInputSubsystem::TRIG_MODE_FALLING_EDGE
+ * AnalogInputSubsystem::TRIG_MODE_SCAN
+ * AnalogInputSubsystem::TRIG_MODE_EXTERNAL
  * AnalogInputSubsystem::TRIG_MODE_TIMER</i>
  * @return This subsystem, useful for chaining together multiple operations.
  * @throws IllegalArgumentException
@@ -420,14 +420,14 @@ IntArray AnalogInputSubsystem::getRange( int startChannel, int numChannels ) con
 /**
  * Sets the range for a single A/D channel.
  * @param channel the channel for which to set the range.
- * @param range the range (voltage range) for the channel. May be one of:<br>
- * <i>AnalogInputSubsystem::RANGE_0_1V<br>
- * AnalogInputSubsystem::RANGE_1V<br>
- * AnalogInputSubsystem::RANGE_0_2V<br>
- * AnalogInputSubsystem::RANGE_2V<br>
- * AnalogInputSubsystem::RANGE_0_5V<br>
- * AnalogInputSubsystem::RANGE_5V<br>
- * AnalogInputSubsystem::RANGE_0_10V<br>
+ * @param range the range (voltage range) for the channel. May be one of:
+ * <i>AnalogInputSubsystem::RANGE_0_1V
+ * AnalogInputSubsystem::RANGE_1V
+ * AnalogInputSubsystem::RANGE_0_2V
+ * AnalogInputSubsystem::RANGE_2V
+ * AnalogInputSubsystem::RANGE_0_5V
+ * AnalogInputSubsystem::RANGE_5V
+ * AnalogInputSubsystem::RANGE_0_10V
  * AnalogInputSubsystem::RANGE_10V</i>
  * @return This subsystem, useful for chaining together multiple operations.
  * @see setDifferentialMode( int channel, bool differentialMode )
@@ -523,32 +523,32 @@ BoolArray AnalogInputSubsystem::isDifferentialMode( int startChannel, int numCha
 
 /**
  * Sets a single A/D channel to differential or single-ended mode.
- * <br><br>When using differential mode, one should have a good understanding of how the hardware implements it.
+ * When using differential mode, one should have a good understanding of how the hardware implements it.
  * Considering the simple case of a device with only sixteen input channels, when differential mode is enabled
  * for a channel, that channel is paired with another channel, eight higher than the one for which differential
  * mode is enabled. For instance, if differential mode is enabled for channel 1, then it is paired with channel 9,
  * meaning that channel 1 will return the voltage difference between channels 1 and 9, and channel 9 will no longer
  * return a meaningful reading.
- * <br><br>This scheme also means that enabling differential mode for channels 8-15 has no effect. In fact, if
+ * This scheme also means that enabling differential mode for channels 8-15 has no effect. In fact, if
  * one attempts to enable differential mode for channels 8-15, nothing happens and if the differential mode setting
  * is read back from the device for those channels, it will likely no longer be enabled! Further confusing matters is
  * that some newer firmware does not clear the differential mode setting for channels 8-15, meaning that it will be
  * returned from the device exactly as set even though it has no effect. So ... one should not rely on the
  * differential mode setting for channels 8-15 to behave in a consistent or predictable manner.
- * <br><br>For consistency and simplicity, one may read counts or volts from channels 8-15 even while differential
+ * For consistency and simplicity, one may read counts or volts from channels 8-15 even while differential
  * mode is enabled, but the readings will not be meaningful. In differential mode, only the base channel (0-7) of the
  * pair that's enabled for differential mode will return a meaningful reading. Channels 8-15 which are not enabled
  * for differential mode will continue to return meaningful readings. For example, if differential mode is enabled
  * for channel 1, then channel 1 will return a meaningful reading, channel 9 will not, and channels 8 and
  * 10-15 will.
- * <br><br>Considering the more complex case of a device such as the USB-AI16-64MA, which has an additional MUX
+ * Considering the more complex case of a device such as the USB-AI16-64MA, which has an additional MUX
  * affording 32 differential, or 64 single-ended inputs, things are a bit more complex. In this case, channels
  * 0-3 share the same differential mode (and range) setting; channels 4-7 share the same setting; and so on. For the
  * sake of simplicity and to support future designs which may have distinct settings for all channels, this software
  * permits the differential mode (and range) to be specified for <i>any</i> MUXed channel, even though ultimately
  * multiple channels may share the same setting. For example, on such a device as this, setting the differential
  * mode (or range) of channel 1 also sets the differential mode (or range) of channels 0, 2 and 3.
- * <br><br>There is yet another case to consider, that of devices such as the USB-AI16-128A. This device may have
+ * There is yet another case to consider, that of devices such as the USB-AI16-128A. This device may have
  * up to 128 channels, which share settings in groups of eight rather than four on the USB-AI16-64MA. Method
  * <i>getChannelsPerGroup()</i> tells how many channels are grouped together on each device, and this topic is discussed
  * more thoroughly in <a href="http://accesio.com/MANUALS/USB-AI%20FAMILY.PDF">http://accesio.com/MANUALS/USB-AI FAMILY.PDF</a>.
@@ -812,18 +812,18 @@ UShortArray AnalogInputSubsystem::calibrate( bool autoCal, bool returnCalTable, 
  * <i>readCounts( int channel )</i>). It's also a good idea to enable oversampling while recording these
  * values in order to obtain the most stable readings. Alternatively, since <i>points</i> is an array of <i>double</i> values,
  * you can obtain individual A/D count measurements and average them yourself, producing a <i>double</i> average, and put that
- * value into the <i>points</i> array.<br><br>
+ * value into the <i>points</i> array.
  * The <i>points</i> array consists of voltage-count pairs; <i>points[0]</i> is the first input voltage; <i>points[1]</i> is
  * the corresponding count value measured by the A/D; <i>points[2]</i> and <i>points[3]</i> contain the second pair of
  * voltage-count values; and so on. You can provide any number of pairs, although more than a few dozen is probably overkill,
- * not to mention would take a lot of effort to acquire.<br><br>
+ * not to mention would take a lot of effort to acquire.
  * This calibration procedure uses the current gain A/D setting for channel 0, so it must be the same as that used to collect
  * the measured A/D counts. It's recommended that all the channels be set to the same gain, the one that will be used during
  * normal operation. The calibration is gain dependent, so switching the gain after calibrating may introduce slight offset or
  * gain changes. So for best results, the A/D should be calibrated on the same gain setting that will be used during normal
  * operation. You can create any number of calibration tables. If your application needs to switch between ranges, you may wish
  * to create a separate calibration table for each range your application will use. Then when switching to a different range,
- * the application can load the appropriate calibration table.<br><br>
+ * the application can load the appropriate calibration table.
  * Although calibrating in this manner does take some effort, it produces the best results, eliminating all sources of error
  * from the input pins onward. Furthermore, the calibration table can be saved to a file and reloaded into the A/D, ensuring consistency.
  * @param points array of voltage-count pairs to calibrate the A/D with.
@@ -969,9 +969,9 @@ DoubleArray AnalogInputSubsystem::readVolts( int startChannel, int numChannels )
  * acquisition process can be monitored using <i>readBulkSamplesAvailable()</i>, which
  * returns the number of samples available to be retrieved by <i>readBulkNext( int numSamples )</i>.
  * When the last of the data has been retrieved using <i>readBulkNext()</i>, the bulk acquisition process is
- * automatically terminated and becomes ready to be used again.<br><br>
+ * automatically terminated and becomes ready to be used again.
  * <i>While a bulk acquisition process is in progress, no functions of the device other than readBulkSamplesAvailable()
- * or readBulkNext() should be used.</i><br><br>
+ * or readBulkNext() should be used.</i>
  * This example shows the proper way to configure the device for a large A/D acquisition process using the internal timer.
  * <pre>device.adc()
  *   .setStreamingBlockSize( 100000 )

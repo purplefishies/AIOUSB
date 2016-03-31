@@ -108,10 +108,10 @@ public:
 
 	/**
 	 * Clears the streaming FIFO, using one of several different methods.
-	 * @param method the method to use when clearing the FIFO. May be one of:<br>
-	 * <i>USBDeviceBase::CLEAR_FIFO_METHOD_IMMEDIATE<br>
-	 * USBDeviceBase::CLEAR_FIFO_METHOD_AUTO<br>
-	 * USBDeviceBase::CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT<br>
+	 * @param method the method to use when clearing the FIFO. May be one of:
+	 * <i>USBDeviceBase::CLEAR_FIFO_METHOD_IMMEDIATE
+	 * USBDeviceBase::CLEAR_FIFO_METHOD_AUTO
+	 * USBDeviceBase::CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT
 	 * USBDeviceBase::CLEAR_FIFO_METHOD_WAIT</i>
 	 * @return This subsystem, useful for chaining together multiple operations.
 	 */

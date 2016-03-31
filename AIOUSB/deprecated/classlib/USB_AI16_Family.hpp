@@ -20,11 +20,12 @@
 namespace AIOUSB {
 
 /**
- * Class USB_AI16_Family represents a USB-AI16-family device, which encompasses the following product IDs:<br>
- * USB_AI16_16A, USB_AI16_16E, USB_AI12_16A, USB_AI12_16, USB_AI12_16E, USB_AI16_64MA, USB_AI16_64ME, USB_AI12_64MA,<br>
- * USB_AI12_64M, USB_AI12_64ME, USB_AI16_32A, USB_AI16_32E, USB_AI12_32A, USB_AI12_32, USB_AI12_32E, USB_AI16_64A,<br>
- * USB_AI16_64E, USB_AI12_64A, USB_AI12_64, USB_AI12_64E, USB_AI16_96A, USB_AI16_96E, USB_AI12_96A, USB_AI12_96,<br>
- * USB_AI12_96E, USB_AI16_128A, USB_AI16_128E, USB_AI12_128A, USB_AI12_128, USB_AI12_128E.<br><br>
+ * @verbatim
+ * Class USB_AI16_Family represents a USB-AI16-family device, which encompasses the following product IDs:
+ * USB_AI16_16A, USB_AI16_16E, USB_AI12_16A, USB_AI12_16, USB_AI12_16E, USB_AI16_64MA, USB_AI16_64ME, USB_AI12_64MA,
+ * USB_AI12_64M, USB_AI12_64ME, USB_AI16_32A, USB_AI16_32E, USB_AI12_32A, USB_AI12_32, USB_AI12_32E, USB_AI16_64A,
+ * USB_AI16_64E, USB_AI12_64A, USB_AI12_64, USB_AI12_64E, USB_AI16_96A, USB_AI16_96E, USB_AI12_96A, USB_AI12_96,
+ * USB_AI12_96E, USB_AI16_128A, USB_AI16_128E, USB_AI12_128A, USB_AI12_128, USB_AI12_128E.
  * Instances of class <i>USB_AI16_Family</i> are automatically created by the USB device manager when they are
  * detected on the bus. You should use one of the <i>USBDeviceManager</i> search methods, such as
  * <i>USBDeviceManager::getDeviceByProductID( int productID ) const</i>,
@@ -33,6 +34,7 @@ namespace AIOUSB {
  * <pre>USBDeviceArray devices = deviceManager.getDeviceByProductID( USB_AI12_32A, USB_AI12_32E );
  *if( devices.size() > 0 )
  *  USB_AI16_Family &device = *( USB_AI16_Family * ) devices.at( 0 );</pre>
+ * @endverbatim
  */
 
 class USB_AI16_Family : public USBDeviceBase {

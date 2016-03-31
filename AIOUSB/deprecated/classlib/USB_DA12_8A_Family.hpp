@@ -20,8 +20,8 @@
 namespace AIOUSB {
 
 /**
- * Class USB_DA12_8A_Family represents a USB-DA12-8A-family device, which encompasses the following product IDs:<br>
- * USB_DA12_8A_REV_A, USB_DA12_8A.<br><br>
+ * Class USB_DA12_8A_Family represents a USB-DA12-8A-family device, which encompasses the following product IDs:
+ * USB_DA12_8A_REV_A, USB_DA12_8A.
  * Instances of class <i>USB_DA12_8A_Family</i> are automatically created by the USB device manager when they are
  * detected on the bus. You should use one of the <i>USBDeviceManager</i> search methods, such as
  * <i>USBDeviceManager::getDeviceByProductID( int productID ) const</i>,

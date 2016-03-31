@@ -132,12 +132,12 @@ IntArray DA12_AnalogOutputSubsystem::getRange( int startChannel, int numChannels
  * matches the hardware jumper configuration, otherwise the voltage-count conversions will be
  * incorrect.
  * @param channel the channel for which to set the range.
- * @param range the voltage range to select. May be one of:<br>
- * <i>DA12_AnalogOutputSubsystem::RANGE_0_2_5V<br>
- * DA12_AnalogOutputSubsystem::RANGE_2_5V<br>
- * DA12_AnalogOutputSubsystem::RANGE_0_5V<br>
- * DA12_AnalogOutputSubsystem::RANGE_5V<br>
- * DA12_AnalogOutputSubsystem::RANGE_0_10V<br>
+ * @param range the voltage range to select. May be one of:
+ * <i>DA12_AnalogOutputSubsystem::RANGE_0_2_5V
+ * DA12_AnalogOutputSubsystem::RANGE_2_5V
+ * DA12_AnalogOutputSubsystem::RANGE_0_5V
+ * DA12_AnalogOutputSubsystem::RANGE_5V
+ * DA12_AnalogOutputSubsystem::RANGE_0_10V
  * DA12_AnalogOutputSubsystem::RANGE_10V</i>
  * @return This subsystem, useful for chaining together multiple operations.
  * @throws IllegalArgumentException

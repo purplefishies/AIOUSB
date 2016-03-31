@@ -19,8 +19,8 @@
 namespace AIOUSB {
 
 /**
- * Class USB_DIO_16_Family represents a USB-DIO-16-family device, which encompasses the following product IDs:<br>
- * USB_DI16A_REV_A1, USB_DO16A_REV_A1, USB_DI16A_REV_A2, USB_DIO_16H, USB_DI16A, USB_DO16A, USB_DIO_16A.<br><br>
+ * Class USB_DIO_16_Family represents a USB-DIO-16-family device, which encompasses the following product IDs:
+ * USB_DI16A_REV_A1, USB_DO16A_REV_A1, USB_DI16A_REV_A2, USB_DIO_16H, USB_DI16A, USB_DO16A, USB_DIO_16A.
  * Instances of class <i>USB_DIO_16_Family</i> are automatically created by the USB device manager when they are
  * detected on the bus. You should use one of the <i>USBDeviceManager</i> search methods, such as
  * <i>USBDeviceManager::getDeviceByProductID( int productID ) const</i>,

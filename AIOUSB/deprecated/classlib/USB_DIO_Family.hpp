@@ -20,10 +20,10 @@ namespace AIOUSB {
 
 /**
  * Class USB_DIO_Family represents a USB-DIO-family device, which performs basic digital I/O and
- * encompasses the following product IDs:<br>
- * USB_DIO_48, USB_DIO_96, USB_IIRO_16, USB_II_16, USB_RO_16, USB_IIRO_8, USB_II_8, USB_IIRO_4,<br>
- * USB_IDIO_16, USB_II_16_OLD, USB_IDO_16, USB_IDIO_8, USB_II_8_OLD, USB_IDIO_4, USB_IIRO4_2SM, USB_IIRO4_COM,<br>
- * USB_DIO16RO8, PICO_DIO16RO8.<br><br>
+ * encompasses the following product IDs:
+ * USB_DIO_48, USB_DIO_96, USB_IIRO_16, USB_II_16, USB_RO_16, USB_IIRO_8, USB_II_8, USB_IIRO_4,
+ * USB_IDIO_16, USB_II_16_OLD, USB_IDO_16, USB_IDIO_8, USB_II_8_OLD, USB_IDIO_4, USB_IIRO4_2SM, USB_IIRO4_COM,
+ * USB_DIO16RO8, PICO_DIO16RO8.
  * Instances of class <i>USB_DIO_Family</i> are automatically created by the USB device manager when they are
  * detected on the bus. You should use one of the <i>USBDeviceManager</i> search methods, such as
  * <i>USBDeviceManager::getDeviceByProductID( int productID ) const</i>,

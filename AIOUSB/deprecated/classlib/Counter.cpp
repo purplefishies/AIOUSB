@@ -53,12 +53,12 @@ int Counter::getDeviceIndex() const {
 
 /**
  * Sets the counter's mode.
- * @param mode the counter mode. May be one of:<br>
- * <i>Counter::MODE_TERMINAL_COUNT<br>
- * Counter::MODE_ONE_SHOT<br>
- * Counter::MODE_RATE_GENERATOR<br>
- * Counter::MODE_SQUARE_WAVE<br>
- * Counter::MODE_SW_TRIGGERED<br>
+ * @param mode the counter mode. May be one of:
+ * <i>Counter::MODE_TERMINAL_COUNT
+ * Counter::MODE_ONE_SHOT
+ * Counter::MODE_RATE_GENERATOR
+ * Counter::MODE_SQUARE_WAVE
+ * Counter::MODE_SW_TRIGGERED
  * Counter::MODE_HW_TRIGGERED</i>
  * @return This counter, useful for chaining together multiple operations.
  * @throws IllegalArgumentException
@@ -134,8 +134,8 @@ unsigned short Counter::readCount() {
 
 /**
  * Reads a counter's current count value and status.
- * @return An array of 2 16-bit integers:<br>
- * char[ 0 ] contains the current count value (0-65,535)<br>
+ * @return An array of 2 16-bit integers:
+ * char[ 0 ] contains the current count value (0-65,535)
  * char[ 1 ] contains the current counter status (0-255)
  * @throws OperationFailedException
  */

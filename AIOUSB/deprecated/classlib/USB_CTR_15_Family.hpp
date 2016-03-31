@@ -18,8 +18,8 @@
 namespace AIOUSB {
 
 /**
- * Class USB_CTR_15_Family represents a USB-CTR-15-family device, which encompasses the following product IDs:<br>
- * USB_CTR_15.<br><br>
+ * Class USB_CTR_15_Family represents a USB-CTR-15-family device, which encompasses the following product IDs:
+ * USB_CTR_15.
  * Instances of class <i>USB_CTR_15_Family</i> are automatically created by the USB device manager when they are
  * detected on the bus. You should use one of the <i>USBDeviceManager</i> search methods, such as
  * <i>USBDeviceManager::getDeviceByProductID( int productID ) const</i>,

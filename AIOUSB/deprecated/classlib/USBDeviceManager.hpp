@@ -109,7 +109,7 @@ public:
 	 * Gets the string representation of an AIOUSB result code, useful mainly for debugging purposes.
 	 * This method is also used to convert an AIOUSB result code to a string when an
 	 * OperationFailedException is thrown in response to an AIOUSB failure.
-	 * <br><br>Although this method is <i>static</i>, an instance of USBDeviceManager must be created
+	 * Although this method is <i>static</i>, an instance of USBDeviceManager must be created
 	 * and be "open" for use before this method can be used. This stipulation is imposed because the
 	 * underlying library must be initialized in order for result code lookups to succeed, and that
 	 * initialization occurs only when an instance of USBDeviceManager is created and its

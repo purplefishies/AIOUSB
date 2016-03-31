@@ -56,7 +56,7 @@ USB_DIO_32_Family::~USB_DIO_32_Family() {
 
 /**
  * Gets an array of all the product names supported by this USB device family.
- * <br><br>Although this method is <i>static</i>, an instance of USBDeviceManager must be created
+ * Although this method is <i>static</i>, an instance of USBDeviceManager must be created
  * and be "open" for use before this method can be used. This stipulation is imposed because the
  * underlying library must be initialized in order for product name/ID lookups to succeed, and that
  * initialization occurs only when an instance of USBDeviceManager is created and its

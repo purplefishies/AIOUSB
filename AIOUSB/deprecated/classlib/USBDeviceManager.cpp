@@ -107,7 +107,7 @@ USBDeviceManager &USBDeviceManager::printDevices() {
  * from this method, but that is not guaranteed. This method provides a name that constitutes a
  * user-friendly alternative to a product ID number. The complement of this method is
  * <i>productNameToID( const std::string &productName )</i>.
- * <br><br>Although this method is <i>static</i>, an instance of USBDeviceManager must be created
+ * Although this method is <i>static</i>, an instance of USBDeviceManager must be created
  * and be "open" for use before this method can be used. This stipulation is imposed because the
  * underlying library must be initialized in order for product name/ID lookups to succeed, and that
  * initialization occurs only when an instance of USBDeviceManager is created and its
@@ -130,7 +130,7 @@ std::string USBDeviceManager::productIDToName( int productID ) {
  * Gets the product names for an array of product IDs. Functionally identical to
  * <i>productIDToName( int productID )</i> except that it operates
  * on an array of product IDs rather than an individual product ID.
- * <br><br>Although this method is <i>static</i>, an instance of USBDeviceManager must be created
+ * Although this method is <i>static</i>, an instance of USBDeviceManager must be created
  * and be "open" for use before this method can be used. This stipulation is imposed because the
  * underlying library must be initialized in order for product name/ID lookups to succeed, and that
  * initialization occurs only when an instance of USBDeviceManager is created and its
@@ -158,7 +158,7 @@ StringArray USBDeviceManager::productIDToName( const IntArray &productID ) {
  * If one has access to a device and its name, then they should obtain the product ID from the device
  * itself rather than from this method. This method is mainly for easily converting between product
  * names and IDs, primarily to serve the needs of user interfaces.
- * <br><br>Although this method is <i>static</i>, an instance of USBDeviceManager must be created
+ * Although this method is <i>static</i>, an instance of USBDeviceManager must be created
  * and be "open" for use before this method can be used. This stipulation is imposed because the
  * underlying library must be initialized in order for product name/ID lookups to succeed, and that
  * initialization occurs only when an instance of USBDeviceManager is created and its
@@ -178,7 +178,7 @@ int USBDeviceManager::productNameToID( const std::string &productName ) {
  * Gets the product IDs for an array of product names. Functionally identical to
  * <i>productNameToID( const std::string &productName )</i> except that it operates
  * on an array of product names rather than an individual product name.
- * <br><br>Although this method is <i>static</i>, an instance of USBDeviceManager must be created
+ * Although this method is <i>static</i>, an instance of USBDeviceManager must be created
  * and be "open" for use before this method can be used. This stipulation is imposed because the
  * underlying library must be initialized in order for product name/ID lookups to succeed, and that
  * initialization occurs only when an instance of USBDeviceManager is created and its

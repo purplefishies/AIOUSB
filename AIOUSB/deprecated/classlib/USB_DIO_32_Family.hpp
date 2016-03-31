@@ -19,8 +19,8 @@
 namespace AIOUSB {
 
 /**
- * Class USB_DIO_32_Family represents a USB-DIO-32-family device, which encompasses the following product IDs:<br>
- * USB_DIO_32.<br><br>
+ * Class USB_DIO_32_Family represents a USB-DIO-32-family device, which encompasses the following product IDs:
+ * USB_DIO_32.
  * Instances of class <i>USB_DIO_32_Family</i> are automatically created by the USB device manager when they are
  * detected on the bus. You should use one of the <i>USBDeviceManager</i> search methods, such as
  * <i>USBDeviceManager::getDeviceByProductID( int productID ) const</i>,

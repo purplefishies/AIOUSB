@@ -144,16 +144,16 @@ CounterSubsystem &CounterSubsystem::selectGate( int counter ) {
  * are used in measuring frequency. To measure frequency one must count pulses for a known duration. In simplest terms,
  * the number of pulses that occur for 1 second translates directly to Hertz. In the USB-CTR-15 and other supported devices,
  * you can create a known duration by configuring one counter to act as a "gating" signal for any collection of other counters.
- * The other "measurement" counters will only count during the "high" side of the gate signal, which we can control.<br><br>
- * So, to measure frequency you:<br>
- * 1. Create a gate signal of known duration<br>
- * 2. Connect this gating signal to the gate pins of all the "measurement" counters<br>
- * 3. Call <i>selectGate()</i> to tell the board which counter is generating that gate<br>
+ * The other "measurement" counters will only count during the "high" side of the gate signal, which we can control.
+ * So, to measure frequency you:
+ * 1. Create a gate signal of known duration
+ * 2. Connect this gating signal to the gate pins of all the "measurement" counters
+ * 3. Call <i>selectGate()</i> to tell the board which counter is generating that gate
  * 4. Call <i>readCounts( true )</i> periodically to read the latched count values from
- * all the "measurement" counters.<br><br>
+ * all the "measurement" counters.
  * In practice, it may not be possible to generate a gating signal of sufficient duration from a single counter. Simply concatenate
  * two or more counters into a series, or daisy-chain, and use the last counter's output as your gating signal. This last counter
- * in the chain should be selected as the "gate source" using <i>selectGate( int counter )</i>.<br><br>
+ * in the chain should be selected as the "gate source" using <i>selectGate( int counter )</i>.
  * Once a value has been read from a counter using the <i>readCounts( true )</i> call, it
  * can be translated into actual Hz by dividing the count value returned by the high-side-duration of the gating signal, in seconds.
  * For example, if your gate is configured for 10Hz, the high-side lasts 0.05 seconds. If you read 1324 counts via the

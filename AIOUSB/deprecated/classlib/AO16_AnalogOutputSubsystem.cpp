@@ -81,10 +81,10 @@ std::string AO16_AnalogOutputSubsystem::getRangeText( int range ) {
 
 /**
  * Sets the voltage range of the D/A outputs.
- * @param range the voltage range to select. May be one of:<br>
- * <i>AO16_AnalogOutputSubsystem::RANGE_0_5V<br>
- * AO16_AnalogOutputSubsystem::RANGE_5V<br>
- * AO16_AnalogOutputSubsystem::RANGE_0_10V<br>
+ * @param range the voltage range to select. May be one of:
+ * <i>AO16_AnalogOutputSubsystem::RANGE_0_5V
+ * AO16_AnalogOutputSubsystem::RANGE_5V
+ * AO16_AnalogOutputSubsystem::RANGE_0_10V
  * AO16_AnalogOutputSubsystem::RANGE_10V</i>
  * @return This subsystem, useful for chaining together multiple operations.
  * @throws IllegalArgumentException
