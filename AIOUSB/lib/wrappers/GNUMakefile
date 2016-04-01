@@ -163,9 +163,10 @@ ruby:
 		$(SWIG) $(SWIG_IGNORE_WARNINGS) -I../../ -ruby AIOUSB.i 2>&1; \
 		$(RUBY) extconf.rb --with-ldflags="$(RUBY_LDFLAGS)" --with-name-include="$(RUBY_INCLUDES)" 2>&1 ; \
 		$(MAKE) -f Makefile 2>&1;\
-		fi
-	@touch $(RUBY_BUILT); fi
-
+		if [ "$$?" == 0 ] ; then \
+			touch $(RUBY_BUILT); \
+		fi \
+	fi
 
 $(RUBY_BUILT): ruby
 
