@@ -300,11 +300,13 @@ java_atest:
 
 R:
 	@if [ ! -f $(R_BUILT) ] ; then \
-		$(SWIG) $(SWIG_IGNORE_WARNINGS) -I../../ -r AIOUSB.i 2>&1 ; \
-		 export PKG_CFLAGS="-I../../" ; \
-		R CMD SHLIB -o AIOUSB.so AIOUSB_wrap.c -L$${AIO_LIB_DIR} -laiousb -lusb-1.0 2>&1; \
-		fi
-	@touch $(R_BUILT);
+		$(SWIG) $(SWIG_IGNORE_WARNINGS) -I/usr/include/libusb-1.0 -I$${AIO_LIB_DIR} -r AIOUSB.i 2>&1 ; \
+		export PKG_CFLAGS="-I../../" ; \
+		R CMD SHLIB -o AIOUSB.so AIOUSB_wrap.c -I/usr/include/libusb-1.0 -I$${AIO_LIB_DIR} -L$${AIO_LIB_DIR} -laiousb -lusb-1.0 2>&1; \
+		if [ "$$?" == 0 ]; then \
+			touch $(R_BUILT); \
+		fi;\
+	fi
 
 $(R_BUILT): R
 

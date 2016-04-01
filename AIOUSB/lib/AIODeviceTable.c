@@ -982,16 +982,16 @@ AIORESULT  _Card_Specific_Settings(unsigned long DeviceIndex)
  }
 
 /*----------------------------------------------------------------------------*/ 
-AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , AIORESULT *result ) 
+AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , AIORESULT *res ) 
 {
     AIOUSBDevice *retval = NULL;
-    AIO_ERROR_VALID_DATA_W_CODE( NULL, *result = AIOUSB_ERROR_NOT_INIT, AIOUSB_IsInit());
+    AIO_ERROR_VALID_DATA_W_CODE( NULL, *res = AIOUSB_ERROR_NOT_INIT, AIOUSB_IsInit());
 
     if (DeviceIndex == diFirst) { /* find first device on bus */
-        *result = AIOUSB_ERROR_FILE_NOT_FOUND;
+        *res = AIOUSB_ERROR_FILE_NOT_FOUND;
         int index;
         for(index = 0; index < MAX_USB_DEVICES; index++) {
-            if ( (retval = _verified_device(_get_device(index , result ), result )) && *result == AIOUSB_SUCCESS ) {
+            if ( (retval = _verified_device(_get_device(index , res ), res )) && *res == AIOUSB_SUCCESS ) {
                 DeviceIndex = index;
                 break;
             }
@@ -1000,23 +1000,23 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , AIORES
         /*
          * find first device on bus, ensuring that it's the only device
          */
-        *result = AIOUSB_ERROR_FILE_NOT_FOUND;
+        *res = AIOUSB_ERROR_FILE_NOT_FOUND;
         int index;
         for(index = 0; index < MAX_USB_DEVICES; index++) {
-            if ( (retval = _verified_device(_get_device(index, result ), result )) ) {
+            if ( (retval = _verified_device(_get_device(index, res ), res )) ) {
                 /* found a device */
-                if ( *result != AIOUSB_SUCCESS) {
+                if ( *res != AIOUSB_SUCCESS) {
                     /*
                      * this is the first device found; save this index, but
                      * keep checking to see that this is the only device
                      */
                     DeviceIndex = index;
-                    *result = AIOUSB_SUCCESS;
+                    *res = AIOUSB_SUCCESS;
                 } else {
                     /*
                      * there are multiple devices on the bus
                      */
-                    *result = AIOUSB_ERROR_DUP_NAME;
+                    *res = AIOUSB_ERROR_DUP_NAME;
                     retval = NULL;
                     break;
                 }
@@ -1026,7 +1026,7 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , AIORES
         /*
          * simply verify that the supplied index is valid
          */
-        retval = _verified_device( _get_device( DeviceIndex , result ), result );
+        retval = _verified_device( _get_device( DeviceIndex , res ), res );
     }
 
     return retval;
