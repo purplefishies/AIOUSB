@@ -263,9 +263,11 @@ java: 	$(JAVA_DIR)
 		javac $(JAVA_DIR)/*.java; \
 		cd tests && javac -classpath "$$(pwd):$$(pwd)/./:$$(pwd)/../" test.java 2>&1; \
 		if [ ! -d /tmp/scala-devel ] ; then mkdir /tmp/scala-devel; chmod 777 /tmp/scala-devel; fi \
-		fi
-	@jar cf AIOUSB.jar libAIOUSB.so AIOUSB/*.class
-	@touch $(JAVA_BUILT);
+	fi
+	@jar cf AIOUSB.jar libAIOUSB.so AIOUSB/*.class;\
+	if [ "$$?" == 0 ]; then \
+		touch $(JAVA_BUILT); \
+	fi;\
 
 java_test:	$(JAVA_BUILT) $(TEST_DIR)
 	@LD_LIBRARY_PATH="$${AIO_LIB_DIR}:$${AIO_CLASSLIB_DIR}:$$(pwd)" $(JAVA) -classpath "$${AIO_LIB_DIR}/lib/wrappers/java/AIOUSB.jar::Sample.jar:/usr/share/java/bsh.jar:$${PWD}/tests" test
