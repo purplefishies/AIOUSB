@@ -100,7 +100,10 @@ perl:
 		$(SWIG) $(SWIG_IGNORE_WARNINGS) $(PERL_INCLUDES)  -perl5 AIOUSB.i 2>&1; \
 		$(PERL) Makefile.PL CCFLAGS="$(PERL_CFLAGS) $(PERL_XTRA_CFLAGS)" $(PERL_PREFIX_INSTALL) ;\
 		$(MAKE) -f Makefile ; \
-		touch $(PERL_BUILT); fi 
+		if [ "$$?" == 0 ] ; then \
+			touch $(PERL_BUILT); \
+		fi \
+	fi 
 
 $(PERL_BUILT): perl
 
