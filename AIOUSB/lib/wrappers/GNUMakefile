@@ -14,6 +14,9 @@ RUBY		:= ruby
 
 MKDIR		:= mkdir
 
+
+include $(AIOUSB_ROOT)/Mkfiles/oses.inc
+
 override CFLAGS     += -I. -I/usr/include/libusb-1.0 -std=gnu99
 
 LIBDIR		:= $(shell printenv AIOUSB_ROOT)/lib
