@@ -4,7 +4,7 @@
 
 [TOC]
 
-# AIOUSB driver library {#AIOUSBLibrary}
+#<a name="AIOUSBLibrary"></a>AIOUSB driver library
 
 This project contains USB drivers and APIs for ACCES I/O Product's line of USB based data acquisition modules. This driver represents a large API collection for communicating with one or more of ACCES I/O Product's line of USB based data acquisition products. All of the core functionality that exists and is supported by the Windows software is implemented in this library for non-Windows based operating systems.  This code base compiles using either GCC and Clang compilers to both shared and static libraries that be can used in applications that need to perform highspeed USB data acquisition.
 
@@ -23,7 +23,7 @@ Currently, this project provides full support to the following platforms:
 **NOTE**: At this moment using these drivers under Windows is **not** supported although several customers have successfully been able to build and deploy solutions based on this system. We expect to have Windows libusb support available in the near future.
 
 
-## Prerequisites  {#Prerequisites}
+## <a name="Prerequisites"></a>Prerequisites
 The functionality in this driver depends on the following installed packages.
 
 1. [libusb-1.0](http://www.libusb.info/)
@@ -79,9 +79,10 @@ sudo apt-get install python-dev # If you want Python bindings
 
 # <a name="UnixBuild"></a>Building on Linux/ MacOS / BSD / *NIX systems
 
-Building ACCES I/O Products' Driver library amounts to compiling C source files to produce C and C++ based shared ( .so ) or static (.a) libraries.  The build process relies on either GNU make or Cmake.  The first method of building ( see [non-cmake users](#NonCmakeBuild) is a little more involved but will give you the ability to build wrapper language packs.  Currently ,the simplified cmake system is easier to build and install the general libraries but we have been unable to use it to deploy the Swig based wrappers as we would have liked. 
+Building ACCES I/O Products' Driver library amounts to compiling C source files to produce C and C++ based shared ( .so ) or static (.a) libraries.  The build process relies on either GNU make or Cmake.  The first method of building ( see [non-cmake users](#NonCmakeBuild) is a little more involved but will give you the ability to [build wrapper language packs](#BuildWrapperLanguages).  Currently ,the simplified cmake system is easier to build and install the general libraries but we have been unable to use it to deploy the Swig based wrappers as we would have liked.   The other option is the [CMake build](#CMakeBuild).
 
-## Non CMakeBuild {#NonCmakeBuild}
+## <a name="NonCmakeBuild"></a>Non CMakeBuild
+
 
 You will need to do the following
 
@@ -94,7 +95,7 @@ cd samples/USB_SAMPLE_OF_CHOICE
 make sample AIOUSBLIBDIR=${AIO_LIB_DIR} AIOUSBCLASSLIBDIR=${AIO_CLASSLIB_DIR} DEBUG=1
 ~~~
 
-## Build with CMake {#CMakeBuild}
+## <a name="CMakeBuild"></a>Build with CMake
 
 ~~~bash
 cd AIOUSB
@@ -151,9 +152,9 @@ wrapper language support for the following languages:
 * Octave
 * R
 
-## How to build Wrapper languages
+## <a name="BuildWrapperLanguages"></a>How to build Wrapper languages
 
-### CMake {#cmake_build}
+### <a name="CMakeBuildWrappers"></a>CMake
 
 This is the easiest way to build the wrapper languages. Perform the following
 
@@ -178,7 +179,7 @@ cmake-gui -DCMAKE_INSTALL_PREFIX=/some/path/Dir ..
 
 
 
-### Regular Make system
+### <a name="RegularBuildWrappers"></a> Regular Make system for building wrapper language support
 
 Perform this step *AFTER* you have already followed the instructions
 for building the aiousb libraries.  
