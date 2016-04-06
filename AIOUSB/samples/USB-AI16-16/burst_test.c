@@ -125,9 +125,7 @@ main(int argc, char *argv[] )
      * @snippet burst_test.c newbuf_for_counts
      */ 
     /*[newbuf_for_counts] */
-    buf = (AIOContinuousBuf *)NewAIOContinuousBufForCounts( options.index, 
-                                                            options.num_scans, 
-                                                            options.num_channels );
+    buf = (AIOContinuousBuf *)NewAIOContinuousBufForCounts(options.index, options.num_scans, options.num_channels );
     if( !buf ) {
       fprintf(stderr,"Can't create AIOContinuousBuf \n");
       exit(1);
@@ -224,17 +222,25 @@ main(int argc, char *argv[] )
      * @subsection sample_usb_ai16_16_burst_test_setclocks Set the Clock rate / Data Acquisition speed
      * @brief
      * 
-     * Setup the sampling clock rate, in this case 10_000_000 / 1000
+     * Setup the sampling clock rate, in this case 10000000 / 1000
+     * @snippet burst_test.c setclock
      */ 
+    /* [setclock] */
     AIOContinuousBufSetClock( buf, options.clock_rate );
+    /* [setclock] */
 
     /**
+     * @page sample_usb_ai16_16_burst_test burst_test.c
+     * @tableofcontents
+     * @subsection sample_usb_ai16_16_burst_test_startcallback Start the continuous mode callback 
      * @brief Start the Callback that fills up the
      * AIOContinuousBuf. This fires up an thread that performs the
      * acquistion, while you go about doing other things.
+     * @snippet burst_test.c startcallback
      */ 
-
+    /* [startcallback] */
     AIOContinuousBufInitiateCallbackAcquisition(buf);
+    /* [startcallback] */
 
     /**
      * in this example we read bytes in blocks of our core num_channels parameter. 
@@ -248,10 +254,25 @@ main(int argc, char *argv[] )
     int scans_remaining;
     int read_count = 0;
     int scans_read = 0;
+    
+    /**
+     * @page sample_usb_ai16_16_burst_test burst_test.c
+     * @tableofcontents
+     * @subsection sample_usb_ai16_16_burst_test_acquiredata Acquire data until not needed
+     * @brief This part shows how to acquire data continuously until
+     * there is nore more data remaining. It makes use of the function
+     * AIOContinuousBufPending() that indicates that data is still
+     * available for acquisition.
+     *
+     * @snippet burst_test.c looping_and_waiting
+     * <i>Do something with the data</i>
+     * @snippet burst_test.c ended_waiting
+     */
+    /* [looping_and_waiting] */
     while ( AIOContinuousBufPending(buf) ) {
 
         if ( (scans_remaining = AIOContinuousBufCountScansAvailable(buf) ) > 0 ) { 
-
+    /* [looping_and_waiting] */
             if ( scans_remaining ) { 
 
 #ifdef UNIX
@@ -283,11 +304,12 @@ main(int argc, char *argv[] )
                     }
                 }
             }
+    /* [ended_waiting] */
         } else {
             usleep(100);
         }
-        
     }
+    /* [ended_waiting] */
 
     fclose(fp);
     fprintf(stdout,"Test completed...exiting\n");

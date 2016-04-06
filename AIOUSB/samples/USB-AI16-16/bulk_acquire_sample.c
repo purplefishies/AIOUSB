@@ -1,18 +1,10 @@
 /**
  * @file   AIOUSB_Core.c
- * @author $Format: %an <%ae>$
- * @date   $Format: %ad$
- * @version $Format: %h$
- * 
  * 
  * @page bulk_acquire_test bulk_aquire_test.c
-
- * @par BulkAcquireSample
- * This is a sample that runs a high speed bulk acquisition on a USB-AI board.
  *
- * - Do something first
- * - Do another thing
- * - Do a last thing
+ * @deprecated This is a Deprecated sample. Please look at burst_test.c, continuous_mode_callback.c
+ * or continuous_mode_callback.c
  *
  */
 
