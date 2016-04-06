@@ -15,7 +15,7 @@
  * acquisition and then write to the file called "output.txt".
  * 
  * The output file, _output.txt_, is just a Command Separated Value
- * (csv) file that can be analyzed using Excel , R or Matlab to
+ * (csv) file that can be analyzed using R, Matlab or Excel to
  * examine the waveforms generated.
  * 
  * @section sample_usb_ai16_16_burst_test_desc Parts of the sample
@@ -58,14 +58,6 @@ shell> ./burst_test --help
  *
  * @todo Document the Command line Parsing helper library
  *
- * @subsection sample_usb_ai16_16_burst_test_init Initializing the AIOContinuousBuf  
- * See the entry at \ref set_index "setting a device index" to find out about this feature
- *
- * @subsection sample_usb_ai16_16_burst_test_aiobufsetup Configuring the AIOContinuousBuf
- *
- * 
- * - @subpage set_index "Setup the AIOContinuousBuf index"
- * - @subpage initialize_aiocontinuousbuf  "more stuff"
  *
  */
 
@@ -123,21 +115,40 @@ main(int argc, char *argv[] )
     if ( ( retval = aio_supply_default_command_line_settings(&options)) != AIOUSB_SUCCESS )
         exit(retval);
 
-
-    buf = (AIOContinuousBuf *)NewAIOContinuousBufForCounts( options.index, options.num_scans, options.num_channels );
+    /**
+     * @page sample_usb_ai16_16_burst_test burst_test.c
+     * @tableofcontents
+     * @subsection create_new_buf Create a new AIOContinuousBuf
+     * @brief This blurb allocates a new AIOContinuousBuf buffer for
+     * reading counts, or unsigned shorts, from the Analog board.
+     *
+     * @snippet burst_test.c newbuf_for_counts
+     */ 
+    /*[newbuf_for_counts] */
+    buf = (AIOContinuousBuf *)NewAIOContinuousBufForCounts( options.index, 
+                                                            options.num_scans, 
+                                                            options.num_channels );
     if( !buf ) {
-      fprintf(stderr,"Can't allocate memory for temporary buffer \n");
+      fprintf(stderr,"Can't create AIOContinuousBuf \n");
       exit(1);
     }
+    /*[newbuf_for_counts] */
 
     /**
-     * @page setting_device_index Setting a device index in an AIOContinuousBuf 
-     * @section set_index Setting an Index
-     *
-     * @par Associates the AIOContinuousBuf with a particular index
+     * @page sample_usb_ai16_16_burst_test burst_test.c
+     * @tableofcontents
+     * @subsection sample_usb_ai16_16_set_index Set the device index for the AIOContinuousBuf 
+     * 
+     * @brief The following command associates the AIOContinuousBuf
+     * with a particular index. Typically you either pass in the
+     * device index to the constructor ( see NewAIOContinuousBuf() ) or,
+     * you can set it after the fact with this routine.
+     * 
+     * @snippet burst_test.c Assign the first matching device for this sample
      */
-
-    AIOContinuousBufSetDeviceIndex( buf, options.index ); /* Assign the first matching device for this sample */
+    /*[Assign the first matching device for this sample] */
+    AIOContinuousBufSetDeviceIndex( buf, options.index );
+    /*[Assign the first matching device for this sample] */
 
     if( options.reset ) {
         fprintf(stderr,"Resetting device at index %d\n",buf->DeviceIndex );
@@ -158,13 +169,21 @@ main(int argc, char *argv[] )
 
 
     /**
-     * @page initialize_aiocontinuousbuf
-     * @section burst_test_init Initialization of the AIOContinuousBuf
-     * 2. Setup the Config object for Acquisition, either the more complicated 
-     *    part in comments (BELOW) or using a simple interface.
+     * @page sample_usb_ai16_16_burst_test burst_test.c
+     * @tableofcontents
+     * @subsection sample_usb_ai16_16_burst_test_init Initialize the AIOContinuousBuf  
+     * @brief
+     * Setup the AIOContinuousBuf 's ADCConfig object for
+     * Acquisition. This is a simplified interface for an easy
+     * configuration. Alternatively, you may use functionality
+     * provided through ADC_SetConfig()  to set the configuration
+     * registers and ADC_GetConfig() to read the configuration registers.
+     *
+     * @snippet burst_test.c initaiobuf
      */
-    /* New simpler interface */
+    /* [initaiobuf] */
     AIOContinuousBufInitConfiguration( buf );
+    /* [initaiobuf] */
 
     if ( options.slow_acquire ) {
         unsigned char bufData[64];
@@ -200,15 +219,19 @@ main(int argc, char *argv[] )
     }
 
     /**
-     * 3. Setup the sampling clock rate, in this case 
-     *    10_000_000 / 1000
+     * @page sample_usb_ai16_16_burst_test burst_test.c
+     * @tableofcontents
+     * @subsection sample_usb_ai16_16_burst_test_setclocks Set the Clock rate / Data Acquisition speed
+     * @brief
+     * 
+     * Setup the sampling clock rate, in this case 10_000_000 / 1000
      */ 
     AIOContinuousBufSetClock( buf, options.clock_rate );
+
     /**
-     * 4. Start the Callback that fills up the 
-     *    AIOContinuousBuf. This fires up an thread that 
-     *    performs the acquistion, while you go about 
-     *    doing other things.
+     * @brief Start the Callback that fills up the
+     * AIOContinuousBuf. This fires up an thread that performs the
+     * acquistion, while you go about doing other things.
      */ 
 
     AIOContinuousBufInitiateCallbackAcquisition(buf);
