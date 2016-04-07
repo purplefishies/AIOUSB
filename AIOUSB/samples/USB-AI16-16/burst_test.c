@@ -78,9 +78,6 @@ shell> ./burst_test --help
 #define  _FILE_OFFSET_BITS 64  
 
 
-void process_with_single_buf( struct opts *opts, AIOContinuousBuf *buf , FILE *fp, unsigned short *tobuf, unsigned short tobufsize);
-void process_with_looping_buf( struct opts *opts, AIOContinuousBuf *buf , FILE *fp, unsigned short *tobuf, unsigned short tobufsize);
-
 AIOUSB_BOOL find_ai_board( AIOUSBDevice *dev ) { 
     if ( dev->ProductID >= USB_AI16_16A && dev->ProductID <= USB_AI12_128E ) { 
         return AIOUSB_TRUE;
@@ -258,7 +255,7 @@ main(int argc, char *argv[] )
     /**
      * @page sample_usb_ai16_16_burst_test burst_test.c
      * @tableofcontents
-     * @subsection sample_usb_ai16_16_burst_test_acquiredata Acquire data until not needed
+     * @subsection sample_usb_ai16_16_burst_test_acquiredata Acquire data until completed
      * @brief This part shows how to acquire data continuously until
      * there is nore more data remaining. It makes use of the function
      * AIOContinuousBufPending() that indicates that data is still
@@ -317,9 +314,3 @@ main(int argc, char *argv[] )
     return 0;
 }
 
-void process_with_single_buf( struct opts *opts, AIOContinuousBuf *buf , FILE *fp, unsigned short *tobuf, unsigned short tobufsize)
-{
-
-}
-
-/* fprintf(fp ,"%d,%d,", (int)curtime.tv_sec, (int)(( curtime.tv_sec - starttime.tv_sec )*1e9 + (curtime.tv_nsec - starttime.tv_nsec ))); */
