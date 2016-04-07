@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-open(FOO,">>foo");
+
 
 sub myencode {
     my ($line) = @_;
@@ -10,7 +10,7 @@ sub myencode {
 }
 
 if ( $ARGV[0] =~ /(README|Testing).md/ ) {
-    print FOO "Ahh::: $ARGV[0]\n";
+
     while (<>) {
         if ( /^\s*(#{1,8})\s*<a name="([^"]+)"><\/a>\s*(\S+.*)$/ ) {
             chomp;
@@ -23,10 +23,10 @@ if ( $ARGV[0] =~ /(README|Testing).md/ ) {
         }
     }
 } else {
-    print FOO "Ohhh::: $ARGV[0]\n";
+
     while (<>) {
         print;
     }
 }
 
-close(FOO);
+
