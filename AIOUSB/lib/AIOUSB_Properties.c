@@ -357,7 +357,7 @@ AIORET_TYPE AIOUSB_ShowDevices( AIODisplayType display_type )
                 }
                 switch ( display_type ) {
                 case BASIC:
-                    fprintf(stderr,"  Device at index %d:\n  Product ID: %#.4lx\n  Product name: %s\n  Number of digital I/O bytes: %lu\n  Number of counters: %lu\n  SerialNumber: %lu\n",
+                    fprintf(stderr,"  Device at index %d:\n  Product ID: %#.4lx\n  Product name: %s\n  Number of digital I/O bytes: %lu\n  Number of counters: %lu\n  SerialNumber: %#lx\n",
                             index,
                             productID,
                             name,
