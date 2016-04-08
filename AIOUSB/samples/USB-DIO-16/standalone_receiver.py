@@ -47,11 +47,10 @@ Example: %s  0x40e4bc6f1fffffff 512  30000
     deviceIndex = 0
 
     result = AIOUSB_SetCommTimeout( deviceIndex, 5000 );
-    print("Result : %d\n" % result )
 
     AIOUSB_SetStreamingBlockSize( deviceIndex, 512 );
 
-    readClock  = new_udp(); udp_assign(readClock,40000);
+    readClock  = new_udp(); udp_assign(readClock,ReadClockHz );
     writeClock = new_udp(); udp_assign(writeClock,0);
     tmpclock  = new_udp(); udp_assign( tmpclock,0 );
     
@@ -105,7 +104,9 @@ Example: %s  0x40e4bc6f1fffffff 512  30000
         print("%lu FramePoints successfully read from device at index %lu\n" % (framePoints, deviceIndex ))
 
         fp = file("output.dat","w")
-        fp.write( "".join(  list(itertools.chain.from_iterable([ [chr(frameData[x] & 0xff),chr((frameData[x] & 0xff00)>>8)] for x in range(0,framePoints)]))))
+        for x in range(0,framePoints):
+            fp.write( chr(frameData[x] & 0xff ) )
+            fp.write(chr((frameData[x] & 0xff00)>>8))
         fp.close()
     else:
         print("""
