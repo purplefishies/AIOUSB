@@ -46,7 +46,9 @@ Example: %s  0x40e4bc6f1fffffff 512  30000
     deviceIndex = GetDeviceBySerialNumber( serialNumber );
     deviceIndex = 0
 
-    AIOUSB_SetCommTimeout( deviceIndex, 2000000 );
+    result = AIOUSB_SetCommTimeout( deviceIndex, 5000 );
+    print("Result : %d\n" % result )
+
     AIOUSB_SetStreamingBlockSize( deviceIndex, 512 );
 
     readClock  = new_udp(); udp_assign(readClock,40000);
@@ -58,6 +60,9 @@ Example: %s  0x40e4bc6f1fffffff 512  30000
     if result != AIOUSB_SUCCESS:
         print("Error '%s' setting stream clocks\n" % ( AIOUSB_GetResultCodeAsString( result ) ))
         sys.exit(1)
+
+    # AIOUSB_ClearFIFO( deviceIndex, CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT )
+
 
     outputMask = new_ucp(); ucp_assign(outputMask, 0x08 );
     initialData = new_ulp(); ulp_assign( initialData, 0xffffffff );
@@ -113,11 +118,13 @@ Error running DIO_StreamFrame, result=%ld
                ))
 
 
-    DIO_StreamClose( deviceIndex )
+    result = DIO_StreamClose( deviceIndex )
+    print("Result: %d\n" % result )
+
     udp_assign( tmpclock,0 );
     result = DIO_StreamSetClocks( deviceIndex, tmpclock, tmpclock );
-    AIOUSB_ClearFIFO( deviceIndex, CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT )
     AIOUSB_Exit()
+
 
 
 if __name__ == '__main__':

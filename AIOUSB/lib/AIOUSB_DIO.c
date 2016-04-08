@@ -709,6 +709,12 @@ AIORESULT DIO_StreamSetClocks(
 
 #define GET_ENDPOINT( isread )  ( isread ? (LIBUSB_ENDPOINT_IN | USB_BULK_READ_ENDPOINT) : (LIBUSB_ENDPOINT_OUT | USB_BULK_WRITE_ENDPOINT) )
 
+int pow_of_minsize( int val  ) 
+{
+    return ((val / 512)+1)*512;
+}
+
+
 /*----------------------------------------------------------------------------*/
 AIORESULT DIO_StreamFrame(
                           unsigned long DeviceIndex,
@@ -735,24 +741,29 @@ AIORESULT DIO_StreamFrame(
      * @note convert parameter types to those that libusb likes
      */
     unsigned char *data = ( unsigned char* )pFrameData;
+    unsigned char *tmpdata = (unsigned char *)malloc(streamingBlockSize * sizeof(unsigned char));
+
     int remaining = ( int )FramePoints * sizeof(unsigned short);
     int total = 0;
+    int libusbResult;
+    int minval;
+    int bytes;
     while (remaining > 0) {
-        int bytes;
-        int libusbResult = deviceHandle->usb_bulk_transfer(deviceHandle, 
+        minval = ((remaining < streamingBlockSize) ? pow_of_minsize(remaining) : streamingBlockSize);
+        libusbResult = deviceHandle->usb_bulk_transfer(deviceHandle, 
                                                            GET_ENDPOINT( device->bDIORead ),
-                                                           data,
-                                                           (remaining < streamingBlockSize) ? remaining : streamingBlockSize,
+                                                           tmpdata,
+                                                           minval,
                                                            &bytes, 
-                                                           device->commTimeout
+                                                           10000
                                                            );
-        /* usleep( 800 ); */
-
-        if (libusbResult == LIBUSB_SUCCESS) {
+        /* printf("\t\tRequested: %d ,  rounded: %d, Got %d bytes, strblksize: %d, result: %d\n", remaining, pow_of_minsize(remaining),bytes, streamingBlockSize, libusbResult ); */
+        if (libusbResult == LIBUSB_SUCCESS || libusbResult == LIBUSB_ERROR_OVERFLOW ) {
             if (bytes > 0) {
-                total += bytes;
-                data += bytes;
-                remaining -= bytes;
+                memcpy(data, tmpdata, MIN(bytes,remaining));
+                data += MIN(bytes, remaining );
+                total += MIN(bytes, remaining);
+                remaining -= MIN(bytes,remaining);
             }
         } else {
             result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult);
@@ -762,6 +773,7 @@ AIORESULT DIO_StreamFrame(
     if (result == AIOUSB_SUCCESS)
         *BytesTransferred = total;
 
+    free(tmpdata);
     return result;
 }
 

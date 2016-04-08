@@ -99,8 +99,8 @@ Usage: %s HEX_SERIAL_NUMBER FRAME_POINTS [CLOCKSPEED]\n\n", AIOUSB_GetVersion(),
     unsigned long transferred;
 
     /* set up communication parameters */
-    AIOUSB_SetCommTimeout( deviceIndex, 1600000 );
-    AIOUSB_SetStreamingBlockSize( deviceIndex, 256 );
+    AIOUSB_SetCommTimeout( deviceIndex, 16000 );
+    AIOUSB_SetStreamingBlockSize( deviceIndex, 512 );
 
     /* First stop the clocks*/
     {
@@ -108,6 +108,11 @@ Usage: %s HEX_SERIAL_NUMBER FRAME_POINTS [CLOCKSPEED]\n\n", AIOUSB_GetVersion(),
         result = DIO_StreamSetClocks( deviceIndex, &tmpclock, &tmpclock );
         if ( result != AIOUSB_SUCCESS ) {
             fprintf(stderr,"Can't temporarily stop the clocks: %ld\n", result );
+            goto abort;
+        }
+        result = AIOUSB_ClearFIFO( deviceIndex, CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT );
+        if ( result != AIOUSB_SUCCESS ) {
+            fprintf(stderr,"Can't Clear the FIFO: %ld\n", result );
             goto abort;
         }
     }
