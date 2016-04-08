@@ -558,7 +558,7 @@ PUBLIC_EXTERN AIORET_TYPE AIODeviceTablePopulateTable(void);
 PUBLIC_EXTERN AIORET_TYPE AIODeviceTablePopulateTableTest(unsigned long *products, int length );
 PUBLIC_EXTERN AIORESULT AIODeviceTableClearDevices( void );
 PUBLIC_EXTERN AIORESULT ClearDevices( void );
-PUBLIC_EXTERN AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *result );
+PUBLIC_EXTERN AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , AIORESULT *res );
 PUBLIC_EXTERN USBDevice *AIODeviceTableGetUSBDeviceAtIndex( unsigned long DeviceIndex, AIORESULT *res );
 void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID );
 
@@ -736,7 +736,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOUSBDeviceWriteADCConfig( AIOUSBDevice *device, ADCC
 /* #include "AIOUSB_Properties.h" */
 
 PUBLIC_EXTERN AIORESULT AIOUSB_GetDeviceByProductID(int minProductID,int maxProductID,int maxDevices, int *deviceList );
-PUBLIC_EXTERN AIORESULT GetDeviceBySerialNumber(uint64_t *pSerialNumber);
+PUBLIC_EXTERN AIORESULT GetDeviceBySerialNumber(uint64_t pSerialNumber);
 PUBLIC_EXTERN AIORESULT GetDeviceSerialNumber(unsigned long DeviceIndex, uint64_t *pSerialNumber );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetDeviceSerialNumber( unsigned long DeviceIndex );
 

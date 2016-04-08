@@ -35,8 +35,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-using namespace AIOUSB;
-
 
 int main( int argc, char **argv ) {
     unsigned long result = AIOUSB_SUCCESS;
@@ -80,7 +78,7 @@ Usage: %s HEX_SERIAL_NUMBER FRAME_POINTS [CLOCKSPEED]\n\n", AIOUSB_GetVersion(),
     /*
      * find the device with the specified serial number
      */
-    unsigned long deviceIndex = GetDeviceBySerialNumber( &targetSerialNumber );
+    unsigned long deviceIndex = GetDeviceBySerialNumber( targetSerialNumber );
     if ( deviceIndex == diNone ) {
         fprintf(stderr,"No USB-DIO_16 devices were found...exiting\n");
         return 1;
@@ -103,24 +101,17 @@ Usage: %s HEX_SERIAL_NUMBER FRAME_POINTS [CLOCKSPEED]\n\n", AIOUSB_GetVersion(),
     /*
      * set up communication parameters
      */
-    AIOUSB_SetCommTimeout( deviceIndex, 1000 );
+    AIOUSB_SetCommTimeout( deviceIndex, 1600000 );
     AIOUSB_SetStreamingBlockSize( deviceIndex, 256 );
 
-
-    /* turn off the clocks; the sender will control the clock */
-    ReadClockHz = 40000; 
-    WriteClockHz = 0;
-    result = DIO_StreamSetClocks( deviceIndex, &ReadClockHz, &WriteClockHz );
-    if( result < AIOUSB_SUCCESS ) {
-        printf( "Error '%s' setting stream clock for device at index %lu\n" , AIOUSB_GetResultCodeAsString( result ), deviceIndex );
-        goto abort;
-    }
-
-    /* open stream for reading */
-    result = DIO_StreamOpen( deviceIndex, AIOUSB_TRUE );
-    if( result < AIOUSB_SUCCESS ) {
-        fprintf( stderr, "Error '%s' opening read stream for device at index %lu\n" , AIOUSB_GetResultCodeAsString( result ), deviceIndex );
-        goto abort;
+    /* First stop the clocks*/
+    {
+        double tmpclock = 0;
+        result = DIO_StreamSetClocks( deviceIndex, &tmpclock, &tmpclock );
+        if ( result != AIOUSB_SUCCESS ) {
+            fprintf(stderr,"Can't temporarily stop the clocks: %ld\n", result );
+            goto abort;
+        }
     }
 
     /* configure I/O ports */
@@ -131,9 +122,23 @@ Usage: %s HEX_SERIAL_NUMBER FRAME_POINTS [CLOCKSPEED]\n\n", AIOUSB_GetVersion(),
         goto abort;
     }
 
+    /* open stream for reading */
+    result = DIO_StreamOpen( deviceIndex, AIOUSB_TRUE );
+    if( result < AIOUSB_SUCCESS ) {
+        fprintf( stderr, "Error '%s' opening read stream for device at index %lu\n" , AIOUSB_GetResultCodeAsString( result ), deviceIndex );
+        goto abort;
+    }
+
+    /* Set the receiver to  a specific clock frequency */
+    result = DIO_StreamSetClocks( deviceIndex, &ReadClockHz, &WriteClockHz );
+    if( result < AIOUSB_SUCCESS ) {
+        printf( "Error '%s' setting stream clock for device at index %lu\n" , AIOUSB_GetResultCodeAsString( result ), deviceIndex );
+        goto abort;
+    }
+
     /* receive frame */
     result = DIO_StreamFrame( deviceIndex, framePoints, frameData, &transferred );
-    if( result >= AIOUSB_SUCCESS ) {
+    if( result == AIOUSB_SUCCESS ) {
         if( transferred != framePoints * sizeof( unsigned short ) ) {
             fprintf(stderr,"Received bytes (%ld) was not equal to what was expected (%ld)\n",
                     transferred, framePoints * sizeof( unsigned short ) );
@@ -142,16 +147,30 @@ Usage: %s HEX_SERIAL_NUMBER FRAME_POINTS [CLOCKSPEED]\n\n", AIOUSB_GetVersion(),
 
         printf( "%lu FramePoints successfully read from device at index %lu\n" , framePoints, deviceIndex );
 
+
+
     } else {
-        printf("Error: incorrect amount of frame data read from device at index %lu\n"
-               "  attempted to read %lu bytes, but actually read %lu bytes\n", deviceIndex, 
+        printf("Error running DIO_StreamFrame, result=%ld\n"
+               "%lu\n attempted to read %lu bytes, but actually read %lu bytes\n", 
+               result,
+               deviceIndex, 
                framePoints * sizeof( unsigned short ), 
                transferred 
                );
     }
 
-    AIOUSB_ClearFIFO( deviceIndex, CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT );
     DIO_StreamClose( deviceIndex );
+    AIOUSB_ClearFIFO( deviceIndex, CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT );
+
+    {
+        double tmpclock = 0;
+        result = DIO_StreamSetClocks( deviceIndex, &tmpclock, &tmpclock );
+        if ( result != AIOUSB_SUCCESS ) {
+            fprintf(stderr,"Can't temporarily stop the clocks: %ld\n", result );
+            goto abort;
+        }
+    }
+
 
  abort:
     free( frameData );

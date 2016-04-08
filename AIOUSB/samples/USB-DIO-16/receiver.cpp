@@ -81,7 +81,7 @@ int main( int argc, char **argv ) {
 			/*
 			 * find the device with the specified serial number
 			 */
-      		unsigned long deviceIndex = GetDeviceBySerialNumber( &targetSerialNumber );
+      		unsigned long deviceIndex = GetDeviceBySerialNumber( targetSerialNumber );
 			if( deviceIndex != diNone ) {
 				/*
 				 * found it; allocate buffer in which to receive streaming DIO data

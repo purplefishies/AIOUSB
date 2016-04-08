@@ -158,11 +158,11 @@ out_GetDeviceSerialNumber:
 }
 
 /*----------------------------------------------------------------------------*/
-unsigned long GetDeviceBySerialNumber(uint64_t *pSerialNumber) 
+unsigned long GetDeviceBySerialNumber(uint64_t serialNumber) 
 {
     unsigned long deviceIndex = diNone;
 
-    if(pSerialNumber == NULL)
+    if (serialNumber == 0 )
         return deviceIndex;
 
     int index;
@@ -172,7 +172,7 @@ unsigned long GetDeviceBySerialNumber(uint64_t *pSerialNumber)
                 uint64_t deviceSerialNumber;
                 unsigned long result = GetDeviceSerialNumber(index, &deviceSerialNumber);
 
-                if( result == AIOUSB_SUCCESS && deviceSerialNumber == *pSerialNumber ) {
+                if( result == AIOUSB_SUCCESS && deviceSerialNumber == serialNumber ) {
                       deviceIndex = index;
                       break;
                   }

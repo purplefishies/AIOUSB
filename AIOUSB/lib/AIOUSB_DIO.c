@@ -10,6 +10,7 @@
 #include "AIODeviceTable.h"
 #include "AIOUSB_Core.h"
 #include "USBDevice.h"
+#include <arpa/inet.h>
 
 #ifdef __cplusplus
 namespace AIOUSB {
@@ -31,18 +32,11 @@ int TRISTATE_BYTES_SIZE(AIOUSBDevice *device)
  */
 unsigned short aiousb_htons(unsigned short octaveOffset)
 {
-  short a;
-  char tmp1, tmp2;
-  a = 0xff;
-  tmp1 = *((char*)&a); 
-  if ( tmp1 == 0xff ) {	/* Little Endinan */
-    a = octaveOffset;
-    tmp1 = *((char*)&a); 
-    tmp2 = *(((char*)&a)+1);
-    *((char*)&a) = tmp2;
-    *(((char*)&a)+1) = tmp1;
-  }
-  return a;
+#if defined(__BYTE_ORDER__)&&(__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+    return (((0xff) & octaveOffset) << 8 ) | (( 0xff00 & octaveOffset )>>8 );
+#else 
+    return octaveOffset;
+#endif
 }
 
 
@@ -735,7 +729,7 @@ AIORESULT DIO_StreamFrame(
     AIO_ERROR_VALID_DATA(AIOUSB_ERROR_DEVICE_NOT_CONNECTED, deviceHandle ); 
     AIO_ERROR_VALID_DATA(result, result == AIOUSB_SUCCESS );
 
-    int streamingBlockSize = ( int )device->StreamingBlockSize * sizeof(unsigned short);
+    int streamingBlockSize = ( int )device->StreamingBlockSize;
 
     /**
      * @note convert parameter types to those that libusb likes
