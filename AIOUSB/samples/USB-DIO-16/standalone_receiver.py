@@ -34,6 +34,11 @@ Example: %s  0x40e4bc6f1fffffff 512  30000
     
     serialNumber = int(sys.argv[1],16)
     framePoints = int(sys.argv[2])
+    if (framePoints / 512) * 512 != framePoints:
+        oldfp = framePoints
+        framePoints = (framePoints / 512)*512
+        print("\nRounding framePoints(%ld) to %ld ( multiple of 512 )\n" % ( oldfp, framePoints) )
+                   
     if ( len(sys.argv) == 4 ):
         ReadClockHz = int(sys.argv[3])
 
@@ -41,8 +46,8 @@ Example: %s  0x40e4bc6f1fffffff 512  30000
     deviceIndex = GetDeviceBySerialNumber( serialNumber );
     deviceIndex = 0
 
-    AIOUSB_SetCommTimeout( deviceIndex, 1600000 );
-    AIOUSB_SetStreamingBlockSize( deviceIndex, 256 );
+    AIOUSB_SetCommTimeout( deviceIndex, 2000000 );
+    AIOUSB_SetStreamingBlockSize( deviceIndex, 512 );
 
     readClock  = new_udp(); udp_assign(readClock,40000);
     writeClock = new_udp(); udp_assign(writeClock,0);
@@ -71,16 +76,17 @@ Example: %s  0x40e4bc6f1fffffff 512  30000
         sys.exit(1)
 
 
+    transferred = new_ulp()
+    ulp_assign(transferred, 0)
+
+    # receive frame
+    frameData = ushortarray(framePoints)
+
     # Start clocks
     result = DIO_StreamSetClocks( deviceIndex, readClock, writeClock );
     if result < AIOUSB_SUCCESS:
         print("Error '%s' setting stream clock for device at index %lu\n" % ( AIOUSB_GetResultCodeAsString( result ), deviceIndex ))
         sys.exit(1)
-
-    transferred = new_ulp()
-
-    # receive frame
-    frameData = ushortarray(framePoints)
 
     result = DIO_StreamFrame( deviceIndex, framePoints, frameData, transferred );
 
@@ -108,6 +114,8 @@ Error running DIO_StreamFrame, result=%ld
 
 
     DIO_StreamClose( deviceIndex )
+    udp_assign( tmpclock,0 );
+    result = DIO_StreamSetClocks( deviceIndex, tmpclock, tmpclock );
     AIOUSB_ClearFIFO( deviceIndex, CLEAR_FIFO_METHOD_IMMEDIATE_AND_ABORT )
     AIOUSB_Exit()
 
