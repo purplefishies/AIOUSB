@@ -15,6 +15,7 @@
 %pointer_functions( unsigned short, usp );
 %pointer_functions( double , dp );
 %pointer_functions( char , cp );
+%pointer_functions( unsigned char , ucp );
 %array_functions( char , cstring );
 
 
@@ -23,6 +24,7 @@
 
 %apply unsigned long *INOUT { unsigned long *result };
 %apply long long { int64_t };
+%apply unsigned long long { uint64_t };
 
 %{
   extern unsigned long ADC_BulkPoll( unsigned long DeviceIndex, unsigned long *INOUT );
@@ -259,35 +261,13 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *O
 
 %array_functions(unsigned short, counts )
 %array_functions(double, volts )
+%array_class(unsigned short, ushortarray )
 
-%inline %{
-
-
-    /* For handling counts */
-    unsigned short *new_ushortarray(int size) {
-        return (unsigned short *)malloc(size*sizeof(unsigned short));
-    }
-
-    void delete_ushortarray( unsigned short *ary ) {
-        free(ary);
-    }
-
-    int ushort_getitem(unsigned short *ary, int index) {
-       return (int)ary[index];
-    }
-
-    void ushort_setitem( unsigned short *ary, int index, int value ) {
-       ary[index] = (unsigned short)value;
-    }
-
-    void print_array(double x[10]) {
-       int i;
-       for (i = 0; i < 10; i++) {
-          printf("[%d] = %g\n", i, x[i]);
-       }
-    }
-
-%}
+%extend ushortarray { 
+    const char *__repr__() { 
+        return (const char *)"unsigned short []";
+    }    
+}
 
 
 %extend AIOChannelMask { 

@@ -98,9 +98,7 @@ Usage: %s HEX_SERIAL_NUMBER FRAME_POINTS [CLOCKSPEED]\n\n", AIOUSB_GetVersion(),
 
     unsigned long transferred;
 
-    /*
-     * set up communication parameters
-     */
+    /* set up communication parameters */
     AIOUSB_SetCommTimeout( deviceIndex, 1600000 );
     AIOUSB_SetStreamingBlockSize( deviceIndex, 256 );
 
