@@ -149,7 +149,11 @@ Usage: %s HEX_SERIAL_NUMBER FRAME_POINTS [CLOCKSPEED]\n\n", AIOUSB_GetVersion(),
         }
 
         printf( "%lu FramePoints successfully read from device at index %lu\n" , framePoints, deviceIndex );
+        FILE *fp = fopen("output.dat","w");
 
+        fwrite(frameData,sizeof(frameData[0]),framePoints,fp);
+
+        fclose(fp);
 
 
     } else {
