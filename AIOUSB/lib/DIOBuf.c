@@ -120,10 +120,10 @@ DIOBuf *DIOBufReplaceString( DIOBuf *buf, char *ary, int size_array )
 DIOBuf *DIOBufReplaceBinString( DIOBuf *buf, char *bitstr ) 
 { 
     if ( buf  ) {
-        if ( strlen(bitstr) / BITS_PER_BYTE > DIOBufSize( buf ) ) {
-            return NULL;
-        }
-        for ( int i = strlen(bitstr) ; i >= 0 ; i -- ) {
+        if ( strlen(bitstr) != DIOBufSize( buf ) )
+            DIOBufResize(buf, strlen(bitstr) );
+
+        for ( int i = strlen(bitstr)-1 ; i >= 0 ; i -- ) {
             DIOBufSetIndex( buf, i, (bitstr[i] == '0' ? 0 : 1)  );
         }
     }
@@ -446,6 +446,19 @@ TEST(DIOBuf, Correct_Index_Writing ) {
     EXPECT_STREQ( DIOBufToString(buf), "10101010111111111111111111111111" );
     DIOBufSetByteAtIndex( buf, 2, 0x0f );
     EXPECT_STREQ( DIOBufToString(buf), "10101010000011111111111111111111" );
+    DeleteDIOBuf( buf );
+}
+
+TEST(DIOBuf, ReplaceWithLargerString )
+{
+    DIOBuf *buf = NewDIOBuf(16);
+    std::string tmp = "101010101010101011111";
+    ASSERT_TRUE( buf );
+
+    DIOBufReplaceBinString( buf, (char *)tmp.c_str() );
+    ASSERT_TRUE(buf);
+
+    ASSERT_EQ( strlen(tmp.c_str()), DIOBufSize(buf));
     DeleteDIOBuf( buf );
 }
 
