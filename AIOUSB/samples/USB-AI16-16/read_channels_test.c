@@ -66,7 +66,7 @@ int main( int argc, char **argv )
 
     usb = AIOUSBDeviceGetUSBHandle( dev );
 
-#if 0 
+#if 0
     retval = ADC_SetCal(options.index, ":AUTO:");
     if ( retval < AIOUSB_SUCCESS ) {
         fprintf(stderr,"Error setting calibration %d\n", (int)retval);
@@ -97,7 +97,8 @@ int main( int argc, char **argv )
             if ( options.with_timing )
                 clock_gettime( CLOCK_MONOTONIC_RAW, &prevtime );
 #endif
-            ADC_GetScan( options.index, (unsigned short*)volts );
+            retval = ADC_GetScan( options.index, (unsigned short*)volts );
+	    if ( retval != AIOUSB_SUCCESS ) fprintf(stderr,"Error: Got code %d\n", (int)retval );
 #ifdef UNIX
             if ( options.with_timing ) 
                 clock_gettime( CLOCK_MONOTONIC_RAW, &curtime );
@@ -119,7 +120,8 @@ int main( int argc, char **argv )
             if ( options.with_timing )
                 clock_gettime( CLOCK_MONOTONIC_RAW, &prevtime );
 #endif
-            ADC_GetScanV( options.index, volts );
+            retval = ADC_GetScanV( options.index, volts );
+	    if ( retval != AIOUSB_SUCCESS ) fprintf(stderr,"Error: Got code %d\n", (int)retval );
 #ifdef UNIX
             if ( options.with_timing ) 
                 clock_gettime( CLOCK_MONOTONIC_RAW, &curtime );

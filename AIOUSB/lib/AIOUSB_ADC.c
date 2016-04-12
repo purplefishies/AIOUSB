@@ -344,7 +344,8 @@ PRIVATE AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short co
     AIOUSB_BOOL configChanged, discardFirstSample; 
     int samplesToAverage = 0, sampleIndex = 0;
     int numChannels, samplesPerChannel, libusbresult;
-    unsigned numSamples, overSample, bytesTransferred;     
+    unsigned numSamples, overSample;     
+    int bytesTransferred;
 
     unsigned short *sampleBuffer;
     AIORET_TYPE result = AIOUSB_SUCCESS;
@@ -439,8 +440,8 @@ PRIVATE AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short co
                                                  sizeof(bcdata),
                                                  deviceDesc->commTimeout
                                                  );
-    if ( bytesTransferred != sizeof(bcdata) ) { 
-        result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);       
+    if ( bytesTransferred != (int)sizeof(bcdata) ) { 
+        result = -LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);       
         goto out_freebuf_AIOUSB_GetScan;
     }
 
@@ -465,9 +466,9 @@ PRIVATE AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short co
                                           );
 
         if (libusbresult != LIBUSB_SUCCESS) {
-            result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbresult);
-        } else if (bytesTransferred != numSamples * sizeof(unsigned short) ) {
-            result = AIOUSB_ERROR_INVALID_DATA;
+            result = -LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbresult);
+        } else if (bytesTransferred != (int)(numSamples * sizeof(unsigned short)) ) {
+            result = -AIOUSB_ERROR_INVALID_DATA;
         } else {
             /**
              * Compute the average of all the samples taken for each channel, discarding
@@ -480,6 +481,7 @@ PRIVATE AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short co
              * returns the averaged data readings in counts[], putting the reading for
              * startChannel in counts[0], and the reading for endChannel in counts[numChannels-1]
              */
+            result = AIOUSB_SUCCESS;
             samplesToAverage = discardFirstSample ? samplesPerChannel - 1 : samplesPerChannel;
             sampleIndex = 0;
 
@@ -501,7 +503,7 @@ PRIVATE AIORET_TYPE AIOUSB_GetScan( unsigned long DeviceIndex, unsigned short co
     
     if (configChanged) {
         deviceDesc->cachedConfigBlock = origConfigBlock;
-        result = USBDevicePutADCConfigBlock( usb, &deviceDesc->cachedConfigBlock );
+	USBDevicePutADCConfigBlock( usb, &deviceDesc->cachedConfigBlock );
     }
 
  out_AIOUSB_GetScan:
@@ -728,7 +730,7 @@ AIORET_TYPE ADC_GetScanV( unsigned long DeviceIndex, double *pBuf )
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_ENOUGH_MEMORY, counts );
 
     result = ADC_GetScan(DeviceIndex, counts);
-    AIO_ERROR_VALID_DATA_W_CODE( result, free(counts),  result >= AIOUSB_SUCCESS );
+    AIO_ERROR_VALID_DATA_W_CODE( result, free(counts),  result == AIOUSB_SUCCESS );
     
     /**
      * Convert from A/D counts to volts; only
@@ -762,11 +764,12 @@ AIORET_TYPE ADC_GetScan( unsigned long DeviceIndex,unsigned short *pBuf )
 {
     unsigned startChannel;
     AIORET_TYPE result;
+    AIORESULT res;
     AIOUSBDevice * deviceDesc;
     
     AIO_ASSERT_RET( AIOUSB_ERROR_INVALID_PARAMETER, pBuf );
-    deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, (AIORESULT*)&result );
-    AIO_ERROR_VALID_DATA( result , result == AIOUSB_SUCCESS );
+    deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, (AIORESULT*)&res );
+    AIO_ERROR_VALID_DATA( res , res == AIOUSB_SUCCESS );
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_SUPPORTED, deviceDesc->bADCStream == AIOUSB_TRUE );
 
     /**
