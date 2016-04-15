@@ -9,6 +9,7 @@
 
 %feature("autodoc", "1");
 
+
 %pointer_functions( unsigned long,  ulp );
 %pointer_functions( long long, ullp );
 %pointer_functions( double,  udp );
@@ -20,15 +21,24 @@
 %array_functions( char , cstring );
 
 
+
+
+
 %apply unsigned long *INOUT { unsigned long *result };
 %apply long long { int64_t };
 %apply unsigned long long { uint64_t };
+
+
+
+
 
 %apply AIORESULT *OUTPUT { unsigned long *result };
 
 %{
   extern unsigned long ADC_BulkPoll( unsigned long DeviceIndex, unsigned long *INOUT );
 %}
+
+
 
 
 
@@ -44,6 +54,7 @@
   #include "AIODeviceInfo.h"
   #include "AIOUSB_Properties.h"
   #include "AIOUSB_DAC.h"
+  #include "AIOUSB_ADC.h"
   #include "AIOUSB_CTR.h"
   #include "cJSON.h"
   #include "AIOUSB_DIO.h"
@@ -54,49 +65,12 @@
 
 %}
 
-%include "AIOTypes.h"
-%include "AIOUSB_Core.h"
-%include "ADCConfigBlock.h"
-%include "AIOContinuousBuffer.h"
-%include "AIOUSB_Properties.h"
-%include "AIOChannelMask.h"
-%include "AIODeviceTable.h"    
-%include "AIODeviceQuery.h"
-%include "AIOUSB_ADC.h"
-%include "AIOUSB_DAC.h"
-%include "AIOUSB_CTR.h"
-%include "AIOUSBDevice.h"
-%include "AIODeviceInfo.h"
-%include "AIOUSB_DIO.h"
-%include "cJSON.h"
-%include "AIOBuf.h"
-%include "DIOBuf.h"
 
 
 
-/* Needed to allow inclusion into Scala */
-%pragma(java) modulecode=%{
-    static {
-        System.loadLibrary("AIOUSB");
-    }
-%}
-
-
-%newobject CreateSmartBuffer;
-%newobject NewAIOBuf;
-%newobject NewAIODeviceQuery;
-%delobject AIOBuf::DeleteAIOBuf;
-
-AIORET_TYPE ADC_GetChannelV( unsigned long DeviceIndex, unsigned long ChannelIndex, double *OUTPUT);
-AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsigned long *OUTPUT );
-
-
-
-#if defined(SWIGPYTHON)
 %typemap(in) unsigned char *pGainCodes {
     int i;
     static unsigned char temp[16];
-
     if (!PySequence_Check($input)) {
         PyErr_SetString(PyExc_ValueError,"Expected a sequence");
         return NULL;
@@ -117,6 +91,27 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsign
     $1 = temp;
 }
 
+
+/* Needed to allow inclusion into Scala */
+%pragma(java) modulecode=%{
+    static {
+        System.loadLibrary("AIOUSB");
+    }
+%}
+
+
+
+%newobject CreateSmartBuffer;
+%newobject NewAIOBuf;
+%newobject NewAIODeviceQuery;
+%delobject AIOBuf::DeleteAIOBuf;
+
+AIORET_TYPE ADC_GetChannelV( unsigned long DeviceIndex, unsigned long ChannelIndex, double *OUTPUT);
+AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsigned long *OUTPUT );
+
+
+
+#if defined(SWIGPYTHON)
 %typemap(in)  double *voltages
 {
     double temp[256];
@@ -452,6 +447,8 @@ typedef struct {
 
 
 
+
+
 #if defined(SWIGPYTHON)
 %pythoncode %{
 def new_ushortarray(n):
@@ -478,7 +475,6 @@ def new_ushortarray(n):
 
 %exception DIOBuf::__getitem__ { 
     $action 
-    printf("FOOOOO\n");
     if ( result < 0 ) {
           PyErr_SetString(PyExc_IndexError,"Index out of range");
           return NULL;
@@ -497,6 +493,27 @@ def new_ushortarray(n):
         }
     }
 }
+
+
+%include "AIOTypes.h"
+%include "AIOUSB_Core.h"
+%include "ADCConfigBlock.h"
+%include "AIOContinuousBuffer.h"
+%include "AIOUSB_Properties.h"
+%include "AIOChannelMask.h"
+%include "AIODeviceTable.h"    
+%include "AIODeviceQuery.h"
+%include "AIOUSB_ADC.h"
+%include "AIOUSB_DAC.h"
+%include "AIOUSB_CTR.h"
+%include "AIOUSBDevice.h"
+%include "AIODeviceInfo.h"
+%include "AIOUSB_DIO.h"
+%include "cJSON.h"
+%include "AIOBuf.h"
+%include "DIOBuf.h"
+
+
 
 %extend DIOBuf {
   int __getitem__( int index ) {
@@ -524,12 +541,6 @@ def new_ushortarray(n):
 
  }
 #elif defined(SWIGJAVA)
-  %extend AIOChannelMask {
-      char *toFoo() {
-          return AIOChannelMaskToString( $self );
-      }
-  }
-
   %extend DIOBuf {
       const char *toString() {
           return DIOBufToString( $self );
