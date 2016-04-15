@@ -22,7 +22,7 @@ typedef enum {
 } AIOBufType;
 
 
-typedef struct aiobuf {
+typedef struct AIOBuf {
     size_t size;
     void *_buf;
     size_t endpos;

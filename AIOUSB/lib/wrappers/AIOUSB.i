@@ -261,14 +261,71 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *O
 
 %array_functions(unsigned short, counts )
 %array_functions(double, volts )
-%array_class(unsigned short, ushortarray )
 
-%extend ushortarray { 
-    const char *__repr__() { 
-        return (const char *)"unsigned short []";
-    }    
+#if defined(SWIGPYTHON)
+%exception ushortarray::__getitem__ {
+    if ( arg2 > arg1->_size - 1 || arg2 < 0 ) {
+        PyErr_SetString(PyExc_IndexError,"Index out of range");
+        return NULL;
+    }
+    $action
 }
 
+%exception ushortarray::__setitem__ {
+    if ( arg2 > arg1->_size - 1 || arg2 < 0 ) {
+        PyErr_SetString(PyExc_IndexError,"Index out of range");
+        return NULL;
+    }
+    $action
+}
+#endif
+
+%inline %{
+typedef struct { 
+    unsigned short *el;
+    int _size; 
+} ushortarray;
+%}
+
+%extend ushortarray {
+
+  ushortarray(size_t nelements) {
+      ushortarray *arr = (ushortarray*)malloc(sizeof(ushortarray));
+      arr->el = (unsigned short *)calloc(nelements, sizeof(unsigned short));
+      arr->_size = (int)nelements;
+      return arr;
+  }
+
+  ~ushortarray() {
+      %delete_array(self->el);
+      %delete(self);
+  }
+  
+  unsigned short __getitem__(int index) {
+      return self->el[index];
+  }
+
+  void __setitem__(int index, unsigned short value) {
+      self->el[index] = value;
+  }
+
+  unsigned short * cast() {
+      return self->el;
+  }
+
+  static ushortarray *frompointer(unsigned short *t) {
+      return %reinterpret_cast(t, ushortarray *);
+  }
+
+}
+
+%extend ushortarray {
+    const char *__repr__() {
+        static char buf[BUFSIZ];
+        snprintf(buf,BUFSIZ,"unsigned short [%d]", self->_size );
+        return buf;
+    }
+}
 
 %extend AIOChannelMask { 
     AIOChannelMask( unsigned size ) { 
@@ -358,10 +415,6 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *O
     return DIOBufToHex($self);
   }
 
-  unsigned size() { 
-     return DIOBufSize( $self );
-  }
-  
   DIOBuf *resize( unsigned size ) {
     return DIOBufResize( $self, size );
   } 
@@ -397,18 +450,21 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *O
 
 
 
-#if defined(SWIGPYTHON) | defined(SWIGLUA) 
+#if defined(SWIGPYTHON)
+%pythoncode %{
+def new_ushortarray(n):
+    """Creates a new ushortarray of size n"""
+    import AIOUSB
+    return AIOUSB.ushortarray(n)
+%}
 
 
 /* Special conversion so that binary string with multiple zeros aren't truncated */
- 
 %extend DIOBuf {
     
     %typemap(out) char * {
          $result = PyString_FromStringAndSize( $1, MAX(strlen($1),DIOBufByteSize( arg1 )) );
     }
-
-
 
     char *to_bin() {
         return DIOBufToBinary($self);
@@ -420,6 +476,7 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *O
 
 %exception DIOBuf::__getitem__ { 
     $action 
+    printf("FOOOOO\n");
     if ( result < 0 ) {
           PyErr_SetString(PyExc_IndexError,"Index out of range");
           return NULL;
