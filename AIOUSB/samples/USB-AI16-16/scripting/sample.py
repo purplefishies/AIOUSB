@@ -55,7 +55,8 @@ index = 0
 while deviceMask > 0 and len(devices) < number_devices :
     if (deviceMask & 1 ) != 0:
         obj = AIODeviceInfoGet( index )
-        if obj.PID == USB_AIO16_16A or obj.PID == USB_DIO_16A :
+        if (obj.PID >= USB_AI16_16A and obj.PID <= USB_AI12_128E) or \
+           (obj.PID >=  USB_AIO16_16A and obj.PID <= USB_AIO12_128E ):
             devices.append( Device( index=index, productID=obj.PID, numDIOBytes=obj.DIOBytes,numCounters=obj.Counters ))
     index += 1
     deviceMask >>= 1
@@ -100,7 +101,7 @@ print "A/D settings successfully configured"
 retval = 0
 retval = ADC_SetCal(deviceIndex, ":AUTO:")
 
-if retval != AIOUSB_SUCCESS:
+if retval < AIOUSB_SUCCESS:
     print "Error '%s' performing automatic A/D calibration" % ( AIOUSB_GetResultCodeAsString( retval ) )
     sys.exit(0)
 
@@ -112,20 +113,20 @@ AIOUSBDeviceWriteADCConfig( ndevice, cb )
 # A better API is coming soon, so you won't have to do
 # this to get Data
 counts = new_ushortarray( 16 )
-result = ADC_GetScan( deviceIndex, counts );
+result = ADC_GetScan( deviceIndex, counts.cast() );
 
 if retval < AIOUSB_SUCCESS:
     print "Error '%s' attempting to read ground counts\n" % ( AIOUSB_GetResultCodeAsString( result ) )
 else:
-    print "Ground counts = %u (should be approx. 0)" % ( ushort_getitem( counts, CAL_CHANNEL) )
+    print "Ground counts = %u (should be approx. 0)" % ( counts[CAL_CHANNEL] )
 
 
 ADC_ADMode( deviceIndex, 0 , AD_CAL_MODE_REFERENCE ) # TriggerMode
-result = ADC_GetScan( deviceIndex, counts );
+result = ADC_GetScan( deviceIndex, counts.cast() );
 if result < AIOUSB_SUCCESS:
     print "Error '%s' attempting to read reference counts" % ( AIOUSB_GetResultCodeAsString( result ) )
 else:
-    print "Reference counts = %u (should be approx. 65130)" % ( ushort_getitem( counts, CAL_CHANNEL) )
+    print "Reference counts = %u (should be approx. 65130)" % ( counts[CAL_CHANNEL] )
 
 gainCodes = [0 for x in range(0,16)]
 
