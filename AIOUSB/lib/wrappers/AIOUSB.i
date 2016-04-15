@@ -69,6 +69,7 @@
 %include "AIODeviceInfo.h"
 %include "AIOUSB_DIO.h"
 %include "cJSON.h"
+%include "AIOBuf.h"
 %include "DIOBuf.h"
 
 
@@ -374,11 +375,11 @@ typedef struct {
 }
 
 %extend AIOBuf {
-  AIOBuf(int bufsize)  {
-    return (AIOBuf *)NewAIOBuf( bufsize );
-  }
+   AIOBuf(int bufsize, int refsize)  {
+       return (AIOBuf *)NewAIOBuf( bufsize, refsize );
+   }  
   ~AIOBuf()  {
-    DeleteAIOBuf$self);
+       DeleteAIOBuf($self);
   }
 }
 
