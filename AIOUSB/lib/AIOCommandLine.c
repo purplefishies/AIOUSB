@@ -278,6 +278,27 @@ void AIOPrintUsage(int argc, char **argv,  struct option *options)
     }
 }
 
+/*----------------------------------------------------------------------------*/
+AIOCommandLineOptions *NewDefaultAIOCommandLineOptions()
+{
+    AIOCommandLineOptions *ndef = (AIOCommandLineOptions *)malloc(sizeof(AIOCommandLineOptions));
+    if ( !ndef )
+        return ndef;
+    memcpy( ndef, &AIO_DEFAULT_CMDLINE_OPTIONS, sizeof( AIOCommandLineOptions ));
+    return ndef;
+}
+
+
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE DeleteAIOCommandLineOptions( AIOCommandLineOptions *options )
+{
+    AIO_ASSERT( options );
+    
+    free( options );
+    return AIOUSB_SUCCESS;
+}
+
+
 AIOChannelRangeTmp *AIOGetChannelRange(char *optarg )
 {
     int i = 0;
@@ -337,4 +358,50 @@ AIOChannelRangeTmp *AIOGetChannelRange(char *optarg )
 
 #ifdef __cplusplus
 }
+#endif
+
+/*****************************************************************************
+ * Self-test 
+ * @note This section is for stress testing the DIO code without using the USB 
+ * features
+ *
+ ****************************************************************************/ 
+
+#ifdef SELF_TEST
+
+#include "AIOUSBDevice.h"
+#include "gtest/gtest.h"
+
+#include <iostream>
+using namespace AIOUSB;
+
+TEST( AIOCmdLine, CorrectDefaults )
+{
+    AIOCommandLineOptions *nopts = NewDefaultAIOCommandLineOptions();
+    ASSERT_TRUE( nopts );
+
+    ASSERT_EQ( 0, nopts->default_num_oversamples );
+
+    ASSERT_EQ( AD_GAIN_CODE_0_5V, nopts->gain_code );
+
+    DeleteAIOCommandLineOptions( nopts );
+
+}
+
+
+#include <unistd.h>
+#include <stdio.h>
+
+int main(int argc, char *argv[] )
+{
+  
+  AIORET_TYPE retval;
+
+  testing::InitGoogleTest(&argc, argv);
+  testing::TestEventListeners & listeners = testing::UnitTest::GetInstance()->listeners();
+
+  return RUN_ALL_TESTS();  
+
+}
+
 #endif
