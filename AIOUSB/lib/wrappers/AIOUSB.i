@@ -2,6 +2,7 @@
 %module AIOUSB
 %include "cpointer.i"
 %include "carrays.i"
+%include "typemaps.i"
 #if defined(SWIGJAVA)
 %include "enums.swg"
 #endif
@@ -19,12 +20,11 @@
 %array_functions( char , cstring );
 
 
-%include typemaps.i
-
-
 %apply unsigned long *INOUT { unsigned long *result };
 %apply long long { int64_t };
 %apply unsigned long long { uint64_t };
+
+%apply AIORESULT *OUTPUT { unsigned long *result };
 
 %{
   extern unsigned long ADC_BulkPoll( unsigned long DeviceIndex, unsigned long *INOUT );
@@ -87,7 +87,8 @@
 %delobject AIOBuf::DeleteAIOBuf;
 
 AIORET_TYPE ADC_GetChannelV( unsigned long DeviceIndex, unsigned long ChannelIndex, double *OUTPUT);
-AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long index , AIORESULT *OUTPUT );
+AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsigned long *OUTPUT );
+
 
 
 #if defined(SWIGPYTHON)
