@@ -38,10 +38,6 @@
   extern unsigned long ADC_BulkPoll( unsigned long DeviceIndex, unsigned long *INOUT );
 %}
 
-
-
-
-
 %{
   #include "AIOTypes.h"
   #include "AIOUSB_Core.h"
@@ -64,9 +60,6 @@
   #include <pthread.h>
 
 %}
-
-
-
 
 %typemap(in) unsigned char *pGainCodes {
     int i;
@@ -255,6 +248,24 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsign
 
 #endif
 
+/* Typemaps should remain before the includes */
+%include "AIOTypes.h"
+%include "AIOUSB_Core.h"
+%include "ADCConfigBlock.h"
+%include "AIOContinuousBuffer.h"
+%include "AIOUSB_Properties.h"
+%include "AIOChannelMask.h"
+%include "AIODeviceTable.h"    
+%include "AIODeviceQuery.h"
+%include "AIOUSB_ADC.h"
+%include "AIOUSB_DAC.h"
+%include "AIOUSB_CTR.h"
+%include "AIOUSBDevice.h"
+%include "AIODeviceInfo.h"
+%include "AIOUSB_DIO.h"
+%include "cJSON.h"
+%include "AIOBuf.h"
+%include "DIOBuf.h"
 
 %array_functions(unsigned short, counts )
 %array_functions(double, volts )
@@ -494,24 +505,6 @@ def new_ushortarray(n):
     }
 }
 
-
-%include "AIOTypes.h"
-%include "AIOUSB_Core.h"
-%include "ADCConfigBlock.h"
-%include "AIOContinuousBuffer.h"
-%include "AIOUSB_Properties.h"
-%include "AIOChannelMask.h"
-%include "AIODeviceTable.h"    
-%include "AIODeviceQuery.h"
-%include "AIOUSB_ADC.h"
-%include "AIOUSB_DAC.h"
-%include "AIOUSB_CTR.h"
-%include "AIOUSBDevice.h"
-%include "AIODeviceInfo.h"
-%include "AIOUSB_DIO.h"
-%include "cJSON.h"
-%include "AIOBuf.h"
-%include "DIOBuf.h"
 
 
 
