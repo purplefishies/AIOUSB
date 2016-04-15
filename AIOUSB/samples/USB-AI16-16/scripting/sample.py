@@ -30,7 +30,7 @@ NUM_SCANS = 100000
 BULK_BYTES = NUM_SCANS * NUM_CHANNELS * 2 * (NUM_OVERSAMPLES+1);
 CLOCK_SPEED = 500000 / ( NUM_CHANNELS * (NUM_OVERSAMPLES+1) );
 
-print """USB-AI16-16A sample program version 1.110, 17 November 2014
+print """USB-AI16-16A sample program
 AIOUSB library version %s, %s
 This program demonstrates controlling a USB-AI16-16A device on
 the USB bus. For simplicity, it uses the first such device found
