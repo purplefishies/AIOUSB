@@ -334,13 +334,6 @@ AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *ind
 }
 
 /*----------------------------------------------------------------------------*/
-const char *AIOCommandLineGetDefaultADCJSONConfig( AIOCommandLineOptions *options )
-{
-    AIO_ASSERT_RET( NULL, options );
-    return options->adcconfig_json;
-}
-
-/*----------------------------------------------------------------------------*/
 AIOChannelRangeTmp *AIOGetChannelRange(char *optarg )
 {
     int i = 0;
