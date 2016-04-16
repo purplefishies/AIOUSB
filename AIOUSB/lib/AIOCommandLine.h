@@ -85,6 +85,9 @@ PUBLIC_EXTERN AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int
 PUBLIC_EXTERN AIOChannelRangeTmp *AIOGetChannelRange(char *optarg );
 PUBLIC_EXTERN void AIOPrintUsage(int argc, char **argv,  struct option  *options);
 PUBLIC_EXTERN AIORET_TYPE DeleteAIOCommandLineOptions( AIOCommandLineOptions *options );
+PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOptionsGetDeviceIndex( AIOCommandLineOptions *options );
+PUBLIC_EXTERN AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *indices, int num_devices );
+PUBLIC_EXTERN const char *AIOCommandLineGetDefaultADCJSONConfig( AIOCommandLineOptions *options );
 /* END AIOUSB_API */
 
 

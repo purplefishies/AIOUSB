@@ -298,7 +298,49 @@ AIORET_TYPE DeleteAIOCommandLineOptions( AIOCommandLineOptions *options )
     return AIOUSB_SUCCESS;
 }
 
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOCommandLineOptionsGetDeviceIndex( AIOCommandLineOptions *options )
+{
+    AIO_ASSERT( options );
+    return options->index;
+}
 
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *indices, int num_devices )
+{
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIOUSB_ListDevices();
+    if ( num_devices <= 0 ) {
+        fprintf(stderr,"No devices were found\n");
+        retval = -AIOUSB_ERROR_DEVICE_NOT_FOUND;
+    } else {
+        if ( options->index < 0 ) 
+            options->index = indices[0];
+        fprintf(stderr,"Matching devices found at indices: ");
+        options->index = ( options->index < 0 ? indices[0] : options->index );
+        int i;
+        for (i = 0; i < num_devices - 1; i ++ ) { 
+            fprintf(stderr, "%d",indices[i] );
+            if ( num_devices > 2 )
+                fprintf(stderr,", "); 
+        }
+        if ( num_devices > 1 ) 
+            fprintf(stderr," and ");
+
+        fprintf(stderr, "%d , Using index=%d \n",indices[i], options->index);
+    }
+    return retval;
+
+}
+
+/*----------------------------------------------------------------------------*/
+const char *AIOCommandLineGetDefaultADCJSONConfig( AIOCommandLineOptions *options )
+{
+    AIO_ASSERT_RET( NULL, options );
+    return options->adcconfig_json;
+}
+
+/*----------------------------------------------------------------------------*/
 AIOChannelRangeTmp *AIOGetChannelRange(char *optarg )
 {
     int i = 0;
@@ -386,6 +428,12 @@ TEST( AIOCmdLine, CorrectDefaults )
 
     DeleteAIOCommandLineOptions( nopts );
 
+}
+
+TEST( AIOCmdLine, CorrectlyDies )
+{
+    AIOCommandLineOptions *nopts = NULL;
+    ASSERT_DEATH( {AIOCommandLineOptionsGetDeviceIndex(nopts); },"Assertion `options' failed"); 
 }
 
 

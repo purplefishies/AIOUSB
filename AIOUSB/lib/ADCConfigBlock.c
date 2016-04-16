@@ -939,7 +939,7 @@ cJSON *ADCConfigBlockGetJSONValueOrInt( cJSON *config,
 }
 
 /*------------------------------------------------------------------------------*/
-ADCConfigBlock *NewADCConfigBlockFromJSON( char *str )
+ADCConfigBlock *NewADCConfigBlockFromJSON( const char *str )
 {
     ADCConfigBlock *adc = (ADCConfigBlock *)calloc(sizeof(ADCConfigBlock),1);
     adc->size = 20;

@@ -111,7 +111,7 @@ PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetDebug( const ADCConfigBlock *obj );
 
 /* JSON API */
 PUBLIC_EXTERN char *ADCConfigBlockToJSON(ADCConfigBlock *config);
-PUBLIC_EXTERN ADCConfigBlock *NewADCConfigBlockFromJSON( char *str );
+PUBLIC_EXTERN ADCConfigBlock *NewADCConfigBlockFromJSON( const char *str );
 PUBLIC_EXTERN AIORET_TYPE DeleteADCConfigBlock( ADCConfigBlock *config );
 
 PUBLIC_EXTERN AIOUSB_BOOL is_all_digits( char *str );

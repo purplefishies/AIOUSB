@@ -383,7 +383,7 @@ PUBLIC_EXTERN AIORET_TYPE ADCConfigBlockGetDebug( const ADCConfigBlock *obj );
 
 /* JSON API */
 PUBLIC_EXTERN char *ADCConfigBlockToJSON(ADCConfigBlock *config);
-PUBLIC_EXTERN ADCConfigBlock *NewADCConfigBlockFromJSON( char *str );
+PUBLIC_EXTERN ADCConfigBlock *NewADCConfigBlockFromJSON( const char *str );
 PUBLIC_EXTERN AIORET_TYPE DeleteADCConfigBlock( ADCConfigBlock *config );
 
 PUBLIC_EXTERN AIOUSB_BOOL is_all_digits( char *str );
@@ -796,9 +796,14 @@ PUBLIC_EXTERN libusb_device_handle *USBDeviceGetUSBDeviceHandle( USBDevice *usb 
 
 /* #include "AIOCommandLine.h" */
 
+PUBLIC_EXTERN AIOCommandLineOptions *NewDefaultAIOCommandLineOptions();
 PUBLIC_EXTERN AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv);
 PUBLIC_EXTERN AIOChannelRangeTmp *AIOGetChannelRange(char *optarg );
 PUBLIC_EXTERN void AIOPrintUsage(int argc, char **argv,  struct option  *options);
+PUBLIC_EXTERN AIORET_TYPE DeleteAIOCommandLineOptions( AIOCommandLineOptions *options );
+PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOptionsGetDeviceIndex( AIOCommandLineOptions *options );
+PUBLIC_EXTERN AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *indices, int num_devices );
+PUBLIC_EXTERN const char *AIOCommandLineGetDefaultADCJSONConfig( AIOCommandLineOptions *options );
 
 
 
