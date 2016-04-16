@@ -4,6 +4,17 @@
 namespace AIOUSB {
 #endif
 
+/**
+ * @brief The default settings for running various samples. THis makes it 
+ * easier to just get a sample up and running and then tweak certain parameters
+ * for ones own needs. For instance, if the user wanted to perform an simple ADC_GetScan,
+ * s/he could just use the settings provided in the AIO_DEFAULT_CMDLINE_OPTIONS variable
+ * to get
+ * - 16 channels per scan
+ * - Each channel sampling at AD_GAIN_CODE_0_5V ( 0 to 5 volts )
+ * - 0 Oversamples.
+ * - 1000 ms timeout.
+ */
 AIOCommandLineOptions AIO_DEFAULT_CMDLINE_OPTIONS = {
                            -1,                            /* int64_t num_scans; */
                            10000,                         /* int64_t default_num_scans; */
@@ -39,8 +50,17 @@ AIOCommandLineOptions AIO_DEFAULT_CMDLINE_OPTIONS = {
                            NULL
 };
 
-
-
+/*----------------------------------------------------------------------------*/
+/**
+ * @brief A simplified command line parsing library for 
+ * 
+ * @param options AIOCommandLineOptions object that holds overridden cmd 
+ *        line options
+ * @param argc Number of command line arguments
+ * @param argv Array of strings to the command line arguments
+ * 
+ * @return 
+ */
 AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv)
 {
     int c;
@@ -259,6 +279,13 @@ AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **
 }
 
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief Shows the user the various options that this library is capable
+ *        of parsing on the command line.
+ * @param argc Number of command line arguments
+ * @param argv Array of strings to the command line arguments
+ * @param options 
+ */
 void AIOPrintUsage(int argc, char **argv,  struct option *options)
 {
     fprintf(stderr,"%s - Options\n", argv[0] );
@@ -299,6 +326,14 @@ AIORET_TYPE DeleteAIOCommandLineOptions( AIOCommandLineOptions *options )
 }
 
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief Returns the index that the user has specified on the command line
+ * for running the test on.
+ * 
+ * @param options 
+ * 
+ * @return 
+ */
 AIORET_TYPE AIOCommandLineOptionsGetDeviceIndex( AIOCommandLineOptions *options )
 {
     AIO_ASSERT( options );
