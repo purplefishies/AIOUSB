@@ -334,6 +334,58 @@ AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *ind
 }
 
 /*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOCommandLineOverrideADCConfigBlock(  ADCConfigBlock *config, AIOCommandLineOptions *options)
+{
+    AIO_ASSERT( options );
+    AIO_ASSERT( config );
+    AIORET_TYPE retval = AIOUSB_SUCCESS,retval2 = AIOUSB_SUCCESS;
+    
+    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( options->index , (AIORESULT*)&retval );
+    AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+
+    ADCConfigBlock *hwconfig = AIOUSBDeviceGetADCConfigBlock( dev );
+    memcpy(&config->mux_settings, &hwconfig->mux_settings, sizeof( hwconfig->mux_settings ) );
+
+    if ( options->num_oversamples < 0 ) { 
+        retval = ADCConfigBlockSetOversample( config, options->default_num_oversamples );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    } else {
+        retval = ADCConfigBlockSetOversample( config, options->num_oversamples );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    }
+    
+    if( !options->number_ranges ) {
+        retval = ADCConfigBlockSetAllGainCodeAndDiffMode( config , options->gain_code , AIOUSB_FALSE );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    } else {
+        for ( int i = 0; i < options->number_ranges ; i ++ ) {
+            retval = ADCConfigBlockSetChannelRange( config, 
+                                                    options->ranges[i]->start_channel,
+                                                    options->ranges[i]->end_channel,
+                                                    options->ranges[i]->gaincode 
+                                                    );                                          
+            if ( retval != AIOUSB_SUCCESS ) {
+                fprintf(stderr,"Error setting ChannelRange: %d\n", (int)retval );
+                return retval;
+            }
+        }
+        /* also set the range for the buffer */
+        retval = ADCConfigBlockSetStartChannel( config, options->start_channel );
+        retval2 = ADCConfigBlockSetEndChannel( config, options->end_channel );
+        if ( retval != AIOUSB_SUCCESS || retval2 != AIOUSB_SUCCESS ) {
+            fprintf(stderr,"Error trying to set StartCh=%d and EndCh=%d...%d\n", 
+                    options->start_channel, 
+                    options->end_channel,
+                    (int)retval
+                    );
+            return retval;
+        }
+    }
+  
+    return retval;
+}
+
+/*----------------------------------------------------------------------------*/
 AIOChannelRangeTmp *AIOGetChannelRange(char *optarg )
 {
     int i = 0;
