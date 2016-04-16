@@ -90,7 +90,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *opti
 PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOverrideADCConfigBlock( ADCConfigBlock *config, AIOCommandLineOptions *options );
 
 static inline const char *AIOCommandLineGetDefaultADCJSONConfig( AIOCommandLineOptions *options ) {AIO_ASSERT_RET( NULL, options );return options->adcconfig_json;};
-static inline AIORET_TYPE AIOCommandLineGetIncludeTiming( AIOCommandLineOptions *options ){ AIO_ASSERT(options); return options->index;};
+static inline AIORET_TYPE AIOCommandLineGetIncludeTiming( AIOCommandLineOptions *options ){ AIO_ASSERT(options); return options->with_timing;};
 static inline AIORET_TYPE AIOCommandLineGetCounts( AIOCommandLineOptions *options ) { AIO_ASSERT(options); return options->counts; };
 static inline AIORET_TYPE AIOCommandLineGetScans( AIOCommandLineOptions *options ) { AIO_ASSERT(options); return options->num_scans; };
 /* END AIOUSB_API */
