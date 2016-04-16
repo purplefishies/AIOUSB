@@ -306,6 +306,11 @@ void AIOPrintUsage(int argc, char **argv,  struct option *options)
 }
 
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief Creates a new command line option object for performing comparisons 
+ *        with the default settings for AIOUSB devices
+ * @return AIOCommandLineOptions * a new object containing the default settings
+ */
 AIOCommandLineOptions *NewDefaultAIOCommandLineOptions()
 {
     AIOCommandLineOptions *ndef = (AIOCommandLineOptions *)malloc(sizeof(AIOCommandLineOptions));
@@ -317,6 +322,13 @@ AIOCommandLineOptions *NewDefaultAIOCommandLineOptions()
 
 
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief A Descructor for the allocated AIOCommandLineOptions
+ * 
+ * @param options 
+ * 
+ * @return 
+ */
 AIORET_TYPE DeleteAIOCommandLineOptions( AIOCommandLineOptions *options )
 {
     AIO_ASSERT( options );
@@ -329,10 +341,9 @@ AIORET_TYPE DeleteAIOCommandLineOptions( AIOCommandLineOptions *options )
 /**
  * @brief Returns the index that the user has specified on the command line
  * for running the test on.
- * 
  * @param options 
  * 
- * @return 
+ * @return >= 0 is a valid index, < 0 indicated error
  */
 AIORET_TYPE AIOCommandLineOptionsGetDeviceIndex( AIOCommandLineOptions *options )
 {
@@ -341,6 +352,14 @@ AIORET_TYPE AIOCommandLineOptionsGetDeviceIndex( AIOCommandLineOptions *options 
 }
 
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief Lists any devices that were matched and then lists which index was
+ *        specified.
+ * @param options AIOCommandLineOptions object
+ * @param indices Array of devices found
+ * @param num_devices number of devices in the array
+ * @return >= AIOUSB_SUCCESS if devices have been found, < 0 if no devices found
+ */
 AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *indices, int num_devices )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
@@ -369,6 +388,14 @@ AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *ind
 }
 
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief Allows the AIOCommandLineOptions options to override the settings in 
+ *        the ADCConfigBlock
+ * @param config ADCConfigBlock object that is written to the AIOUSB device
+ * @param options AIOCommandLineOptions object that represents the set of user
+ *        parameters specified on the command line
+ * @return >= AIOUSB_SUCCESS is successful, < 0 if there was an error
+ */
 AIORET_TYPE AIOCommandLineOverrideADCConfigBlock(  ADCConfigBlock *config, AIOCommandLineOptions *options)
 {
     AIO_ASSERT( options );
