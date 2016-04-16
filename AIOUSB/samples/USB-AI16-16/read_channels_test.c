@@ -24,7 +24,7 @@ AIOUSB_BOOL find_ai_board( AIOUSBDevice *dev ) {
 
 int main( int argc, char **argv ) 
 {
-    struct opts options = AIO_OPTIONS;
+    AIOCommandLineOptions *options = NewDefaultAIOCommandLineOptions();
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     int *indices;
     int num_devices;
@@ -33,78 +33,90 @@ int main( int argc, char **argv )
     USBDevice *usb;
     double *volts;
     struct timespec starttime , curtime, prevtime ;
-    process_aio_cmd_line( &options, argc, argv );
 
-    retval = AIOUSB_Init();
-    if ( retval != AIOUSB_SUCCESS ) {
-        fprintf(stderr,"Error calling AIOUSB_Init(): %d\n", (int)retval );
-        exit(retval );
-    }
-
-    AIOUSB_ListDevices();
-
-    process_aio_cmd_line( &options, argc, argv );
-
-    AIOUSB_FindDevices( &indices, &num_devices, find_ai_board );
+    /**
+     * @brief these functions are not needed IF you use
+     * the function AIOProcessCmdLine(). It will make the 
+     * following call sequence
+     * 
+     * @verbatim
+    * retval = AIOUSB_Init();
+    * if ( retval != AIOUSB_SUCCESS ) { 
+    *     fprintf(stderr,"Error calling AIOUSB_Init(): %d\n", (int)retval );
+    *     exit(retval );
+    * }
+    * AIOUSB_ListDevices();
+    * @endverbatim
+    */
     
-    if( (retval = aio_list_devices( &options, indices, num_devices ) != AIOUSB_SUCCESS )) 
+    retval = AIOProcessCmdline( options, argc, argv );
+    if ( retval < 0 ) 
         exit(retval);
 
-    if ( (config = NewADCConfigBlockFromJSON( options.adcconfig_json )) == NULL )
+    AIOUSB_FindDevices( &indices, &num_devices, find_ai_board );
+
+    if ( ( retval = AIOCommandLineListDevices( options, indices, num_devices )) < AIOUSB_SUCCESS )
+        exit(retval);
+
+    if ( (config = NewADCConfigBlockFromJSON( AIOCommandLineGetDefaultADCJSONConfig(options) )) == NULL )
         exit(AIOUSB_ERROR_INVALID_ADCCONFIG);
 
-    if ( (retval = aio_override_adcconfig_settings( config, &options )) != AIOUSB_SUCCESS )
+
+    if ( (retval = AIOCommandLineOverrideADCConfigBlock( config, options )) != AIOUSB_SUCCESS )
         exit(retval);
 
 
     /* Save the config for the device index  in question */
-    dev = AIODeviceTableGetDeviceAtIndex( options.index , (AIORESULT*)&retval );
+    dev = AIODeviceTableGetDeviceAtIndex( AIOCommandLineOptionsGetDeviceIndex(options) , (AIORESULT*)&retval );
     if ( retval != AIOUSB_SUCCESS ) {
-        fprintf(stderr,"Error getting device at index %d\n", options.index );
+        fprintf(stderr,"Error getting device at index %d\n", (int)AIOCommandLineOptionsGetDeviceIndex(options) );
         exit(retval);
     }
-
+    
     usb = AIOUSBDeviceGetUSBHandle( dev );
 
 #if 0
-    retval = ADC_SetCal(options.index, ":AUTO:");
+    retval = ADC_SetCal(AIOCommandLineOptionsGetDeviceIndex(options), ":AUTO:");
     if ( retval < AIOUSB_SUCCESS ) {
         fprintf(stderr,"Error setting calibration %d\n", (int)retval);
         exit(retval);
     }
 #endif
 
-    /* Copy the modified config settings back to the 
+    /**
+     * Copy the modified config settings back to the 
      * device ave config to the device 
      */
     retval = ADCConfigBlockCopy( AIOUSBDeviceGetADCConfigBlock( dev ), config );
     retval = USBDevicePutADCConfigBlock( usb, config );
     /* or do this     
-     * ADC_SetConfig( options.index, config->registers, &config->size ); */
+     * ADC_SetConfig( AIOCommandLineOptionsGetDeviceIndex(options), config->registers, &config->size ); */
+
+
 
     volts = (double*)malloc((ADCConfigBlockGetEndChannel( config )-ADCConfigBlockGetStartChannel( config )+1)*sizeof(double));
     
 #ifdef UNIX
-    if ( options.with_timing ) {
+    if ( AIOCommandLineGetIncludeTiming( options ) ) {
         clock_gettime( CLOCK_MONOTONIC_RAW, &starttime );
         memcpy(&prevtime,&starttime,sizeof(starttime));
     }
 #endif
 
-    for ( int i = 0, channel = 0; i < options.num_scans; i ++ , channel = 0) {
-        if ( options.counts ) { /* --counts will write out the raw values */
+    for ( int i = 0, channel = 0; i < AIOCommandLineGetScans(options); i ++ , channel = 0) {
+        if ( AIOCommandLineGetCounts( options ) ) { /* --counts will write out the raw values */
 #ifdef UNIX
-            if ( options.with_timing )
+            if ( AIOCommandLineGetIncludeTiming( options ) )
                 clock_gettime( CLOCK_MONOTONIC_RAW, &prevtime );
 #endif
-            retval = ADC_GetScan( options.index, (unsigned short*)volts );
+            retval = ADC_GetScan( AIOCommandLineOptionsGetDeviceIndex(options), (unsigned short*)volts );
 	    if ( retval != AIOUSB_SUCCESS ) fprintf(stderr,"Error: Got code %d\n", (int)retval );
 #ifdef UNIX
-            if ( options.with_timing ) 
+            if ( AIOCommandLineGetIncludeTiming( options ) ) 
                 clock_gettime( CLOCK_MONOTONIC_RAW, &curtime );
 #endif
             unsigned short *counts = (unsigned short *)volts;
-            if( options.with_timing )
+            if( AIOCommandLineGetIncludeTiming( options ) )
                 fprintf(stdout,"%ld,%ld,%ld,", curtime.tv_sec, (( prevtime.tv_sec - starttime.tv_sec )*1000000000 + (prevtime.tv_nsec - starttime.tv_nsec )), (curtime.tv_sec-prevtime.tv_sec)*1000000000 + ( curtime.tv_nsec - prevtime.tv_nsec) );
 
 
@@ -117,16 +129,16 @@ int main( int argc, char **argv )
 
         } else {
 #ifdef UNIX
-            if ( options.with_timing )
+            if ( AIOCommandLineGetIncludeTiming( options ) )
                 clock_gettime( CLOCK_MONOTONIC_RAW, &prevtime );
 #endif
-            retval = ADC_GetScanV( options.index, volts );
+            retval = ADC_GetScanV( AIOCommandLineOptionsGetDeviceIndex(options) , volts );
 	    if ( retval != AIOUSB_SUCCESS ) fprintf(stderr,"Error: Got code %d\n", (int)retval );
 #ifdef UNIX
-            if ( options.with_timing ) 
+            if ( AIOCommandLineGetIncludeTiming( options ) ) 
                 clock_gettime( CLOCK_MONOTONIC_RAW, &curtime );
 #endif
-            if( options.with_timing )
+            if( AIOCommandLineGetIncludeTiming( options ) )
                 fprintf(stdout,"%ld,%ld,%ld,", curtime.tv_sec, (( prevtime.tv_sec - starttime.tv_sec )*1000000000 + (prevtime.tv_nsec - starttime.tv_nsec )), (curtime.tv_sec-prevtime.tv_sec)*1000000000+ ( curtime.tv_nsec - prevtime.tv_nsec) );
 
             for ( int j = ADCConfigBlockGetStartChannel( config ); j < ADCConfigBlockGetEndChannel( config ) ; j ++ , channel ++) {
@@ -139,6 +151,7 @@ int main( int argc, char **argv )
 
     }
 
+    DeleteAIOCommandLineOptions( options );
     return 0;
 }
 
