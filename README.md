@@ -95,7 +95,7 @@ cd samples/USB_SAMPLE_OF_CHOICE
 make sample AIOUSBLIBDIR=${AIO_LIB_DIR} AIOUSBCLASSLIBDIR=${AIO_CLASSLIB_DIR} DEBUG=1
 ~~~
 
-## <a name="CMakeBuild"></a>Build with CMake
+## <a name="CMakeBuild"></a>Build with <a href="https://cmake.org/">CMake</a>
 
 ~~~bash
 cd AIOUSB
