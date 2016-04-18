@@ -14,10 +14,9 @@ if ( $ARGV[0] =~ /(README|Testing).md/ ) {
     while (<>) {
         if ( /^\s*(#{1,8})\s*<a name="([^"]+)"><\/a>\s*(\S+.*)$/ ) {
             chomp;
-            #print "$1: $2 $3\n";
-            #print FOO (("#" x $1 ) . " $3 " . "  { #$2 } \n" );
-            # print (("#" x $1 ) . " $3 " . "  { #$2 } \n" );
-            print $1 . " " . $3 . " {#" . $2 . "}\n";
+            my ($hashes,$anchor,$rest) = ($1,$2,$3);
+            $rest =~ s/<a href="[^"]+">(.*?)<\s*\/a\s*>/$1/g;
+            print $hashes . " " . $rest . " {#" . $anchor . "}\n";
         } else {
             print;
         }
