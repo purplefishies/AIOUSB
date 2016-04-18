@@ -34,7 +34,7 @@ Compiling Programs
 
 Assuming you have installed the AIOUSB C library according to the above instructions, compiling a program to use it is as simple as:
 
-\section aiousb_compile_sample Compiling sample
+\section aiousb_compile_sample Compiling samples
 
 Please see \ref UnixBuild "compiling for Linux / Mac" or \ref WindowsBuild "compiling on windows".
 */
