@@ -7,6 +7,7 @@ SHELL		:= /bin/bash
 SWIG_FILE	:= AIOUSB.i	 
 SWIG		:= swig 
 SWIG_IGNORE_WARNINGS	:= -w326,522,523
+SWIG_INCLUDES	:= -I..
 
 PERL		:= perl
 PYTHON		:= python
@@ -100,7 +101,7 @@ inplace_octave:
 
 perl:
 	@if [ ! -f $(PERL_BUILT) ] ; then \
-		$(SWIG) $(SWIG_IGNORE_WARNINGS) $(PERL_INCLUDES)  -perl5 AIOUSB.i 2>&1; \
+		$(SWIG) $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) $(PERL_INCLUDES)  -perl5 AIOUSB.i 2>&1; \
 		$(PERL) Makefile.PL CCFLAGS="$(PERL_CFLAGS) $(PERL_XTRA_CFLAGS)" $(PERL_PREFIX_INSTALL) ;\
 		$(MAKE) -f Makefile ; \
 		if [ "$$?" == 0 ] ; then \
@@ -134,7 +135,7 @@ PYTHON_VERSION=$(shell python -c 'import distutils.sysconfig; print distutils.sy
 
 python: 
 	@if [ ! -f $(PYTHON_BUILT) ] ; then \
-		$(SWIG) $(SWIG_IGNORE_WARNINGS) -I${LIBDIR}  -python AIOUSB.i 2>&1; \
+		$(SWIG) $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) -I${LIBDIR}  -python AIOUSB.i 2>&1; \
 		LDFLAGS="$(PYTHON_LDFLAGS)"  python setup.py build 2>&1; \
 		if [ "$$?" == 0 ] ; then \
 			touch $(PYTHON_BUILT); \
@@ -166,7 +167,7 @@ python_atest:
 #
 ruby:
 	@if [ ! -f $(RUBY_BUILT) ] ; then \
-		$(SWIG) $(SWIG_IGNORE_WARNINGS) -I../../ -ruby AIOUSB.i 2>&1; \
+		$(SWIG) $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) -I../../ -ruby AIOUSB.i 2>&1; \
 		$(RUBY) extconf.rb --with-ldflags="$(RUBY_LDFLAGS)" --with-name-include="$(RUBY_INCLUDES)" 2>&1 ; \
 		$(MAKE) -f Makefile 2>&1;\
 		if [ "$$?" == 0 ] ; then \
@@ -198,7 +199,7 @@ ruby_atest:
 
 php:
 	@if [ ! -f $(PHP_BUILT) ] ; then \
-		$(SWIG) $(SWIG_IGNORE_WARNINGS) -I../..// -php AIOUSB.i 2>&1 ; \
+		$(SWIG) $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) -I../..// -php AIOUSB.i 2>&1 ; \
 		$(CC) -I. -I$$AIO_LIB_DIR -I../../  $$(php-config --includes) -fpic -c AIOUSB_wrap.c 2>&1 ; \
 		$(CC) -fPIC -shared -Wl,-soname,AIOUSB.so AIOUSB_wrap.o -o AIOUSB.so -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -lusb-1.0 -laiousb 2>&1;\
 		if [ "$$?" == 0 ] ; then \
@@ -228,7 +229,7 @@ octave:
 	@echo "Building Octave module WITHOUT MPI support ! Please remove -DMPICH_SKIP_MPICXX"
 	@echo "   and  -DOMPI_SKIP_MPICXX  from this build if you need this functionality"
 	@if [ ! -f $(OCTAVE_BUILT) ] ; then \
-		$(SWIG) $(SWIG_IGNORE_WARNINGS) -I../../ -octave -o AIOUSB_wrap.cpp AIOUSB.i 2>&1 ; \
+		$(SWIG) $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) -I../../ -octave -o AIOUSB_wrap.cpp AIOUSB.i 2>&1 ; \
 		mkoctfile -o AIOUSB.oct   -DMPICH_SKIP_MPICXX  -DOMPI_SKIP_MPICXX  -I../../ AIOUSB_wrap.cpp -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -laiousb 2>&1; \
 		if [ "$$?" == 0 ] ; then \
 			touch $(OCTAVE_BUILT); \
@@ -261,7 +262,7 @@ $(JAVA_DIR):
 
 java: 	$(JAVA_DIR)
 	@if [ ! -f $(JAVA_BUILT) ] ; then \
-		$(SWIG) $(SWIG_IGNORE_WARNINGS) -I../../ -java -package AIOUSB -outdir $(JAVA_DIR) AIOUSB.i 2>&1; \
+		$(SWIG) $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) -I../../ -java -package AIOUSB -outdir $(JAVA_DIR) AIOUSB.i 2>&1; \
 		$(CC)  -fPIC -shared  -o libAIOUSB.so ./AIOUSB_wrap.c ${CFLAGS} -I../.. -I$${JAVA_HOME}/include -L$${AIO_LIB_DIR} -L$${AIO_CLASSLIB_DIR} -laiousbdbg -lusb-1.0 -lpthread -lrt -ldl -lm -lc  2>&1 ; \
 		javac $(JAVA_DIR)/*.java; \
 		cd tests && javac -classpath "$$(pwd):$$(pwd)/./:$$(pwd)/../" test.java 2>&1; \
@@ -303,7 +304,7 @@ java_atest:
 
 R:
 	@if [ ! -f $(R_BUILT) ] ; then \
-		$(SWIG) $(SWIG_IGNORE_WARNINGS) -I/usr/include/libusb-1.0 -I$${AIO_LIB_DIR} -r AIOUSB.i 2>&1 ; \
+		$(SWIG) $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) -I/usr/include/libusb-1.0 -I$${AIO_LIB_DIR} -r AIOUSB.i 2>&1 ; \
 		export PKG_CFLAGS="-I../../" ; \
 		R CMD SHLIB -o AIOUSB.so AIOUSB_wrap.c -I/usr/include/libusb-1.0 -I$${AIO_LIB_DIR} -L$${AIO_LIB_DIR} -laiousb -lusb-1.0 2>&1; \
 		if [ "$$?" == 0 ]; then \

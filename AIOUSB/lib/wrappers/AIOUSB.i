@@ -3,6 +3,7 @@
 %include "cpointer.i"
 %include "carrays.i"
 %include "typemaps.i"
+%include "aioarrays.i"
 #if defined(SWIGJAVA)
 %include "enums.swg"
 #endif
@@ -105,33 +106,11 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsign
 
 
 #if defined(SWIGPYTHON)
-%typemap(in)  double *voltages
-{
-    double temp[256];
-    $1 = temp;
-}
 
 %typemap(in)  double *pBuf
 {
     double temp[256];
     $1 = temp;
-}
-
-%typemap(argout) (unsigned long DeviceIndex, double *voltages)  {
-    int i;
-    AIORESULT result = AIOUSB_SUCCESS;
-    AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( $1, &result );
-    if ( result != AIOUSB_SUCCESS ) {
-        PyErr_SetString(PyExc_ValueError,"Invalid DeviceIndex");
-        return NULL;
-    }
-
-    int tmpsize = deviceDesc->ADCMUXChannels;
-    $result = PyList_New(tmpsize);
-    for (i = 0; i < tmpsize; i++) {
-        PyObject *o = PyFloat_FromDouble((double) $2[i]);
-        PyList_SetItem($result,i,o);
-    }
 }
 
 %typemap(argout) (unsigned long DeviceIndex, unsigned long ChannelIndex, double *pBuf )
@@ -267,73 +246,14 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsign
 %include "AIOBuf.h"
 %include "DIOBuf.h"
 
-%array_functions(unsigned short, counts )
-%array_functions(double, volts )
-
-#if defined(SWIGPYTHON)
-%exception ushortarray::__getitem__ {
-    if ( arg2 > arg1->_size - 1 || arg2 < 0 ) {
-        PyErr_SetString(PyExc_IndexError,"Index out of range");
-        return NULL;
-    }
-    $action
-}
-
-%exception ushortarray::__setitem__ {
-    if ( arg2 > arg1->_size - 1 || arg2 < 0 ) {
-        PyErr_SetString(PyExc_IndexError,"Index out of range");
-        return NULL;
-    }
-    $action
-}
-#endif
+%aioarray_class(unsigned short,ushortarray)
+%aioarray_class(double,doublearray)
 
 %inline %{
-typedef struct { 
-    unsigned short *el;
-    int _size; 
-} ushortarray;
+AIORET_TYPE ADC_GetScanVToDoubleArray( unsigned long DeviceIndex, doublearray *ary ) {
+    return ADC_GetScanV( DeviceIndex, ary->el );
+}
 %}
-
-%extend ushortarray {
-
-  ushortarray(size_t nelements) {
-      ushortarray *arr = (ushortarray*)malloc(sizeof(ushortarray));
-      arr->el = (unsigned short *)calloc(nelements, sizeof(unsigned short));
-      arr->_size = (int)nelements;
-      return arr;
-  }
-
-  ~ushortarray() {
-      %delete_array(self->el);
-      %delete(self);
-  }
-  
-  unsigned short __getitem__(int index) {
-      return self->el[index];
-  }
-
-  void __setitem__(int index, unsigned short value) {
-      self->el[index] = value;
-  }
-
-  unsigned short * cast() {
-      return self->el;
-  }
-
-  static ushortarray *frompointer(unsigned short *t) {
-      return %reinterpret_cast(t, ushortarray *);
-  }
-
-}
-
-%extend ushortarray {
-    const char *__repr__() {
-        static char buf[BUFSIZ];
-        snprintf(buf,BUFSIZ,"unsigned short [%d]", self->_size );
-        return buf;
-    }
-}
 
 %extend AIOChannelMask { 
     AIOChannelMask( unsigned size ) { 
@@ -462,10 +382,27 @@ typedef struct {
 
 #if defined(SWIGPYTHON)
 %pythoncode %{
+from AIOUSB import doublearray as volts
+from AIOUSB import ushortarray as counts
+
 def new_ushortarray(n):
     """Creates a new ushortarray of size n"""
     import AIOUSB
     return AIOUSB.ushortarray(n)
+
+def delete_ushortarray(n):
+    del n
+
+def new_volts(n):
+    """Creates a new double array of size n"""
+    import AIOUSB
+    return AIOUSB.volts(n)
+
+def delete_volts(n):
+    """Creates a new double array of size n"""
+    del n
+
+
 %}
 
 
