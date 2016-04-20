@@ -93,14 +93,12 @@
     }
 %}
 
-
-
 %newobject CreateSmartBuffer;
 %newobject NewAIOBuf;
 %newobject NewAIODeviceQuery;
 %delobject AIOBuf::DeleteAIOBuf;
 
-AIORET_TYPE ADC_GetChannelV( unsigned long DeviceIndex, unsigned long ChannelIndex, double *OUTPUT);
+
 AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsigned long *OUTPUT );
 
 
@@ -113,49 +111,12 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsign
     $1 = temp;
 }
 
-%typemap(argout) (unsigned long DeviceIndex, unsigned long ChannelIndex, double *pBuf )
-{
-
-    if ( result < AIOUSB_SUCCESS ) {
-        PyErr_SetString(PyExc_ValueError,"Invalid DeviceIndex");
-        return NULL;
-    }
-
-    $result = PyList_New(1);
-
-    PyObject *o = PyFloat_FromDouble((double) $3[$2]);
-    PyList_SetItem($result,0,o);
-}
-
 %typemap(in)  double *ctrClockHz {
     double tmp = PyFloat_AsDouble($input);
     $1 = &tmp;
 }
 
 #elif defined(SWIGPERL)
-
-%typemap(in)  double *voltages {
-    unsigned short temp[256];
-    $1 = temp;
-}
-
-%typemap(argout) double *voltages {
-    AV *myav;
-    SV **svs;
-    int i = 0,len = 16;
-    /* Figure out how many elements we have */
-    svs = (SV **) malloc(len*sizeof(SV *));
-    for (i = 0; i < len ; i++) {
-        svs[i] = sv_newmortal();
-
-        sv_setnv( (SV*)svs[i],(double)$1[i] );
-    };
-    myav = av_make(len,svs);
-    free(svs);
-    $result = newRV_noinc((SV*)myav);
-    sv_2mortal($result);
-    argvi++;
-}
 
 %typemap(in) unsigned char *pGainCodes {
     AV *tempav;
