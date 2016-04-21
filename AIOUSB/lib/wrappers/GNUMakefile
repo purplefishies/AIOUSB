@@ -230,8 +230,9 @@ octave:
 	@echo "   and  -DOMPI_SKIP_MPICXX  from this build if you need this functionality"
 	@if [ ! -f $(OCTAVE_BUILT) ] ; then \
 		$(SWIG) $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) -I../../ -octave -o AIOUSB_wrap.cpp AIOUSB.i 2>&1 ; \
-		mkoctfile -o AIOUSB.oct   -DMPICH_SKIP_MPICXX  -DOMPI_SKIP_MPICXX  -I../../ AIOUSB_wrap.cpp -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -laiousb 2>&1; \
-		if [ "$$?" == 0 ] ; then \
+		mkoctfile -o AIOUSB.oct   -DMPICH_SKIP_MPICXX  -DOMPI_SKIP_MPICXX  -I../../ AIOUSB_wrap.cpp -L$$AIOUSB_ROOT/lib -L$$AIOUSB_ROOT/classlib -laiousb 2>&1 | tee octave.log; \
+		grep -i error octave.log; \
+		if [ "$$?" != 0 ] ; then \
 			touch $(OCTAVE_BUILT); \
 		fi;\
 	fi
