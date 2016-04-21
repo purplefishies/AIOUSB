@@ -62,6 +62,7 @@
 
 %}
 
+#if defined(SWIGPYTHON)
 %typemap(in) unsigned char *pGainCodes {
     int i;
     static unsigned char temp[16];
@@ -84,7 +85,7 @@
     }
     $1 = temp;
 }
-
+#endif
 
 /* Needed to allow inclusion into Scala */
 %pragma(java) modulecode=%{
@@ -169,21 +170,6 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsign
         /* printf("Setting temp[%d] to %d\n", i, (int)temp[i] ); */
     }
     $1 = temp;
-}
-
-%typemap(in)  double *voltages {
-    double temp[256];
-    $1 = temp;
-}
-
-%typemap(argout) double *voltages {
-    int i;
-    // printf("Debugging ruby voltages\n");
-    $result = rb_ary_new2(16);
-    // printf("Allocated buffer\n");
-    for (i = 0; i < 16; i++) {
-        rb_ary_store( $result, i, rb_float_new((double)$1[i]));
-    }
 }
 
 #endif
