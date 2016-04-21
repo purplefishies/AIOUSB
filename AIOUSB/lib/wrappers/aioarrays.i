@@ -2,7 +2,6 @@
 /* #if defined(SWIGPYTHON_BUILTIN) */
 /*   %feature("python:slot", "sq_item", functype="ssizeargfunc") NAME::__getitem__; */
 /*   %feature("python:slot", "sq_ass_item", functype="ssizeobjargproc") NAME::__setitem__; */
-/* aioarray_class(unsigned short, ushortarray) */
 
 #if defined(SWIGPYTHON)
 %exception NAME::__getitem__ {
@@ -39,8 +38,8 @@ typedef struct {
   }
 
   ~NAME() {
-      %delete_array(self->el);
-      %delete(self);
+      free(self->el);
+      free(self);
   }
   
   TYPE __getitem__(int index) {
@@ -56,7 +55,7 @@ typedef struct {
   }
 
   static NAME *frompointer(TYPE *t) {
-      return %reinterpret_cast(t, NAME *);
+      return (NAME *)t;
   }
 
 }
@@ -72,9 +71,9 @@ typedef struct {
 
 %types(NAME = TYPE);
 
+
 %enddef
 
-%include <typemaps/carrays.swg>
 
 
 

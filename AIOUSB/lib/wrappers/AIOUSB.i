@@ -6,6 +6,8 @@
 %include "aioarrays.i"
 #if defined(SWIGJAVA)
 %include "enums.swg"
+#else
+
 #endif
 
 %feature("autodoc", "1");
@@ -22,15 +24,9 @@
 %array_functions( char , cstring );
 
 
-
-
-
 %apply unsigned long *INOUT { unsigned long *result };
 %apply long long { int64_t };
 %apply unsigned long long { uint64_t };
-
-
-
 
 
 %apply AIORESULT *OUTPUT { unsigned long *result };
@@ -247,14 +243,16 @@ AIORET_TYPE ADC_GetScanVToDoubleArray( unsigned long DeviceIndex, doublearray *a
 
 }
 
+
 %extend AIOBuf {
    AIOBuf(int bufsize, int refsize)  {
-       return (AIOBuf *)NewAIOBuf( bufsize, refsize );
+       return (AIOBuf *)NewAIOBuf( (AIOBufType)bufsize, refsize );
    }  
   ~AIOBuf()  {
        DeleteAIOBuf($self);
   }
 }
+
 
 %extend DIOBuf {
 
