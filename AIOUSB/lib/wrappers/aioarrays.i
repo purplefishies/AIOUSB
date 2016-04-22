@@ -49,6 +49,16 @@ typedef struct {
   void __setitem__(int index, TYPE value) {
       self->el[index] = value;
   }
+  
+#if defined(SWIGPERL)
+  TYPE get(int index) { 
+      return self->el[index];
+  }
+
+  void set(int index, TYPE value ) {
+      self->el[index] = value;
+  }
+#endif
 
   TYPE * cast() {
       return self->el;
@@ -66,9 +76,29 @@ typedef struct {
         snprintf(buf,BUFSIZ,"TYPE [%d]", self->_size );
         return buf;
     }
+
+    const char *__str__() {
+        static char buf[BUFSIZ];
+        snprintf(buf,BUFSIZ,"TYPE [%d]", self->_size );
+        return buf;
+    }
 }
 
-
+#if defined(SWIGPERL)
+%perlcode %{
+    {
+    package  AIOUSB::NAME;
+    sub FETCH {
+        my ($self,$key) = @_;
+        return $self->get($key);
+    }
+    sub STORE {
+        my($self,$key,$value) = @_;
+        $self->set($key,$value);
+    }
+    }
+%}
+#endif
 %types(NAME = TYPE);
 
 
