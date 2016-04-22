@@ -48,12 +48,15 @@ if( $deviceMask == 0 ) {
 
 $devices = [];
 $number_devices = 1;
+AIOUSB::AIOUSB_ListDevices();
 $index = 0;
 
 while( $deviceMask > 0 && $#{$devices} < $number_devices ) { 
     if( $deviceMask & 1 ) {
         my $obj = AIOUSB::AIODeviceInfoGet( $index );
-        if( $obj->swig_PID_get() == $AIOUSB::USB_AIO16_16A || $obj->swig_PID_get == $AIOUSB::USB_DIO_16A ) { 
+
+        if ( ($obj->swig_PID_get() >= $AIOUSB::USB_AI16_16A && $obj->swig_PID_get() <= $AIOUSB::USB_AI12_128E) ||
+             ($obj->swig_PID_get() >= $AIOUSB::USB_AIO16_16A &&  $obj->swig_PID_get() <= $AIOUSB::USB_AIO12_128E )) {
             push( @{$devices}, new Device( "index" => $index, "productID"=>$obj->swig_PID_get(), "numDIOBytes"=>$obj->swig_DIOBytes_get,"numCounters" => $obj->swig_Counters_get ));
             print "";
         }
@@ -111,27 +114,25 @@ AIOUSB::ADC_SetOversample( $deviceIndex, 0 );
 AIOUSB::ADC_SetScanLimits( $deviceIndex, $CAL_CHANNEL, $CAL_CHANNEL );
 AIOUSB::ADC_ADMode( $deviceIndex, 0 , $AIOUSB::AD_CAL_MODE_GROUND );
 
-$counts = AIOUSB::new_ushortarray( 16 );
-$result = AIOUSB::ADC_GetScan( $deviceIndex, $counts );
+$counts = AIOUSB::ushortarray->new( 16 );
+$result = AIOUSB::ADC_GetScan( $deviceIndex, $counts->cast() );
 
 if( $result < $AIOUSB::AIOUSB_SUCCESS ) {
     print sprintf "Error '%s' attempting to read ground counts\n" , AIOUSB::AIOUSB_GetResultCodeAsString( $result );
 } else {
-    print sprintf "Ground counts = %u (should be approx. 0)\n" , AIOUSB::ushort_getitem( $counts, $CAL_CHANNEL) ;
+    print sprintf "Ground counts = %u (should be approx. 0)\n" , $counts->{$CAL_CHANNEL} ;
 }
 
 
 
 
 AIOUSB::ADC_ADMode( $deviceIndex, 0 , $AIOUSB::AD_CAL_MODE_REFERENCE ); # TriggerMode
-$result = AIOUSB::ADC_GetScan( $deviceIndex, $counts );
+$result = AIOUSB::ADC_GetScan( $deviceIndex, $counts->cast() );
 if( result < AIOUSB_SUCCESS ) { 
     print sprintf "Error '%s' attempting to read reference counts\n" , AIOUSB_GetResultCodeAsString( result );
 } else {
-    print sprintf "Reference counts = %u (should be approx. 65130)\n", AIOUSB::ushort_getitem( $counts, $CAL_CHANNEL );
+    print sprintf "Reference counts = %u (should be approx. 65130)\n", $counts->{$CAL_CHANNEL};
 }
-
-
 
 $gainCodes = [ map { 0 } 1..16 ];
 
@@ -154,11 +155,12 @@ AIOUSB::ADC_ADMode( $deviceIndex, 0 , $AD_CAL_MODE_NORMAL );
 print "Volts read:\n";
 
 if ( 1 ) { 
-$volts = [map { 0 } 1..16 ];
+# $volts = [map { 0 } 1..16 ];
+$volts = AIOUSB::doublearray->new(16);
 for( $i = 0; $i < 1 ; $i ++ ) {
-    $result = AIOUSB::ADC_GetScanV( $deviceIndex, $volts );
+    $result = AIOUSB::ADC_GetScanV( $deviceIndex, $volts->cast() );
     for( $j = 0; $j < 16 ; $j ++ ) {
-        print sprintf "  Channel %2d = %6.6f\n" , $j, $result->[$j];
+        print sprintf "  Channel %2d = %6.6f\n" , $j, $volts->{$j};
     }
 }
 
@@ -166,13 +168,15 @@ for( $i = 0; $i < 1 ; $i ++ ) {
 }
 
 # demonstrate reading a single channel in volts
-($exitcode, $result) = AIOUSB::ADC_GetChannelV( $deviceIndex, $CAL_CHANNEL );
+$voltage = AIOUSB::new_udp();
+$result = AIOUSB::ADC_GetChannelV( $deviceIndex, $CAL_CHANNEL, $voltage );
 
-print sprintf("Result from A/D channel %d was %f\n" , $CAL_CHANNEL, $result );
+print sprintf("Result from A/D channel %d was %f\n" , $CAL_CHANNEL, AIOUSB::udp_value($voltage) );
 
-($exitcode, $result)  = AIOUSB::ADC_GetChannelV( $deviceIndex, 1 );
 
-print sprintf("Result from A/D channel %d was %f\n", 1, $result );
+$result = AIOUSB::ADC_GetChannelV( $deviceIndex, 1, $voltage );
+
+print sprintf("Result from A/D channel %d was %f\n", 1, AIOUSB::udp_value($voltage) );
 
 
 AIOUSB::AIOUSB_Reset( $deviceIndex );
