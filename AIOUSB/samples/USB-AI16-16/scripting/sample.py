@@ -146,15 +146,17 @@ ADC_SetOversample( deviceIndex, NUM_OVERSAMPLES );
 ADC_SetScanLimits( deviceIndex, 0, NUM_CHANNELS - 1 );
 ADC_ADMode( deviceIndex, 0 , AD_CAL_MODE_NORMAL );
 
-volts = [0.0 for x in range(0,16)]
+# volts = [0.0 for x in range(0,16)]
+volts = doublearray(16)
 for i in range(0,1):
-    result = ADC_GetScanV( deviceIndex, volts );
-    for j in range(0,len(result)):
-        print "  Channel %2d = %6.6f" % ( j, result[j] )
+    result = ADC_GetScanV( deviceIndex, volts.cast() );
+    for j in range(0,16):
+        print "  Channel %2d = %6.6f" % ( j, volts[j] )
 
 
-[result,voltage] = ADC_GetChannelV( deviceIndex, CAL_CHANNEL );
-print "Result from A/D channel %d was %s " % (CAL_CHANNEL, voltage )
+voltage = new_udp()
+result = ADC_GetChannelV( deviceIndex, CAL_CHANNEL, voltage );
+print "Result from A/D channel %d was %s " % (CAL_CHANNEL, udp_value(voltage) )
 
 
 
