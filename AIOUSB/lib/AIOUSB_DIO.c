@@ -505,7 +505,7 @@ AIORET_TYPE DIO_ReadAllToDIOBuf(
         goto cleanup_DIO_ReadAll;
     }
     
-    DIOBufReplaceString( buf, tmpbuf, device->DIOBytes ); /* Copy to the DIOBuf */
+    DIOBufReplaceString( buf, tmpbuf, device->DIOBytes );
     cleanup_DIO_ReadAll:
     free(tmpbuf);
 
@@ -689,8 +689,6 @@ AIORESULT DIO_StreamSetClocks(
 
     *( unsigned short* )&configBlock[ 1 ] = OctaveDacFromFreq(WriteClockHz);
     *( unsigned short* )&configBlock[ 3 ] = OctaveDacFromFreq(ReadClockHz);
-    /* *( unsigned short* )&configBlock[ 1 ] =  */
-    /*     *( unsigned short* )&configBlock[ 3 ] =  */
 
     bytesTransferred = usb->usb_control_transfer(usb,
                                                  USB_WRITE_TO_DEVICE, 
@@ -757,7 +755,7 @@ AIORESULT DIO_StreamFrame(
                                                            &bytes, 
                                                            10000
                                                            );
-        /* printf("\t\tRequested: %d ,  rounded: %d, Got %d bytes, strblksize: %d, result: %d\n", remaining, pow_of_minsize(remaining),bytes, streamingBlockSize, libusbResult ); */
+
         if (libusbResult == LIBUSB_SUCCESS || libusbResult == LIBUSB_ERROR_OVERFLOW ) {
             if (bytes > 0) {
                 memcpy(data, tmpdata, MIN(bytes,remaining));
