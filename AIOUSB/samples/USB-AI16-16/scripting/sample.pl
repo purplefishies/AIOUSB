@@ -76,10 +76,6 @@ print "Setting timeout\n";
 AIOUSB::AIOUSB_SetCommTimeout( $deviceIndex, 1000 );
 AIOUSB::AIOUSB_SetDiscardFirstSample( $deviceIndex, $AIOUSB::AIOUSB_TRUE );
 
-# $serialNumber = AIOUSB::new_ulp();
-# $result = AIOUSB::GetDeviceSerialNumber( $deviceIndex, $serialNumber );
-# print sprintf "Serial number of device at index %d: %x\n" , $deviceIndex, AIOUSB::ulp_value( $serialNumber );
-
 $result = 0;
 ($ndevice,$result) = AIOUSB::AIODeviceTableGetDeviceAtIndex( $deviceIndex );
 $cb = AIOUSB::AIOUSBDeviceGetADCConfigBlock( $ndevice );
@@ -97,10 +93,6 @@ AIOUSB::ADCConfigBlockSetOversample( $cb, 0 );
 AIOUSB::AIOUSBDeviceWriteADCConfig( $ndevice, $cb );
 
 print "A/D settings successfully configured\n";
-
-
-
-
 
 
 
@@ -122,8 +114,6 @@ if( $result < $AIOUSB::AIOUSB_SUCCESS ) {
 } else {
     print sprintf "Ground counts = %u (should be approx. 0)\n" , $counts->{$CAL_CHANNEL} ;
 }
-
-
 
 
 AIOUSB::ADC_ADMode( $deviceIndex, 0 , $AIOUSB::AD_CAL_MODE_REFERENCE ); # TriggerMode
@@ -182,7 +172,7 @@ print sprintf("Result from A/D channel %d was %f\n", 1, AIOUSB::udp_value($volta
 AIOUSB::AIOUSB_Reset( $deviceIndex );
 AIOUSB::AIOUSB_Exit();
 
-exit 1;
+
 
 __END__
 
