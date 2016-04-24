@@ -1562,9 +1562,6 @@ typedef struct device_populator {
 } AIODevicePopulator;
 #endif
 
-/* #define DEVICE_POPULATOR_INTERFACE(T)                                         \ */
-/*     AIORET_TYPE (*get_device_ids)( T *self , int **product_ids, int *size );  \ */
-    
 typedef struct test_populator 
 {
     DEVICE_POPULATOR_INTERFACE(struct device_populator );
@@ -1586,14 +1583,13 @@ AIORET_TYPE test_get_device_ids( AIODevicePopulator *self )
             if ( strlen(token) > 3 && strncmp(token,"USB",3 ) == 0 ) {
                 unsigned int tmpproduct = ProductNameToID( token );
                 if ( tmpproduct ) { 
-                    /* printf("Using %d\n", tmpproduct ); */
                     self->size ++;
                     self->products = (unsigned long *)realloc( self->products, (self->size)*sizeof(unsigned long)) ;
                     self->products[self->size-1] = tmpproduct;
                 }
             }
         }
-        /* printf("After is 0x%x",(int)(long)(int*)&orig[0] ); */
+
         free(orig);
 
     } else {

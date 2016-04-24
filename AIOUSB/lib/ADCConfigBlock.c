@@ -418,8 +418,8 @@ AIORET_TYPE ADCConfigBlockSetScanRange(ADCConfigBlock *config, unsigned startCha
          endChannel <= adcmux_channels &&
          startChannel <= endChannel
         ) {
-        if (config->size == AD_MUX_CONFIG_REGISTERS) {
-            /*<< this board has a MUX, so support more channels */
+        if (config->size == AD_MUX_CONFIG_REGISTERS) { /*<< this board has a MUX, so support more channels */
+
             config->registers[ AD_CONFIG_START_END ] = ( unsigned char )((endChannel << 4) | (startChannel & 0x0f));
             config->registers[ AD_CONFIG_MUX_START_END ] = ( unsigned char )((endChannel & 0xf0) | ((startChannel >> 4) & 0x0f));
         } else {
@@ -883,7 +883,6 @@ cJSON *ADCConfigBlockGetJSONValueOrDefault( cJSON *config,
     int found = 0;
 
     if ( config && (tmp = cJSON_GetObjectItem(config, key ) ) ) {
-        /* \"calibration\":\"Normal\" */
         char *foo = tmp->valuestring;
         if( !foo && tmp->string )
             foo = tmp->string;
@@ -1061,8 +1060,7 @@ ADCConfigBlock *NewADCConfigBlockFromJSON( const char *str )
 
     if ( adcconfig ) 
         cJSON_Delete( adcconfig );
-    /* if ( json )  */
-    /*     cJSON_Delete(json); */
+
     return adc;
 }
 
