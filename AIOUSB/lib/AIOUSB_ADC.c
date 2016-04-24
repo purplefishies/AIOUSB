@@ -645,13 +645,21 @@ unsigned short AIOUSB_VoltsToCounts(
 }
 
 /*----------------------------------------------------------------------------*/
-/** 
- * @param DeviceIndex 
- * @param ChannelIndex 
- * @param singlevoltage 
+/**
+ * @brief Read one voltage input’s current value 
  * 
+ * @param DeviceIndex DeviceIndex of the card you wish to query;
+ *        generally either diOnly or a specific device’s Device Index.
+ *
+ * @param ChannelIndex number indicating which channel's data you wish to get
+ *
+ * @param singlevoltage a pointer to a double precision IEEE floating
+ *        point num ber which will receive the value read
+ * 
+ * @note This is a slow function
  * @return 
- */AIORET_TYPE ADC_GetChannelV(unsigned long DeviceIndex, unsigned long ChannelIndex, double *singlevoltage )
+ */
+AIORET_TYPE ADC_GetChannelV(unsigned long DeviceIndex, unsigned long ChannelIndex, double *singlevoltage )
 {
     AIO_ASSERT( singlevoltage );
     AIORET_TYPE result = AIOUSB_SUCCESS;
@@ -756,9 +764,19 @@ AIORET_TYPE ADC_GetScanV( unsigned long DeviceIndex, double *pBuf )
 }
 
 /**
- * @param DeviceIndex
- * @param pBuf
- * @return
+ * @brief This simple function takes one scan of A/D data, in counts.
+ * @param DeviceIndex DeviceIndex of the card you wish to query; generally either diOnly or a specific
+ *        device’s Device Index.
+ * @param pBuf Pointer to an array of W ORDs. Each elem ent in the
+ * array will receive the value read from the corresponding A/D input
+ * channel. The array m ust be at least as large as the num ber of A/D
+ * input channels your product contains (16, 32, 64, 96, or 128) - but it
+ * is safe to always pass a pointer to an array of 128 W ORDs.  Only elem
+ * ents in the array corresponding to A/D channels actually acquired
+ * during the scan will be updated: start-channel through end-channel,
+ * inclusive. Other values will rem ain unchanged.
+ * 
+ * @return AIORET_TYPE  either AIOUSB_SUCCESS or a failure
  */
 AIORET_TYPE ADC_GetScan( unsigned long DeviceIndex,unsigned short *pBuf )
 {
@@ -788,12 +806,14 @@ AIORET_TYPE ADC_GetScan( unsigned long DeviceIndex,unsigned short *pBuf )
 
 /*----------------------------------------------------------------------------*/
 /**
- * @brief Copies the old Cached Config block registers into the pConfigBuf
- *       object. * 
- * @param DeviceIndex 
- * @param ConfigBuf 
- * @param ConfigBufSize 
- * @return 
+ * @brief Determ ine inform ation about the device found at a specific DeviceIndex
+ * @param DeviceIndex DeviceIndex of the card you wish to query;
+ * generally either diOnly or a specific device’s Device Index.
+ * @param ConfigBuf a pointer to the first of an array of bytes for configuration data
+ * @param ConfigBufSize a pointer to a variable holding the num ber of
+ * configuration bytes to read. W ill be set to the num ber of
+ * configuration bytes read 
+ * @return
  */
 unsigned long ADC_GetConfig(
                             unsigned long DeviceIndex,
@@ -1482,11 +1502,15 @@ unsigned long ADC_QueryCal(
 
 
 /**
- * @param DeviceIndex
- * @param pConfigBuf
- * @param ConfigBufSize
- * @param CalFileName
- * @return
+ * @brief Determ ine information about the device found at a specific DeviceIndex
+ * @param DeviceIndex DeviceIndex of the card you wish to control;
+ *        generally either diOnly or a specific device’s Device Index.  
+ * @param pConfigBuf A pointer an array of configuration bytes, identical to that 
+ *        used in ADC_SetConfig()
+ * @param ConfigBufSize a pointer to a variable holding the num ber of configuration bytes to write.
+ * @param CalFileName the file nam e of a calibration file, or a com m and string. 
+          See ADC_SetCal() for details.
+ * @return AIOUSB_SUCCESS if successful, error otherwise.
  */
 unsigned long ADC_Initialize(
     unsigned long DeviceIndex,
@@ -1515,10 +1539,17 @@ unsigned long ADC_Initialize(
 static void *BulkAcquireWorker(void *params);
 
 /**
- * @param DeviceIndex
- * @param BufSize
- * @param pBuf
- * @return
+ * @brief Determine inform ation about the device found at a specific DeviceIndex
+ * @param DeviceIndex DeviceIndex of the card you wish to control; generally either diOnly or a specific
+ *        device’s Device Index.
+ * @param BufSize the size, in bytes, of the buffer to receive the data
+ * @param pBuf a pointer to the buffer in which to receive data
+ * @return AIOUSB_SUCCESS indicates success, failure otherwise
+ * 
+ * @note This function will return im m ediately. A return value of
+ * AIOUSB_SUCCESS indicates that bulk data is being acquired
+ * in the background, and the buffer should not be deallocated or m
+ * oved. Use ADC_BulkPoll() to query this background operation.
  */
 unsigned long ADC_BulkAcquire(
                               unsigned long DeviceIndex,
