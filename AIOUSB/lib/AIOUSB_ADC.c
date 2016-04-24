@@ -108,7 +108,6 @@ AIORET_TYPE ADC_ReadADConfigBlock( unsigned long DeviceIndex , ADConfigBlock *co
     if ( result  != AIOUSB_SUCCESS )
         goto out_ADC_ReadADConfigBlock;
 
-    /* Check size ...not necessary */
     result = GenericVendorRead( DeviceIndex, 
                                 AUR_ADC_GET_CONFIG , 
                                 0 , 
@@ -948,7 +947,7 @@ out_ADC_SetConfig:
 
 
 /*----------------------------------------------------------------------------*/
-/** 
+/**
  * @brief Copies the given ADConfig object into the cachedConfigBlock
  * that is used to communicate with the USB device 
  * @param DeviceIndex
@@ -1562,7 +1561,6 @@ unsigned long ADC_BulkAcquire(
         return AIOUSB_ERROR_INVALID_PARAMETER;
     AIORESULT result = AIOUSB_SUCCESS;
     
-    /* AIOUSBDevice * deviceDesc = &deviceTable[ DeviceIndex ]; */
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
     if ( result != AIOUSB_SUCCESS ) 
         return result;
@@ -1595,7 +1593,6 @@ unsigned long ADC_BulkAcquire(
         acquireParams->BufSize      = BufSize;
         acquireParams->pBuf         = pBuf;
 
-        /* int maxPriority = sched_get_priority_max(SCHED_FIFO); */
         struct sched_param schedParam = { sched_get_priority_max(SCHED_FIFO) };
         pthread_attr_t workerThreadAttr;
         pthread_t workerThreadID;
@@ -1604,8 +1601,6 @@ unsigned long ADC_BulkAcquire(
         pthread_attr_setschedpolicy(&workerThreadAttr, SCHED_FIFO);
         pthread_attr_setschedparam(&workerThreadAttr, &schedParam);
 
-
-        /* int threadResult = pthread_create(&workerThreadID, &workerThreadAttr, BulkAcquireWorker, acquireParams); */
         int threadResult = pthread_create( &workerThreadID, NULL, BulkAcquireWorker, acquireParams );
 
         if (threadResult == 0) {
@@ -1741,7 +1736,6 @@ static void *BulkAcquireWorker(void *params)
 #endif
         if (libusbResult != LIBUSB_SUCCESS) {
             result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult);
-            /* printf("ERROR was %dl\n", (int)result ); */
             break;
         } else {
             data += bytesTransferred;
@@ -1779,7 +1773,7 @@ static void *BulkAcquireWorker(void *params)
     return 0;
 }
 
-/** 
+/**
  * @brief After setting up your oversamples and such, creates a new
  * AIOBuf object that can be used for BulkAcquiring.
  * @param DeviceIndex 
@@ -1800,33 +1794,6 @@ AIOBuf *CreateSmartBuffer( unsigned long DeviceIndex )
   
   return tmp;
 }
-
-/* AIORET_TYPE   */
-/* BulkAcquire( */
-/*             unsigned long DeviceIndex, */
-/*             AIOBuf *aiobuf, */
-/*             int size */
-/*             ) */
-/* { */
-/*   AIORET_TYPE result = 0; */
-/*   result = ADC_BulkAcquire( DeviceIndex, aiobuf->bufsize , aiobuf->buffer ); */
-/*   aiobuf->bytes_remaining = aiobuf->bufsize; */
-/*   return result; */
-/* } */
-
-
-/* AIORET_TYPE   */
-/* BulkPoll( */
-/*          unsigned long DeviceIndex, */
-/*          AIOBuf *aiobuf */
-/*          ) */
-/* { */
-/*   AIORET_TYPE result= AIOUSB_SUCCESS; */
-/*   unsigned long retval = ADC_BulkPoll( DeviceIndex, &(aiobuf->bytes_remaining) ); */
-/*   if ( retval != AIOUSB_SUCCESS )  */
-/*     result = - retval; */
-/*   return result; */
-/* } */
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -1922,7 +1889,6 @@ unsigned long ADC_CreateFastITConfig(unsigned long DeviceIndex,
                                      int size
                                      )
 {
-    /* AIOUSBDevice *deviceDesc = &deviceTable[ DeviceIndex ]; */
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
     if ( result != AIOUSB_SUCCESS ) 
@@ -1955,7 +1921,6 @@ unsigned char *ADC_GetADConfigBlock_Registers(ADConfigBlock *config)
 /*----------------------------------------------------------------------------*/
 AIORESULT ADC_ClearFastITConfig(unsigned long DeviceIndex)
 {
-    /* AIOUSBDevice *deviceDesc = &deviceTable[ DeviceIndex ]; */
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
     if ( result != AIOUSB_SUCCESS ) 
@@ -2058,7 +2023,6 @@ unsigned long ADC_ResetFastITScanV(
     )
 {
     AIORESULT result = 0;
-    /* AIOUSBDevice *deviceDesc = &deviceTable[ DeviceIndex ]; */
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
     if ( result != AIOUSB_SUCCESS ) 
         return result;
@@ -2072,8 +2036,6 @@ unsigned long ADC_ResetFastITScanV(
     if (result != AIOUSB_SUCCESS)
         goto RETURN_ADC_ResetFastITScanV;
 
-    /* Dat = 0x0; */
-    /* result = GenericVendorWrite( DeviceIndex, 0xD4, 0x1E, 0, sizeof(Dat), &Dat ); */
     ADC_ClearFastITConfig(DeviceIndex);
 
 RETURN_ADC_ResetFastITScanV:
@@ -2087,7 +2049,6 @@ unsigned long ADC_SetFastITScanVChannels(
 {
     AIORESULT result = 0;
     ADConfigBlock configBlock;
-    /* AIOUSBDevice *const deviceDesc = &deviceTable[ DeviceIndex ]; */
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
     if ( result != AIOUSB_SUCCESS ) 
         return result;
@@ -2502,7 +2463,6 @@ AIOUSB_BOOL AIOUSB_IsDiscardFirstSample(
     if ( result != AIOUSB_SUCCESS ) 
         return result;
 
-    /* if (AIOUSB_Validate(&DeviceIndex) == AIOUSB_SUCCESS) */
         discard = deviceDesc->discardFirstSample;
 
     return discard;
@@ -3112,7 +3072,7 @@ AIORET_TYPE AIOUSB_SetScanRange(ADConfigBlock *config, unsigned startChannel, un
     if ( !config->device || !config->size )  {
         return  -(AIOUSB_ERROR_INVALID_DATA);
     }
-    /* const AIOUSBDevice *const deviceDesc = ( DeviceDescriptor* )config->device; */
+
     AIOUSBDevice *deviceDesc = ADCConfigBlockGetAIOUSBDevice( config, &retval );
     if ( retval != AIOUSB_SUCCESS ) 
         return retval;
@@ -3252,7 +3212,7 @@ unsigned long AIOUSB_ADC_ExternalCal(
           /*
            * verify that input voltages and measured counts are unique and ascending
            */
-          for(index = 1 /* yes, 1 */; index < numPoints; index++) {
+          for(index = 1 ; index < numPoints; index++) {
                 if (
                     workingPoints[ index * WORKING_COLUMNS + COLUMN_VOLTS ] <=
                     workingPoints[ (index - 1) * WORKING_COLUMNS + COLUMN_VOLTS ] ||
@@ -3310,7 +3270,7 @@ unsigned long AIOUSB_ADC_ExternalCal(
              * two points, and "span" refers to the higher of the two points
              * @endverbatim
              */
-                for(index = 1 /* yes, 1 */; index < numPoints; index++) {
+                for(index = 1 ; index < numPoints; index++) {
                       double counts0 = AIOUSB_VoltsToCounts(DeviceIndex, 0,           /* channel */
                                                                   workingPoints[ (index - 1) * WORKING_COLUMNS + COLUMN_VOLTS ]),
                                    counts1 = AIOUSB_VoltsToCounts(DeviceIndex, 0,           /* channel */
@@ -3359,7 +3319,7 @@ unsigned long AIOUSB_ADC_ExternalCal(
                   }
 #endif
 
-/*
+/**
  * generate calibration table using the equation
  *   ccounts = ( mcounts – offset ) / slope
  * described above; each slope/offset pair in workingPoints[] describes the line
@@ -3374,7 +3334,7 @@ unsigned long AIOUSB_ADC_ExternalCal(
                 unsigned short *calTable = ( unsigned short* )malloc(CAL_TABLE_WORDS * sizeof(unsigned short));
                 if (calTable != 0) {
                       int measCounts = 0;                 // stretch first line segment to bottom of A/D count range
-                      for(index = 1 /* yes, 1 */; index < numPoints; index++) {
+                      for(index = 1 ; index < numPoints; index++) {
                             double slope = workingPoints[ index * WORKING_COLUMNS + COLUMN_SLOPE ],
                                          offset = workingPoints[ index * WORKING_COLUMNS + COLUMN_OFFSET ];
                             int maxSegmentCounts
