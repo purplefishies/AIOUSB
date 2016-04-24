@@ -39,7 +39,7 @@ AIORET_TYPE _AIOContinuousBufResizeFifo( AIOContinuousBuf *buf );
 AIORET_TYPE  AIOContinuousBufForceTerminateAcqusitionOverrun( AIOContinuousBuf *buf );
 AIORET_TYPE  AIOContinuousBufForceTerminateAcqusition( AIOContinuousBuf *buf );
 
-/*-----------------------------  Constructors  -----------------------------*/
+/*-------------------------------  Constructors  -----------------------------*/
 AIOContinuousBuf *NewAIOContinuousBufForCounts( unsigned long DeviceIndex, unsigned scancounts, unsigned num_channels )
 {
     AIO_ASSERT_RET(NULL, num_channels > 0 );
@@ -1895,7 +1895,7 @@ AIORET_TYPE AIOContinuousBufSetOversample( AIOContinuousBuf *buf, unsigned os )
 AIORET_TYPE AIOContinuousBufSetOverSample( AIOContinuousBuf *buf, size_t os ) { return AIOContinuousBufSetOversample(buf, os); } 
 
 
-/*------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBuf_GetOverSample( AIOContinuousBuf *buf ) { return AIOContinuousBufGetOversample( buf ); }
 AIORET_TYPE AIOContinuousBufGetOversample( AIOContinuousBuf *buf ) {
     AIO_ASSERT_AIOCONTBUF( buf );
@@ -1903,7 +1903,7 @@ AIORET_TYPE AIOContinuousBufGetOversample( AIOContinuousBuf *buf ) {
 }
 
 
-/*------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE AIOContinuousBuf_SetAllGainCodeAndDiffMode( AIOContinuousBuf *buf, ADGainCode gain, AIOUSB_BOOL diff ) {
     return AIOContinuousBufSetAllGainCodeAndDiffMode( buf, gain, diff );
 }
@@ -2304,7 +2304,6 @@ TEST_P(AIOContinuousBufThreeParamTest,BufferScanCounting )
 
     EXPECT_EQ( AIOContinuousBufGetRemainingSize(buf)/ sizeof(unsigned short), (1)*num_channels );
 
-    /*----------------------------------------------------------------------------*/
     /**< Cleanup */
     DeleteAIOContinuousBuf(buf); 
     free(use_data);

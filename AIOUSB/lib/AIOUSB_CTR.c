@@ -104,7 +104,7 @@ AIORET_TYPE _check_valid_counter_device_for_read(AIOUSBDevice *deviceDesc,
         return (AIORET_TYPE)-AIOUSB_ERROR_INVALID_PARAMETER;
     return (AIORET_TYPE)AIOUSB_SUCCESS;
 }
-/*------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE _check_valid_counter_device_for_gate(AIOUSBDevice *deviceDesc, unsigned long GateIndex  ) 
 {
     AIORET_TYPE retval;
@@ -118,7 +118,7 @@ AIORET_TYPE _check_valid_counter_device_for_gate(AIOUSBDevice *deviceDesc, unsig
     }
     return AIOUSB_SUCCESS;
 }
-/*------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE _check_valid_counter_output_frequency( AIOUSBDevice *deviceDesc, unsigned long BlockIndex, double *pHz ) {
     AIORET_TYPE retval;
     if( (retval = _check_valid_counters( deviceDesc )) != AIOUSB_SUCCESS ) 
@@ -128,7 +128,7 @@ AIORET_TYPE _check_valid_counter_output_frequency( AIOUSBDevice *deviceDesc, uns
     }
     return (AIORET_TYPE)AIOUSB_SUCCESS;
 }
-/*------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE _check_valid_input_for_modeload( AIOUSBDevice *deviceDesc, 
                                              unsigned long BlockIndex, 
                                              unsigned long CounterIndex, 
@@ -235,8 +235,6 @@ AIORET_TYPE CTR_8254Load(
 
     AIOUSB_UnLock();
     controlValue = (( unsigned short )CounterIndex << (6 + 8)) | ( unsigned short )BlockIndex;
-                /* | ( 0x3u << ( 4 + 8 ) )*/
-                /* | ( ( unsigned short ) Mode << ( 1 + 8 ) )*/
     bytesTransferred = usb->usb_control_transfer(usb,
                                                  USB_WRITE_TO_DEVICE, 
                                                  AUR_CTR_LOAD,
@@ -269,7 +267,6 @@ AIORET_TYPE CTR_8254ModeLoad(
     unsigned short controlValue;
     int bytesTransferred;
 
-    /* RETURN_IF_INVALID_INPUT( deviceDesc, result, _check_valid_counter_device( deviceDesc, BlockIndex, CounterIndex )); */
     retval =  _check_valid_counter_device( deviceDesc, BlockIndex, CounterIndex );
     if ( retval != AIOUSB_SUCCESS ) 
         goto out_CTR_8254ModeLoad;
