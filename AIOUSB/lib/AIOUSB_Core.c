@@ -241,7 +241,6 @@ unsigned long AIOUSB_Validate_Lock(unsigned long *DeviceIndex)
         int index;
         for(index = 0; index < MAX_USB_DEVICES; index++) {
             if(deviceTable[ index ].usb_device != NULL) {
-                /* found a device */
                 if(result != AIOUSB_SUCCESS) {
                     /*
                      * this is the first device found; save this index, but
@@ -259,7 +258,6 @@ unsigned long AIOUSB_Validate_Lock(unsigned long *DeviceIndex)
             }
         }
     } else {
-        /* simply verify that the supplied index is valid */
         if(
            *DeviceIndex < MAX_USB_DEVICES &&
            deviceTable[ *DeviceIndex ].usb_device != NULL
@@ -296,8 +294,7 @@ unsigned long AIOUSB_Validate(unsigned long *DeviceIndex)
           result = AIOUSB_ERROR_FILE_NOT_FOUND;
           for(int index = 0; index < MAX_USB_DEVICES; index++) {
                 if(deviceTable[ index ].usb_device != NULL) {
-                  /* found a device */
-                      if(result != AIOUSB_SUCCESS) {
+                      if(result != AIOUSB_SUCCESS) { /* found a device */
                         /*
                          * this is the first device found; save this index, but
                          * keep checking to see that this is the only device
@@ -392,7 +389,7 @@ ADConfigBlock *AIOUSB_GetConfigBlock( DeviceDescriptor *dev)
     }
 }
 
-/*----------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
 /**
  * @brief This function is deprecated.
  * @param DeviceIndex
@@ -460,12 +457,10 @@ unsigned long AIOUSB_ClearFIFO(
     if ( result != AIOUSB_SUCCESS ) 
         return result;
 
-    /*
-     * translate method into vendor request message
-     */
+    /* translate method into vendor request message */
     int request;
     switch(Method) {
-        /* case CLEAR_FIFO_METHOD_IMMEDIATE: */
+
     case CLEAR_FIFO_METHOD_AUTO:
         request = AUR_GEN_CLEAR_FIFO_NEXT;
         break;
@@ -542,7 +537,6 @@ unsigned AIOUSB_GetCommTimeout(
     if (AIOUSB_Validate(&DeviceIndex) == AIOUSB_SUCCESS)
         timeout = deviceTable[ DeviceIndex ].commTimeout;
 
-    /* } */
     return timeout;
 }
 
@@ -678,8 +672,6 @@ unsigned long AIOUSB_ADC_SetCalTable(
     unsigned char bRequest;
     unsigned char data[1024];
     int bytesTransferred = 0;
-    /* int wordsWritten = 0; */
-
 
     /*
      * send calibration table to SRAM one block at a time; according to
@@ -687,7 +679,7 @@ unsigned long AIOUSB_ADC_SetCalTable(
      * of calibration data to "endpoint 2" and then send a control message
      * to load it into the SRAM
      */
-    /* bmRequestType = 0x40 */
+
     bRequest = AUR_LOAD_BULK_CALIBRATION_BLOCK;
     wValue = 0x00;
     wIndex = 0x00;
@@ -854,26 +846,6 @@ TEST(AIOUSB_Core,MockObjects) {
     EXPECT_EQ( ((AIOUSBDevice *)&deviceTable[1])->ProductID, USB_DIO_32  );
 
 }
-
-
-/* TEST(AIOUSB_Core,NewDevices) { */
-/*     int numDevices = 0; */
-/*     AIOUSB_InitTest(); */
-/*     AddDeviceToDeviceTable( &numDevices, USB_DIO_32I ); */
-/*     EXPECT_EQ( ((DeviceDescriptor *)&deviceTable[0])->ProductID, USB_DIO_32I ); */
-/*     deviceTable[0].device = (libusb_device *)0x42; */
-/*     deviceTable[0].bGetName = false; */
-/*     int MAX_NAME_SIZE = 100; */
-/*     char name[ MAX_NAME_SIZE + 1 ]; */
-/*     unsigned long productID; */
-/*     unsigned long nameSize = 20; */
-/*     unsigned long numDIOBytes; */
-/*     unsigned long numCounters; */
-/*     unsigned long result = QueryDeviceInfo(0, &productID, &nameSize, name, &numDIOBytes, &numCounters); */
-/*     EXPECT_EQ( numDIOBytes, 4 ); */
-/* } */
-
-
 
 int main( int argc , char *argv[] ) 
 {
