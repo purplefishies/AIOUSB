@@ -140,16 +140,13 @@ fxload -t fx2lp -I AIOUSB/Firmware/CORRESPONDING_HEXFILE.hex -D 1605:${PRODUCTID
 ### Windows Installation
 
 1. Un-install all of the AIOUSB drivers that have been installed and are associated with your device. The procedure to do this is as follows:
-a. Plug in your card
-b. Go to device manager , search for data acqusition products and remove the AIOUSB / ACCES I/O driver associated with your card. 
-c. Click the Scan For Hardware Changes toolbar icon, or the equivalent menu item.
-d, If Windows detects and reinstalls the device, go back to step C. You may have to repeat this loop many times, depending on how (and how many times) you've installed our drivers. If the device shows up as an "unknown" of some kind, proceed to step F.
+   1. Plug in your card
+   2. Go to device manager , search for data acqusition products and remove the AIOUSB / ACCES I/O driver associated with your card. 
+   3. Click the Scan For Hardware Changes toolbar icon, or the equivalent menu item.
+   4. If Windows detects and reinstalls the device, go back to step C. You may have to repeat this loop many times, depending on how (and how many times) you've installed our drivers. If the device shows up as an "unknown" of some kind, proceed to step F.
 
-2. Download the WinUSB 8.10 drivers from this location.
-
-http://www.accesio.com/files/forever/ACCESDrivers810.zip
-
-Extract them to a saved directory "Saved_Directory"
+2. Download the [WinUSB 8.10 drivers](http://www.accesio.com/files/forever/ACCESDrivers810.zip) and
+   extract them to a saved directory.
 
 3. In Device Manager right click on the original USB Data acquisition
 device that should now have no driver associated with it and it should
@@ -174,7 +171,7 @@ wrong, please tell us.
    - swig ( if you want to build wrapper language support )
 
 
-6. Follow the instructions listed at either [Cmake build](#CmakeBuildWrappers) or [GNU make](#NonCmakeBuild)
+6. Follow the instructions listed at either [Cmake build](#CMakeBuild) or [GNU make](#NonCmakeBuild)
 
 ## Extra Language Support
 In addition, to providing fully functional C Shared and Static libraries, this project also provides
