@@ -18,9 +18,7 @@ Currently, this project provides full support to the following platforms:
 * [Rasberry Pi](https://www.raspberrypi.org/) 
 * [Beagle Board](http://beagleboard.org/bone)
 * POSIX compliant operating systems that can successfully compile and use libusb.
-
-
-**NOTE**: At this moment using these drivers under Windows is **not** supported although several customers have successfully been able to build and deploy solutions based on this system. We expect to have Windows libusb support available in the near future.
+* Windows with Cygwin
 
 
 ## <a name="Prerequisites"></a>Prerequisites
@@ -139,6 +137,44 @@ fxload -t fx2lp -I AIOUSB/Firmware/CORRESPONDING_HEXFILE.hex -D 1605:${PRODUCTID
 
 
 
+### Windows Installation
+
+1. Un-install all of the AIOUSB drivers that have been installed and are associated with your device. The procedure to do this is as follows:
+a. Plug in your card
+b. Go to device manager , search for data acqusition products and remove the AIOUSB / ACCES I/O driver associated with your card. 
+c. Click the Scan For Hardware Changes toolbar icon, or the equivalent menu item.
+d, If Windows detects and reinstalls the device, go back to step C. You may have to repeat this loop many times, depending on how (and how many times) you've installed our drivers. If the device shows up as an "unknown" of some kind, proceed to step F.
+
+2. Download the WinUSB 8.10 drivers from this location.
+
+http://www.accesio.com/files/forever/ACCESDrivers810.zip
+
+Extract them to a saved directory "Saved_Directory"
+
+3. In Device Manager right click on the original USB Data acquisition
+device that should now have no driver associated with it and it should
+be listed as a generic USB device.  Right click on the device and
+click "Update Driver" and instruct Windows to look for the drivers in
+the "Saved_Directory" from step 2.
+
+4. After it has installed, under Device Manager the device should now
+be listed as a Data Acquisition product.  In addition, Check the name
+the device ended up with; it should have a (WinUSB) tag, like "ACCES
+USB-IIRO-16 (WinUSB)". If it has a (CyUSB) tag instead, something went
+wrong, please tell us.
+
+5. Make sure that you already have a full Cygwin installation along with the following packages:
+   - python
+   - python-development
+   - cmake
+   - gnumake
+   - libusb-1.0
+   - gcc
+   - g++ 
+   - swig ( if you want to build wrapper language support )
+
+
+6. Follow the instructions listed at either [Cmake build](#CmakeBuildWrappers) or [GNU make](#NonCmakeBuild)
 
 ## Extra Language Support
 In addition, to providing fully functional C Shared and Static libraries, this project also provides
