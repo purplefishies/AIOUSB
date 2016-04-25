@@ -16,6 +16,7 @@ namespace AIOUSB {
  * - 1000 ms timeout.
  */
 AIOCommandLineOptions AIO_DEFAULT_CMDLINE_OPTIONS = {
+                           0,                             /* int pass_through; */
                            -1,                            /* int64_t num_scans; */
                            10000,                         /* int64_t default_num_scans; */
                            -1,                            /* unsigned num_channels; */      
@@ -49,6 +50,44 @@ AIOCommandLineOptions AIO_DEFAULT_CMDLINE_OPTIONS = {
                            (char*)"{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\",\"oversample\":\"0\",\"timeout\":\"1000\",\"clock_rate\":\"1000\"}",
                            NULL
 };
+
+
+AIOCommandLineOptions AIO_DEFAULT_SCRIPTING_OPTIONS = {
+                           1,                             /* int pass_through; */
+                           -1,                            /* int64_t num_scans; */
+                           10000,                         /* int64_t default_num_scans; */
+                           -1,                            /* unsigned num_channels; */      
+                           16,                            /* unsigned default_num_channels; */      
+                           -1,                            /* unsigned num_oversamples; */   
+                           0,                             /* unsigned default_num_oversamples; */   
+                           AD_GAIN_CODE_0_5V ,            /* int gain_code; */              
+                           -1,                            /* int clock_rate; */             
+                           10000,                         /* int default_clock_rate;  */
+                           (char*)"output.txt",                  /* char *outfile; */              
+                           0,                             /* int reset; */                  
+                           AIODEFAULT_LOG_LEVEL,          /* int debug_level; */            
+                           0,                             /* int number_ranges; */          
+                           0,                             /* int verbose; */                
+                           -1,                            /* int start_channel; */          
+                           0,                             /* int default_start_channel; */          
+                           -1,                            /* int end_channel; */            
+                           15,                            /* int default_end_channel; */            
+                           -1,                            /* int index; */                  
+                           -1,                            /* int block_size; */             
+                           0,                             /* int with_timing; */            
+                           0,                             /* int slow_acquire; */           
+                           2048,                          /* int buffer_size; */            
+                           100,                           /* int rate_limit; */             
+                           0,                             /* int physical; */               
+                           0,                             /* int counts; */                 
+                           0,                             /* int calibration; */            
+                           2,                             /* int repeat */
+                           NULL,
+                           (char *)"{\"DeviceIndex\":0,\"base_size\":2048,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2}",
+                           (char*)"{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\",\"oversample\":\"0\",\"timeout\":\"1000\",\"clock_rate\":\"1000\"}",
+                           NULL
+};
+
 
 /*----------------------------------------------------------------------------*/
 /**
@@ -207,8 +246,10 @@ AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **
             }
             break;
         default:
-            fprintf(stderr, "Incorrect argument '%s'\n", optarg );
-            error = 1;
+            if ( !options->pass_through ) {
+                 fprintf(stderr, "Incorrect argument '%s'\n", optarg );
+                 error = 1;
+            }
             break;
         }
         if( error ) {

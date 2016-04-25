@@ -32,6 +32,7 @@ typedef struct AIOChannelRangeTmp {
 
 
 typedef struct AIOCommandLineOptions {
+    int pass_through;
     int64_t num_scans;
     int64_t default_num_scans;
     int num_channels;
@@ -97,6 +98,7 @@ static inline AIORET_TYPE AIOCommandLineGetScans( AIOCommandLineOptions *options
 
 
 extern AIOCommandLineOptions AIO_DEFAULT_CMDLINE_OPTIONS;
+extern AIOCommandLineOptions AIO_DEFAULT_SCRIPTING_OPTIONS;
 
 #ifdef __aiousb_cplusplus
 }
