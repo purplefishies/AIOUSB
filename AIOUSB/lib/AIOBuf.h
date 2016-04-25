@@ -30,11 +30,13 @@ typedef struct AIOBuf {
     AIOUSB_BOOL defined;
 } AIOBuf;
 
+#ifndef SWIG
 typedef struct aiobuf_iterator {
     AIOBuf *buf;
     void *loc;
     void (*next)(struct aiobuf_iterator *);
 } AIOBufIterator;
+#endif
 
 /* BEGIN AIOUSB_API */
 
