@@ -1,5 +1,8 @@
 #include "AIOCommandLine.h"
 
+extern int opterr;
+extern int optind;
+
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
@@ -89,18 +92,7 @@ AIOCommandLineOptions AIO_DEFAULT_SCRIPTING_OPTIONS = {
 };
 
 
-/*----------------------------------------------------------------------------*/
-/**
- * @brief A simplified command line parsing library for 
- * 
- * @param options AIOCommandLineOptions object that holds overridden cmd 
- *        line options
- * @param argc Number of command line arguments
- * @param argv Array of strings to the command line arguments
- * 
- * @return 
- */
-AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv)
+AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, char **argv )
 {
     int c;
     int error = 0;
@@ -108,7 +100,7 @@ AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **
     int query = 0;
     int dump_adcconfig = 0;
     AIODisplayType display_type = BASIC;
-
+    opterr = 0;
     static struct option long_options[] = {
         {"debug"            , required_argument, 0,  'D'   },
         {"dump"             , no_argument      , 0,   DUMP },
@@ -140,7 +132,7 @@ AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **
     };
     while (1) { 
         AIOChannelRangeTmp *tmp;
-        c = getopt_long(argc, argv, "B:C:D:JL:N:R:S:TVYb:O:c:g:hi:m:n:o:q", long_options, &option_index);
+        c = getopt_long(*argc, argv, "B:C:D:JL:N:R:S:TVYb:O:c:g:hi:m:n:o:q", long_options, &option_index);
         if( c == -1 )
             break;
         switch (c) {
@@ -212,7 +204,7 @@ AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **
             options->outfile = strdup(optarg);
             break;
         case 'h':
-            AIOPrintUsage(argc, argv, long_options );
+            AIOPrintUsage(*argc, argv, long_options );
             return -AIOUSB_ERROR_AIOCOMMANDLINE_HELP;
             break;
         case 'i':
@@ -253,12 +245,12 @@ AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **
             break;
         }
         if( error ) {
-            AIOPrintUsage(argc, argv, long_options);
+            AIOPrintUsage(*argc, argv, long_options);
             return -AIOUSB_ERROR_INVALID_LIBUSB_DEVICE_HANDLE;
         }
         if( options->num_channels == 0 ) {
             fprintf(stderr,"Error: You must specify num_channels > 0: %d\n", options->num_channels );
-            AIOPrintUsage(argc, argv, long_options);
+            AIOPrintUsage(*argc, argv, long_options);
             return -AIOUSB_ERROR_AIOCOMMANDLINE_INVALID_NUM_CHANNELS;
         }
     }
@@ -287,7 +279,7 @@ AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **
     if ( options->number_ranges == 0 ) { 
         if ( options->start_channel >= 0 && options->end_channel >=0  && options->num_channels ) {
             fprintf(stdout,"Error: you can only specify -start_channel & -end_channel OR  --start_channel & --numberchannels\n");
-            AIOPrintUsage(argc, argv, long_options );
+            AIOPrintUsage(*argc, argv, long_options );
             return -AIOUSB_ERROR_AIOCOMMANDLINE_INVALID_START_END_CHANNEL;
 
         } else if ( options->start_channel >= 0 && options->num_channels >= 0 ) {
@@ -317,6 +309,22 @@ AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **
     }
 
     return AIOUSB_SUCCESS;
+}
+
+/*----------------------------------------------------------------------------*/
+/**
+ * @brief A simplified command line parsing library for 
+ * 
+ * @param options AIOCommandLineOptions object that holds overridden cmd 
+ *        line options
+ * @param argc Number of command line arguments
+ * @param argv Array of strings to the command line arguments
+ * 
+ * @return 
+ */
+AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv)
+{
+    return AIOProcessCommandLine( options, &argc, argv );
 }
 
 /*----------------------------------------------------------------------------*/
@@ -358,6 +366,17 @@ AIOCommandLineOptions *NewDefaultAIOCommandLineOptions()
     if ( !ndef )
         return ndef;
     memcpy( ndef, &AIO_DEFAULT_CMDLINE_OPTIONS, sizeof( AIOCommandLineOptions ));
+    return ndef;
+}
+
+/*----------------------------------------------------------------------------*/
+AIOCommandLineOptions *NewAIOCommandLineOptionsFromDefaultOptions(AIOCommandLineOptions *orig )
+{
+    AIO_ASSERT_RET( NULL, orig != NULL );
+    AIOCommandLineOptions *ndef = (AIOCommandLineOptions *)malloc(sizeof(AIOCommandLineOptions));
+    if ( !ndef )
+        return ndef;
+    memcpy( ndef, orig, sizeof( AIOCommandLineOptions ));
     return ndef;
 }
 
@@ -583,6 +602,39 @@ TEST( AIOCmdLine, CorrectlyDies )
     AIOCommandLineOptions *nopts = NULL;
     ASSERT_DEATH( {AIOCommandLineOptionsGetDeviceIndex(nopts); },"Assertion `options' failed"); 
 }
+
+TEST( AIOCmdLine, CmdlineParsing )
+{
+    AIOCommandLineOptions *nopts = NewDefaultAIOCommandLineOptions();
+    AIORET_TYPE retval;
+    ASSERT_TRUE( nopts );
+    char *argv[] = {(char *)"foo",(char *)"-N",(char *)"1000"};
+    int argc = 3;
+
+    ASSERT_EQ( 0, nopts->default_num_oversamples );
+
+    ASSERT_EQ( AD_GAIN_CODE_0_5V, nopts->gain_code );
+
+    retval = AIOProcessCmdline( nopts, argc, argv );
+
+    ASSERT_EQ(3, optind );
+
+    ASSERT_GE( retval, AIOUSB_SUCCESS );
+
+    DeleteAIOCommandLineOptions( nopts );
+}
+
+TEST(AIOCmdLine, NewOptions )
+{
+
+    AIOCommandLineOptions *nopts = NewAIOCommandLineOptionsFromDefaultOptions( &AIO_DEFAULT_CMDLINE_OPTIONS );
+    ASSERT_TRUE( nopts );
+    
+    ASSERT_EQ( 0, memcmp(nopts, &AIO_DEFAULT_CMDLINE_OPTIONS, sizeof(AIOCommandLineOptions)));
+    
+    DeleteAIOCommandLineOptions( nopts );
+}
+
 
 
 #include <unistd.h>
