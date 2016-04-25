@@ -91,7 +91,16 @@ AIOCommandLineOptions AIO_DEFAULT_SCRIPTING_OPTIONS = {
                            NULL
 };
 
-
+/*----------------------------------------------------------------------------*/
+/**
+ * @brief 
+ * 
+ * @param options 
+ * @param argc Pointer to number of arguments in argv. 
+ * @param argv An array of strings
+ * 
+ * @return 
+ */
 AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, char **argv )
 {
     int c;
@@ -99,6 +108,12 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
     int option_index = 0;
     int query = 0;
     int dump_adcconfig = 0;
+    int indprev;
+    int keepcount = 1, keepsize = 1,*keepindices = (int*)malloc(sizeof(int *)*keepsize);
+    if ( !keepindices ) 
+        return -AIOUSB_ERROR_INVALID_MEMORY;
+    keepindices[0] = 0;
+
     AIODisplayType display_type = BASIC;
     opterr = 0;
     static struct option long_options[] = {
@@ -132,6 +147,7 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
     };
     while (1) { 
         AIOChannelRangeTmp *tmp;
+        indprev = optind;
         c = getopt_long(*argc, argv, "B:C:D:JL:N:R:S:TVYb:O:c:g:hi:m:n:o:q", long_options, &option_index);
         if( c == -1 )
             break;
@@ -241,6 +257,12 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
             if ( !options->pass_through ) {
                  fprintf(stderr, "Incorrect argument '%s'\n", optarg );
                  error = 1;
+            } else {
+                keepsize += (optind - indprev);
+                keepindices = (int*)realloc(keepindices,sizeof(int *)*keepsize);
+                for( int i = indprev; i < optind; i ++ , keepcount ++) { 
+                    keepindices[keepcount] = i;
+                }
             }
             break;
         }
@@ -306,6 +328,13 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
         options->start_channel = min;
         options->end_channel = max;
         options->num_channels = (max - min + 1 );
+    }
+    if ( options->pass_through && keepcount > 1 ) {
+        for ( int i = 1; i < keepcount ; i ++ ) {
+            argv[i] = argv[keepindices[i]];
+        }
+        *argc = keepcount;
+        optind = keepcount + 1;
     }
 
     return AIOUSB_SUCCESS;
@@ -634,6 +663,36 @@ TEST(AIOCmdLine, NewOptions )
     
     DeleteAIOCommandLineOptions( nopts );
 }
+
+TEST( AIOCmdLine, CommandlineParsing )
+{
+    AIOCommandLineOptions *nopts = NewAIOCommandLineOptionsFromDefaultOptions(&AIO_DEFAULT_SCRIPTING_OPTIONS);
+    AIORET_TYPE retval;
+    ASSERT_TRUE( nopts );
+    char *tmp = (char *)"--foobar";
+    char *argv[] = {(char *)"foo",(char *)"-N",(char *)"1000", tmp };
+    int argc = sizeof(argv)/sizeof(char*);
+    optind = 1;
+    ASSERT_EQ( 0, nopts->default_num_oversamples );
+
+    ASSERT_EQ( AD_GAIN_CODE_0_5V, nopts->gain_code );
+
+    retval = AIOProcessCommandLine( nopts, &argc, argv );
+    ASSERT_GE( retval, AIOUSB_SUCCESS );
+
+    ASSERT_EQ(2, argc ) << "\"-N\" and \"1000\" should be removed leaving us with 2 args\n";
+
+    ASSERT_EQ(3, optind );
+
+    EXPECT_STREQ( argv[0], (char*)"foo" );
+
+    EXPECT_STREQ( argv[1], tmp );
+
+    DeleteAIOCommandLineOptions( nopts );
+}
+
+
+
 
 
 
