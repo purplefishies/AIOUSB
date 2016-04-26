@@ -116,6 +116,7 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
     keepindices[0] = 0;
     char **oargv = 0;
     oargv = (char **)malloc(sizeof(char *)* *argc );
+    optind = 1;
 
     memcpy( oargv, argv, sizeof(char *)* *argc ); /* Save the strings bc getopt_long 
                                                    * is known to switch order after

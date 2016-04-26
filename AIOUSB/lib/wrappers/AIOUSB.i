@@ -38,6 +38,7 @@
 %{
   #include "AIOTypes.h"
   #include "AIOUSB_Core.h"
+  #include "AIOCommandLine.h"
   #include "ADCConfigBlock.h"
   #include "AIOContinuousBuffer.h"
   #include "AIOChannelMask.h"
@@ -81,6 +82,50 @@
     }
     $1 = temp;
 }
+
+%typemap(in) (int *argc, char **argv) {
+    int i;
+    $2 = NULL;
+    if (!PyList_Check($input)) {
+        PyErr_SetString(PyExc_ValueError, "Expecting a list");
+        return NULL;
+    }
+    $1 = (int *)malloc(sizeof(int));
+    if (!$1 ) 
+        return NULL;
+    *$1 = PyList_Size($input);
+    $2 = (char **) malloc((*$1+1)*sizeof(char *));
+    for (i = 0; i < *$1; i++) {
+        PyObject *s = PyList_GetItem($input,i);
+        if (!PyString_Check(s)) {
+            free($2);
+            PyErr_SetString(PyExc_ValueError, "List items must be strings");
+            return NULL;
+        }
+        $2[i] = PyString_AsString(s);
+    }
+    $2[i] = 0;
+}
+/* After arguments have been processed....
+ * we set the argv to be this new value */
+%typemap(argout) (int *argc, char **argv) {
+    PyList_SetSlice($input, 0, PyList_Size($input), NULL);
+    {
+        int i; 
+        for ( i = 0; i < *$1 ; i ++ ) { 
+            /* printf("Adding %s\n", $2[i]); */
+            PyObject *ofmt = SWIG_Python_str_FromChar( $2[i] );
+            PyList_Append( $input, ofmt );
+        }
+    } 
+}
+
+%typemap(freearg) (int *argc, char **argv) {
+    if ($1) free($1);
+    if ($2) free($2);
+}
+
+
 #endif
 
 /* Needed to allow inclusion into Scala */
@@ -174,6 +219,7 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsign
 %include "AIOTypes.h"
 %include "AIOUSB_Core.h"
 %include "ADCConfigBlock.h"
+%include "AIOCommandLine.h"
 %include "AIOContinuousBuffer.h"
 %include "AIOUSB_Properties.h"
 %include "AIOChannelMask.h"
