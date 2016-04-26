@@ -112,9 +112,11 @@
     PyList_SetSlice($input, 0, PyList_Size($input), NULL);
     {
         int i; 
+        printf("After: %d\n", *$1 );
         for ( i = 0; i < *$1 ; i ++ ) { 
             /* printf("Adding %s\n", $2[i]); */
             PyObject *ofmt = SWIG_Python_str_FromChar( $2[i] );
+            printf("Values are %d\n", i );
             PyList_Append( $input, ofmt );
         }
     } 
@@ -182,9 +184,67 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsign
         temp[i] = (unsigned char) SvNV(*tv );
         // printf("Setting value %d\n", (int)SvNV(*tv ));
     }
-    
     $1 = temp;
 }
+
+%typemap(in) (int *argc, char **argv) {
+    AV *tempav;
+    I32 len;
+    int i;
+    SV **tv;
+    if (!SvROK($input))
+        croak("Argument $argnum is not a reference.");
+    if (SvTYPE(SvRV($input)) != SVt_PVAV)
+        croak("Argument $argnum is not an array.");
+
+    $2 = NULL;
+
+    $1 = (int *)malloc(sizeof(int));
+    if (!$1 )
+        return;
+
+    tempav = (AV*)SvRV($input);
+    *$1 = av_len(tempav);
+    printf("Original value: %d\n", av_len(tempav) );
+    $2 = (char **)malloc((*$1+1)*sizeof(char *));
+    for (i = 0; i < *$1; i++) {
+        tv = av_fetch(tempav, i, 0);
+        $2[i] = (char *) SvPV(*tv,PL_na);
+        printf("\targv[%d] = %s\n", i, $2[i] );
+    }
+    $2[i+1] = 0;
+}
+
+%typemap(argout) (int *argc, char **argv) {
+    printf("After: %d\n", *$1 );
+    SV **svs;
+    AV *tempav = (AV*)SvRV($input);
+    /* av_clear( tempav  ); */
+    {
+        int i;
+        svs = (SV **) malloc(*$1*sizeof(SV *));
+        for ( i = 0; i < *$1 ; i ++ ) { 
+            printf("Values are %d\n", i );
+        }
+        /* for (i = 0; i < *$1 ; i++) { */
+        /*     printf("Pushing value %s\n", $2[i] ); */
+        /*     svs[i] = sv_newmortal(); */
+        /*     /\* sv_setpv((SV*)svs[i],$2[i]); *\/ */
+        /*     av_push( tempav, svs[i] ); */
+        /* }; */
+        /* myav = av_make(len,svs); */
+        free(svs);
+    } 
+}
+
+
+%typemap(freearg) (int *argc, char **argv) {
+    if ($1) free($1);
+    if ($2) free($2);
+}
+/* End (int argc, char **argv) setting */
+
+
 
 %typemap(in)  double *ctrClockHz {
     double tmp = SvIV($input);
@@ -212,6 +272,43 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsign
     }
     $1 = temp;
 }
+
+%typemap(in) (int *argc, char **argv) {
+    int i;
+    VALUE *ptr;
+    $2 = NULL;
+    $1 = (int *)malloc(sizeof(int));
+    if (!$1 ) 
+        return NULL;
+    *$1 = RARRAY_LEN($input);
+    $2 = (char **) malloc((*$1+1)*sizeof(char *));
+    ptr = RARRAY_PTR($input);
+    for (i = 0; i < *$1; i++, ptr++) {
+        $2[i] = StringValuePtr(*ptr);
+    }
+    $2[i] = 0;
+}
+
+%typemap(argout) (int *argc, char **argv) {
+    {
+        int i; 
+        VALUE ptr;
+        /* printf("After: %d\n", *$1 ); */
+        ptr = (VALUE)RARRAY($input);
+        rb_ary_clear(ptr);
+        for ( i = 0; i < *$1 ; i ++ ) { 
+            rb_ary_push( ptr, rb_str_new2( $2[i] ));
+            /* printf("Values are %s\n", $2[i] ); */
+        }
+    } 
+}
+
+
+%typemap(freearg) (int *argc, char **argv) {
+    if ($1) free($1);
+    if ($2) free($2);
+}
+
 
 #endif
 
@@ -243,6 +340,20 @@ AIORET_TYPE ADC_GetScanVToDoubleArray( unsigned long DeviceIndex, doublearray *a
     return ADC_GetScanV( DeviceIndex, ary->el );
 }
 %}
+
+%extend AIOCommandLineOptions {
+    AIOCommandLineOptions() { 
+        return NewAIOCommandLineOptionsFromDefaultOptions( AIO_SCRIPTING_OPTIONS() );
+    }
+
+    ~AIOCommandLineOptions() {
+        DeleteAIOCommandLineOptions( $self );        
+    }
+
+    AIORET_TYPE ProcessCommandLine( int *argc, char **argv ) {
+        return AIOProcessCommandLine( $self, argc, argv );
+    }
+}
 
 %extend AIOChannelMask { 
     AIOChannelMask( unsigned size ) { 
