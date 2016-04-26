@@ -355,6 +355,7 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
         *argc = keepcount;
         optind = keepcount + 1;
         free(keepindices);
+        free(oargv);
     }
 
     return AIOUSB_SUCCESS;
