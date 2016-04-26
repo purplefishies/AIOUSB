@@ -101,7 +101,7 @@ AIOCommandLineOptions AIO_DEFAULT_SCRIPTING_OPTIONS = {
  * 
  * @return 
  */
-AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, char **argv )
+AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, char *argv[] )
 {
     int c;
     int error = 0;
@@ -376,7 +376,7 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
  * 
  * @return 
  */
-AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv)
+AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char *argv[] )
 {
     return AIOProcessCommandLine( options, &argc, argv );
 }
