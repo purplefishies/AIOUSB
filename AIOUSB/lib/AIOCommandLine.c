@@ -309,7 +309,6 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
             return -AIOUSB_ERROR_AIOCOMMANDLINE_INVALID_INDEX_NUM;
         } else {
             AIOUSB_Init();
-            /* AIOUSB_ShowDevices( display_type ); */
             ADCConfigBlock config;
             ADCConfigBlockInitializeDefault( &config );
             ADC_GetConfig( options->index, config.registers, &config.size );
