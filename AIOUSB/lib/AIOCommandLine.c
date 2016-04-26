@@ -264,7 +264,6 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
                     keepindices[keepcount] = i;
                 }
             }
-            break;
         }
         if( error ) {
             AIOPrintUsage(*argc, argv, long_options);
@@ -688,6 +687,35 @@ TEST( AIOCmdLine, CommandlineParsing )
     EXPECT_STREQ( argv[0], (char*)"foo" );
 
     EXPECT_STREQ( argv[1], tmp );
+
+    DeleteAIOCommandLineOptions( nopts );
+}
+
+TEST( AIOCmdLine, LargerParsingTest )
+{
+    AIOCommandLineOptions *nopts = NewAIOCommandLineOptionsFromDefaultOptions(&AIO_DEFAULT_SCRIPTING_OPTIONS);
+    AIORET_TYPE retval;
+    ASSERT_TRUE( nopts );
+    char *tmp = (char *)"--foobar";
+    char *argv[] = {(char *)"foo",(char *)"-N",(char *)"1000",(char *)"--foobar",(char *)"--args",
+                    (char*)"--range",(char *)"0-4=5,5-9=2",(char *)"--clockrate",(char*)"40000",
+                    (char *)"--buffer_size",(char *)"343434" };
+
+    int argc = sizeof(argv)/sizeof(char*);
+    optind = 1;
+
+    retval = AIOProcessCommandLine( nopts, &argc, argv );
+    ASSERT_GE( retval, AIOUSB_SUCCESS );
+
+    ASSERT_EQ(3, argc ) << "should be removed leaving us with 3 args\n";
+
+    ASSERT_EQ(4, optind );
+
+    EXPECT_STREQ( argv[0], (char*)"foo" );
+
+    EXPECT_STREQ( argv[1], tmp );
+
+    EXPECT_STREQ( argv[2], (char *)"--args" );
 
     DeleteAIOCommandLineOptions( nopts );
 }
