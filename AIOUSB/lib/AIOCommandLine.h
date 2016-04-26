@@ -82,9 +82,9 @@ typedef enum {
 
 /* BEGIN AIOUSB_API */
 PUBLIC_EXTERN AIOCommandLineOptions *NewDefaultAIOCommandLineOptions();
-PUBLIC_EXTERN AIOCommandLineOptions *NewAIOCommandLineOptionsFromDefaultOptions(AIOCommandLineOptions *orig );
-PUBLIC_EXTERN AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char *argv[] );
-PUBLIC_EXTERN AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, char *argv[] );
+PUBLIC_EXTERN AIOCommandLineOptions *NewAIOCommandLineOptionsFromDefaultOptions(const AIOCommandLineOptions *orig );
+PUBLIC_EXTERN AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv );
+PUBLIC_EXTERN AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, char **argv );
 PUBLIC_EXTERN AIOChannelRangeTmp *AIOGetChannelRange(char *optarg );
 PUBLIC_EXTERN void AIOPrintUsage(int argc, char **argv,  struct option  *options);
 PUBLIC_EXTERN AIORET_TYPE DeleteAIOCommandLineOptions( AIOCommandLineOptions *options );
@@ -96,7 +96,12 @@ static inline const char *AIOCommandLineGetDefaultADCJSONConfig( AIOCommandLineO
 static inline AIORET_TYPE AIOCommandLineGetIncludeTiming( AIOCommandLineOptions *options ){ AIO_ASSERT(options); return options->with_timing;};
 static inline AIORET_TYPE AIOCommandLineGetCounts( AIOCommandLineOptions *options ) { AIO_ASSERT(options); return options->counts; };
 static inline AIORET_TYPE AIOCommandLineGetScans( AIOCommandLineOptions *options ) { AIO_ASSERT(options); return options->num_scans; };
+
+
+PUBLIC_EXTERN const AIOCommandLineOptions *AIO_SCRIPTING_OPTIONS(void);
+PUBLIC_EXTERN const AIOCommandLineOptions *AIO_CMDLINE_OPTIONS(void);
 /* END AIOUSB_API */
+
 
 
 extern AIOCommandLineOptions AIO_DEFAULT_CMDLINE_OPTIONS;

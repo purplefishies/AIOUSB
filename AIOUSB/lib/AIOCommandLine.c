@@ -101,7 +101,7 @@ AIOCommandLineOptions AIO_DEFAULT_SCRIPTING_OPTIONS = {
  * 
  * @return 
  */
-AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, char *argv[] )
+AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, char **argv )
 {
     int c;
     int error = 0;
@@ -376,7 +376,7 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
  * 
  * @return 
  */
-AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char *argv[] )
+AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv )
 {
     return AIOProcessCommandLine( options, &argc, argv );
 }
@@ -424,7 +424,7 @@ AIOCommandLineOptions *NewDefaultAIOCommandLineOptions()
 }
 
 /*----------------------------------------------------------------------------*/
-AIOCommandLineOptions *NewAIOCommandLineOptionsFromDefaultOptions(AIOCommandLineOptions *orig )
+AIOCommandLineOptions *NewAIOCommandLineOptionsFromDefaultOptions(const AIOCommandLineOptions *orig )
 {
     AIO_ASSERT_RET( NULL, orig != NULL );
     AIOCommandLineOptions *ndef = (AIOCommandLineOptions *)malloc(sizeof(AIOCommandLineOptions));
@@ -620,6 +620,14 @@ AIOChannelRangeTmp *AIOGetChannelRange(char *optarg )
     return tmp;
 }
 
+const AIOCommandLineOptions *AIO_SCRIPTING_OPTIONS(void) 
+{
+    return &AIO_DEFAULT_SCRIPTING_OPTIONS;
+}
+const AIOCommandLineOptions *AIO_CMDLINE_OPTIONS(void) 
+{
+    return &AIO_DEFAULT_CMDLINE_OPTIONS;
+}
 
 
 #ifdef __cplusplus
@@ -723,7 +731,7 @@ TEST( AIOCmdLine, LargerParsingTest )
 
 TEST( AIOCmdLine, StrangeArguments )
 {
-    AIOCommandLineOptions *nopts = NewAIOCommandLineOptionsFromDefaultOptions(&AIO_DEFAULT_SCRIPTING_OPTIONS);
+    AIOCommandLineOptions *nopts = NewAIOCommandLineOptionsFromDefaultOptions( AIO_SCRIPTING_OPTIONS() );
     AIORET_TYPE retval;
     ASSERT_TRUE( nopts );
     char *tmp = (char *)"--foobar";
