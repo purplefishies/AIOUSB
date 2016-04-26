@@ -108,14 +108,21 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
     int option_index = 0;
     int query = 0;
     int dump_adcconfig = 0;
-    int indprev;
+    int indprev,indafter = -1;
     int keepcount = 1, keepsize = 1,*keepindices = (int*)malloc(sizeof(int *)*keepsize);
     if ( !keepindices ) 
         return -AIOUSB_ERROR_INVALID_MEMORY;
     keepindices[0] = 0;
+    char **oargv = (char **)malloc(sizeof(char *)* *argc );
+
+    memcpy( oargv, argv, sizeof(char *)* *argc ); /* Save the strings bc getopt_long 
+                                                   * is known to switch order after
+                                                   * processing */
 
     AIODisplayType display_type = BASIC;
     opterr = 0;
+    char *arguments = (char *)"B:C:D:JL:N:R:S:TVYb:O:c:g:hi:m:n:o:q";
+
     static struct option long_options[] = {
         {"debug"            , required_argument, 0,  'D'   },
         {"dump"             , no_argument      , 0,   DUMP },
@@ -148,7 +155,7 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
     while (1) { 
         AIOChannelRangeTmp *tmp;
         indprev = optind;
-        c = getopt_long(*argc, argv, "B:C:D:JL:N:R:S:TVYb:O:c:g:hi:m:n:o:q", long_options, &option_index);
+        c = getopt_long(*argc, argv, arguments, long_options, &option_index);
         if( c == -1 )
             break;
         switch (c) {
@@ -163,15 +170,18 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
             options->ranges[options->number_ranges-1] = tmp;
             break;
         case 'S':
+            
             options->buffer_size = atoi( optarg );
             break;
         case 'T':
             options->with_timing = 1;
             break;
         case 'B':
+            
             options->block_size = atoi( optarg );
             break;
         case 'C':
+            
             options->calibration = atoi( optarg );
             if ( !VALID_ENUM( ADCalMode, options->calibration ) ) {
                 fprintf(stderr,"Error: calibration %d is not valid\n", options->calibration );
@@ -195,6 +205,7 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
                 options->physical = 1;
                 break;
         case 'L':
+            
             options->rate_limit = atoi(optarg);
             break;
         case 'q':
@@ -265,6 +276,15 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
                 }
             }
         }
+        if ( indafter != -1 && optind - indprev >= 3 ) {
+            int stop = ( long_options[option_index].has_arg ? optind - 2 : optind - 1 );
+            keepsize += ( stop - indprev );
+            keepindices = (int*)realloc(keepindices,sizeof(int *)*keepsize);
+            for ( int i = indprev; i < stop ;i ++ , keepcount ++) { 
+                keepindices[keepcount] = i;
+            }
+        }
+
         if( error ) {
             AIOPrintUsage(*argc, argv, long_options);
             return -AIOUSB_ERROR_INVALID_LIBUSB_DEVICE_HANDLE;
@@ -274,6 +294,7 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
             AIOPrintUsage(*argc, argv, long_options);
             return -AIOUSB_ERROR_AIOCOMMANDLINE_INVALID_NUM_CHANNELS;
         }
+        indafter = indprev;
     }
 
     if ( query ) {
@@ -330,7 +351,7 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
     }
     if ( options->pass_through && keepcount > 1 ) {
         for ( int i = 1; i < keepcount ; i ++ ) {
-            argv[i] = argv[keepindices[i]];
+            argv[i] = oargv[keepindices[i]];
         }
         *argc = keepcount;
         optind = keepcount + 1;
@@ -664,33 +685,6 @@ TEST(AIOCmdLine, NewOptions )
     DeleteAIOCommandLineOptions( nopts );
 }
 
-TEST( AIOCmdLine, CommandlineParsing )
-{
-    AIOCommandLineOptions *nopts = NewAIOCommandLineOptionsFromDefaultOptions(&AIO_DEFAULT_SCRIPTING_OPTIONS);
-    AIORET_TYPE retval;
-    ASSERT_TRUE( nopts );
-    char *tmp = (char *)"--foobar";
-    char *argv[] = {(char *)"foo",(char *)"-N",(char *)"1000", tmp };
-    int argc = sizeof(argv)/sizeof(char*);
-    optind = 1;
-    ASSERT_EQ( 0, nopts->default_num_oversamples );
-
-    ASSERT_EQ( AD_GAIN_CODE_0_5V, nopts->gain_code );
-
-    retval = AIOProcessCommandLine( nopts, &argc, argv );
-    ASSERT_GE( retval, AIOUSB_SUCCESS );
-
-    ASSERT_EQ(2, argc ) << "\"-N\" and \"1000\" should be removed leaving us with 2 args\n";
-
-    ASSERT_EQ(3, optind );
-
-    EXPECT_STREQ( argv[0], (char*)"foo" );
-
-    EXPECT_STREQ( argv[1], tmp );
-
-    DeleteAIOCommandLineOptions( nopts );
-}
-
 TEST( AIOCmdLine, LargerParsingTest )
 {
     AIOCommandLineOptions *nopts = NewAIOCommandLineOptionsFromDefaultOptions(&AIO_DEFAULT_SCRIPTING_OPTIONS);
@@ -719,6 +713,36 @@ TEST( AIOCmdLine, LargerParsingTest )
 
     DeleteAIOCommandLineOptions( nopts );
 }
+
+TEST( AIOCmdLine, StrangeArguments )
+{
+    AIOCommandLineOptions *nopts = NewAIOCommandLineOptionsFromDefaultOptions(&AIO_DEFAULT_SCRIPTING_OPTIONS);
+    AIORET_TYPE retval;
+    ASSERT_TRUE( nopts );
+    char *tmp = (char *)"--foobar";
+    char *argv[] = {(char *)"foo",(char *)"-N",(char *)"1000",(char *)"--foobar",(char *)"3434",(char *)"3434",
+                    (char*)"--range",(char *)"0-4=5,5-9=2",(char *)"--clockrate",(char*)"40000",
+                    (char *)"--buffer_size",(char *)"343434" };
+
+    int argc = sizeof(argv)/sizeof(char*);
+    optind = 1;
+
+    retval = AIOProcessCommandLine( nopts, &argc, argv );
+    ASSERT_GE( retval, AIOUSB_SUCCESS );
+
+    ASSERT_EQ(4, argc ) << "should be removed leaving us with 3 args\n";
+
+    ASSERT_EQ(5, optind );
+
+    EXPECT_STREQ( argv[0], (char*)"foo" );
+
+    EXPECT_STREQ( argv[1], tmp );
+
+    EXPECT_STREQ( argv[2], (char *)"3434" );
+
+    DeleteAIOCommandLineOptions( nopts );
+}
+
 
 
 
