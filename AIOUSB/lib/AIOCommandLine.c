@@ -109,11 +109,13 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
     int query = 0;
     int dump_adcconfig = 0;
     int indprev,indafter = -1;
-    int keepcount = 1, keepsize = 1,*keepindices = (int*)malloc(sizeof(int *)*keepsize);
+    int keepcount = 1, keepsize = 1,*keepindices = 0;
+    keepindices = (int*)malloc(sizeof(int *)*keepsize);
     if ( !keepindices ) 
         return -AIOUSB_ERROR_INVALID_MEMORY;
     keepindices[0] = 0;
-    char **oargv = (char **)malloc(sizeof(char *)* *argc );
+    char **oargv = 0;
+    oargv = (char **)malloc(sizeof(char *)* *argc );
 
     memcpy( oargv, argv, sizeof(char *)* *argc ); /* Save the strings bc getopt_long 
                                                    * is known to switch order after
@@ -354,9 +356,11 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
         }
         *argc = keepcount;
         optind = keepcount + 1;
-        free(keepindices);
-        free(oargv);
+
+
     }
+    if ( keepindices ) free(keepindices);
+    free(oargv);
 
     return AIOUSB_SUCCESS;
 }
@@ -442,7 +446,10 @@ AIOCommandLineOptions *NewAIOCommandLineOptionsFromDefaultOptions(AIOCommandLine
 AIORET_TYPE DeleteAIOCommandLineOptions( AIOCommandLineOptions *options )
 {
     AIO_ASSERT( options );
-    
+    for ( int i = 0; i < options->number_ranges ; i ++ ) { 
+        free(options->ranges[i]);
+    }
+    free(options->ranges);
     free( options );
     return AIOUSB_SUCCESS;
 }
