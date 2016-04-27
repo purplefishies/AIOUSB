@@ -48,8 +48,18 @@ int main( int argc, char **argv )
     * AIOUSB_ListDevices();
     * @endverbatim
     */
-    
-    retval = AIOProcessCmdline( options, argc, argv );
+
+    retval = AIOProcessCommandLine( options, &argc, argv );
+    /**
+     * @brief this is the preferred form over 
+     * @verbatim
+     *        retval = AIOProcessCmdline( options, argc, argv );
+     * @verbatim
+     *        in the case where you want your program to process 
+     *        extra options on the comamnd line
+     */
+
+
     if ( retval < 0 ) 
         exit(retval);
 
