@@ -39,38 +39,18 @@ the USB bus. For simplicity, it uses the first such device found
 on the bus.
 """ % ( AIOUSB_GetVersion(), AIOUSB_GetVersionDate() )
 
-result = AIOUSB_Init()
-if result != AIOUSB_SUCCESS:
-    print "Error running AIOUSB_Init()..."
-    sys.exit(1)
+def find_ai(obj):
+    if (obj.PID >= USB_AI16_16A and obj.PID <= USB_AI12_128E) or \
+       (obj.PID >=  USB_AIO16_16A and obj.PID <= USB_AIO12_128E ):
+        return True
 
-deviceMask = GetDevices()
-if deviceMask == 0:
-    print "No ACCES devices found on USB bus\n"
-    sys.exit(1)
+# Simplified API call that uses Python callback that takes 
+# an AIOUSBDevice as it's argument .
+# Typically, all you care about is the obj.PID matching 
 
-number_devices = 1
-devices = []
-AIOUSB_ListDevices()
-index = 0
+device_indices = AIOUSB_FindDevices( find_ai )
 
-while deviceMask > 0 and len(devices) < number_devices :
-    if (deviceMask & 1 ) != 0:
-        obj = AIODeviceInfoGet( index )
-        if (obj.PID >= USB_AI16_16A and obj.PID <= USB_AI12_128E) or \
-           (obj.PID >=  USB_AIO16_16A and obj.PID <= USB_AIO12_128E ):
-            devices.append( Device( index=index, productID=obj.PID, numDIOBytes=obj.DIOBytes,numCounters=obj.Counters ))
-    index += 1
-    deviceMask >>= 1
-try:
-    device = devices[0]
-except IndexError:
-    print """No devices were found. Please make sure you have at least one 
-ACCES I/O Products USB device plugged into your computer"""
-    sys.exit(1)
-
-
-deviceIndex = device.index
+deviceIndex = device_indices[0]
 
 AIOUSB_Reset( deviceIndex );
 print "Setting timeout"
