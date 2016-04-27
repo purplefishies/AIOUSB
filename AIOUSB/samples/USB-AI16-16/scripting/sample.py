@@ -48,9 +48,18 @@ def find_ai(obj):
 # an AIOUSBDevice as it's argument .
 # Typically, all you care about is the obj.PID matching 
 
+options = NewAIOCommandLineOptionsFromDefaultOptions( AIO_SCRIPTING_OPTIONS() )
 device_indices = AIOUSB_FindDevices( find_ai )
+AIOProcessCommandLine( options, sys.argv )
 
-deviceIndex = device_indices[0]
+if options.index == -1:
+    deviceIndex = device_indices[0]
+elif set(device_indices) & set([options.index]):
+    deviceIndex = (set(device_indices) & set([options.index])).pop()
+else:
+    sys.stderr.write("Error: can't find a valid device (index=%d) != (found device indices=%s)\n" % ( options.index,device_indices ))
+    sys.exit(1)
+                    
 
 AIOUSB_Reset( deviceIndex );
 print "Setting timeout"
