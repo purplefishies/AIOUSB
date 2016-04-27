@@ -504,6 +504,22 @@ def delete_volts(n):
     """Creates a new double array of size n"""
     del n
 
+def AIOUSB_FindDevices(fn):
+    import AIOUSB
+    devices = [];
+    index = 0;
+    deviceMask = AIOUSB.GetDevices();
+
+    while deviceMask > 0:
+        if (deviceMask & 1 ) != 0:
+            obj = AIOUSB.AIODeviceInfoGet( index );
+            if fn( obj ):
+                devices.append( index )
+
+        index += 1
+        deviceMask >>= 1;
+
+    return devices;
 
 %}
 
