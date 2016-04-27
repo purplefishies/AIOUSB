@@ -228,7 +228,7 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
             options->aiobuf_json = strdup( optarg );
             break;
         case REPEAT:
-            options->repeat = atoi(optarg);
+            options->repeat_number = atoi(optarg);
             break;
         case 'f':
             options->outfile = strdup(optarg);

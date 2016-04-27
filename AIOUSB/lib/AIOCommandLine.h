@@ -60,7 +60,7 @@ typedef struct AIOCommandLineOptions {
     int physical;
     int counts;
     int calibration;            
-    int repeat;
+    int repeat_number;
     char *aiobuf_json;
     char *default_aiobuf_json;
     char *adcconfig_json;
