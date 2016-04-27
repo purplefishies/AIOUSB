@@ -88,20 +88,34 @@ PUBLIC_EXTERN AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options,
 PUBLIC_EXTERN AIOChannelRangeTmp *AIOGetChannelRange(char *optarg );
 PUBLIC_EXTERN void AIOPrintUsage(int argc, char **argv,  struct option  *options);
 PUBLIC_EXTERN AIORET_TYPE DeleteAIOCommandLineOptions( AIOCommandLineOptions *options );
-PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOptionsGetDeviceIndex( AIOCommandLineOptions *options );
-PUBLIC_EXTERN AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *indices, int num_devices );
-PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOverrideADCConfigBlock( ADCConfigBlock *config, AIOCommandLineOptions *options );
 
-static inline const char *AIOCommandLineGetDefaultADCJSONConfig( AIOCommandLineOptions *options ) {AIO_ASSERT_RET( NULL, options );return options->adcconfig_json;};
-static inline AIORET_TYPE AIOCommandLineGetIncludeTiming( AIOCommandLineOptions *options ){ AIO_ASSERT(options); return options->with_timing;};
-static inline AIORET_TYPE AIOCommandLineGetCounts( AIOCommandLineOptions *options ) { AIO_ASSERT(options); return options->counts; };
-static inline AIORET_TYPE AIOCommandLineGetScans( AIOCommandLineOptions *options ) { AIO_ASSERT(options); return options->num_scans; };
+
+PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOptionsListDevices( AIOCommandLineOptions *options , int *indices, int num_devices );
+PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOptionsOverrideADCConfigBlock( ADCConfigBlock *config, AIOCommandLineOptions *options );
+
+static inline AIORET_TYPE AIOCommandLineOptionsGetDeviceIndex( AIOCommandLineOptions *options ) {AIO_ASSERT( options ); return options->index;};
+static inline const char *AIOCommandLineOptionsGetDefaultADCJSONConfig( AIOCommandLineOptions *options ) {AIO_ASSERT_RET( NULL, options );return options->adcconfig_json;};
+static inline AIORET_TYPE AIOCommandLineOptionsGetIncludeTiming( AIOCommandLineOptions *options ){ AIO_ASSERT(options); return options->with_timing;};
+static inline AIORET_TYPE AIOCommandLineOptionsGetCounts( AIOCommandLineOptions *options ) { AIO_ASSERT(options); return options->counts; };
+static inline AIORET_TYPE AIOCommandLineOptionsGetScans( AIOCommandLineOptions *options ) { AIO_ASSERT(options); return options->num_scans; };
 
 
 PUBLIC_EXTERN const AIOCommandLineOptions *AIO_SCRIPTING_OPTIONS(void);
 PUBLIC_EXTERN const AIOCommandLineOptions *AIO_CMDLINE_OPTIONS(void);
-/* END AIOUSB_API */
 
+
+/* DEPRECATED FUNCTIONS */
+#ifndef SWIG
+
+PUBLIC_EXTERN AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *indices, int num_devices ) ACCES_DEPRECATED("Please use AIOCommandLineOptionsListDevices");
+PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOverrideADCConfigBlock( ADCConfigBlock *config, AIOCommandLineOptions *options ) ACCES_DEPRECATED("Please use AIOCommandLineOptionsOverrideADCConfigBlock");
+static inline ACCES_DEPRECATED("Please use AIOCommandLineOptionsGetDefaultADCJSONConfig") const char *AIOCommandLineGetDefaultADCJSONConfig( AIOCommandLineOptions *options )  { return AIOCommandLineOptionsGetDefaultADCJSONConfig(options);};
+static inline ACCES_DEPRECATED("Please use AIOCommandLineOptionsGetIncludeTiming") AIORET_TYPE AIOCommandLineGetIncludeTiming( AIOCommandLineOptions *options ){ return AIOCommandLineOptionsGetIncludeTiming(options);};
+static inline ACCES_DEPRECATED("Please use AIOCommandLineOptionsGetCounts") AIORET_TYPE AIOCommandLineGetCounts( AIOCommandLineOptions *options ) {return AIOCommandLineOptionsGetCounts(options );};
+static inline ACCES_DEPRECATED("Please use AIOCommandLineOptionsGetScans") AIORET_TYPE AIOCommandLineGetScans( AIOCommandLineOptions *options ) { return AIOCommandLineOptionsGetScans(options);};
+
+#endif
+/* END AIOUSB_API */
 
 
 extern AIOCommandLineOptions AIO_DEFAULT_CMDLINE_OPTIONS;

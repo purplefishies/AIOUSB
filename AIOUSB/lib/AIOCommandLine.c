@@ -455,18 +455,10 @@ AIORET_TYPE DeleteAIOCommandLineOptions( AIOCommandLineOptions *options )
     return AIOUSB_SUCCESS;
 }
 
-/*----------------------------------------------------------------------------*/
-/**
- * @brief Returns the index that the user has specified on the command line
- * for running the test on.
- * @param options 
- * 
- * @return >= 0 is a valid index, < 0 indicated error
- */
-AIORET_TYPE AIOCommandLineOptionsGetDeviceIndex( AIOCommandLineOptions *options )
+/*---------------------------         DEPRECATED    --------------------------*/
+AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *indices, int num_devices )
 {
-    AIO_ASSERT( options );
-    return options->index;
+    return AIOCommandLineOptionsListDevices( options, indices, num_devices );
 }
 
 /*----------------------------------------------------------------------------*/
@@ -478,7 +470,7 @@ AIORET_TYPE AIOCommandLineOptionsGetDeviceIndex( AIOCommandLineOptions *options 
  * @param num_devices number of devices in the array
  * @return >= AIOUSB_SUCCESS if devices have been found, < 0 if no devices found
  */
-AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *indices, int num_devices )
+AIORET_TYPE AIOCommandLineOptionsListDevices( AIOCommandLineOptions *options , int *indices, int num_devices )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     AIOUSB_ListDevices();
@@ -505,6 +497,13 @@ AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *ind
 
 }
 
+/*---------------------------         DEPRECATED    --------------------------*/
+AIORET_TYPE AIOCommandLineOverrideADCConfigBlock( ADCConfigBlock *config, AIOCommandLineOptions *options)
+{
+    return AIOCommandLineOptionsOverrideADCConfigBlock( config, options );
+}
+
+
 /*----------------------------------------------------------------------------*/
 /**
  * @brief Allows the AIOCommandLineOptions options to override the settings in 
@@ -514,7 +513,7 @@ AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *ind
  *        parameters specified on the command line
  * @return >= AIOUSB_SUCCESS is successful, < 0 if there was an error
  */
-AIORET_TYPE AIOCommandLineOverrideADCConfigBlock(  ADCConfigBlock *config, AIOCommandLineOptions *options)
+AIORET_TYPE AIOCommandLineOptionsOverrideADCConfigBlock(  ADCConfigBlock *config, AIOCommandLineOptions *options)
 {
     AIO_ASSERT( options );
     AIO_ASSERT( config );
