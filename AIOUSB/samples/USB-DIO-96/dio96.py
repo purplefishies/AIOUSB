@@ -14,24 +14,6 @@ from AIOUSB import *
 
 MAX_DIO_BYTES = 32
 
-# Simple class for keeping track of deviecs found
-#
-class Device:
-    outputMask = NewAIOChannelMaskFromStr("1111")
-    readBuffer = DIOBuf(MAX_DIO_BYTES )
-    writeBuffer = DIOBuf( MAX_DIO_BYTES )
-    name = ""
-    serialNumber = 0
-    index = 0
-    numDIOBytes = 0
-    numCounters = 0
-    productID = 0
-    def __init__(self, **kwds):
-        self.__dict__.update(kwds)
-
-
-
-
 devices = []                    # Array of our Devices
 number_devices = 1
 
@@ -43,26 +25,18 @@ first device found found on the bus
 """ % ( "$Format: %t$", "$Format: %ad$", AIOUSB_GetVersion(), AIOUSB_GetVersionDate() )
          
 
-result = AIOUSB_Init()
-if result != AIOUSB_SUCCESS:
-    sys.exit("Unable to initialize USB devices")
-devicesFound = 0
-deviceMask = GetDevices()
-index = 0
-AIOUSB_ListDevices()
-while deviceMask > 0 and len(devices) < number_devices :
-    if (deviceMask & 1 ) != 0:
-        obj = AIODeviceInfoGet( index )
-        if obj.PID == USB_DIO_96 :
-            devices.append( Device( index=index, productID=obj.PID, numDIOBytes=obj.DIOBytes,numCounters=obj.Counters ))
-    index += 1
-    deviceMask >>= 1
-try:
-    device = devices[0]
-except IndexError:
-    print """No devices were found. Please make sure you have at least one 
+def find_dio96(obj):
+    if obj.PID == USB_DIO_96 :
+        return True
+
+indices = AIOUSB_FindDevices( find_dio96 )
+
+if not indices:
+    print """No USB-DIO-96 devices were found. Please make sure you have at least one 
 ACCES I/O Products USB device plugged into your computer"""
     sys.exit(1)
+
+device = indices[0]
 
 
 # Ports 3 and 1 , all writable
@@ -88,9 +62,9 @@ buf = DIOBuf(
 
 print "Buf is %s" % ( buf  )
 
-DIO_ConfigureWithDIOBuf( 0 , AIOUSB_FALSE, mask, buf )
+DIO_ConfigureWithDIOBuf(device , AIOUSB_FALSE, mask, buf )
 
-retval = DIO_ReadAllToDIOBuf(0, buf)
+retval = DIO_ReadAllToDIOBuf(device, buf)
 print "Retval was %d" % ( retval )
 
 print "Read8: %s" % ( buf )
