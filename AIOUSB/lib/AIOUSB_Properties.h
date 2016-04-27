@@ -38,7 +38,9 @@ PUBLIC_EXTERN const char *AIOUSB_GetResultCodeAsString(unsigned long result_valu
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_ListDevices();
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_ShowDevices( AIODisplayType display_type );
 
+#ifndef SWIG
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_FindDevices( int **where, int *length , AIOUSB_BOOL (*is_ok_device)( AIOUSBDevice *dev )  );
+#endif
 /* END AIOUSB_API */
 
 #ifdef __aiousb_cplusplus       /* Required for header file inclusion and SWIG */
