@@ -112,11 +112,11 @@
     PyList_SetSlice($input, 0, PyList_Size($input), NULL);
     {
         int i; 
-        printf("After: %d\n", *$1 );
+        /* printf("After: %d\n", *$1 ); */
         for ( i = 0; i < *$1 ; i ++ ) { 
             /* printf("Adding %s\n", $2[i]); */
             PyObject *ofmt = SWIG_Python_str_FromChar( $2[i] );
-            printf("Values are %d\n", i );
+            /* printf("Values are %d\n", i ); */
             PyList_Append( $input, ofmt );
         }
     } 
