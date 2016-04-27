@@ -587,6 +587,30 @@ return DIOBufGetIndex( $self, index );
 }
 #elif defined(SWIGPERL)
 %perlcode %{
+{
+package AIOUSB;
+sub AIOUSB_FindDevices
+{
+    my ($fn) = @_;
+    my $devices = [];
+    my $index = 0;
+    my $deviceMask = AIOUSB::GetDevices();
+
+    while ( $deviceMask > 0 ) {
+        if ( ($deviceMask & 1 ) != 0 ) {
+            $obj = AIOUSB::AIODeviceInfoGet( $index );
+            if ( $fn->( $obj ) ) {
+                push( @{$devices}, $index );
+            }
+        }
+        $index ++;
+        $deviceMask >>= 1;
+    }
+    return $devices;
+}
+}
+
+{
 package  AIOUSB::DIOBuf;
 sub newDESTROY {
     return unless $_[0]->isa('HASH');
@@ -600,6 +624,7 @@ sub newDESTROY {
         delete $OWNER{$tmp};
     }
 }
+ }
 *AIOUSB::DIOBuf::DESTROY = *AIOUSB::DIOBuf::newDESTROY;
 %}
 #endif

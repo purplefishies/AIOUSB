@@ -105,6 +105,7 @@ perl:
 		$(PERL) Makefile.PL CCFLAGS="$(PERL_CFLAGS) $(PERL_XTRA_CFLAGS)" $(PERL_PREFIX_INSTALL) ;\
 		$(MAKE) -f Makefile ; \
 		if [ "$$?" == 0 ] ; then \
+			$(PERL) -i -ne 's/^(\*)swig_+([\S_]*)?_(get|set)/$$1$$3_$$2/g;print;' AIOUSB.pm;\
 			touch $(PERL_BUILT); \
 		fi \
 	fi 
