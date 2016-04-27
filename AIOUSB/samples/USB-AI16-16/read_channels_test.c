@@ -55,14 +55,14 @@ int main( int argc, char **argv )
 
     AIOUSB_FindDevices( &indices, &num_devices, find_ai_board );
 
-    if ( ( retval = AIOCommandLineListDevices( options, indices, num_devices )) < AIOUSB_SUCCESS )
+    if ( ( retval = AIOCommandLineOptionsListDevices( options, indices, num_devices )) < AIOUSB_SUCCESS )
         exit(retval);
 
-    if ( (config = NewADCConfigBlockFromJSON( AIOCommandLineGetDefaultADCJSONConfig(options) )) == NULL )
+    if ( (config = NewADCConfigBlockFromJSON( AIOCommandLineOptionsGetDefaultADCJSONConfig(options) )) == NULL )
         exit(AIOUSB_ERROR_INVALID_ADCCONFIG);
 
 
-    if ( (retval = AIOCommandLineOverrideADCConfigBlock( config, options )) != AIOUSB_SUCCESS )
+    if ( (retval = AIOCommandLineOptionsOverrideADCConfigBlock( config, options )) != AIOUSB_SUCCESS )
         exit(retval);
 
 
@@ -97,26 +97,26 @@ int main( int argc, char **argv )
     volts = (double*)malloc((ADCConfigBlockGetEndChannel( config )-ADCConfigBlockGetStartChannel( config )+1)*sizeof(double));
     
 #ifdef UNIX
-    if ( AIOCommandLineGetIncludeTiming( options ) ) {
+    if ( AIOCommandLineOptionsGetIncludeTiming( options ) ) {
         clock_gettime( CLOCK_MONOTONIC_RAW, &starttime );
         memcpy(&prevtime,&starttime,sizeof(starttime));
     }
 #endif
 
-    for ( int i = 0, channel = 0; i < AIOCommandLineGetScans(options); i ++ , channel = 0) {
-        if ( AIOCommandLineGetCounts( options ) ) { /* --counts will write out the raw values */
+    for ( int i = 0, channel = 0; i < AIOCommandLineOptionsGetScans(options); i ++ , channel = 0) {
+        if ( AIOCommandLineOptionsGetCounts( options ) ) { /* --counts will write out the raw values */
 #ifdef UNIX
-            if ( AIOCommandLineGetIncludeTiming( options ) )
+            if ( AIOCommandLineOptionsGetIncludeTiming( options ) )
                 clock_gettime( CLOCK_MONOTONIC_RAW, &prevtime );
 #endif
             retval = ADC_GetScan( AIOCommandLineOptionsGetDeviceIndex(options), (unsigned short*)volts );
 	    if ( retval != AIOUSB_SUCCESS ) fprintf(stderr,"Error: Got code %d\n", (int)retval );
 #ifdef UNIX
-            if ( AIOCommandLineGetIncludeTiming( options ) ) 
+            if ( AIOCommandLineOptionsGetIncludeTiming( options ) ) 
                 clock_gettime( CLOCK_MONOTONIC_RAW, &curtime );
 #endif
             unsigned short *counts = (unsigned short *)volts;
-            if( AIOCommandLineGetIncludeTiming( options ) )
+            if( AIOCommandLineOptionsGetIncludeTiming( options ) )
                 fprintf(stdout,"%ld,%ld,%ld,", curtime.tv_sec, (( prevtime.tv_sec - starttime.tv_sec )*1000000000 + (prevtime.tv_nsec - starttime.tv_nsec )), (curtime.tv_sec-prevtime.tv_sec)*1000000000 + ( curtime.tv_nsec - prevtime.tv_nsec) );
 
 
@@ -129,16 +129,16 @@ int main( int argc, char **argv )
 
         } else {
 #ifdef UNIX
-            if ( AIOCommandLineGetIncludeTiming( options ) )
+            if ( AIOCommandLineOptionsGetIncludeTiming( options ) )
                 clock_gettime( CLOCK_MONOTONIC_RAW, &prevtime );
 #endif
             retval = ADC_GetScanV( AIOCommandLineOptionsGetDeviceIndex(options) , volts );
 	    if ( retval != AIOUSB_SUCCESS ) fprintf(stderr,"Error: Got code %d\n", (int)retval );
 #ifdef UNIX
-            if ( AIOCommandLineGetIncludeTiming( options ) ) 
+            if ( AIOCommandLineOptionsGetIncludeTiming( options ) ) 
                 clock_gettime( CLOCK_MONOTONIC_RAW, &curtime );
 #endif
-            if( AIOCommandLineGetIncludeTiming( options ) )
+            if( AIOCommandLineOptionsGetIncludeTiming( options ) )
                 fprintf(stdout,"%ld,%ld,%ld,", curtime.tv_sec, (( prevtime.tv_sec - starttime.tv_sec )*1000000000 + (prevtime.tv_nsec - starttime.tv_nsec )), (curtime.tv_sec-prevtime.tv_sec)*1000000000+ ( curtime.tv_nsec - prevtime.tv_nsec) );
 
             for ( int j = ADCConfigBlockGetStartChannel( config ); j < ADCConfigBlockGetEndChannel( config ) ; j ++ , channel ++) {
