@@ -230,15 +230,16 @@ set(CPACK_PACKAGE_VENDOR "ACCES")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../README.md")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE")
 set(CPACK_PACKAGE_VERSION_MAJOR "1")
-set(CPACK_PACKAGE_VERSION_MINOR "111")
+set(CPACK_PACKAGE_VERSION_MINOR "117")
 set(CPACK_PACKAGE_VERSION_PATCH "0" )
 set(CPACK_PACKAGE_NAME "libaiousb" )
-set(CPACK_PACKAGE_ARCHITECTURE "i386" )
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "This project contains USB userspace drivers based off of libusb" )
+set(CPACK_PACKAGE_ARCHITECTURE "amd64" )
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "This project contains ACCES I/O Products' USB userspace drivers (based off of libusb)" )
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}\n and samples for ACCES I/O Product's line of USB based " )
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}\n data acquisition modules." )
 
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "accesio ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
+
 if( WIN32 AND NOT UNIX )        # WIN32
   set(CPACK_NSIS_CONTACT "support@accesio.com")
 ELSE( UNIX )                    # LINUX / UNIX 
@@ -246,17 +247,18 @@ ELSE( UNIX )                    # LINUX / UNIX
   set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Jimi Damon <jdamon@accesio.com>") #required
   set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE ${CPACK_PACKAGE_ARCHITECTURE} )
   set(CPACK_RPM_PACKAGE_ARCHITECTURE ${CPACK_PACKAGE_ARCHITECTURE} )
-  set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "i386" )
   set(CPACK_DEBIAN_PACKAGE_DEPENDS "libusb-1.0-0 ( >= 1.0.0 ), libusb-dev ( >= 0.1.0 )")
   set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, cmake ( >= 2.8 ), cmake-curses-gui ( >= 2.8 ) , cmake-data ( >= 2.8 )")
   set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/accesio/AIOUSB" )
   set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, gcc , binutils")
 
   # RPM Stuff
+  set(CPACK_RPM_PACKAGE_ARCHITECTURE "x86_64")
+  set(CPACK_RPM_PACKAGE_SUMMARY "This project contains ACCES I/O Products USB userspace drivers based off of libusb")
   set(CPACK_RPM_PACKAGE_LICENSE "${CPACK_RESOURCE_FILE_LICENSE}")
   set(CPACK_RPM_PACKAGE_REQUIRES "libusb-1.0 >= 1.0.0, cmake >= 2.8 , cmake-data >= 2.8")
   set(CPACK_RPM_PACKAGE_SUMMARY "ACCES I/O Products' libusb based userspace drivers" )
-  set(CPACK_GENERATOR "DEB")
+  set(CPACK_RPM_PACKAGE_RELEASE	"1.0" )
 
 endif(WIN32 AND NOT UNIX )
 
