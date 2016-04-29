@@ -57,10 +57,10 @@ AIOProductGroup *NewAIOProductGroup(size_t numbergroups, ... )
     return ng;
 
  err:
-    for ( ;i >= 0; i -- ) {
+    for (i = i-1 ;i >= 0; i -- ) {
         free(ng->_groups[i]);
     }
-
+    
  cleanup:
     free( ng );
 
@@ -118,6 +118,22 @@ TEST(AIOProductGroup,NewGroup )
 
     DeleteAIOProductGroup( pg );
 }
+
+TEST(AIOProductGroup,NulLGroups )
+{
+    AIOProductRange *first = NewAIOProductRange(100,1100);
+    AIOProductRange *second = NewAIOProductRange(1105,1200);
+    AIOProductRange *nullval = NULL;
+
+    AIOProductGroup *pg = NewAIOProductGroup( 3, first, second, nullval);
+    
+    ASSERT_FALSE( pg );
+
+    ASSERT_DEATH( { DeleteAIOProductGroup(pg); }, "Assertion `pg' failed.");
+    DeleteAIOProductRange( first );
+    DeleteAIOProductRange( second );
+}
+
 
 int main(int argc, char *argv[] )
 {
