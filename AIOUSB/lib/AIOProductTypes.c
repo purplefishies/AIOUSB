@@ -48,10 +48,9 @@ AIOProductGroup *NewAIOProductGroup(size_t numbergroups, ... )
 
     va_start( arguments, numbergroups );
     for ( i = 0; i < (int)numbergroups ; i ++ ) {
-        ng->_groups[i] = (AIOProductRange*)malloc(sizeof(AIOProductRange));
-        if ( !ng->_groups[i] ) goto err;
         AIOProductRange *tmp = va_arg( arguments, AIOProductRange*);
-        memcpy( ng->_groups[i],tmp ,sizeof(AIOProductGroup));
+        if ( !tmp ) goto err;
+        ng->_groups[i] = tmp;
     }
 
     va_end(arguments);
@@ -76,6 +75,7 @@ AIORET_TYPE DeleteAIOProductGroup( AIOProductGroup *pg )
         free( pg->_groups[i] );
     }
     free(pg->_groups);
+    free(pg);
     return AIOUSB_SUCCESS;
 }
 
@@ -116,7 +116,7 @@ TEST(AIOProductGroup,NewGroup )
     ASSERT_TRUE( pg );
 
 
-    DeleteAIOProductGroup(pg );
+    DeleteAIOProductGroup( pg );
 }
 
 int main(int argc, char *argv[] )
