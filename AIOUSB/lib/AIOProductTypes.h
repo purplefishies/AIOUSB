@@ -32,6 +32,8 @@ typedef struct AIOProductGroup {
 #ifndef SWIG
 #ifdef __cplusplus
     AIOProductGroup( size_t numgroups, AIOProductRange **groups ) : _num_groups(numgroups), _groups(groups) {};
+    AIOProductGroup( size_t numgroups, ... );
+    ~AIOProductGroup();
 #endif
 #endif
     size_t _num_groups;
@@ -41,12 +43,12 @@ typedef struct AIOProductGroup {
 /* BEGIN AIOUSB_API */
 PUBLIC_EXTERN AIOProductRange *NewAIOProductRange( unsigned long start, unsigned long end);
 PUBLIC_EXTERN AIORET_TYPE DeleteAIOProductRange( AIOProductRange *pr );
-PUBLIC_EXTERN AIORET_TYPE AIOProductRangeStart( AIOProductRange *pr );
-PUBLIC_EXTERN AIORET_TYPE AIOProductRangeEnd( AIOProductRange *pr );
+PUBLIC_EXTERN AIORET_TYPE AIOProductRangeStart( const AIOProductRange *pr );
+PUBLIC_EXTERN AIORET_TYPE AIOProductRangeEnd( const AIOProductRange *pr );
 
 PUBLIC_EXTERN AIOProductGroup *NewAIOProductGroup(size_t numgroups, ...  );
 PUBLIC_EXTERN AIORET_TYPE DeleteAIOProductGroup(AIOProductGroup *);
-PUBLIC_EXTERN AIORET_TYPE AIOProductGroupContains( AIOProductGroup *g, unsigned long val );
+PUBLIC_EXTERN AIORET_TYPE AIOProductGroupContains( const AIOProductGroup *g, unsigned long val );
 
 /* END AIOUSB_API */
 

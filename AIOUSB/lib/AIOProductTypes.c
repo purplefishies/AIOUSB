@@ -24,17 +24,41 @@ AIORET_TYPE DeleteAIOProductRange( AIOProductRange *pr )
     return AIOUSB_SUCCESS;
 }
 
-AIORET_TYPE AIOProductRangeStart( AIOProductRange *pr )
+AIORET_TYPE AIOProductRangeStart( const AIOProductRange *pr )
 {
     AIO_ASSERT(pr);
     return pr->_start;
 }
 
-AIORET_TYPE AIOProductRangeEnd( AIOProductRange *pr )
+AIORET_TYPE AIOProductRangeEnd( const AIOProductRange *pr )
 {
     AIO_ASSERT(pr);
     return pr->_end;
 }
+
+/* This is a hack to allow
+ * me to not force users to use -std=gnu++11
+ */
+#ifdef __cplusplus
+AIOProductGroup::AIOProductGroup( size_t numbergroups, ... ) : _num_groups(numbergroups), _groups(NULL)
+{
+    va_list arguments;
+    this->_groups = new AIOProductRange*[numbergroups];
+    va_start( arguments, numbergroups );
+    for ( int i = 0; i < (int)numbergroups ; i ++ ) {
+        AIOProductRange *tmp = va_arg( arguments, AIOProductRange*);
+        this->_groups[i] = tmp;
+    }
+    va_end(arguments);
+}
+
+AIOProductGroup::~AIOProductGroup(){
+    for ( int i = 0; i < (int)this->_num_groups; i ++ ) { 
+        free( this->_groups[i] ); // Ranges are created with malloc
+    }
+    delete [] this->_groups;
+}
+#endif
 
 AIOProductGroup *NewAIOProductGroup(size_t numbergroups, ... )
 {
@@ -79,7 +103,7 @@ AIORET_TYPE DeleteAIOProductGroup( AIOProductGroup *pg )
     return AIOUSB_SUCCESS;
 }
 
-AIORET_TYPE AIOProductGroupContains( AIOProductGroup *g, unsigned long val )
+AIORET_TYPE AIOProductGroupContains( const AIOProductGroup *g, unsigned long val )
 {
     AIO_ASSERT( g );
     int i;
@@ -143,22 +167,30 @@ TEST(AIOProductGroup,NullGroups )
     ASSERT_FALSE( pg );
 
 }
+
 #define RANGE(start,stop) new AIOProductRange(start,stop)
+#define RANGETEST(start,stop) ({ const AIOProductRange tmp(start,stop); &tmp ;})
+
 
 TEST(AIOProductGroup, Defaults )
 {
     /* AIOProductRange first = { ._start = 10, ._end = 12  }; */
     /* static const AIOProductRange *second = new AIOProductRange {._start = 10, ._end=34 }; */
     AIOProductRange newbie(10,20);
-    AIOProductRange **blah = new AIOProductRange*[2] { RANGE(3,4), RANGE(4,5)};
-    /* AIOProductRange *baz = new AIOProductRange[2] { AIOProductRange(3,4), AIOProductRange(4,5)}; */
-    AIOProductGroup grp( 2, blah );
+    const AIOProductGroup mygroup( 2, RANGE(3,4), RANGE(4,5) );
 
-    AIORET_TYPE retval = AIOProductGroupContains( &grp, 3 );
+    /* AIOProductRange *baz = new AIOProductRange[2] { AIOProductRange(3,4), AIOProductRange(4,5)}; */
+    /* AIOProductGroup grp( 2, blah ); */
+
+    AIOProductRange const* blahblah = ({ const AIOProductRange tmp(10,100); &tmp ;});
+    AIOProductRange const* blahblah2 = ({ const AIOProductRange tmp2(200,400); &tmp2 ;});
+
+
+    AIORET_TYPE retval = AIOProductGroupContains( &mygroup, 3 );
 
     ASSERT_GE( retval, AIOUSB_SUCCESS );
 
-    retval = AIOProductGroupContains( &grp, 3 );
+    retval = AIOProductGroupContains( &mygroup, 3 );
 
     ASSERT_LE( retval, AIOUSB_SUCCESS );
     
