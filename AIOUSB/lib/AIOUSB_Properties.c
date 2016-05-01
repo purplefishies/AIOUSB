@@ -223,6 +223,13 @@ AIORET_TYPE AIOUSB_FindDevices( int **where, int *length , AIOUSB_BOOL (*is_ok_d
     return retval;
 }
 
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOUSB_FindDevicesByGroup( int **where, int *length, AIOProductGroup *pg )
+{
+    AIORET_TYPE retval = -AIOUSB_ERROR_DEVICE_NOT_FOUND;
+
+    return retval;
+}
 
 /*----------------------------------------------------------------------------*/
 /**

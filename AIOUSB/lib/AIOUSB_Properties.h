@@ -10,6 +10,7 @@
 
 #include "AIOUSB_Core.h"
 #include "AIOTypes.h"
+#include "AIOProductTypes.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -41,6 +42,8 @@ PUBLIC_EXTERN AIORET_TYPE AIOUSB_ShowDevices( AIODisplayType display_type );
 #ifndef SWIG
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_FindDevices( int **where, int *length , AIOUSB_BOOL (*is_ok_device)( AIOUSBDevice *dev )  );
 #endif
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_FindDevicesByGroup( int **where, int *length, AIOProductGroup *pg );
+
 /* END AIOUSB_API */
 
 #ifdef __aiousb_cplusplus       /* Required for header file inclusion and SWIG */
