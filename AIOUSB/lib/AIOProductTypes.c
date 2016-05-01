@@ -79,6 +79,19 @@ AIORET_TYPE DeleteAIOProductGroup( AIOProductGroup *pg )
     return AIOUSB_SUCCESS;
 }
 
+AIORET_TYPE AIOProductGroupContains( AIOProductGroup *g, unsigned long val )
+{
+    AIO_ASSERT( g );
+    int i;
+    for ( i = 0 ; i < (int)g->_num_groups; i ++ ) {
+        if ( val >= g->_groups[i]->_start && val <= g->_groups[i]->_end )
+            return AIOUSB_SUCCESS;
+
+    }
+    return -AIOUSB_ERROR_INVALID_DATA;
+}
+
+
 
 #ifdef __cplusplus
 }
@@ -130,6 +143,36 @@ TEST(AIOProductGroup,NullGroups )
     ASSERT_FALSE( pg );
 
 }
+#define RANGE(start,stop) new AIOProductRange(start,stop)
+
+TEST(AIOProductGroup, Defaults )
+{
+    /* AIOProductRange first = { ._start = 10, ._end = 12  }; */
+    /* static const AIOProductRange *second = new AIOProductRange {._start = 10, ._end=34 }; */
+    AIOProductRange newbie(10,20);
+    AIOProductRange **blah = new AIOProductRange*[2] { RANGE(3,4), RANGE(4,5)};
+    /* AIOProductRange *baz = new AIOProductRange[2] { AIOProductRange(3,4), AIOProductRange(4,5)}; */
+    AIOProductGroup grp( 2, blah );
+
+    AIORET_TYPE retval = AIOProductGroupContains( &grp, 3 );
+
+    ASSERT_GE( retval, AIOUSB_SUCCESS );
+
+    retval = AIOProductGroupContains( &grp, 3 );
+
+    ASSERT_LE( retval, AIOUSB_SUCCESS );
+    
+#if 0
+    AIOProductRange *second = new AIOProductRange {._start = 10, ._end=34 };
+    //AIOProductGroup blah = { ._num_groups = 20 , _groups = new AIOProductRange[1] {{second, &first}}  };
+    /* static const AIOProductGroup *pg = new AIOProductGroup { ._num_groups = 20 , ._groups = NULL }; */
+    /* AIOProductRange **tmp = new AIOProductRange[2] {{._start=10,._end=32},{._start=3,._end=344}}); */
+    /* static const AIOProductGroup *pg = new AIOProductGroup {._num_groups = 20, ._groups = new AIOProductRange[2] {{0}} }; */
+    AIOProductRange **blah=  new AIOProductRange*[2] { new AIOProductRange {._start=  10,._end=34}, second } ;
+#endif 
+    /* printf("here\n"); */
+}
+
 
 
 int main(int argc, char *argv[] )
