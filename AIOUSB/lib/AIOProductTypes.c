@@ -7,6 +7,9 @@
 namespace AIOUSB {
 #endif
 
+AIO_PRODUCT_CONSTANT( AIO_ANALOG_OUTPUT_OBJ, AIO_ANALOG_OUTPUT_GROUP, 2 ,AIO_RANGE(USB_AI16_16A,USB_AI12_128E),AIO_RANGE(USB_AIO16_16A,USB_AIO12_128E) );
+
+
 
 AIOProductRange *NewAIOProductRange( unsigned long start, unsigned long end)
 {
@@ -167,21 +170,20 @@ TEST(AIOProductGroup,NullGroups )
     ASSERT_FALSE( pg );
 
 }
-#undef AIO_RANGE
-#undef AIO_PRODUCT_GROUP
+/* #undef AIO_RANGE */
+/* #undef AIO_PRODUCT_GROUP */
+/* #ifdef __cplusplus */
+/* #define AIO_RANGE(start,stop) new AIOProductRange(start,stop) */
+/* #define AIO_PRODUCT_GROUP(NAME, N , ... ) const AIOProductGroup NAME( N, __VA_ARGS__ ) */
+/* #define AIO_PRODUCT_CONSTANT(NAME, NAMEPTR, N, ... )   const AIOProductGroup NAME( N, __VA_ARGS__ ); \ */
+/*                                                        const AIOProductGroup *NAMEPTR = &NAME; */
+/* #else */
+/* #define AIO_RANGE(start,stop) (&(AIOProductRange *){ ._start=start, ._end =stop }) */
+/* #define AIO_PRODUCT_GROUP(NAME, N , ... ) const AIOProductGroup *NAME = (&(AIOProductGroup){ ._num_groups =N, ._groups = (AIOProductRange **)&(AIOProductRange *[N]){ __VA_ARGS__ } } ) ; */
 
-#ifdef __cplusplus
-#define AIO_RANGE(start,stop) new AIOProductRange(start,stop)
-#define AIO_PRODUCT_GROUP(NAME, N , ... ) const AIOProductGroup NAME( N, __VA_ARGS__ )
-#define AIO_PRODUCT_CONSTANT(NAME, NAMEPTR, N, ... )   const AIOProductGroup NAME( N, __VA_ARGS__ ); \
-                                                       const AIOProductGroup *NAMEPTR = &NAME;
-#else
-#define AIO_RANGE(start,stop) (&(AIOProductRange *){ ._start=start, ._end =stop })
-#define AIO_PRODUCT_GROUP(NAME, N , ... ) const AIOProductGroup *NAME = (&(AIOProductGroup){ ._num_groups =N, ._groups = (AIOProductRange **)&(AIOProductRange *[N]){ __VA_ARGS__ } } ) ;
-
-#define AIO_PRODUCT_CONSTANT(NAME, NAMEPTR, N, ... )   const AIOProductGroup NAME( N, __VA_ARGS__ ); \
-                                                       const AIOProductGroup *NAMEPTR = &NAME;
-#endif 
+/* #define AIO_PRODUCT_CONSTANT(NAME, NAMEPTR, N, ... )   const AIOProductGroup NAME( N, __VA_ARGS__ ); \ */
+/*                                                        const AIOProductGroup *NAMEPTR = &NAME; */
+/* #endif */
 
 TEST(AIOProductGroup, Defaults )
 {
@@ -200,6 +202,17 @@ TEST(AIOProductGroup, Defaults )
     
     delete second;
 
+}
+
+TEST(AIOProductGroup, CheckConstants )
+{
+    ASSERT_GE( AIOProductGroupContains(AIO_ANALOG_OUTPUT_GROUP, USB_AI12_32 ), AIOUSB_SUCCESS );
+
+    ASSERT_GE( AIOProductGroupContains(AIO_ANALOG_OUTPUT_GROUP, USB_AIO12_16 ), AIOUSB_SUCCESS );
+    ASSERT_GE( AIOProductGroupContains(AIO_ANALOG_OUTPUT_GROUP, USB_AIO12_96 ), AIOUSB_SUCCESS );
+
+    ASSERT_LT( AIOProductGroupContains(AIO_ANALOG_OUTPUT_GROUP, USB_DIO_32 ), AIOUSB_SUCCESS );
+    ASSERT_LT( AIOProductGroupContains(AIO_ANALOG_OUTPUT_GROUP, USB_CTR_15 ), AIOUSB_SUCCESS );
 }
 
 int main(int argc, char *argv[] )

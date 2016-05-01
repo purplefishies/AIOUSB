@@ -59,12 +59,18 @@ PUBLIC_EXTERN AIORET_TYPE AIOProductGroupContains( const AIOProductGroup *g, uns
                                                        const AIOProductGroup *NAMEPTR = &NAME;
 
 #else
+/* C definitions */
 #define AIO_RANGE(start,stop) (&(AIOProductRange){ ._start=start, ._end =stop })
 #define AIO_PRODUCT_GROUP(NAME, N , ... ) const AIOProductGroup NAME = { ._num_groups =N, ._groups = (AIOProductRange **)&(AIOProductRange *[N]){ __VA_ARGS__ } } ;
-#define AIO_PRODUCT_CONSTANT(NAME, NAMEPTR, N, ... )   const AIOProductGroup NAME( N, __VA_ARGS__ ); \
+#define AIO_PRODUCT_CONSTANT(NAME, NAMEPTR, N, ... )   AIO_PRODUCT_GROUP(NAME,N, __VA_ARGS__);\
                                                        const AIOProductGroup *NAMEPTR = &NAME;
-
 #endif
+
+#define AIO_PRODUCT_EXTERN(NAME,NAMEPTR)               extern const AIOProductGroup NAME; \
+                                                       extern const AIOProductGroup *NAMEPTR;
+
+AIO_PRODUCT_EXTERN(AIO_ANALOG_OUTPUT_OBJ, AIO_ANALOG_OUTPUT_GROUP);
+
 
 
 /* END AIOUSB_API */
