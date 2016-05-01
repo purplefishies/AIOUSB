@@ -39,7 +39,7 @@ USBDevice.o
 
 HEADERS		:= $(wildcard *.h)
 TESTOBJS	:= $(wildcard $(PWD)/tests/*_test)
-TEST_EXTRA_CXXFLAGS	:= -std=c++0x 
+TEST_EXTRA_CXXFLAGS	:= -std=gnu++11
 
 TESTFILES	:= $(shell grep  -lP "\bmain\b" *.c)
 CPPTEST_FILES 	:= $(patsubst %.c,%_cpp_test,$(TESTFILES))
@@ -191,7 +191,7 @@ endif
 EXTRA_COPTS		:= -D_GNU_SOURCE
 SELF_TEST_FLAGS		:= -DSELF_TEST
 SELF_TEST_LIBS		:= -lm -laiousbdbg -lusb-1.0
-SELF_TEST_CXX_FLAGS	:= -D__aiousb_cplusplus -DSELF_TEST $(CXXFLAGS)
+SELF_TEST_CXX_FLAGS	:= -D__aiousb_cplusplus -DSELF_TEST -std=gnu++11 $(CXXFLAGS)
 SELF_TEST_CXX_LIBS	:= -lm -lusb-1.0 -laiousbcppdbg -lgtest -lpthread
 
 PYCFLAGS		= $(DEBUGOPTS) $(COMMONOPTS)
