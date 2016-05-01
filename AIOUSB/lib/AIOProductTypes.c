@@ -168,32 +168,31 @@ TEST(AIOProductGroup,NullGroups )
 
 }
 
-#define RANGE(start,stop) new AIOProductRange(start,stop)
+#ifdef __cplusplus
+#define AIO_RANGE(start,stop) new AIOProductRange(start,stop)
+#define AIO_PRODUCT_GROUP(NAME, N , ... ) const AIOProductGroup NAME( N, __VA_ARGS__ )
+#else
+#define AIO_RANGE(start,stop) (&(AIOProductRange *){ ._start=start, ._end =stop })
+#define AIO_PRODUCT_GROUP(NAME, N , ... ) const AIOProductGroup NAME( N, __VA_ARGS__ )
+#endif
 
 TEST(AIOProductGroup, Defaults )
 {
     AIOProductRange newbie(10,20);
-    static const AIOProductRange *second = new AIOProductRange(10,34);
+    AIOProductRange *second = new AIOProductRange(10,34);
 
-    const AIOProductGroup mygroup( 2, RANGE(3,4), second );
+    AIO_PRODUCT_GROUP( mygroup, 2, AIO_RANGE(3,4), AIO_RANGE(10,34) );
 
     AIORET_TYPE retval = AIOProductGroupContains( &mygroup, 3 );
-
     ASSERT_GE( retval, AIOUSB_SUCCESS );
-
-    retval = AIOProductGroupContains( &mygroup, -3 );
-
-    ASSERT_LT( retval, AIOUSB_SUCCESS );
+    ASSERT_GE( AIOProductGroupContains( &mygroup, 10 ), AIOUSB_SUCCESS );
+    ASSERT_GE( AIOProductGroupContains( &mygroup, 4 ), AIOUSB_SUCCESS );
+    ASSERT_LT( AIOProductGroupContains( &mygroup, 5 ), AIOUSB_SUCCESS );
+    ASSERT_GE( AIOProductGroupContains( &mygroup, 11 ), AIOUSB_SUCCESS );
+    ASSERT_GE( AIOProductGroupContains( &mygroup, 34 ), AIOUSB_SUCCESS );
+    ASSERT_LT( AIOProductGroupContains( &mygroup, 2 ), AIOUSB_SUCCESS );
     
-#if 0
-    AIOProductRange *second = new AIOProductRange {._start = 10, ._end=34 };
-    //AIOProductGroup blah = { ._num_groups = 20 , _groups = new AIOProductRange[1] {{second, &first}}  };
-    /* static const AIOProductGroup *pg = new AIOProductGroup { ._num_groups = 20 , ._groups = NULL }; */
-    /* AIOProductRange **tmp = new AIOProductRange[2] {{._start=10,._end=32},{._start=3,._end=344}}); */
-    /* static const AIOProductGroup *pg = new AIOProductGroup {._num_groups = 20, ._groups = new AIOProductRange[2] {{0}} }; */
-    AIOProductRange **blah=  new AIOProductRange*[2] { new AIOProductRange {._start=  10,._end=34}, second } ;
-#endif 
-    /* printf("here\n"); */
+    delete second;
 }
 
 
