@@ -224,10 +224,34 @@ AIORET_TYPE AIOUSB_FindDevices( int **where, int *length , AIOUSB_BOOL (*is_ok_d
 }
 
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE AIOUSB_FindDevicesByGroup( int **where, int *length, AIOProductGroup *pg )
+AIORET_TYPE AIOUSB_FindDevicesByGroup( int **where, int *length, const AIOProductGroup *pg )
 {
+    AIO_ASSERT( where );
+    AIO_ASSERT( length );
+    AIO_ASSERT( pg );
+    if ( !AIOUSB_IsInit() )
+        AIOUSB_Init();
     AIORET_TYPE retval = -AIOUSB_ERROR_DEVICE_NOT_FOUND;
+    unsigned long deviceMask = AIOUSB_GetAllDevices();
+    static int indices[MAX_USB_DEVICES];
 
+    int index = 0;
+
+    *length = 0;
+
+    while ( deviceMask  ) {
+        if ( deviceMask & 1 ) {
+            AIOUSBDevice *dev = &deviceTable[index];
+            if ( AIOProductGroupContains( pg, dev->ProductID ) >= AIOUSB_SUCCESS ) {
+                retval = AIOUSB_SUCCESS;
+                indices[(*length)++] = index;
+            }
+        }
+        index++;
+        deviceMask >>= 1;
+    }
+    if ( retval == AIOUSB_SUCCESS )
+        *where = indices;
     return retval;
 }
 
@@ -429,4 +453,48 @@ AIORET_TYPE  AIOUSB_ListDevices()
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef SELF_TEST
+#include "gtest/gtest.h"
+
+#include <stdlib.h>
+
+using namespace AIOUSB;
+
+
+TEST(AIODeviceTable, SetsUpDefaults )
+{
+    int numDevices = 0;
+    AIOUSB_BOOL tmp;
+    AIORESULT retval;
+    AIORET_TYPE ret;
+    int *indices = 0;
+    int length = 0;
+
+    AIODeviceTableInit();    
+    retval = AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numDevices, USB_AI16_16E, NULL );
+    EXPECT_EQ( retval, AIOUSB_SUCCESS );
+    AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numDevices, USB_DIO_32, NULL );
+    EXPECT_EQ( retval, AIOUSB_SUCCESS );
+
+    ret = AIOUSB_FindDevicesByGroup( &indices, &length, AIO_ANALOG_INPUT_GROUP );
+
+    EXPECT_GE( ret, AIOUSB_SUCCESS );
+    EXPECT_EQ( length, 1 );
+
+    
+
+    ClearAIODeviceTable( numDevices );
+}
+
+int 
+main(int argc, char *argv[] )
+{
+    testing::InitGoogleTest(&argc, argv);
+    testing::TestEventListeners & listeners = testing::UnitTest::GetInstance()->listeners();
+    return RUN_ALL_TESTS();  
+}
+
+
 #endif

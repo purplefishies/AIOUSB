@@ -1252,6 +1252,7 @@ AIORESULT AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( int *numAccesDevice
     device->usb_device    = usb_dev;
     device->ProductID     = productID;
     device->isInit        = AIOUSB_TRUE;
+    device->valid         = AIOUSB_TRUE;
     _setup_device_parameters( device , productID );
     ADCConfigBlockSetDevice( AIOUSBDeviceGetADCConfigBlock( device ), device );
 
