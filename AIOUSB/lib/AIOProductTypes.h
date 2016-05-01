@@ -18,8 +18,10 @@ namespace AIOUSB
 typedef struct AIOProductRange  {
     unsigned long _start;
     unsigned long _end;
+#ifndef SWIG
 #ifdef __cplusplus
 AIOProductRange( unsigned long start, unsigned long end ) : _start(start), _end(end) {};
+#endif
 #endif
 } AIOProductRange;
 
