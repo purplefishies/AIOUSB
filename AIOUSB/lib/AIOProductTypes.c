@@ -169,30 +169,23 @@ TEST(AIOProductGroup,NullGroups )
 }
 
 #define RANGE(start,stop) new AIOProductRange(start,stop)
-#define RANGETEST(start,stop) ({ const AIOProductRange tmp(start,stop); &tmp ;})
-
 
 TEST(AIOProductGroup, Defaults )
 {
     /* AIOProductRange first = { ._start = 10, ._end = 12  }; */
     /* static const AIOProductRange *second = new AIOProductRange {._start = 10, ._end=34 }; */
     AIOProductRange newbie(10,20);
-    const AIOProductGroup mygroup( 2, RANGE(3,4), RANGE(4,5) );
+    static const AIOProductRange *second = new AIOProductRange {._start = 10, ._end=34 };
 
-    /* AIOProductRange *baz = new AIOProductRange[2] { AIOProductRange(3,4), AIOProductRange(4,5)}; */
-    /* AIOProductGroup grp( 2, blah ); */
-
-    AIOProductRange const* blahblah = ({ const AIOProductRange tmp(10,100); &tmp ;});
-    AIOProductRange const* blahblah2 = ({ const AIOProductRange tmp2(200,400); &tmp2 ;});
-
+    const AIOProductGroup mygroup( 2, RANGE(3,4), second );
 
     AIORET_TYPE retval = AIOProductGroupContains( &mygroup, 3 );
 
     ASSERT_GE( retval, AIOUSB_SUCCESS );
 
-    retval = AIOProductGroupContains( &mygroup, 3 );
+    retval = AIOProductGroupContains( &mygroup, -3 );
 
-    ASSERT_LE( retval, AIOUSB_SUCCESS );
+    ASSERT_LT( retval, AIOUSB_SUCCESS );
     
 #if 0
     AIOProductRange *second = new AIOProductRange {._start = 10, ._end=34 };
