@@ -54,7 +54,7 @@ AIOProductGroup::AIOProductGroup( size_t numbergroups, ... ) : _num_groups(numbe
 
 AIOProductGroup::~AIOProductGroup(){
     for ( int i = 0; i < (int)this->_num_groups; i ++ ) { 
-        free( this->_groups[i] ); // Ranges are created with malloc
+        delete this->_groups[i];
     }
     delete [] this->_groups;
 }
@@ -167,22 +167,27 @@ TEST(AIOProductGroup,NullGroups )
     ASSERT_FALSE( pg );
 
 }
+#undef AIO_RANGE
+#undef AIO_PRODUCT_GROUP
 
 #ifdef __cplusplus
 #define AIO_RANGE(start,stop) new AIOProductRange(start,stop)
 #define AIO_PRODUCT_GROUP(NAME, N , ... ) const AIOProductGroup NAME( N, __VA_ARGS__ )
+#define AIO_PRODUCT_CONSTANT(NAME, NAMEPTR, N, ... )   const AIOProductGroup NAME( N, __VA_ARGS__ ); \
+                                                       const AIOProductGroup *NAMEPTR = &NAME;
 #else
 #define AIO_RANGE(start,stop) (&(AIOProductRange *){ ._start=start, ._end =stop })
 #define AIO_PRODUCT_GROUP(NAME, N , ... ) const AIOProductGroup NAME( N, __VA_ARGS__ )
-#endif
+
+
+#endif 
 
 TEST(AIOProductGroup, Defaults )
 {
     AIOProductRange newbie(10,20);
     AIOProductRange *second = new AIOProductRange(10,34);
-
-    AIO_PRODUCT_GROUP( mygroup, 2, AIO_RANGE(3,4), AIO_RANGE(10,34) );
-
+    AIOProductGroup other( 3, AIO_RANGE(3,4),AIO_RANGE(3,4),AIO_RANGE(3,4) );
+    AIO_PRODUCT_CONSTANT( mygroup, mygroupp, 2 , AIO_RANGE(3,4), AIO_RANGE(10,34) );
     AIORET_TYPE retval = AIOProductGroupContains( &mygroup, 3 );
     ASSERT_GE( retval, AIOUSB_SUCCESS );
     ASSERT_GE( AIOProductGroupContains( &mygroup, 10 ), AIOUSB_SUCCESS );
@@ -193,9 +198,8 @@ TEST(AIOProductGroup, Defaults )
     ASSERT_LT( AIOProductGroupContains( &mygroup, 2 ), AIOUSB_SUCCESS );
     
     delete second;
+
 }
-
-
 
 int main(int argc, char *argv[] )
 {
