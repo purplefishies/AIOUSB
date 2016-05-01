@@ -172,10 +172,8 @@ TEST(AIOProductGroup,NullGroups )
 
 TEST(AIOProductGroup, Defaults )
 {
-    /* AIOProductRange first = { ._start = 10, ._end = 12  }; */
-    /* static const AIOProductRange *second = new AIOProductRange {._start = 10, ._end=34 }; */
     AIOProductRange newbie(10,20);
-    static const AIOProductRange *second = new AIOProductRange {._start = 10, ._end=34 };
+    static const AIOProductRange *second = new AIOProductRange(10,34);
 
     const AIOProductGroup mygroup( 2, RANGE(3,4), second );
 
