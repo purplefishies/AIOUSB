@@ -177,9 +177,10 @@ TEST(AIOProductGroup,NullGroups )
                                                        const AIOProductGroup *NAMEPTR = &NAME;
 #else
 #define AIO_RANGE(start,stop) (&(AIOProductRange *){ ._start=start, ._end =stop })
-#define AIO_PRODUCT_GROUP(NAME, N , ... ) const AIOProductGroup NAME( N, __VA_ARGS__ )
+#define AIO_PRODUCT_GROUP(NAME, N , ... ) const AIOProductGroup *NAME = (&(AIOProductGroup){ ._num_groups =N, ._groups = (AIOProductRange **)&(AIOProductRange *[N]){ __VA_ARGS__ } } ) ;
 
-
+#define AIO_PRODUCT_CONSTANT(NAME, NAMEPTR, N, ... )   const AIOProductGroup NAME( N, __VA_ARGS__ ); \
+                                                       const AIOProductGroup *NAMEPTR = &NAME;
 #endif 
 
 TEST(AIOProductGroup, Defaults )
