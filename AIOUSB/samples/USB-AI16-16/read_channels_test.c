@@ -56,9 +56,10 @@ int main( int argc, char **argv )
      *        retval = AIOProcessCmdline( options, argc, argv );
      * @verbatim
      *        in the case where you want your program to process 
-     *        extra options on the comamnd line
+     *        extra options on the command line as the options not 
+     *        parsed by AIOProcessCommandLine will be retained
+     *        in argv.
      */
-
 
     if ( retval < 0 ) 
         exit(retval);
