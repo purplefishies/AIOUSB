@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # @file   sample.py
 # @author $Format: %an <%ae>$
 # @date   $Format: %ad$

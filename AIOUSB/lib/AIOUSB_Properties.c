@@ -478,7 +478,7 @@ TEST(AIODeviceTable, SetsUpDefaults )
     AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numDevices, USB_DIO_32, NULL );
     EXPECT_EQ( retval, AIOUSB_SUCCESS );
 
-    ret = AIOUSB_FindDevicesByGroup( &indices, &length, AIO_ANALOG_INPUT_GROUP );
+    ret = AIOUSB_FindDevicesByGroup( &indices, &length, AIO_ANALOG_INPUT() );
 
     EXPECT_GE( ret, AIOUSB_SUCCESS );
     EXPECT_EQ( length, 1 );
