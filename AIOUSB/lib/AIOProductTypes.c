@@ -17,12 +17,41 @@ AIO_PRODUCT_CONSTANT( AIO_ANALOG_OUTPUT_OBJ, AIO_ANALOG_OUTPUT_GROUP, AIO_ANALOG
                       AIO_RANGE(USB_AO16_16A,USB_AIO12_128E) ,
                       AIO_RANGE(USB_DA12_8A_REV_A,USB_DA12_8E)
                       );
-
 AIO_PRODUCT_CONSTANT( AIO_DIGITAL_HIGHSPEED_OBJ, AIO_DIGITAL_HIGHSPEED_GROUP, AIO_DIGITAL_HIGHSPEED,
                       1,
                       AIO_RANGE(USB_DI16A_REV_A1,USB_DIO_16A)
                       );
 
+AIO_PRODUCT_CONSTANT( AIO_ANALOG_CLOCK_100KHZ_OBJ, AIO_ANALOG_CLOCK_100KHZ_GROUP, AIO_ANALOG_CLOCK_100KHZ,
+                      2,
+                      AIO_RANGE(USB_AI12_16E, USB_AI12_16E),
+                      AIO_RANGE(USB_AIO12_16E,USB_AIO12_16E)
+                      );
+
+AIO_PRODUCT_CONSTANT( AIO_ANALOG_CLOCK_250KHZ_OBJ, AIO_ANALOG_CLOCK_250KHZ_GROUP, AIO_ANALOG_CLOCK_250KHZ,
+                      2,
+                      AIO_RANGE(USB_AI12_16E, USB_AI12_16E),
+                      AIO_RANGE(USB_AIO12_16E,USB_AIO12_16E)
+                      );
+AIO_PRODUCT_CONSTANT( AIO_ANALOG_CLOCK_500KHZ_OBJ, AIO_ANALOG_CLOCK_500KHZ_GROUP, AIO_ANALOG_CLOCK_500KHZ,
+                      2,
+                      AIO_RANGE(USB_AI12_16, USB_AI12_16E),
+                      AIO_RANGE(USB_AIO12_16E,USB_AIO12_16E)
+                      );
+
+ 
+/* 100kHz  USB-AI12-16E	16 SE, 8 DIF	12	4	4	Software	 */
+/* 100kHz  USB-AIO12-16E	16 SE, 8 DIF	12	4	4	Software	 */
+
+/* 250kHz  USB-AI12-16	16 SE, 8 DIF	12	4	4	Software	 */
+/* 250kHz  USB-AI16-16E	16 SE, 8 DIF	16	4	4	Software	 */
+/* 250kHz  USB-AIO12-16	16 SE, 8 DIF	12	4	4	Software	 */
+/* 250kHz  USB-AIO16-16E	16 SE, 8 DIF	16	4	4	Software	 */
+
+/* 500kHz  USB-AI12-16A	16 SE, 8 DIF	12	4	4	Software	 */
+/* 500kHz  USB-AI16-16A	16 SE, 8 DIF	16	4	4	Software	 */
+/* 500kHz  USB-AIO12-16A	16 SE, 8 DIF	12	4	4	Software	 */
+/* 500kHz  USB-AIO16-16A	16 SE, 8 DIF	16	4	4	Software	 */
 
 AIOProductRange *NewAIOProductRange( unsigned long start, unsigned long end)
 {
