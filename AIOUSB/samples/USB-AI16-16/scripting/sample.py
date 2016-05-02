@@ -1,9 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import sys
 import time
 import math
-sys.path.append('build/lib.linux-x86_64-2.7')
+import os
+sys.path.append(os.environ["AIO_LIB_DIR"] + "/wrappers/python/build/lib.linux-x86_64-2.7")
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 
 import AIOUSB
 from AIOUSB import *
