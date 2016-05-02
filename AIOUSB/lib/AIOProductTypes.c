@@ -13,8 +13,9 @@ AIO_PRODUCT_CONSTANT( AIO_ANALOG_INPUT_OBJ, AIO_ANALOG_INPUT_GROUP, AIO_ANALOG_I
                       AIO_RANGE(USB_AIO16_16A,USB_AIO12_128E) 
                       );
 AIO_PRODUCT_CONSTANT( AIO_ANALOG_OUTPUT_OBJ, AIO_ANALOG_OUTPUT_GROUP, AIO_ANALOG_OUTPUT,
-                      1 ,
-                      AIO_RANGE(USB_AO16_16A,USB_AIO12_128E) 
+                      2 ,
+                      AIO_RANGE(USB_AO16_16A,USB_AIO12_128E) ,
+                      AIO_RANGE(USB_DA12_8A_REV_A,USB_DA12_8E)
                       );
 
 
