@@ -264,6 +264,12 @@ TEST(AIOProductGroup,CopyConstant)
     DeleteAIOProductGroup( tmp );
 }
 
+TEST(AIOProductGroup,MacroTypes)
+{
+    int tmp = NUMARGS(AIO_RANGE(3,4),AIO_RANGE(3,4),AIO_RANGE(3,4),AIO_RANGE(344,434),AIO_RANGE(3434,2323));
+    EXPECT_EQ( 5, tmp );
+}
+
 int main(int argc, char *argv[] )
 {
   

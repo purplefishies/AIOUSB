@@ -55,6 +55,8 @@ PUBLIC_EXTERN AIORET_TYPE DeleteAIOProductGroup(AIOProductGroup *);
 PUBLIC_EXTERN AIORET_TYPE AIOProductGroupContains( const AIOProductGroup *g, unsigned long val );
 PUBLIC_EXTERN AIOProductGroup *groupcpy ( const AIOProductGroup *g);
 
+#define NUMARGS(...)  (sizeof((void*[]){__VA_ARGS__})/sizeof(void*))
+
 #ifdef __cplusplus
 #define AIO_RANGE(start,stop) new AIOProductRange(start,stop)
 #define AIO_PRODUCT_GROUP(NAME, N , ... ) const AIOProductGroup NAME( N, __VA_ARGS__ )
