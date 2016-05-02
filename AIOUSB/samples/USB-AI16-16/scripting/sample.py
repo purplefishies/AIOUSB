@@ -5,7 +5,6 @@ import time
 import math
 import os
 sys.path.append(os.environ["AIO_LIB_DIR"] + "/wrappers/python/build/lib.linux-x86_64-2.7")
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 
 import AIOUSB
