@@ -51,6 +51,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOProductRangeEnd( const AIOProductRange *pr );
 PUBLIC_EXTERN AIOProductGroup *NewAIOProductGroup(size_t numgroups, ...  );
 PUBLIC_EXTERN AIORET_TYPE DeleteAIOProductGroup(AIOProductGroup *);
 PUBLIC_EXTERN AIORET_TYPE AIOProductGroupContains( const AIOProductGroup *g, unsigned long val );
+PUBLIC_EXTERN AIOProductGroup *groupcpy ( const AIOProductGroup *g);
 
 #ifdef __cplusplus
 #define AIO_RANGE(start,stop) new AIOProductRange(start,stop)

@@ -124,7 +124,35 @@ AIORET_TYPE AIOProductGroupContains( const AIOProductGroup *g, unsigned long val
     return -AIOUSB_ERROR_INVALID_DATA;
 }
 
+AIOProductGroup *groupcpy( const AIOProductGroup *g )
+{
+    AIO_ASSERT_RET( NULL, g );
+    AIOProductGroup *tmppg = (AIOProductGroup*)malloc( sizeof(AIOProductGroup));
+    int i;
+    if ( !tmppg ) goto exitout;
+        
+    tmppg->_num_groups = g->_num_groups;
+    tmppg->_groups = (AIOProductRange**)malloc(sizeof(AIOProductRange*)*tmppg->_num_groups );
+    if (!tmppg->_groups ) goto cleanup;
 
+    for ( i = 0; i < (int)tmppg->_num_groups ; i ++ ) {
+        AIOProductRange *tmp = (AIOProductRange*)malloc(sizeof(AIOProductRange)) ;
+        if ( !tmp ) goto err;
+        memcpy(tmp, g->_groups[i], sizeof(AIOProductRange));
+        tmppg->_groups[i] = tmp;
+    }
+        
+    return tmppg;
+
+ err:
+    for ( i= i - 1; i >= 0 ; i -- ) {
+        free( tmppg->_groups[i] );
+    }
+ cleanup:
+    free(tmppg);
+ exitout:
+    return NULL;
+}
 
 #ifdef __cplusplus
 }
@@ -205,6 +233,16 @@ TEST(AIOProductGroup, CheckConstants )
 
     ASSERT_LT( AIOProductGroupContains(AIO_ANALOG_OUTPUT_GROUP, USB_DIO_32 ), AIOUSB_SUCCESS );
     ASSERT_LT( AIOProductGroupContains(AIO_ANALOG_OUTPUT_GROUP, USB_CTR_15 ), AIOUSB_SUCCESS );
+}
+
+TEST(AIOProductGroup,CopyConstant)
+{
+    AIOProductGroup *tmp = groupcpy( AIO_ANALOG_OUTPUT_GROUP );
+    
+    ASSERT_GE( AIOProductGroupContains(tmp, USB_AIO12_16 ), AIOUSB_SUCCESS );
+    ASSERT_GE( AIOProductGroupContains(tmp, USB_AIO12_96 ), AIOUSB_SUCCESS );
+
+    DeleteAIOProductGroup( tmp );
 }
 
 int main(int argc, char *argv[] )
