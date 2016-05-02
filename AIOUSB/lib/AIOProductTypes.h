@@ -66,11 +66,12 @@ PUBLIC_EXTERN AIORET_TYPE AIOProductGroupContains( const AIOProductGroup *g, uns
                                                        const AIOProductGroup *NAMEPTR = &NAME;
 #endif
 
-#define AIO_PRODUCT_EXTERN(NAME,NAMEPTR)               extern const AIOProductGroup NAME; \
-                                                       extern const AIOProductGroup *NAMEPTR;
+#define AIO_PRODUCT_EXTERN(NAME,NAMEPTR,NAMEFN)        extern const AIOProductGroup NAME; \
+                                                       extern const AIOProductGroup *NAMEPTR;\
+                                                       extern AIOProductGroup *NAMEFN();
 
-AIO_PRODUCT_EXTERN(AIO_ANALOG_OUTPUT_OBJ, AIO_ANALOG_OUTPUT_GROUP );
-AIO_PRODUCT_EXTERN(AIO_ANALOG_INPUT_OBJ , AIO_ANALOG_INPUT_GROUP  );
+AIO_PRODUCT_EXTERN(AIO_ANALOG_OUTPUT_OBJ, AIO_ANALOG_OUTPUT_GROUP, AIO_ANALOG_OUTPUT );
+AIO_PRODUCT_EXTERN(AIO_ANALOG_INPUT_OBJ , AIO_ANALOG_INPUT_GROUP, AIO_ANALOG_INPUT  );
 
 
 /* END AIOUSB_API */
