@@ -224,7 +224,7 @@ AIORET_TYPE AIOUSB_FindDevices( int **where, int *length , AIOUSB_BOOL (*is_ok_d
 }
 
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE AIOUSB_FindDevicesByGroup( int **where, int *length, const AIOProductGroup *pg )
+AIORET_TYPE AIOUSB_FindDevicesByGroup( int **where, int *length, AIOProductGroup *pg )
 {
     AIO_ASSERT( where );
     AIO_ASSERT( length );
@@ -252,6 +252,8 @@ AIORET_TYPE AIOUSB_FindDevicesByGroup( int **where, int *length, const AIOProduc
     }
     if ( retval == AIOUSB_SUCCESS )
         *where = indices;
+
+    DeleteAIOProductGroup( pg );
     return retval;
 }
 
