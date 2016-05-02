@@ -63,7 +63,8 @@ int main( int argc, char **argv )
     if ( retval < 0 ) 
         exit(retval);
 
-    AIOUSB_FindDevices( &indices, &num_devices, find_ai_board );
+    /* AIOUSB_FindDevices( &indices, &num_devices, find_ai_board ); */
+    AIOUSB_FindDevicesByGroup( &indices, &num_devices, AIO_ANALOG_INPUT() );
 
     if ( ( retval = AIOCommandLineOptionsListDevices( options, indices, num_devices )) < AIOUSB_SUCCESS )
         exit(retval);
