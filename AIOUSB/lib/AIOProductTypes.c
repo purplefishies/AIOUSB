@@ -18,6 +18,10 @@ AIO_PRODUCT_CONSTANT( AIO_ANALOG_OUTPUT_OBJ, AIO_ANALOG_OUTPUT_GROUP, AIO_ANALOG
                       AIO_RANGE(USB_DA12_8A_REV_A,USB_DA12_8E)
                       );
 
+AIO_PRODUCT_CONSTANT( AIO_DIGITAL_HIGHSPEED_OBJ, AIO_DIGITAL_HIGHSPEED_GROUP, AIO_DIGITAL_HIGHSPEED,
+                      1,
+                      AIO_RANGE(USB_DI16A_REV_A1,USB_DIO_16A)
+                      );
 
 
 AIOProductRange *NewAIOProductRange( unsigned long start, unsigned long end)
