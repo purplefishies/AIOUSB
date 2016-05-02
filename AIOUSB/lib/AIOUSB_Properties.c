@@ -485,7 +485,10 @@ TEST(AIODeviceTable, SetsUpDefaults )
     EXPECT_GE( ret, AIOUSB_SUCCESS );
     EXPECT_EQ( length, 1 );
 
-    
+    ret = AIOUSB_FindDevicesByGroup( &indices, &length, NewAIOProductGroup(1,AIO_RANGE(USB_DIO_32,USB_AI16_16E)));    
+
+    EXPECT_GE( ret, AIOUSB_SUCCESS );
+    EXPECT_EQ( length, 2 );
 
     ClearAIODeviceTable( numDevices );
 }
