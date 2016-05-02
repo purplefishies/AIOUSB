@@ -3,7 +3,9 @@
 #define _AIOPRODUCT_TYPES_H
 
 #include "AIOTypes.h"
-
+#ifdef __cplusplus
+#include <algorithm>
+#endif
 
 #ifdef __aiousb_cplusplus
 namespace AIOUSB
@@ -20,7 +22,7 @@ typedef struct AIOProductRange  {
     unsigned long _end;
 #ifndef SWIG
 #ifdef __cplusplus
-AIOProductRange( unsigned long start, unsigned long end ) : _start(start), _end(end) {};
+    AIOProductRange( unsigned long start, unsigned long end ) : _start(std::min(start,end)), _end(std::max(start,end)) {};
 #endif
 #endif
 } AIOProductRange;

@@ -23,9 +23,16 @@ AIO_PRODUCT_CONSTANT( AIO_ANALOG_OUTPUT_OBJ, AIO_ANALOG_OUTPUT_GROUP, AIO_ANALOG
 AIOProductRange *NewAIOProductRange( unsigned long start, unsigned long end)
 {
     AIOProductRange *tmp = (AIOProductRange*)malloc(sizeof(AIOProductRange));
+    unsigned long tmpval;
     if (!tmp) return NULL;
-    tmp->_start = start;
-    tmp->_end   = end;
+    if ( start > end ) {
+        tmpval = end;
+        end = start;
+        start = tmpval;
+    } else {
+        tmp->_start = start;
+        tmp->_end   = end;
+    }
     return tmp;
 }
 
@@ -208,7 +215,7 @@ TEST(AIOProductGroup,NullGroups )
 
 }
 
-AIO_PRODUCT_CONSTANT( mygroup, mygroupp, mygroupfn, 2 , AIO_RANGE(3,4), AIO_RANGE(10,34) );
+AIO_PRODUCT_CONSTANT( mygroup, mygroupp, mygroupfn, 2 , AIO_RANGE(4,3), AIO_RANGE(10,34) );
 
 TEST(AIOProductGroup, Defaults )
 {
