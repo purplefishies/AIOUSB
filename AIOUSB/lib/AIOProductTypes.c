@@ -7,11 +7,13 @@
 namespace AIOUSB {
 #endif
 /* Make SURE the number matches the number of AIO_RANGEs */
-AIO_PRODUCT_CONSTANT( AIO_ANALOG_INPUT_OBJ, AIO_ANALOG_INPUT_GROUP, 2 ,
+AIO_PRODUCT_CONSTANT( AIO_ANALOG_INPUT_OBJ, AIO_ANALOG_INPUT_GROUP, AIO_ANALOG_INPUT,
+                      2 ,
                       AIO_RANGE(USB_AI16_16A,USB_AI12_128E),
                       AIO_RANGE(USB_AIO16_16A,USB_AIO12_128E) 
                       );
-AIO_PRODUCT_CONSTANT( AIO_ANALOG_OUTPUT_OBJ, AIO_ANALOG_OUTPUT_GROUP, 1 ,
+AIO_PRODUCT_CONSTANT( AIO_ANALOG_OUTPUT_OBJ, AIO_ANALOG_OUTPUT_GROUP, AIO_ANALOG_OUTPUT,
+                      1 ,
                       AIO_RANGE(USB_AO16_16A,USB_AIO12_128E) 
                       );
 
@@ -205,12 +207,13 @@ TEST(AIOProductGroup,NullGroups )
 
 }
 
+AIO_PRODUCT_CONSTANT( mygroup, mygroupp, mygroupfn, 2 , AIO_RANGE(3,4), AIO_RANGE(10,34) );
+
 TEST(AIOProductGroup, Defaults )
 {
     AIOProductRange newbie(10,20);
     AIOProductRange *second = new AIOProductRange(10,34);
     AIOProductGroup other( 3, AIO_RANGE(3,4),AIO_RANGE(3,4),AIO_RANGE(3,4) );
-    AIO_PRODUCT_CONSTANT( mygroup, mygroupp, 2 , AIO_RANGE(3,4), AIO_RANGE(10,34) );
     AIORET_TYPE retval = AIOProductGroupContains( &mygroup, 3 );
     ASSERT_GE( retval, AIOUSB_SUCCESS );
     ASSERT_GE( AIOProductGroupContains( &mygroup, 10 ), AIOUSB_SUCCESS );
@@ -241,6 +244,14 @@ TEST(AIOProductGroup,CopyConstant)
     
     ASSERT_GE( AIOProductGroupContains(tmp, USB_AIO12_16 ), AIOUSB_SUCCESS );
     ASSERT_GE( AIOProductGroupContains(tmp, USB_AIO12_96 ), AIOUSB_SUCCESS );
+
+    DeleteAIOProductGroup( tmp );
+
+    tmp =  groupcpy( AIO_ANALOG_INPUT_GROUP );
+    
+    ASSERT_GE( AIOProductGroupContains(tmp, USB_AI12_32 ), AIOUSB_SUCCESS );
+
+    ASSERT_GE( AIOProductGroupContains(tmp, USB_AIO12_16 ), AIOUSB_SUCCESS );
 
     DeleteAIOProductGroup( tmp );
 }

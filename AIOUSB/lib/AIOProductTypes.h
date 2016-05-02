@@ -56,15 +56,17 @@ PUBLIC_EXTERN AIOProductGroup *groupcpy ( const AIOProductGroup *g);
 #ifdef __cplusplus
 #define AIO_RANGE(start,stop) new AIOProductRange(start,stop)
 #define AIO_PRODUCT_GROUP(NAME, N , ... ) const AIOProductGroup NAME( N, __VA_ARGS__ )
-#define AIO_PRODUCT_CONSTANT(NAME, NAMEPTR, N, ... )   const AIOProductGroup NAME( N, __VA_ARGS__ ); \
-                                                       const AIOProductGroup *NAMEPTR = &NAME;
+#define AIO_PRODUCT_CONSTANT(NAME, NAMEPTR, NAMEFN, N, ... )   const AIOProductGroup NAME( N, __VA_ARGS__ ); \
+                                                               const AIOProductGroup *NAMEPTR = &NAME; \
+                                                               AIOProductGroup *NAMEFN() { return groupcpy(NAMEPTR);};
 
 #else
 /* C definitions */
 #define AIO_RANGE(start,stop) (&(AIOProductRange){ ._start=start, ._end =stop })
 #define AIO_PRODUCT_GROUP(NAME, N , ... ) const AIOProductGroup NAME = { ._num_groups =N, ._groups = (AIOProductRange **)&(AIOProductRange *[N]){ __VA_ARGS__ } } ;
-#define AIO_PRODUCT_CONSTANT(NAME, NAMEPTR, N, ... )   AIO_PRODUCT_GROUP(NAME,N, __VA_ARGS__);\
-                                                       const AIOProductGroup *NAMEPTR = &NAME;
+#define AIO_PRODUCT_CONSTANT(NAME, NAMEPTR,NAMEFN, N, ... )   AIO_PRODUCT_GROUP(NAME,N, __VA_ARGS__); \
+                                                              const AIOProductGroup *NAMEPTR = &NAME; \
+                                                              AIOProductGroup *NAMEFN() { return groupcpy( NAMEPTR );}
 #endif
 
 #define AIO_PRODUCT_EXTERN(NAME,NAMEPTR,NAMEFN)        extern const AIOProductGroup NAME; \
