@@ -59,6 +59,7 @@ int main( int argc, char **argv )
      *        extra options on the command line as the options not 
      *        parsed by AIOProcessCommandLine will be retained
      *        in argv.
+     * @endverbatim
      */
 
     if ( retval < 0 ) 
