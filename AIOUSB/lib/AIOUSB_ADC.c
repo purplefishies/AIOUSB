@@ -2767,6 +2767,11 @@ unsigned long AIOUSB_ADC_InternalCal(
        * word equals the input word
        */
         ADConfigBlock tmpconfig = deviceDesc->cachedConfigBlock;
+        
+        for ( int i = 0; i < CAL_TABLE_WORDS; i ++ ) {
+            calTable[i] = i;
+        }
+
         memset(&tmpconfig.registers,0,tmpconfig.size);
         tmpconfig.size = 20;
         tmpconfig.registers[0x10] = 0x05;
