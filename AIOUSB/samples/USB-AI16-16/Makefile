@@ -191,6 +191,10 @@ $(AIO_LIB_DIR)/%.so:	$(wildcard $(AIO_LIB_DIR)/*.c)
 	$(JAVAC) -cp $(AIOUSBJAVALIBDIR)/AIOUSB.jar $<
 
 
+%.class: 	%.scala
+	scalac -classpath $(AIO_LIB_DIR)/wrappers/java $<
+
+
 Extcal.jar: Extcal.class
 	@echo "Class-Path: $(AIOUSBJAVALIBDIR)/AIOUSB.jar" > manifest
 	jar cmfe manifest Extcal.jar Extcal Extcal.class
