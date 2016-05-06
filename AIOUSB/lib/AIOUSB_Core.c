@@ -668,9 +668,9 @@ unsigned long AIOUSB_ADC_SetCalTable(
     if ( result != AIOUSB_SUCCESS )
         return result;    
 
-    unsigned short wValue, wIndex, wLength;
-    unsigned char bRequest;
-    unsigned char data[1024];
+    /* unsigned short /\* wValue, *\/ /\* wIndex, *\/ wLength; */
+    /* unsigned char bRequest; */
+    /* unsigned char data[1024]; */
     int bytesTransferred = 0;
 
     /*
@@ -680,20 +680,6 @@ unsigned long AIOUSB_ADC_SetCalTable(
      * to load it into the SRAM
      */
 
-    bRequest = AUR_LOAD_BULK_CALIBRATION_BLOCK;
-    wValue = 0x00;
-    wIndex = 0x00;
-    wLength = 0x1;
-    /* First read */
-    bytesTransferred = usb->usb_control_transfer(usb,
-                                                 USB_READ_FROM_DEVICE,
-                                                 bRequest,
-                                                 wValue, 
-                                                 wIndex,
-                                                 data,
-                                                 wLength,
-                                                 deviceDesc->commTimeout
-                                                 );
           
     int SRAM_BLOCK_WORDS = 1024;
     int sramAddress = 0;
@@ -715,7 +701,14 @@ unsigned long AIOUSB_ADC_SetCalTable(
             result = AIOUSB_ERROR_INVALID_DATA;
             break;
         } else {
-            bytesTransferred = usb->usb_control_transfer( usb, 0x40, 0xBB, sramAddress, 0x400 , NULL, 0 , deviceDesc->commTimeout );
+            bytesTransferred = usb->usb_control_transfer( usb, 
+                                                          0x40, 
+                                                          0xBB, 
+                                                          sramAddress, 
+                                                          0x400,
+                                                          NULL, 
+                                                          0, 
+                                                          deviceDesc->commTimeout );
 
             if (bytesTransferred != 0) {
                 result = LIBUSB_RESULT_TO_AIOUSB_RESULT(bytesTransferred);
