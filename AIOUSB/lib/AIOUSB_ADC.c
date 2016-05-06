@@ -939,8 +939,8 @@ unsigned long ADC_SetConfig(
 
 
 
-     usb->usb_put_config( usb, &configBlock );
-
+     result = usb->usb_put_config( usb, &configBlock );
+     result = result >= 0 ? AIOUSB_SUCCESS : abs(result);
 out_ADC_SetConfig:
      return result;
 }
