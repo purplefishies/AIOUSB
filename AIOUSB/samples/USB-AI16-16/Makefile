@@ -194,6 +194,8 @@ $(AIO_LIB_DIR)/%.so:	$(wildcard $(AIO_LIB_DIR)/*.c)
 %.class: 	%.scala
 	scalac -classpath $(AIO_LIB_DIR)/wrappers/java $<
 
+%: %.class	
+	LD_LIBRARY_PATH="$${AIO_LIB_DIR}:$${PWD}/../../lib/wrappers/java" scala -classpath $(AIO_LIB_DIR)/wrappers/java $<
 
 Extcal.jar: Extcal.class
 	@echo "Class-Path: $(AIOUSBJAVALIBDIR)/AIOUSB.jar" > manifest
