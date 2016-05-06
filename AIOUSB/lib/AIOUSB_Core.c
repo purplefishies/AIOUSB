@@ -668,9 +668,6 @@ unsigned long AIOUSB_ADC_SetCalTable(
     if ( result != AIOUSB_SUCCESS )
         return result;    
 
-    /* unsigned short /\* wValue, *\/ /\* wIndex, *\/ wLength; */
-    /* unsigned char bRequest; */
-    /* unsigned char data[1024]; */
     int bytesTransferred = 0;
 
     /*
@@ -679,7 +676,6 @@ unsigned long AIOUSB_ADC_SetCalTable(
      * of calibration data to "endpoint 2" and then send a control message
      * to load it into the SRAM
      */
-
           
     int SRAM_BLOCK_WORDS = 1024;
     int sramAddress = 0;

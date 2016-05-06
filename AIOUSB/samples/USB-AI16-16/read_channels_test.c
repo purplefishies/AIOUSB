@@ -88,8 +88,10 @@ int main( int argc, char **argv )
     
     usb = AIOUSBDeviceGetUSBHandle( dev );
 
-#if 0
-    retval = ADC_SetCal(AIOCommandLineOptionsGetDeviceIndex(options), ":AUTO:");
+#if 1
+    /* retval = ADC_SetCal(AIOCommandLineOptionsGetDeviceIndex(options), ":AUTO:"); */
+    // or 
+    retval = ADC_SetCal(AIOCommandLineOptionsGetDeviceIndex(options), ":1TO1:");
     if ( retval < AIOUSB_SUCCESS ) {
         fprintf(stderr,"Error setting calibration %d\n", (int)retval);
         exit(retval);
