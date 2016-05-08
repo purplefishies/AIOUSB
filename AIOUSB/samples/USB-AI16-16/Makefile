@@ -5,6 +5,7 @@
 #
 # make file for AIOUSB library sample programs
 #
+SHELL	= /bin/bash
 ifdef DEBUG
 	DEBUGOPTS 	+= -ggdb
 	DEBUGSTEM 	:= dbg
@@ -131,8 +132,7 @@ ALL_CLEAN_TARGETS	:=	$(JAVA_OBJECT_FILES) \
 
 
 #*********************************  RULES  **********************************
-
-.PNONY: all
+.PHONY: clean all
 .SUFFIXES:
 
 all: $(FINAL_TARGETS)
@@ -177,12 +177,20 @@ $(AIO_LIB_DIR)/wrappers/java/$(JAVA_BUILT):
 	cd $(AIO_LIB_DIR)/wrappers && $(MAKE) -f GNUMakefile inplace_java
 
 %.jar: %.class $(AIO_LIB_DIR)/wrappers/java/$(JAVA_BUILT)
-	@echo "Class-Path: $(AIOUSBJAVALIBDIR)/AIOUSB.jar" > manifest
-	jar cvfm $@ manifest $<
+	mkdir -p tmplib
+	cp $(AIOUSBJAVALIBDIR)/AIOUSB.jar tmplib
+	@echo -ne "Class-Path: tmplib/AIOUSB.jar " > manifest
+	@if [[ "$(shell echo $< | perl -ne 's/^.*(_)([A-Za-z\d]+?)\.class/$$2/g;print;')" == "scala" ]] ; then \
+		cp /home/jdamon/Tools/Scala/2.11.0/lib/scala-library.jar tmplib;\
+		echo -ne " tmplib/scala-library.jar\n" >> manifest;\
+	fi
+	@echo "Main-Class: $(shell grep -P "^\s*(object|(public )?class)" $(shell echo $< | perl -ne 's/(_)([A-Za-z\d]+?)\.class/$$1$$2.$$2/g;print;') | perl -ane 'print $$F[1];' )" >> manifest
+	jar cvfm $@ manifest $(basename $<)*.class tmplib/*.jar
 	rm manifest
 
 %:	%.jar
-	LD_LIBRARY_PATH="$${AIO_LIB_DIR}:$${PWD}/../../lib/wrappers/java" java -classpath "::$${PWD}/../../lib/wrappers/java/AIOUSB.jar:$<" $@
+	java -classpath "::$${PWD}/../../lib/wrappers/java/AIOUSB.jar:$<" $@
+
 
 $(AIO_LIB_DIR)/%.so:	$(wildcard $(AIO_LIB_DIR)/*.c)
 	cd $(AIO_LIB_DIR) && $(MAKE) $(nodir $@)
@@ -194,19 +202,17 @@ $(AIO_LIB_DIR)/%.so:	$(wildcard $(AIO_LIB_DIR)/*.c)
 %.class: 	%.scala
 	scalac -classpath $(AIO_LIB_DIR)/wrappers/java $<
 
-%: %.class	
-	LD_LIBRARY_PATH="$${AIO_LIB_DIR}:$${PWD}/../../lib/wrappers/java" scala -classpath $(AIO_LIB_DIR)/wrappers/java $<
-
 Extcal.jar: Extcal.class
 	@echo "Class-Path: $(AIOUSBJAVALIBDIR)/AIOUSB.jar" > manifest
 	jar cmfe manifest Extcal.jar Extcal Extcal.class
 	rm manifest
 
+
 Extcal.class: Extcal.java
 	$(JAVAC) -cp $(AIOUSBJAVALIBDIR)/AIOUSB.jar Extcal.java
 
-mostlyclean:
-	-rm -f sample.o extcal.o Sample.class Extcal.class
+# mostlyclean:
+# 	-rm -f sample.o extcal.o Sample.class Extcal.class
 
 
 lib/TestCaseSetup.o: lib/TestCaseSetup.cpp lib/TestCaseSetup.h  $(LIBRARY_DEPS)
