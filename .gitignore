@@ -21,3 +21,5 @@ AIOUSB/latex
 AIOUSB/man
 AIOUSB/samples/USB-AI16-16/*.txt
 HOLD*
+*.class
+*.jar
