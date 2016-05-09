@@ -164,6 +164,7 @@ endif( NOT CYGWIN )
 
 
 find_package( GTest ) 
+find_package( GMock ) 
 find_package( GTestTap )
 
 
@@ -175,7 +176,7 @@ if( GTESTTAP_FOUND AND NOT DISABLE_TESTING )
   set(GTEST_FILES ADCConfigBlock.c AIOChannelMask.c AIOChannelRange.c AIOContinuousBuffer.c AIODeviceInfo.c AIODeviceTable.c AIOUSBDevice.c AIOUSB_Core.c DIOBuf.c AIOUSB_DIO.c USBDevice.c AIOFifo.c AIOEither.c AIOCountsConverter.c AIODeviceQuery.c AIOCommandLine.c AIOProductTypes.c )
   foreach( gtest ${GTEST_FILES} ) 
     set(MY_FLAGS "${CXX_FLAGS} -DSELF_TEST -D__aiousb_cplusplus -std=gnu++0x"  )
-    set(MY_LIBRARIES aiousbdbg usb-1.0 pthread m ${GTEST_BOTH_LIBRARIES} aiousb aiousbcpp )
+    set(MY_LIBRARIES aiousbdbg usb-1.0 pthread m ${GTEST_BOTH_LIBRARIES} ${GMOCK_BOTH_LIBRARIES} aiousb aiousbcpp )
     # MESSAGE(STATUS "Libraries: ${MY_LIBRARIES}")
     # set(MY_FLAGS "${MY_FLAGS} -DNDEBUG" )
     build_gtest_cpp_file( aiousblibs ${gtest}  ${MY_FLAGS} "${MY_LIBRARIES}"  )
