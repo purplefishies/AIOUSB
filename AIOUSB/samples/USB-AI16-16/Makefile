@@ -204,7 +204,7 @@ $(AIO_LIB_DIR)/%.so:	$(wildcard $(AIO_LIB_DIR)/*.c)
 
 
 %:	%.scala
-	LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$$AIO_LIB_DIR/wrappers/java:$$AIO_LIB_DIR" scala -cp "${AIO_LIB_DIR}/wrappers/java:." $<
+	@LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$$AIO_LIB_DIR/wrappers/java:$$AIO_LIB_DIR" scala -cp "${AIO_LIB_DIR}/wrappers/java:." $<
 
 
 Extcal.jar: Extcal.class
