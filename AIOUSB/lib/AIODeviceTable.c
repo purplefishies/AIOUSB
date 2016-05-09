@@ -303,7 +303,8 @@ static int CompareProductNames(const void *p1, const void *p2)
  * @param pDIOBytes 
  * @param pCounters 
  * @return 
- */unsigned long QueryDeviceInfo( unsigned long DeviceIndex,
+ */
+unsigned long QueryDeviceInfo( unsigned long DeviceIndex,
                                unsigned long *pPID,
                                unsigned long *pNameSize,
                                char *pName,
