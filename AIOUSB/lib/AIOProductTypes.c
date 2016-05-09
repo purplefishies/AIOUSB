@@ -40,9 +40,8 @@ AIO_PRODUCT_CONSTANT( AIO_ANALOG_CLOCK_500KHZ_OBJ, AIO_ANALOG_CLOCK_500KHZ_GROUP
                       );
 
 AIO_PRODUCT_CONSTANT( AIO_ANALOG_12BIT_A2D_OBJ, AIO_ANALOG_12BIT_A2D_GROUP, AIO_AIO_ANALOG_12BIT_A2D,
-                      5,
+                      4,
                       AIO_RANGE( USB_AI12_16A    ,  USB_AI12_16E    ),
-                      AIO_RANGE( USB_AI12_16E    ,  USB_AI12_16E    ),
                       AIO_RANGE( USB_AO12_16A    ,  USB_AO12_16A    ),
                       AIO_RANGE( USB_AO12_8A     ,  USB_AO12_8A     ),
                       AIO_RANGE( USB_AIO12_16A   ,  USB_AIO12_16E   )
