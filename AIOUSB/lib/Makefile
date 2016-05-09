@@ -192,7 +192,7 @@ EXTRA_COPTS		:= -D_GNU_SOURCE
 SELF_TEST_FLAGS		:= -DSELF_TEST
 SELF_TEST_LIBS		:= -lm -laiousbdbg -lusb-1.0
 SELF_TEST_CXX_FLAGS	:= -D__aiousb_cplusplus -DSELF_TEST  $(CXXFLAGS)
-SELF_TEST_CXX_LIBS	:= -lm -lusb-1.0 -laiousbcppdbg -lgtest -lpthread
+SELF_TEST_CXX_LIBS	:= -lm -lusb-1.0 -laiousbcppdbg -lgtest -lgmock -lpthread
 
 PYCFLAGS		= $(DEBUGOPTS) $(COMMONOPTS)
 COPTS			:= $(DEBUGOPTS) $(COMMONOPTS) $(EXTRA_COPTS)
