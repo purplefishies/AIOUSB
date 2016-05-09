@@ -57,20 +57,6 @@ AIO_PRODUCT_CONSTANT( AIO_ANALOG_CLOCK_500KHZ_OBJ, AIO_ANALOG_CLOCK_500KHZ_GROUP
                        AIO_RANGE( USB_AIO16_16A   ,  USB_AIO12_16    )
                        );
 
- 
-/* 100kHz  USB-AI12-16E	16 SE, 8 DIF	12	4	4	Software	 */
-/* 100kHz  USB-AIO12-16E	16 SE, 8 DIF	12	4	4	Software	 */
-
-/* 250kHz  USB-AI12-16	16 SE, 8 DIF	12	4	4	Software	 */
-/* 250kHz  USB-AI16-16E	16 SE, 8 DIF	16	4	4	Software	 */
-/* 250kHz  USB-AIO12-16	16 SE, 8 DIF	12	4	4	Software	 */
-/* 250kHz  USB-AIO16-16E	16 SE, 8 DIF	16	4	4	Software	 */
-
-/* 500kHz  USB-AI12-16A	16 SE, 8 DIF	12	4	4	Software	 */
-/* 500kHz  USB-AI16-16A	16 SE, 8 DIF	16	4	4	Software	 */
-/* 500kHz  USB-AIO12-16A	16 SE, 8 DIF	12	4	4	Software	 */
-/* 500kHz  USB-AIO16-16A	16 SE, 8 DIF	16	4	4	Software	 */
-
 AIOProductRange *NewAIOProductRange( unsigned long start, unsigned long end)
 {
     AIOProductRange *tmp = (AIOProductRange*)malloc(sizeof(AIOProductRange));
