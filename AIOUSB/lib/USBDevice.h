@@ -14,8 +14,11 @@ namespace AIOUSB {
 typedef struct USBDevice USBDevice;
 
 struct USBDevice { 
-
+#ifdef __cplusplus
+    int usb_control_transfer( USBDevice *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout );
+#else
     int (*usb_control_transfer)( USBDevice *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout );
+#endif
 
     int (*usb_bulk_transfer)( USBDevice *dev_handle,
                       unsigned char endpoint, unsigned char *data, int length,
@@ -25,6 +28,8 @@ struct USBDevice {
     int (*usb_reset_device)(USBDevice *usbdev );
     int (*usb_put_config)( USBDevice *usb, ADCConfigBlock *configBlock );
     int (*usb_get_config)( USBDevice *usb, ADCConfigBlock *configBlock );
+
+
 
     uint8_t timeout;
     libusb_device *device;

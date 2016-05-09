@@ -117,7 +117,9 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
         fputs("STATE: -connecting-to-device\n", stderr);
     
     usb->debug = AIOUSB_FALSE;
+#ifndef __cplusplus
     usb->usb_control_transfer  = usb_control_transfer;
+#endif
     usb->usb_bulk_transfer     = usb_bulk_transfer;
     usb->usb_request           = usb_request;
     usb->usb_reset_device      = usb_reset_device;
@@ -333,10 +335,16 @@ int USBDevicePutADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock )
     return retval;
 }
 
-/*----------------------------------------------------------------------------*/
+#ifdef __cplusplus
+int 
+USBDevice::usb_control_transfer(USBDevice *dev_handle,
+                                uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
+                                unsigned char *data, uint16_t wLength, unsigned int timeout)
+#else
 int usb_control_transfer(USBDevice *dev_handle,
                          uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
                          unsigned char *data, uint16_t wLength, unsigned int timeout)
+#endif
 {
 
     libusb_device_handle *handle = get_usb_device( dev_handle );
@@ -445,6 +453,7 @@ int usb_reset_device( USBDevice *usb )
  */ 
 
 #include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 using namespace AIOUSB;
 
@@ -470,6 +479,35 @@ TEST(USBDevice,FailsCorrectly)
     ASSERT_DEATH( { InitializeUSBDevice(usb, args); } , "Assertion `args' failed" );
 }
 
+struct USBMock : public USBDevice {
+    MOCK_METHOD8(usb_control_transfer,  int(USBDevice *, uint8_t, uint8_t, uint16_t, uint16_t, unsigned char *, uint16_t, unsigned int ));
+};
+
+using ::testing::Return;                            // #1
+
+TEST(USBDevice,TestMock)
+{
+    ASSERT_EQ(1,1);
+    USBMock foo;
+    EXPECT_CALL( foo, usb_control_transfer( &foo, 0,0,0,0,0,0,0 ))
+        .WillOnce( Return(2) )
+        .WillOnce( Return(0) );
+    int val = foo.usb_control_transfer( &foo, 0,0,0,0,0,0,0 );
+    EXPECT_EQ( 2, val );
+    val = foo.usb_control_transfer( &foo, 0,0,0,0,0,0,0 );
+    EXPECT_EQ( 0, val );
+    USBMock *bar = new USBMock();
+    EXPECT_CALL( *bar, usb_control_transfer( bar, 0,0,0,0,0,0,0 ))
+        .WillOnce( Return(1) )
+        .WillOnce( Return(2) );
+    val = bar->usb_control_transfer( bar, 0,0,0,0,0,0,0 );
+    EXPECT_EQ( 1, val );
+    val = bar->usb_control_transfer( bar, 0,0,0,0,0,0,0 );
+    EXPECT_EQ( 2, val );
+
+    delete bar;
+
+}
 
 int main(int argc, char *argv[] )
 {
