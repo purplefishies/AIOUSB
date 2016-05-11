@@ -1399,7 +1399,8 @@ PREDEFINED             += DOXYGEN_IGNORED=
 # The macro definition that is found in the sources will be used.
 # Use the PREDEFINED tag if you want to use a different macro definition that overrules the definition found in the source code.
 
-EXPAND_AS_DEFINED      = CREATE_ENUM_W_START
+EXPAND_AS_DEFINED      = CREATE_ENUM_W_START \
+                         INTERNAL_METHOD
                          
 
 # If the SKIP_FUNCTION_MACROS tag is set to YES (the default) then
