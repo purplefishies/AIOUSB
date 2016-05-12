@@ -84,10 +84,6 @@
     $1 = temp;
 }
 
-
-
-
-
 %typemap(in) (int *argc, char **argv) {
     int i;
     $2 = NULL;
@@ -117,15 +113,35 @@
     PyList_SetSlice($input, 0, PyList_Size($input), NULL);
     {
         int i; 
-        /* printf("After: %d\n", *$1 ); */
         for ( i = 0; i < *$1 ; i ++ ) { 
-            /* printf("Adding %s\n", $2[i]); */
             PyObject *ofmt = SWIG_Python_str_FromChar( $2[i] );
+            PyList_Append( $input, ofmt );
+        }
+    } 
+}
+
+%typemap(in) (int **where, int *length) {
+    int *tmp = 0;
+    $1 = &tmp;
+    $2 = (int *)malloc(sizeof(int));
+    *$2 = 0;
+}
+/* After arguments have been processed....
+ * we set the argv to be this new value */
+%typemap(argout) (int **where, int *length) {
+    PyList_SetSlice($input, 0, (Py_ssize_t)*$2, NULL);
+    {
+        int i; 
+        /* printf("After: %d\n", *$1 ); */
+        for ( i = 0; i < *$2 ; i ++ ) { 
+            PyObject *ofmt = PyInt_FromLong( *$1[i] );
+            /* PyObject *PyString_FromString(char *); */
             /* printf("Values are %d\n", i ); */
             PyList_Append( $input, ofmt );
         }
     } 
 }
+
 
 %typemap(freearg) (int *argc, char **argv) {
     if ($1) free($1);
