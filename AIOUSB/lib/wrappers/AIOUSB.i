@@ -44,6 +44,7 @@
   #include "AIOChannelMask.h"
   #include "AIODeviceTable.h"    
   #include "AIODeviceQuery.h"
+  #include "AIOProductTypes.h"
   #include "AIOUSBDevice.h"
   #include "AIODeviceInfo.h"
   #include "AIOUSB_Properties.h"
@@ -82,6 +83,10 @@
     }
     $1 = temp;
 }
+
+
+
+
 
 %typemap(in) (int *argc, char **argv) {
     int i;
@@ -327,6 +332,7 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsign
 %include "AIOUSB_CTR.h"
 %include "AIOUSBDevice.h"
 %include "AIODeviceInfo.h"
+%include "AIOProductTypes.h"
 %include "AIOUSB_DIO.h"
 %include "cJSON.h"
 %include "AIOBuf.h"
