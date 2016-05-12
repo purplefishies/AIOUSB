@@ -159,7 +159,8 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
         AIOChannelRangeTmp *tmp;
         indprev = optind;
         c = getopt_long(*argc, argv, arguments, long_options, &option_index);
-        if( c == -1 )
+        memcpy(argv,oargv,(*argc)*sizeof(char *));
+        if( c == -1 && optind == *argc )
             break;
         switch (c) {
         case 'R':
@@ -271,6 +272,13 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
             if ( !options->pass_through ) {
                  fprintf(stderr, "Incorrect argument '%s'\n", optarg );
                  error = 1;
+            } else if ( c == -1 && optind != *argc && (optind  - indprev ) == 0 ) {
+                keepsize += (*argc - optind);
+                keepindices = (int*)realloc(keepindices,sizeof(int *)*keepsize);
+                for( int i = indprev; i < *argc; i ++ , keepcount ++) { 
+                    keepindices[keepcount] = i;
+                }
+                goto endloop;
             } else {
                 keepsize += (optind - indprev);
                 keepindices = (int*)realloc(keepindices,sizeof(int *)*keepsize);
@@ -278,6 +286,9 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
                     keepindices[keepcount] = i;
                 }
             }
+        }
+        if ( c != -1 && optind == *argc )  {
+            break;
         }
         if ( indafter != -1 && optind - indprev >= 3 ) {
             int stop = ( long_options[option_index].has_arg ? optind - 2 : optind - 1 );
@@ -299,7 +310,7 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
         }
         indafter = indprev;
     }
-
+ endloop:
     if ( query ) {
         AIOUSB_Init();
         AIOUSB_ShowDevices( display_type );
@@ -351,15 +362,14 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
         options->end_channel = max;
         options->num_channels = (max - min + 1 );
     }
-    if ( options->pass_through && keepcount > 1 ) {
+    if ( options->pass_through && keepcount >= 1 ) {
         for ( int i = 1; i < keepcount ; i ++ ) {
             argv[i] = oargv[keepindices[i]];
         }
         *argc = keepcount;
         optind = keepcount + 1;
-
-
     }
+    /* printf("Keepcount: %d\n", keepcount ); */
     if ( keepindices ) free(keepindices);
     free(oargv);
 
@@ -758,10 +768,31 @@ TEST( AIOCmdLine, StrangeArguments )
     DeleteAIOCommandLineOptions( nopts );
 }
 
+TEST( AIOCmdLine, EatAllArguments )
+{
+    AIOCommandLineOptions *nopts = NewAIOCommandLineOptionsFromDefaultOptions( AIO_SCRIPTING_OPTIONS() );
+    AIORET_TYPE retval;
+    ASSERT_TRUE( nopts );
+    char *tmp = (char *)"--foobar";
+    char *argv1[] = {(char *)"./sample.py",(char *)"-N",(char *)"100",(char*)"--range",(char *)"0-4=5,5-9=2"};
+    char *argv2[] = {(char *)"./sample.py",(char *)"-N",(char *)"100",(char*)"--range",(char *)"0-4=5,5-9=2",
+                     (char *)"--foo",(char *)"--bar",(char *)"34"};
 
+    int argc1 = sizeof(argv1)/sizeof(char*);
+    int argc2 = sizeof(argv2)/sizeof(char*);
+    optind = 1;
 
+    retval = AIOProcessCommandLine( nopts, &argc1, argv1 );
+    ASSERT_GE( retval, AIOUSB_SUCCESS );
 
+    ASSERT_EQ(1, argc1 ) << "should be removed leaving us with 1 args\n";
 
+    retval = AIOProcessCommandLine( nopts, &argc2, argv2 );
+
+    ASSERT_EQ(4, argc2 ) << "should be removed leaving us with 4 args\n";
+
+    DeleteAIOCommandLineOptions( nopts );
+}
 
 
 #include <unistd.h>
