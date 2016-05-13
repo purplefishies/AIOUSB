@@ -51,7 +51,13 @@ def find_ai(obj):
 # Typically, all you care about is the obj.PID matching 
 
 options = NewAIOCommandLineOptionsFromDefaultOptions( AIO_SCRIPTING_OPTIONS() )
-device_indices = AIOUSB_FindDevices( find_ai )
+
+
+device_indices = []
+AIOUSB_FindDevicesByGroup( device_indices, AIOUSB.AIO_ANALOG_INPUT() )
+# or
+# device_indices = AIOUSB_FindDevices( find_ai )
+
 AIOProcessCommandLine( options, sys.argv )
 
 if options.index == -1:
