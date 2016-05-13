@@ -33,6 +33,7 @@
 
 %{
   extern unsigned long ADC_BulkPoll( unsigned long DeviceIndex, unsigned long *INOUT );
+
 %}
 
 %{
@@ -57,8 +58,42 @@
   #include "DIOBuf.h"
   #include "libusb.h"
   #include <pthread.h>
-
 %}
+
+
+#if defined(SWIGJAVA)
+%typemap(in) ( int *argc, char **argv ) {
+         int i = 0;
+         int tmpval;
+         $1 = &tmpval;
+         tmpval = (*jenv)->GetArrayLength(jenv, $input);
+         $2 = (char **) malloc((*$1+1)*sizeof(char *));
+         /* make a copy of each string */
+         /* printf("FOOO"); */
+         for (i = 0; i<*$1; i++) {
+              jstring j_string = (jstring)(*jenv)->GetObjectArrayElement(jenv, $input, i);
+              const char * c_string = (*jenv)->GetStringUTFChars(jenv, j_string, 0);
+              $2[i] = malloc((strlen(c_string)+1)*sizeof(char));
+              strcpy($2[i], c_string);
+              (*jenv)->ReleaseStringUTFChars(jenv, j_string, c_string);
+              (*jenv)->DeleteLocalRef(jenv, j_string);
+         }
+         $2[i] = 0;
+}
+
+%typemap(freearg) (int *argc, char **argv) {
+    int i;
+    for (i=0; i<*$1-1; i++)
+        free($2[i]);
+    free($2);
+ }
+
+%typemap(jni)    (int *argc, char **argv) "jobjectArray"
+%typemap(jtype)  (int *argc, char **argv) "String[]"
+%typemap(jstype) (int *argc, char **argv) "String[]"
+%typemap(javain) (int *argc, char **argv) "$javainput"
+
+#endif
 
 #if defined(SWIGPYTHON)
 %typemap(in) unsigned char *pGainCodes {
@@ -354,6 +389,13 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsign
 %include "AIOBuf.h"
 %include "DIOBuf.h"
 
+/* Functions that require special care */
+#if !defined(SWIGJAVA)
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_FindDevicesByGroup( int **where, int *length, AIOProductGroup *pg );
+#else 
+/* AIOTUPLE2_PTR(AIOTuple2_AIORET_TYPE__char_p_p, AIORET_TYPE,char **) AIOUSB_FindDevicesByGroup( int **where, int *length, AIOProductGroup *pg ); */
+#endif
+
 %aioarray_class(unsigned short,ushortarray)
 %aioarray_class(double,doublearray)
 
@@ -611,11 +653,13 @@ def AIOUSB_FindDevices(fn):
 
  }
 #elif defined(SWIGJAVA)
-  %extend DIOBuf {
-      const char *toString() {
-          return DIOBufToString( $self );
-      }
-  } 
+
+
+%extend DIOBuf {
+    const char *toString() {
+        return DIOBufToString( $self );
+    }
+} 
 
 #elif defined(SWIGRUBY)
 %extend DIOBuf {
