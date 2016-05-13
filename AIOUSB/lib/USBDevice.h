@@ -11,15 +11,17 @@
 namespace AIOUSB {
 #endif
 
+#ifdef __cplusplus
+#define INTERNAL_METHOD( NAME, RETVAL, ... )\
+    RETVAL NAME( __VA_ARGS__ )
+#else
+#define INTERNAL_METHOD( NAME, RETVAL, ... )\
+    RETVAL (*NAME)( __VA_ARGS__ )
+#endif
 typedef struct USBDevice USBDevice;
 
 struct USBDevice { 
-#ifdef __cplusplus
-    int usb_control_transfer( USBDevice *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout );
-#else
-    int (*usb_control_transfer)( USBDevice *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout );
-#endif
-
+    INTERNAL_METHOD( usb_control_transfer , int, USBDevice *usbdev, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout  );
     int (*usb_bulk_transfer)( USBDevice *dev_handle,
                       unsigned char endpoint, unsigned char *data, int length,
                       int *actual_length, unsigned int timeout );
