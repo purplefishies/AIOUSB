@@ -91,6 +91,27 @@ AIOCommandLineOptions AIO_DEFAULT_SCRIPTING_OPTIONS = {
                            NULL
 };
 
+
+/*----------------------------------------------------------------------------*/
+AIOCommandLineOptions *GET_AIO_DEFAULT_CMDLINE_OPTIONS()
+{
+    AIOCommandLineOptions *tmp = (AIOCommandLineOptions*)malloc(sizeof(AIOCommandLineOptions));
+    if ( !tmp ) 
+        return NULL;
+    memcpy( tmp, &AIO_DEFAULT_CMDLINE_OPTIONS, sizeof(AIOCommandLineOptions));
+    return tmp;
+}
+
+/*----------------------------------------------------------------------------*/
+AIOCommandLineOptions *GET_AIO_DEFAULT_SCRIPTING_OPTIONS()
+{
+    AIOCommandLineOptions *tmp = (AIOCommandLineOptions*)malloc(sizeof(AIOCommandLineOptions));
+    if ( !tmp ) 
+        return NULL;
+    memcpy( tmp, &AIO_DEFAULT_SCRIPTING_OPTIONS, sizeof(AIOCommandLineOptions));
+    return tmp;
+}
+
 /*----------------------------------------------------------------------------*/
 /**
  * @brief 
