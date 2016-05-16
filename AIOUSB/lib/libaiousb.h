@@ -747,7 +747,10 @@ PUBLIC_EXTERN AIORET_TYPE AIOUSB_ShowDevices( AIODisplayType display_type );
 
 #ifndef SWIG
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_FindDevices( int **where, int *length , AIOUSB_BOOL (*is_ok_device)( AIOUSBDevice *dev )  );
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_FindDevicesByGroup( int **where, int *length, AIOProductGroup *pg );
 #endif
+
+
 
 /* #include "AIOUSB_WDG.h" */
 
@@ -800,6 +803,11 @@ PUBLIC_EXTERN libusb_device_handle *USBDeviceGetUSBDeviceHandle( USBDevice *usb 
 
 PUBLIC_EXTERN AIOCommandLineOptions *NewDefaultAIOCommandLineOptions();
 PUBLIC_EXTERN AIOCommandLineOptions *NewAIOCommandLineOptionsFromDefaultOptions(const AIOCommandLineOptions *orig );
+PUBLIC_EXTERN AIOCommandLineOptions *AIO_CMDLINE_DEFAULT_OPTIONS();
+PUBLIC_EXTERN AIOCommandLineOptions *AIO_CMDLINE_SCRIPTING_OPTIONS();
+PUBLIC_EXTERN AIORET_TYPE AIO_CMDLINE_CLEAR_OPTIONS(AIOCommandLineOptions *opts);
+
+
 PUBLIC_EXTERN AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv );
 PUBLIC_EXTERN AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, char **argv );
 PUBLIC_EXTERN AIOChannelRangeTmp *AIOGetChannelRange(char *optarg );
