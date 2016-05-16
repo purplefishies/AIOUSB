@@ -92,8 +92,10 @@ AIOCommandLineOptions AIO_DEFAULT_SCRIPTING_OPTIONS = {
 };
 
 
+
+
 /*----------------------------------------------------------------------------*/
-AIOCommandLineOptions *GET_AIO_DEFAULT_CMDLINE_OPTIONS()
+AIOCommandLineOptions *AIO_CMDLINE_DEFAULT_OPTIONS()
 {
     AIOCommandLineOptions *tmp = (AIOCommandLineOptions*)malloc(sizeof(AIOCommandLineOptions));
     if ( !tmp ) 
@@ -103,13 +105,21 @@ AIOCommandLineOptions *GET_AIO_DEFAULT_CMDLINE_OPTIONS()
 }
 
 /*----------------------------------------------------------------------------*/
-AIOCommandLineOptions *GET_AIO_DEFAULT_SCRIPTING_OPTIONS()
+AIOCommandLineOptions *AIO_CMDLINE_SCRIPTING_OPTIONS()
 {
     AIOCommandLineOptions *tmp = (AIOCommandLineOptions*)malloc(sizeof(AIOCommandLineOptions));
     if ( !tmp ) 
         return NULL;
     memcpy( tmp, &AIO_DEFAULT_SCRIPTING_OPTIONS, sizeof(AIOCommandLineOptions));
     return tmp;
+}
+
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE AIO_CMDLINE_CLEAR_OPTIONS(AIOCommandLineOptions *opts)
+{
+    AIO_ASSERT( opts );
+    free(opts);
+    return AIOUSB_SUCCESS;
 }
 
 /*----------------------------------------------------------------------------*/

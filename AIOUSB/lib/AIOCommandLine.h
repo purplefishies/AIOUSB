@@ -83,8 +83,10 @@ typedef enum {
 /* BEGIN AIOUSB_API */
 PUBLIC_EXTERN AIOCommandLineOptions *NewDefaultAIOCommandLineOptions();
 PUBLIC_EXTERN AIOCommandLineOptions *NewAIOCommandLineOptionsFromDefaultOptions(const AIOCommandLineOptions *orig );
-PUBLIC_EXTERN AIOCommandLineOptions *GET_AIO_DEFAULT_CMDLINE_OPTIONS();
-PUBLIC_EXTERN AIOCommandLineOptions *GET_AIO_DEFAULT_SCRIPTING_OPTIONS();
+PUBLIC_EXTERN AIOCommandLineOptions *AIO_CMDLINE_DEFAULT_OPTIONS();
+PUBLIC_EXTERN AIOCommandLineOptions *AIO_CMDLINE_SCRIPTING_OPTIONS();
+PUBLIC_EXTERN AIORET_TYPE AIO_CMDLINE_CLEAR_OPTIONS(AIOCommandLineOptions *opts);
+
 
 PUBLIC_EXTERN AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv );
 PUBLIC_EXTERN AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, char **argv );
