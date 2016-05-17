@@ -2,12 +2,36 @@
 #include "AIOTypes.h"
 #include <stdarg.h>
 #include <string.h>
-
+#include <stddef.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
 
+#ifdef __cplusplus
+StringArray::StringArray(int size, ... ) : _size(size) 
+{
+     this->_strings = new char *[size];
+     va_list arguments;
+     va_start( arguments, size );
+     for ( int i = 0; i < (int)size; i ++ ) { 
+         char *tmp = va_arg(arguments, char * );
+         this->_strings[i] = strdup(tmp);
+     }
+     va_end(arguments);
+}
+
+    StringArray::~StringArray() { 
+        for ( int i = 0; i < this->_size; i ++ ) {
+            free(this->_strings[i] );
+        }
+        delete [] this->_strings;
+    }
+#endif
+
+
+/*----------------------------------------------------------------------------*/
 StringArray *NewStringArrayWithStrings(size_t numstrings, ... )
 {
     StringArray *tmpsa = NewStringArray( numstrings );
@@ -23,6 +47,7 @@ StringArray *NewStringArrayWithStrings(size_t numstrings, ... )
     return tmpsa;
 }
 
+/*----------------------------------------------------------------------------*/
 StringArray *NewStringArray(size_t numstrings)
 {
     if ( !numstrings ) return NULL;
@@ -41,6 +66,7 @@ StringArray *NewStringArray(size_t numstrings)
     return NULL;
 }
 
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE DeleteStringArray( StringArray *str)
 {
     AIO_ASSERT( str );
@@ -52,6 +78,7 @@ AIORET_TYPE DeleteStringArray( StringArray *str)
     return AIOUSB_SUCCESS;
 }
 
+/*----------------------------------------------------------------------------*/
 StringArray *CopyStringArray( StringArray *str )
 {
     AIO_ASSERT_RET( NULL, str );
@@ -61,17 +88,38 @@ StringArray *CopyStringArray( StringArray *str )
     return tmp;
 }
 
+/*----------------------------------------------------------------------------*/
 char *StringArrayToString( StringArray *str )
 {
-
-    return NULL;
+    return StringArrayToStringWithDelimeter( str, NULL);
 }
 
-char *StringArrayToStringWithDelimeter( StringArray *str )
+/*----------------------------------------------------------------------------*/
+char *StringArrayToStringWithDelimeter( StringArray *str, const char *delim)
 {
 
-
-    return NULL;
+    AIO_ASSERT_RET( NULL, str );
+    char *tmpdelim  = ((char *)delim == NULL ? (char *)" " : (char *)delim );
+    int i;
+    char *retval = NULL;
+    char *tmp;
+    for ( i = 0; i < str->_size -1 ; i ++ ) { 
+        if ( i == 0 && retval == NULL ) { 
+            asprintf(&retval, "%s%s", str->_strings[i], tmpdelim );
+        } else if ( i != 0 && retval == NULL ) {
+            asprintf(&retval, "%s%s", str->_strings[i], tmpdelim );
+        } else {
+            tmp = strdup(retval );
+            free(retval);
+            asprintf(&retval, "%s%s%s", tmp, str->_strings[i], tmpdelim );
+            free(tmp);
+        }
+    }
+    tmp = strdup(retval);
+    free(retval);
+    asprintf(&retval, "%s%s", tmp, str->_strings[i]);
+    free(tmp);
+    return retval;
 }
 
 
@@ -95,6 +143,18 @@ TEST(StringArray,Basics )
     StringArray *tmp = NewStringArrayWithStrings(4,(char*)"First",(char*)"Second",(char*)"Third",(char *)"Fourth");
     ASSERT_TRUE( tmp );
     DeleteStringArray( tmp );
+}
+
+
+TEST(StringArray,Stringification)
+{
+    StringArray tmp = StringArray(4,(char*)"1",(char*)"2",(char*)"3",(char *)"4" );
+    char *tmpstr = StringArrayToString( &tmp );
+    ASSERT_STREQ( "1 2 3 4", tmpstr );
+    free(tmpstr);
+    tmpstr = StringArrayToStringWithDelimeter( &tmp, (const char *)"," );
+    ASSERT_STREQ( "1,2,3,4", tmpstr );
+    free(tmpstr);
 }
 
 int main(int argc, char *argv[] )

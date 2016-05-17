@@ -11,6 +11,10 @@ namespace AIOUSB
 typedef struct StringArray {
     int _size;
     char ** _strings;
+#ifdef __cplusplus
+    StringArray(int size, ... );
+    ~StringArray();
+#endif
 } StringArray;
 
 #ifdef __cplusplus
@@ -25,7 +29,7 @@ PUBLIC_EXTERN StringArray *NewStringArrayWithStrings(size_t numstrings, ... );
 PUBLIC_EXTERN AIORET_TYPE DeleteStringArray(StringArray *str);
 PUBLIC_EXTERN StringArray *CopyStringArray( StringArray *str );
 PUBLIC_EXTERN char *StringArrayToString( StringArray *str );
-PUBLIC_EXTERN char *StringArrayToStringWithDelimeter( StringArray *str );
+PUBLIC_EXTERN char *StringArrayToStringWithDelimeter( StringArray *str, const char *delim);
 /* END AIOUSB_API */
 
 #ifdef __aiousb_cplusplus
