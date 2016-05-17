@@ -9,27 +9,6 @@
 namespace AIOUSB {
 #endif
 
-#ifdef __cplusplus
-StringArray::StringArray(int size, ... ) : _size(size) 
-{
-     this->_strings = new char *[size];
-     va_list arguments;
-     va_start( arguments, size );
-     for ( int i = 0; i < (int)size; i ++ ) { 
-         char *tmp = va_arg(arguments, char * );
-         this->_strings[i] = strdup(tmp);
-     }
-     va_end(arguments);
-}
-
-    StringArray::~StringArray() { 
-        for ( int i = 0; i < this->_size; i ++ ) {
-            free(this->_strings[i] );
-        }
-        delete [] this->_strings;
-    }
-#endif
-
 
 /*----------------------------------------------------------------------------*/
 StringArray *NewStringArrayWithStrings(size_t numstrings, ... )
@@ -77,6 +56,30 @@ AIORET_TYPE DeleteStringArray( StringArray *str)
     free(str);
     return AIOUSB_SUCCESS;
 }
+
+
+/*----------------------------------------------------------------------------*/
+
+#ifdef __cplusplus
+StringArray::StringArray(int size, ... ) : _size(size) 
+{
+     this->_strings = new char *[size];
+     va_list arguments;
+     va_start( arguments, size );
+     for ( int i = 0; i < (int)size; i ++ ) { 
+         char *tmp = va_arg(arguments, char * );
+         this->_strings[i] = strdup(tmp);
+     }
+     va_end(arguments);
+}
+
+    StringArray::~StringArray() { 
+        for ( int i = 0; i < this->_size; i ++ ) {
+            free(this->_strings[i] );
+        }
+        delete [] this->_strings;
+    }
+#endif
 
 /*----------------------------------------------------------------------------*/
 StringArray *CopyStringArray( StringArray *str )
