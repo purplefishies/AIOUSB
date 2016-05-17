@@ -34,6 +34,7 @@ AIOChannelRange.o \
 AIOCountsConverter.o \
 AIOFifo.o\
 AIOProductTypes.o\
+StringArray.o\
 USBDevice.o
 
 
