@@ -14,6 +14,7 @@ typedef struct StringArray {
 #ifdef __cplusplus
     StringArray(int size, ... );
     ~StringArray();
+    StringArray(const StringArray &ref);
 #endif
 } StringArray;
 

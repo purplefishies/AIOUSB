@@ -34,6 +34,7 @@ AIOChannelRange.o \
 AIOCountsConverter.o \
 AIOFifo.o\
 AIOProductTypes.o\
+AIOTuple.o\
 StringArray.o\
 USBDevice.o
 
@@ -117,6 +118,7 @@ bist:
 	@echo "CPPEXTRAOBJS=$(CPPEXTRAOBJS)"
 	@echo "Headers=$(HEADERS)"
 	@echo "tests: $(TESTOBJS)"
+	@echo "CPPTESTFILES: $(CPPTEST_FILES)"
 
 GTAGS_FILES	:= GPATH GRTAGS GSYMS GTAGS
 

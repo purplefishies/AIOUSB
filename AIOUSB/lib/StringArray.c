@@ -61,6 +61,8 @@ AIORET_TYPE DeleteStringArray( StringArray *str)
 /*----------------------------------------------------------------------------*/
 
 #ifdef __cplusplus
+
+
 StringArray::StringArray(int size, ... ) : _size(size) 
 {
      this->_strings = new char *[size];
@@ -73,12 +75,22 @@ StringArray::StringArray(int size, ... ) : _size(size)
      va_end(arguments);
 }
 
-    StringArray::~StringArray() { 
-        for ( int i = 0; i < this->_size; i ++ ) {
-            free(this->_strings[i] );
-        }
-        delete [] this->_strings;
+StringArray::~StringArray() { 
+    for ( int i = 0; i < this->_size; i ++ ) {
+        free(this->_strings[i] );
     }
+    delete [] this->_strings;
+}
+
+StringArray::StringArray(const StringArray &ref)
+{
+    _size = ref._size;
+    _strings = new char *[_size] ;
+    for ( int i = 0; i < _size ;i ++ ) { 
+        _strings[i] = strdup( ref._strings[i] );
+    }
+}
+
 #endif
 
 /*----------------------------------------------------------------------------*/
@@ -158,6 +170,22 @@ TEST(StringArray,Stringification)
     tmpstr = StringArrayToStringWithDelimeter( &tmp, (const char *)"," );
     ASSERT_STREQ( "1,2,3,4", tmpstr );
     free(tmpstr);
+}
+
+TEST(StringArray,CopyXtor)
+{
+    StringArray tmp1(4,(char*)"1",(char*)"2",(char*)"3",(char *)"4" );
+    StringArray tmp2(tmp1);
+
+    for ( int i = 0; i < tmp1._size ; i ++ ) 
+        ASSERT_STREQ( tmp1._strings[i], tmp2._strings[i] );
+    
+    StringArray *p1 = new StringArray(tmp2);
+
+    for ( int i = 0; i < p1->_size ; i ++ ) 
+        ASSERT_STREQ( p1->_strings[i], tmp2._strings[i] );
+    
+    delete p1;
 }
 
 int main(int argc, char *argv[] )
