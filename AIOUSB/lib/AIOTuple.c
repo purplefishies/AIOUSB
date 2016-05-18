@@ -23,12 +23,15 @@ using namespace AIOUSB;
 
 TEST(Tuple,Basic2)
 {
-    AIOTUPLE2( AIOTuple2_AIORET_TYPE__StringArray, AIORET_TYPE, StringArray ) bar( AIOUSB_ERROR_INVALID_DATA, StringArray(3 , (char *)"Hello",(char *)"There",(char*)"" ));
-    ASSERT_STREQ( "Hello", bar._2._strings[0] );
-    ASSERT_STREQ( "There", bar._2._strings[1] );
+    AIOTuple2_AIORET_TYPE__StringArray_p *bar = NewAIOTuple2_AIORET_TYPE__StringArray_p( AIOUSB_ERROR_INVALID_DATA, new StringArray(2 , (char *)"Hello",(char *)"There"));
 
-    ASSERT_EQ( AIOUSB_ERROR_INVALID_DATA, bar._1 );
+    char *tmp = AIOTUPLE2_TO_STR( AIOTuple2_AIORET_TYPE__StringArray_p , bar );
+
+    ASSERT_STREQ( tmp, "(5,Hello There)");
+    free(tmp);
+    DeleteAIOTuple2_AIORET_TYPE__StringArray_p( bar );
 }
+
 
 TEST(Tuple,StringArray)
 {
