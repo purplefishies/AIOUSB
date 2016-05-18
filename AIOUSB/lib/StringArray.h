@@ -27,6 +27,7 @@ typedef struct StringArray {
 /* BEGIN AIOUSB_API */
 PUBLIC_EXTERN StringArray *NewStringArray(size_t numstrings );
 PUBLIC_EXTERN StringArray *NewStringArrayWithStrings(size_t numstrings, ... );
+PUBLIC_EXTERN StringArray *NewStringArrayFromCArgs( int argc, char *argv[] );
 PUBLIC_EXTERN AIORET_TYPE DeleteStringArray(StringArray *str);
 PUBLIC_EXTERN StringArray *CopyStringArray( StringArray *str );
 PUBLIC_EXTERN char *StringArrayToString( StringArray *str );

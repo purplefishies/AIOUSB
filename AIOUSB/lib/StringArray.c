@@ -46,6 +46,20 @@ StringArray *NewStringArray(size_t numstrings)
 }
 
 /*----------------------------------------------------------------------------*/
+StringArray *NewStringArrayFromCArgs( int argc, char *argv[] )
+{
+    AIO_ASSERT_RET( NULL, argv );
+    if ( argc == 0 ) 
+        return NULL;
+    StringArray *tmp = NewStringArray( argc );
+    if (!tmp) return NULL;
+    for ( int i = 0; i < argc; i ++ ) {
+        tmp->_strings[i] = strdup(argv[i]);
+    }
+    return tmp;
+}
+
+/*----------------------------------------------------------------------------*/
 AIORET_TYPE DeleteStringArray( StringArray *str)
 {
     AIO_ASSERT( str );
@@ -186,6 +200,18 @@ TEST(StringArray,CopyXtor)
         ASSERT_STREQ( p1->_strings[i], tmp2._strings[i] );
     
     delete p1;
+}
+
+TEST(StringArray,FromCArgs ) 
+{
+    char **tmp = new char *[4]{(char*)"this",(char*)"is",(char *)"a",(char *)"string"};
+    int argc = 4;
+    StringArray *sa = NewStringArrayFromCArgs( argc, tmp );
+    char *tstr;
+    ASSERT_STREQ( (tstr = StringArrayToString(sa)),"this is a string" );
+    free(tstr);
+    DeleteStringArray( sa );
+    delete [] tmp;
 }
 
 int main(int argc, char *argv[] )
