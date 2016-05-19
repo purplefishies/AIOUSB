@@ -33,6 +33,7 @@ AIOConfiguration.o \
 AIOChannelRange.o \
 AIOCountsConverter.o \
 AIOFifo.o\
+AIOList.o\
 AIOProductTypes.o\
 AIOTuple.o\
 StringArray.o\

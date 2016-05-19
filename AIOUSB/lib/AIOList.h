@@ -9,18 +9,18 @@ namespace AIOUSB
 #endif
 
 
-#define TAIL_Q_LIST( TYPE , PRETTYNAME )                           \
-    typedef struct TailQListEntry ## PRETTYNAME {                  \
-        TYPE _value;                                               \
-        TAILQ_ENTRY(TailQListEntry ## PRETTYNAME) entries;         \
-    } TailQListEntry ##PRETTYNAME;                                 \
-                                                                   \
-    typedef struct TailQList ## PRETTYNAME {                       \
-        struct TailQListEntry ## PRETTYNAME _list;                 \
-        /* New stuff */                                            \
-        TAILQ_HEAD( tailhead, TailQListEntry ## PRETTYNAME ) head; \
-        struct tailhead *headp;                                    \
-    } TailQList ##PRETTYNAME;                                      \
+#define TAIL_Q_LIST( TYPE , PRETTYNAME )                                          \
+    typedef struct TailQListEntry ## PRETTYNAME {                                 \
+        TYPE _value;                                                              \
+        TAILQ_ENTRY(TailQListEntry ## PRETTYNAME) entries;                        \
+    } TailQListEntry ##PRETTYNAME;                                                \
+                                                                                  \
+    typedef struct TailQList ## PRETTYNAME {                                      \
+        struct TailQListEntry ## PRETTYNAME _list;                                \
+        /* New stuff */                                                           \
+        TAILQ_HEAD( tailhead ##PRETTYNAME, TailQListEntry ## PRETTYNAME ) head;   \
+        struct tailhead ##PRETTYNAME  *headp;                                     \
+    } TailQList ##PRETTYNAME;                                                     \
 
 #ifdef DEBUG_NL
 #define __NL__ __NL__
@@ -101,7 +101,9 @@ __NL__        }                                                                 
 __NL__                                                                                                \
 __NL__        AIORET_TYPE TailQList ## PRETTYNAME ## Insert( TailQList ## PRETTYNAME  *list,          \
 __NL__                                                    TailQListEntry ## PRETTYNAME *nnode ) {     \
+__NL__            AIO_ASSERT( list ); AIO_ASSERT( nnode );                                            \
 __NL__            TAILQ_INSERT_TAIL( &list->head, nnode, entries );                                   \
+__NL__            return AIOUSB_SUCCESS;                                                              \
 __NL__        }
 
 TAIL_Q_LIST(int, int );

@@ -62,6 +62,7 @@ SET( tmp_aiousb_files
   "${CMAKE_CURRENT_SOURCE_DIR}/AIODeviceTable.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOEither.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOFifo.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/AIOList.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOProductTypes.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/AIOTuple.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/ADCConfigBlock.c"  
@@ -175,7 +176,7 @@ find_package( GTestTap )
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 if( GTESTTAP_FOUND AND GMOCK_FOUND AND GTEST_FOUND AND NOT DISABLE_TESTING )
 
-  set(GTEST_FILES ADCConfigBlock.c AIOChannelMask.c AIOChannelRange.c AIOContinuousBuffer.c AIODeviceInfo.c AIODeviceTable.c AIOUSBDevice.c AIOUSB_Core.c DIOBuf.c AIOUSB_DIO.c USBDevice.c AIOFifo.c AIOEither.c AIOCountsConverter.c AIODeviceQuery.c AIOCommandLine.c AIOProductTypes.c AIOTuple.c StringArray.c )
+  set(GTEST_FILES ADCConfigBlock.c AIOChannelMask.c AIOChannelRange.c AIOContinuousBuffer.c AIODeviceInfo.c AIODeviceTable.c AIOUSBDevice.c AIOUSB_Core.c DIOBuf.c AIOUSB_DIO.c USBDevice.c AIOFifo.c AIOEither.c AIOCountsConverter.c AIODeviceQuery.c AIOCommandLine.c AIOProductTypes.c AIOTuple.c StringArray.c AIOList.c )
   foreach( gtest ${GTEST_FILES} ) 
     set(MY_FLAGS "${CXX_FLAGS} -DSELF_TEST -D__aiousb_cplusplus -std=gnu++0x"  )
     set(MY_LIBRARIES aiousbdbg usb-1.0 pthread m ${GMOCK_BOTH_LIBRARIES} ${GTEST_BOTH_LIBRARIES} aiousb aiousbcpp )
