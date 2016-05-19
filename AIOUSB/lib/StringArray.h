@@ -32,6 +32,9 @@ PUBLIC_EXTERN AIORET_TYPE DeleteStringArray(StringArray *str);
 PUBLIC_EXTERN StringArray *CopyStringArray( StringArray *str );
 PUBLIC_EXTERN char *StringArrayToString( StringArray *str );
 PUBLIC_EXTERN char *StringArrayToStringWithDelimeter( StringArray *str, const char *delim);
+static inline char *StringArray_pToString( StringArray *sa) { return StringArrayToString(sa); };
+static inline AIORET_TYPE DeleteStringArray_p(StringArray *str) { return DeleteStringArray(str); };
+
 /* END AIOUSB_API */
 
 #ifdef __aiousb_cplusplus
