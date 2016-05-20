@@ -945,10 +945,12 @@ ADCConfigBlock *NewADCConfigBlockFromJSON( const char *str )
 
     cJSON *adcconfig = cJSON_Parse( str );
     cJSON *tmpconfig = NULL;
+    cJSON *origconfig = adcconfig;
     if (!adcconfig )
         return NULL;
     if ( adcconfig && ((tmpconfig = cJSON_GetObjectItem(adcconfig,"adcconfig") ) != 0 ) )
         adcconfig  = tmpconfig;
+
 
     cJSON *tmp;
 
@@ -1059,7 +1061,7 @@ ADCConfigBlock *NewADCConfigBlockFromJSON( const char *str )
     ADCConfigBlockSetClockRate( adc, (ADCalMode)tmp->valueint );
 
     if ( adcconfig ) 
-        cJSON_Delete( adcconfig );
+        cJSON_Delete( origconfig );
 
     return adc;
 }
@@ -1154,9 +1156,11 @@ TEST( ADCConfigBlock, PreserveEdges )
 {
     char *exp = (char*)"{\"adcconfig\":{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"0\",\"oversample\":\"0\",\"timeout\":\"5000\",\"clock_rate\":\"0\"}}";
     ADCConfigBlock *configBlock = NewADCConfigBlockFromJSON( exp );
-    
-    EXPECT_STREQ( ADCConfigBlockToJSON( configBlock ), exp );
+    char *tmp;
+    EXPECT_STREQ( (tmp=ADCConfigBlockToJSON( configBlock )), exp );
+    free(tmp);
 
+    DeleteADCConfigBlock( configBlock );
 
 }
 
@@ -1196,6 +1200,8 @@ TEST( ADCConfigBlock, ReferenceToJSON )
     hold[sz] = 0;
     
     ASSERT_STREQ( hold, "counter" );
+
+    free(tmp);
 }
 
 
