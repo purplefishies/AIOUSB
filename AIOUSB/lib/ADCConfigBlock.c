@@ -1229,20 +1229,26 @@ TEST(ADCConfigBlock, SetAllGainCodes)
 
 TEST(ADCConfigBlock,CopyConfigs ) 
 {
-    ADCConfigBlock from,to;
-    AIOUSBDevice dev;
-    AIORET_TYPE result;
+    ADCConfigBlock from = {0},to = {0};
+    AIOUSBDevice *dev = 0;
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIORESULT result = AIOUSB_SUCCESS;
+    int numDevices = 0;
+    AIODeviceTableInit();
 
-    AIOUSBDeviceInitializeWithProductID( &dev, USB_AIO16_16A );
+    retval = AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numDevices, USB_AI16_16E, NULL );
+    dev = AIODeviceTableGetDeviceAtIndex( numDevices - 1, &result );
+    
+    ASSERT_EQ( result, AIOUSB_SUCCESS );
 
-    ADCConfigBlockInitializeFromAIOUSBDevice( &from , &dev);
-    ADCConfigBlockInitializeFromAIOUSBDevice( &to , &dev );
+    ADCConfigBlockInitializeFromAIOUSBDevice( &from , dev);
+    ADCConfigBlockInitializeFromAIOUSBDevice( &to , dev );
    
     /* verify copying the test state */
     from.testing = AIOUSB_TRUE;
-    result  = ADCConfigBlockCopy( &to, &from );
+    retval = ADCConfigBlockCopy( &to, &from );
     
-    EXPECT_GE( result, AIOUSB_SUCCESS );
+    EXPECT_GE( retval, AIOUSB_SUCCESS );
     
     EXPECT_EQ( from.testing, to.testing );
 
@@ -1253,7 +1259,10 @@ TEST(ADCConfigBlock,CopyConfigs )
     for ( int i = 0; i < 16; i ++ )
         EXPECT_EQ( from.registers[i], to.registers[i] );
 
+    ClearAIODeviceTable( numDevices );
+
 }
+
 TEST( ADCConfigBlock, CanSetDevice )
 {
     ADCConfigBlock tmp;
