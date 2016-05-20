@@ -23,7 +23,7 @@ using namespace AIOUSB;
 
 TEST(Tuple,Basic2)
 {
-    AIOTuple2_AIORET_TYPE__CStringArray_p *bar = NewAIOTuple2_AIORET_TYPE__CStringArray_p( AIOUSB_ERROR_INVALID_DATA, new CStringArray(2 , (char *)"Hello",(char *)"There"));
+    AIOTuple2_AIORET_TYPE__CStringArray_p *bar = NewAIOTuple2_AIORET_TYPE__CStringArray_p( AIOUSB_ERROR_INVALID_DATA, NewCStringArrayWithStrings(2 , (char *)"Hello",(char *)"There"));
 
     char *tmp = AIOTUPLE2_TO_STR( AIOTuple2_AIORET_TYPE__CStringArray_p , bar );
 

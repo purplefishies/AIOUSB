@@ -54,7 +54,11 @@ inline char *AIOTuple2_AIORET_TYPE__CStringArray_pToString( AIOTuple2_AIORET_TYP
 inline AIORET_TYPE DeleteAIOTuple2_AIORET_TYPE__CStringArray_p( AIOTuple2_AIORET_TYPE__CStringArray_p * type ) { 
     AIO_ASSERT( type );
     DeleteCStringArray( type->_2 );
+#ifdef __cplusplus
+    delete type;
+#else
     free(type);
+#endif
     return AIOUSB_SUCCESS;
 }
 
