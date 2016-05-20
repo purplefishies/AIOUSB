@@ -323,6 +323,31 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsign
 
 #elif defined(SWIGRUBY)
 
+/*---------------- intlist * ----------------  */
+%typemap(in) (intlist *indices ) {
+    intlist *tmp = Newintlist();
+    $1 = tmp;
+}
+
+%typemap(argout) (intlist *indices) {
+    VALUE ptr;
+    intlistentry *np;
+    ptr = (VALUE)RARRAY($input);
+    rb_ary_clear(ptr);
+    for (np = $1->head.tqh_first; np != NULL; np = np->entries.tqe_next) {                    
+        rb_ary_push( ptr, INT2FIX( np->_value ));
+    }                                                                                           
+
+}
+
+%typemap(freearg) (intlist *indices) {
+    if ($1) 
+        Deleteintlist( $1 );
+}
+
+/*--------------- done intlist * ---------------*/
+
+
 %typemap(in)  double *ctrClockHz {
     double tmp = NUM2DBL($input);
     // printf("Type was %d\n", (int)tmp );
