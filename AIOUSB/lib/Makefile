@@ -36,7 +36,7 @@ AIOFifo.o\
 AIOList.o\
 AIOProductTypes.o\
 AIOTuple.o\
-StringArray.o\
+CStringArray.o\
 USBDevice.o
 
 

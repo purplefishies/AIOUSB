@@ -16,10 +16,13 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
+#include "AIOList.h"
 
 #ifdef __cplusplus
 namespace AIOUSB {
 #endif
+
+
 
 /*----------------------------------------------------------------------------*/
 #define RESULT_TEXT_SIZE 40
@@ -220,6 +223,35 @@ AIORET_TYPE AIOUSB_FindDevices( int **where, int *length , AIOUSB_BOOL (*is_ok_d
     }
     if ( retval == AIOUSB_SUCCESS )
         *where = indices;
+    return retval;
+}
+
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOUSB_FindDeviceIndicesByGroup( intlist *indices, AIOProductGroup *pg )
+{
+    AIO_ASSERT( indices );
+    AIO_ASSERT( pg ); 
+    if ( !AIOUSB_IsInit() )
+        AIOUSB_Init();
+
+    int index = 0;
+    unsigned long deviceMask = AIOUSB_GetAllDevices();
+
+    AIORET_TYPE retval = -AIOUSB_ERROR_DEVICE_NOT_FOUND;
+    while ( deviceMask ) {
+        if ( deviceMask & 1 ) {
+            AIOUSBDevice *dev = &deviceTable[index];
+            if ( AIOProductGroupContains( pg, dev->ProductID ) >= AIOUSB_SUCCESS ) {
+                retval = AIOUSB_SUCCESS;
+                TailQListintInsert( indices , NewTailQListEntryint( index ));
+            }
+        }
+        index++;
+        deviceMask >>= 1;
+    }
+
+    DeleteAIOProductGroup( pg );
+
     return retval;
 }
 
@@ -492,6 +524,32 @@ TEST(AIODeviceTable, SetsUpDefaults )
 
     ClearAIODeviceTable( numDevices );
 }
+
+TEST(AIODeviceTable, FindIndices )
+{
+    int numDevices = 0;
+    AIOUSB_BOOL tmp;
+    AIORESULT retval;
+    AIORET_TYPE ret;
+
+    int length = 0;
+    intlist *indices = Newintlist();
+
+    AIODeviceTableInit();    
+    retval = AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numDevices, USB_AI16_16E, NULL );
+    EXPECT_EQ( retval, AIOUSB_SUCCESS );
+    AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numDevices, USB_DIO_32, NULL );
+    EXPECT_EQ( retval, AIOUSB_SUCCESS );
+
+    ret =  AIOUSB_FindDeviceIndicesByGroup( indices, AIO_ANALOG_INPUT() );
+
+    ret = Deleteintlist( indices );
+
+    ASSERT_EQ( AIOUSB_SUCCESS, ret );
+
+    ClearAIODeviceTable( numDevices );
+}
+
 
 int 
 main(int argc, char *argv[] )

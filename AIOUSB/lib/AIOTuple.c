@@ -23,22 +23,22 @@ using namespace AIOUSB;
 
 TEST(Tuple,Basic2)
 {
-    AIOTuple2_AIORET_TYPE__StringArray_p *bar = NewAIOTuple2_AIORET_TYPE__StringArray_p( AIOUSB_ERROR_INVALID_DATA, new StringArray(2 , (char *)"Hello",(char *)"There"));
+    AIOTuple2_AIORET_TYPE__CStringArray_p *bar = NewAIOTuple2_AIORET_TYPE__CStringArray_p( AIOUSB_ERROR_INVALID_DATA, new CStringArray(2 , (char *)"Hello",(char *)"There"));
 
-    char *tmp = AIOTUPLE2_TO_STR( AIOTuple2_AIORET_TYPE__StringArray_p , bar );
+    char *tmp = AIOTUPLE2_TO_STR( AIOTuple2_AIORET_TYPE__CStringArray_p , bar );
 
     ASSERT_STREQ( tmp, "(5,Hello There)");
     free(tmp);
-    DeleteAIOTuple2_AIORET_TYPE__StringArray_p( bar );
+    DeleteAIOTuple2_AIORET_TYPE__CStringArray_p( bar );
 }
 
 
-TEST(Tuple,StringArray)
+TEST(Tuple,CStringArray)
 {
     
-    AIOTuple2_AIORET_TYPE__StringArray *tmp;
-    StringArray t1(3 , (char *)"Hello",(char *)"There",(char*)"Blah" );
-    AIOTuple2_AIORET_TYPE__StringArray bar( AIOUSB_ERROR_INVALID_DATA, t1 );
+    AIOTuple2_AIORET_TYPE__CStringArray *tmp;
+    CStringArray t1(3 , (char *)"Hello",(char *)"There",(char*)"Blah" );
+    AIOTuple2_AIORET_TYPE__CStringArray bar( AIOUSB_ERROR_INVALID_DATA, t1 );
 
     ASSERT_EQ(1,1);
 }

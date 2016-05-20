@@ -2,7 +2,7 @@
 #define _AIOLIST_H
 
 #include "AIOTypes.h"
-#include "StringArray.h"
+#include "CStringArray.h"
 #include <sys/queue.h>
 
 #ifdef __aiousb_cplusplus
@@ -116,8 +116,11 @@ __NL__            return AIOUSB_SUCCESS;                                        
 __NL__        }
 
 TAIL_Q_LIST(int, int );
-TAIL_Q_LIST(StringArray *, StringArray_p );
+TAIL_Q_LIST(CStringArray *, CStringArray_p );
 typedef TAIL_Q_LIST_TYPE( int ) intlist;
+
+inline intlist *Newintlist() { return NewTailQListint(); }
+inline AIORET_TYPE Deleteintlist(intlist *list) { return DeleteTailQListint(list); }
 
 
 #ifdef __aiousb_cplusplus

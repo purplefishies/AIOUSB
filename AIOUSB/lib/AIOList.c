@@ -21,7 +21,7 @@ AIORET_TYPE Deleteint( int val ) {
     return AIOUSB_SUCCESS;
 }
  
-TAIL_Q_LIST_IMPLEMENTATION( StringArray *, StringArray_p );
+TAIL_Q_LIST_IMPLEMENTATION( CStringArray *, CStringArray_p );
 TAIL_Q_LIST_IMPLEMENTATION( int, int );
 
 
@@ -55,17 +55,17 @@ TEST(QList,test)
     DeleteTailQListint( tmp );
 }
 
-TEST(Qlist,StringArray)
+TEST(Qlist,CStringArray)
 {
-    TailQListStringArray_p *tmp = NewTailQListStringArray_p();
+    TailQListCStringArray_p *tmp = NewTailQListCStringArray_p();
     char *hold;
 
-    TailQListStringArray_pInsert(tmp,NewTailQListEntryStringArray_p(NewStringArrayWithStrings(3,(char *)"This",(char *)"is",(char *)"a string")));
-    TailQListStringArray_pInsert(tmp,NewTailQListEntryStringArray_p(NewStringArrayWithStrings(3,(char *)"and", (char *)"another",(char *)"string")));
-    ASSERT_STREQ((hold=TailQListStringArray_pToString( tmp )), "This is a string,and another string" ); 
+    TailQListCStringArray_pInsert(tmp,NewTailQListEntryCStringArray_p(NewCStringArrayWithStrings(3,(char *)"This",(char *)"is",(char *)"a string")));
+    TailQListCStringArray_pInsert(tmp,NewTailQListEntryCStringArray_p(NewCStringArrayWithStrings(3,(char *)"and", (char *)"another",(char *)"string")));
+    ASSERT_STREQ((hold=TailQListCStringArray_pToString( tmp )), "This is a string,and another string" ); 
     free(hold);
 
-    DeleteTailQListStringArray_p( tmp );
+    DeleteTailQListCStringArray_p( tmp );
 }
 
 int 

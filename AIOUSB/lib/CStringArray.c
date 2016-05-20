@@ -1,4 +1,4 @@
-#include "StringArray.h"
+#include "CStringArray.h"
 #include "AIOTypes.h"
 #include <stdarg.h>
 #include <string.h>
@@ -11,9 +11,9 @@ namespace AIOUSB {
 
 
 /*----------------------------------------------------------------------------*/
-StringArray *NewStringArrayWithStrings(size_t numstrings, ... )
+CStringArray *NewCStringArrayWithStrings(size_t numstrings, ... )
 {
-    StringArray *tmpsa = NewStringArray( numstrings );
+    CStringArray *tmpsa = NewCStringArray( numstrings );
     if ( !tmpsa )return tmpsa;
 
     va_list arguments;
@@ -27,10 +27,10 @@ StringArray *NewStringArrayWithStrings(size_t numstrings, ... )
 }
 
 /*----------------------------------------------------------------------------*/
-StringArray *NewStringArray(size_t numstrings)
+CStringArray *NewCStringArray(size_t numstrings)
 {
     if ( !numstrings ) return NULL;
-    StringArray *tmp = (StringArray *)malloc(sizeof(StringArray));
+    CStringArray *tmp = (CStringArray *)malloc(sizeof(CStringArray));
     if (!tmp) return NULL;
     tmp->_size = numstrings;
     tmp->_strings = (char **)malloc(sizeof(char *)*numstrings);
@@ -46,12 +46,12 @@ StringArray *NewStringArray(size_t numstrings)
 }
 
 /*----------------------------------------------------------------------------*/
-StringArray *NewStringArrayFromCArgs( int argc, char *argv[] )
+CStringArray *NewCStringArrayFromCArgs( int argc, char *argv[] )
 {
     AIO_ASSERT_RET( NULL, argv );
     if ( argc == 0 ) 
         return NULL;
-    StringArray *tmp = NewStringArray( argc );
+    CStringArray *tmp = NewCStringArray( argc );
     if (!tmp) return NULL;
     for ( int i = 0; i < argc; i ++ ) {
         tmp->_strings[i] = strdup(argv[i]);
@@ -60,7 +60,7 @@ StringArray *NewStringArrayFromCArgs( int argc, char *argv[] )
 }
 
 /*----------------------------------------------------------------------------*/
-AIORET_TYPE DeleteStringArray( StringArray *str)
+AIORET_TYPE DeleteCStringArray( CStringArray *str)
 {
     AIO_ASSERT( str );
     for ( int i = 0; i < str->_size; i ++ ) {
@@ -77,7 +77,7 @@ AIORET_TYPE DeleteStringArray( StringArray *str)
 #ifdef __cplusplus
 
 
-StringArray::StringArray(int size, ... ) : _size(size) 
+CStringArray::CStringArray(int size, ... ) : _size(size) 
 {
      this->_strings = new char *[size];
      va_list arguments;
@@ -89,14 +89,14 @@ StringArray::StringArray(int size, ... ) : _size(size)
      va_end(arguments);
 }
 
-StringArray::~StringArray() { 
+CStringArray::~CStringArray() { 
     for ( int i = 0; i < this->_size; i ++ ) {
         free(this->_strings[i] );
     }
     delete [] this->_strings;
 }
 
-StringArray::StringArray(const StringArray &ref)
+CStringArray::CStringArray(const CStringArray &ref)
 {
     _size = ref._size;
     _strings = new char *[_size] ;
@@ -108,23 +108,23 @@ StringArray::StringArray(const StringArray &ref)
 #endif
 
 /*----------------------------------------------------------------------------*/
-StringArray *CopyStringArray( StringArray *str )
+CStringArray *CopyCStringArray( CStringArray *str )
 {
     AIO_ASSERT_RET( NULL, str );
-    StringArray *tmp = NewStringArray( str->_size );
+    CStringArray *tmp = NewCStringArray( str->_size );
     if ( !tmp ) return tmp;
     memcpy(tmp->_strings, str->_strings, sizeof(char *)*str->_size );
     return tmp;
 }
 
 /*----------------------------------------------------------------------------*/
-char *StringArrayToString( StringArray *str )
+char *CStringArrayToString( CStringArray *str )
 {
-    return StringArrayToStringWithDelimeter( str, NULL);
+    return CStringArrayToStringWithDelimeter( str, NULL);
 }
 
 /*----------------------------------------------------------------------------*/
-char *StringArrayToStringWithDelimeter( StringArray *str, const char *delim)
+char *CStringArrayToStringWithDelimeter( CStringArray *str, const char *delim)
 {
 
     AIO_ASSERT_RET( NULL, str );
@@ -167,34 +167,34 @@ using namespace AIOUSB;
 #include <stdio.h>
 
 
-TEST(StringArray,Basics ) 
+TEST(CStringArray,Basics ) 
 {
-    StringArray *tmp = NewStringArrayWithStrings(4,(char*)"First",(char*)"Second",(char*)"Third",(char *)"Fourth");
+    CStringArray *tmp = NewCStringArrayWithStrings(4,(char*)"First",(char*)"Second",(char*)"Third",(char *)"Fourth");
     ASSERT_TRUE( tmp );
-    DeleteStringArray( tmp );
+    DeleteCStringArray( tmp );
 }
 
 
-TEST(StringArray,Stringification)
+TEST(CStringArray,Stringification)
 {
-    StringArray tmp = StringArray(4,(char*)"1",(char*)"2",(char*)"3",(char *)"4" );
-    char *tmpstr = StringArrayToString( &tmp );
+    CStringArray tmp = CStringArray(4,(char*)"1",(char*)"2",(char*)"3",(char *)"4" );
+    char *tmpstr = CStringArrayToString( &tmp );
     ASSERT_STREQ( "1 2 3 4", tmpstr );
     free(tmpstr);
-    tmpstr = StringArrayToStringWithDelimeter( &tmp, (const char *)"," );
+    tmpstr = CStringArrayToStringWithDelimeter( &tmp, (const char *)"," );
     ASSERT_STREQ( "1,2,3,4", tmpstr );
     free(tmpstr);
 }
 
-TEST(StringArray,CopyXtor)
+TEST(CStringArray,CopyXtor)
 {
-    StringArray tmp1(4,(char*)"1",(char*)"2",(char*)"3",(char *)"4" );
-    StringArray tmp2(tmp1);
+    CStringArray tmp1(4,(char*)"1",(char*)"2",(char*)"3",(char *)"4" );
+    CStringArray tmp2(tmp1);
 
     for ( int i = 0; i < tmp1._size ; i ++ ) 
         ASSERT_STREQ( tmp1._strings[i], tmp2._strings[i] );
     
-    StringArray *p1 = new StringArray(tmp2);
+    CStringArray *p1 = new CStringArray(tmp2);
 
     for ( int i = 0; i < p1->_size ; i ++ ) 
         ASSERT_STREQ( p1->_strings[i], tmp2._strings[i] );
@@ -202,15 +202,15 @@ TEST(StringArray,CopyXtor)
     delete p1;
 }
 
-TEST(StringArray,FromCArgs ) 
+TEST(CStringArray,FromCArgs ) 
 {
     char **tmp = new char *[4]{(char*)"this",(char*)"is",(char *)"a",(char *)"string"};
     int argc = 4;
-    StringArray *sa = NewStringArrayFromCArgs( argc, tmp );
+    CStringArray *sa = NewCStringArrayFromCArgs( argc, tmp );
     char *tstr;
-    ASSERT_STREQ( (tstr = StringArrayToString(sa)),"this is a string" );
+    ASSERT_STREQ( (tstr = CStringArrayToString(sa)),"this is a string" );
     free(tstr);
-    DeleteStringArray( sa );
+    DeleteCStringArray( sa );
     delete [] tmp;
 }
 

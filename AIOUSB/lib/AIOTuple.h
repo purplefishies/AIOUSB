@@ -2,7 +2,7 @@
 #define _AIOTUPLE_H
 
 #include "AIOTypes.h"
-#include "StringArray.h"
+#include "CStringArray.h"
 #include <stdio.h>
 
 #ifdef __aiousb_cplusplus
@@ -40,20 +40,20 @@ namespace AIOUSB
 
 
 /* AIOTUPLE2_TYPE(AIOTuple2_AIORET_TYPE__char_p_p, AIORET_TYPE, char ** ); */
-AIOTUPLE2_TYPE(AIOTuple2_AIORET_TYPE__StringArray  , AIORET_TYPE, StringArray );
-AIOTUPLE2_TYPE(AIOTuple2_AIORET_TYPE__StringArray_p, AIORET_TYPE, StringArray * );
+AIOTUPLE2_TYPE(AIOTuple2_AIORET_TYPE__CStringArray  , AIORET_TYPE, CStringArray );
+AIOTUPLE2_TYPE(AIOTuple2_AIORET_TYPE__CStringArray_p, AIORET_TYPE, CStringArray * );
 
 
-inline char *AIOTuple2_AIORET_TYPE__StringArray_pToString( AIOTuple2_AIORET_TYPE__StringArray_p * type ) { 
+inline char *AIOTuple2_AIORET_TYPE__CStringArray_pToString( AIOTuple2_AIORET_TYPE__CStringArray_p * type ) { 
     char *tmp;
-    char *t2 = StringArrayToString(type->_2);
+    char *t2 = CStringArrayToString(type->_2);
     asprintf(&tmp, "(%d,%s)", (int)type->_1, t2);
     free(t2);
     return tmp;
 }
-inline AIORET_TYPE DeleteAIOTuple2_AIORET_TYPE__StringArray_p( AIOTuple2_AIORET_TYPE__StringArray_p * type ) { 
+inline AIORET_TYPE DeleteAIOTuple2_AIORET_TYPE__CStringArray_p( AIOTuple2_AIORET_TYPE__CStringArray_p * type ) { 
     AIO_ASSERT( type );
-    DeleteStringArray( type->_2 );
+    DeleteCStringArray( type->_2 );
     free(type);
     return AIOUSB_SUCCESS;
 }
