@@ -69,7 +69,6 @@
          tmpval = (*jenv)->GetArrayLength(jenv, $input);
          $2 = (char **) malloc((*$1+1)*sizeof(char *));
          /* make a copy of each string */
-         /* printf("FOOO"); */
          for (i = 0; i<*$1; i++) {
               jstring j_string = (jstring)(*jenv)->GetObjectArrayElement(jenv, $input, i);
               const char * c_string = (*jenv)->GetStringUTFChars(jenv, j_string, 0);
@@ -170,17 +169,32 @@
         /* printf("After: %d\n", *$1 ); */
         for ( i = 0; i < *$2 ; i ++ ) { 
             PyObject *ofmt = PyInt_FromLong( *$1[i] );
-            /* PyObject *PyString_FromString(char *); */
-            /* printf("Values are %d\n", i ); */
             PyList_Append( $input, ofmt );
         }
     } 
 }
 
+/*---------------- intlist * ----------------  */
+%typemap(in) (intlist *indices ) {
+    intlist *tmp = Newintlist();
+    $1 = tmp;
+    /* printf("FOOO\n"); */
+}
 
-%typemap(freearg) (int *argc, char **argv) {
-    if ($1) free($1);
-    if ($2) free($2);
+%typemap(argout) (intlist *indices) {
+    PyList_SetSlice($input, 0, (Py_ssize_t)intlistSize($1), NULL);
+    {
+       intlistentry *np;                                                           
+       for (np = $1->head.tqh_first; np != NULL; np = np->entries.tqe_next) {                    
+           PyObject *ofmt = PyInt_FromLong( np->_value );
+           PyList_Append( $input, ofmt );
+       }                                                                                           
+    } 
+}
+
+%typemap(freearg) (intlist *indices) {
+    if ($1) 
+        Deleteintlist( $1 );
 }
 
 
