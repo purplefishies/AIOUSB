@@ -540,8 +540,14 @@ TEST(AIODeviceTable, FindIndices )
     EXPECT_EQ( retval, AIOUSB_SUCCESS );
     AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numDevices, USB_DIO_32, NULL );
     EXPECT_EQ( retval, AIOUSB_SUCCESS );
+    retval = AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numDevices, USB_AIO16_16A, NULL );
+    EXPECT_EQ( retval, AIOUSB_SUCCESS );
 
     ret =  AIOUSB_FindDeviceIndicesByGroup( indices, AIO_ANALOG_INPUT() );
+
+    char *tmpstr;
+    ASSERT_STREQ( (tmpstr=intlistToString( indices )), "0,2");
+    free(tmpstr);
 
     ret = Deleteintlist( indices );
 

@@ -121,7 +121,7 @@ typedef TAIL_Q_LIST_TYPE( int ) intlist;
 
 inline intlist *Newintlist() { return NewTailQListint(); }
 inline AIORET_TYPE Deleteintlist(intlist *list) { return DeleteTailQListint(list); }
-
+inline char *intlistToString( intlist *list) { return TailQListintToString( list ); };
 
 #ifdef __aiousb_cplusplus
 }
