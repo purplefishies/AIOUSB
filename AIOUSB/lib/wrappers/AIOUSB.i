@@ -312,9 +312,29 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsign
     if ($1) free($1);
     if ($2) free($2);
 }
-/* End (int argc, char **argv) setting */
 
+/*---------------- intlist * ----------------  */
+%typemap(in) (intlist *indices ) {
+    intlist *tmp = Newintlist();
+    $1 = tmp;
+    /* printf("BAAAAR\n"); */
+}
 
+%typemap(argout) (intlist *indices) {
+    intlistentry *np;
+    SV *tmp = $input;
+    AV *ary = (AV*)SvRV( tmp );
+    /* printf("Value is %d\n", (int)av_top_index(ary)); */
+    av_clear(ary);
+    for (np = $1->head.tqh_first; np != NULL; np = np->entries.tqe_next) {                    
+        av_push( ary, newSViv( np->_value ));
+    }                                                                                           
+}
+
+%typemap(freearg) (intlist *indices) {
+    if ($1) 
+        Deleteintlist( $1 );
+}
 
 %typemap(in)  double *ctrClockHz {
     double tmp = SvIV($input);
