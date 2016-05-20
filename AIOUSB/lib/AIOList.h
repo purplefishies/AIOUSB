@@ -11,6 +11,7 @@ namespace AIOUSB
 #endif
 
 #define TAIL_Q_LIST_TYPE( PRETTYNAME )   TailQList ## PRETTYNAME
+#define TAIL_Q_LIST_ENTRY_TYPE( PRETTYNAME ) TailQListEntry ## PRETTYNAME
 #define TAIL_Q_LIST( TYPE , PRETTYNAME )                                                         \
     typedef struct TailQListEntry ## PRETTYNAME {                                                \
         TYPE _value;                                                                             \
@@ -122,11 +123,12 @@ __NL__        }
 TAIL_Q_LIST(int, int );
 TAIL_Q_LIST(CStringArray *, CStringArray_p );
 typedef TAIL_Q_LIST_TYPE( int ) intlist;
+typedef TAIL_Q_LIST_ENTRY_TYPE( int ) intlistentry;
 
 inline intlist *Newintlist() { return NewTailQListint(); }
 inline AIORET_TYPE Deleteintlist(intlist *list) { return DeleteTailQListint(list); }
 inline char *intlistToString( intlist *list) { return TailQListintToString( list ); };
-
+inline int intlistSize(intlist *list) { return TailQListintSize( list ); };
 #ifdef __aiousb_cplusplus
 }
 #endif
