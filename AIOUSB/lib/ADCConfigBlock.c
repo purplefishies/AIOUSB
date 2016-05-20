@@ -1090,6 +1090,7 @@ AIORET_TYPE ADCConfigBlockGetClockRate( ADCConfigBlock *config )
 
 #include "gtest/gtest.h"
 #include "AIOUSBDevice.h"
+#include "AIODeviceTable.h"
 using namespace AIOUSB;
 
 
@@ -1204,18 +1205,26 @@ TEST( ADCConfigBlock, ReferenceToJSON )
     free(tmp);
 }
 
-
 TEST(ADCConfigBlock, SetAllGainCodes) 
 {
-    AIOUSBDevice dev;
-    AIOUSBDeviceInitializeWithProductID( &dev, USB_AIO16_16A );
-    ADConfigBlock configBlock;
-    ADCConfigBlockInitializeFromAIOUSBDevice( &configBlock, &dev );
+    AIOUSBDevice *dev;
+    AIODeviceTableInit();
+    int numDevices = 0;
+    AIORESULT result;
+
+    result = AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numDevices, USB_AI16_16E, NULL );
+    dev = AIODeviceTableGetDeviceAtIndex( numDevices - 1, &result );
+
+    ASSERT_EQ( result, AIOUSB_SUCCESS );
+    ADConfigBlock configBlock = {0};
+    ADCConfigBlockInitializeFromAIOUSBDevice( &configBlock, dev );
             
     AIOUSB_SetAllGainCodeAndDiffMode( &configBlock, AD_GAIN_CODE_0_2V, AIOUSB_FALSE );
 
     for ( int i = 0; i < 16 ; i ++ )
         ASSERT_EQ( AD_GAIN_CODE_0_2V, configBlock.registers[0] );
+
+    ClearAIODeviceTable( numDevices );
 }
 
 TEST(ADCConfigBlock,CopyConfigs ) 
