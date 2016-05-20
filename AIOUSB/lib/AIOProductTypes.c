@@ -65,10 +65,10 @@ AIOProductRange *NewAIOProductRange( unsigned long start, unsigned long end)
         tmpval = end;
         end = start;
         start = tmpval;
-    } else {
-        tmp->_start = start;
-        tmp->_end   = end;
     }
+    tmp->_start = start;
+    tmp->_end   = end;
+
     return tmp;
 }
 
@@ -109,7 +109,7 @@ AIOProductGroup::AIOProductGroup( size_t numbergroups, ... ) : _num_groups(numbe
 
 AIOProductGroup::~AIOProductGroup(){
     for ( int i = 0; i < (int)this->_num_groups; i ++ ) { 
-        delete this->_groups[i];
+        free( this->_groups[i] );
     }
     delete [] this->_groups;
 }
@@ -256,7 +256,7 @@ AIO_PRODUCT_CONSTANT( mygroup, mygroupp, mygroupfn, 2 , AIO_RANGE(4,3), AIO_RANG
 TEST(AIOProductGroup, Defaults )
 {
     AIOProductRange newbie(10,20);
-    AIOProductRange *second = new AIOProductRange(10,34);
+    AIOProductRange *second = NewAIOProductRange(10,34);
     AIOProductGroup other( 3, AIO_RANGE(3,4),AIO_RANGE(3,4),AIO_RANGE(3,4) );
     AIORET_TYPE retval = AIOProductGroupContains( &mygroup, 3 );
     ASSERT_GE( retval, AIOUSB_SUCCESS );
@@ -267,7 +267,7 @@ TEST(AIOProductGroup, Defaults )
     ASSERT_GE( AIOProductGroupContains( &mygroup, 34 ), AIOUSB_SUCCESS );
     ASSERT_LT( AIOProductGroupContains( &mygroup, 2 ), AIOUSB_SUCCESS );
     
-    delete second;
+    DeleteAIOProductRange( second );
 
 }
 

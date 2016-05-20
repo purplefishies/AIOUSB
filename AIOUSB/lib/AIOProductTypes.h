@@ -58,7 +58,7 @@ PUBLIC_EXTERN AIOProductGroup *groupcpy ( const AIOProductGroup *g);
 #define NUMARGS(...)  (sizeof((void*[]){__VA_ARGS__})/sizeof(void*))
 
 #ifdef __cplusplus
-#define AIO_RANGE(start,stop) new AIOProductRange(start,stop)
+#define AIO_RANGE(start,stop) NewAIOProductRange(start,stop)
 #define AIO_PRODUCT_GROUP(NAME, N , ... ) const AIOProductGroup NAME( N, __VA_ARGS__ )
 #define AIO_PRODUCT_CONSTANT(NAME, NAMEPTR, NAMEFN, N, ... )   const AIOProductGroup NAME( N, __VA_ARGS__ ); \
                                                                const AIOProductGroup *NAMEPTR = &NAME; \
