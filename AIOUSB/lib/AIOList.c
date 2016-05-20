@@ -50,6 +50,7 @@ TEST(QList,test)
     TailQListintInsert( tmp, NewTailQListEntryint( 43 )  );
     TailQListintInsert( tmp, NewTailQListEntryint( 44 )  );
     ASSERT_STREQ((hold=TailQListintToString( tmp )), "42,43,44" ); 
+    ASSERT_EQ( TailQListintSize(tmp), 3 );
     free(hold);
 
     DeleteTailQListint( tmp );
@@ -63,6 +64,9 @@ TEST(Qlist,CStringArray)
     TailQListCStringArray_pInsert(tmp,NewTailQListEntryCStringArray_p(NewCStringArrayWithStrings(3,(char *)"This",(char *)"is",(char *)"a string")));
     TailQListCStringArray_pInsert(tmp,NewTailQListEntryCStringArray_p(NewCStringArrayWithStrings(3,(char *)"and", (char *)"another",(char *)"string")));
     ASSERT_STREQ((hold=TailQListCStringArray_pToString( tmp )), "This is a string,and another string" ); 
+    ASSERT_EQ( TailQListCStringArray_pSize(tmp), 2 );
+
+
     free(hold);
 
     DeleteTailQListCStringArray_p( tmp );

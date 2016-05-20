@@ -19,13 +19,15 @@ namespace AIOUSB
                                                                                                  \
     typedef struct TailQList ## PRETTYNAME {                                                     \
         struct TailQListEntry ## PRETTYNAME _list;                                               \
+        int _size;                                                                               \
         /* New stuff */                                                                          \
         TAILQ_HEAD( tailhead ##PRETTYNAME, TailQListEntry ## PRETTYNAME ) head;                  \
         struct tailhead ##PRETTYNAME  *headp;                                                    \
     } TailQList ##PRETTYNAME;                                                                    \
     PUBLIC_EXTERN TailQList ## PRETTYNAME  *NewTailQList ## PRETTYNAME();                        \
-        TailQListEntry ## PRETTYNAME *NewTailQListEntry ## PRETTYNAME( TYPE value );             \
-        AIORET_TYPE DeleteTailQListEntry ## PRETTYNAME( TailQListEntry ## PRETTYNAME *entry );   \
+    TailQListEntry ## PRETTYNAME *NewTailQListEntry ## PRETTYNAME( TYPE value );                 \
+    AIORET_TYPE DeleteTailQListEntry ## PRETTYNAME( TailQListEntry ## PRETTYNAME *entry );       \
+    int TailQList ## PRETTYNAME ## Size( TailQList ## PRETTYNAME  *list );                       \
     char *TailQListEntry ## PRETTYNAME ## ToString( TailQListEntry ## PRETTYNAME *entry );       \
     char *TailQList ## PRETTYNAME ## ToString( TailQList ## PRETTYNAME  *list );                 \
     AIORET_TYPE DeleteTailQList ## PRETTYNAME ( TailQList ## PRETTYNAME  *list );                \
@@ -95,6 +97,7 @@ __NL__                started = 0;                                              
 __NL__            }                                                                                           \
 __NL__            return tmp;                                                                                 \
 __NL__        }                                                                                               \
+__NL__        int TailQList ## PRETTYNAME ## Size( TailQList ## PRETTYNAME  *list ) {return list->_size;}     \
 __NL__                                                                                                        \
 __NL__        AIORET_TYPE DeleteTailQList ## PRETTYNAME ( TailQList ## PRETTYNAME  *list ) {                  \
 __NL__            AIO_ASSERT(list);                                                                           \
@@ -112,6 +115,7 @@ __NL__        AIORET_TYPE TailQList ## PRETTYNAME ## Insert( TailQList ## PRETTY
 __NL__                                                    TailQListEntry ## PRETTYNAME *nnode ) {             \
 __NL__            AIO_ASSERT( list ); AIO_ASSERT( nnode );                                                    \
 __NL__            TAILQ_INSERT_TAIL( &list->head, nnode, entries );                                           \
+__NL__            list->_size ++;                                                                             \
 __NL__            return AIOUSB_SUCCESS;                                                                      \
 __NL__        }
 
