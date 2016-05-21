@@ -56,6 +56,7 @@
   #include "AIOUSB_DIO.h"
   #include "AIOBuf.h"
   #include "DIOBuf.h"
+  #include "AIOList.h"
   #include "libusb.h"
   #include <pthread.h>
 %}
@@ -91,6 +92,62 @@
 %typemap(jtype)  (int *argc, char **argv) "String[]"
 %typemap(jstype) (int *argc, char **argv) "String[]"
 %typemap(javain) (int *argc, char **argv) "$javainput"
+
+
+/*---------------- intlist * ----------------  */
+%typemap(in) (intlist *indices ) {
+    intlist *tmp = NewTailQListint();
+    $1 = tmp;
+}
+
+%typemap(argout) (intlist *indices ) {
+    /* printf("BAAR\n"); */
+    jclass cls = (*jenv)->FindClass(jenv, "java/util/ArrayList");
+    jclass intCls =  (*jenv)->FindClass(jenv, "java/lang/Integer");
+    /* printf("Found cls: %d\n", (int)cls ); */
+    /* printf("Found cls: %d\n", (int)intCls ); */
+
+    intlistentry *np;                       
+    /* printf("Finding class arrayList\n"); */
+    (*jenv)->FindClass(jenv, "java/util/ArrayList");
+    /* printf("Found class arraylist\n"); */
+    /* a.clear(); */   
+    jmethodID clearMethod = (*jenv)->GetMethodID(jenv, cls, "clear", "()V");
+    jmethodID initMethod = (*jenv)->GetMethodID(jenv, cls, "<init>", "()V");
+    jmethodID addMethod  = (*jenv)->GetMethodID(jenv, cls, "add", "(Ljava/lang/Object;)Z");  
+    jmethodID sizeMethod = (*jenv)->GetMethodID(jenv, cls, "size", "()I");
+    jmethodID intInit = (*jenv)->GetMethodID(jenv, intCls, "<init>", "(I)V" );
+
+    /* printf("Found clearMethod:%lx\n", clearMethod ); */
+    /* printf("Found initMethod:%lx\n", initMethod ); */
+    /* printf("Found addMethod:%lx\n", addMethod ); */
+    /* printf("Found sizeMethod:%lx\n", sizeMethod ); */
+    /* printf("Found intInit:%lx\n", intInit ); */
+
+    (*jenv)->CallObjectMethod(jenv, jarg1, clearMethod );
+    /* printf("Called clear on the jarg1\n"); */
+    for (np = $1->head.tqh_first; np != NULL; np = np->entries.tqe_next) {                    
+        /* printf("Value was %d\n", np->_value ); */
+        jobject tmpobj =  (*jenv)->NewObject(jenv, intCls  ,intInit , np->_value );
+        /* printf("tmpobj was %d\n", (jint)tmpobj ); */
+        /* printf("Value was %d\n", (jint)np->_value ); */
+        /* return env->NewObject(cls, methodID, value); */
+        /* (*jenv)->NewStringUTF(s.c_str()); */
+        (*jenv)->CallObjectMethod(jenv, jarg1, addMethod, tmpobj  ); 
+    }                                                                                           
+}
+
+%typemap(freearg) (intlist *indices) {
+    if ($1) 
+        DeleteTailQListint( $1 );
+}
+
+%typemap(jni)    intlist *indices  "jobject"
+%typemap(jtype)  intlist *indices  "java.util.ArrayList"
+%typemap(jstype) intlist *indices  "java.util.ArrayList"
+%typemap(javain) intlist *indices  "$javainput"
+
+
 
 #endif
 
@@ -178,7 +235,6 @@
 %typemap(in) (intlist *indices ) {
     intlist *tmp = Newintlist();
     $1 = tmp;
-    /* printf("FOOO\n"); */
 }
 
 %typemap(argout) (intlist *indices) {
@@ -447,6 +503,7 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsign
 %include "cJSON.h"
 %include "AIOBuf.h"
 %include "DIOBuf.h"
+
 
 /* Functions that require special care */
 #if !defined(SWIGJAVA)
