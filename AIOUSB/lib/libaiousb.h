@@ -749,7 +749,7 @@ PUBLIC_EXTERN AIORET_TYPE AIOUSB_ShowDevices( AIODisplayType display_type );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_FindDevices( int **where, int *length , AIOUSB_BOOL (*is_ok_device)( AIOUSBDevice *dev )  );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_FindDevicesByGroup( int **where, int *length, AIOProductGroup *pg );
 #endif
-
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_FindDeviceIndicesByGroup( intlist *indices, AIOProductGroup *pg );
 
 
 /* #include "AIOUSB_WDG.h" */
