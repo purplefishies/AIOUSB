@@ -1,5 +1,6 @@
 
 %module AIOUSB
+
 %include "cpointer.i"
 %include "carrays.i"
 %include "typemaps.i"
@@ -37,6 +38,7 @@
 %}
 
 %{
+
   #include "AIOTypes.h"
   #include "AIOUSB_Core.h"
   #include "AIOCommandLine.h"

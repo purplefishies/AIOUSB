@@ -1,3 +1,4 @@
+
 %define %aioarray_class(TYPE,NAME)
 /* #if defined(SWIGPYTHON_BUILTIN) */
 /*   %feature("python:slot", "sq_item", functype="ssizeargfunc") NAME::__getitem__; */
@@ -50,13 +51,28 @@ typedef struct {
       self->el[index] = value;
   }
   
-#if defined(SWIGPERL)
+#if defined(SWIGPERL) || defined(SWIGJAVA)
   TYPE get(int index) { 
       return self->el[index];
   }
 
   void set(int index, TYPE value ) {
       self->el[index] = value;
+  }
+#endif
+#if defined(SWIGJAVA)
+  #include <stdio.h>
+  char *toString() { 
+      char *tmp = (char *)calloc(1,sizeof(char));
+      tmp[0] = '\0';
+      for ( int i = 0; i < self->_size; i ++ ) {
+          char *hold = 0;
+          asprintf(&hold,"%s%s%d", tmp , ( i == 0 ? "" : "," ), (int)self->el[i] );
+          if (tmp) 
+              free(tmp);
+          tmp = hold;
+      }
+      return tmp;
   }
 #endif
 
@@ -69,7 +85,7 @@ typedef struct {
   }
 
 }
-
+#if !defined(SWIGJAVA)
 %extend NAME {
     const char *__repr__() {
         static char buf[BUFSIZ];
@@ -83,7 +99,7 @@ typedef struct {
         return buf;
     }
 }
-
+#endif
 #if defined(SWIGPERL)
 %perlcode %{
     {
