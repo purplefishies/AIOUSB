@@ -18,7 +18,7 @@ MKDIR		:= mkdir
 
 include $(AIOUSB_ROOT)/Mkfiles/oses.inc
 
-override CFLAGS     += -I. -I/usr/include/libusb-1.0 -std=gnu99
+override CFLAGS     += -I. -I/usr/include/libusb-1.0 -D_GNU_SOURCE=1 -std=gnu99
 
 LIBDIR		:= $(shell printenv AIOUSB_ROOT)/lib
 CLASSLIBDIR	:= $(shell printenv AIOUSB_ROOT)/classlib
