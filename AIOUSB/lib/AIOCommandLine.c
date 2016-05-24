@@ -193,6 +193,7 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
         memcpy(argv,oargv,(*argc)*sizeof(char *));
         if( c == -1 && optind == *argc )
             break;
+        
         switch (c) {
         case 'R':
             if( !( tmp = AIOGetChannelRange(optarg)) ) {
@@ -311,6 +312,9 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
                 }
                 goto endloop;
             } else {
+                if ( optind == indprev && c == '?' ) {
+                    optind ++;
+                }
                 keepsize += (optind - indprev);
                 keepindices = (int*)realloc(keepindices,sizeof(int *)*keepsize);
                 for( int i = indprev; i < optind; i ++ , keepcount ++) { 
@@ -823,6 +827,46 @@ TEST( AIOCmdLine, EatAllArguments )
     ASSERT_EQ(4, argc2 ) << "should be removed leaving us with 4 args\n";
 
     DeleteAIOCommandLineOptions( nopts );
+}
+
+TEST( AIOCmdLine, Java_arguments )
+{
+    AIOCommandLineOptions *nopts = NewAIOCommandLineOptionsFromDefaultOptions( AIO_SCRIPTING_OPTIONS() );
+    AIORET_TYPE retval;
+    ASSERT_TRUE( nopts );
+
+    char *argv1[] = {(char *)"tmp",(char *)"-N",(char *)"1000",(char *)"-foo",(char *)"3434"};
+
+    int argc1 = sizeof(argv1)/sizeof(char*);
+
+    retval = AIOProcessCommandLine( nopts, &argc1, argv1 );
+    ASSERT_EQ( retval, 0 );
+    ASSERT_EQ( 3 , argc1 );
+    ASSERT_STREQ( argv1[0] , (char *)"tmp" );
+    ASSERT_STREQ( argv1[1] , (char *)"-foo" );
+    ASSERT_STREQ( argv1[2] , (char *)"3434" );
+
+}
+
+TEST( AIOCmdLine, Java_arguments2 )
+{
+    AIOCommandLineOptions *nopts = NewAIOCommandLineOptionsFromDefaultOptions( AIO_SCRIPTING_OPTIONS() );
+    AIORET_TYPE retval;
+    ASSERT_TRUE( nopts );
+
+    char *argv1[] = {(char *)"tmp",(char *)"-N",(char *)"1000",(char*)"-foo",(char*)"23",
+                     (char *)"--range",(char *)"0-10=0" };
+
+    int argc1 = sizeof(argv1)/sizeof(char*);
+
+    retval = AIOProcessCommandLine( nopts, &argc1, argv1 );
+    ASSERT_EQ( retval, 0 );
+
+    ASSERT_EQ( 3 , argc1 );
+    ASSERT_STREQ( argv1[0] , (char *)"tmp" );
+    ASSERT_STREQ( argv1[1] , (char *)"-foo" );
+    ASSERT_STREQ( argv1[2] , (char *)"23" );
+
 }
 
 
