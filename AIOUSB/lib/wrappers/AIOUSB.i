@@ -63,36 +63,74 @@
   #include <pthread.h>
 %}
 
-
 #if defined(SWIGJAVA)
+/* ArrayList in of Arguments */
 %typemap(in) ( int *argc, char **argv ) {
-         int i = 0;
-         int tmpval;
-         $1 = &tmpval;
-         tmpval = (*jenv)->GetArrayLength(jenv, $input);
-         $2 = (char **) malloc((*$1+1)*sizeof(char *));
-         /* make a copy of each string */
-         for (i = 0; i<*$1; i++) {
-              jstring j_string = (jstring)(*jenv)->GetObjectArrayElement(jenv, $input, i);
-              const char * c_string = (*jenv)->GetStringUTFChars(jenv, j_string, 0);
-              $2[i] = malloc((strlen(c_string)+1)*sizeof(char));
-              strcpy($2[i], c_string);
-              (*jenv)->ReleaseStringUTFChars(jenv, j_string, c_string);
-              (*jenv)->DeleteLocalRef(jenv, j_string);
-         }
-         $2[i] = 0;
+    jclass cls = (*jenv)->FindClass(jenv, "java/util/ArrayList");
+    jmethodID sizeMethod = (*jenv)->GetMethodID(jenv, cls, "size", "()I");
+    jmethodID getMethod = (*jenv)->GetMethodID(jenv, cls, "get", "(I)Ljava/lang/Object;");
+    /* printf("sizeMethod was %d\n", (int)sizeMethod ); */
+    /* printf("getMethod was %d\n", (int)getMethod ); */
+    int i = 0;
+    int tmpval;
+    tmpval = (int)(long)(*jenv)->CallObjectMethod(jenv, jarg2, sizeMethod  );
+    tmpval ++;
+    /* printf("Got size %d\n", tmpval ); */
+    
+    $1 = &tmpval;
+    /* printf("Allocating of size %d  * %d  = %d\n", (*$1+1),sizeof(char*),((*$1+1)*sizeof(char *))); */
+    // Java needs an extra one 
+    $2 = (char **) malloc((*$1+1)*sizeof(char *));
+    $2[0] = "tmp";
+    /* printf("using string %s\n", $2[0] ); */
+    for (i = 1; i<*$1; i++) {
+        jstring jstr = (*jenv)->CallObjectMethod(jenv, jarg2, getMethod, i-1 );
+        const char *cstr = (const char *)(*jenv)->GetStringUTFChars(jenv, jstr, 0);
+        /* printf("using string %s\n", cstr ); */
+        $2[i] = (char *)cstr;
+    }
+    /* printf("final value\n"); */
+    $2[i+1] = 0;
+    /* for ( i = 0; i < *$1; i ++ ) { */
+    /*     printf("%s ",$2[i]); */
+    /* } */
+    /* printf("\n"); */
+    /* printf("size: %d\n", *$1 ); */
 }
 
 %typemap(freearg) (int *argc, char **argv) {
-    int i;
-    for (i=0; i<*$1-1; i++)
-        free($2[i]);
     free($2);
  }
 
-%typemap(jni)    (int *argc, char **argv) "jobjectArray"
-%typemap(jtype)  (int *argc, char **argv) "String[]"
-%typemap(jstype) (int *argc, char **argv) "String[]"
+%typemap(argout) (int *argc, char **argv) {
+
+    jclass cls = (*jenv)->FindClass(jenv, "java/util/ArrayList");
+    jclass strCls =  (*jenv)->FindClass(jenv, "java/lang/Integer");
+    int i ;
+    intlistentry *np;                       
+    /* for ( i =0 ; i < *$1+1 ; i ++ ) { */
+    /*     printf("$2[%d]=%s\n", i, $2[i] ); */
+    /* } */
+
+    (*jenv)->FindClass(jenv, "java/util/ArrayList");
+
+    jmethodID clearMethod = (*jenv)->GetMethodID(jenv, cls, "clear", "()V");
+    jmethodID addMethod  = (*jenv)->GetMethodID(jenv, cls, "add", "(Ljava/lang/Object;)Z");  
+    jmethodID sizeMethod = (*jenv)->GetMethodID(jenv, cls, "size", "()I");
+
+    (*jenv)->CallObjectMethod(jenv, jarg2, clearMethod );
+    /* printf("New size: %d\n",  (int)(*jenv)->CallObjectMethod(jenv, jarg2, sizeMethod ) ); */
+    /* printf("After : size=%d\n", *$1 ); */
+
+    for ( i = 1; i < *$1; i ++ ) { 
+        jstring temp_string = (*jenv)->NewStringUTF(jenv, $2[i] );
+        (*jenv)->CallObjectMethod(jenv, jarg2, addMethod, temp_string  ); 
+    }
+}
+
+%typemap(jni)    (int *argc, char **argv) "jobject"
+%typemap(jtype)  (int *argc, char **argv) "java.util.ArrayList"
+%typemap(jstype) (int *argc, char **argv) "java.util.ArrayList"
 %typemap(javain) (int *argc, char **argv) "$javainput"
 
 
@@ -103,38 +141,22 @@
 }
 
 %typemap(argout) (intlist *indices ) {
-    /* printf("BAAR\n"); */
     jclass cls = (*jenv)->FindClass(jenv, "java/util/ArrayList");
     jclass intCls =  (*jenv)->FindClass(jenv, "java/lang/Integer");
-    /* printf("Found cls: %d\n", (int)cls ); */
-    /* printf("Found cls: %d\n", (int)intCls ); */
 
     intlistentry *np;                       
-    /* printf("Finding class arrayList\n"); */
+
     (*jenv)->FindClass(jenv, "java/util/ArrayList");
-    /* printf("Found class arraylist\n"); */
-    /* a.clear(); */   
+
     jmethodID clearMethod = (*jenv)->GetMethodID(jenv, cls, "clear", "()V");
     jmethodID initMethod = (*jenv)->GetMethodID(jenv, cls, "<init>", "()V");
     jmethodID addMethod  = (*jenv)->GetMethodID(jenv, cls, "add", "(Ljava/lang/Object;)Z");  
     jmethodID sizeMethod = (*jenv)->GetMethodID(jenv, cls, "size", "()I");
     jmethodID intInit = (*jenv)->GetMethodID(jenv, intCls, "<init>", "(I)V" );
 
-    /* printf("Found clearMethod:%lx\n", clearMethod ); */
-    /* printf("Found initMethod:%lx\n", initMethod ); */
-    /* printf("Found addMethod:%lx\n", addMethod ); */
-    /* printf("Found sizeMethod:%lx\n", sizeMethod ); */
-    /* printf("Found intInit:%lx\n", intInit ); */
-
     (*jenv)->CallObjectMethod(jenv, jarg1, clearMethod );
-    /* printf("Called clear on the jarg1\n"); */
     for (np = $1->head.tqh_first; np != NULL; np = np->entries.tqe_next) {                    
-        /* printf("Value was %d\n", np->_value ); */
         jobject tmpobj =  (*jenv)->NewObject(jenv, intCls  ,intInit , np->_value );
-        /* printf("tmpobj was %d\n", (jint)tmpobj ); */
-        /* printf("Value was %d\n", (jint)np->_value ); */
-        /* return env->NewObject(cls, methodID, value); */
-        /* (*jenv)->NewStringUTF(s.c_str()); */
         (*jenv)->CallObjectMethod(jenv, jarg1, addMethod, tmpobj  ); 
     }                                                                                           
 }
@@ -506,13 +528,6 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsign
 %include "AIOBuf.h"
 %include "DIOBuf.h"
 
-
-/* Functions that require special care */
-#if !defined(SWIGJAVA)
-PUBLIC_EXTERN AIORET_TYPE AIOUSB_FindDevicesByGroup( int **where, int *length, AIOProductGroup *pg );
-#else 
-/* AIOTUPLE2_PTR(AIOTuple2_AIORET_TYPE__char_p_p, AIORET_TYPE,char **) AIOUSB_FindDevicesByGroup( int **where, int *length, AIOProductGroup *pg ); */
-#endif
 
 %aioarray_class(unsigned short,ushortarray)
 %aioarray_class(double,doublearray)
