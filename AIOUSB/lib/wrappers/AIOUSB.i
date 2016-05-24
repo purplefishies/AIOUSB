@@ -69,33 +69,20 @@
     jclass cls = (*jenv)->FindClass(jenv, "java/util/ArrayList");
     jmethodID sizeMethod = (*jenv)->GetMethodID(jenv, cls, "size", "()I");
     jmethodID getMethod = (*jenv)->GetMethodID(jenv, cls, "get", "(I)Ljava/lang/Object;");
-    /* printf("sizeMethod was %d\n", (int)sizeMethod ); */
-    /* printf("getMethod was %d\n", (int)getMethod ); */
     int i = 0;
     int tmpval;
     tmpval = (int)(long)(*jenv)->CallObjectMethod(jenv, jarg2, sizeMethod  );
     tmpval ++;
-    /* printf("Got size %d\n", tmpval ); */
-    
     $1 = &tmpval;
-    /* printf("Allocating of size %d  * %d  = %d\n", (*$1+1),sizeof(char*),((*$1+1)*sizeof(char *))); */
     // Java needs an extra one 
     $2 = (char **) malloc((*$1+1)*sizeof(char *));
     $2[0] = "tmp";
-    /* printf("using string %s\n", $2[0] ); */
     for (i = 1; i<*$1; i++) {
         jstring jstr = (*jenv)->CallObjectMethod(jenv, jarg2, getMethod, i-1 );
         const char *cstr = (const char *)(*jenv)->GetStringUTFChars(jenv, jstr, 0);
-        /* printf("using string %s\n", cstr ); */
         $2[i] = (char *)cstr;
     }
-    /* printf("final value\n"); */
     $2[i+1] = 0;
-    /* for ( i = 0; i < *$1; i ++ ) { */
-    /*     printf("%s ",$2[i]); */
-    /* } */
-    /* printf("\n"); */
-    /* printf("size: %d\n", *$1 ); */
 }
 
 %typemap(freearg) (int *argc, char **argv) {
@@ -108,10 +95,6 @@
     jclass strCls =  (*jenv)->FindClass(jenv, "java/lang/Integer");
     int i ;
     intlistentry *np;                       
-    /* for ( i =0 ; i < *$1+1 ; i ++ ) { */
-    /*     printf("$2[%d]=%s\n", i, $2[i] ); */
-    /* } */
-
     (*jenv)->FindClass(jenv, "java/util/ArrayList");
 
     jmethodID clearMethod = (*jenv)->GetMethodID(jenv, cls, "clear", "()V");
@@ -119,9 +102,6 @@
     jmethodID sizeMethod = (*jenv)->GetMethodID(jenv, cls, "size", "()I");
 
     (*jenv)->CallObjectMethod(jenv, jarg2, clearMethod );
-    /* printf("New size: %d\n",  (int)(*jenv)->CallObjectMethod(jenv, jarg2, sizeMethod ) ); */
-    /* printf("After : size=%d\n", *$1 ); */
-
     for ( i = 1; i < *$1; i ++ ) { 
         jstring temp_string = (*jenv)->NewStringUTF(jenv, $2[i] );
         (*jenv)->CallObjectMethod(jenv, jarg2, addMethod, temp_string  ); 
