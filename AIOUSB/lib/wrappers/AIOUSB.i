@@ -74,7 +74,8 @@
     tmpval = (int)(long)(*jenv)->CallObjectMethod(jenv, jarg2, sizeMethod  );
     tmpval ++;
     $1 = &tmpval;
-    // Java needs an extra one 
+    // Java needs an extra one for
+    // the name of the process
     $2 = (char **) malloc((*$1+1)*sizeof(char *));
     $2[0] = "tmp";
     for (i = 1; i<*$1; i++) {
