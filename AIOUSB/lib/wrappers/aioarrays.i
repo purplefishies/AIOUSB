@@ -29,6 +29,11 @@ typedef struct {
 } NAME;
 %}
 
+#if defined(SWIGJAVA)
+%newobject NAME::toString;
+#endif
+
+
 %extend NAME {
 
   NAME(size_t nelements) {
@@ -43,6 +48,7 @@ typedef struct {
       free(self);
   }
   
+#if defined (SWIGRUBY) || defined(SWIGPYTHON)
   TYPE __getitem__(int index) {
       return self->el[index];
   }
@@ -50,6 +56,7 @@ typedef struct {
   void __setitem__(int index, TYPE value) {
       self->el[index] = value;
   }
+#endif
   
 #if defined(SWIGPERL) || defined(SWIGJAVA)
   TYPE get(int index) { 
