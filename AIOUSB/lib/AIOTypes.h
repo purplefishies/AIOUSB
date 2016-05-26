@@ -150,12 +150,15 @@ enum {
  *
  */
 
+#define AIO_ERROR(X) ( -abs(X) )
 #define AIO_ERROR_VALID_DATA(err,...) if ( !(__VA_ARGS__) ) { return err; }
 #define AIO_ERROR_VALID_DATA_RETVAL( err, ... ) if ( !(__VA_ARGS__) ) { return -abs(err); }
 #define AIO_ERROR_VALID_AIORET_TYPE( err, ... ) if ( !(__VA_ARGS__) ) { return -abs(err); }
 #define AIO_ERROR_AIOEITHER_VALID_DATA(err,...) if ( !(__VA_ARGS__) ) { \
         AIOEither tmp; tmp.left = err; tmp.errmsg=NULL; return tmp; }
 #define AIO_ERROR_VALID_DATA_W_CODE(err, code, ... ) if ( !(__VA_ARGS__) ) { { code; }; return err; }
+#define AIO_ERROR_VALID_DATA_WITH_CODE(retval, err, code ) if ( ! (code) ) { errno = -abs(err); return retval; }
+
 
 #if !(defined (G_STMT_START) && defined (G_STMT_END))
 #define G_STMT_START  do
