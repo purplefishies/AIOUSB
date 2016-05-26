@@ -1,5 +1,6 @@
 #include "AIODeviceTable.h" 
 #include <string.h>
+#include <errno.h>
 
 #ifdef __cplusplus
 namespace AIOUSB {
@@ -1033,6 +1034,67 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , AIORES
     return retval;
 }
 
+/*----------------------------------------------------------------------------*/ 
+AIOUSBDevice *AIODeviceTableGetAIOUSBDeviceAtIndex( unsigned long DeviceIndex ) 
+{
+    AIOUSBDevice *retval = NULL;
+    AIORESULT value = AIOUSB_SUCCESS;
+    AIORESULT *res = &value;
+    errno = AIOUSB_SUCCESS;
+
+    AIO_ERROR_VALID_DATA_WITH_CODE( NULL, AIOUSB_ERROR_NOT_INIT, AIOUSB_IsInit() == AIOUSB_TRUE );
+
+    if (DeviceIndex == diFirst) { /* find first device on bus */
+        errno = AIO_ERROR(AIOUSB_ERROR_DEVICE_NOT_FOUND);
+        int index;
+        for(index = 0; index < MAX_USB_DEVICES; index++) {
+            if ( (retval = _verified_device(_get_device(index , res ), res )) && *res == AIOUSB_SUCCESS ) {
+                errno = AIOUSB_SUCCESS;
+                DeviceIndex = index;
+                break;
+            }
+        }
+    } else if (DeviceIndex == diOnly) {
+        /*
+         * find first device on bus, ensuring that it's the only device
+         */
+        errno = AIO_ERROR(AIOUSB_ERROR_DEVICE_NOT_FOUND);
+        int index;
+        for(index = 0; index < MAX_USB_DEVICES; index++) {
+            if ( (retval = _verified_device(_get_device(index, res ), res )) ) {
+                /* found a device */
+                if ( *res != AIOUSB_SUCCESS) {
+                    /*
+                     * this is the first device found; save this index, but
+                     * keep checking to see that this is the only device
+                     */
+                    DeviceIndex = index;
+                    errno = AIOUSB_SUCCESS;
+                } else {
+                    /*
+                     * there are multiple devices on the bus
+                     */
+                    errno = AIO_ERROR(AIOUSB_ERROR_DUP_NAME);
+                    retval = NULL;
+                    break;
+                }
+            }
+        }
+    } else {
+        /*
+         * simply verify that the supplied index is valid
+         */
+        retval = _verified_device( _get_device( DeviceIndex , res ), res );
+        if ( retval )
+            errno = AIOUSB_SUCCESS;
+        else
+            errno = AIO_ERROR(AIOUSB_ERROR_DEVICE_NOT_FOUND);
+    }
+
+    return retval;
+}
+
+
 /*----------------------------------------------------------------------------*/
 void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID ) 
 {
@@ -1631,6 +1693,27 @@ TEST(AIODeviceTable, SetsUpDefaults )
     EXPECT_EQ( retval, AIOUSB_SUCCESS );
 
     EXPECT_EQ( ((AIOUSBDevice *)&deviceTable[1])->DIOBytes, 4  );
+    ClearAIODeviceTable( numDevices );
+}
+
+TEST(AIODeviceTable,IncorrectIndices)
+{
+    int numDevices = 0;
+    AIORET_TYPE result;
+    AIOUSB_BOOL tmp;
+    AIODeviceTableInit();    
+    result = AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( &numDevices, USB_AI16_16E, NULL );
+    AIOUSBDevice *blah = AIODeviceTableGetAIOUSBDeviceAtIndex( 0 );
+    
+    ASSERT_TRUE( blah );
+    
+
+    blah = AIODeviceTableGetAIOUSBDeviceAtIndex( 55 );
+
+    ASSERT_FALSE( blah );
+
+    ASSERT_LT( errno, AIOUSB_SUCCESS );
+
     ClearAIODeviceTable( numDevices );
 }
 

@@ -8,6 +8,7 @@
 
 #include "libusb.h"
 #include <stdlib.h>
+#include <errno.h>
 
 #ifdef __aiousb_cplusplus
 namespace AIOUSB
@@ -23,6 +24,7 @@ PUBLIC_EXTERN AIORET_TYPE AIODeviceTablePopulateTableTest(unsigned long *product
 PUBLIC_EXTERN AIORESULT AIODeviceTableClearDevices( void );
 PUBLIC_EXTERN AIORESULT ClearDevices( void );
 PUBLIC_EXTERN AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , AIORESULT *res );
+PUBLIC_EXTERN AIOUSBDevice *AIODeviceTableGetAIOUSBDeviceAtIndex( unsigned long DeviceIndex );
 PUBLIC_EXTERN USBDevice *AIODeviceTableGetUSBDeviceAtIndex( unsigned long DeviceIndex, AIORESULT *res );
 void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID );
 
