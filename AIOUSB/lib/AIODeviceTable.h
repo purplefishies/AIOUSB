@@ -45,6 +45,9 @@ PUBLIC_EXTERN void CloseAllDevices(void);
 PUBLIC_EXTERN AIORESULT AIOUSB_GetAllDevices();
 
 PUBLIC_EXTERN unsigned long AIOUSB_INIT_PATTERN;
+
+PUBLIC_EXTERN AIORET_TYPE AIOUSBGetError();
+
 /* END AIOUSB_API */
 
 #ifdef __aiousb_cplusplus

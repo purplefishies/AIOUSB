@@ -1094,6 +1094,11 @@ AIOUSBDevice *AIODeviceTableGetAIOUSBDeviceAtIndex( unsigned long DeviceIndex )
     return retval;
 }
 
+/*----------------------------------------------------------------------------*/
+AIORET_TYPE AIOUSBGetError()
+{
+    return (AIORET_TYPE)errno;
+}
 
 /*----------------------------------------------------------------------------*/
 void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID ) 
