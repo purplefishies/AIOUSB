@@ -1,4 +1,5 @@
 #include "AIOCommandLine.h"
+#include "AIOList.h"
 
 extern int opterr;
 extern int optind;
@@ -503,7 +504,16 @@ AIORET_TYPE DeleteAIOCommandLineOptions( AIOCommandLineOptions *options )
 /*---------------------------         DEPRECATED    --------------------------*/
 AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *indices, int num_devices )
 {
-    return AIOCommandLineOptionsListDevices( options, indices, num_devices );
+    intlist *tmplist = Newintlist();
+    if ( !tmplist ) {
+        return AIOUSB_ERROR_VALUE(AIOUSB_ERROR_NOT_ENOUGH_MEMORY);
+    }
+    int i;
+    for ( i = 0; i < num_devices ; i ++ ) {
+        intlistInsert( tmplist, indices[i] );
+    }
+
+    return AIOCommandLineOptionsListDevices( options, tmplist );
 }
 
 /*----------------------------------------------------------------------------*/
@@ -515,28 +525,34 @@ AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *ind
  * @param num_devices number of devices in the array
  * @return >= AIOUSB_SUCCESS if devices have been found, < 0 if no devices found
  */
-AIORET_TYPE AIOCommandLineOptionsListDevices( AIOCommandLineOptions *options , int *indices, int num_devices )
+/* AIORET_TYPE AIOCommandLineOptionsListDevices( AIOCommandLineOptions *options , intlist *indices, int num_devices ) */
+AIORET_TYPE AIOCommandLineOptionsListDevices( AIOCommandLineOptions *options , intlist *indices )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
     AIOUSB_ListDevices();
-    if ( num_devices <= 0 ) {
+    if ( intlistSize( indices ) <= 0 ) {
         fprintf(stderr,"No devices were found\n");
-        retval = -AIOUSB_ERROR_DEVICE_NOT_FOUND;
+        retval = AIOUSB_ERROR_VALUE(AIOUSB_ERROR_DEVICE_NOT_FOUND);
     } else {
-        if ( options->index < 0 ) 
-            options->index = indices[0];
+        int num_devices = intlistSize( indices );
         fprintf(stderr,"Matching devices found at indices: ");
-        options->index = ( options->index < 0 ? indices[0] : options->index );
-        int i;
-        for (i = 0; i < num_devices - 1; i ++ ) { 
-            fprintf(stderr, "%d",indices[i] );
+        options->index = ( options->index < 0 ? intlistFirst( indices ) : options->index );
+        options->index = 0;
+        int i,j=0;
+        /* for (i = 0; i < intlistSize( indices ) ; i ++ ) { */
+        foreach_int( i, indices) {
+            if ( j >= TailQListintSize( indices ) - 1  )
+                break;
+            fprintf(stderr, "%d", i  );
             if ( num_devices > 2 )
-                fprintf(stderr,", "); 
+                fprintf(stderr,", ");
         }
-        if ( num_devices > 1 ) 
+        if ( num_devices > 1 )
             fprintf(stderr," and ");
+        if ( TailQListintLast( indices ) ) { 
+            fprintf(stderr, "%d , Using index=%d \n", TailQListintLastValue( indices ) , options->index  );
+        }
 
-        fprintf(stderr, "%d , Using index=%d \n",indices[i], options->index);
     }
     return retval;
 

@@ -24,6 +24,22 @@ AIORET_TYPE Deleteint( int val ) {
 TAIL_Q_LIST_IMPLEMENTATION( CStringArray *, CStringArray_p );
 TAIL_Q_LIST_IMPLEMENTATION( int, int );
 
+int newone;
+
+int intlistFirst( intlist *list ) { 
+    TailQListEntryint *ent = TailQListintFirst( list );
+    assert(ent);
+    return ent->_value;
+}
+
+/* #define foreach_int( J, ILIST ) for ( intlistentry *_ ## IVAL = TailQListintFirst( ILIST) ; _ ## IVAL && (J = _##IVAL->_value); _ ## IVAL = _ ## IVAL->entries.tqe_next ) */
+
+intlist *Newintlist() { return NewTailQListint(); }
+AIORET_TYPE Deleteintlist(intlist *list) { return DeleteTailQListint(list); }
+char *intlistToString( intlist *list) { return TailQListintToString( list ); };
+int intlistSize(intlist *list) { return TailQListintSize( list ); };
+AIORET_TYPE intlistInsert( intlist *list, int tmpval ) { intlistentry *val = NewTailQListEntryint( tmpval ); if (!val ) { return AIOUSB_ERROR_VALUE(AIOUSB_ERROR_NOT_ENOUGH_MEMORY); } return TailQListintInsert( list, val ); }
+
 
 #ifdef __cplusplus
 }
@@ -70,6 +86,55 @@ TEST(Qlist,CStringArray)
     free(hold);
 
     DeleteTailQListCStringArray_p( tmp );
+}
+
+
+
+TEST(intlist,BasicTest) 
+{
+   intlist *tmp = Newintlist();
+   char *hold = 0;
+   int expected[] = {23, 48, 56};
+   intlistInsert( tmp, 23 );
+   intlistInsert( tmp, 48 );
+   intlistInsert( tmp, 56 );
+   ASSERT_EQ( TailQListintSize(tmp), 3 );
+   ASSERT_STREQ((hold=TailQListintToString( tmp )), (char *)"23,48,56" ); 
+   int i = 0;
+   int j;
+   foreach_int( j,  tmp ) { 
+       ASSERT_EQ( expected[i], j );
+       i ++;
+   }
+
+   free(hold);
+   DeleteTailQListint( tmp );
+}
+
+TEST(intlist,Iterate) {
+   intlist *indices = Newintlist();
+   char *hold = 0;
+   int expected[] = {23, 48, 56, 64};
+   for( int i = 0; i < sizeof(expected)/sizeof(int); i ++ ) { 
+       intlistInsert( indices, expected[i] );
+   }
+
+   ASSERT_EQ( TailQListintSize(indices), sizeof(expected)/sizeof(int) );
+
+   int i = 0;
+   int k;
+   foreach_int( k, indices ) {
+       if ( i >= TailQListintSize( indices ) - 1 )
+           break;
+       ASSERT_EQ( expected[i], k );
+       i ++;
+   }
+   ASSERT_EQ( i, TailQListintSize( indices ) - 1);
+   
+   ASSERT_EQ( TailQListEntryintToint(TailQListintLast( indices )), expected[sizeof(expected)/sizeof(int)-1] );
+
+   free(hold);
+   DeleteTailQListint( indices );
 }
 
 int 

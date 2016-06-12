@@ -127,6 +127,7 @@ enum {
 };
 
 #define AIO_MAKE_ERROR(N) -1*abs(N)
+#define AIOUSB_ERROR_VALUE(N) -1*abs(N)
 
 #define AIO_ASSERT(...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { errno = -AIOUSB_ERROR_INVALID_PARAMETER; return -AIOUSB_ERROR_INVALID_PARAMETER; }
 #define AIO_ASSERT_RET(ret,...) assert( __VA_ARGS__ ); if (!( __VA_ARGS__) ) { return ret; }

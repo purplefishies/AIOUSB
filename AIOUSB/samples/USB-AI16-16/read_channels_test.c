@@ -26,8 +26,7 @@ int main( int argc, char **argv )
 {
     AIOCommandLineOptions *options = NewDefaultAIOCommandLineOptions();
     AIORET_TYPE retval = AIOUSB_SUCCESS;
-    int *indices;
-    int num_devices;
+    intlist *indices = Newintlist();
     ADCConfigBlock *config;
     AIOUSBDevice *dev;
     USBDevice *usb;
@@ -66,9 +65,10 @@ int main( int argc, char **argv )
         exit(retval);
 
     /* AIOUSB_FindDevices( &indices, &num_devices, find_ai_board ); */
-    AIOUSB_FindDevicesByGroup( &indices, &num_devices, AIO_ANALOG_INPUT() );
+    AIOUSB_FindDeviceIndicesByGroup( indices, AIO_ANALOG_INPUT() );
+         /* AIOUSB_FindDevicesByGroup( &indices, &num_devices, AIO_ANALOG_INPUT() ); */
 
-    if ( ( retval = AIOCommandLineOptionsListDevices( options, indices, num_devices )) < AIOUSB_SUCCESS )
+    if ( ( retval = AIOCommandLineOptionsListDevices( options, indices )) < AIOUSB_SUCCESS )
         exit(retval);
 
     if ( (config = NewADCConfigBlockFromJSON( AIOCommandLineOptionsGetDefaultADCJSONConfig(options) )) == NULL )

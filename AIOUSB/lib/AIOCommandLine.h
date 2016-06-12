@@ -95,7 +95,7 @@ PUBLIC_EXTERN void AIOPrintUsage(int argc, char **argv,  struct option  *options
 PUBLIC_EXTERN AIORET_TYPE DeleteAIOCommandLineOptions( AIOCommandLineOptions *options );
 
 
-PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOptionsListDevices( AIOCommandLineOptions *options , int *indices, int num_devices );
+PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOptionsListDevices( AIOCommandLineOptions *options , intlist *indices );
 PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOptionsOverrideADCConfigBlock( ADCConfigBlock *config, AIOCommandLineOptions *options );
 
 static inline AIORET_TYPE AIOCommandLineOptionsGetDeviceIndex( AIOCommandLineOptions *options ) {AIO_ASSERT( options ); return options->index;};

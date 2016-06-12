@@ -12,27 +12,34 @@ namespace AIOUSB
 
 #define TAIL_Q_LIST_TYPE( PRETTYNAME )   TailQList ## PRETTYNAME
 #define TAIL_Q_LIST_ENTRY_TYPE( PRETTYNAME ) TailQListEntry ## PRETTYNAME
-#define TAIL_Q_LIST( TYPE , PRETTYNAME )                                                         \
-    typedef struct TailQListEntry ## PRETTYNAME {                                                \
-        TYPE _value;                                                                             \
-        TAILQ_ENTRY(TailQListEntry ## PRETTYNAME) entries;                                       \
-    } TailQListEntry ##PRETTYNAME;                                                               \
-                                                                                                 \
-    typedef struct TailQList ## PRETTYNAME {                                                     \
-        struct TailQListEntry ## PRETTYNAME _list;                                               \
-        int _size;                                                                               \
-        /* New stuff */                                                                          \
-        TAILQ_HEAD( tailhead ##PRETTYNAME, TailQListEntry ## PRETTYNAME ) head;                  \
-        struct tailhead ##PRETTYNAME  *headp;                                                    \
-    } TailQList ##PRETTYNAME;                                                                    \
-    PUBLIC_EXTERN TailQList ## PRETTYNAME  *NewTailQList ## PRETTYNAME();                        \
-    TailQListEntry ## PRETTYNAME *NewTailQListEntry ## PRETTYNAME( TYPE value );                 \
-    AIORET_TYPE DeleteTailQListEntry ## PRETTYNAME( TailQListEntry ## PRETTYNAME *entry );       \
-    int TailQList ## PRETTYNAME ## Size( TailQList ## PRETTYNAME  *list );                       \
-    char *TailQListEntry ## PRETTYNAME ## ToString( TailQListEntry ## PRETTYNAME *entry );       \
-    char *TailQList ## PRETTYNAME ## ToString( TailQList ## PRETTYNAME  *list );                 \
-    AIORET_TYPE DeleteTailQList ## PRETTYNAME ( TailQList ## PRETTYNAME  *list );                \
-    AIORET_TYPE TailQList ## PRETTYNAME ## Insert( TailQList ## PRETTYNAME  *list,               \
+    /* TAILQ_HEAD( tailhead ##PRETTYNAME, TailQListEntry ## PRETTYNAME ) head;                          \ */
+#define TAIL_Q_LIST( TYPE , PRETTYNAME )                                                                 \
+    typedef struct TailQListEntry ## PRETTYNAME {                                                        \
+        TYPE _value;                                                                                     \
+        TAILQ_ENTRY(TailQListEntry ## PRETTYNAME) entries;                                               \
+    } TailQListEntry ##PRETTYNAME;                                                                       \
+    struct tailhead ## PRETTYNAME { struct TailQListEntry ## PRETTYNAME *tqh_first;                      \
+                                         struct TailQListEntry ## PRETTYNAME **tqh_last; };              \
+                                                                                                         \
+    typedef struct TailQList ## PRETTYNAME {                                                             \
+        struct TailQListEntry ## PRETTYNAME _list;                                                       \
+        int _size;                                                                                       \
+        /* New stuff */                                                                                  \
+        struct tailhead ## PRETTYNAME head;                                                              \
+        struct tailhead ## PRETTYNAME *headp;                                                            \
+    } TailQList ##PRETTYNAME;                                                                            \
+    PUBLIC_EXTERN TailQList ## PRETTYNAME  *NewTailQList ## PRETTYNAME();                                \
+    TailQListEntry ## PRETTYNAME *NewTailQListEntry ## PRETTYNAME( TYPE value );                         \
+    AIORET_TYPE DeleteTailQListEntry ## PRETTYNAME( TailQListEntry ## PRETTYNAME *entry );               \
+    int TailQList ## PRETTYNAME ## Size( TailQList ## PRETTYNAME  *list );                               \
+    TailQListEntry ## PRETTYNAME * TailQList ## PRETTYNAME ## First( TailQList ## PRETTYNAME *list );    \
+    TailQListEntry ## PRETTYNAME * TailQList ## PRETTYNAME ## Last( TailQList ## PRETTYNAME *list );     \
+    TYPE TailQList ## PRETTYNAME ## LastValue( TailQList ## PRETTYNAME *list );                          \
+    TYPE TailQListEntry ## PRETTYNAME ## To ##PRETTYNAME( TailQListEntry ## PRETTYNAME *entry );         \
+    char *TailQListEntry ## PRETTYNAME ## ToString( TailQListEntry ## PRETTYNAME *entry );               \
+    char *TailQList ## PRETTYNAME ## ToString( TailQList ## PRETTYNAME  *list );                         \
+    AIORET_TYPE DeleteTailQList ## PRETTYNAME ( TailQList ## PRETTYNAME  *list );                        \
+    AIORET_TYPE TailQList ## PRETTYNAME ## Insert( TailQList ## PRETTYNAME  *list,                       \
                                                    TailQListEntry ## PRETTYNAME *nnode );
 #ifdef DEBUG_NL
 #define __NL__ __NL__
@@ -100,6 +107,25 @@ __NL__            return tmp;                                                   
 __NL__        }                                                                                               \
 __NL__        int TailQList ## PRETTYNAME ## Size( TailQList ## PRETTYNAME  *list ) {return list->_size;}     \
 __NL__                                                                                                        \
+__NL__        TailQListEntry ## PRETTYNAME * TailQList ## PRETTYNAME ## First( TailQList ## PRETTYNAME *list )\
+__NL__        {                                                                                               \
+__NL__            TailQListEntry ## PRETTYNAME *tmp = list->head.tqh_first;                                   \
+__NL__            return tmp;                                                                                 \
+__NL__        }                                                                                               \
+__NL__        TailQListEntry ## PRETTYNAME * TailQList ## PRETTYNAME ## Last( TailQList ## PRETTYNAME *list ) \
+__NL__        {                                                                                               \
+__NL__            TailQListEntry ## PRETTYNAME *tmp = (TailQListEntry ## PRETTYNAME *)(*(((struct tailhead ## PRETTYNAME *)((list->head).tqh_last))->tqh_last)); \
+__NL__            return tmp;                                                                                 \
+__NL__        }                                                                                               \
+__NL__        TYPE TailQListEntry ## PRETTYNAME ## To ##PRETTYNAME( TailQListEntry ## PRETTYNAME *entry )  {  \
+__NL__             return entry->_value;                                                                      \
+__NL__        }                                                                                               \
+__NL__                                                                                                        \
+__NL__        TYPE TailQList ## PRETTYNAME ## LastValue( TailQList ## PRETTYNAME *list )                      \
+__NL__        {                                                                                               \
+__NL__            return (TailQList ## PRETTYNAME ## Last( list ))->_value;                                   \
+__NL__        }                                                                                               \
+__NL__                                                                                                        \
 __NL__        AIORET_TYPE DeleteTailQList ## PRETTYNAME ( TailQList ## PRETTYNAME  *list ) {                  \
 __NL__            AIO_ASSERT(list);                                                                           \
 __NL__            TailQListEntry ## PRETTYNAME *tmp;                                                          \
@@ -125,10 +151,19 @@ TAIL_Q_LIST(CStringArray *, CStringArray_p );
 typedef TAIL_Q_LIST_TYPE( int ) intlist;
 typedef TAIL_Q_LIST_ENTRY_TYPE( int ) intlistentry;
 
-inline intlist *Newintlist() { return NewTailQListint(); }
-inline AIORET_TYPE Deleteintlist(intlist *list) { return DeleteTailQListint(list); }
-inline char *intlistToString( intlist *list) { return TailQListintToString( list ); };
-inline int intlistSize(intlist *list) { return TailQListintSize( list ); };
+intlist *Newintlist();
+AIORET_TYPE Deleteintlist(intlist *list);
+char *intlistToString( intlist *list);
+int intlistSize(intlist *list);
+
+int intlistFirst( intlist *list );
+AIORET_TYPE intlistInsert( intlist *list, int tmpval );
+
+
+#define foreach_int( J, ILIST ) for ( intlistentry *_ ## IVAL = TailQListintFirst( ILIST) ; _ ## IVAL && (J = _##IVAL->_value); _ ## IVAL = _ ## IVAL->entries.tqe_next )
+
+#define foreach_CStringArray_p( J, ILIST ) for ( CStringArray_plistentry *_ ## IVAL = TailQListCStringArray_pFirst( ILIST) ; _ ## IVAL && (J = _##IVAL->_value); _ ## IVAL = _ ## IVAL->entries.tqe_next )
+
 #ifdef __aiousb_cplusplus
 }
 #endif
