@@ -49,20 +49,22 @@ if (LIBUSB_1_LIBRARIES AND LIBUSB_1_INCLUDE_DIRS)
 else (LIBUSB_1_LIBRARIES AND LIBUSB_1_INCLUDE_DIRS)
   find_path(LIBUSB_1_INCLUDE_DIR
     NAMES
-libusb.h
+       libusb.h
     PATHS
-      /usr/include
+      $ENV{LIBUSB_HOME}/include/
       /usr/local/include
       /opt/local/include
       /sw/include
-PATH_SUFFIXES
-libusb-1.0
+      /usr/include
+    PATH_SUFFIXES
+       libusb-1.0
   )
 
   find_library(LIBUSB_1_LIBRARY
     NAMES
       usb-1.0 usb
     PATHS
+      $ENV{LIBUSB_HOME}/lib
       /usr/lib
       /usr/local/lib
       /opt/local/lib

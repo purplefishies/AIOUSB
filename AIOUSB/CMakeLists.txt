@@ -16,6 +16,8 @@ option(BUILD_R "Build the R Interfaces" OFF)
 option(BUILD_OCTAVE "Build the Octave Interfaces" OFF)
 option(BUILD_PHP "Build the PHP Interfaces" OFF)
 option(BUILD_DOCUMENTATION "Build the Doxygen documentation" OFF )
+option(DISABLE_TESTING "Turns off BIST on C/C++ samples" OFF )
+
 option(INSTALL_WRAPPERS_RELATIVE "Install Scripting languages in Paths relative to CMAKE_INSTALL_PREFIX" ON )
 option(GUESS_WRAPPER_INSTALL_DIRECTORIES "Guess the location of Wrapper installation paths" ON )
 option(MEMORY_PROFILING "Run Memory profiler on tests" OFF )
@@ -99,27 +101,20 @@ if(  UNIX OR APPLE )
     set(USE_CLANG TRUE )
   endif( CMAKE_COMPILER_IS_GNUCC ) 
 
-
-  if("$ENV{CFLAGS}" STREQUAL "")
-    if(USE_GCC OR USE_CLANG)
-      message(STATUS "GCC compiler?:${USE_GCC}")
-      if( USE_GCC ) 
-      	  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
-      endif( USE_GCC )
-
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__aiousb_cplusplus ")
-      if (USE_GCC AND NOT CYGWIN )
-        set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -fPIC" )
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC" )	
-      endif(USE_GCC AND NOT CYGWIN )
-
-      set(CORELIBS ${CORELIBS} usb-1.0 )
-
-    endif(USE_GCC OR USE_CLANG)
-  else("$ENV{CFLAGS}" STREQUAL "")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} $ENV{CFLAGS}")
-    list(APPEND EXTRA_CFLAGS "$ENV{CFLAGS}")
-  endif("$ENV{CFLAGS}" STREQUAL "")
+  if(USE_GCC OR USE_CLANG)
+    message(STATUS "GCC compiler?:${USE_GCC}")
+    if( USE_GCC ) 
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
+    endif( USE_GCC )
+    
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__aiousb_cplusplus ")
+    if (USE_GCC AND NOT CYGWIN )
+      set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -fPIC" )
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC" )	
+    endif(USE_GCC AND NOT CYGWIN )
+    
+    set(CORELIBS ${CORELIBS} usb-1.0 )
+  endif(USE_GCC OR USE_CLANG)
 
 endif( UNIX OR APPLE)
 
