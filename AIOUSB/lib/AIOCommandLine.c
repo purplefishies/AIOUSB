@@ -525,7 +525,6 @@ AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *ind
  * @param num_devices number of devices in the array
  * @return >= AIOUSB_SUCCESS if devices have been found, < 0 if no devices found
  */
-/* AIORET_TYPE AIOCommandLineOptionsListDevices( AIOCommandLineOptions *options , intlist *indices, int num_devices ) */
 AIORET_TYPE AIOCommandLineOptionsListDevices( AIOCommandLineOptions *options , intlist *indices )
 {
     AIORET_TYPE retval = AIOUSB_SUCCESS;
@@ -539,7 +538,6 @@ AIORET_TYPE AIOCommandLineOptionsListDevices( AIOCommandLineOptions *options , i
         options->index = ( options->index < 0 ? intlistFirst( indices ) : options->index );
         options->index = 0;
         int i,j=0;
-        /* for (i = 0; i < intlistSize( indices ) ; i ++ ) { */
         foreach_int( i, indices) {
             if ( j >= TailQListintSize( indices ) - 1  )
                 break;

@@ -65,8 +65,8 @@ int main( int argc, char **argv )
         exit(retval);
 
     /* AIOUSB_FindDevices( &indices, &num_devices, find_ai_board ); */
+    /* AIOUSB_FindDevicesByGroup( &indices, &num_devices, AIO_ANALOG_INPUT() ); */
     AIOUSB_FindDeviceIndicesByGroup( indices, AIO_ANALOG_INPUT() );
-         /* AIOUSB_FindDevicesByGroup( &indices, &num_devices, AIO_ANALOG_INPUT() ); */
 
     if ( ( retval = AIOCommandLineOptionsListDevices( options, indices )) < AIOUSB_SUCCESS )
         exit(retval);
@@ -88,7 +88,7 @@ int main( int argc, char **argv )
     
     usb = AIOUSBDeviceGetUSBHandle( dev );
 
-#if 1
+
     retval = ADC_SetCal(AIOCommandLineOptionsGetDeviceIndex(options), ":AUTO:");
     // or 
     /* retval = ADC_SetCal(AIOCommandLineOptionsGetDeviceIndex(options), ":1TO1:"); */
@@ -96,7 +96,7 @@ int main( int argc, char **argv )
         fprintf(stderr,"Error setting calibration %d\n", (int)retval);
         exit(retval);
     }
-#endif
+
 
     /**
      * Copy the modified config settings back to the 

@@ -12,7 +12,6 @@ namespace AIOUSB
 
 #define TAIL_Q_LIST_TYPE( PRETTYNAME )   TailQList ## PRETTYNAME
 #define TAIL_Q_LIST_ENTRY_TYPE( PRETTYNAME ) TailQListEntry ## PRETTYNAME
-    /* TAILQ_HEAD( tailhead ##PRETTYNAME, TailQListEntry ## PRETTYNAME ) head;                          \ */
 #define TAIL_Q_LIST( TYPE , PRETTYNAME )                                                                 \
     typedef struct TailQListEntry ## PRETTYNAME {                                                        \
         TYPE _value;                                                                                     \

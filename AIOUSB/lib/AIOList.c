@@ -32,8 +32,6 @@ int intlistFirst( intlist *list ) {
     return ent->_value;
 }
 
-/* #define foreach_int( J, ILIST ) for ( intlistentry *_ ## IVAL = TailQListintFirst( ILIST) ; _ ## IVAL && (J = _##IVAL->_value); _ ## IVAL = _ ## IVAL->entries.tqe_next ) */
-
 intlist *Newintlist() { return NewTailQListint(); }
 AIORET_TYPE Deleteintlist(intlist *list) { return DeleteTailQListint(list); }
 char *intlistToString( intlist *list) { return TailQListintToString( list ); };
