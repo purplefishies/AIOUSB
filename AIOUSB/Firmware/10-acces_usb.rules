@@ -461,3 +461,13 @@ SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="16
 SUBSYSTEM=="usb", ACTION=="add", ATTR{idVendor}=="fffe", ATTR{idProduct}=="0480" , MODE="0666"
 
 # end of file
+
+#
+# New PCIeWDG
+#
+
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="04b4", ATTR{idProduct}=="8613", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/PCIe-WDG-CSM.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
+
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="0080", RUN+="/bin/sh -c '/sbin/fxload -t fx2lp -D $tempnode -I /usr/share/usb/PCIe-WDG-CSM.hex; /bin/sleep 1; /bin/chmod 0666 $tempnode'"
+
+SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1605", ATTR{idProduct}=="8080", RUN+="/bin/chmod 0666 $tempnode"
