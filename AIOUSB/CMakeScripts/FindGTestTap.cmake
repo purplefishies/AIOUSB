@@ -49,6 +49,7 @@ else ( GTESTTAP_INCLUDE_DIRS)
     NAMES
     tap.h
     PATHS
+      $ENV{GMOCK_TEST}
       /usr/include
       /usr/local/include
       /opt/local/include
