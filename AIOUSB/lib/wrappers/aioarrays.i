@@ -4,6 +4,7 @@
 /*   %feature("python:slot", "sq_item", functype="ssizeargfunc") NAME::__getitem__; */
 /*   %feature("python:slot", "sq_ass_item", functype="ssizeobjargproc") NAME::__setitem__; */
 
+
 #if defined(SWIGPYTHON)
 %exception NAME::__getitem__ {
     if ( arg2 > arg1->_size - 1 || arg2 < 0 ) {
@@ -29,8 +30,10 @@ typedef struct {
 } NAME;
 %}
 
+
 #if defined(SWIGJAVA)
 %newobject NAME::toString;
+
 #endif
 
 
@@ -72,9 +75,23 @@ typedef struct {
   char *toString() { 
       char *tmp = (char *)calloc(1,sizeof(char));
       tmp[0] = '\0';
+      char *typestr;
+      if (__builtin_types_compatible_p(__typeof__(self->el[0]), float)) {
+          typestr = "%s%s%f";
+      } else if (__builtin_types_compatible_p(__typeof__(self->el[0]), double )) {
+          typestr = "%s%s%lf";
+      } else if (__builtin_types_compatible_p(__typeof__(self->el[0]), long )) {
+          typestr = "%s%s%d";
+      } else if (__builtin_types_compatible_p(__typeof__(self->el[0]), int )) {
+          typestr = "%s%s%d";
+      } else if (__builtin_types_compatible_p(__typeof__(self->el[0]), unsigned short )) {
+          typestr = "%s%s%u";
+      } else {
+          typestr = "%s%s%s";
+      }
       for ( int i = 0; i < self->_size; i ++ ) {
           char *hold = 0;
-          asprintf(&hold,"%s%s%d", tmp , ( i == 0 ? "" : "," ), (int)self->el[i] );
+          asprintf(&hold,typestr, tmp , ( i == 0 ? "" : "," ), self->el[i] );
           if (tmp) 
               free(tmp);
           tmp = hold;
@@ -92,6 +109,8 @@ typedef struct {
   }
 
 }
+
+
 #if !defined(SWIGJAVA)
 %extend NAME {
     const char *__repr__() {

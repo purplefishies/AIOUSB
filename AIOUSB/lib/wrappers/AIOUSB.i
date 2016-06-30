@@ -541,6 +541,7 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsign
 %aioarray_class(unsigned short,ushortarray)
 %aioarray_class(double,doublearray)
 
+
 %inline %{
 AIORET_TYPE ADC_GetScanVToDoubleArray( unsigned long DeviceIndex, doublearray *ary ) {
     return ADC_GetScanV( DeviceIndex, ary->el );
@@ -686,8 +687,6 @@ AIORET_TYPE ADC_GetScanVToDoubleArray( unsigned long DeviceIndex, doublearray *a
 
 
 
-
-
 #if defined(SWIGPYTHON)
 %pythoncode %{
 from AIOUSB import doublearray as volts
@@ -701,12 +700,12 @@ def new_ushortarray(n):
 def delete_ushortarray(n):
     del n
 
-def new_volts(n):
+def new_doublearray(n):
     """Creates a new double array of size n"""
     import AIOUSB
-    return AIOUSB.volts(n)
+    return AIOUSB.doublearray(n)
 
-def delete_volts(n):
+def delete_doublearray(n):
     """Creates a new double array of size n"""
     del n
 
