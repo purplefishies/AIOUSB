@@ -559,6 +559,7 @@ PUBLIC_EXTERN AIORET_TYPE AIODeviceTablePopulateTableTest(unsigned long *product
 PUBLIC_EXTERN AIORESULT AIODeviceTableClearDevices( void );
 PUBLIC_EXTERN AIORESULT ClearDevices( void );
 PUBLIC_EXTERN AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , AIORESULT *res );
+PUBLIC_EXTERN AIOUSBDevice *AIODeviceTableGetAIOUSBDeviceAtIndex( unsigned long DeviceIndex );
 PUBLIC_EXTERN USBDevice *AIODeviceTableGetUSBDeviceAtIndex( unsigned long DeviceIndex, AIORESULT *res );
 void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID );
 
@@ -579,6 +580,9 @@ PUBLIC_EXTERN void CloseAllDevices(void);
 PUBLIC_EXTERN AIORESULT AIOUSB_GetAllDevices();
 
 PUBLIC_EXTERN unsigned long AIOUSB_INIT_PATTERN;
+
+PUBLIC_EXTERN AIORET_TYPE AIOUSBGetError();
+
 
 /* #include "AIOFifo.h" */
 
@@ -779,7 +783,6 @@ PUBLIC_EXTERN AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , US
 PUBLIC_EXTERN void DeleteUSBDevices( USBDevice *devs);
 PUBLIC_EXTERN int USBDeviceClose( USBDevice *dev );
 
-PUBLIC_EXTERN int USBDeviceReadADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock );
 PUBLIC_EXTERN int USBDeviceGetIdProduct( USBDevice *device );
 PUBLIC_EXTERN int USBDeviceFetchADCConfigBlock( USBDevice *device, ADCConfigBlock *config );
 PUBLIC_EXTERN int USBDevicePutADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock );
@@ -815,7 +818,7 @@ PUBLIC_EXTERN void AIOPrintUsage(int argc, char **argv,  struct option  *options
 PUBLIC_EXTERN AIORET_TYPE DeleteAIOCommandLineOptions( AIOCommandLineOptions *options );
 
 
-PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOptionsListDevices( AIOCommandLineOptions *options , int *indices, int num_devices );
+PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOptionsListDevices( AIOCommandLineOptions *options , intlist *indices );
 PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOptionsOverrideADCConfigBlock( ADCConfigBlock *config, AIOCommandLineOptions *options );
 
 static inline AIORET_TYPE AIOCommandLineOptionsGetDeviceIndex( AIOCommandLineOptions *options ) {AIO_ASSERT( options ); return options->index;};

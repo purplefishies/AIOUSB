@@ -61,7 +61,6 @@ PUBLIC_EXTERN AIORET_TYPE AddAllACCESUSBDevices( libusb_device **deviceList , US
 PUBLIC_EXTERN void DeleteUSBDevices( USBDevice *devs);
 PUBLIC_EXTERN int USBDeviceClose( USBDevice *dev );
 
-PUBLIC_EXTERN int USBDeviceReadADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock );
 PUBLIC_EXTERN int USBDeviceGetIdProduct( USBDevice *device );
 PUBLIC_EXTERN int USBDeviceFetchADCConfigBlock( USBDevice *device, ADCConfigBlock *config );
 PUBLIC_EXTERN int USBDevicePutADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock );

@@ -59,6 +59,7 @@
   #include "AIOBuf.h"
   #include "DIOBuf.h"
   #include "AIOList.h"
+  #include "USBDevice.h"
   #include "libusb.h"
   #include <pthread.h>
 %}
@@ -118,27 +119,53 @@
 /*---------------- intlist * ----------------  */
 %typemap(in) (intlist *indices ) {
     intlist *tmp = NewTailQListint();
+    jclass cls = (*jenv)->FindClass(jenv, "java/util/ArrayList");
+    jclass intcls = (*jenv)->FindClass(jenv, "java/lang/Integer");
+    jmethodID intgetVal = (*jenv)->GetMethodID(jenv,intcls, "intValue", "()I");
+
+    int thissize;
+    jmethodID sizeMethod = (*jenv)->GetMethodID(jenv, cls, "size", "()I");
+    jmethodID getMethod = (*jenv)->GetMethodID(jenv, cls, "get", "(I)Ljava/lang/Object;");
+    /* printf("sizeMethod: %ld\n", (long)sizeMethod ); */
+    /* printf("getMethod: %ld\n", (long)getMethod ); */
+
+    int i;
+    thissize = (int)(long)(*jenv)->CallObjectMethod(jenv, $input, sizeMethod );
+    /* printf("Size is %d\n", thissize ); */
+    for ( i = 0; i < thissize; i ++ ) {
+        jobject tmpobj = (*jenv)->CallObjectMethod(jenv, $input, getMethod, i );
+        int val = (*jenv)->CallIntMethod(jenv,tmpobj, intgetVal );
+        /* printf("Got value: %d\n", val); */
+        intlistInsert(tmp, val );
+    }
+
     $1 = tmp;
 }
 
 %typemap(argout) (intlist *indices ) {
     jclass cls = (*jenv)->FindClass(jenv, "java/util/ArrayList");
     jclass intCls =  (*jenv)->FindClass(jenv, "java/lang/Integer");
-
+    long mid;
     intlistentry *np;                       
-
+    /* printf("HERE!!\n"); */
     (*jenv)->FindClass(jenv, "java/util/ArrayList");
-
     jmethodID clearMethod = (*jenv)->GetMethodID(jenv, cls, "clear", "()V");
-    jmethodID initMethod = (*jenv)->GetMethodID(jenv, cls, "<init>", "()V");
     jmethodID addMethod  = (*jenv)->GetMethodID(jenv, cls, "add", "(Ljava/lang/Object;)Z");  
-    jmethodID sizeMethod = (*jenv)->GetMethodID(jenv, cls, "size", "()I");
     jmethodID intInit = (*jenv)->GetMethodID(jenv, intCls, "<init>", "(I)V" );
-
-    (*jenv)->CallObjectMethod(jenv, jarg1, clearMethod );
+    /* printf("AGAIN!!\n"); */
+    /* printf("Commands: %ld\n", (long)clearMethod ); */
+    /* printf("Commands: %ld\n", (long)sizeMethod ); */
+    /* printf("Commands: %ld\n", (long)addMethod ); */
+    jclass clazz = (*jenv)->GetObjectClass(jenv, $input );
+    /* printf("Class: %ld\n", (long)clazz ); */
+    /* mid = (*jenv)->GetMethodID(jenv, clazz, "clear", "()V"); */
+    /* printf("Mid: %ld\n", (long)mid ); */
+    /* PyList_SetSlice($input, 0, (Py_ssize_t)intlistSize($1), NULL); */
+    (*jenv)->CallObjectMethod(jenv, $input, clearMethod );
+    /* printf("LAST!!\n"); */
     for (np = $1->head.tqh_first; np != NULL; np = np->entries.tqe_next) {                    
         jobject tmpobj =  (*jenv)->NewObject(jenv, intCls  ,intInit , np->_value );
-        (*jenv)->CallObjectMethod(jenv, jarg1, addMethod, tmpobj  ); 
+        (*jenv)->CallObjectMethod(jenv, $input, addMethod, tmpobj  ); 
     }                                                                                           
 }
 
@@ -508,6 +535,7 @@ AIOUSBDevice *AIODeviceTableGetDeviceAtIndex( unsigned long DeviceIndex , unsign
 %include "cJSON.h"
 %include "AIOBuf.h"
 %include "DIOBuf.h"
+%include "USBDevice.h"
 
 
 %aioarray_class(unsigned short,ushortarray)
