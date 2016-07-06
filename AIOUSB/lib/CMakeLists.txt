@@ -229,6 +229,6 @@ install( TARGETS aiousbdbg DESTINATION lib )
 install( TARGETS aiousbcpp DESTINATION lib )
 install( TARGETS aiousbcppdbg DESTINATION lib )
 FILE( GLOB aiousb_header_files *.h )
-install( FILES ${aiousb_header_files} DESTINATION include )
+install( FILES ${aiousb_header_files} DESTINATION include/aiousb/ )
 
 
