@@ -1106,7 +1106,7 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
     device->ProductID = productID;
     device->StreamingBlockSize = 31ul * 1024ul;
     device->bGetName = AIOUSB_TRUE;             // most boards support this feature
-    if (productID == USB_DIO_32) {
+    if (productID == USB_DIO_32 || productID == USB_DIO_32I ) {
         device->DIOBytes = 4;
         device->Counters = 3;
         device->RootClock = 3000000;
