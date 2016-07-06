@@ -18,9 +18,14 @@ option(BUILD_PHP "Build the PHP Interfaces" OFF)
 option(BUILD_DOCUMENTATION "Build the Doxygen documentation" OFF )
 option(DISABLE_TESTING "Turns off BIST on C/C++ samples" OFF )
 
+SET(FIRMWARE_DIRECTORY /usr/share/usb CACHE PATH "Directory to install .HEX firmware files")
+SET(UDEV_DIRECTORY /etc/udev/rules.d CACHE PATH "Directory to install UDEV rules files"  )
+
+
 option(INSTALL_WRAPPERS_RELATIVE "Install Scripting languages in Paths relative to CMAKE_INSTALL_PREFIX" ON )
 option(GUESS_WRAPPER_INSTALL_DIRECTORIES "Guess the location of Wrapper installation paths" ON )
 option(MEMORY_PROFILING "Run Memory profiler on tests" OFF )
+
 
 
 set(CPACK_COMPONENT_AIOUSBLIB_DISPLAY_NAME "ACCES I/O USB libraries")
@@ -256,6 +261,14 @@ ELSE( UNIX )                    # LINUX / UNIX
   set(CPACK_RPM_PACKAGE_RELEASE	"1.0" )
 
 endif(WIN32 AND NOT UNIX )
+
+file( GLOB HEX_FILES ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/Firmware/*.hex" )
+file( GLOB UDEV_RULES ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/Firmware/*.rules" )
+file( GLOB PERL_FILES ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}/Firmware/accesloader.pl" )
+
+install(FILES ${HEX_FILES} DESTINATION ${FIRMWARE_DIRECTORY} COMPONENT firmware )
+install(FILES ${UDEV_RULES} DESTINATION ${UDEV_DIRECTORY} COMPONENT firmware )
+install(FILES ${PERL_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin COMPONENT firmware )
 
 set(CPACK_COMPONENT_MANPAGES_GROUP "docs")
 
