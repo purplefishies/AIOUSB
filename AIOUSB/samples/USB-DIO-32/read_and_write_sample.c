@@ -85,7 +85,7 @@ int main( int argc, char **argv ) {
                                       &device->numCounters
                                       );
             if( result == AIOUSB_SUCCESS ) {
-                if( device->productID == USB_DIO_32 ) { // found a USB-DIO-32
+                if( device->productID == 0x8004 ) { // found a USB-DIO-32
                     device->index = index;
                     devicesFound++;
                 }
@@ -136,38 +136,62 @@ int main( int argc, char **argv ) {
     for( port = 0; port <= 0xff; port ++ ) { 
         device->writeBuffer[0] = port;
         result = DIO_Configure( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
+        if ( result < AIOUSB_SUCCESS ) {
+            fprintf(stderr,"Error running DIO_Configure: %ld\n", result );
+            exit(1);
+        }
         usleep(10000);
     }
 
     for( port = 0; port <= 0xff; port ++ ) { 
         device->writeBuffer[1] = port;
         result = DIO_Configure( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
+        if ( result < AIOUSB_SUCCESS ) {
+            fprintf(stderr,"Error running DIO_Configure: %ld\n", result );
+            exit(1);
+        }
         usleep(10000);
     }
 
     for( port = 0; port <= 0xff; port ++ ) { 
         device->writeBuffer[2] = port;
         result = DIO_Configure( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
+        if ( result < AIOUSB_SUCCESS ) {
+            fprintf(stderr,"Error running DIO_Configure: %ld\n", result );
+            exit(1);
+        }
         usleep(10000);
     }
 
     for( port = 0; port <= 0xff; port ++ ) { 
         device->writeBuffer[3] = port;
         result = DIO_Configure( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
+        if ( result < AIOUSB_SUCCESS ) {
+            fprintf(stderr,"Error running DIO_Configure: %ld\n", result );
+            exit(1);
+        }
         usleep(10000);
     }
 
     for ( port = 0; port < 4 ; port ++ )  {
         device->writeBuffer[port] = 0xff;
     }
-    result = DIO_Configure( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
 
+    result = DIO_Configure( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
+    if ( result < AIOUSB_SUCCESS ) {
+        fprintf(stderr,"Error running DIO_Configure: %ld\n", result );
+        exit(1);
+    }
 
     for ( int i =0 ; i <= 0xf ; i ++ ) { 
         device->outputMask[0] = (unsigned char )i;
         /* AIOChannelMask *outmask = NewAIOChannelMaskFromChr( (char)(unsigned char)i ); */
             
         result = DIO_Configure( device->index, AIOUSB_FALSE, device->outputMask, device->writeBuffer );
+        if ( result < AIOUSB_SUCCESS ) {
+            fprintf(stderr,"Error running DIO_Configure: %ld\n", result );
+            exit(1);
+        }
         if ( result != AIOUSB_SUCCESS ) 
             break;
         usleep(100000);
