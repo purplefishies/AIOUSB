@@ -188,9 +188,9 @@ $(AIO_LIB_DIR)/wrappers/java/$(JAVA_BUILT):
 	jar cvfm $@ manifest $(basename $<)*.class tmplib/*.jar
 	rm manifest
 
-%:	%.jar
-	java -classpath "::$${PWD}/../../lib/wrappers/java/AIOUSB.jar:$<" $@
-
+%:	%.java
+	javac -cp "$${AIO_LIB_DIR}/wrappers/java/AIOUSB.jar:$<" $< 
+	LD_LIBRARY_PATH="$${LD_LIBRARY_PATH}:$${AIO_LIB_DIR}/wrappers/java:$${AIO_LIB_DIR}" java -classpath ".:$${AIO_LIB_DIR}/wrappers/java/AIOUSB.jar" read_channels_test_java  $(ARGS)
 
 $(AIO_LIB_DIR)/%.so:	$(wildcard $(AIO_LIB_DIR)/*.c)
 	cd $(AIO_LIB_DIR) && $(MAKE) $(nodir $@)
