@@ -87,8 +87,8 @@ You will need to do the following
 ~~~bash
 cd AIOUSB
 source sourceme.sh
-cd lib && make && cd -
-cd classlib && make && cd -
+cd ${AIO_LIB_DIR} && make && cd -
+cd ${AIO_CLASSLIB_DIR} && make && cd -
 cd samples/USB_SAMPLE_OF_CHOICE
 make sample AIOUSBLIBDIR=${AIO_LIB_DIR} AIOUSBCLASSLIBDIR=${AIO_CLASSLIB_DIR} DEBUG=1
 ~~~
