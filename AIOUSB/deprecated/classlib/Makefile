@@ -58,18 +58,19 @@ STCPPDBGLIB	:=$(LIBPREFIX)classaiousbdbg.$(STATICSUFFIX)
 SHCPPLIB	:=$(LIBPREFIX)classaiousb.$(LIBSUFFIX)
 SHCPPDBGLIB	:=$(LIBPREFIX)classaiousbdbg.$(LIBSUFFIX)
 
-LIBS 		:= $(STCPPLIB) $(STCPPDBGLIB) $(SHCPPLIB) $(SHCPPDBGLIB)
+LIBS 		:= $(SHCPPLIB) $(SHCPPDBGLIB)
+#$(STCPPLIB) $(STCPPDBGLIB) $(SHCPPLIB) $(SHCPPDBGLIB)
 
 
-.PHONY : all warnings
-
+.PHONY : all
 
 
 all : $(LIBS) 
 
-warnings:
+warnings: 
 	@/bin/echo -ne $(WARNINGS)
 	@sleep 1
+	@touch warnings
 
 
 completely_all: $(LIBS) $(DOCINDEX)
@@ -80,7 +81,7 @@ mostlyclean:
 
 .PHONY : clean
 clean:
-	-rm -f $(LIBS) $(CPPOBJS) $(CPPDBGOBJS) $(DOCDIR)/*
+	-rm -f $(LIBS) $(CPPOBJS) $(CPPDBGOBJS) warnings
 
 distclean: clean
 	-rm -f $(LIBS)
@@ -103,10 +104,10 @@ $(SHCPPLIB) : $(CPPOBJS)  warnings
 $(SHCPPDBGLIB): $(CPPDBGOBJS)  warnings
 	$(CXX) $(LDFLAGS) $(CXXFLAGS) $(CC_SHFLAGS) -shared -o $@  -Wl,--out-implib=$(subst cyg,lib,$@).a -Wl,--export-all-symbols -Wl,--enable-auto-import  -Wl,--whole-archive $(CPPDBGOBJS) -Wl,--no-whole-archive $(SHARED_LIBS)
 else				# Linux and UNIXes
-$(SHCPPLIB) : $(CPPOBJS)  warnings
+$(SHCPPLIB) : $(CPPOBJS)
 	$(CXX) $(CXXFLAGS) $(CFLAGS) $(LDFLAGS) $(CXX_SHFLAGS),$@ -o $@ $(CPPOBJS) $(SHARED_LIBS)
 
-$(SHCPPDBGLIB) : $(CPPDBGOBJS)  warnings
+$(SHCPPDBGLIB) : $(CPPDBGOBJS)
 	$(CXX) $(CXXFLAGS) $(CFLAGS) $(LDFLAGS) $(CXX_SHFLAGS),$@ -o $@ $(CPPDBGOBJS) $(SHARED_LIBS)
 endif
 
@@ -114,10 +115,10 @@ endif
 
 $(CPPOBJS) $(CPPDBGOBJS) : $(HPPSOURCES)
 
-%.o : %.cpp  warnings
+%.o : %.cpp warnings
 	$(CXX) $(DEBUGOPTS) $(CXXFLAGS) $(CFLAGS) $(COMMONOPTS) $(CPPOPTS) $< -o $@
 
-%.dbg.o : %.cpp  warnings
+%.dbg.o : %.cpp warnings
 	$(CXX)  $(DEBUGOPTS) $(CXXFLAGS) $(CFLAGS) $(COMMONOPTS) $(CPPOPTS) $< -o $@
 
 $(DOCINDEX) : Doxyfile $(HPPSOURCES) $(CPPSOURCES)
