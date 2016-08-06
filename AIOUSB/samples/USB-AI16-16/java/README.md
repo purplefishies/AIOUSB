@@ -3,7 +3,5 @@
 # How to run
 
 
-cd ../../..
-source sourceme.sh
-cd -
-make read_channels_test_java ARGS="-N 1000"
+cd into a directory and read the README.md file for how
+to build that sample
