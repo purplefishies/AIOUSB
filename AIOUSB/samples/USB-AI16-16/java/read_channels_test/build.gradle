@@ -1,0 +1,68 @@
+
+buildscript {
+    repositories {
+        maven { 
+            url "https://plugins.gradle.org/m2/"
+        }
+        jcenter()
+    }
+    dependencies {
+        classpath "com.tkruse.gradle:gradle-groovysh-plugin:1.0.8"
+    }
+}
+
+plugins { 
+    id "java"
+    id "com.github.tkruse.groovysh" version "1.0.8"
+}
+
+// apply plugin: 'java'
+
+version = '1.0'
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+
+//create a single Jar with all dependencies
+task fatJar(type: Jar) {
+	manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',  
+        	'Implementation-Version': version,
+        	'Main-Class': 'com.accesio.MyAppLauncher'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+
+compileJava {
+    // classpath.add( files( System.getenv()["AIO_LIB_DIR"] + "/wrappers/java" )  )
+    doLast { 
+        println "Done compiling"
+    }
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDir System.getenv()["AIO_LIB_DIR"] + "/wrappers/java"
+        }
+    }
+}
+
+
+
+//Get dependencies from Maven central repository
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+//Project dependencies
+dependencies {
+	compile 'ch.qos.logback:logback-classic:1.1.2'
+
+        compile fileTree( dir:( System.getenv()["AIO_LIB_DIR"] + "/wrappers/java" ),
+                          include:'AIOUSB.jar')
+}
