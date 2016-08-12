@@ -35,14 +35,6 @@ task fatJar(type: Jar) {
     with jar
 }
 
-
-compileJava {
-    // classpath.add( files( System.getenv()["AIO_LIB_DIR"] + "/wrappers/java" )  )
-    doLast { 
-        println "Done compiling"
-    }
-}
-
 sourceSets {
     main {
         resources {
