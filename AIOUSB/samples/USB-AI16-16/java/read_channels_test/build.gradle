@@ -20,27 +20,20 @@ version = '1.0'
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
-
-//create a single Jar with all dependencies
 task fatJar(type: Jar) {
-	manifest {
+    manifest {
         attributes 'Implementation-Title': 'Gradle Jar File Example',  
         	'Implementation-Version': version,
         	'Main-Class': 'com.accesio.MyAppLauncher'
     }
     baseName = project.name + '-all'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    from(System.getenv()["AIO_LIB_DIR"] + "/wrappers/java") { 
+        include "libAIOUSB.so"
+    }
+
     with jar
 }
-
-sourceSets {
-    main {
-        resources {
-            srcDir System.getenv()["AIO_LIB_DIR"] + "/wrappers/java"
-        }
-    }
-}
-
 
 
 //Get dependencies from Maven central repository
@@ -52,7 +45,7 @@ repositories {
 //Project dependencies
 dependencies {
 	compile 'ch.qos.logback:logback-classic:1.1.2'
-
-        compile fileTree( dir:( System.getenv()["AIO_LIB_DIR"] + "/wrappers/java" ),
-                          include:'AIOUSB.jar')
+        compile files(System.getenv()["AIO_LIB_DIR"] + "/wrappers/java/AIOUSB.jar")
+    
 }
+
