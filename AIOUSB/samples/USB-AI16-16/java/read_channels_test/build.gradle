@@ -27,10 +27,14 @@ task fatJar(type: Jar) {
         	'Main-Class': 'com.accesio.MyAppLauncher'
     }
     baseName = project.name + '-all'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     from(System.getenv()["AIO_LIB_DIR"] + "/wrappers/java") { 
-        include "libAIOUSB.so"
+        include '*AIOUSB*.so'
+        include "AIOUSB.jar"
     }
+    from(System.getenv()["AIO_LIB_DIR"] ) { 
+        include "libaiousbdbg.so"
+    }
+
 
     with jar
 }
@@ -46,6 +50,5 @@ repositories {
 dependencies {
 	compile 'ch.qos.logback:logback-classic:1.1.2'
         compile files(System.getenv()["AIO_LIB_DIR"] + "/wrappers/java/AIOUSB.jar")
-    
 }
 
