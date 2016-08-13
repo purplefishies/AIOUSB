@@ -266,11 +266,13 @@ java: 	$(JAVA_DIR)
 	@if [ ! -f $(JAVA_BUILT) ] ; then \
 		$(SWIG) $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) -I../../ -java -package AIOUSB -outdir $(JAVA_DIR) AIOUSB.i 2>&1; \
 		$(CC)  -fPIC -shared  -o libAIOUSB.so ./AIOUSB_wrap.c ${CFLAGS} -I../.. -I$${JAVA_HOME}/include -L$${AIO_LIB_DIR} -L$${AIO_CLASSLIB_DIR} -laiousbdbg -lusb-1.0 -lpthread -lrt -ldl -lm -lc  2>&1 ; \
+		cp libAIOUSB.so libAIOUSB32.so;\
+		cp libAIOUSB.so libAIOUSB64.so;\
 		javac $(JAVA_DIR)/*.java; \
-		cd tests && javac -classpath "$$(pwd):$$(pwd)/./:$$(pwd)/../" test.java 2>&1; \
+		cd tests && javac -classpath "$$(pwd):$$(pwd)/./:$$(pwd)/../" test.java com/jdotsoft/jarloader/JarClassLoader.java 2>&1; \
 		if [ ! -d /tmp/scala-devel ] ; then mkdir /tmp/scala-devel; chmod 777 /tmp/scala-devel; fi \
 	fi
-	@jar cf AIOUSB.jar libAIOUSB.so AIOUSB/*.class;\
+	@jar cf AIOUSB.jar libAIOUSB{32,64}.so -C $${AIO_LIB_DIR} libaiousbdbg.so AIOUSB;\
 	if [ "$$?" == 0 ]; then \
 		touch $(JAVA_BUILT); \
 	fi;\
