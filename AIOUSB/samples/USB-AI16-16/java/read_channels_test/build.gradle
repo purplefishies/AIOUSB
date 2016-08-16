@@ -20,7 +20,16 @@ version = '1.0'
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
+
+task checkProjectSetup << {
+    if( System.getenv()["AIO_LIB_DIR"] == null ) { 
+        throw new GradleException('You must source sourceme.sh first !')
+    }
+}
+
+
 task fatJar(type: Jar) {
+    dependsOn checkProjectSetup
     manifest {
         attributes 'Implementation-Title': 'Gradle Jar File Example',  
         	'Implementation-Version': version,
