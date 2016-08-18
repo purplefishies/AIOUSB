@@ -336,7 +336,7 @@ int USBDevicePutADCConfigBlock( USBDevice *usb, ADCConfigBlock *configBlock )
     return retval;
 }
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && defined(mocktesting)
 int 
 USBDevice::usb_control_transfer(USBDevice *dev_handle,
                                 uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex,

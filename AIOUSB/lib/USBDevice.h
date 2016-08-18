@@ -11,7 +11,7 @@
 namespace AIOUSB {
 #endif
 
-#ifdef __cplusplus
+#if defined( __cplusplus) && defined(mocktesting)
 #define INTERNAL_METHOD( NAME, RETVAL, ... )\
     RETVAL NAME( __VA_ARGS__ )
 #else
