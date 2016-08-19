@@ -291,6 +291,7 @@
 /* Needed to allow inclusion into Scala */
 %pragma(java) modulecode=%{
     static {
+        System.loadLibrary("aiousbdbg");
         System.loadLibrary("AIOUSB");
     }
 %}
