@@ -289,10 +289,19 @@
 #endif
 
 /* Needed to allow inclusion into Scala */
+%pragma(java) moduleimports=%{
+     import cz.adamh.utils.NativeUtils;
+     import java.io.IOException;
+%}
+
 %pragma(java) modulecode=%{
     static {
-        System.loadLibrary("aiousbdbg");
-        System.loadLibrary("AIOUSB");
+        try {    
+            NativeUtils.loadLibraryFromJar("/libaiousbdbg.so");
+            NativeUtils.loadLibraryFromJar("/libAIOUSB.so");
+        } catch (IOException e) {    
+            e.printStackTrace();  
+        }    
     }
 %}
 

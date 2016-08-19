@@ -8,8 +8,6 @@ public class test {
 
     public static void main(String argv[]) {
         System.out.println("Loading AIOUSB64");
-        System.loadLibrary("aiousbdbg");
-        System.loadLibrary("AIOUSB64");
 
         System.out.println( AIOUSB.AIOUSB_Init() );
 
