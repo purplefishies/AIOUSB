@@ -1,5 +1,7 @@
 # File: Android.mk
 
+APP_ABI := armeabi armeabi-v7a x86 mips
+
 LOCAL_PATH := $(call my-dir)
 MYLOCAL_DIR	:= $(shell pwd)/jni
 include $(PATH_TO_LIBUSB_SRC)/android/jni/libusb.mk
