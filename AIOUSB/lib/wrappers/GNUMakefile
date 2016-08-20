@@ -269,12 +269,13 @@ java: 	$(JAVA_DIR)
 		$(CC)  -fPIC -shared  -o libAIOUSB.so ./AIOUSB_wrap.c ${CFLAGS} -I../.. -I$${JAVA_HOME}/include -L$${AIO_LIB_DIR} -L$${AIO_CLASSLIB_DIR} -laiousbdbg -lusb-1.0 -lpthread -lrt -ldl -lm -lc  2>&1 ; \
 		cp libAIOUSB.so libAIOUSB32.so;\
 		cp libAIOUSB.so libAIOUSB64.so;\
-		$(JAVAC) -d FOO  AIOUSB/*.java $$(find cz -name "*.java");\
+		mkdir -p TMPDIR;\
+		$(JAVAC) -d TMPDIR  AIOUSB/*.java $$(find cz -name "*.java");\
 		mkdir -p tests/TESTDIR;\
-		cd tests && javac -classpath "../FOO:$$(pwd)/:$$(pwd)/../" -d TESTDIR test.java com/jdotsoft/jarloader/JarClassLoader.java 2>&1; \
+		cd tests && javac -classpath "../TMPDIR:$$(pwd)/:$$(pwd)/../" -d TESTDIR test.java com/jdotsoft/jarloader/JarClassLoader.java 2>&1; \
 		if [ ! -d /tmp/scala-devel ] ; then mkdir /tmp/scala-devel; chmod 777 /tmp/scala-devel; fi \
 	fi
-	@jar cf AIOUSB.jar libAIOUSB{32,64}.so libAIOUSB.so -C $${AIO_LIB_DIR} libaiousbdbg.so -C FOO .
+	@jar cf AIOUSB.jar libAIOUSB{32,64}.so libAIOUSB.so -C $${AIO_LIB_DIR} libaiousbdbg.so -C TMPDIR .
 	@if [ "$$?" == 0 ]; then \
 		touch $(JAVA_BUILT); \
 	fi;
@@ -294,6 +295,7 @@ java_cleanup:
 	@$(RM) -rf /tmp/scala-devel || true
 	$(RM) -f tests/*.class
 	$(RM) -rf tests/TESTDIR
+	$(RM) -rf TMPDIR
 
 java_atest:
 	@$(MAKE) -f GNUMakefile java 2>&1 > /dev/null
