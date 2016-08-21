@@ -291,7 +291,7 @@ $(JAVA_BUILT): java
 
 java_cleanup:
 	$(RM) -rf com
-	$(RM) -rf libAIOUSB.so $(JAVA_BUILT) AIOUSB_wrap.c AIOUSB_wrap.o AIOUSB.jar *.class $(JAVA_DIR)
+	$(RM) -rf libAIOUSB*.so $(JAVA_BUILT) AIOUSB_wrap.c AIOUSB_wrap.o AIOUSB.jar *.class $(JAVA_DIR)
 	@$(RM) -rf /tmp/scala-devel || true
 	$(RM) -f tests/*.class
 	$(RM) -rf tests/TESTDIR
