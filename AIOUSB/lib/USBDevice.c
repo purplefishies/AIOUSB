@@ -37,6 +37,10 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
     usb->deviceDesc            = *args->deviceDesc;
 
     errcode = libusb_open(  usb->device, &usb->deviceHandle );
+    if ( errcode < 0 ) {
+        retcode = asprintf(&retval.errmsg,"ERROR: Failed on libusb_open, code: %d\n", errcode);
+        goto error;
+    }
 
     if ((errcode = libusb_get_device_descriptor( usb->device, &devdesc)) < 0) {
         retcode = asprintf(&retval.errmsg,"ERROR: Failed to get device descriptor, code: %d\n", errcode);
