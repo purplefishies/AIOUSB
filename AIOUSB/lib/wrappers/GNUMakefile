@@ -37,7 +37,8 @@ JAVA_BUILT	:= java_built.txt
 PHP_BUILT	:= php_built.txt
 OCTAVE_BUILT	:= octave_built.txt
 R_BUILT		:= R_build.txt
-
+ANDROID_BUILD	:= android_build.txt
+ANDROID_LIBS_BUILD :=	$$(AIO_LIB_DIR)/ndkbuild
 
 PERL_CFLAGS	:= $(shell perl -MConfig -e "print \$$Config{ccflags}")
 PERL_XTRA_CFLAGS:= -std=gnu99 -fno-merge-constants
@@ -253,6 +254,18 @@ octave_atest:
 	@$(MAKE) --no-print-directory -f GNUMakefile octave_test
 	@$(MAKE) -f GNUMakefile octave_cleanup > /dev/null
 
+
+#
+# Android
+#
+
+$${AIO_LIB_DIR}/ndkbuild/builtndk.txt:
+	cd $${AIO_LIB_DIR}/ndkbuild && make 
+
+android_cleanup:
+	cd $${AIO_LIB_DIR}/ndkbuild && make clean
+
+android: $(ANDROID_DIR) $${AIO_LIB_DIR}/ndkbuild/builtndk.txt
 
 
 #
