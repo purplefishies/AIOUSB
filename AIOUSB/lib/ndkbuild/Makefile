@@ -4,6 +4,7 @@ all: builtndk.txt
 
 
 builtndk.txt:
+	cd libusb && git submodule init && git submodule update
 	ndk-build
 	touch builtndk.txt
 
