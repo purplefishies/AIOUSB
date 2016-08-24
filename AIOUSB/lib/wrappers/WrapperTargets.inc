@@ -5,3 +5,4 @@ JAVA_BUILT	:= java_built.txt
 PHP_BUILT	:= php_built.txt
 OCTAVE_BUILT	:= octave_built.txt
 R_BUILT		:= R_build.txt
+ANDROID_BUILT   := android_build.txt
