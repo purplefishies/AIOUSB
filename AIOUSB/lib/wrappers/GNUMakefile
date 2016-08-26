@@ -37,7 +37,7 @@ JAVA_BUILT	:= java_built.txt
 PHP_BUILT	:= php_built.txt
 OCTAVE_BUILT	:= octave_built.txt
 R_BUILT		:= R_built.txt
-yANDROID_BUILT	:= android_built.txt
+ANDROID_BUILT	:= android_built.txt
 ANDROID_LIBS_BUILD :=	$$(AIO_LIB_DIR)/ndkbuild
 
 PERL_CFLAGS	:= $(shell perl -MConfig -e "print \$$Config{ccflags}")
@@ -69,7 +69,7 @@ all:
 	done
 
 clean:
-	for i in perl python ruby php java octave R; do \
+	for i in perl python ruby php java octave R android; do \
 		cd $$i && $(MAKE) -f GNUMakefile $${i}_cleanup && cd -; \
 	done
 
@@ -272,8 +272,7 @@ android_cleanup:
 	rm -f *.so *.jar
 	rm -f $(ANDROID_BUILT)
 	rm -f AIOUSB_wrap*
-	ndk-build clean
-
+	rm -rf libs
 
 android: $(ANDROID_DIR) $${AIO_LIB_DIR}/ndkbuild/builtndk.txt
 	@echo $$(pwd)
