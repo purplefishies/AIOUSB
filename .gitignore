@@ -8,8 +8,9 @@
 *.so
 AIOUSB/samples/USB-AI16-16/*_test
 java/tests/test.java
-AIOUSB/lib/wrappers/java/AIOUSB
-AIOUSB/lib/wrappers/java/AIOUSB_wrap.c
+AIOUSB/lib/wrappers/*/AIOUSB_wrap.c
+AIOUSB/lib/wrappers/*/AIOUSB
+AIOUSB/lib/wrappers/*/*_build.txt
 *.cmd
 BUILD_LOG.txt
 AIOUSB/build
