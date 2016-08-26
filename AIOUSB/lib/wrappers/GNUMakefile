@@ -37,7 +37,7 @@ JAVA_BUILT	:= java_built.txt
 PHP_BUILT	:= php_built.txt
 OCTAVE_BUILT	:= octave_built.txt
 R_BUILT		:= R_build.txt
-ANDROID_BUILD	:= android_build.txt
+ANDROID_BUILT	:= android_build.txt
 ANDROID_LIBS_BUILD :=	$$(AIO_LIB_DIR)/ndkbuild
 
 PERL_CFLAGS	:= $(shell perl -MConfig -e "print \$$Config{ccflags}")
@@ -52,6 +52,8 @@ PYTHON_PREFIX	:=
 
 JAVA_DIR	:= AIOUSB
 JAVA_ROOT	:= AIOUSB
+ANDROID_DIR	:= AIOUSB
+
 
 TEST_DIR	:=	test_dir
 
@@ -262,10 +264,34 @@ octave_atest:
 $${AIO_LIB_DIR}/ndkbuild/builtndk.txt:
 	cd $${AIO_LIB_DIR}/ndkbuild && make 
 
-android_cleanup:
+full_android_cleanup: android_cleanup
 	cd $${AIO_LIB_DIR}/ndkbuild && make clean
 
+android_cleanup:
+	rm -rf AIOUSB
+	rm -rf TMPDIR
+	rm -f *.so
+	rm -f $(ANDROID_BUILT)
+
+
 android: $(ANDROID_DIR) $${AIO_LIB_DIR}/ndkbuild/builtndk.txt
+	@echo $$(pwd)
+	@if [ ! -f $(ANDROID_BUILT) ] ; then \
+		echo "Do something";\
+		$(SWIG) $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) -I../../ -java -package AIOUSB -outdir $(ANDROID_DIR) AIOUSB.i 2>&1; \
+		$(CC)  -fPIC -shared  -o libAIOUSB.so ./AIOUSB_wrap.c ${CFLAGS} -I../.. -I$${JAVA_HOME}/include -L$${AIO_LIB_DIR} -L$${AIO_CLASSLIB_DIR} -laiousbdbg -lusb-1.0 -lpthread -lrt -ldl -lm -lc  2>&1 ; \
+		cp libAIOUSB.so libAIOUSB32.so;\
+		cp libAIOUSB.so libAIOUSB64.so;\
+		mkdir -p TMPDIR;\
+		$(JAVAC) -d TMPDIR  AIOUSB/*.java $$(find cz -name "*.java" -follow);\
+		mkdir -p tests/TESTDIR;\
+		cd tests && javac -classpath "../TMPDIR:$$(pwd)/:$$(pwd)/../" -d TESTDIR test.java com/jdotsoft/jarloader/JarClassLoader.java 2>&1; \
+		if [ ! -d /tmp/scala-devel ] ; then mkdir /tmp/scala-devel; chmod 777 /tmp/scala-devel; fi \
+	fi
+	@jar cf AIOUSB.jar libAIOUSB{32,64}.so libAIOUSB.so -C $${AIO_LIB_DIR} libaiousbdbg.so -C TMPDIR .
+	@if [ "$$?" == 0 ]; then \
+		touch $(ANDROID_BUILT); \
+	fi;
 
 
 #
