@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <unistd.h>
 #include <string.h>
-#include "aiocommon.h"
+
 
 
 AIOUSB_BOOL find_ai_board( AIOUSBDevice *dev ) { 
