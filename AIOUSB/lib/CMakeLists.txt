@@ -17,15 +17,6 @@ OPTION(BUILD_AIOUSBDBG_SHARED "Build the AIOUSB Debug libraries shared." ON)
 OPTION(BUILD_AIOUSBCPP_SHARED "Build the AIOUSB C++ libraries shared." ON)
 OPTION(BUILD_AIOUSBCPPDBG_SHARED "Build the AIOUSB C++ Debug libraries shared." ON)
 
-
-#
-# Options for building shared vs. Static libraries
-#
-OPTION(BUILD_AIOUSB_SHARED "Build the AIOUSB libraries shared." ON)
-OPTION(BUILD_AIOUSBDBG_SHARED "Build the AIOUSB Debug libraries shared." ON)
-OPTION(BUILD_AIOUSBCPP_SHARED "Build the AIOUSB C++ libraries shared." ON)
-OPTION(BUILD_AIOUSBCPPDBG_SHARED "Build the AIOUSB C++ Debug libraries shared." ON)
-
 IF(BUILD_AIOUSB_SHARED)
   SET(AIOUSB_LIBRARY_TYPE SHARED)
 ELSE(BUILD_AIOUSB_SHARED)
@@ -179,7 +170,7 @@ if( GTESTTAP_FOUND AND GMOCK_FOUND AND GTEST_FOUND AND NOT DISABLE_TESTING )
   set(GTEST_FILES ADCConfigBlock.c AIOChannelMask.c AIOChannelRange.c AIOContinuousBuffer.c AIODeviceInfo.c AIODeviceTable.c AIOUSBDevice.c AIOUSB_Core.c DIOBuf.c AIOUSB_DIO.c USBDevice.c AIOFifo.c AIOEither.c AIOCountsConverter.c AIODeviceQuery.c AIOCommandLine.c AIOProductTypes.c AIOTuple.c CStringArray.c AIOList.c )
   foreach( gtest ${GTEST_FILES} ) 
     set(MY_FLAGS "${CXX_FLAGS} -DSELF_TEST -D__aiousb_cplusplus -std=gnu++0x"  )
-    set(MY_LIBRARIES aiousbdbg usb-1.0 pthread m ${GMOCK_BOTH_LIBRARIES} ${GTEST_BOTH_LIBRARIES} aiousb aiousbcpp )
+    set(MY_LIBRARIES aiousbdbg aiousbcpp usb-1.0 pthread m ${GMOCK_BOTH_LIBRARIES} ${GTEST_BOTH_LIBRARIES}  )
     # MESSAGE(STATUS "Libraries: ${MY_LIBRARIES}")
     # set(MY_FLAGS "${MY_FLAGS} -DNDEBUG" )
     build_gtest_cpp_file( aiousblibs ${gtest}  ${MY_FLAGS} "${MY_LIBRARIES}"  )
@@ -191,7 +182,7 @@ if( GTESTTAP_FOUND AND GMOCK_FOUND AND GTEST_FOUND AND NOT DISABLE_TESTING )
   FILE( GLOB GTESTING_FILES tests/*.cpp )
   foreach( gtest_file ${GTESTING_FILES} ) 
     # MESSAGE(STATUS "Trying out file ${gtest_file}")
-    set(MY_LIBRARIES usb-1.0 pthread m ${GMOCK_BOTH_LIBRARIES} ${GTEST_BOTH_LIBRARIES} aiousbcppdbg )
+    set(MY_LIBRARIES aiousbcppdbg usb-1.0 pthread m ${GMOCK_BOTH_LIBRARIES} ${GTEST_BOTH_LIBRARIES}  )
     # MESSAGE(STATUS "MY_LIBRARIES=  ${MY_LIBRARIES}" )
     build_gtest_test_file( aiousblibs ${gtest_file} ${MY_FLAGS} "${MY_LIBRARIES}" )
   endforeach( gtest_file )

@@ -99,7 +99,7 @@ if(  UNIX OR APPLE )
   include_directories( ${LIBUSB_1_INCLUDE_DIRS} )
   message( STATUS "Trying Apple / Unix" )
 
-  set(EXTRA_LIBS m)
+  set(EXTRA_LIBS pthread m)
   if( CMAKE_COMPILER_IS_GNUCC )
     set( USE_GCC TRUE )
   elseif( CMAKE_C_COMPILER_ID MATCHES "Clang")
