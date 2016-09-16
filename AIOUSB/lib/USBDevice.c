@@ -122,7 +122,7 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
         fputs("STATE: -connecting-to-device\n", stderr);
     
     usb->debug = AIOUSB_FALSE;
-#ifndef __cplusplus
+#if !defined(__cplusplus) || !defined(mocktesting)
     usb->usb_control_transfer  = usb_control_transfer;
 #endif
     usb->usb_bulk_transfer     = usb_bulk_transfer;
