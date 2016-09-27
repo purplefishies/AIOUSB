@@ -288,6 +288,8 @@
 
 #endif
 
+#if defined(SWIGJAVA) && defined(SWIGANDROID)
+#else
 /* Needed to allow inclusion into Scala */
 %pragma(java) moduleimports=%{
      import cz.adamh.utils.NativeUtils;
@@ -304,6 +306,7 @@
         }    
     }
 %}
+#endif
 
 %newobject CreateSmartBuffer;
 %newobject NewAIOBuf;
