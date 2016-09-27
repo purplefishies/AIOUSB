@@ -277,10 +277,16 @@ android_cleanup:
 android: $(ANDROID_DIR) $${AIO_LIB_DIR}/ndkbuild/builtndk.txt
 	@echo $$(pwd)
 	@if [ ! -f $(ANDROID_BUILT) ] ; then \
-		$(SWIG) $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) -I../../ -java -package AIOUSB -outdir $(ANDROID_DIR) AIOUSB.i 2>&1; \
+		$(SWIG) -DSWIGANDROID $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) -I../../ -java -package AIOUSB -outdir $(ANDROID_DIR) AIOUSB.i 2>&1; \
 		ndk-build;\
-		if [[ $$? !=  0 ]] ; then exit 1;fi \
+		if [[ $$? !=  0 ]] ; then exit 1;fi; \
+		mkdir -p TMPDIR; \
+		$(JAVAC) -d TMPDIR  AIOUSB/*.java $$(find cz -name "*.java" -follow);\
 	fi
+	cp libs/armeabi/libAIOUSB.so .
+	cp libAIOUSB.so libAIOUSB32.so
+	cp libAIOUSB.so libAIOUSB64.so
+	jar cf AIOUSB.jar  -C TMPDIR . *.so -C $${AIO_LIB_DIR}/ndkbuild/libs/armeabi libaiousbdbg.so -C $${AIO_LIB_DIR}/ndkbuild/libs/armeabi libaiousb.so
 	touch $(ANDROID_BUILT);
 
 #
