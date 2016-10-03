@@ -135,7 +135,7 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
 
     if (!init_usb_device)  {
 #ifdef __cplusplus        
-        tmpthingy = dlsym(RTLD_NEXT,"_ZN6AIOUSB19InitializeUSBDeviceEPNS_13aiousb_deviceEPNS_18aiousb_libusb_argsE");
+        tmpthingy = dlsym(RTLD_NEXT,"_ZN6AIOUSB19InitializeUSBDeviceEPNS_9USBDeviceEPNS_18aiousb_libusb_argsE");
         init_usb_device = (init_device)tmpthingy;
         if ( !init_usb_device ) {
             fprintf(stderr,"ERROR!!! Can't mock function \n");
@@ -152,8 +152,12 @@ AIOEither InitializeUSBDevice( USBDevice *usb, LIBUSBArgs *args )
 
     printf("Wrapped the original !!\n");
     retval = init_usb_device( usb, args );
-
-    outfile = fopen("usb_datalog.txt","w");
+    char *fname = getenv("USB_DATALOG_NAME");
+    if ( !fname ) { 
+        fname = (char *)"usb_data_log.txt";
+    }
+    
+    outfile = fopen(fname,"a+");
     if (!outfile ) {
         fprintf(stderr,"Can't open outputfile\n");
     }
