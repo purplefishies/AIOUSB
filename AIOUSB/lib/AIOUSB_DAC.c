@@ -132,7 +132,7 @@ unsigned long DACMultiDirect( unsigned long DeviceIndex,
 {
     AIO_ASSERT( pDACData );
     AIO_ASSERT( DACDataCount <= 10000  );
-    AIO_ERROR_VALID_DATA( AIOUSB_SUCCESS, DACDataCount == 0 ); /* NOOP */
+    AIO_ERROR_VALID_DATA( AIOUSB_SUCCESS, !(DACDataCount == 0) ); /* NOOP */
 
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &result );
@@ -140,8 +140,12 @@ unsigned long DACMultiDirect( unsigned long DeviceIndex,
     AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_SUPPORTED, deviceDesc->ImmDACs );
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_OPEN_FAILED, 
-                          ((deviceDesc->bDACStream && (!(deviceDesc->bDACOpen || deviceDesc->bDACClosing ))) || 
-                           ((deviceDesc->bDACOpen || deviceDesc->bDACClosing) && !deviceDesc->bDACStream )));
+                          !(
+                            ( deviceDesc->bDACDIOStream || deviceDesc->bDACSlowWaveStream || deviceDesc->bDACStream ) && 
+                            ( deviceDesc->bDACOpen || deviceDesc->bDACClosing )
+                            )
+                          );
+
                           
     USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, &result );
     AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );

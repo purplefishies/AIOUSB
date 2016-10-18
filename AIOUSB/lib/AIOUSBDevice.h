@@ -41,6 +41,8 @@ struct AIOUSBDevice {
     unsigned long ConfigBytes;
     unsigned ImmDACs;
     AIOUSB_BOOL bDACStream;
+    AIOUSB_BOOL bDACDIOStream;
+    AIOUSB_BOOL bDACSlowWaveStream;
     AIOUSB_BOOL bDACDIOClock;
     unsigned DACsUsed;
     AIOUSB_BOOL bADCStream;
