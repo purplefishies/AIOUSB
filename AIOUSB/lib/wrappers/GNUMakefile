@@ -64,7 +64,7 @@ R		:= R
 
 # ruby php java octave
 all:
-	for i in perl python ruby php octave; do \
+	for i in perl python ruby php octave java; do \
 		cd $${i} && $(MAKE) -f GNUMakefile $${i}_test && cd - ;\
 	done
 
