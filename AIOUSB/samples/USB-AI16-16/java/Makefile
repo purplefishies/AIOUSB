@@ -7,6 +7,8 @@ CP	:= cp
 JAVAC	:= javac
 JAR	:= jar
 CURAPP	:= $(shell basename $(shell pwd))
+ARCH	:= $(shell uname -p )
+
 
 .PHONY  : build clean
 
