@@ -147,7 +147,8 @@ main(int argc, char *argv[] )
 
     if( options.reset ) {
         fprintf(stderr,"Resetting device at index %d\n",buf->DeviceIndex );
-        AIOContinuousBufResetDevice( buf );
+        /* AIOContinuousBufResetDevice( buf ); */
+        AIOUSB_ResetChip( buf->DeviceIndex );
         exit(0);
     }
     FILE *fp = fopen(options.outfile,"w");

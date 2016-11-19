@@ -214,6 +214,25 @@ AIOUSB_BOOL AIOUSB_UnLock() {
 #endif
 }
 
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_ResetChip( unsigned long DeviceIndex )
+{
+    unsigned char data[2] = {0x01};
+    int usbval;
+    AIORET_TYPE retval;
+    USBDevice *usb = AIODeviceTableGetUSBDeviceAtIndex( DeviceIndex, (AIORESULT*)&retval );
+    AIO_ERROR_VALID_AIORET_TYPE( retval, retval == AIOUSB_SUCCESS);
+
+    usbval = usb->usb_control_transfer(usb, 0x40, 0xA0, 0xE600, 0 , data, 1, usb->timeout );
+    data[0] = 0;
+
+    usbval = usb->usb_control_transfer(usb, 0x40, 0xA0, 0xE600, 0 , data, 1, usb->timeout );
+    retval = (AIORET_TYPE )usbval;
+
+    return retval;
+
+
+}
+
  
 unsigned long AIOUSB_Validate_Lock(unsigned long *DeviceIndex)
 {

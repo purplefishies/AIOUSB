@@ -69,6 +69,7 @@ extern unsigned long aiousbInit ;
 PUBLIC_EXTERN unsigned long ADC_ResetDevice( unsigned long DeviceIndex  );
 PUBLIC_EXTERN AIORET_TYPE AIOUSB_GetDeviceSerialNumber( unsigned long DeviceIndex );
 
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_ResetChip( unsigned long DeviceIndex );
 
 #ifndef SWIG
 PUBLIC_EXTERN AIOUSB_BOOL AIOUSB_Lock(void);
