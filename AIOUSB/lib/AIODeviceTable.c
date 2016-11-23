@@ -17,6 +17,7 @@ static ProductIDName productIDNameTable[] = {
     { USB_DIO_32I       , "USB-DIO-32"     },
     { USB_DIO_48        , "USB-DIO-48"     },
     { USB_DIO_96        , "USB-DIO-96"     },
+    { USB_DIO24_CTR6    , "USB-DIO24-CTR6" },
     { USB_DI16A_REV_A1  , "USB-DI16A-A1"   },
     { USB_DO16A_REV_A1  , "USB-DO16A-A1"   },
     { USB_DI16A_REV_A2  , "USB-DI16A-A2"   },
