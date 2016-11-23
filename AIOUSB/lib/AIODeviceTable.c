@@ -167,7 +167,7 @@ AIOUSBDevice *_get_device_no_error( unsigned long index )
 AIOUSB_BOOL AIOUSB_SetInit()
 {
     aiousbInit = AIOUSB_INIT_PATTERN;
-    return AIOUSB_SUCCESS;
+    return AIOUSB_TRUE;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -264,7 +264,7 @@ AIOUSB_BOOL AIOUSB_Cleanup()
 {
     aiousbInit = ~ AIOUSB_INIT_PATTERN;
     memset( &deviceTable[0], 0, MAX_USB_DEVICES * AIOUSBDeviceSize() );
-    return AIOUSB_SUCCESS;
+    return AIOUSB_TRUE;
 }
 
 /*----------------------------------------------------------------------------*/

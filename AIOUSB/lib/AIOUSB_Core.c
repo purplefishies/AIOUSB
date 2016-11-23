@@ -42,7 +42,7 @@ namespace AIOUSB {
 
 int aio_errno;
 
-static const ProductIDName productIDNameTable[] = {
+ProductIDName productIDNameTable[] = {
     { USB_DA12_8A_REV_A , "USB-DA12-8A-A"  },
     { USB_DA12_8A       , "USB-DA12-8A"    },
     { USB_DA12_8E       , "USB-DA12-8E"    },
@@ -152,12 +152,6 @@ static const ProductIDName productIDNameTable[] = {
     { USB_AIO12_128     , "USB-AIO12-128"  },
     { USB_AIO12_128E    , "USB-AIO12-128E" }
 };
-#ifdef __cplusplus
-const int NUM_PROD_NAMES = sizeof(productIDNameTable) / sizeof(productIDNameTable[ 0 ]);
-#else
-#define NUM_PROD_NAMES (sizeof(productIDNameTable) / sizeof(productIDNameTable[ 0 ]))
-#endif
-
 
 #define AIOUSB_ENABLE_MUTEX
 
@@ -353,10 +347,8 @@ unsigned long ResolveDeviceIndex(unsigned long DeviceIndex) {
 
 /*------------------------------------------------------------------------*/
 DeviceDescriptor *DeviceTableAtIndex( unsigned long DeviceIndex ) { 
-    unsigned long result = AIOUSB_Validate( &DeviceIndex  );
-    if ( !result != AIOUSB_SUCCESS ) {
-        
-    }
+    AIOUSB_Validate( &DeviceIndex  );
+
     DeviceDescriptor * deviceDesc = &deviceTable[ DeviceIndex ];
 
     return deviceDesc;

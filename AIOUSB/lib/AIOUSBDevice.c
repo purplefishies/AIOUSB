@@ -246,7 +246,7 @@ USBDevice *AIOUSBDeviceGetUSBHandleFromDeviceIndex( unsigned long DeviceIndex, A
 {
     
     *dev = AIODeviceTableGetDeviceAtIndex( DeviceIndex , result );
-    USBDevice *dh;
+    USBDevice *dh=0;
 
     if ( *result != AIOUSB_SUCCESS ) {
     } else if ( !*dev  ) {
