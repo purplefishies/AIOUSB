@@ -1111,6 +1111,15 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
         device->DIOBytes = 4;
         device->Counters = 3;
         device->RootClock = 3000000;
+    } else if ( productID == USB_DIO24_CTR6 ) {
+      device->DIOBytes = 3;
+      device->DIOConfigBits = 4;
+      device->Tristates = 1;
+      device->Counters = 2;
+      device->RootClock = 10000000;
+      device->bGetName = AIOUSB_TRUE;
+      device->bSetCustomClocks = AIOUSB_TRUE;
+      device->bDIODebounce = AIOUSB_TRUE;
     } else if (productID == USB_DIO_48) {
         device->DIOBytes = 6;
     } else if (productID == USB_DIO_96) {
