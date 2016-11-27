@@ -70,25 +70,25 @@ ulp_assign(outData, 0x5465 );
 DIO_WriteAll(deviceIndex, outData );
 disp('Reading back data');
 buf = DIOBuf(10)
-DIO_ReadIntoDIOBuf( deviceIndex, buf );
+DIO_ReadAllToDIOBuf( deviceIndex, buf );
 val = sprintf("Binary was: %s", DIOBufToString(buf) );
 disp(val);
 val = sprintf("Hex was: %s", DIOBufToHex(buf) );
 disp(val)
-tmp = new_ip();
+tmp = new_ucp();
 for i=0:3
   DIO_Read8(deviceIndex,i, tmp );
-  printf("read8 = %d\n", ip_value(tmp) );
+  printf("read8 = %d\n", ucp_value(tmp) );
 end
 printf("-----\n");
 for i=7:-1:0
         DIO_Read1(deviceIndex,i, tmp );
-        printf("%d",ip_value(tmp));
+        printf("%d",ucp_value(tmp));
 end
 printf("\n-----\n");
 for i=15:-1:8
         val = DIO_Read1(deviceIndex,i,tmp );
-        printf("%d",ip_value(tmp));
+        printf("%d",ucp_value(tmp));
 end
 
 
