@@ -43,7 +43,7 @@ timeout = 1000;
 AIOUSB_Reset(  deviceIndex );
 AIOUSB_SetCommTimeout( deviceIndex, timeout );
 
-outData = new_usp()
+outData = new_usp();
 usp_assign(outData, 15 );
 readData = new_usp();
 usp_assign(readData ,0);       
@@ -51,7 +51,7 @@ usp_assign(readData ,0);
 
 countval = 1;
 num_per_bin = 10;
-# num_repetitions = 10;           
+num_repetitions = 10;           
 vals = zeros(1,(2^stopval)*num_repetitions/num_per_bin);
 tic;
 start = tic;
