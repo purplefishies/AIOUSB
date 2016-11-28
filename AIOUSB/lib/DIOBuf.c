@@ -198,9 +198,10 @@ char *DIOBufToString( DIOBuf *buf ) {
  */
 char *DIOBufToHex( DIOBuf *buf ) {
     AIO_ASSERT_RET( NULL, buf );
-    char *tmp = (char *)malloc( DIOBufSize(buf) / BITS_PER_BYTE );
-    int size = DIOBufSize(buf) / BITS_PER_BYTE;
 
+    int size = DIOBufSize(buf) / BITS_PER_BYTE + ( DIOBufSize(buf) % BITS_PER_BYTE > 0 );
+    char *tmp = (char *)malloc( size );
+   
     memset( buf->strbuf, 0, buf->strbuf_size );
     memcpy( tmp, DIOBufToBinary( buf ), size );
 
@@ -387,6 +388,18 @@ TEST(DIOBuf, Inverted_Binary ) {
     free(tmp);
     DeleteDIOBuf( buf );
 }
+
+TEST(DIOBuf, CorrectHex ) { 
+    DIOBuf *buf = NewDIOBufFromBinStr("0011111000111111");
+    char *tmp = DIOBufToHex(buf);
+    EXPECT_STREQ( tmp, "0x3e3f" );
+    DeleteDIOBuf( buf );
+    buf = NewDIOBufFromBinStr("011111000111111");
+    tmp = DIOBufToHex( buf );
+    EXPECT_STREQ( tmp, "0x7c7e" );
+    DeleteDIOBuf( buf );
+}
+
 
 TEST(DIOBuf, Resize_Test ) {
     DIOBuf *buf = NewDIOBuf(0);
