@@ -29,6 +29,9 @@
 %apply long long { int64_t };
 %apply unsigned long long { uint64_t };
 
+%inline %{
+    typedef char tmpchar;
+%}
 
 %apply AIORESULT *OUTPUT { unsigned long *result };
 
@@ -745,15 +748,15 @@ def AIOUSB_FindDevices(fn):
 /* Special conversion so that binary string with multiple zeros aren't truncated */
 %extend DIOBuf {
     
-    %typemap(out) char * {
-         $result = PyString_FromStringAndSize( $1, MAX(strlen($1),DIOBufByteSize( arg1 )) );
+    %typemap(out) tmpchar * {
+        printf("Strlen: %d ,  bytesize: %d\n", (int)strlen($1), (int)DIOBufByteSize( arg1 ));
+        $result = PyString_FromStringAndSize( $1, MAX(strlen($1),DIOBufByteSize( arg1 )) );
     }
 
-    char *to_bin() {
+    tmpchar *to_bin() {
         return DIOBufToBinary($self);
     }
 
-    %typemap(out) char *; /* Remove this for other char * returning methods */
 }
 
 
