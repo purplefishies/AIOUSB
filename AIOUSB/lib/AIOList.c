@@ -11,7 +11,10 @@ namespace AIOUSB {
 char *intToString( int val )
 {
     char *tmp = 0;
-    asprintf(&tmp,"%d",val );
+
+    if ( asprintf(&tmp,"%d",val ) < 0 ) 
+        return NULL;
+    
     return tmp;
 }
 /**

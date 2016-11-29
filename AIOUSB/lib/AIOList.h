@@ -75,7 +75,7 @@ __NL__        char *TailQListEntry ## PRETTYNAME ## ToString( TailQListEntry ## 
 __NL__        {                                                                                               \
 __NL__            char *tmpstr = 0;                                                                           \
 __NL__            char *tmp;                                                                                  \
-__NL__            asprintf(&tmpstr, "%s", (tmp= PRETTYNAME ## ToString(entry->_value)) );                     \
+__NL__            if(asprintf(&tmpstr, "%s", (tmp= PRETTYNAME ## ToString(entry->_value)) )<0) return NULL;   \
 __NL__            free(tmp);                                                                                  \
 __NL__            return tmpstr;                                                                              \
 __NL__        }                                                                                               \
@@ -88,14 +88,14 @@ __NL__            int started = 1;                                              
 __NL__            char *keep = (char *)0;                                                                     \
 __NL__            for (np = list->head.tqh_first; np != NULL; np = np->entries.tqe_next) {                    \
 __NL__                char *_t1;                                                                              \
-__NL__                asprintf(&keep, "%s%s", tmp, (_t1 = TailQListEntry ## PRETTYNAME ## ToString( np )) );  \
+__NL__                if(asprintf(&keep, "%s%s", tmp, (_t1 = TailQListEntry ## PRETTYNAME ## ToString( np )))<0) return NULL; \
 __NL__                free(_t1);                                                                              \
 __NL__                if ( started != 1 )                                                                     \
 __NL__                    free(tmp);                                                                          \
 __NL__                tmp = strdup(keep);                                                                     \
 __NL__                free(keep);                                                                             \
 __NL__                if ( np->entries.tqe_next ) {                                                           \
-__NL__                    asprintf(&keep, "%s,", tmp );                                                       \
+__NL__                    if(asprintf(&keep, "%s,", tmp )<0)return NULL;                                      \
 __NL__                    free(tmp);                                                                          \
 __NL__                    tmp = strdup(keep);                                                                 \
 __NL__                    free(keep);                                                                         \

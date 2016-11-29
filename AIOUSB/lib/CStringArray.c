@@ -130,23 +130,29 @@ char *CStringArrayToStringWithDelimeter( CStringArray *str, const char *delim)
     AIO_ASSERT_RET( NULL, str );
     char *tmpdelim  = ((char *)delim == NULL ? (char *)" " : (char *)delim );
     int i;
+    int retcode = 0;
     char *retval = NULL;
     char *tmp;
     for ( i = 0; i < str->_size -1 ; i ++ ) { 
         if ( i == 0 && retval == NULL ) { 
-            asprintf(&retval, "%s%s", str->_strings[i], tmpdelim );
+            retcode = asprintf(&retval, "%s%s", str->_strings[i], tmpdelim );
         } else if ( i != 0 && retval == NULL ) {
-            asprintf(&retval, "%s%s", str->_strings[i], tmpdelim );
+            retcode = asprintf(&retval, "%s%s", str->_strings[i], tmpdelim );
         } else {
             tmp = strdup(retval );
             free(retval);
-            asprintf(&retval, "%s%s%s", tmp, str->_strings[i], tmpdelim );
+            retcode = asprintf(&retval, "%s%s%s", tmp, str->_strings[i], tmpdelim );
             free(tmp);
         }
     }
+    if ( retcode < 0 )
+        return NULL;
+
     tmp = strdup(retval);
     free(retval);
-    asprintf(&retval, "%s%s", tmp, str->_strings[i]);
+    retcode = asprintf(&retval, "%s%s", tmp, str->_strings[i]);
+    if ( retcode < 0 ) 
+        return NULL;
     free(tmp);
     return retval;
 }
