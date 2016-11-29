@@ -98,12 +98,13 @@ PUBLIC_EXTERN AIORET_TYPE DeleteAIOCommandLineOptions( AIOCommandLineOptions *op
 PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOptionsListDevices( AIOCommandLineOptions *options , intlist *indices );
 PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOptionsOverrideADCConfigBlock( ADCConfigBlock *config, AIOCommandLineOptions *options );
 
+#if !defined(MATLAB)
 static inline AIORET_TYPE AIOCommandLineOptionsGetDeviceIndex( AIOCommandLineOptions *options ) {AIO_ASSERT( options ); return options->index;};
 static inline const char *AIOCommandLineOptionsGetDefaultADCJSONConfig( AIOCommandLineOptions *options ) {AIO_ASSERT_RET( NULL, options );return options->adcconfig_json;};
 static inline AIORET_TYPE AIOCommandLineOptionsGetIncludeTiming( AIOCommandLineOptions *options ){ AIO_ASSERT(options); return options->with_timing;};
 static inline AIORET_TYPE AIOCommandLineOptionsGetCounts( AIOCommandLineOptions *options ) { AIO_ASSERT(options); return options->counts; };
 static inline AIORET_TYPE AIOCommandLineOptionsGetScans( AIOCommandLineOptions *options ) { AIO_ASSERT(options); return options->num_scans; };
-
+#endif
 
 PUBLIC_EXTERN const AIOCommandLineOptions *AIO_SCRIPTING_OPTIONS(void);
 PUBLIC_EXTERN const AIOCommandLineOptions *AIO_CMDLINE_OPTIONS(void);
@@ -111,14 +112,14 @@ PUBLIC_EXTERN const AIOCommandLineOptions *AIO_CMDLINE_OPTIONS(void);
 
 /* DEPRECATED FUNCTIONS */
 #ifndef SWIG
-
+#if !defined(MATLAB)
 PUBLIC_EXTERN AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *indices, int num_devices ) ACCES_DEPRECATED("Please use AIOCommandLineOptionsListDevices");
 PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOverrideADCConfigBlock( ADCConfigBlock *config, AIOCommandLineOptions *options ) ACCES_DEPRECATED("Please use AIOCommandLineOptionsOverrideADCConfigBlock");
 static inline ACCES_DEPRECATED("Please use AIOCommandLineOptionsGetDefaultADCJSONConfig") const char *AIOCommandLineGetDefaultADCJSONConfig( AIOCommandLineOptions *options )  { return AIOCommandLineOptionsGetDefaultADCJSONConfig(options);};
 static inline ACCES_DEPRECATED("Please use AIOCommandLineOptionsGetIncludeTiming") AIORET_TYPE AIOCommandLineGetIncludeTiming( AIOCommandLineOptions *options ){ return AIOCommandLineOptionsGetIncludeTiming(options);};
 static inline ACCES_DEPRECATED("Please use AIOCommandLineOptionsGetCounts") AIORET_TYPE AIOCommandLineGetCounts( AIOCommandLineOptions *options ) {return AIOCommandLineOptionsGetCounts(options );};
 static inline ACCES_DEPRECATED("Please use AIOCommandLineOptionsGetScans") AIORET_TYPE AIOCommandLineGetScans( AIOCommandLineOptions *options ) { return AIOCommandLineOptionsGetScans(options);};
-
+#endif
 #endif
 /* END AIOUSB_API */
 

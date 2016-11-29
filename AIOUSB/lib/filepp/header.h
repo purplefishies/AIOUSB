@@ -6,6 +6,8 @@
 typedef unsigned long AIORESULT;
 typedef int64_t AIORET_TYPE;
 
+#define MATLAB
+
 /* only needed because of mexFunction below and mexPrintf */
 #include "AIOUSB_Core.h"
 #include "AIOChannelMask.h"
@@ -16,6 +18,7 @@ typedef int64_t AIORET_TYPE;
 #include "AIODeviceQuery.h"
 #include "AIOCommandLine.h"
 #include "AIOUSB_Properties.h"
+
 
 /* #include <pthread.h> */
 
