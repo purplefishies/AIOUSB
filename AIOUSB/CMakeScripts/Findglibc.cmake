@@ -41,7 +41,7 @@ if ( GLIBC_FOUND AND GLIBC_VERSION )
   # in cache already
   set(GLIBC_FOUND TRUE)
 else ()
-  if ( UNIX ) 
+  if ( UNIX AND NOT APPLE ) 
     execute_process( COMMAND ldd --version RESULT_VARIABLE RESVALUE
       OUTPUT_VARIABLE LDDOUT
       ERROR_VARIABLE LDDOUT
@@ -59,7 +59,7 @@ else ()
     message(FATAL "Can't find GLIBC")
   elseif( WINDOWS )
     message(FATAL "Can't find GLIBC")
-  endif( UNIX )
+  endif( UNIX AND NOT APPLE )
 endif( GLIBC_FOUND AND GLIBC_VERSION )
 
 if (GLIBC_FOUND)
