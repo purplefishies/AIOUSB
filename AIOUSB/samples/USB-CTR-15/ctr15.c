@@ -20,19 +20,8 @@ AIOUSB_BOOL find_ctr15( AIOUSBDevice *dev )
     if ( dev->ProductID == USB_CTR_15 )
         return AIOUSB_TRUE;
     else
-        return AIOUSB_TRUE;
+        return AIOUSB_FALSE;
 }
-
-/*
- * Sub-options.
- */
-char    *subopts[] = {
-#define COLOR   0
-    "color",
-#define SOLID   1
-    "solid",
-    NULL
-};
 
 void print_usage(int argc, char **argv )
 {
@@ -56,9 +45,7 @@ int main(int argc, char *argv[] )
 {
     int num_devices, *indices;
     int c, option_index;
-    /* char *options = 0; */
     double channel_frequencies[5] = {0.0};
-    /* int channum = 0; */
     static struct option long_options[] = {
         {"channel"   , required_argument, 0,  'C'   },
         {"help"      , no_argument      , 0,  'h'   },
@@ -139,8 +126,7 @@ int main(int argc, char *argv[] )
             CTR_8254ModeLoad( indices[0], i, 1, 2, counter_value);
             CTR_8254ModeLoad( indices[0], i, 2, 3, counter_value);
         }
-    } else {
+    } else {                    /* To come */
 
     }
-
 }
