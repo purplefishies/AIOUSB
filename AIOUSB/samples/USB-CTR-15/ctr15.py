@@ -1,12 +1,26 @@
 #!/usr/bin/python
 
-
 from __future__ import print_function
 from AIOUSB import *
 from string import split
 
 import math
 import sys
+
+usage = """
+Usage: 
+       ctr15.py [ --rapiddisplay | -D ] ( --channel=<path>)... 
+
+Options:
+       -h, --help              Show the help screen
+       --rapiddisplay      Update the counters
+
+Try: 
+        ctr15.py -D
+        ctr15.py --channel ./here --channel ./there
+        ctr15.py (-h | --help | --version)
+
+"""
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -26,6 +40,10 @@ def find_idio(obj):
 
 def main(args):
     channel_frequencies = [0.0,0.0,0.0,0.0,0.0]
+
+    if len(sys.argv) == 1:
+        eprint("You must specify an option")
+        print(usage)
 
     AIOUSB_ListDevices();
     indices = AIOUSB_FindDevices( find_idio )
@@ -64,26 +82,22 @@ def main(args):
         CTR_8254ModeLoad( indices[0], i, 1, 2, counter_value )
         CTR_8254ModeLoad( indices[0], i, 2, 3, counter_value )
 
-              
+    if args["--rapiddisplay"] or args["-D"]:
+        counts = ushortarray(15)
+        count = 0
+        print("Printing out counters")
+        while count < 100000:
+            CTR_8254ReadAll( indices[0] , counts.cast() );
+            print("\r%5.5hu,%5.5hu,%5.5hu   %5.5hu,%5.5hu,%5.5hu   %5.5hu,%5.5hu,%5.5hu   %5.5hu,%5.5hu,%5.5hu    %5.5hu,%5.5hu,%5.5hu" % (counts[0], counts[1], counts[2], counts[3], counts[4], counts[5], counts[6], counts[7], counts[8], counts[9], counts[10], counts[11], counts[12], counts[13], counts[14] ), end="")
+            count += 1
+        print("")
+        
+   
 
 if __name__ == "__main__":
     
-    usage = """
-Usage: counted_example.py --help
-       counted_example.py (--channel=<path>)...
 
-Options:
-    -h, --help  Show the help screen
-
-Try: 
-     counted_example.py --channel ./here --channel ./there
-     counted_example.py this.txt that.txt
-    """
     from docopt import *
-    arguments = docopt(usage,  )
+    arguments = docopt(usage )
     main(arguments)
 
-
-# main( args )
-#     ctr15.py --channel 0=1000 --channel 1=10000
-#    ctr15.py (--channel=<CHANNELNUM=HZ>)... 
