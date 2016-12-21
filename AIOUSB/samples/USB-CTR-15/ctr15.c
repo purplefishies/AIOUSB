@@ -25,7 +25,7 @@ AIOUSB_BOOL find_ctr15( AIOUSBDevice *dev )
 
 void print_usage(int argc, char **argv )
 {
-    printf("%s :  -c CHANNEL_NUMBER=CLOCK_HZ [ -c CHANNEL_NUMBER=CLOCK_HZ ...]\n", argv[0] );
+    printf("%s:  [--rapiddisplay | -D ]\n          -c CHANNEL_NUMBER=CLOCK_HZ [ -c CHANNEL_NUMBER=CLOCK_HZ ...]\n", argv[0] );
 }
 
 /**
@@ -45,21 +45,21 @@ int main(int argc, char *argv[] )
 {
     int num_devices, *indices;
     int c, option_index;
+    int display_counters = 0;
     double channel_frequencies[5] = {0.0};
+    unsigned short counts[15] = {0};
+
     static struct option long_options[] = {
-        {"channel"   , required_argument, 0,  'C'   },
-        {"help"      , no_argument      , 0,  'h'   },
+        {"channel"      , required_argument, 0,  'C'   },
+        {"rapiddisplay" , no_argument      , 0,  'D'   },
+        {"help"         , no_argument      , 0,  'H'   },
     };
 
-    AIOUSB_ListDevices();
-    AIOUSB_FindDevices( &indices, &num_devices, find_ctr15 );
-    num_devices = 1;
-    if ( num_devices <= 0 ) {
-        fprintf(stderr,"Unable to find a USB-CTR-16 device..exiting\n");
+    if ( argc <= 1 ) { 
+        print_usage(argc, argv);
         exit(1);
-    } else {
-        printf("Using device at index %d\n", indices[0] );
     }
+
 
 
     /**
@@ -76,7 +76,7 @@ int main(int argc, char *argv[] )
      * Quick command line processing -C 1=
      */
     while (1) {
-        c = getopt_long(argc, argv, "C:H", long_options, &option_index);
+        c = getopt_long(argc, argv, "C:HD", long_options, &option_index);
         if ( c == -1 )
             break;
 
@@ -99,13 +99,29 @@ int main(int argc, char *argv[] )
             }
 
             break;
+        case 'D':
+            display_counters = 1;
+            break;
         case 'H': 
             print_usage( argc , argv );
             exit(1);
         default:
+            fprintf(stderr,"Undefined option %s\n", optarg );
             break;
         }
     }
+
+    AIOUSB_ListDevices();
+    AIOUSB_FindDevices( &indices, &num_devices, find_ctr15 );
+    num_devices = 1;
+    if ( num_devices <= 0 ) {
+        fprintf(stderr,"Unable to find a USB-CTR-16 device..exiting\n");
+        exit(1);
+    } else {
+        printf("Using device at index %d\n", indices[0] );
+    }
+
+
 
     /* Debug */
     for ( int i = 0; i < 5; i ++ ) {
@@ -113,20 +129,31 @@ int main(int argc, char *argv[] )
     }
 
 
-    if ( 1 ) {
-
-        for ( int i = 0; i < 5; i ++ ) {
-            int counter_value;
-            if ( channel_frequencies[i] == 0 ) { 
-                counter_value = 62071;
-            } else {
-                counter_value = frequency_to_counter( channel_frequencies[i] );
-            }
-            printf("Setting channel %d counter to %d\n", i , counter_value );
+    for ( int i = 0; i < 5; i ++ ) {
+        int counter_value;
+        if ( channel_frequencies[i] == 0 ) { 
+            counter_value = 62071;
+        } else {
+            counter_value = frequency_to_counter( channel_frequencies[i] );
+        }
+        printf("Setting channel %d counter to %d\n", i , counter_value );
             CTR_8254ModeLoad( indices[0], i, 1, 2, counter_value);
             CTR_8254ModeLoad( indices[0], i, 2, 3, counter_value);
-        }
-    } else {                    /* To come */
-
     }
+
+        
+    if ( display_counters ) {
+        int counter = 0;
+        while ( counter < 100000) {
+            CTR_8254ReadAll( indices[0] , &counts[0] );
+            printf("%5.5hu,%5.5hu,%5.5hu   %5.5hu,%5.5hu,%5.5hu   %5.5hu,%5.5hu,%5.5hu   %5.5hu,%5.5hu,%5.5hu    %5.5hu,%5.5hu,%5.5hu",
+                   counts[0], counts[1], counts[2], counts[3], counts[4], counts[5], counts[6], counts[7], counts[8], counts[9], counts[10], counts[11], counts[12], counts[13], counts[14] );               
+            printf("\r");
+            counter ++;
+        }
+        usleep(100);
+        printf("\n");
+    }
+
 }
+
