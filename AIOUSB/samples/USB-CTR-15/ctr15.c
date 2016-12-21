@@ -109,7 +109,7 @@ int main(int argc, char *argv[] )
 
     /* Debug */
     for ( int i = 0; i < 5; i ++ ) {
-        printf("Channel %i is set to %.2f\n", i, channel_frequencies[i] );
+        printf("Channel %i is set to %.2f Hz\n", i, channel_frequencies[i] );
     }
 
 
