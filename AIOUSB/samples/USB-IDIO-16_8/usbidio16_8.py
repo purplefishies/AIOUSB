@@ -51,3 +51,8 @@ for port in range(0x20):
     print DIOBufToString( writeBuffer )
     result = DIO_Configure( device, AIOUSB_FALSE, outputMask , writeBuffer )
     time.sleep(1/6.0)
+
+# demonstrate read
+buf = DIOBuf(32)
+DIO_ReadAllToDIOBuf(0, buf)
+print("%s" % buf )
