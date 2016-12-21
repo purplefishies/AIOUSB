@@ -1,3 +1,6 @@
+#!/usr/bin/python
+
+
 from __future__ import print_function
 from AIOUSB import *
 from string import split
