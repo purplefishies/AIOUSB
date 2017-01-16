@@ -16,7 +16,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_C_INCLUDES  := /usr/include/libusb-1.0 ${AIO_LIB_DIR}  ${AIO_LIB_DIR}/ndkbuild/libs/${TARGET_ARCH_ABI}
+LOCAL_C_INCLUDES  := -I${AIO_LIB_DIR} /usr/include/libusb-1.0 ${AIO_LIB_DIR}  ${AIO_LIB_DIR}/ndkbuild/libs/${TARGET_ARCH_ABI}
 LOCAL_CFLAGS 	+= -std=c99 -L${AIO_LIB_DIR}/ndkbuild/libs/${TARGET_ARCH_ABI}
 LOCAL_MODULE    := AIOUSB
 LOCAL_SRC_FILES := AIOUSB_wrap.c
