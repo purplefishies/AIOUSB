@@ -741,7 +741,7 @@ def AIOUSB_FindDevices(fn):
     
     %typemap(out) tmpchar * {
         printf("Strlen: %d ,  bytesize: %d\n", (int)strlen($1), (int)DIOBufByteSize( arg1 ));
-        $result = PyString_FromStringAndSize( $1, MAX(strlen($1),DIOBufByteSize( arg1 )) );
+        $result = PyUnicode_FromStringAndSize( $1, MAX(strlen($1),DIOBufByteSize( arg1 )) );
     }
 
     tmpchar *to_bin() {

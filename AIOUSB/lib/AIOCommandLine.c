@@ -521,8 +521,7 @@ AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *ind
  * @brief Lists any devices that were matched and then lists which index was
  *        specified.
  * @param options AIOCommandLineOptions object
- * @param indices Array of devices found
- * @param num_devices number of devices in the array
+ * @param indices Intlist of device indices found
  * @return >= AIOUSB_SUCCESS if devices have been found, < 0 if no devices found
  */
 AIORET_TYPE AIOCommandLineOptionsListDevices( AIOCommandLineOptions *options , intlist *indices )

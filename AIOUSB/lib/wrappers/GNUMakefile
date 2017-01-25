@@ -135,13 +135,13 @@ perl_install:  perl_test
 	$(MAKE) -f Makefile install 
 
 
-PYTHON_PLATFORM=$(shell python  -c 'import distutils.util; print distutils.util.get_platform()')
-PYTHON_VERSION=$(shell python -c 'import distutils.sysconfig; print distutils.sysconfig.get_python_version()' )
+PYTHON_PLATFORM=$(shell $(PYTHON)  -c 'import distutils.util; print(distutils.util.get_platform())')
+PYTHON_VERSION=$(shell $(PYTHON) -c 'import distutils.sysconfig; print(distutils.sysconfig.get_python_version())' )
 
 python: 
 	@if [ ! -f $(PYTHON_BUILT) ] ; then \
 		$(SWIG) $(SWIG_INCLUDES) $(SWIG_IGNORE_WARNINGS) -I${LIBDIR}  -python AIOUSB.i 2>&1; \
-		LDFLAGS="$(PYTHON_LDFLAGS)"  python setup.py build 2>&1; \
+		LDFLAGS="$(PYTHON_LDFLAGS)"  $(PYTHON) setup.py build 2>&1; \
 		if [ "$$?" == 0 ] ; then \
 			touch $(PYTHON_BUILT); \
 		fi \
@@ -150,9 +150,14 @@ python:
 $(PYTHON_BUILT): python
 
 
-python_test: $(PYTHON_BUILT) $(TEST_DIR)
-	PYTHONPATH=$${PWD}/build/lib.$(PYTHON_PLATFORM)-$(PYTHON_VERSION) python -c 'import AIOUSB; AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices()'
+pytest:	
+	@echo $(PYTHON_PLATFORM)
+	@echo $(PYTHON_VERSION)
 
+python_test: $(PYTHON_BUILT) $(TEST_DIR)
+	PYTHONPATH=$${PWD}/build/lib.$(PYTHON_PLATFORM)-$(PYTHON_VERSION) $(PYTHON) -c 'import AIOUSB; AIOUSB.AIOUSB_Init(); AIOUSB.AIOUSB_ListDevices()'
+
+#	echo "$${PWD}/build/lib.$(PYTHON_PLATFORM)-$(PYTHON_VERSION) "
 
 python_cleanup:
 	$(RM) -f AIOUSB_wrap.c AIOUSB.py $(PYTHON_BUILT)
@@ -273,6 +278,7 @@ android_cleanup:
 	rm -f $(ANDROID_BUILT)
 	rm -f AIOUSB_wrap*
 	rm -rf libs
+	rm -rf $${AIO_LIB_DIR}/ndkbuild/builtndk.txt
 
 android: $(ANDROID_DIR) $${AIO_LIB_DIR}/ndkbuild/builtndk.txt
 	@echo $$(pwd)

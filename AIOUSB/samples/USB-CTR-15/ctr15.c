@@ -29,7 +29,7 @@ void print_usage(int argc, char **argv )
 }
 
 /**
- * @desc Computes the counter value that gives you the 
+ * @brief Computes the counter value that gives you the 
  *       best approximation at the frequency stated
  * 
  *
@@ -63,7 +63,7 @@ int main(int argc, char *argv[] )
 
 
     /**
-     * @desc Alternative ways to find your card
+     * @brief Alternative ways to find your card
      * optional
      * retval = ClearDevices();
      * retval = GetDevices();
@@ -72,7 +72,7 @@ int main(int argc, char *argv[] )
      */
  
     /**
-     * @desc 
+     * @brief 
      * Quick command line processing -C 1=
      */
     while (1) {
