@@ -491,6 +491,46 @@ AIORET_TYPE GetDevices(void)
     return (AIORET_TYPE)deviceMask;
 }
 
+/**
+ * @brief Checks whether the device has firmware 2.0 enabled or not
+ * @param DeviceIndex 
+ * @return < 0 if failure
+ */
+AIORET_TYPE AIOUSB_CheckFirmware20( unsigned long DeviceIndex )
+{
+    AIORESULT res = AIOUSB_SUCCESS;
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIOUSBDevice *deviceDesc;
+    unsigned char memflags[3];
+    USBDevice *usb;
+    int bytesTransferred;
+
+    deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &res );
+    AIO_ERROR_VALID_DATA( abs(res), res == AIOUSB_SUCCESS );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_DEVICE_NOT_FOUND, deviceDesc );
+
+    if ( deviceDesc->bFirmware20 ) return AIOUSB_SUCCESS;
+
+    usb = AIOUSBDeviceGetUSBHandle( deviceDesc );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_USBDEVICE_NOT_FOUND, usb );
+
+
+    bytesTransferred = usb->usb_control_transfer(usb,
+                                                 USB_READ_FROM_DEVICE,
+                                                 CUR_RAM_READ,
+                                                 0x8000,
+                                                 1,
+                                                 memflags,
+                                                 sizeof(memflags),
+                                                 deviceDesc->commTimeout
+                                                 );
+
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_SUPPORTED,  bytesTransferred == sizeof(memflags) );
+
+        
+    return retval;
+}
+
 /*----------------------------------------------------------------------------*/
 /** 
  * @param DeviceIndex Device index we are probing
@@ -957,29 +997,23 @@ AIORESULT  _Card_Specific_Settings(unsigned long DeviceIndex)
  {
      AIORET_TYPE result = AIOUSB_SUCCESS;
      AIOUSBDevice *device = AIODeviceTableGetDeviceAtIndex( DeviceIndex, (AIORESULT*)&result );
-     if ( result != AIOUSB_SUCCESS )
-         return result;
 
+     AIO_ERROR_VALID_DATA_RETVAL( result, result == AIOUSB_SUCCESS );
      if ( !device->usb_device  ) {
-         if ( device->bDeviceWasHere) 
-             result = AIOUSB_ERROR_DEVICE_NOT_CONNECTED;
-         else 
-             result = AIOUSB_ERROR_USBDEVICE_NOT_FOUND;
-         goto RETURN_AIOUSB_EnsureOpen;
+         AIO_ERROR_VALID_DATA( AIOUSB_ERROR_DEVICE_NOT_CONNECTED, !device->bDeviceWasHere );
+         AIO_ERROR_VALID_DATA( AIOUSB_ERROR_USBDEVICE_NOT_FOUND, device->bDeviceWasHere );
      }  
-   
-     if (device->bOpen) {
-         result = AIOUSB_ERROR_OPEN_FAILED;
+     if ( device->bOpen ) 
+         return AIOUSB_SUCCESS;
+
+     _Initialize_Device_Desc(DeviceIndex);
+
+     result |= _Card_Specific_Settings(DeviceIndex);
+     if (result != AIOUSB_SUCCESS)
          goto RETURN_AIOUSB_EnsureOpen;
-     }
-     if (result == AIOUSB_SUCCESS) {
-         _Initialize_Device_Desc(DeviceIndex);
-         result |= _Card_Specific_Settings(DeviceIndex);
-         if (result != AIOUSB_SUCCESS)
-             goto RETURN_AIOUSB_EnsureOpen;
-         if (device->DIOConfigBits == 0)
-             device->DIOConfigBits = device->DIOBytes;
-     }
+     if (device->DIOConfigBits == 0)
+         device->DIOConfigBits = device->DIOBytes;
+
  RETURN_AIOUSB_EnsureOpen:
      return result;
  }

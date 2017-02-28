@@ -41,6 +41,8 @@ PUBLIC_EXTERN AIORET_TYPE AIOUSB_Reset( unsigned long DeviceIndex );
 PUBLIC_EXTERN void AIODeviceTableInit(void);
 PUBLIC_EXTERN AIORET_TYPE ClearAIODeviceTable( int numDevices );
 
+PUBLIC_EXTERN AIORET_TYPE AIOUSB_CheckFirmware20( unsigned long DeviceIndex );
+
 PUBLIC_EXTERN void CloseAllDevices(void);
 PUBLIC_EXTERN AIORESULT AIOUSB_GetAllDevices();
 

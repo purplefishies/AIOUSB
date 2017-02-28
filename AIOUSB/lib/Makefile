@@ -35,6 +35,7 @@ AIOCountsConverter.o \
 AIOFifo.o\
 AIOList.o\
 AIOProductTypes.o\
+AIOPlugNPlay.o\
 AIOTuple.o\
 CStringArray.o\
 USBDevice.o

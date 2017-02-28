@@ -4,6 +4,7 @@
 #include "AIOTypes.h"
 #include "ADCConfigBlock.h"
 #include "USBDevice.h"
+#include "AIOPlugNPlay.h"
 #include "cJSON.h"
 #include <string.h>
 #include <semaphore.h>
@@ -99,7 +100,15 @@ struct AIOUSBDevice {
     int ADBuf_size;
     AIOUSB_BOOL testing;
     AIOUSB_BOOL valid;
+
+    AIOUSB_BOOL bFirmware20;
+    USB_SPEED USBSpeed;
+    AIOPlugNPlay PNPData;
+    
 };
+/* unsigned long PNPData; */
+/* USBSpeed: TUSBSpeed; */
+/* PNPData: TPNPData; */
 
 #ifndef _AIOUSBDEVICE_STRUCT
 #define _AIOUSBDEVICE_STRUCT

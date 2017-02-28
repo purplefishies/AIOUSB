@@ -386,6 +386,13 @@ AIORESULT DIO_Write8(
 }
 
 /*----------------------------------------------------------------------------*/
+/**
+ * @brief 
+ * @param DeviceIndex  Device to write to 
+ * @param BitIndex  The index of the bit to configure
+ * @param bData The value to write
+ * @return AIORESULT
+ */
 AIORESULT DIO_Write1(
                      unsigned long DeviceIndex,
                      unsigned long BitIndex,
@@ -395,26 +402,53 @@ AIORESULT DIO_Write1(
     AIORESULT result = AIOUSB_SUCCESS;
     AIOUSBDevice *device = _check_dio( DeviceIndex, &result );
 
-    if ( result != AIOUSB_SUCCESS )
-        return result;
+    AIO_ASSERT_AIORET_TYPE( result, result == AIOUSB_SUCCESS );
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_PARAMETER, BYTE_INDEX(BitIndex) < device->DIOBytes );
+    AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_PARAMETER, bData == AIOUSB_FALSE || bData == AIOUSB_TRUE );
 
-    unsigned byteIndex = BitIndex / BITS_PER_BYTE;
-    if (( bData != AIOUSB_FALSE && bData != AIOUSB_TRUE ) || byteIndex >= device->DIOBytes ) {
-        return AIOUSB_ERROR_INVALID_PARAMETER;
-    }
-
-    if ( !device->LastDIOData ) {
-        result = AIOUSB_ERROR_NOT_ENOUGH_MEMORY;
-    }
+    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_NOT_ENOUGH_MEMORY, device->LastDIOData );
         
-    unsigned char value = device->LastDIOData[ byteIndex ];
+    unsigned char value = device->LastDIOData[ BYTE_INDEX(BitIndex) ];
     unsigned char bitMask = 1 << (BitIndex % BITS_PER_BYTE);
     if (bData == AIOUSB_FALSE)
         value &= ~bitMask;
     else
         value |= bitMask;
+
+    /*   if Result <> ERROR_SUCCESS then Exit; */
+    /*   with Dev[DeviceIndex] do begin */
+    /*     if DIOBytes = 0 then begin */
+    /*       Result := ERROR_BAD_TOKEN_TYPE; */
+    /*       Exit; */
+    /*     end; */
+    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_BAD_TOKEN_TYPE,  device->DIOBytes );
+
+    /*     ByteIndex := BitIndex div 8; */
+    /*     if ByteIndex >= DIOBytes then begin */
+    /*       Result := ERROR_INVALID_ADDRESS; */
+    /*       Exit; */
+    /*     end; */
+    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_ADDRESS, BYTE_INDEX( BitIndex ) < device->DIOBytes );
+    /*     if Data then */
+    /*       LastDIOData[ByteIndex] := LastDIOData[ByteIndex] or (1 shl (BitIndex and 7)) */
+    /*     else */
+    /*       LastDIOData[ByteIndex] := LastDIOData[ByteIndex] and not (1 shl (BitIndex and 7)) */
+    /*     ; */
+    if ( bData ) {
+        device->LastDIOData[BYTE_INDEX(BitIndex)] = device->LastDIOData[BYTE_INDEX(BitIndex)] | ( 1 << (BitIndex & 7));
+    } else {
+        device->LastDIOData[BYTE_INDEX(BitIndex)] = device->LastDIOData[BYTE_INDEX(BitIndex)] & ( ~(1 << (BitIndex & 7)));
+    }
     
-    result = DIO_Write8(DeviceIndex, byteIndex, value);
+    /*     if bFirmware20 and bDevHasPNPByte(PNPData.HasDIOWrite1) and (PNPData.HasDIOWrite1 <> 0) then */
+    if ( device->bFirmware20 && DeviceHasPNPByte( &device->PNPData ) && ( device->PNPData.HasDIOWrite1 != 0 ) ) {
+    /* Result := GenericVendorWrite(DeviceIndex, AUR_DIO_WRITE, Ord(Data), BitIndex, 0, nil) */
+    /* Vendor Request 0x10 or 0x11, MSB(Index) = 0, LSB(Index) = "bit index", MSB(Value) = 0, LSB(Value)=bool, Length=0 */
+    /* result = DIO_Write8(DeviceIndex, BYTE_INDEX(BitIndex), value); */
+    /* else */
+    /* Result := GenericVendorWrite(DeviceIndex, AUR_DIO_WRITE, 0, 0, DIOBytes, @LastDIOData[0]) */
+    /* ; */
+    }        
     
     return result;
 }

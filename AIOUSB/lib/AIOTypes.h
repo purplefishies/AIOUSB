@@ -232,6 +232,12 @@ typedef long double AIO_NUMBER;
     } while (0 )
 
 
+CREATE_ENUM_W_START(USB_SPEED,0,
+                    usUnknown, 
+                    usLowFull, 
+                    usHigh);
+
+
 CREATE_ENUM_W_START(ProductIDS,0,
                      ACCES_VENDOR_ID    = 0x1605,
                      /**
@@ -443,6 +449,7 @@ CREATE_ENUM_W_START( ResultCode, 0,
                      AIOUSB_ERROR_INVALID_MUTEX,
                      AIOUSB_ERROR_INVALID_PARAMETER,
                      AIOUSB_ERROR_INVALID_THREAD,
+                     AIOUSB_ERROR_INVALID_ADDRESS,
                      AIOUSB_ERROR_NOT_ENOUGH_MEMORY,
                      AIOUSB_ERROR_INVALID_MEMORY,
                      AIOUSB_ERROR_NOT_SUPPORTED,
@@ -645,16 +652,25 @@ CREATE_ENUM_W_START( ADGainCode, 0,
                      AUR_FLASH_READWRITE                     = 0xB5,
                      AUR_DAC_RANGE                           = 0xB7,
                      AUR_PROBE_CALFEATURE                    = 0xBA,
+
+
                      AUR_LOAD_BULK_CALIBRATION_BLOCK         = 0xBB,
                      AUR_DIO_STREAM_OPEN_OUTPUT              = 0xBB,
                      AUR_START_ACQUIRING_BLOCK               = 0xBC,
                      AUR_DIO_STREAM_OPEN_INPUT               = 0xBC,
+
                      AUR_DIO_SETCLOCKS                       = 0xBD,
                      AUR_ADC_SET_CONFIG                      = 0xBE,
                      AUR_ADC_IMMEDIATE                       = 0xBF,
                      AUR_DIO_SPI_WRITE                       = 0xC0,
                      AUR_DIO_SPI_READ                        = 0xC1,
+                     AUR_SET_CUSTOM_CLOCKS                   = 0xC4,
                      AUR_ADC_GET_CONFIG                      = 0xD2,
+                     AUR_DEBUG_DEBUG                         = 0xD4,
+                     AUR_DEBUG_FLASH_1TO1                    = 0xF0,
+                     AUR_DEBUG_FLASH_ERASE                   = 0xFC,
+
+                     CUR_RAM_READ                            = 0xA3,
                      CYPRESS_GET_DESC                        = 0x06
                      );
 
@@ -687,6 +703,8 @@ enum {
     USB_BULK_WRITE_ENDPOINT       = 2,
     USB_BULK_READ_ENDPOINT        = 6
 };
+
+#define BYTE_INDEX( bitnumber ) ( bitnumber / BITS_PER_BYTE )
 
 
 /*
