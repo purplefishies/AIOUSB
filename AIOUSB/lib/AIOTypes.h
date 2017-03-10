@@ -253,6 +253,7 @@ CREATE_ENUM_W_START(ProductIDS,0,
                       */
                      USB_DIO_32         = 0x8001,
                      USB_DIO_32I        = 0x8004,
+                     USB_DIO_24         = 0x8005,
                      USB_DIO_48         = 0x8002,
                      USB_DIO_96         = 0x8003,
                      USB_DIO24_CTR6     = 0x8006,

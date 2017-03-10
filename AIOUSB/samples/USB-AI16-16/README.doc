@@ -1,7 +1,39 @@
 /*! @page usb_ai16_16 USB-AI16-16
 
-These are the samples of the [USB-AI](http://accesio.com/?p=../usb/usb-aio16-16a.html) series
+These are samples for
+[USB-AI](http://accesio.com/?p=../usb/usb-aio16-16a.html) series cards
+that are used to take high speed analog voltage readings . The
+operation of the cards can be thought of as two basic modes. One ,
+which is demonstrated by the sample read_channels_test, is just a slow
+looping function call to ADC_GetScan() and it returns a vector 
+of voltage readings. It is designed to be as simple as possible to
+reason and to implement in code. Think of it as the low performance
+multi-meter that can take voltage readings for you on 16 or more
+channels.
 
+The second type of sample demonstrates the high speed analog sample
+capabilities of the
+[USB-AI](http://accesio.com/?p=../usb/usb-aio16-16a.html)
+series. These samples take some more programming sophistication but
+they generate higher data rates streams of sampled data. If you are not
+interested in trying out the high speed acquisiton without immediately
+writing code, please try out one of the JSON configuration file
+inspired samples. These samples allow you to easily acqurire data at the
+fastest speeds you choose without having to write code. All you have
+to do is modify one of the JSON configuration files and pass it to one
+of the samples and you are done.
+   
+
+# Continuous mode
+
+Running continuous mode across some samples
+
+
+# Samples
+
+
+
+# General samples
 
 @subpage sample_usb_ai16_16_extcal External calibration sample
 

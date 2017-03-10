@@ -16,7 +16,7 @@ typedef struct AIOPlugNPlay AIOPlugNPlay;
 
 struct __attribute__((__packed__)) AIOPlugNPlay {
     int8_t  PNPSize;
-    int32_t Rev;
+    int16_t Rev;
     int8_t nADCConfigBytes;
     int8_t nDIOControlBytes;
     int8_t nDIOBytes;
@@ -31,8 +31,9 @@ struct __attribute__((__packed__)) AIOPlugNPlay {
     int8_t HasDIOWrite1;
 };
 
-
 AIOUSB_BOOL DeviceHasPNPByte(const AIOPlugNPlay *pnpentry );
+AIORET_TYPE CheckPNPData( unsigned long DeviceIndex );
+
 
 #ifdef __aiousb_cplusplus
 }

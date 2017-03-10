@@ -1,4 +1,6 @@
 #include "AIOPlugNPlay.h"
+#include "AIODeviceTable.h"
+#include <stdio.h>
 
 #ifdef __cplusplus
 namespace AIOUSB {
@@ -16,17 +18,33 @@ namespace AIOUSB {
  */
 AIOUSB_BOOL DeviceHasPNPByte(const AIOPlugNPlay *pnpentry )
 {
-
-    return AIOUSB_TRUE;
+    return ( pnpentry->HasDIOWrite1 != 0 ? 1 : 0 );
 }
-/* sort of a container of thingy */
-/* pnpentry - pnpentry->dev[0];a */
-/* I := Cardinal(@PNPEntry) - Cardinal(@Dev[0]); */
-/* I := I div SizeOf(Dev[0]); */
-/* Result := Dev[I].PNPData.PNPSize > (Cardinal(@PNPEntry) - Cardinal(@Dev[I].PNPData)); */
-/* container_of( pnpentry, AIOPlugNPlay  , struct  */
+
+AIORET_TYPE CheckPNPData( unsigned long DeviceIndex )
+{
+    AIOUSBDevice *deviceDesc = &deviceTable[DeviceIndex];
+    USBDevice *usb = AIOUSBDeviceGetUSBHandle( deviceDesc );
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_USBDEVICE , usb );
+
+    deviceDesc->PNPData.PNPSize = 0;
+    
+    retval = AIOUSB_CheckFirmware20( DeviceIndex );
+    AIO_ERROR_VALID_DATA_RETVAL( AIOUSB_ERROR_INVALID_DATA,  retval == AIOUSB_SUCCESS );
+
+    deviceDesc->PNPData.PNPSize = sizeof(AIOPlugNPlay);
+    retval = usb->usb_control_transfer( usb, 0xC0, 0x3F, 0 , 0, (unsigned char *)&deviceDesc->PNPData, deviceDesc->PNPData.PNPSize, deviceDesc->commTimeout  );
 
 
+    if ( retval != deviceDesc->PNPData.PNPSize || deviceDesc->PNPData.PNPSize == 0xFF ) {
+        deviceDesc->PNPData.PNPSize = 0;
+        retval = AIOUSB_ERROR_INVALID_DATA;
+    } else 
+        retval = AIOUSB_SUCCESS;
+
+    return retval;
+}
 
 #ifdef __cplusplus
 }

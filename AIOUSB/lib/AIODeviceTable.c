@@ -1,4 +1,5 @@
 #include "AIODeviceTable.h" 
+#include "AIOPlugNPlay.h"
 #include <string.h>
 #include <errno.h>
 
@@ -14,9 +15,10 @@ static ProductIDName productIDNameTable[] = {
     { USB_DA12_8A       , "USB-DA12-8A"    },
     { USB_DA12_8E       , "USB-DA12-8E"    },
     { USB_DIO_32        , "USB-DIO-32"     },
-    { USB_DIO_32I       , "USB-DIO-32"     },
+    { USB_DIO_32I       , "USB-DIO-32I"    },
     { USB_DIO_48        , "USB-DIO-48"     },
     { USB_DIO_96        , "USB-DIO-96"     },
+    { USB_DIO_24        , "USB-DIO-24"     },
     { USB_DIO24_CTR6    , "USB-DIO24-CTR6" },
     { USB_DI16A_REV_A1  , "USB-DI16A-A1"   },
     { USB_DO16A_REV_A1  , "USB-DO16A-A1"   },
@@ -527,7 +529,13 @@ AIORET_TYPE AIOUSB_CheckFirmware20( unsigned long DeviceIndex )
 
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_SUPPORTED,  bytesTransferred == sizeof(memflags) );
 
-        
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_SUPPORTED, bytesTransferred >= (int)sizeof(memflags) );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_SUPPORTED, memflags[0] != 0xFF );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_SUPPORTED, memflags[0] >= 3 );
+    AIO_ERROR_VALID_DATA( AIOUSB_ERROR_NOT_SUPPORTED, (memflags[2] & 0x02) != 0);
+
+    deviceDesc->bFirmware20 = AIOUSB_TRUE;
+
     return retval;
 }
 
@@ -688,6 +696,9 @@ AIORESULT _Initialize_Device_Desc(unsigned long DeviceIndex)
     device->FlashSectors = 0;
     device->WDGBytes = 0;
     device->bSetCustomClocks = AIOUSB_FALSE;
+
+    CheckPNPData(DeviceIndex );
+
     return result;
 }
 
@@ -1141,19 +1152,34 @@ void _setup_device_parameters( AIOUSBDevice *device , unsigned long productID )
     device->ProductID = productID;
     device->StreamingBlockSize = 31ul * 1024ul;
     device->bGetName = AIOUSB_TRUE;             // most boards support this feature
+
+
     if (productID == USB_DIO_32 || productID == USB_DIO_32I ) {
         device->DIOBytes = 4;
         device->Counters = 3;
-        device->RootClock = 3000000;
-    } else if ( productID == USB_DIO24_CTR6 ) {
+
+        device->bGetName = AIOUSB_TRUE;
+        device->bSetCustomClocks = AIOUSB_TRUE;
+        device->Tristates = 1;
+        if ( productID == USB_DIO_32 ) {
+            device->RootClock = 3000000;
+            device->bDIODebounce = AIOUSB_TRUE;
+        } else {
+            device->DIOConfigBits = 32;
+        } 
+
+    } else if ( productID == USB_DIO24_CTR6 || productID == USB_DIO_24 ) {
       device->DIOBytes = 3;
       device->DIOConfigBits = 4;
       device->Tristates = 1;
-      device->Counters = 2;
-      device->RootClock = 10000000;
       device->bGetName = AIOUSB_TRUE;
-      device->bSetCustomClocks = AIOUSB_TRUE;
       device->bDIODebounce = AIOUSB_TRUE;
+      if (productID == USB_DIO24_CTR6 ) { 
+          device->Counters = 2;
+          device->bSetCustomClocks = AIOUSB_TRUE;
+          device->RootClock = 10000000;
+      }
+
     } else if (productID == USB_DIO_48) {
         device->DIOBytes = 6;
     } else if (productID == USB_DIO_96) {
@@ -1366,6 +1392,9 @@ AIORESULT AIODeviceTableAddDeviceToDeviceTableWithUSBDevice( int *numAccesDevice
     device->isInit        = AIOUSB_TRUE;
     device->valid         = AIOUSB_TRUE;
     _setup_device_parameters( device , productID );
+
+    CheckPNPData( *numAccesDevices );
+
     ADCConfigBlockSetDevice( AIOUSBDeviceGetADCConfigBlock( device ), device );
 
     *numAccesDevices += 1;
@@ -1518,8 +1547,9 @@ AIORET_TYPE AIODeviceTablePopulateTable(void)
 
         unsigned productID = USBDeviceGetIdProduct( &usbdevices[i] );
         _setup_device_parameters( device, productID );
-
         device->usb_device = CopyUSBDevice( &usbdevices[i] );
+        CheckPNPData( i );
+
     }
 
     libusb_free_device_list(deviceList, AIOUSB_TRUE);    
