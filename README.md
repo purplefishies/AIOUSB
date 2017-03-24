@@ -104,6 +104,20 @@ make
 sudo make install
 ~~~
 
+## <a name="OptionalStaticLibraries"></a>Building static libraries with CMake</a>
+
+~~~bash
+cd AIOUSB
+mkdir build
+cd build
+cmake -DBUILD_AIOUSBCPPDBG_SHARED=OFF \
+ -DBUILD_AIOUSBCPP_SHARED=OFF \
+ -DBUILD_AIOUSBDBG_SHARED=OFF \
+ -DBUILD_AIOUSB_SHARED=OFF ..
+make
+sudo make install
+~~~
+
 ## <a name="Installation"></a>Installation
 
 
