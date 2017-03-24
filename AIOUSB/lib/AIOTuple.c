@@ -27,7 +27,7 @@ TEST(Tuple,Basic2)
 
     char *tmp = AIOTUPLE2_TO_STR( AIOTuple2_AIORET_TYPE__CStringArray_p , bar );
 
-    ASSERT_STREQ( tmp, "(5,Hello There)");
+    ASSERT_STREQ( tmp, "(6,Hello There)");
     free(tmp);
     DeleteAIOTuple2_AIORET_TYPE__CStringArray_p( bar );
 }
