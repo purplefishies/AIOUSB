@@ -54,7 +54,9 @@ options = NewAIOCommandLineOptionsFromDefaultOptions( AIO_SCRIPTING_OPTIONS() )
 
 
 device_indices = []
-AIOUSB_FindDevicesByGroup( device_indices, AIOUSB.AIO_ANALOG_INPUT() )
+#AIOUSB_FindDevicesByGroup( device_indices, AIOUSB.AIO_ANALOG_INPUT() )
+AIOUSB_FindDeviceIndicesByGroup( device_indices, AIOUSB.AIO_ANALOG_INPUT() ) 
+
 # or
 # device_indices = AIOUSB_FindDevices( find_ai )
 
