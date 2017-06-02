@@ -508,7 +508,7 @@ AIORET_TYPE AIOUSB_CheckFirmware20( unsigned long DeviceIndex )
     int bytesTransferred;
 
     deviceDesc = AIODeviceTableGetDeviceAtIndex( DeviceIndex, &res );
-    AIO_ERROR_VALID_DATA( abs(res), res == AIOUSB_SUCCESS );
+    AIO_ERROR_VALID_DATA( labs(res), res == AIOUSB_SUCCESS );
     AIO_ERROR_VALID_DATA( AIOUSB_ERROR_DEVICE_NOT_FOUND, deviceDesc );
 
     if ( deviceDesc->bFirmware20 ) return AIOUSB_SUCCESS;
