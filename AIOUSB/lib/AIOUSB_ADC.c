@@ -102,8 +102,8 @@ unsigned char *ADC_GetConfigRegisters( ADConfigBlock *config )
 /*----------------------------------------------------------------------------*/
 AIORET_TYPE ADC_ReadADConfigBlock( unsigned long DeviceIndex , ADConfigBlock *config )
 {
-    AIORESULT result = AIOUSB_ERROR_INVALID_DATA;
-    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIORESULT result;
+    AIORET_TYPE retval;
     AIODeviceTableGetDeviceAtIndex( DeviceIndex , &result );
     if ( result  != AIOUSB_SUCCESS )
         goto out_ADC_ReadADConfigBlock;
@@ -939,7 +939,7 @@ unsigned long ADC_SetConfig(
 
 
      result = usb->usb_put_config( usb, &configBlock );
-
+     result = result >= 0 ? AIOUSB_SUCCESS : abs(result);
 out_ADC_SetConfig:
      return result;
 }
