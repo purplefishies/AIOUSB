@@ -64,7 +64,7 @@ main(int argc, char *argv[] )
     AIOUSB_Init();
     AIOUSB_ListDevices();
 
-#ifdef __GNUC__
+#if !defined(__clang__)
     AIOUSB_FindDevices( &indices, &num_devices, LAMBDA( AIOUSB_BOOL, (AIOUSBDevice *dev), { 
                 if ( dev->ProductID >= USB_AI16_16A && dev->ProductID <= USB_AI12_128E ) { 
                     return AIOUSB_TRUE;

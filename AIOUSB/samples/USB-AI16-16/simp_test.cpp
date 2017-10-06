@@ -34,7 +34,7 @@ int main( int argc, char **argv ) {
         tcs.doVerifyReferenceCalibration();
         while(1) { 
           tcs.doCSVReadVoltages();
-          usleep(0.1);
+          usleep(10);
         }
       } catch ( Error &e  ) {
         std::cout << "Errors" << e.what() << std::endl;

@@ -22,9 +22,7 @@ namespace AIOUSB {
 
 
 UCharArray &DigitalIOSubsystem::bitsToBytes( UCharArray &dest, int bit, const BoolArray &src ) {
-	assert( &dest != 0
-		&& dest.size() > 0
-		&& &src != 0
+	assert( dest.size() > 0
 		&& src.size() > 0
 		&& bit >= 0
 		&& ( bit + src.size() ) <= dest.size() * BITS_PER_BYTE );
@@ -48,9 +46,7 @@ UCharArray &DigitalIOSubsystem::bitsToBytes( UCharArray &dest, int bit, const Bo
 }	// DigitalIOSubsystem::bitsToBytes()
 
 BoolArray &DigitalIOSubsystem::bytesToBits( BoolArray &dest, const UCharArray &src, int bit ) {
-	assert( &dest != 0
-		&& dest.size() > 0
-		&& &src != 0
+	assert( dest.size() > 0
 		&& src.size() > 0
 		&& bit >= 0
 		&& ( bit + dest.size() ) <= src.size() * BITS_PER_BYTE );
@@ -108,7 +104,6 @@ DigitalIOSubsystem::~DigitalIOSubsystem() {
  */
 
 ostream &DigitalIOSubsystem::print( ostream &out ) {
-	assert( &out != 0 );
 	out
 		<< "    Number of digital I/O ports: " << dec << numPorts << endl
 		<< "    Number of digital I/O channels: " << numChannels << endl
@@ -139,13 +134,10 @@ ostream &DigitalIOSubsystem::print( ostream &out ) {
  */
 
 DigitalIOSubsystem &DigitalIOSubsystem::configure( bool tristate, const BoolArray &outputs, const BoolArray &values ) {
-	if(
-		&outputs == 0
-		|| outputs.size() < 1
-		|| ( int ) outputs.size() > numPorts
-		|| &values == 0
-		|| values.size() < 1
-		|| ( int ) values.size() > numChannels
+	if(outputs.size() < 1
+           || ( int ) outputs.size() > numPorts
+           || values.size() < 1
+           || ( int ) values.size() > numChannels
 	)
 		throw IllegalArgumentException( "Invalid outputs or values" );
 	UCharArray outputMask( ( numPorts + BITS_PER_BYTE - 1 ) / BITS_PER_BYTE );
@@ -178,16 +170,12 @@ DigitalIOSubsystem &DigitalIOSubsystem::configure( bool tristate, const BoolArra
  */
 
 DigitalIOSubsystem &DigitalIOSubsystem::configure( const BoolArray &tristates, const BoolArray &outputs, const BoolArray &values ) {
-	if(
-		&tristates == 0
-		|| tristates.size() < 1
-		|| ( int ) tristates.size() > numTristateChannels
-		|| &outputs == 0
-		|| outputs.size() < 1
-		|| ( int ) outputs.size() > numPorts
-		|| &values == 0
-		|| values.size() < 1
-		|| ( int ) values.size() > numChannels
+	if( tristates.size() < 1
+            || ( int ) tristates.size() > numTristateChannels
+            || outputs.size() < 1
+            || ( int ) outputs.size() > numPorts
+            || values.size() < 1
+            || ( int ) values.size() > numChannels
 	)
 		throw IllegalArgumentException( "Invalid tristates, outputs or values" );
 	UCharArray outputMask( ( numPorts + BITS_PER_BYTE - 1 ) / BITS_PER_BYTE );
@@ -318,12 +306,9 @@ DigitalIOSubsystem &DigitalIOSubsystem::write( int channel, bool value ) {
  */
 
 DigitalIOSubsystem &DigitalIOSubsystem::write( int startChannel, const BoolArray &values ) {
-	if(
-		&values == 0
-		|| values.size() < 1
-		|| startChannel < 0
-		|| startChannel + ( int ) values.size() > numChannels
-	)
+	if(values.size() < 1
+           || startChannel < 0
+           || startChannel + ( int ) values.size() > numChannels)
 		throw IllegalArgumentException( "Invalid values or start channel" );
 	const int result = DIO_WriteAll( getDeviceIndex(), bitsToBytes( writeValues, startChannel, values ).data() );
 	if( result != AIOUSB_SUCCESS )

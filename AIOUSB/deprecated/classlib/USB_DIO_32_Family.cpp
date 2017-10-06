@@ -97,7 +97,6 @@ bool USB_DIO_32_Family::isSupportedProductID( int productID ) {
  */
 
 ostream &USB_DIO_32_Family::print( ostream &out ) {
-	assert( &out != 0 );
 	USBDeviceBase::print( out );
 	digitalIOSubsystem.print( out );
 	counterSubsystem.print( out );

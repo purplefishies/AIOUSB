@@ -119,10 +119,7 @@ AO16_AnalogOutputSubsystem &AO16_AnalogOutputSubsystem::writeVolts( int channel,
  */
 
 AO16_AnalogOutputSubsystem &AO16_AnalogOutputSubsystem::writeVolts( const OutputVoltagePointArray &points ) {
-	if(
-		&points == 0
-		|| points.size() < 1
-	)
+	if( points.size() < 1 )
 		throw IllegalArgumentException( "Invalid points array" );
 
 	/*

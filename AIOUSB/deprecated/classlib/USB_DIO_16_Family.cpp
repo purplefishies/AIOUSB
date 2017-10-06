@@ -104,7 +104,6 @@ bool USB_DIO_16_Family::isSupportedProductID( int productID ) {
  */
 
 ostream &USB_DIO_16_Family::print( ostream &out ) {
-	assert( &out != 0 );
 	USBDeviceBase::print( out );
 	digitalIOSubsystem.print( out );
 	dioStreamSubsystem.print( out );

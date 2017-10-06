@@ -97,7 +97,6 @@ bool USB_CTR_15_Family::isSupportedProductID( int productID ) {
  */
 
 ostream &USB_CTR_15_Family::print( ostream &out ) {
-	assert( &out != 0 );
 	USBDeviceBase::print( out );
 	counterSubsystem.print( out );
 	return out;

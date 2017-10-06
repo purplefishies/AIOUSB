@@ -65,7 +65,6 @@ CounterSubsystem::~CounterSubsystem() {
  */
 
 ostream &CounterSubsystem::print( ostream &out ) {
-	assert( &out != 0 );
 	out
 		<< "    Number of counter blocks: " << numCounterBlocks << endl
 		<< "    Number of counters: " << numCounters << endl;

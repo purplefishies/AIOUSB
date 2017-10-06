@@ -45,7 +45,6 @@ DIOStreamSubsystem::~DIOStreamSubsystem() {
  */
 
 ostream &DIOStreamSubsystem::print( ostream &out ) {
-	assert( &out != 0 );
 	out << "    Digital I/O streaming capability installed" << endl;
 	return out;
 }	// DIOStreamSubsystem::print()
@@ -147,10 +146,7 @@ UShortArray DIOStreamSubsystem::read( int numSamples ) {
  */
 
 int DIOStreamSubsystem::write( const UShortArray &values ) {
-	if(
-		&values == 0
-		|| values.size() < 1
-	)
+        if(values.size() < 1)
 		throw IllegalArgumentException( "Invalid values" );
 	unsigned long bytesTransferred;
 	int result = (int)DIO_StreamFrame( getDeviceIndex(), values.size(), ( unsigned short * ) values.data(), &bytesTransferred );

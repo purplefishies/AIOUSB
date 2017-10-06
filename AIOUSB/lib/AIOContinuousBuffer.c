@@ -263,11 +263,11 @@ AIORET_TYPE AIOContinuousBufInitConfiguration(  AIOContinuousBuf *buf )
     AIOContinuousBufSendPreConfig( buf );
 
     tmp = ADC_SetConfig( AIOContinuousBufGetDeviceIndex( buf ), config.registers, &config.size );
-    AIO_ERROR_VALID_AIORET_TYPE( tmp, tmp == AIOUSB_SUCCESS );
+    AIO_ERROR_VALID_DATA( -tmp, tmp == AIOUSB_SUCCESS );
 
         
     tmp = ADCConfigBlockCopy( AIOUSBDeviceGetADCConfigBlock( deviceDesc ), &config );
-    AIO_ERROR_VALID_AIORET_TYPE( tmp, tmp == AIOUSB_SUCCESS );
+    AIO_ERROR_VALID_DATA( -tmp, tmp == AIOUSB_SUCCESS );
 
     return retval;
 }
@@ -299,7 +299,7 @@ AIORET_TYPE AIOContinuousBufSendPreConfig( AIOContinuousBuf *buf )
                                                wLength,
                                                buf->timeout
                                                );
-        AIO_ERROR_VALID_AIORET_TYPE( LIBUSB_RESULT_TO_AIOUSB_RESULT( usbresult ), usbresult >= 0 );
+        AIO_ERROR_VALID_DATA( -LIBUSB_RESULT_TO_AIOUSB_RESULT( usbresult ), usbresult >= 0 );
     }
 
     return retval;
@@ -1159,7 +1159,7 @@ AIORET_TYPE StartStreaming( AIOContinuousBuf *buf )
                                            buf->timeout
                                            );
 
-    AIO_ERROR_VALID_AIORET_TYPE( LIBUSB_RESULT_TO_AIOUSB_RESULT(usbval ), usbval >= 0 );
+    AIO_ERROR_VALID_DATA( -LIBUSB_RESULT_TO_AIOUSB_RESULT(usbval ), usbval >= 0 );
 
     return retval;
 }
@@ -1205,7 +1205,7 @@ AIORET_TYPE ResetCounters( AIOContinuousBuf *buf )
                                        wLength,
                                        buf->timeout
                                        );
-    AIO_ERROR_VALID_AIORET_TYPE( LIBUSB_RESULT_TO_AIOUSB_RESULT(usbval), usbval == 0 );
+    AIO_ERROR_VALID_DATA( -LIBUSB_RESULT_TO_AIOUSB_RESULT(usbval), usbval == 0 );
 
     wValue = 0xb600;
     usbval = usb->usb_control_transfer(usb,
@@ -1218,7 +1218,7 @@ AIORET_TYPE ResetCounters( AIOContinuousBuf *buf )
                                        buf->timeout
                                        );
 
-    AIO_ERROR_VALID_AIORET_TYPE( LIBUSB_RESULT_TO_AIOUSB_RESULT(usbval), usbval == 0 );
+    AIO_ERROR_VALID_DATA( -LIBUSB_RESULT_TO_AIOUSB_RESULT(usbval), usbval == 0 );
     
     return retval;
 }
@@ -1245,7 +1245,7 @@ AIORET_TYPE AIOContinuousBufLoadCounters( AIOContinuousBuf *buf, unsigned counte
                                            wLength,
                                            timeout
                                            );
-    AIO_ERROR_VALID_AIORET_TYPE( LIBUSB_RESULT_TO_AIOUSB_RESULT(usbval), usbval == 0 );
+    AIO_ERROR_VALID_DATA( -LIBUSB_RESULT_TO_AIOUSB_RESULT(usbval), usbval == 0 );
 
     wValue = 0xb600;
     usbval = usb->usb_control_transfer(usb,
@@ -1257,7 +1257,7 @@ AIORET_TYPE AIOContinuousBufLoadCounters( AIOContinuousBuf *buf, unsigned counte
                                        wLength,
                                        timeout
                                        );
-    AIO_ERROR_VALID_AIORET_TYPE( LIBUSB_RESULT_TO_AIOUSB_RESULT(usbval), usbval == 0 );
+    AIO_ERROR_VALID_DATA(-LIBUSB_RESULT_TO_AIOUSB_RESULT(usbval), usbval == 0 );
 
     return retval;
 }

@@ -63,7 +63,6 @@ USBDeviceBase::~USBDeviceBase() {
  */
 
 ostream &USBDeviceBase::print( ostream &out ) {
-	assert( &out != 0 );
 	out
 		<< "  Device at index " << left << dec << deviceIndex << ':' << endl
 		<< "    Product ID: 0x" << right << setw( 4 ) << setfill( '0' ) << hex << productID << endl
@@ -170,11 +169,9 @@ USBDeviceBase &USBDeviceBase::reset() {
  */
 
 USBDeviceBase &USBDeviceBase::customEEPROMWrite( int address, const UCharArray &data ) {
-	if(
-		&data == 0
-		|| data.size() < 1
-		|| address < 0
-		|| address + ( int ) data.size() > CUSTOM_EEPROM_SIZE
+	if(data.size() < 1
+           || address < 0
+           || address + ( int ) data.size() > CUSTOM_EEPROM_SIZE
 	)
 		throw IllegalArgumentException( "Invalid data or address" );
 	const int result = CustomEEPROMWrite( deviceIndex, address, data.size(), ( void * ) data.data() );
@@ -214,7 +211,6 @@ UCharArray USBDeviceBase::customEEPROMRead( int address, int numBytes ) {
 
 
 ostream &operator<<( ostream &out, USBDeviceBase &device ) {
-	assert( &device != 0 );
 	return device.print( out );
 }	// operator<<()
 

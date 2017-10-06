@@ -46,7 +46,6 @@ AI16_DataSet::~AI16_DataSet() {
  */
 
 std::ostream &AI16_DataSet::print( std::ostream &out ) {
-	assert( &out != 0 );
 	assert( sizeof( long ) == sizeof( time_t ) );
 	time_t ts = ( time_t ) timeStamp;
 	out

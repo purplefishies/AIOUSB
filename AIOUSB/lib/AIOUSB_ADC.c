@@ -891,6 +891,7 @@ unsigned long ADC_SetConfig(
 
      unsigned endChannel;
      AIORESULT result;
+     int retval;
      if ( !pConfigBuf || !ConfigBufSize )
           return AIOUSB_ERROR_INVALID_PARAMETER;
 
@@ -938,8 +939,8 @@ unsigned long ADC_SetConfig(
 
 
 
-     result = usb->usb_put_config( usb, &configBlock );
-     result = result >= 0 ? AIOUSB_SUCCESS : abs(result);
+     retval = usb->usb_put_config( usb, &configBlock );
+     result = retval >= 0 ? AIOUSB_SUCCESS : abs(retval);
 out_ADC_SetConfig:
      return result;
 }

@@ -164,11 +164,9 @@ DA12_AnalogOutputSubsystem &DA12_AnalogOutputSubsystem::setRange( int channel, i
  */
 
 DA12_AnalogOutputSubsystem &DA12_AnalogOutputSubsystem::setRange( int startChannel, const IntArray &range ) {
-	if(
-		&range == 0
-		|| range.size() < 1
-		|| startChannel < 0
-		|| startChannel + ( int ) range.size() > numChannels
+	if(range.size() < 1
+           || startChannel < 0
+           || startChannel + ( int ) range.size() > numChannels
 	)
 		throw IllegalArgumentException( "Invalid range array or start channel" );
 	for( int index = 0; index < ( int ) range.size(); index++ )
@@ -213,10 +211,7 @@ DA12_AnalogOutputSubsystem &DA12_AnalogOutputSubsystem::writeVolts( int channel,
  */
 
 DA12_AnalogOutputSubsystem &DA12_AnalogOutputSubsystem::writeVolts( const OutputVoltagePointArray &points ) {
-	if(
-		&points == 0
-		|| points.size() < 1
-	)
+       if(points.size() < 1)
 		throw IllegalArgumentException( "Invalid points array" );
 
 	/*

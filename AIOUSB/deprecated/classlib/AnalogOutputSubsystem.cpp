@@ -53,7 +53,6 @@ AnalogOutputSubsystem::~AnalogOutputSubsystem() {
  */
 
 ostream &AnalogOutputSubsystem::print( ostream &out ) {
-	assert( &out != 0 );
 	out
 		<< "    Number of D/A channels: " << dec << numChannels << endl
 		<< "    D/A count range: " << hex << minCounts << "-" << maxCounts << endl;
@@ -103,11 +102,7 @@ AnalogOutputSubsystem &AnalogOutputSubsystem::writeCounts( int channel, unsigned
  */
 
 AnalogOutputSubsystem &AnalogOutputSubsystem::writeCounts( const UShortArray &points ) {
-	if(
-		&points == 0
-		|| points.size() < 2
-		|| ( points.size() & 1 ) != 0
-	)
+	if(points.size() < 2 || ( points.size() & 1 ) != 0)
 		throw IllegalArgumentException( "Invalid points array" );
 
 	/*

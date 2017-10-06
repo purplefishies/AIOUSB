@@ -97,7 +97,6 @@ bool USB_DA12_8E_Family::isSupportedProductID( int productID ) {
  */
 
 ostream &USB_DA12_8E_Family::print( ostream &out ) {
-	assert( &out != 0 );
 	USBDeviceBase::print( out );
 	analogOutputSubsystem.print( out );
 	return out;

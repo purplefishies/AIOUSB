@@ -74,7 +74,6 @@ USBDeviceManager::~USBDeviceManager() {
  */
 
 ostream &USBDeviceManager::print( ostream &out ) {
-	assert( &out != 0 );
 	if( ! isOpen() )
 		throw OperationFailedException( MESSAGE_NOT_OPEN );
 	if( deviceList.size() > 0 ) {
@@ -356,10 +355,7 @@ USBDeviceArray USBDeviceManager::getDeviceByProductID( int minProductID, int max
  */
 
 USBDeviceArray USBDeviceManager::getDeviceByProductID( const IntArray &productIDs ) const {
-	if(
-		&productIDs == 0
-		|| productIDs.size() < 1
-	)
+        if(productIDs.size() < 1)
 		throw IllegalArgumentException( "Invalid product ID array" );
 	for( int index = 0; index < ( int ) productIDs.size(); index++ ) {
 		if(

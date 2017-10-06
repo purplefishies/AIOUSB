@@ -37,13 +37,18 @@ AIOUSB_BOOL fnd( AIOUSBDevice *dev ) {
 }
 
 FILE *fp;
-
+AIOContinuousBuf *buf = 0;
+#if defined(__clang__)
+void sig_handler( int sig ) {
+    printf("Forced exit, and will do so gracefully\n");
+    AIOContinuousBufStopAcquisition(buf);
+}
+#endif 
 
 int 
 main(int argc, char *argv[] ) 
 {
     struct opts options = AIO_OPTIONS;
-    AIOContinuousBuf *buf = 0;
     struct sigaction sa;
 
     AIORET_TYPE retval = AIOUSB_SUCCESS;
@@ -53,10 +58,14 @@ main(int argc, char *argv[] )
     sa.sa_flags = 0;
     
     /* Custom handler , catches INTR ( control-C ) and gracefully exits */
+#if !defined(__clang__)
     sa.sa_handler = LAMBDA( void , (int sig) , { 
             printf("Forced exit, and will do so gracefully\n");
             AIOContinuousBufStopAcquisition(buf);
     });
+#else
+    sa.sa_handler = sig_handler;
+#endif
 
     if (sigaction(SIGINT, &sa, NULL) == -1) {
         fprintf(stderr, "Error with sigaction: \n");
@@ -68,7 +77,7 @@ main(int argc, char *argv[] )
     AIOUSB_Init();
     AIOUSB_ListDevices();
 
-#ifdef __GNUC__
+#if !defined(__clang__)
     AIOUSB_FindDevices( &indices, &num_devices, LAMBDA( AIOUSB_BOOL, (AIOUSBDevice *dev), { 
                 if ( dev->ProductID >= USB_AI16_16A && dev->ProductID <= USB_AI12_128E ) { 
                     return AIOUSB_TRUE;

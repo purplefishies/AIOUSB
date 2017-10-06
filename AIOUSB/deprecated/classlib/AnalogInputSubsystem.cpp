@@ -162,7 +162,6 @@ AnalogInputSubsystem::~AnalogInputSubsystem() {
  */
 
 ostream &AnalogInputSubsystem::print( ostream &out ) {
-	assert( &out != 0 );
 	out
 		<< "    Number of A/D channels: " << dec << numChannels << endl
 		<< "    Number of MUXed A/D channels: " << numMUXChannels << endl;
@@ -457,11 +456,9 @@ AnalogInputSubsystem &AnalogInputSubsystem::setRange( int channel, int range ) {
  */
 
 AnalogInputSubsystem &AnalogInputSubsystem::setRange( int startChannel, const IntArray &range ) {
-	if(
-		&range == 0
-		|| range.size() < 1
-		|| startChannel < 0
-		|| startChannel + ( int ) range.size() > numMUXChannels
+	if( range.size() < 1
+            || startChannel < 0
+            || startChannel + ( int ) range.size() > numMUXChannels
 	)
 		throw IllegalArgumentException( "Invalid gain code array or start channel" );
 	bool configChanged = false;
@@ -584,9 +581,7 @@ AnalogInputSubsystem &AnalogInputSubsystem::setDifferentialMode( int channel, bo
  */
 
 AnalogInputSubsystem &AnalogInputSubsystem::setDifferentialMode( int startChannel, const BoolArray &differentialMode ) {
-	if(
-		&differentialMode == 0
-		|| differentialMode.size() < 1
+	if( differentialMode.size() < 1
 		|| startChannel < 0
 		|| startChannel + ( int ) differentialMode.size() > numMUXChannels
 	)
@@ -650,14 +645,11 @@ AnalogInputSubsystem &AnalogInputSubsystem::setRangeAndDiffMode( int channel, in
  */
 
 AnalogInputSubsystem &AnalogInputSubsystem::setRangeAndDiffMode( int startChannel, const IntArray &range, const BoolArray &differentialMode ) {
-	if(
-		&range == 0
-		|| range.size() < 1
-		|| &differentialMode == 0
-		|| differentialMode.size() < 1
-		|| startChannel < 0
-		|| startChannel + ( int ) range.size() > numMUXChannels
-		|| startChannel + ( int ) differentialMode.size() > numMUXChannels
+	if(range.size() < 1
+           || differentialMode.size() < 1
+           || startChannel < 0
+           || startChannel + ( int ) range.size() > numMUXChannels
+           || startChannel + ( int ) differentialMode.size() > numMUXChannels
 	)
 		throw IllegalArgumentException( "Invalid gain code array, differential mode array or start channel" );
 	bool configChanged = false;
@@ -743,10 +735,7 @@ AnalogInputSubsystem &AnalogInputSubsystem::setOverSample( int overSample ) {
  */
 
 AnalogInputSubsystem &AnalogInputSubsystem::setCalibrationTable( const std::string &fileName ) {
-	if(
-		&fileName == 0
-		|| fileName.empty()
-	)
+	if(fileName.empty())
 		throw IllegalArgumentException( "Invalid file name" );
 	const int result = AIOUSB_ADC_LoadCalTable( getDeviceIndex(), fileName.c_str() );
 	if( result != AIOUSB_SUCCESS )
@@ -765,10 +754,7 @@ AnalogInputSubsystem &AnalogInputSubsystem::setCalibrationTable( const std::stri
  */
 
 AnalogInputSubsystem &AnalogInputSubsystem::setCalibrationTable( const UShortArray &calTable ) {
-	if(
-		&calTable == 0
-		|| ( int ) calTable.size() != CAL_TABLE_WORDS
-	)
+	if(( int ) calTable.size() != CAL_TABLE_WORDS	)
 		throw IllegalArgumentException( "Invalid cal. table" );
 	const int result = AIOUSB_ADC_SetCalTable( getDeviceIndex(), calTable.data() );
 	if( result != AIOUSB_SUCCESS )
@@ -838,10 +824,8 @@ UShortArray AnalogInputSubsystem::calibrate( bool autoCal, bool returnCalTable, 
  */
 
 UShortArray AnalogInputSubsystem::calibrate( const DoubleArray &points, bool returnCalTable, const std::string &saveFileName ) {
-	if(
-		&points == 0
-		|| points.size() < 4					// at least 2 voltage-count pairs
-		|| ( points.size() & 1 ) != 0
+	if(points.size() < 4					// at least 2 voltage-count pairs
+           || ( points.size() & 1 ) != 0
 	)
 		throw IllegalArgumentException( "Invalid points array" );
 	UShortArray calTable( returnCalTable ? CAL_TABLE_WORDS : 0 );
@@ -1110,11 +1094,9 @@ double AnalogInputSubsystem::countsToVolts( int channel, unsigned short counts )
  */
 
 DoubleArray AnalogInputSubsystem::countsToVolts( int startChannel, const UShortArray &counts ) const {
-	if(
-		&counts == 0
-		|| counts.size() < 1
-		|| startChannel < 0
-		|| startChannel + ( int ) counts.size() > numMUXChannels
+	if(counts.size() < 1
+           || startChannel < 0
+           || startChannel + ( int ) counts.size() > numMUXChannels
 	)
 		throw IllegalArgumentException( "Invalid counts array or start channel" );
 	DoubleArray volts( counts.size() );
@@ -1159,12 +1141,10 @@ unsigned short AnalogInputSubsystem::voltsToCounts( int channel, double volts ) 
  */
 
 UShortArray AnalogInputSubsystem::voltsToCounts( int startChannel, const DoubleArray &volts ) const {
-	if(
-		&volts == 0
-		|| volts.size() < 1
-		|| startChannel < 0
-		|| startChannel + ( int ) volts.size() > numMUXChannels
-	)
+	if(volts.size() < 1
+           || startChannel < 0
+           || startChannel + ( int ) volts.size() > numMUXChannels
+           )
 		throw IllegalArgumentException( "Invalid volts array or start channel" );
 	UShortArray counts( volts.size() );
 	for( int index = 0; index < ( int ) volts.size(); index++ )

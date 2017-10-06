@@ -15,7 +15,6 @@
 namespace AIOUSB {
 
 DeviceSubsystem::DeviceSubsystem( USBDeviceBase &parent ) {
-	assert( &parent != 0 );
 	this->parent = &parent;
 }	// DeviceSubsystem::DeviceSubsystem()
 

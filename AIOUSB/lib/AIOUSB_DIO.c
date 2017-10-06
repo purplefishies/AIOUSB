@@ -403,7 +403,7 @@ AIORESULT DIO_Write1(
     AIORET_TYPE retval;
     AIOUSBDevice *deviceDesc = _check_dio( DeviceIndex, &result );
     USBDevice *usb;
-    AIO_ASSERT_AIORET_TYPE( result, result == AIOUSB_SUCCESS );
+    AIO_ERROR_VALID_DATA( result, result == AIOUSB_SUCCESS );
     AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_PARAMETER, BYTE_INDEX(BitIndex) < deviceDesc->DIOBytes );
     AIO_ASSERT_AIORET_TYPE( AIOUSB_ERROR_INVALID_PARAMETER, bData == AIOUSB_FALSE || bData == AIOUSB_TRUE );
 

@@ -37,7 +37,7 @@ AIORET_TYPE CheckPNPData( unsigned long DeviceIndex )
     retval = usb->usb_control_transfer( usb, 0xC0, 0x3F, 0 , 0, (unsigned char *)&deviceDesc->PNPData, deviceDesc->PNPData.PNPSize, deviceDesc->commTimeout  );
 
 
-    if ( retval != deviceDesc->PNPData.PNPSize || deviceDesc->PNPData.PNPSize == 0xFF ) {
+    if ( retval != deviceDesc->PNPData.PNPSize || (int8_t)deviceDesc->PNPData.PNPSize == (int8_t)0xFF ) {
         deviceDesc->PNPData.PNPSize = 0;
         retval = AIOUSB_ERROR_INVALID_DATA;
     } else 
