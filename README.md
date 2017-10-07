@@ -7,6 +7,9 @@
 #<a name="AIOUSBLibrary"></a>AIOUSB driver library
 
 [![Build Status](https://travis-ci.org/accesio/AIOUSB.svg?branch=master)](https://travis-ci.org/accesio/AIOUSB)
+[![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
+[![Github Releases](https://img.shields.io/github/release/accesio/AIOUSB.svg)](https://github.com/accesio/AIOUSB/releases)
+[![Github Issues](https://img.shields.io/github/issues/accesio/AIOUSB.svg)](http://github.com/accesio/AIOUSB/issues)
 
 This project contains USB drivers and APIs for ACCES I/O Product's line of USB based data acquisition modules. This driver represents a large API collection for communicating with one or more of ACCES I/O Product's line of USB based data acquisition products. All of the core functionality that exists and is supported by the Windows software is implemented in this library for non-Windows based operating systems.  This code base compiles using either GCC and Clang compilers to both shared and static libraries that be can used in applications that need to perform highspeed USB data acquisition.
 
