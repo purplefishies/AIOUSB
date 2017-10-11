@@ -1,3 +1,18 @@
+/* 
+ * Copyright (c) 2015 Jimi Damon , ACCES I/O Products
+ * 
+ * This program is free software: you can redistribute it and/or modify  
+ * it under the terms of the GNU Lesser General Public License as   
+ * published by the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but 
+ * WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * Lesser General Lesser Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 #include "AIOCommandLine.h"
 #include "AIOList.h"
 
@@ -9,7 +24,7 @@ namespace AIOUSB {
 #endif
 
 /**
- * @brief The default settings for running various samples. THis makes it 
+ * @brief The default settings for running various samples. THis makes it
  * easier to just get a sample up and running and then tweak certain parameters
  * for ones own needs. For instance, if the user wanted to perform an simple ADC_GetScan,
  * s/he could just use the settings provided in the AIO_DEFAULT_CMDLINE_OPTIONS variable
@@ -23,35 +38,43 @@ AIOCommandLineOptions AIO_DEFAULT_CMDLINE_OPTIONS = {
                            0,                             /* int pass_through; */
                            -1,                            /* int64_t num_scans; */
                            10000,                         /* int64_t default_num_scans; */
-                           -1,                            /* unsigned num_channels; */      
-                           16,                            /* unsigned default_num_channels; */      
-                           -1,                            /* unsigned num_oversamples; */   
-                           0,                             /* unsigned default_num_oversamples; */   
-                           AD_GAIN_CODE_0_5V ,            /* int gain_code; */              
-                           -1,                            /* int clock_rate; */             
+                           -1,                            /* unsigned num_channels; */
+                           16,                            /* unsigned default_num_channels; */
+                           -1,                            /* unsigned num_oversamples; */
+                           0,                             /* unsigned default_num_oversamples; */
+                           AD_GAIN_CODE_0_5V ,            /* int gain_code; */
+                           -1,                            /* int clock_rate; */
                            10000,                         /* int default_clock_rate;  */
-                           (char*)"output.txt",                  /* char *outfile; */              
-                           0,                             /* int reset; */                  
-                           AIODEFAULT_LOG_LEVEL,          /* int debug_level; */            
-                           0,                             /* int number_ranges; */          
-                           0,                             /* int verbose; */                
-                           -1,                            /* int start_channel; */          
-                           0,                             /* int default_start_channel; */          
-                           -1,                            /* int end_channel; */            
-                           15,                            /* int default_end_channel; */            
-                           -1,                            /* int index; */                  
-                           -1,                            /* int block_size; */             
-                           0,                             /* int with_timing; */            
-                           0,                             /* int slow_acquire; */           
-                           2048,                          /* int buffer_size; */            
-                           100,                           /* int rate_limit; */             
-                           0,                             /* int physical; */               
-                           0,                             /* int counts; */                 
-                           0,                             /* int calibration; */            
+                           (char*)"output.txt",           /* char *outfile; */
+                           0,                             /* int reset; */
+                           AIODEFAULT_LOG_LEVEL,          /* int debug_level; */
+                           0,                             /* int number_ranges; */
+                           0,                             /* int verbose; */
+                           -1,                            /* int start_channel; */
+                           0,                             /* int default_start_channel; */
+                           -1,                            /* int end_channel; */
+                           15,                            /* int default_end_channel; */
+                           -1,                            /* int index; */
+                           -1,                            /* int block_size; */
+                           0,                             /* int with_timing; */
+                           0,                             /* int slow_acquire; */
+                           2048,                          /* int buffer_size; */
+                           100,                           /* int rate_limit; */
+                           0,                             /* int physical; */
+                           0,                             /* int counts; */
+                           0,                             /* int calibration; */
                            2,                             /* int repeat */
                            NULL,
-                           (char *)"{\"DeviceIndex\":0,\"base_size\":2048,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2}",
-                           (char*)"{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\",\"oversample\":\"0\",\"timeout\":\"1000\",\"clock_rate\":\"1000\"}",
+                           (char *)"{\"DeviceIndex\":0,\"base_size\":2048,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,"\
+                           "\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,"\
+                           "\"type\":2,\"unit_size\":2}",
+                           (char*)"{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},"\
+                           "{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},"\
+                           "{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},"\
+                           "{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},"\
+                           "{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":"\
+                           "\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\","\
+                           "\"oversample\":\"0\",\"timeout\":\"1000\",\"clock_rate\":\"1000\"}",
                            NULL
 };
 
@@ -60,35 +83,43 @@ AIOCommandLineOptions AIO_DEFAULT_SCRIPTING_OPTIONS = {
                            1,                             /* int pass_through; */
                            -1,                            /* int64_t num_scans; */
                            10000,                         /* int64_t default_num_scans; */
-                           -1,                            /* unsigned num_channels; */      
-                           16,                            /* unsigned default_num_channels; */      
-                           -1,                            /* unsigned num_oversamples; */   
-                           0,                             /* unsigned default_num_oversamples; */   
-                           AD_GAIN_CODE_0_5V ,            /* int gain_code; */              
-                           -1,                            /* int clock_rate; */             
+                           -1,                            /* unsigned num_channels; */
+                           16,                            /* unsigned default_num_channels; */
+                           -1,                            /* unsigned num_oversamples; */
+                           0,                             /* unsigned default_num_oversamples; */
+                           AD_GAIN_CODE_0_5V ,            /* int gain_code; */
+                           -1,                            /* int clock_rate; */
                            10000,                         /* int default_clock_rate;  */
-                           (char*)"output.txt",                  /* char *outfile; */              
-                           0,                             /* int reset; */                  
-                           AIODEFAULT_LOG_LEVEL,          /* int debug_level; */            
-                           0,                             /* int number_ranges; */          
-                           0,                             /* int verbose; */                
-                           -1,                            /* int start_channel; */          
-                           0,                             /* int default_start_channel; */          
-                           -1,                            /* int end_channel; */            
-                           15,                            /* int default_end_channel; */            
-                           -1,                            /* int index; */                  
-                           -1,                            /* int block_size; */             
-                           0,                             /* int with_timing; */            
-                           0,                             /* int slow_acquire; */           
-                           2048,                          /* int buffer_size; */            
-                           100,                           /* int rate_limit; */             
-                           0,                             /* int physical; */               
-                           0,                             /* int counts; */                 
-                           0,                             /* int calibration; */            
+                           (char*)"output.txt",                  /* char *outfile; */
+                           0,                             /* int reset; */
+                           AIODEFAULT_LOG_LEVEL,          /* int debug_level; */
+                           0,                             /* int number_ranges; */
+                           0,                             /* int verbose; */
+                           -1,                            /* int start_channel; */
+                           0,                             /* int default_start_channel; */
+                           -1,                            /* int end_channel; */
+                           15,                            /* int default_end_channel; */
+                           -1,                            /* int index; */
+                           -1,                            /* int block_size; */
+                           0,                             /* int with_timing; */
+                           0,                             /* int slow_acquire; */
+                           2048,                          /* int buffer_size; */
+                           100,                           /* int rate_limit; */
+                           0,                             /* int physical; */
+                           0,                             /* int counts; */
+                           0,                             /* int calibration; */
                            2,                             /* int repeat */
                            NULL,
-                           (char *)"{\"DeviceIndex\":0,\"base_size\":2048,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,\"type\":2,\"unit_size\":2}",
-                           (char*)"{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\",\"oversample\":\"0\",\"timeout\":\"1000\",\"clock_rate\":\"1000\"}",
+                           (char *)"{\"DeviceIndex\":0,\"base_size\":2048,\"block_size\":65536,\"debug\":\"false\",\"hz\":10000,"\
+                           "\"num_channels\":16,\"num_oversamples\":0,\"num_scans\":1024,\"testing\":\"false\",\"timeout\":1000,"\
+                           "\"type\":2,\"unit_size\":2}",
+                           (char*)"{\"channels\":[{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},"\
+                           "{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},"\
+                           "{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},"\
+                           "{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},{\"gain\":\"0-10V\"},"\
+                           "{\"gain\":\"0-10V\"}],\"calibration\":\"Normal\",\"trigger\":{\"reference\":\"sw\",\"edge\""\
+                           ":\"rising-edge\",\"refchannel\":\"single-channel\"},\"start_channel\":\"0\",\"end_channel\":\"15\","\
+                           "\"oversample\":\"0\",\"timeout\":\"1000\",\"clock_rate\":\"1000\"}",
                            NULL
 };
 
@@ -99,7 +130,7 @@ AIOCommandLineOptions AIO_DEFAULT_SCRIPTING_OPTIONS = {
 AIOCommandLineOptions *AIO_CMDLINE_DEFAULT_OPTIONS()
 {
     AIOCommandLineOptions *tmp = (AIOCommandLineOptions*)malloc(sizeof(AIOCommandLineOptions));
-    if ( !tmp ) 
+    if ( !tmp )
         return NULL;
     memcpy( tmp, &AIO_DEFAULT_CMDLINE_OPTIONS, sizeof(AIOCommandLineOptions));
     return tmp;
@@ -109,7 +140,7 @@ AIOCommandLineOptions *AIO_CMDLINE_DEFAULT_OPTIONS()
 AIOCommandLineOptions *AIO_CMDLINE_SCRIPTING_OPTIONS()
 {
     AIOCommandLineOptions *tmp = (AIOCommandLineOptions*)malloc(sizeof(AIOCommandLineOptions));
-    if ( !tmp ) 
+    if ( !tmp )
         return NULL;
     memcpy( tmp, &AIO_DEFAULT_SCRIPTING_OPTIONS, sizeof(AIOCommandLineOptions));
     return tmp;
@@ -125,13 +156,13 @@ AIORET_TYPE AIO_CMDLINE_CLEAR_OPTIONS(AIOCommandLineOptions *opts)
 
 /*----------------------------------------------------------------------------*/
 /**
- * @brief 
- * 
- * @param options 
- * @param argc Pointer to number of arguments in argv. 
+ * @brief
+ *
+ * @param options
+ * @param argc Pointer to number of arguments in argv.
  * @param argv An array of strings
- * 
- * @return 
+ *
+ * @return
  */
 AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, char **argv )
 {
@@ -140,19 +171,18 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
     int option_index = 0;
     int query = 0;
     int dump_adcconfig = 0;
-    int indprev,indafter = -1;
+    int indprev, indafter = -1;
     int keepcount = 1, keepsize = 1,*keepindices = 0;
     keepindices = (int*)malloc(sizeof(int *)*keepsize);
-    if ( !keepindices ) 
+    if ( !keepindices )
         return -AIOUSB_ERROR_INVALID_MEMORY;
     keepindices[0] = 0;
     char **oargv = 0;
     oargv = (char **)malloc(sizeof(char *)* *argc );
     optind = 1;
 
-    memcpy( oargv, argv, sizeof(char *)* *argc ); /* Save the strings bc getopt_long 
-                                                   * is known to switch order after
-                                                   * processing */
+    memcpy( oargv, argv, sizeof(char *)* *argc ); //!< Save the strings bc getopt_long
+                                                  //!< is known to switch order after processing
 
     AIODisplayType display_type = BASIC;
     opterr = 0;
@@ -181,44 +211,46 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
         {"query"            , no_argument      , 0,  'q'   },
         {"ratelimit"        , required_argument, 0,  'L'   },
         {"physical"         , no_argument      , 0,  'p'   },
-        {"counts"           , no_argument      , 0,   CNTS },         
+        {"counts"           , no_argument      , 0,   CNTS },
         {"yaml"             , no_argument      , 0,  'Y'   },
         {"json"             , no_argument      , 0,  'J'   },
         {"jsonconfig"       , required_argument, 0,  JCONF },
         {0                  , 0,                 0,   0    }
     };
-    while (1) { 
+    while (1) {
         AIOChannelRangeTmp *tmp;
         indprev = optind;
         c = getopt_long(*argc, argv, arguments, long_options, &option_index);
-        memcpy(argv,oargv,(*argc)*sizeof(char *));
-        if( c == -1 && optind == *argc )
+        memcpy( argv, oargv, (*argc)*sizeof(char *) );
+        if ( c == -1 && optind == *argc )
             break;
-        
+
         switch (c) {
         case 'R':
-            if( !( tmp = AIOGetChannelRange(optarg)) ) {
+            if ( !( tmp = AIOGetChannelRange(optarg)) ) {
                 fprintf(stdout,"Incorrect channel range spec, should be '--range START-END=GAIN_CODE', not %s\n", optarg );
                 return -AIOUSB_ERROR_AIOCOMMANDLINE_INVALID_CHANNEL_RANGE;
             }
 
-            options->ranges = (AIOChannelRangeTmp **)realloc( options->ranges , (++options->number_ranges)*sizeof(AIOChannelRangeTmp *)  );
+            options->ranges = (AIOChannelRangeTmp **)realloc( options->ranges ,
+                                                              (++options->number_ranges)*sizeof(AIOChannelRangeTmp *)
+                                                              );
 
             options->ranges[options->number_ranges-1] = tmp;
             break;
         case 'S':
-            
+
             options->buffer_size = atoi( optarg );
             break;
         case 'T':
             options->with_timing = 1;
             break;
         case 'B':
-            
+
             options->block_size = atoi( optarg );
             break;
         case 'C':
-            
+
             options->calibration = atoi( optarg );
             if ( !VALID_ENUM( ADCalMode, options->calibration ) ) {
                 fprintf(stderr,"Error: calibration %d is not valid\n", options->calibration );
@@ -242,7 +274,7 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
                 options->physical = 1;
                 break;
         case 'L':
-            
+
             options->rate_limit = atoi(optarg);
             break;
         case 'q':
@@ -296,7 +328,7 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
         case 'N':
         case 'b':
             options->num_scans = (int64_t)atoll(optarg);
-            if( options->num_scans <= 0 ) {
+            if ( options->num_scans <= 0 ) {
                 fprintf(stderr,"Warning: Buffer Size outside acceptable range (1,1e8), setting to 10000\n");
                 options->num_scans = 10000;
             }
@@ -308,7 +340,7 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
             } else if ( c == -1 && optind != *argc && (optind  - indprev ) == 0 ) {
                 keepsize += (*argc - optind);
                 keepindices = (int*)realloc(keepindices,sizeof(int *)*keepsize);
-                for( int i = indprev; i < *argc; i ++ , keepcount ++) { 
+                for ( int i = indprev; i < *argc; i ++ , keepcount ++ ) {
                     keepindices[keepcount] = i;
                 }
                 goto endloop;
@@ -318,7 +350,7 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
                 }
                 keepsize += (optind - indprev);
                 keepindices = (int*)realloc(keepindices,sizeof(int *)*keepsize);
-                for( int i = indprev; i < optind; i ++ , keepcount ++) { 
+                for ( int i = indprev; i < optind; i ++ , keepcount ++ ) {
                     keepindices[keepcount] = i;
                 }
             }
@@ -330,16 +362,16 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
             int stop = ( long_options[option_index].has_arg ? optind - 2 : optind - 1 );
             keepsize += ( stop - indprev );
             keepindices = (int*)realloc(keepindices,sizeof(int *)*keepsize);
-            for ( int i = indprev; i < stop ;i ++ , keepcount ++) { 
+            for ( int i = indprev; i < stop ; i ++ , keepcount ++ ) {
                 keepindices[keepcount] = i;
             }
         }
 
-        if( error ) {
+        if ( error ) {
             AIOPrintUsage(*argc, argv, long_options);
             return -AIOUSB_ERROR_INVALID_LIBUSB_DEVICE_HANDLE;
         }
-        if( options->num_channels == 0 ) {
+        if ( options->num_channels == 0 ) {
             fprintf(stderr,"Error: You must specify num_channels > 0: %d\n", options->num_channels );
             AIOPrintUsage(*argc, argv, long_options);
             return -AIOUSB_ERROR_AIOCOMMANDLINE_INVALID_NUM_CHANNELS;
@@ -353,9 +385,10 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
         return AIOUSB_SUCCESS;
     }
 
-    if ( dump_adcconfig ) { 
-        if ( options->index == -1 ) { 
-            fprintf(stderr,"Error: Can't dump adcconfiguration without specifying index ( -i INDEX_NUM ) of the device\nexiting...\n");
+    if ( dump_adcconfig ) {
+        if ( options->index == -1 ) {
+            fprintf(stderr,"Error: Can't dump adcconfiguration without "
+                    "specifying index ( -i INDEX_NUM ) of the device\nexiting...\n");
             return -AIOUSB_ERROR_AIOCOMMANDLINE_INVALID_INDEX_NUM;
         } else {
             AIOUSB_Init();
@@ -365,9 +398,9 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
             printf("%s\n",ADCConfigBlockToJSON(&config));
             return AIOUSB_SUCCESS;
         }
-    } 
+    }
 
-    if ( options->number_ranges == 0 ) { 
+    if ( options->number_ranges == 0 ) {
         if ( options->start_channel >= 0 && options->end_channel >=0  && options->num_channels ) {
             fprintf(stdout,"Error: you can only specify -start_channel & -end_channel OR  --start_channel & --numberchannels\n");
             AIOPrintUsage(*argc, argv, long_options );
@@ -379,16 +412,15 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
             options->start_channel = 0;
             options->end_channel = options->num_channels - 1;
         } else if ( options->num_channels < 0 && options->start_channel < 0 && options->end_channel < 0 ) {
-            
         } else {
             options->num_channels = options->end_channel - options->start_channel  + 1;
         }
     } else {
         int min = -1, max = -1;
-        for( int i = 0; i < options->number_ranges ; i ++ ) {
+        for ( int i = 0; i < options->number_ranges ; i ++ ) {
             if ( min == -1 )
                 min = options->ranges[i]->start_channel;
-            if ( max == -1 ) 
+            if ( max == -1 )
                 max = options->ranges[i]->end_channel;
 
             min = ( options->ranges[i]->start_channel < min ?  options->ranges[i]->start_channel : min );
@@ -414,14 +446,14 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
 
 /*----------------------------------------------------------------------------*/
 /**
- * @brief A simplified command line parsing library for 
- * 
- * @param options AIOCommandLineOptions object that holds overridden cmd 
+ * @brief A simplified command line parsing library for
+ *
+ * @param options AIOCommandLineOptions object that holds overridden cmd
  *        line options
  * @param argc Number of command line arguments
  * @param argv Array of strings to the command line arguments
- * 
- * @return 
+ *
+ * @return
  */
 AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **argv )
 {
@@ -434,20 +466,20 @@ AIORET_TYPE AIOProcessCmdline( AIOCommandLineOptions *options, int argc, char **
  *        of parsing on the command line.
  * @param argc Number of command line arguments
  * @param argv Array of strings to the command line arguments
- * @param options 
+ * @param options
  */
 void AIOPrintUsage(int argc, char **argv,  struct option *options)
 {
     fprintf(stderr,"%s - Options\n", argv[0] );
     for ( int i =0 ; options[i].name != NULL ; i ++ ) {
-        if ( options[i].val < 255 ) { 
+        if ( options[i].val < 255 ) {
             fprintf(stderr,"\t-%c | --%s ", (char)options[i].val, options[i].name);
         } else {
             fprintf(stderr,"\t     --%s ", options[i].name);
         }
-        if( options[i].has_arg == optional_argument ) {
+        if ( options[i].has_arg == optional_argument ) {
             fprintf(stderr, " [ ARG ]\n");
-        } else if( options[i].has_arg == required_argument ) {
+        } else if ( options[i].has_arg == required_argument ) {
             fprintf(stderr, " ARG\n");
         } else {
             fprintf(stderr,"\n");
@@ -457,7 +489,7 @@ void AIOPrintUsage(int argc, char **argv,  struct option *options)
 
 /*----------------------------------------------------------------------------*/
 /**
- * @brief Creates a new command line option object for performing comparisons 
+ * @brief Creates a new command line option object for performing comparisons
  *        with the default settings for AIOUSB devices
  * @return AIOCommandLineOptions * a new object containing the default settings
  */
@@ -485,15 +517,15 @@ AIOCommandLineOptions *NewAIOCommandLineOptionsFromDefaultOptions(const AIOComma
 /*----------------------------------------------------------------------------*/
 /**
  * @brief A Descructor for the allocated AIOCommandLineOptions
- * 
- * @param options 
- * 
- * @return 
+ *
+ * @param options
+ *
+ * @return
  */
 AIORET_TYPE DeleteAIOCommandLineOptions( AIOCommandLineOptions *options )
 {
     AIO_ASSERT( options );
-    for ( int i = 0; i < options->number_ranges ; i ++ ) { 
+    for ( int i = 0; i < options->number_ranges ; i ++ ) {
         free(options->ranges[i]);
     }
     free(options->ranges);
@@ -536,7 +568,7 @@ AIORET_TYPE AIOCommandLineOptionsListDevices( AIOCommandLineOptions *options , i
         fprintf(stderr,"Matching devices found at indices: ");
         options->index = ( options->index < 0 ? intlistFirst( indices ) : options->index );
         options->index = 0;
-        int i,j=0;
+        int i, j = 0;
         foreach_int( i, indices) {
             if ( j >= TailQListintSize( indices ) - 1  )
                 break;
@@ -546,13 +578,11 @@ AIORET_TYPE AIOCommandLineOptionsListDevices( AIOCommandLineOptions *options , i
         }
         if ( num_devices > 1 )
             fprintf(stderr," and ");
-        if ( TailQListintLast( indices ) ) { 
+        if ( TailQListintLast( indices ) ) {
             fprintf(stderr, "%d , Using index=%d \n", TailQListintLastValue( indices ) , options->index  );
         }
-
     }
     return retval;
-
 }
 
 /*---------------------------         DEPRECATED    --------------------------*/
@@ -564,7 +594,7 @@ AIORET_TYPE AIOCommandLineOverrideADCConfigBlock( ADCConfigBlock *config, AIOCom
 
 /*----------------------------------------------------------------------------*/
 /**
- * @brief Allows the AIOCommandLineOptions options to override the settings in 
+ * @brief Allows the AIOCommandLineOptions options to override the settings in
  *        the ADCConfigBlock
  * @param config ADCConfigBlock object that is written to the AIOUSB device
  * @param options AIOCommandLineOptions object that represents the set of user
@@ -576,31 +606,30 @@ AIORET_TYPE AIOCommandLineOptionsOverrideADCConfigBlock(  ADCConfigBlock *config
     AIO_ASSERT( options );
     AIO_ASSERT( config );
     AIORET_TYPE retval = AIOUSB_SUCCESS,retval2 = AIOUSB_SUCCESS;
-    
+
     AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( options->index , (AIORESULT*)&retval );
     AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
 
     ADCConfigBlock *hwconfig = AIOUSBDeviceGetADCConfigBlock( dev );
     memcpy(&config->mux_settings, &hwconfig->mux_settings, sizeof( hwconfig->mux_settings ) );
 
-    if ( options->num_oversamples < 0 ) { 
+    if ( options->num_oversamples < 0 ) {
         retval = ADCConfigBlockSetOversample( config, options->default_num_oversamples );
         AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
     } else {
         retval = ADCConfigBlockSetOversample( config, options->num_oversamples );
         AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
     }
-    
-    if( !options->number_ranges ) {
+
+    if ( !options->number_ranges ) {
         retval = ADCConfigBlockSetAllGainCodeAndDiffMode( config , options->gain_code , AIOUSB_FALSE );
         AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
     } else {
         for ( int i = 0; i < options->number_ranges ; i ++ ) {
-            retval = ADCConfigBlockSetChannelRange( config, 
+            retval = ADCConfigBlockSetChannelRange( config,
                                                     options->ranges[i]->start_channel,
                                                     options->ranges[i]->end_channel,
-                                                    options->ranges[i]->gaincode 
-                                                    );                                          
+                                                    options->ranges[i]->gaincode );
             if ( retval != AIOUSB_SUCCESS ) {
                 fprintf(stderr,"Error setting ChannelRange: %d\n", (int)retval );
                 return retval;
@@ -610,15 +639,15 @@ AIORET_TYPE AIOCommandLineOptionsOverrideADCConfigBlock(  ADCConfigBlock *config
         retval = ADCConfigBlockSetStartChannel( config, options->start_channel );
         retval2 = ADCConfigBlockSetEndChannel( config, options->end_channel );
         if ( retval != AIOUSB_SUCCESS || retval2 != AIOUSB_SUCCESS ) {
-            fprintf(stderr,"Error trying to set StartCh=%d and EndCh=%d...%d\n", 
-                    options->start_channel, 
+            fprintf(stderr,"Error trying to set StartCh=%d and EndCh=%d...%d\n",
+                    options->start_channel,
                     options->end_channel,
                     (int)retval
                     );
             return retval;
         }
     }
-  
+
     return retval;
 }
 
@@ -626,8 +655,8 @@ AIORET_TYPE AIOCommandLineOptionsOverrideADCConfigBlock(  ADCConfigBlock *config
 AIOChannelRangeTmp *AIOGetChannelRange(char *optarg )
 {
     int i = 0;
-  
-    typedef enum { 
+
+    typedef enum {
         BEGIN = 0,
         SCHANNEL,
         ECHANNEL,
@@ -645,21 +674,19 @@ AIOChannelRangeTmp *AIOGetChannelRange(char *optarg )
         if ( mode == BEGIN && isdigit(optarg[i] ) ) {
             pos = i;
             mode = SCHANNEL;
-        } else if ( mode == SCHANNEL && isdigit(optarg[i])  ) {
-      
+        } else if ( mode == SCHANNEL && isdigit(optarg[i]) ) {
         } else if ( mode == SCHANNEL && optarg[i] == '-' ) {
             mode = ECHANNEL;
             strncpy(&buf[0], &optarg[pos], i - pos );
             buf[i-pos] = 0;
             tmp->start_channel = atoi(buf);
-            i ++ ;
+            i ++;
             pos = i;
         } else if ( mode == SCHANNEL ) {
             fprintf(stdout,"Unknown flag while parsing Start_channel: '%c'\n", optarg[i] );
             free(tmp);
             return NULL;
         } else if ( mode == ECHANNEL && isdigit(optarg[i] ) ) {
-      
         } else if ( mode == ECHANNEL && optarg[i] == '=' ) {
             mode = GAIN;
             strncpy(&buf[0], &optarg[pos], i - pos );
@@ -678,34 +705,35 @@ AIOChannelRangeTmp *AIOGetChannelRange(char *optarg )
     return tmp;
 }
 
-const AIOCommandLineOptions *AIO_SCRIPTING_OPTIONS(void) 
+const AIOCommandLineOptions *AIO_SCRIPTING_OPTIONS(void)
 {
     return &AIO_DEFAULT_SCRIPTING_OPTIONS;
 }
-const AIOCommandLineOptions *AIO_CMDLINE_OPTIONS(void) 
+const AIOCommandLineOptions *AIO_CMDLINE_OPTIONS(void)
 {
     return &AIO_DEFAULT_CMDLINE_OPTIONS;
 }
 
 
 #ifdef __cplusplus
-}
+} // namespace AIOUSB
 #endif
 
 /*****************************************************************************
- * Self-test 
- * @note This section is for stress testing the DIO code without using the USB 
+ * Self-test
+ * @note This section is for stress testing the DIO code without using the USB
  * features
  *
- ****************************************************************************/ 
+ ****************************************************************************/
 
 #ifdef SELF_TEST
 
+#include <iostream>
 #include "AIOUSBDevice.h"
 #include "gtest/gtest.h"
 
-#include <iostream>
 using namespace AIOUSB;
+// using AIOUSB;
 
 TEST( AIOCmdLine, CorrectDefaults )
 {
@@ -717,13 +745,12 @@ TEST( AIOCmdLine, CorrectDefaults )
     ASSERT_EQ( AD_GAIN_CODE_0_5V, nopts->gain_code );
 
     DeleteAIOCommandLineOptions( nopts );
-
 }
 
 TEST( AIOCmdLine, CorrectlyDies )
 {
     AIOCommandLineOptions *nopts = NULL;
-    ASSERT_DEATH( {AIOCommandLineOptionsGetDeviceIndex(nopts); },"Assertion `options' failed"); 
+    ASSERT_DEATH( {AIOCommandLineOptionsGetDeviceIndex(nopts); }, "Assertion `options' failed");
 }
 
 TEST( AIOCmdLine, CmdlineParsing )
@@ -731,7 +758,7 @@ TEST( AIOCmdLine, CmdlineParsing )
     AIOCommandLineOptions *nopts = NewDefaultAIOCommandLineOptions();
     AIORET_TYPE retval;
     ASSERT_TRUE( nopts );
-    char *argv[] = {(char *)"foo",(char *)"-N",(char *)"1000"};
+    char *argv[] = {const_cast<char *>("foo"), const_cast<char *>("-N"), const_cast<char *>("1000")};
     int argc = 3;
 
     ASSERT_EQ( 0, nopts->default_num_oversamples );
@@ -749,12 +776,11 @@ TEST( AIOCmdLine, CmdlineParsing )
 
 TEST(AIOCmdLine, NewOptions )
 {
-
     AIOCommandLineOptions *nopts = NewAIOCommandLineOptionsFromDefaultOptions( &AIO_DEFAULT_CMDLINE_OPTIONS );
     ASSERT_TRUE( nopts );
-    
+
     ASSERT_EQ( 0, memcmp(nopts, &AIO_DEFAULT_CMDLINE_OPTIONS, sizeof(AIOCommandLineOptions)));
-    
+
     DeleteAIOCommandLineOptions( nopts );
 }
 
@@ -763,12 +789,14 @@ TEST( AIOCmdLine, LargerParsingTest )
     AIOCommandLineOptions *nopts = NewAIOCommandLineOptionsFromDefaultOptions(&AIO_DEFAULT_SCRIPTING_OPTIONS);
     AIORET_TYPE retval;
     ASSERT_TRUE( nopts );
-    char *tmp = (char *)"--foobar";
-    char *argv[] = {(char *)"foo",(char *)"-N",(char *)"1000",(char *)"--foobar",(char *)"--args",
-                    (char*)"--range",(char *)"0-4=5,5-9=2",(char *)"--clockrate",(char*)"40000",
-                    (char *)"--buffer_size",(char *)"343434" };
+    char *tmp = const_cast<char *>("--foobar");
+    char *argv[] = {const_cast<char *>("foo"),const_cast<char *>("-N"),const_cast<char *>("1000"),
+                    const_cast<char *>("--foobar"),const_cast<char *>("--args"),
+                    const_cast<char *>("--range"),const_cast<char *>("0-4=5,5-9=2"),
+                    const_cast<char *>("--clockrate"),const_cast<char *>("40000"),
+                    const_cast<char *>("--buffer_size"),const_cast<char *>("343434") };
 
-    int argc = sizeof(argv)/sizeof(char*);
+    int argc = sizeof(argv)/sizeof(char *);
     optind = 1;
 
     retval = AIOProcessCommandLine( nopts, &argc, argv );
@@ -778,11 +806,11 @@ TEST( AIOCmdLine, LargerParsingTest )
 
     ASSERT_EQ(4, optind );
 
-    EXPECT_STREQ( argv[0], (char*)"foo" );
+    EXPECT_STREQ( argv[0], const_cast<char *>("foo") );
 
     EXPECT_STREQ( argv[1], tmp );
 
-    EXPECT_STREQ( argv[2], (char *)"--args" );
+    EXPECT_STREQ( argv[2], const_cast<char *>("--args") );
 
     DeleteAIOCommandLineOptions( nopts );
 }
@@ -792,10 +820,11 @@ TEST( AIOCmdLine, StrangeArguments )
     AIOCommandLineOptions *nopts = NewAIOCommandLineOptionsFromDefaultOptions( AIO_SCRIPTING_OPTIONS() );
     AIORET_TYPE retval;
     ASSERT_TRUE( nopts );
-    char *tmp = (char *)"--foobar";
-    char *argv[] = {(char *)"foo",(char *)"-N",(char *)"1000",(char *)"--foobar",(char *)"3434",(char *)"3434",
-                    (char*)"--range",(char *)"0-4=5,5-9=2",(char *)"--clockrate",(char*)"40000",
-                    (char *)"--buffer_size",(char *)"343434" };
+    char *tmp = const_cast<char *>("--foobar");
+    char *argv[] = {const_cast<char *>("foo"),const_cast<char *>("-N"),const_cast<char *>("1000"),
+                    const_cast<char *>("--foobar"),const_cast<char *>("3434"),const_cast<char *>("3434"),
+                    const_cast<char *>("--range"),const_cast<char *>("0-4=5,5-9=2"),const_cast<char *>("--clockrate"),
+                    const_cast<char *>("40000"),const_cast<char *>("--buffer_size"),const_cast<char *>("343434") };
 
     int argc = sizeof(argv)/sizeof(char*);
     optind = 1;
@@ -811,7 +840,7 @@ TEST( AIOCmdLine, StrangeArguments )
 
     EXPECT_STREQ( argv[1], tmp );
 
-    EXPECT_STREQ( argv[2], (char *)"3434" );
+    EXPECT_STREQ( argv[2], const_cast<char *>("3434") );
 
     DeleteAIOCommandLineOptions( nopts );
 }
@@ -821,10 +850,12 @@ TEST( AIOCmdLine, EatAllArguments )
     AIOCommandLineOptions *nopts = NewAIOCommandLineOptionsFromDefaultOptions( AIO_SCRIPTING_OPTIONS() );
     AIORET_TYPE retval;
     ASSERT_TRUE( nopts );
-    char *tmp = (char *)"--foobar";
-    char *argv1[] = {(char *)"./sample.py",(char *)"-N",(char *)"100",(char*)"--range",(char *)"0-4=5,5-9=2"};
-    char *argv2[] = {(char *)"./sample.py",(char *)"-N",(char *)"100",(char*)"--range",(char *)"0-4=5,5-9=2",
-                     (char *)"--foo",(char *)"--bar",(char *)"34"};
+    char *tmp = const_cast<char *>("--foobar");
+    char *argv1[] = {const_cast<char *>("./sample.py"), const_cast<char *>("-N"), const_cast<char *>("100"), \
+                     const_cast<char *>("--range"), const_cast<char *>("0-4=5,5-9=2")};
+    char *argv2[] = {const_cast<char *>("./sample.py"),const_cast<char *>("-N"),const_cast<char *>("100"),
+                     (char*)"--range",const_cast<char *>("0-4=5,5-9=2"),const_cast<char *>("--foo"),
+                     const_cast<char *>("--bar"),const_cast<char *>("34")};
 
     int argc1 = sizeof(argv1)/sizeof(char*);
     int argc2 = sizeof(argv2)/sizeof(char*);
@@ -848,17 +879,17 @@ TEST( AIOCmdLine, Java_arguments )
     AIORET_TYPE retval;
     ASSERT_TRUE( nopts );
 
-    char *argv1[] = {(char *)"tmp",(char *)"-N",(char *)"1000",(char *)"-foo",(char *)"3434"};
+    char *argv1[] = {const_cast<char *>("tmp"), const_cast<char *>("-N"), const_cast<char *>("1000"),
+                     const_cast<char *>("-foo"), const_cast<char *>("3434")};
 
     int argc1 = sizeof(argv1)/sizeof(char*);
 
     retval = AIOProcessCommandLine( nopts, &argc1, argv1 );
     ASSERT_EQ( retval, 0 );
     ASSERT_EQ( 3 , argc1 );
-    ASSERT_STREQ( argv1[0] , (char *)"tmp" );
-    ASSERT_STREQ( argv1[1] , (char *)"-foo" );
-    ASSERT_STREQ( argv1[2] , (char *)"3434" );
-
+    ASSERT_STREQ( argv1[0] , const_cast<char *>("tmp") );
+    ASSERT_STREQ( argv1[1] , const_cast<char *>("-foo") );
+    ASSERT_STREQ( argv1[2] , const_cast<char *>("3434") );
 }
 
 TEST( AIOCmdLine, Java_arguments2 )
@@ -867,8 +898,8 @@ TEST( AIOCmdLine, Java_arguments2 )
     AIORET_TYPE retval;
     ASSERT_TRUE( nopts );
 
-    char *argv1[] = {(char *)"tmp",(char *)"-N",(char *)"1000",(char*)"-foo",(char*)"23",
-                     (char *)"--range",(char *)"0-10=0" };
+    char *argv1[] = {const_cast<char *>("tmp"),const_cast<char *>("-N"),const_cast<char *>("1000"),(char*)"-foo",(char*)"23",
+                     const_cast<char *>("--range"),const_cast<char *>("0-10=0") };
 
     int argc1 = sizeof(argv1)/sizeof(char*);
 
@@ -876,10 +907,9 @@ TEST( AIOCmdLine, Java_arguments2 )
     ASSERT_EQ( retval, 0 );
 
     ASSERT_EQ( 3 , argc1 );
-    ASSERT_STREQ( argv1[0] , (char *)"tmp" );
-    ASSERT_STREQ( argv1[1] , (char *)"-foo" );
-    ASSERT_STREQ( argv1[2] , (char *)"23" );
-
+    ASSERT_STREQ( argv1[0] , const_cast<char *>("tmp") );
+    ASSERT_STREQ( argv1[1] , const_cast<char *>("-foo") );
+    ASSERT_STREQ( argv1[2] , const_cast<char *>("23") );
 }
 
 
@@ -888,14 +918,12 @@ TEST( AIOCmdLine, Java_arguments2 )
 
 int main(int argc, char *argv[] )
 {
-  
   AIORET_TYPE retval;
 
   testing::InitGoogleTest(&argc, argv);
   testing::TestEventListeners & listeners = testing::UnitTest::GetInstance()->listeners();
 
-  return RUN_ALL_TESTS();  
-
+  return RUN_ALL_TESTS();
 }
 
 #endif
