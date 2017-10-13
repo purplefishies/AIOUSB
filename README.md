@@ -1,6 +1,7 @@
-![ACCES I/O Products Inc. Logo](http://accesio.com/images/weblogo2.png)
+[![ACCES I/O Products Inc. Logo](http://accesio.com/images/weblogo2.png)](http://accesio.com)
 
-[ACCES I/O Products, Inc.](http://accesio.com)
+
+
 
 
 # <a name="AIOUSBLibrary"></a>AIOUSB driver library
