@@ -12,7 +12,9 @@ sub myencode {
 if ( $ARGV[0] =~ /(README|Testing).md/ ) {
 
     while (<>) {
-        if ( /^\s*(#{1,8})\s*<a name="([^"]+)"><\/a>\s*(\S+.*)$/ ) {
+        if ( $. == 5 ) {
+            print "[TOC]\n\n";
+        } elsif ( /^\s*(#{1,8})\s*<a name="([^"]+)"><\/a>\s*(\S+.*)$/ ) {
             chomp;
             my ($hashes,$anchor,$rest) = ($1,$2,$3);
             $rest =~ s/<a href="[^"]+">(.*?)<\s*\/a\s*>/$1/g;
