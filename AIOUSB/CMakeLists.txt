@@ -72,6 +72,7 @@ find_package(SWIG )
 find_package(Doxygen)
 find_package(Perl)
 find_package(VALGRIND)
+find_package(Git)
 
 if( VALGRIND_PROGRAM AND MEMORY_PROFILING ) 
   set(CTEST_MEMORYCHECK_COMMAND ${VALGRIND_PROGRAM} )

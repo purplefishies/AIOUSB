@@ -11,7 +11,7 @@ namespace AIOUSB {
 
 extern const char VERSION_TAG[] = "@ACCESIO_TAG_VERSION@";
 extern const char VERSION_NUMBER[] = "$Format: %h$";
-extern const char VERSION_DATE[] = "$Format: %ad$";
+extern const char VERSION_DATE[] = "@ACCESIO_DATE@";
 
 #ifdef __cplusplus
 }

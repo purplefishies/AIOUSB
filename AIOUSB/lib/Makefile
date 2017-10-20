@@ -105,6 +105,7 @@ endif
 REFDIR=$(shell readlink -f $$(pwd)/../../)
 DIR=$(shell basename $(REFDIR))
 RELEASENAME=$(patsubst AIOUSB-%,%,$(DIR))
+CURDATE=$(shell git log -n 1 --format="%ad" 2>/dev/null || date )
 
 .PHONY : all bist
 
@@ -113,7 +114,7 @@ all : $(LIBS) AIOUSB_Version.h
 AIOUSB_Version.h: AIOUSB_Version.h.in
 	@echo "Geting versioning"
 	@tmp=`git describe --tags --always 2>/dev/null || echo $(RELEASENAME)  ` && \
-	perl -ne "s/\@ACCESIO_TAG_VERSION\@/$$tmp/;print;" $< > $@
+	perl -ne "s/\@ACCESIO_TAG_VERSION\@/$$tmp/; s/\@ACCESIO_DATE\@/$(CURDATE)/g;print;" $< > $@
 
 testit:
 	@echo BAR

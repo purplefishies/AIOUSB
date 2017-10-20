@@ -80,6 +80,13 @@ SET( tmp_aiousb_files
 
 set( CMAKE_INCLUDE_CURRENT_DIR  true )
 add_definitions(-D_GNU_SOURCE)
+# Store version into variable
+
+execute_process(COMMAND ${GIT_EXECUTABLE} describe --tags --always OUTPUT_VARIABLE ACCESIO_TAG_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE )
+# The variable will be used when file is configured
+configure_file("AIOUSB_Version.h.in" "AIOUSB_Version.h")
+
+
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Generate 
