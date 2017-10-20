@@ -9,9 +9,9 @@
 namespace AIOUSB {
 #endif
 
-extern const char VERSION_TAG[] = "@ACCESIO_TAG_VERSION@";
-extern const char VERSION_NUMBER[] = "$Format: %h$";
-extern const char VERSION_DATE[] = "@ACCESIO_DATE@";
+const char VERSION_TAG[] = "@ACCESIO_TAG_VERSION@";
+const char VERSION_NUMBER[] = "$Format: %h$";
+const char VERSION_DATE[] = "@ACCESIO_DATE@";
 
 #ifdef __cplusplus
 }
