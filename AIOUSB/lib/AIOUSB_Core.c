@@ -6,6 +6,7 @@
  * @brief  General header files for the AIOUSB library
  *
  */
+#include "AIOUSB_Version.h"
 #include "ADCConfigBlock.h"
 #include "AIOUSB_Core.h"
 #include "AIODeviceTable.h"
@@ -160,9 +161,6 @@ ProductIDName productIDNameTable[] = {
 static pthread_mutex_t aiousbMutex;
 #endif
 
-
-static const char VERSION_NUMBER[] = "$Format: %h$";
-static const char VERSION_DATE[] = "$Format: %ad$";
 
 
 /**
@@ -507,7 +505,7 @@ unsigned long AIOUSB_ClearFIFO(
 
 
 const char *AIOUSB_GetVersion() {
-    return VERSION_NUMBER;
+    return VERSION_TAG;
 }
 
 const char *AIOUSB_GetVersionDate() {

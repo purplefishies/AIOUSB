@@ -64,7 +64,7 @@ int main( int argc, char **argv ) {
 
     DeviceInfo *device;
 
-    printf("USB-DIO-96 sample program version \nAIOUSB library version %s, %s\nThis program demonstrates configuring a USB-DIO-96 device\n",
+    printf("USB-DIO-96 sample program version \nAIOUSB library version:'%s' date:'%s'\nThis program demonstrates configuring a USB-DIO-96 device\n",
            AIOUSB_GetVersion(),
            AIOUSB_GetVersionDate()
            );

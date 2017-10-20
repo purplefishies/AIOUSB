@@ -49,7 +49,7 @@ int main( int argc, char **argv ) {
 
     if( argc < 3  || argc > 4 ) {
         printf(\
-"\nUSB-DIO-16A test program , AIOUSB library version %s, %s.\n\
+"\nUSB-DIO-16A test program , AIOUSB version:'%s', date:'%s'.\n\
 This program demonstrates a simple high speed receiver program\n\
 where the device in question performs digital acquisition using\n\
 the DIO_StreamFrame() API call. It uses the device specified by the\n\

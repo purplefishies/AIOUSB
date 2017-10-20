@@ -22,7 +22,7 @@ int main(int argc, char *argv[] )
     AIOUSB_BOOL deviceFound = AIOUSB_FALSE;
     printf(
            "USB-AI16-16A sample program\n"
-           "  AIOUSB library version %s, %s\n"
+           "  AIOUSB version:'%s',date:'%s'\n"
            "  This program demonstrates controlling a USB-AI16-16A device on\n"
            "  the USB bus. For simplicity, it uses the first such device found\n"
            "  on the bus.\n"

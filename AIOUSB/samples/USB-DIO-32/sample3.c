@@ -79,8 +79,8 @@ int main( int argc, char **argv ) {
     struct DeviceInfo *device;
 
     printf(
-           "USB-DIO-32 sample program version 1.17, 26 November 2009\n"
-           "  AIOUSB library version %s, %s\n"
+           "USB-DIO-32 sample program \n"
+           "  AIOUSB version:'%s',date:'%s'\n"
            "  This program demonstrates communicating with %d USB-DIO-32 devices on\n"
            "  the same USB bus. For simplicity, it uses the first %d such devices\n"
            "  found on the bus.\n",

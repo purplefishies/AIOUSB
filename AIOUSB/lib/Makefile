@@ -41,7 +41,7 @@ CStringArray.o\
 USBDevice.o
 
 
-HEADERS		:= $(wildcard *.h)
+HEADERS		:= $(wildcard *.h) AIOUSB_Version.h
 TESTOBJS	:= $(wildcard $(PWD)/tests/*_test)
 TEST_EXTRA_CXXFLAGS	:= -std=gnu++11
 
@@ -102,9 +102,22 @@ override CFLAGS		+= -Wno-char-subscripts
 override CXXFLAGS	+= -Wno-char-subscripts 
 endif
 
+REFDIR=$(shell readlink -f $$(pwd)/../../)
+DIR=$(shell basename $(REFDIR))
+RELEASENAME=$(patsubst AIOUSB-%,%,$(DIR))
+
 .PHONY : all bist
 
-all : $(LIBS)
+all : $(LIBS) AIOUSB_Version.h
+
+AIOUSB_Version.h: AIOUSB_Version.h.in
+	@echo "Geting versioning"
+	@tmp=`git describe --tags --always 2>/dev/null || echo $(RELEASENAME)  ` && \
+	perl -ne "s/\@ACCESIO_TAG_VERSION\@/$$tmp/;print;" $< > $@
+
+testit:
+	@echo BAR
+	tmp=`git describe --tags --always 2>/dev/null || echo $(RELEASENAME)  ` && echo $$tmp
 
 bist:
 	@echo $(CPPDBGOBJS)
@@ -239,10 +252,10 @@ tests/%_cpp_test: tests/%.cpp $(SHCDBGLIB) $(SHCPPDBGLIB) $(SHCLIB) $(SHCPPLIB)
 	$(CXX) $(TESTFLAGS) $(CXXFLAGS) $(TEST_EXTRA_CXXFLAGS) $(SELF_TEST_CXX_FLAGS) $< -o $@ -L. $(SELF_TEST_CXX_LIBS)
 
 mostlyclean:
-	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS)
+	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) AIOUSB_Version.h
 
 clean:
-	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) $(GTAGS_FILES) $(TESTOBJS) $(CPPTEST_FILES)
+	-rm -f $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) $(GTAGS_FILES) $(TESTOBJS) $(CPPTEST_FILES) AIOUSB_Version.h
 
 distclean: 
 	-rm -f $(LIBS) $(COBJS) $(CDBGOBJS) $(CPPOBJS) $(CPPDBGOBJS) $(TESTOBJS) cscope.out *_test* *.tap *.mexglx

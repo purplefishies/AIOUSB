@@ -39,7 +39,7 @@ int main(int argc, char *argv[] )
     unsigned long deviceIndex = 0;
     AIOUSB_BOOL deviceFound = AIOUSB_FALSE;
     printf(
-           "  AIOUSB library version %s, %s\n"
+           "  AIOUSB version:'%s',date:'%s'\n"
            "  This program demonstrates controlling a USB-IIRO or USB-IDIO device on\n"
            "  the USB bus. For simplicity, it uses the first such device found\n"
            "  on the bus.\n"

@@ -55,7 +55,7 @@ int main( int argc, char **argv ) {
 
 
 
-    printf("USB-AI16-16A sample program version %s, %s\n"
+    printf("USB-AI16-16A sample program version:'%s' date:'%s'\n"
            "This program demonstrates controlling a USB-AI16-16A device on\n"
            "the USB bus. For simplicity, it uses the first such device found\n"
            "on the bus.\n", 
