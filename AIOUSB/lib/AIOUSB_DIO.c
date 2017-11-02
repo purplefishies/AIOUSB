@@ -753,7 +753,7 @@ AIORESULT DIO_StreamFrame(
                           unsigned long FramePoints,
                           unsigned short *pFrameData,
                           unsigned long *BytesTransferred
-                          ) 
+                          )
 {
 
     AIO_ASSERT( pFrameData );
@@ -764,7 +764,7 @@ AIORESULT DIO_StreamFrame(
     AIORESULT result = AIOUSB_SUCCESS;
     USBDevice *deviceHandle = _check_dio_get_device_handle( DeviceIndex, &device, &result );
 
-    AIO_ERROR_VALID_DATA(AIOUSB_ERROR_DEVICE_NOT_CONNECTED, deviceHandle ); 
+    AIO_ERROR_VALID_DATA(AIOUSB_ERROR_DEVICE_NOT_CONNECTED, deviceHandle );
     AIO_ERROR_VALID_DATA(result, result == AIOUSB_SUCCESS );
 
     int streamingBlockSize = ( int )device->StreamingBlockSize;
@@ -780,26 +780,41 @@ AIORESULT DIO_StreamFrame(
     int libusbResult;
     int minval;
     int bytes;
+
+    //
+    // If its a stream write operation have to preload tmpdata with the first 'N' bytes
+    //   
+    if (!(device->bDIORead))
+            memcpy(tmpdata, data, MIN(streamingBlockSize,remaining));
+   
     while (remaining > 0) {
         minval = ((remaining < streamingBlockSize) ? pow_of_minsize(remaining) : streamingBlockSize);
-        libusbResult = deviceHandle->usb_bulk_transfer(deviceHandle, 
+        libusbResult = deviceHandle->usb_bulk_transfer(deviceHandle,
                                                            GET_ENDPOINT( device->bDIORead ),
                                                            tmpdata,
                                                            minval,
-                                                           &bytes, 
+                                                           &bytes,
                                                            10000
                                                            );
 
         if (libusbResult == LIBUSB_SUCCESS || libusbResult == LIBUSB_ERROR_OVERFLOW ) {
             if (bytes > 0) {
-                memcpy(data, tmpdata, MIN(bytes,remaining));
-                data += MIN(bytes, remaining );
-                total += MIN(bytes, remaining);
-                remaining -= MIN(bytes,remaining);
+                if (device->bDIORead) {
+                    memcpy(data, tmpdata, MIN(bytes,remaining));
+                    data += MIN(bytes, remaining );
+                    total += MIN(bytes, remaining);
+                    remaining -= MIN(bytes,remaining);
+                } else {
+                    data += MIN(bytes, remaining );
+                    total += MIN(bytes, remaining);
+                    remaining -= MIN(bytes,remaining);
+                    memcpy(tmpdata, data, MIN(bytes,remaining));
+
+                }
+            } else {
+                result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult);
+                break;
             }
-        } else {
-            result = LIBUSB_RESULT_TO_AIOUSB_RESULT(libusbResult);
-            break;
         }
     }
     if (result == AIOUSB_SUCCESS)
@@ -808,6 +823,7 @@ AIORESULT DIO_StreamFrame(
     free(tmpdata);
     return result;
 }
+
 
 
 #ifdef __cplusplus
