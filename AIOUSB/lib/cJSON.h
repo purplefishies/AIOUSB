@@ -76,6 +76,8 @@ extern void   cJSON_Delete(cJSON *c);
 /*Return an object as an integer value */
 extern int cJSON_AsInteger( cJSON *item );
 
+extern long double cJSON_AsLongDouble( cJSON *item );
+    
 /* Returns the number of items in an array (or object). */
 extern int	  cJSON_GetArraySize(cJSON *array);
 /* Retrieve item number "item" from array "array". Returns NULL if unsuccessful. */

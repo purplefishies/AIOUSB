@@ -11,6 +11,7 @@
 #include "AIOUSB_Core.h"
 #include "AIODeviceTable.h"
 #include "AIOUSB_ADC.h"
+#include "AIOTypes.h"
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -809,6 +810,23 @@ unsigned long GenericVendorRead(
     return result;
 }
 
+Ushort_Array *new_ushortarray(size_t nelements )
+{
+    Ushort_Array *tmp = (Ushort_Array*)malloc(sizeof(Ushort_Array));
+    if (!nelements)
+        return NULL;
+    if (!tmp)
+        return tmp;
+    tmp->ary = (unsigned short *)malloc(sizeof(unsigned short)*nelements );
+    if ( !tmp->ary ) {
+        free(tmp);
+        return NULL;
+    }
+    tmp->size = (unsigned)nelements;
+    return tmp;
+}
+
+ 
 #ifdef __cplusplus
 }
 #endif

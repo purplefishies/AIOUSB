@@ -15,6 +15,8 @@
  */
 #include "AIOCommandLine.h"
 #include "AIOList.h"
+#include <stdlib.h>
+#include <limits.h>
 
 extern int opterr;
 extern int optind;
@@ -222,7 +224,7 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
         indprev = optind;
         c = getopt_long(*argc, argv, arguments, long_options, &option_index);
         memcpy( argv, oargv, (*argc)*sizeof(char *) );
-        if ( c == -1 && optind == *argc )
+        if ( (c == -1 && optind == *argc ))
             break;
 
         switch (c) {
@@ -294,7 +296,7 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
             options->aiobuf_json = strdup( optarg );
             break;
         case REPEAT:
-            options->repeat_number = atoi(optarg);
+            options->repeat = atoi(optarg);
             break;
         case 'f':
             options->outfile = strdup(optarg);
@@ -327,12 +329,19 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
             break;
         case 'N':
         case 'b':
-            options->num_scans = (int64_t)atoll(optarg);
-            if ( options->num_scans <= 0 ) {
-                fprintf(stderr,"Warning: Buffer Size outside acceptable range (1,1e8), setting to 10000\n");
-                options->num_scans = 10000;
+            {
+                long double tmpval = strtold( optarg, NULL );
+                options->num_scans = (int64_t)tmpval;
+                if ( options->num_scans == LONG_MAX || options->num_scans == LONG_MIN)
+                    options->num_scans = LONG_MAX;
+                
+                if ( options->num_scans <= 0 ) {
+                    fprintf(stderr,"Warning: Buffer Size outside acceptable range (1,1e8), setting to 10000\n");
+                    options->num_scans = 10000;
+                }
             }
             break;
+        case '?':
         default:
             if ( !options->pass_through ) {
                  fprintf(stderr, "Incorrect argument '%s'\n", optarg );
@@ -348,6 +357,7 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
                 if ( optind == indprev && c == '?' ) {
                     optind ++;
                 }
+                
                 keepsize += (optind - indprev);
                 keepindices = (int*)realloc(keepindices,sizeof(int *)*keepsize);
                 for ( int i = indprev; i < optind; i ++ , keepcount ++ ) {
@@ -355,9 +365,8 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
                 }
             }
         }
-        if ( c != -1 && optind == *argc )  {
-            break;
-        }
+
+
         if ( indafter != -1 && optind - indprev >= 3 ) {
             int stop = ( long_options[option_index].has_arg ? optind - 2 : optind - 1 );
             keepsize += ( stop - indprev );
@@ -377,6 +386,9 @@ AIORET_TYPE AIOProcessCommandLine( AIOCommandLineOptions *options, int *argc, ch
             return -AIOUSB_ERROR_AIOCOMMANDLINE_INVALID_NUM_CHANNELS;
         }
         indafter = indprev;
+        if ( (c != -1 && optind == *argc))  {
+            break;
+        }
     }
  endloop:
     if ( query ) {
@@ -715,6 +727,97 @@ const AIOCommandLineOptions *AIO_CMDLINE_OPTIONS(void)
 }
 
 
+AIORET_TYPE AIOContinuousBufOverrideAIOCommandLine( AIOContinuousBuf *buf, AIOCommandLineOptions *options )
+{
+    AIORET_TYPE retval = AIOUSB_SUCCESS;
+    AIO_ASSERT_AIOCONTBUF( buf );
+    AIO_ASSERT( options );
+    if ( options->index != AIOContinuousBufGetDeviceIndex( buf ) && options->index >= 0) {
+        AIOContinuousBufSetDeviceIndex( buf, options->index );
+    }
+
+
+    AIOUSBDevice *dev = AIODeviceTableGetDeviceAtIndex( AIOContinuousBufGetDeviceIndex(buf), (AIORESULT*)&retval );
+    AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+
+    ADCConfigBlock *config = AIOUSBDeviceGetADCConfigBlock( dev );
+
+
+    if ( options->num_oversamples >= 0 ) { 
+        retval = AIOContinuousBufSetOversample( buf, options->num_oversamples );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    } else if ( AIOContinuousBufGetOversample( buf ) < 0 || AIOContinuousBufGetOversample( buf ) > 255 ) {
+        retval = AIOContinuousBufSetOversample( buf, options->default_num_oversamples );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    }
+    
+
+    if ( options->start_channel > 0 || options->end_channel > 0 ) { 
+        int tmpstart = ( options->start_channel > 0 ? options->start_channel : ADCConfigBlockGetStartChannel( config ));
+        int tmpend   = ( options->end_channel > 0 ? options->end_channel : ADCConfigBlockGetEndChannel( config ));
+            
+        retval = AIOContinuousBufSetStartAndEndChannel( buf, tmpstart, tmpend );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    } else if ( ADCConfigBlockGetStartChannel(config) < 0 || ADCConfigBlockGetEndChannel(config)  > 15 ) { 
+        fprintf(stderr,"Using StartChannel=%d, and EndChannel=%d\n", options->default_start_channel, options->default_end_channel  );
+        retval = AIOContinuousBufSetStartAndEndChannel( buf, options->default_start_channel, options->default_end_channel );
+    }
+
+    /* if ( options->num_scans != AIOContinuousBufGetNumberScans( buf ) ){ */
+    if ( options->num_scans > 0 ) { 
+        retval = AIOContinuousBufSetNumberScans( buf, options->num_scans );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    } else if ( AIOContinuousBufGetNumberScans( buf ) == 0 ) { 
+        retval = AIOContinuousBufSetNumberScans( buf, options->default_num_scans );
+    }
+
+    if ( options->buffer_size && options->buffer_size > AIOContinuousBufGetBufferSize(buf) / ( AIOContinuousBufGetNumberChannels(buf)*2 )) { 
+        int newbase = options->buffer_size / ( AIOContinuousBufGetUnitSize(buf)*AIOContinuousBufGetNumberChannels(buf)*(1+AIOContinuousBufGetOversample(buf)));
+        if ( newbase <= 0 ) {
+            fprintf(stderr,"Error: new buffersize is too small\n");
+        } else {
+            retval = AIOContinuousBufSetBaseSize( buf, newbase );
+            AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+        }
+    }
+
+    if( options->number_ranges ) {
+        for ( int i = 0; i < options->number_ranges ; i ++ ) {
+            retval = AIOContinuousBufSetChannelRange( buf,
+                                                      options->ranges[i]->start_channel,
+                                                      options->ranges[i]->end_channel,
+                                                      options->ranges[i]->gaincode
+                                                      );
+            if ( retval != AIOUSB_SUCCESS ) {
+                fprintf(stderr,"Error setting ChannelRange: %d\n", (int)retval );
+                return retval;
+            }
+        }
+        /* also set the range for the buffer */
+        retval = AIOContinuousBufSetStartAndEndChannel( buf, options->start_channel, options->end_channel );
+        if ( retval != AIOUSB_SUCCESS ) {
+            fprintf(stderr,"Error trying to set StartCh=%d and EndCh=%d...%d\n", 
+                    options->start_channel, 
+                    options->end_channel,
+                    (int)retval
+                    );
+            return retval;
+        }
+    }
+
+    if ( options->clock_rate > 0 ) { 
+        retval = AIOContinuousBufSetClock( buf , options->clock_rate );
+        AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+    } else if ( AIOContinuousBufGetClock( buf ) == 0 ) { 
+        AIOContinuousBufSetClock( buf , options->default_clock_rate );
+    }
+
+    retval = AIOContinuousBufSaveConfig(buf);
+    AIO_ERROR_VALID_DATA( retval, retval == AIOUSB_SUCCESS );
+
+    return retval;
+}
+ 
 #ifdef __cplusplus
 } // namespace AIOUSB
 #endif
@@ -880,7 +983,7 @@ TEST( AIOCmdLine, Java_arguments )
     ASSERT_TRUE( nopts );
 
     char *argv1[] = {const_cast<char *>("tmp"), const_cast<char *>("-N"), const_cast<char *>("1000"),
-                     const_cast<char *>("-foo"), const_cast<char *>("3434")};
+                     const_cast<char *>("--foo"), const_cast<char *>("3434")};
 
     int argc1 = sizeof(argv1)/sizeof(char*);
 
@@ -888,7 +991,7 @@ TEST( AIOCmdLine, Java_arguments )
     ASSERT_EQ( retval, 0 );
     ASSERT_EQ( 3 , argc1 );
     ASSERT_STREQ( argv1[0] , const_cast<char *>("tmp") );
-    ASSERT_STREQ( argv1[1] , const_cast<char *>("-foo") );
+    ASSERT_STREQ( argv1[1] , const_cast<char *>("--foo") );
     ASSERT_STREQ( argv1[2] , const_cast<char *>("3434") );
 }
 
@@ -898,7 +1001,7 @@ TEST( AIOCmdLine, Java_arguments2 )
     AIORET_TYPE retval;
     ASSERT_TRUE( nopts );
 
-    char *argv1[] = {const_cast<char *>("tmp"),const_cast<char *>("-N"),const_cast<char *>("1000"),(char*)"-foo",(char*)"23",
+    char *argv1[] = {const_cast<char *>("tmp"),const_cast<char *>("-N"),const_cast<char *>("1000"),(char*)"--foo",(char*)"23",
                      const_cast<char *>("--range"),const_cast<char *>("0-10=0") };
 
     int argc1 = sizeof(argv1)/sizeof(char*);
@@ -908,7 +1011,7 @@ TEST( AIOCmdLine, Java_arguments2 )
 
     ASSERT_EQ( 3 , argc1 );
     ASSERT_STREQ( argv1[0] , const_cast<char *>("tmp") );
-    ASSERT_STREQ( argv1[1] , const_cast<char *>("-foo") );
+    ASSERT_STREQ( argv1[1] , const_cast<char *>("--foo") );
     ASSERT_STREQ( argv1[2] , const_cast<char *>("23") );
 }
 

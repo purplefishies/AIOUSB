@@ -97,16 +97,21 @@ static const char *parse_number(cJSON *item,const char *num)
 {
 	double n=0,sign=1,scale=0;int subscale=0,signsubscale=1;
 
-	if (*num=='-') sign=-1,num++;	/* Has sign? */
-	if (*num=='0') num++;			/* is zero */
-	if (*num>='1' && *num<='9')	do	n=(n*10.0)+(*num++ -'0');	while (*num>='0' && *num<='9');	/* Number? */
-	if (*num=='.' && num[1]>='0' && num[1]<='9') {num++;		do	n=(n*10.0)+(*num++ -'0'),scale--; while (*num>='0' && *num<='9');}	/* Fractional part? */
-	if (*num=='e' || *num=='E')		/* Exponent? */
-	{	num++;if (*num=='+') num++;	else if (*num=='-') signsubscale=-1,num++;		/* With sign? */
-		while (*num>='0' && *num<='9') subscale=(subscale*10)+(*num++ - '0');	/* Number? */
-	}
+        if ( 0 == strncasecmp(num,"inf",3) ) {
+            n = INFINITY;
+            num += 3;
+        } else {
+            if (*num=='-') sign=-1,num++;	/* Has sign? */
+            if (*num=='0') num++;			/* is zero */
+            if (*num>='1' && *num<='9')	do	n=(n*10.0)+(*num++ -'0');	while (*num>='0' && *num<='9');	/* Number? */
+            if (*num=='.' && num[1]>='0' && num[1]<='9') {num++;		do	n=(n*10.0)+(*num++ -'0'),scale--; while (*num>='0' && *num<='9');}	/* Fractional part? */
+            if (*num=='e' || *num=='E')		/* Exponent? */
+                {	num++;if (*num=='+') num++;	else if (*num=='-') signsubscale=-1,num++;		/* With sign? */
+                    while (*num>='0' && *num<='9') subscale=(subscale*10)+(*num++ - '0');	/* Number? */
+                }
+            n=sign*n*pow(10.0,(scale+subscale*signsubscale));	/* number = +/- number.fraction * 10^+/- exponent */
+        }
 
-	n=sign*n*pow(10.0,(scale+subscale*signsubscale));	/* number = +/- number.fraction * 10^+/- exponent */
 	
 	item->valuedouble=n;
 	item->valueint=(int)n;
@@ -291,7 +296,7 @@ static const char *parse_value(cJSON *item,const char *value)
 	if (!strncmp(value,"false",5))	{ item->type=cJSON_False; return value+5; }
 	if (!strncmp(value,"true",4))	{ item->type=cJSON_True; item->valueint=1;	return value+4; }
 	if (*value=='\"')				{ return parse_string(item,value); }
-	if (*value=='-' || (*value>='0' && *value<='9'))	{ return parse_number(item,value); }
+	if (*value=='-' || (*value>='0' && *value<='9') || (*value ==  'i' && *(value+1) == 'n' && *(value+2) == 'f' ))	{ return parse_number(item,value); }
 	if (*value=='[')				{ return parse_array(item,value); }
 	if (*value=='{')				{ return parse_object(item,value); }
 
@@ -446,6 +451,15 @@ int cJSON_AsInteger( cJSON *item )
         return item->valueint;
     else 
         return atoi(item->valuestring);
+}
+
+
+long double cJSON_AsLongDouble( cJSON *item )
+{
+    if ( !item->valuestring )
+        return item->valueint;
+    else 
+        return strtold(item->valuestring,NULL);
 }
 
 

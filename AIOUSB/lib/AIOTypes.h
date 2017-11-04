@@ -22,7 +22,7 @@ typedef unsigned long AIORESULT;
 
 typedef unsigned short * COUNTS;
 typedef struct ushort_array {
-    unsigned short *_ary;
+    unsigned short *ary;
     unsigned size;
 } Ushort_Array;
 

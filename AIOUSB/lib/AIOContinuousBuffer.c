@@ -389,6 +389,12 @@ AIORET_TYPE AIOContinuousBufSetNumberScans( AIOContinuousBuf *buf , int64_t num_
 {
     AIO_ASSERT_AIOCONTBUF( buf );
     AIO_ASSERT_VALID_DATA( AIOUSB_ERROR_INVALID_PARAMETER, num_scans >= 0 );
+    if ( num_scans == LONG_MAX ) {
+        buf->infinite = AIOUSB_TRUE;
+    } else {
+        buf->infinite = AIOUSB_FALSE;
+    }
+    
     buf->num_scans = num_scans;
     return  AIOUSB_SUCCESS;
 }
@@ -1047,7 +1053,12 @@ void *ConvertCountsToVoltsFunction( void *object )
     int num_channels = AIOContinuousBufNumberChannels(buf);
     int num_oversamples = AIOContinuousBufGetOversample(buf);
     int num_scans = AIOContinuousBufGetNumberScans(buf);
-    AIOFifoCounts *infifo = NewAIOFifoCounts( (unsigned)num_channels*(num_oversamples+1)*num_scans );
+    AIOFifoCounts *infifo;
+    if ( num_scans == LONG_MAX ) {
+        num_scans = 10000;
+    }
+    infifo = NewAIOFifoCounts( (unsigned)num_channels*(num_oversamples+1)*num_scans );
+
     AIO_ERROR_VALID_DATA_W_CODE( &retval, retval = AIOUSB_ERROR_INVALID_AIOFIFO, infifo );
     AIOFifoVolts *outfifo = (AIOFifoVolts*)buf->fifo;
 
@@ -1080,7 +1091,11 @@ void *ConvertCountsToVoltsFunction( void *object )
 
         AIOUSB_DEVEL("Using counts=%d\n",bytes / 2 );
 
-        bytes = MIN( (int)(buf->num_channels * (buf->num_oversamples+1)*buf->num_scans * sizeof(uint16_t) - count*sizeof(uint16_t)), bytes ); 
+        if ( buf->infinite ) {
+            bytes = MIN( (int)(buf->num_channels * (buf->num_oversamples+1)*num_scans * sizeof(uint16_t) - count*sizeof(uint16_t)), bytes );
+        } else {
+            bytes = MIN( (int)(buf->num_channels * (buf->num_oversamples+1)*buf->num_scans * sizeof(uint16_t) - count*sizeof(uint16_t)), bytes );
+        }
         retval = infifo->PushN( infifo, (uint16_t*)data, bytes / 2 );
 
         if ( bytes ) {
@@ -1103,10 +1118,12 @@ void *ConvertCountsToVoltsFunction( void *object )
              * 1. count >= number we are supposed to read
              * 2. we don't have enough space
              */
-            if ( count >= buf->num_scans*buf->num_channels ) {
-                AIOContinuousBufLock(buf);
-                buf->status = TERMINATED;
-                AIOContinuousBufUnlock(buf);
+            if ( !buf->infinite ) {
+                if ( count >= buf->num_scans*buf->num_channels ) {
+                    AIOContinuousBufLock(buf);
+                    buf->status = TERMINATED;
+                    AIOContinuousBufUnlock(buf);
+                }
             }
         } else if (  usbresult < 0  && usbfail < usbfail_count ) {
             AIOUSB_ERROR("Error with usb: %d\n", (int)usbresult );
@@ -2061,22 +2078,32 @@ char *AIOContinuousBufToJSON( AIOContinuousBuf *buf )
     if ( dev ) {
         ADCConfigBlockCopy( &config, AIOUSBDeviceGetADCConfigBlock( dev ) );
     } 
+    char *num_scans;
+    if ( buf->num_scans == LONG_MAX ) {
+        retcode = asprintf(&num_scans,"%s", "inf");
+        
+    } else {
+        retcode = asprintf(&num_scans,"%ld", buf->num_scans);
+    }
+    if ( retcode < 0 )
+        return NULL;
     retcode = asprintf(&tmp,
-              "{\"DeviceIndex\":%d,\"base_size\":%d,\"block_size\":%d,\"debug\":\"%s\",\"hz\":%d,\"num_channels\":%d,\"num_oversamples\":%d,\"num_scans\":%lu,\"testing\":\"%s\",\"timeout\":%d,\"type\":%d,\"unit_size\":%d,\"adcconfig\":%s}",
-              buf->DeviceIndex,
-              buf->base_size,
-              buf->block_size,
-             (buf->debug == 1 ? "true" : "false" ),
-              buf->hz,
-              buf->num_channels,
-              buf->num_oversamples,
-             (unsigned long)buf->num_scans,
-             ( buf->testing == 1 ? "true" : "false" ),
-              buf->timeout,
-              buf->type,
-              buf->unit_size,
-             ADCConfigBlockToJSON( &config ) 
-              );
+                       "{\"DeviceIndex\":%d,\"base_size\":%d,\"block_size\":%d,\"debug\":\"%s\",\"hz\":%d,\"num_channels\":%d,\"num_oversamples\":%d,\"num_scans\":%s,\"testing\":\"%s\",\"timeout\":%d,\"type\":%d,\"unit_size\":%d,\"adcconfig\":%s}",
+                       buf->DeviceIndex,
+                       buf->base_size,
+                       buf->block_size,
+                       (buf->debug == 1 ? "true" : "false" ),
+                       buf->hz,
+                       buf->num_channels,
+                       buf->num_oversamples,
+                       num_scans,
+                       ( buf->testing == 1 ? "true" : "false" ),
+                       buf->timeout,
+                       buf->type,
+                       buf->unit_size,
+                       ADCConfigBlockToJSON( &config ) 
+                       );
+    free(num_scans);
     if ( retcode < 0 ) 
         return NULL;
     else

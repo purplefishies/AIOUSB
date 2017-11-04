@@ -92,7 +92,7 @@ Example: %s  0x40e4bc6f1fffffff 512  30000
         print("Error '%s' setting stream clock for device at index %lu\n" % ( AIOUSB_GetResultCodeAsString( result ), deviceIndex ))
         sys.exit(1)
 
-    result = DIO_StreamFrame( deviceIndex, framePoints, frameData, transferred );
+    result = DIO_StreamFrameTmp( deviceIndex, framePoints, frameData, transferred );
 
 
     if result == AIOUSB_SUCCESS:

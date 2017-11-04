@@ -551,6 +551,13 @@ AIORET_TYPE ADC_GetScanVToDoubleArray( unsigned long DeviceIndex, doublearray *a
 }
 %}
 
+%inline %{
+AIORET_TYPE DIO_StreamFrameTmp( unsigned long DeviceIndex, unsigned long FramePoints, ushortarray *ary, unsigned long *bytesTransferred ) {
+    return DIO_StreamFrame( DeviceIndex, FramePoints,  ary->el , bytesTransferred );
+}
+%}
+
+
 %extend AIOCommandLineOptions {
     AIOCommandLineOptions() { 
         return NewAIOCommandLineOptionsFromDefaultOptions( AIO_SCRIPTING_OPTIONS() );
@@ -676,12 +683,11 @@ AIORET_TYPE ADC_GetScanVToDoubleArray( unsigned long DeviceIndex, doublearray *a
 #ifdef __cplusplus
    %extend DIOBuf {
      bool operator==( DIOBuf *b ) {
-       int i;
        int equiv = 1;
-       if ( b->_size != $self->_size )
+       if ( b->size != $self->size )
          return 0;
-       for ( int i = 0; i < b->_size; i ++ )
-         equiv &= ( $self->_buffer[i] == b->_buffer[i] );
+       for ( unsigned i = 0; i < b->size; i ++ )
+           equiv &= ( $self->buffer[i] == b->buffer[i] );
        
        return equiv == 1;
      }

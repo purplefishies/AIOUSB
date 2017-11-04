@@ -26,7 +26,7 @@
 #include <libusb.h>
 #include <string.h>
 #include <math.h>
-
+#include <limits.h>
 
 #ifdef __aiousb_cplusplus
 namespace AIOUSB
@@ -88,6 +88,7 @@ typedef struct AIOContinuousBuf {
     unsigned counter_control;
     unsigned timeout;
     AIORET_TYPE exitcode;
+    AIOUSB_BOOL infinite;
     AIOUSB_BOOL testing;
     AIOUSB_BOOL debug;
     AIOChannelMask *mask;               /**< Used for keeping track of channels */

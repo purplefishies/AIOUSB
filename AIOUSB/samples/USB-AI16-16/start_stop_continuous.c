@@ -25,7 +25,7 @@
 
 struct channel_range *get_channel_range( char *optarg );
 void process_cmd_line( struct opts *, int argc, char *argv[] );
-void run_acquisition(AIOContinuousBuf *buf, struct opts *options );
+void run_acquisition(AIOContinuousBuf *buf, AIOCommandLineOptions *options );
 
 
 AIOUSB_BOOL fnd( AIOUSBDevice *dev ) { 
@@ -50,8 +50,7 @@ void sig_handler( int sig ) {
 int 
 main(int argc, char *argv[] ) 
 {
-    struct opts options = AIO_OPTIONS;
-
+    AIOCommandLineOptions *options = NewDefaultAIOCommandLineOptions();
     struct sigaction sa;
 
     AIORET_TYPE retval = AIOUSB_SUCCESS;
@@ -75,69 +74,70 @@ main(int argc, char *argv[] )
         exit(1);
     }
 
-    process_aio_cmd_line( &options, argc, argv );
+    retval = AIOProcessCommandLine( options, &argc, argv );
 
     AIOUSB_Init();
     AIOUSB_ListDevices();
 
+
+
 #if !defined(__clang__)
-    AIOUSB_FindDevices( &indices, &num_devices, LAMBDA( AIOUSB_BOOL, (AIOUSBDevice *dev), { 
+    /**
+     * Alternatives are 
+     * @verbatim
+     * AIOUSB_FindDevices( &indices, &num_devices, find_ai_board );
+     * AIOUSB_FindDevicesByGroup( &indices, &num_devices, AIO_ANALOG_INPUT() );
+     * @endverbatim
+     */
+    AIOUSB_FindDevices( &indices, &num_devices, LAMBDA( AIOUSB_BOOL, (AIOUSBDevice *dev), {
                 if ( dev->ProductID >= USB_AI16_16A && dev->ProductID <= USB_AI12_128E ) { 
                     return AIOUSB_TRUE;
                 } else if ( dev->ProductID >=  USB_AIO16_16A && dev->ProductID <= USB_AIO12_128E ) {
                     return AIOUSB_TRUE;
                 } else {
                     return AIOUSB_FALSE;
-                }
-            } ) 
+                }})
         );
 #else
     AIOUSB_FindDevices( &indices, &num_devices, fnd );
 #endif
 
-    fp = fopen(options.outfile,"w");
+    fp = fopen(options->outfile,"w");
     if( !fp ) {
-        fprintf(stderr,"Unable to open '%s' for writing\n", options.outfile );
+        fprintf(stderr,"Unable to open '%s' for writing\n", options->outfile );
         exit(1);
     }
 
-    if( (retval = aio_list_devices( &options, indices, num_devices ) != AIOUSB_SUCCESS )) 
+    if ( (retval = AIOCommandLineListDevices( options, indices, num_devices ) ) < AIOUSB_SUCCESS )
         exit(retval);
 
+    
     /**
      *
      * @brief Start with the NewAIOContinousBufFromJSON( "{'aiocontin
      *
      *
-     *
-     *
-     *
-     *
-     *
      */
 
-    if ( options.aiobuf_json ) { 
-        if ( (buf = NewAIOContinuousBufFromJSON( options.aiobuf_json )) == NULL )
+    if ( options->aiobuf_json ) { 
+        if ( (buf = NewAIOContinuousBufFromJSON( options->aiobuf_json )) == NULL )
             exit(AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER);
-    } else if ( (buf = NewAIOContinuousBufFromJSON( options.default_aiobuf_json )) == NULL ) {
+    } else if ( (buf = NewAIOContinuousBufFromJSON( options->default_aiobuf_json )) == NULL ) {
         exit(AIOUSB_ERROR_INVALID_AIOCONTINUOUS_BUFFER);
     }
 
-    if ( (retval = aio_override_aiobuf_settings( buf, &options )) != AIOUSB_SUCCESS )
+    if ((retval = AIOContinuousBufOverrideAIOCommandLine( buf,options )) != AIOUSB_SUCCESS )
         exit(retval);
-
-
-
 
     fprintf(stderr,"Output: %s\n", AIOContinuousBufToJSON( buf ));
 
-    for ( int i = 0; i < options.repeat ; i ++ ) { 
+    for ( int i = 0; i < options->repeat ; i ++ ) { 
         AIOContinuousBufCallbackStart(buf);
         if ( getenv("PRE_SLEEP") ) { 
             printf("Sleeping for %d us \n", atoi(getenv("PRE_SLEEP")));
             usleep(atoi(getenv("PRE_SLEEP")));
         }
-        run_acquisition( buf , &options );
+        run_acquisition( buf , options );
         
         if ( AIOContinuousBufGetStatus(buf) != TERMINATED ) { 
             fprintf(stderr,"Status was %d\n", (int)AIOContinuousBufGetStatus(buf));
@@ -153,7 +153,7 @@ main(int argc, char *argv[] )
     return(retval);
 }
 
-void run_acquisition(AIOContinuousBuf *buf, struct opts *options )
+void run_acquisition(AIOContinuousBuf *buf, AIOCommandLineOptions *options )
 {
     int64_t prevscans = 0;
     int tobufsize = (AIOContinuousBufGetNumberChannels(buf) * (AIOContinuousBufGetOversample(buf)+1))*2000;

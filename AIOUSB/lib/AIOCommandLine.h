@@ -60,7 +60,7 @@ typedef struct AIOCommandLineOptions {
     int physical;
     int counts;
     int calibration;            
-    int repeat_number;
+    int repeat;
     char *aiobuf_json;
     char *default_aiobuf_json;
     char *adcconfig_json;
@@ -97,6 +97,9 @@ PUBLIC_EXTERN AIORET_TYPE DeleteAIOCommandLineOptions( AIOCommandLineOptions *op
 
 PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOptionsListDevices( AIOCommandLineOptions *options , intlist *indices );
 PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOptionsOverrideADCConfigBlock( ADCConfigBlock *config, AIOCommandLineOptions *options );
+PUBLIC_EXTERN AIORET_TYPE AIOContinuousBufOverrideAIOCommandLine( AIOContinuousBuf *buf, AIOCommandLineOptions *options );
+
+ 
 
 #if !defined(MATLAB)
 static inline AIORET_TYPE AIOCommandLineOptionsGetDeviceIndex( AIOCommandLineOptions *options ) {AIO_ASSERT( options ); return options->index;};
@@ -113,7 +116,7 @@ PUBLIC_EXTERN const AIOCommandLineOptions *AIO_CMDLINE_OPTIONS(void);
 /* DEPRECATED FUNCTIONS */
 #ifndef SWIG
 #if !defined(MATLAB)
-PUBLIC_EXTERN AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *indices, int num_devices ) ACCES_DEPRECATED("Please use AIOCommandLineOptionsListDevices");
+PUBLIC_EXTERN AIORET_TYPE AIOCommandLineListDevices( AIOCommandLineOptions *options , int *indices, int num_devices ) /* ACCES_DEPRECATED("Please use AIOCommandLineOptionsListDevices") */;
 PUBLIC_EXTERN AIORET_TYPE AIOCommandLineOverrideADCConfigBlock( ADCConfigBlock *config, AIOCommandLineOptions *options ) ACCES_DEPRECATED("Please use AIOCommandLineOptionsOverrideADCConfigBlock");
 static inline ACCES_DEPRECATED("Please use AIOCommandLineOptionsGetDefaultADCJSONConfig") const char *AIOCommandLineGetDefaultADCJSONConfig( AIOCommandLineOptions *options )  { return AIOCommandLineOptionsGetDefaultADCJSONConfig(options);};
 static inline ACCES_DEPRECATED("Please use AIOCommandLineOptionsGetIncludeTiming") AIORET_TYPE AIOCommandLineGetIncludeTiming( AIOCommandLineOptions *options ){ return AIOCommandLineOptionsGetIncludeTiming(options);};
