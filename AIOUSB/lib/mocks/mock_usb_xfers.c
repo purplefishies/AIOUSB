@@ -118,16 +118,16 @@ int mock_usb_control_transfer(USBDevice *dev_handle,
 {
 
     /* libusb_device_handle *handle = get_usb_device( dev_handle ); */
-    printf("Mock control ");
+    fprintf(stderr,"Mock control ");
 
     if ( request_type ==  USB_WRITE_TO_DEVICE ) {
         direction = OUT;
-        printf(" OUT ");
+        fprintf(stderr," OUT ");
     } else if ( request_type == USB_READ_FROM_DEVICE ) {
-        printf(" IN ");
+        fprintf(stderr," IN ");
         direction = IN;
     }
-    printf("\n");
+    fprintf(stderr,"\n");
     switch ( direction ) {
     case IN:
         switch ( bRequest ) {

@@ -167,13 +167,12 @@ endif( NOT CYGWIN )
 
 find_package( GTest ) 
 find_package( GMock ) 
-find_package( GTestTap )
 
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Built in tests
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-if( GTESTTAP_FOUND AND GMOCK_FOUND AND GTEST_FOUND AND NOT DISABLE_TESTING )
+if(  GMOCK_FOUND AND GTEST_FOUND AND NOT DISABLE_TESTING )
 
   set(GTEST_FILES ADCConfigBlock.c AIOChannelMask.c AIOChannelRange.c AIOContinuousBuffer.c AIODeviceInfo.c AIODeviceTable.c AIOUSBDevice.c AIOUSB_Core.c DIOBuf.c AIOUSB_DIO.c USBDevice.c AIOFifo.c AIOEither.c AIOCountsConverter.c AIODeviceQuery.c AIOCommandLine.c AIOProductTypes.c AIOTuple.c CStringArray.c AIOList.c )
   foreach( gtest ${GTEST_FILES} ) 
@@ -194,7 +193,7 @@ if( GTESTTAP_FOUND AND GMOCK_FOUND AND GTEST_FOUND AND NOT DISABLE_TESTING )
     # MESSAGE(STATUS "MY_LIBRARIES=  ${MY_LIBRARIES}" )
     build_gtest_test_file( aiousblibs ${gtest_file} ${MY_FLAGS} "${MY_LIBRARIES}" )
   endforeach( gtest_file )
-endif( GTESTTAP_FOUND AND GMOCK_FOUND AND GTEST_FOUND AND NOT DISABLE_TESTING )
+endif(  GMOCK_FOUND AND GTEST_FOUND AND NOT DISABLE_TESTING )
 
 
 if( BUILD_MATLAB AND BUILD_AIOUSB_SHARED ) 

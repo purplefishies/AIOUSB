@@ -7,3 +7,4 @@ export AIO_CLASSLIB_DIR="$AIOUSB_ROOT/deprecated/classlib"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${AIOUSB_ROOT}/lib:${AIOUSB_ROOT}/deprecated/classlib"
 export TEXINPUTS=$TEXINPUTS:$PWD/doc://;
 export PATH_TO_LIBUSB_SRC=$AIO_LIB_DIR/ndkbuild/libusb
+export PATH=${AIOUSB_ROOT}/doc/bin:$PATH
