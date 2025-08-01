@@ -19,12 +19,12 @@ number_devices = 1
 outputMask = NewAIOChannelMaskFromStr("1111")
 writeBuffer = DIOBuf( MAX_DIO_BYTES )
 
-print """
+print("""
 USB-IDIO sample program version %s, %s 
 This program demonstrates communicating using the USB-IDIO product.
 AIOUSB library version %s, %s the same USB bus. It uses the 
 first device found found on the bus
-""" % ( "$Format: %t$", "$Format: %ad$", AIOUSB_GetVersion(), AIOUSB_GetVersionDate() )
+""" % ( "$Format: %t$", "$Format: %ad$", AIOUSB_GetVersion(), AIOUSB_GetVersionDate() ))
 
 AIOUSB_Init()
 
@@ -35,8 +35,8 @@ def find_idio(obj):
 indices = AIOUSB_FindDevices( find_idio )
 
 if not indices:
-    print """No USB-IDIO devices were found. Please make sure you have at least one 
-ACCES I/O Products USB device plugged into your computer"""
+    print("""No USB-IDIO devices were found. Please make sure you have at least one 
+ACCES I/O Products USB device plugged into your computer""")
     sys.exit(1)
 
 device = indices[0]
@@ -46,9 +46,9 @@ AIOChannelMaskSetMaskFromStr( outputMask, "1111" )
 
 
 for port in range(0x20):
-    print "Using value %d" % (port)
+    print("Using value %d" % (port))
     DIOBufSetIndex( writeBuffer, port, 1 );
-    print DIOBufToString( writeBuffer )
+    print(DIOBufToString( writeBuffer ))
     result = DIO_Configure( device, AIOUSB_FALSE, outputMask , writeBuffer )
     time.sleep(1/6.0)
 

@@ -71,14 +71,14 @@ sudo port install libusb cmake
 ##### Rasberry Pi
 
 ~~~bash
-sudo apt-get install libusb-1.0-0 libusb-1.0-0-dev  cmake 
+sudo apt-get install libusb-1.0-0 libusb-1.0-0-dev  cmake swig
 sudo apt-get install python-dev # If you want Python bindings
 ~~~
 
 
 ##### Beagle Board
 ~~~bash
-sudo apt-get install libusb-1.0-0 libusb-1.0-0-dev cmake 
+sudo apt-get install libusb-1.0-0 libusb-1.0-0-dev cmake swig
 sudo apt-get install python-dev # If you want Python bindings
 ~~~
 
@@ -121,7 +121,10 @@ cd build
 cmake -DBUILD_AIOUSBCPPDBG_SHARED=OFF \
  -DBUILD_AIOUSBCPP_SHARED=OFF \
  -DBUILD_AIOUSBDBG_SHARED=OFF \
- -DBUILD_AIOUSB_SHARED=OFF ..
+ -DBUILD_AIOUSB_SHARED=OFF .. \
+ -DFIRMWARE_DIRECTORY=/PATH/TO/USB/FILES \
+ -DUDEV_DIRECTORY=/PATH/TO/LINUX_UDEV_RULES \
+ -DCMAKE_INSTALL_PREFIX=/YOUR/INSTALL/DIR
 make
 sudo make install
 ~~~
